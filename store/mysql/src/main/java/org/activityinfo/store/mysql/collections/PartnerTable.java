@@ -35,7 +35,7 @@ public class PartnerTable implements SimpleTable {
         
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formId, "partner");
         mapping.setFormLabel("Partner");
-        mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
+        mapping.setDatabaseId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.PARTNER_DOMAIN, "partnerId");
         mapping.setFromClause("partnerindatabase pd LEFT JOIN partner base ON (pd.partnerId=base.partnerId)");
         mapping.setBaseFilter("pd.databaseId=" + databaseId);

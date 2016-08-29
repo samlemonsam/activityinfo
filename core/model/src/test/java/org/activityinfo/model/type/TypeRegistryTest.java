@@ -22,7 +22,6 @@ package org.activityinfo.model.type;
  */
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -46,12 +45,7 @@ public class TypeRegistryTest {
             if (typeClass instanceof ParametrizedFieldTypeClass) {
                 ParametrizedFieldTypeClass parametrizedFieldTypeClass = (ParametrizedFieldTypeClass) typeClass;
                 ParametrizedFieldType parametrizedFieldType = (ParametrizedFieldType) parametrizedFieldTypeClass.createType();
-                parametrizedFieldTypeClass.deserializeType(parametrizedFieldType.getParameters());
-
-                // it's important to have "classId" specified for all parametrized types. Otherwise SimpleFormPanel will fail to load FormClass
-                String classId = parametrizedFieldType.getParameters().getString("classId");
-                Assert.assertNotNull(classId);
-                Assert.assertTrue(classId.startsWith("_"));
+                parametrizedFieldTypeClass.deserializeType(parametrizedFieldType.getParametersAsJson());
             }
         }
     }

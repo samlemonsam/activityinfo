@@ -64,7 +64,6 @@ public class GeoPointType implements RecordFieldType {
     @Override
     public FormClass getFormClass() {
         FormClass formClass = new FormClass(ResourceId.valueOf("geoPoint"));
-        formClass.setOwnerId(ResourceId.ROOT_ID);
         formClass.setLabel(I18N.CONSTANTS.geographicCoordinatesFieldLabel());
         formClass.addField(ResourceId.valueOf("latitude"))
                 .setCode("latitude")

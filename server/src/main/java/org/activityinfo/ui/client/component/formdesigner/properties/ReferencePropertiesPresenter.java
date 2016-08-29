@@ -120,30 +120,28 @@ public class ReferencePropertiesPresenter {
     }
 
     private void putParentLabel(final FormClass leaf, FormClass child, final ResourceLocator locator) {
-        if (child.getOwnerId() == null) {
-            return;
+        if (child.getParentFormId().isPresent()) {
+            locator.getFormClass(child.getParentFormId().get()).then(new AsyncCallback<FormClass>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Log.error(caught.getMessage(), caught);
+                }
+
+                @Override
+                public void onSuccess(FormClass owner) {
+                    int index = getIndexByValue(leaf.getId());
+
+                    String label = view.getListBox().getItemText(index);
+                    label = owner.getLabel() + " > " + label;
+                    view.getListBox().setItemText(index, label);
+
+                    SelectElement selectElement = view.getListBox().getElement().cast(); // set tooltip
+                    selectElement.getOptions().getItem(index).setTitle(label);
+
+                    putParentLabel(leaf, owner, locator);
+                }
+            });
         }
-
-        locator.getFormClass(child.getOwnerId()).then(new AsyncCallback<FormClass>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Log.error(caught.getMessage(), caught);
-            }
-
-            @Override
-            public void onSuccess(FormClass owner) {
-                int index = getIndexByValue(leaf.getId());
-
-                String label = view.getListBox().getItemText(index);
-                label = owner.getLabel() + " > " + label;
-                view.getListBox().setItemText(index, label);
-
-                SelectElement selectElement = view.getListBox().getElement().cast(); // set tooltip
-                selectElement.getOptions().getItem(index).setTitle(label);
-
-                putParentLabel(leaf, owner, locator);
-            }
-        });
     }
 
     private int getIndexByValue(ResourceId resourceId) {

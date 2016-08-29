@@ -67,7 +67,7 @@ public class DatabaseTargetForm implements Serializable {
         mapping.setFormLabel(databaseName + " Targets");
         mapping.setFromClause("target base");
         mapping.setBaseFilter("databaseId = " + databaseId);
-        mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
+        mapping.setDatabaseId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.TARGET_INSTANCE_DOMAIN, "TargetId");
         
         FormField nameField = new FormField(CuidAdapter.field(classId, CuidAdapter.NAME_FIELD));

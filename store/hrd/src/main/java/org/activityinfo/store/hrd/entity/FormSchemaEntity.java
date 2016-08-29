@@ -1,9 +1,11 @@
 package org.activityinfo.store.hrd.entity;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.common.base.Preconditions;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.*;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Parent;
+import com.googlecode.objectify.annotation.Unindex;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.FormConverter;
@@ -29,13 +31,6 @@ public class FormSchemaEntity {
     private long id;
 
     /**
-     * The id of the owner of this form. Currently will be either the id of a database
-     * or an activity, in the case of subforms.
-     */
-    @Index
-    private String owner;
-
-    /**
      * The current version of the schema for this Form.
      */
     @Unindex
@@ -52,14 +47,9 @@ public class FormSchemaEntity {
     }
 
     public FormSchemaEntity(FormClass formClass) {
-
-        if(formClass.getOwnerId() == null) {
-            throw new IllegalArgumentException("FormClass " + formClass.getId() + " has no @owner");
-        }
         
         this.formKey = FormEntity.key(formClass);
         this.id = ENTITY_ID;
-        this.owner = formClass.getOwnerId().asString();
         this.schema = FormConverter.toEmbeddedEntity(formClass.toJsonObject());
     }
     
@@ -88,9 +78,6 @@ public class FormSchemaEntity {
     }
 
     public FormClass readFormClass() {
-        Preconditions.checkNotNull(owner, "owner");
-        Preconditions.checkNotNull(owner, "schema");
-
         return FormClass.fromJson(FormConverter.fromEmbeddedEntity(schema));
     }
 }

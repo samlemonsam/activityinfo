@@ -104,7 +104,7 @@ public class DatabaseResource {
         XFormReader builder = new XFormReader(xForm);
         FormClass formClass = builder.build();
         formClass.setId(CuidAdapter.activityFormClass(activityId));
-        formClass.setOwnerId(CuidAdapter.databaseId(databaseId));
+        formClass.setDatabaseId(CuidAdapter.databaseId(databaseId));
 
         MySqlCatalog formCatalog = (MySqlCatalog) catalog.get();
         formCatalog.createOrUpdateFormSchema(formClass);

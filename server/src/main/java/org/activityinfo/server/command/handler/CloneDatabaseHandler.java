@@ -177,7 +177,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         
         targetFormClass.setLabel(sourceFormClass.getLabel());
         targetFormClass.setDescription(sourceFormClass.getDescription());
-        targetFormClass.setOwnerId(CuidAdapter.databaseId(targetDb.getId()));
+        targetFormClass.setDatabaseId(CuidAdapter.databaseId(targetDb.getId()));
 
         sourceIdToTargetFormElementMapping.clear();
         copyFormElements(sourceFormClass, targetFormClass, sourceFormClass.getId(), targetFormClass.getId());

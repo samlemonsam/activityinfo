@@ -19,7 +19,6 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
-import org.activityinfo.store.mysql.collections.DatabaseTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.query.impl.Updater;
@@ -37,7 +36,6 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
@@ -62,17 +60,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("label"), hasValues("Rdc"));
         assertThat(column("code"), hasValues("CD"));
     }
-
-    @Test
-    public void testDatabase() {
-        query(DatabaseTable.FORM_CLASS_ID, "label", "description", "country", "country.label", "country.code");
-        assertThat(column("label"), hasValues("PEAR", "PEAR Plus", "Alpha", "Public"));
-        assertThat(column("description"), hasAllNullValuesWithLengthOf(4));
-        assertThat(column("country"), hasValues("F0000000001", "F0000000001", "F0000000001", "F0000000001"));
-        assertThat(column("country.label"), hasValues("Rdc", "Rdc", "Rdc", "Rdc"));
-        assertThat(column("country.code"), hasValues("CD", "CD", "CD", "CD"));
-    }
-
+    
     @Test
     public void testLocation() {
 

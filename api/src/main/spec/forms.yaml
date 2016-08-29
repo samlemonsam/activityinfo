@@ -314,6 +314,9 @@ definitions:
       id:
         type: string
         description: Unique identifier of this class.
+      databaseId:
+        type: string
+        description: The id of the database to which this form belongs.
       parentFormId:
         type: string
         description: The id of the parent form, if this is a subform
@@ -348,12 +351,18 @@ definitions:
         enum:
         - text
         - quantity
+      typeParameters:
+        description: Parameters of the field type.
+        type: object
       relevanceCondition:
         description: A boolean-valued expression that determines whether the
             field is shown
         type: string
       required:
         description: True if a value for this field is required
+        type: boolean
+      visible:
+        description: True if the field should be displayed during data entry
         type: boolean
         
   FormRecord:

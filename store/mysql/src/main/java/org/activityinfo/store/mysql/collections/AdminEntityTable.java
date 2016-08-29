@@ -10,6 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.mysql.GeodbFolder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.*;
 import org.activityinfo.store.mysql.metadata.AdminLevel;
@@ -81,7 +82,7 @@ public class AdminEntityTable implements SimpleTable {
 
         // TODO: geometry
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formId, ADMIN_ENTITY_TABLE);
-        mapping.setOwnerId(ResourceId.ROOT_ID);
+        mapping.setDatabaseId(GeodbFolder.GEODB_ID);
         mapping.setPrimaryKeyMapping(CuidAdapter.ADMIN_ENTITY_DOMAIN, "adminEntityId");
         mapping.setBaseFilter("base.AdminLevelId=" + levelId + " AND base.deleted=0");
         mapping.defaultValueOnInsert("AdminLevelId", levelId);

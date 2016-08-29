@@ -62,7 +62,7 @@ public class FormDesignerModel {
     public FormClass registerNewSubform(ResourceId formFieldId, SubFormKind subFormKind) {
         final FormClass formClass = new FormClass(ResourceId.generateId());
 
-        formClass.setOwnerId(rootFormClass.getId());
+        formClass.setDatabaseId(rootFormClass.getDatabaseId());
         formClass.setSubFormKind(subFormKind);
 
         registerSubform(formFieldId, formClass);

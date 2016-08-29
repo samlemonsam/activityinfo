@@ -10,6 +10,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
@@ -30,24 +31,12 @@ import java.util.Set;
 public class FormClass implements FormElementContainer, Serializable {
 
 
-    /**
-     * Because FormClasses are themselves FormInstances, they have a class id of their own
-     */
-    public static final ResourceId CLASS_ID = ResourceId.valueOf("_class");
-
-    
-    /**
-     * Instances of FormClass have one FormField: a label, which has its own
-     * FormField id. It is defined at the application level to be a subproperty of
-     * {@code _label}
-     */
-    public static final String LABEL_FIELD_ID = "_class_label";
     public static final ResourceId PARENT_FIELD_ID = ResourceId.valueOf("@parent");
 
 
     @Nonnull
     private ResourceId id;
-    private ResourceId ownerId;
+    private ResourceId databaseId;
 
     private String label;
     private String description;
@@ -62,19 +51,18 @@ public class FormClass implements FormElementContainer, Serializable {
         this.id = id;
     }
 
-    public ResourceId getOwnerId() {
-        return ownerId;
+    public ResourceId getDatabaseId() {
+        return databaseId;
     }
 
-    public FormClass setOwnerId(ResourceId ownerId) {
-        this.ownerId = ownerId;
-        return this;
+    public void setDatabaseId(ResourceId databaseId) {
+        this.databaseId = databaseId;
     }
 
-    public void setParentId(ResourceId resourceId) {
-        setOwnerId(resourceId);
+    public void setDatabaseId(int databaseId) {
+        setDatabaseId(CuidAdapter.databaseId(databaseId));
     }
-
+    
     public FormElementContainer getElementContainer(ResourceId elementId) {
         return getElementContainerImpl(this, elementId);
     }
@@ -317,6 +305,10 @@ public class FormClass implements FormElementContainer, Serializable {
     public JsonObject toJsonObject() {
         JsonObject object = new JsonObject();
         object.addProperty("id", id.asString());
+        
+        if(databaseId != null) {
+            object.addProperty("databaseId", databaseId.asString());
+        }
         object.addProperty("label", label);
         
         
@@ -355,6 +347,10 @@ public class FormClass implements FormElementContainer, Serializable {
         }
         
         FormClass formClass = new FormClass(id);
+        
+        if(object.has("databaseId")) {
+            formClass.setDatabaseId(ResourceId.valueOf(object.get("databaseId").getAsString()));
+        }
         
         if(object.has("_class_label")) {
             formClass.setLabel(JsonParsing.toNullableString(object.get("_class_label")));
@@ -409,6 +405,5 @@ public class FormClass implements FormElementContainer, Serializable {
         }
         return builtIn;
     }
-
 
 }

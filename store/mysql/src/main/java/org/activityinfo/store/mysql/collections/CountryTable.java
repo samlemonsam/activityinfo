@@ -7,6 +7,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.mysql.GeodbFolder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -52,7 +53,7 @@ public class CountryTable implements SimpleTable {
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);
         mapping.setFormLabel("Country");
         mapping.setPrimaryKeyMapping(CuidAdapter.COUNTRY_DOMAIN, "countryId");
-        mapping.setOwnerId(ResourceId.ROOT_ID);
+        mapping.setDatabaseId(GeodbFolder.GEODB_ID);
         mapping.addTextField(nameField, "name");
         mapping.addTextField(isoField, "iso2");
         mapping.addGeoAreaField(boundaryField);

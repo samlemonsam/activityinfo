@@ -57,6 +57,8 @@ import static org.junit.Assert.assertNotNull;
 @OnDataSet("/dbunit/schema1.db.xml")
 public class FormModelTest extends CommandTestCase2 {
 
+    private static final ResourceId DATABASE_ID = CuidAdapter.databaseId(1);
+    
     private FormClass masterFormClass;
     private FormClass subFormClass;
     private FormField subFormChildField;
@@ -71,7 +73,7 @@ public class FormModelTest extends CommandTestCase2 {
         assertResolves(formModel.loadFormClassWithDependentSubForms(masterFormClass.getId()));
 
         assertEquals(formModel.getRootFormClass().getId(), masterFormClass.getId());
-        assertEquals(formModel.getRootFormClass().getOwnerId(), masterFormClass.getOwnerId());
+        assertEquals(formModel.getRootFormClass().getDatabaseId(), masterFormClass.getDatabaseId());
 
         assertNotNull(formModel.getSubFormByOwnerFieldId(subFormField.getId()));
         assertNotNull(formModel.getClassByField(subFormChildField.getId()));
@@ -84,10 +86,10 @@ public class FormModelTest extends CommandTestCase2 {
         setupForms();
         
         FormClass formClass = new FormClass(ResourceId.generateId());
-        formClass.setOwnerId(ResourceId.generateId());
+        formClass.setDatabaseId(DATABASE_ID);
 
         FormClass subform = new FormClass(ResourceId.generateId());
-        subform.setOwnerId(formClass.getId());
+        subform.setDatabaseId(DATABASE_ID);
 
         FormField subformOwnerField = formClass.addField(CuidAdapter.generateIndicatorId());
         subformOwnerField.setType(new SubFormReferenceType(subform.getId()));
@@ -199,14 +201,14 @@ public class FormModelTest extends CommandTestCase2 {
         ResourceId masterFormId = CuidAdapter.activityFormClass(3);
         
         masterFormClass = new FormClass(masterFormId);
-        masterFormClass.setOwnerId(CuidAdapter.databaseId(1));
+        masterFormClass.setDatabaseId(CuidAdapter.databaseId(1));
 
         FormField labelField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
         labelField.setLabel("label1");
         labelField.setType(TextType.INSTANCE);
 
         subFormClass = new FormClass(ResourceId.generateId());
-        subFormClass.setOwnerId(masterFormClass.getId());
+        subFormClass.setDatabaseId(masterFormClass.getDatabaseId());
         subFormClass.setParentFormId(masterFormId);
         subFormClass.setSubFormKind(SubFormKind.MONTHLY);
         subFormChildField = subFormClass.addField();

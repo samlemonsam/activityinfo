@@ -1,6 +1,5 @@
 package org.activityinfo.legacy.shared.adapter;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
@@ -17,8 +16,6 @@ import org.activityinfo.model.type.time.LocalDateType;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import static org.activityinfo.model.legacy.CuidAdapter.activityCategoryFolderId;
 
 /**
  * Adapts a Legacy "Activity" model to a FormClass
@@ -71,12 +68,7 @@ public class ActivityFormClassBuilder {
 
         siteForm = new FormClass(classId);
         siteForm.setLabel(activity.getName());
-
-        if (!Strings.isNullOrEmpty(activity.getCategory())) {
-            siteForm.setOwnerId(activityCategoryFolderId(activity.getDatabaseId(), activity.getCategory()));
-        } else {
-            siteForm.setOwnerId(CuidAdapter.databaseId(activity.getDatabaseId()));
-        }
+        siteForm.setDatabaseId(activity.getDatabaseId());
 
         siteForm.addElement(createPartnerField(classId, activity));
         siteForm.addElement(createProjectField(classId, activity));

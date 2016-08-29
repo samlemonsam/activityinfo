@@ -24,7 +24,6 @@ public class FormClassTest {
     @Test
     public void serializationWithMissingLabel() {
         FormClass formClass = new FormClass(ResourceId.generateId());
-        formClass.setOwnerId(ResourceId.ROOT_ID);
         formClass.setLabel("Form");
 
         FormField field = new FormField(ResourceId.generateId());

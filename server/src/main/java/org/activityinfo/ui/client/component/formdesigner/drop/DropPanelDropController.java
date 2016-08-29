@@ -197,7 +197,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             FormClass subForm = formDesigner.getModel().registerNewSubform(
                     formField.getId(), 
                     ((SubFormTemplate) template).getKind());
-            subForm.setOwnerId(formDesigner.getRootFormClass().getId());
+            subForm.setDatabaseId(formDesigner.getRootFormClass().getDatabaseId());
             subForm.setParentFormId(formDesigner.getRootFormClass().getId());
             subForm.setLabel(formField.getLabel());
             

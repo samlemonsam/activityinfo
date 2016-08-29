@@ -4,6 +4,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.ResultSet;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 public class GeodbFolder {
 
-    public static final String ROOT_ID = "geodb";
+    public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
     public static final String COUNTRY_ID_PREFIX = "country:";
 
     private QueryExecutor executor;
@@ -27,11 +28,11 @@ public class GeodbFolder {
     }
 
     public CatalogEntry getRootEntry() {
-        return new CatalogEntry(ROOT_ID, I18N.CONSTANTS.geography(), CatalogEntryType.FOLDER);
+        return new CatalogEntry(GEODB_ID.asString(), I18N.CONSTANTS.geography(), CatalogEntryType.FOLDER);
     }
 
     public List<CatalogEntry> getChildren(String parentId) throws SQLException {
-        if(parentId.equals(ROOT_ID)) {
+        if(parentId.equals(GEODB_ID)) {
             return queryCountries();
         } else if(parentId.startsWith(COUNTRY_ID_PREFIX)) {
             return queryCountryForms(parentId.substring(COUNTRY_ID_PREFIX.length()));

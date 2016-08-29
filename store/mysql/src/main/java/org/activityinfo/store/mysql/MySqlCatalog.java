@@ -43,7 +43,6 @@ public class MySqlCatalog implements FormCatalog {
         activityLoader = new ActivityLoader(executor);
         DatabaseCache databaseCache = new DatabaseCache(executor);
 
-        providers.add(new SimpleTableFormProvider(new DatabaseTable(), FormPermissions.readonly()));
         providers.add(new SimpleTableFormProvider(new UserTable(), FormPermissions.readonly()));
         providers.add(new SimpleTableFormProvider(new CountryTable(), FormPermissions.readonly()));
         providers.add(new SimpleTableFormProvider(new AdminEntityTable(), FormPermissions.readonly()));

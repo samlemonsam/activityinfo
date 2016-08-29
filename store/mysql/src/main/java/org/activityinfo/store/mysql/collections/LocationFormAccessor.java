@@ -20,6 +20,7 @@ import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.*;
+import org.activityinfo.store.mysql.GeodbFolder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -113,7 +114,7 @@ public class LocationFormAccessor implements FormAccessor {
         mapping.setBaseFilter("base.locationTypeId=" + locationTypeId);
         mapping.setPrimaryKeyMapping(CuidAdapter.LOCATION_DOMAIN, "locationId");
         mapping.setFormLabel(name);
-        mapping.setOwnerId(CuidAdapter.countryId(countryId));
+        mapping.setDatabaseId(GeodbFolder.GEODB_ID);
         mapping.addTextField(labelField, "name");
         mapping.addTextField(axeField, "axe");
         mapping.addUnmappedField(adminField);

@@ -47,8 +47,8 @@ public class TableMappingBuilder {
         this.formClass.setLabel(name);
     }
 
-    public void setOwnerId(ResourceId rootId) {
-        formClass.setOwnerId(rootId);
+    public void setDatabaseId(ResourceId rootId) {
+        formClass.setDatabaseId(rootId);
     }
     
     public void setFromClause(String fromClause) {
@@ -163,9 +163,9 @@ public class TableMappingBuilder {
         Preconditions.checkState(formClass != null, fromClause + ": FormClass is not set");
         Preconditions.checkState(formClass.getLabel() != null, fromClause + ": formClass.label is null");
         Preconditions.checkState(primaryKeyMapping != null, fromClause + ": Primary key is not set");
-        Preconditions.checkState(formClass.getOwnerId() != null, fromClause + ": ownerId is not set");
         return new TableMapping(tableName, fromClause, baseFilter, primaryKeyMapping, mappings, formClass,
                 deleteMethod, insertDefaults, version);
     }
 
+    
 }

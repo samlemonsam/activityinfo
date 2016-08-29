@@ -35,7 +35,7 @@ public class ProjectTable implements SimpleTable {
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formId, "partner");
         mapping.setFormLabel("Project");
-        mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
+        mapping.setDatabaseId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.PROJECT_DOMAIN, "projectId");
         mapping.setFromClause("project base");
         mapping.setBaseFilter("dateDeleted IS NULL AND databaseId=" + databaseId);

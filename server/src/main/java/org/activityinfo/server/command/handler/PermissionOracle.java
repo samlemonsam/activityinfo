@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.activityinfo.model.legacy.CuidAdapter.ACTIVITY_DOMAIN;
 import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 
 public class PermissionOracle {
@@ -90,17 +89,13 @@ public class PermissionOracle {
     }
 
     private UserDatabase lookupDatabase(FormClass formClass) {
-        ResourceId ownerId = formClass.getOwnerId();
-        if(ownerId.getDomain() == ACTIVITY_DOMAIN) {
-            Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(ownerId));
-            if (activity != null) {
-                return activity.getDatabase();
-            }
-        } else if(ownerId.getDomain() == DATABASE_DOMAIN) {
-            return em.get().getReference(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(ownerId));
+        ResourceId databaseId = formClass.getDatabaseId();
+        
+        if(databaseId.getDomain() == DATABASE_DOMAIN) {
+            return em.get().getReference(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
         }
         throw new IllegalArgumentException(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
-                "a database", formClass.getLabel(), formClass.getId(), formClass.getOwnerId()));
+                "a database", formClass.getLabel(), formClass.getId(), formClass.getDatabaseId()));
     }
 
     public void assertManagePartnerAllowed(UserDatabase database, User user) {
