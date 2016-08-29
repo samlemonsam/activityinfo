@@ -12,7 +12,6 @@ import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.mysql.side.AdminColumnBuilder;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 
@@ -53,6 +52,8 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void execute() {
+
+        baseTableBuilder.where("base.workflowStatusId != 'rejected'");
  
         // Emit all of the base columns 
         Cursor cursor = baseTableBuilder.open();

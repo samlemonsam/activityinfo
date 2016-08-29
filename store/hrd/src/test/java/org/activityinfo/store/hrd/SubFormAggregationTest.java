@@ -63,11 +63,11 @@ public class SubFormAggregationTest {
 
 
         FormClass siteForm = new FormClass(ResourceId.generateId());
-        siteForm.setOwnerId(ResourceId.ROOT_ID);
+        siteForm.setParentFormId(ResourceId.ROOT_ID);
 
         FormClass monthlyForm = new FormClass(ResourceId.generateId());
         monthlyForm.setParentFormId(siteForm.getId());
-        monthlyForm.setOwnerId(siteForm.getId());
+        monthlyForm.setParentFormId(siteForm.getId());
 
         siteForm.setLabel("Household interview");
         FormField villageField = siteForm.addField()

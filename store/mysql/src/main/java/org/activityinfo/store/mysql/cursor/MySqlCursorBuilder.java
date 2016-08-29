@@ -52,6 +52,10 @@ public class MySqlCursorBuilder implements CursorBuilder {
         query.where("base." + tableMapping.getPrimaryKey().getColumnName() + "=" + CuidAdapter.getLegacyIdFromCuid(resourceId));
     }
 
+    public void where(String where) {
+        query.where(where);
+    }
+
     @Override
     public void addResourceId(final CursorObserver<ResourceId> observer) {
         cursor.onNext.add(new Runnable() {

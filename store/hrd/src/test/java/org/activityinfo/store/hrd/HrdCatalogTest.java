@@ -68,7 +68,7 @@ public class HrdCatalogTest {
         ResourceId countField = ResourceId.valueOf("FC");
         
         FormClass formClass = new FormClass(collectionId);
-        formClass.setOwnerId(ResourceId.valueOf("foo"));
+        formClass.setParentFormId(ResourceId.valueOf("foo"));
         formClass.setLabel("NFI Distributions");
         formClass.addField(villageField)
                 .setLabel("Village name")
@@ -130,7 +130,7 @@ public class HrdCatalogTest {
 
 
         FormClass formClass = new FormClass(ResourceId.generateId());
-        formClass.setOwnerId(ResourceId.valueOf("foo"));
+        formClass.setParentFormId(ResourceId.valueOf("foo"));
         formClass.setLabel("NFI Distributions");
         FormField nameField = formClass.addField(ResourceId.generateId())
                 .setLabel("Village name")
@@ -140,7 +140,7 @@ public class HrdCatalogTest {
         HrdCatalog catalog = new HrdCatalog();
         Updater updater = new Updater(catalog, userId);
 
-        HrdFormAccessor collection = catalog.create(formClass);
+        catalog.create(formClass);
         
         String villageNames[] = new String[] { "Rutshuru" , "Beni", "Goma" };
 
@@ -175,9 +175,8 @@ public class HrdCatalogTest {
         
         FormClass memberForm = new FormClass(ResourceId.generateId());
         memberForm.setParentFormId(hhForm.getId());
-        memberForm.setOwnerId(hhForm.getId());
 
-        hhForm.setOwnerId(ResourceId.valueOf("foo"));
+        hhForm.setParentFormId(ResourceId.valueOf("foo"));
         hhForm.setLabel("Household interview");
         FormField hhIdField = hhForm.addField()
                 .setLabel("Household ID")
