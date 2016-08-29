@@ -264,7 +264,7 @@ public class FormField extends FormElement implements Serializable {
         
         if(typeElement.isJsonPrimitive()) {
             type = typeElement.getAsString();
-            typeParameters = jsonObject.get("typeParameters").getAsJsonObject();
+            typeParameters = jsonObject.get("typeParameters");
         } else {
             JsonObject typeObject = typeElement.getAsJsonObject();
             type = typeObject.get("typeClass").getAsString();

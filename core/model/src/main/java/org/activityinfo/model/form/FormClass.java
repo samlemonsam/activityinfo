@@ -378,23 +378,24 @@ public class FormClass implements FormElementContainer, Serializable {
         List<FormElement> elements = new ArrayList<>();
         for (int i = 0; i < elementsArray.size(); i++) {
             JsonObject elementObject = elementsArray.get(i).getAsJsonObject();
-            JsonElement typeElement = elementObject.get("type");
-            if(typeElement.isJsonPrimitive()) {
-                String type = typeElement.getAsString();
-                if ("section".equals(type)) {
-                    elements.add(FormSection.fromJson(elementObject));
-                } else if ("label".equals(type)) {
-                    elements.add(FormLabel.fromJson(elementObject));
-                } else {
-                    throw new IllegalArgumentException("type: " + type);
-                }
-            } else {
-                elements.add(FormField.fromJson(elementObject));
-            }
+            elements.add(elementFromJson(elementObject));
         }
         return elements;
     }
-    
+
+    private static FormElement elementFromJson(JsonObject elementObject) {
+        JsonElement typeElement = elementObject.get("type");
+        if(typeElement.isJsonPrimitive()) {
+            String type = typeElement.getAsString();
+            if ("section".equals(type)) {
+                return FormSection.fromJson(elementObject);
+            } else if ("label".equals(type)) {
+                return FormLabel.fromJson(elementObject);
+            }
+        }
+        return FormField.fromJson(elementObject);
+    }
+
     public static FormClass fromJson(String json) {
         return fromJson(new JsonParser().parse(json).getAsJsonObject());
     }
