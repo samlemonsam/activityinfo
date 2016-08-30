@@ -96,6 +96,7 @@ public class LoginController {
             
         } catch (Exception e) {
             LoginPageModel model = LoginPageModel.unsuccessful();
+            LOGGER.warning("Failed login attempt for user " + email);
 
             return Response.ok(model.asViewable()).type(MediaType.TEXT_HTML).build();
         }
