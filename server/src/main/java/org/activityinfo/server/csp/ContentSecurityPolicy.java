@@ -19,8 +19,12 @@ public class ContentSecurityPolicy {
     
     private static final String GOOGLE_STORAGE = "https://storage.googleapis.com";
     private static final String GOOGLE_FONTS = "https://fonts.googleapis.com";
+    private static final String GOOGLE_FONTS_STATIC = "https://fonts.gstatic.com";
+    
     private static final String CUSTOM_DOMAIN_STORAGE = "https://ai-custom-domains.storage.googleapis.com";
 
+    private static final String MAPBOX_TILES = "https://*.tiles.mapbox.com";
+    
     private final String policy;
 
     public ContentSecurityPolicy() {
@@ -34,14 +38,17 @@ public class ContentSecurityPolicy {
                 
             // Google analytics add images to the page to track
             // Events
-            GOOGLE_ANALYTICS
+            GOOGLE_ANALYTICS,
+                
+            MAPBOX_TILES
         
         );
         
         append(sb, "font-src", SELF,
-                
+            SELF,
             // We use the droid sans font
             GOOGLE_FONTS,
+            GOOGLE_FONTS_STATIC,
             CUSTOM_DOMAIN_STORAGE
         );
         
