@@ -18,7 +18,8 @@ public class ContentSecurityPolicy {
     private static final String GOOGLE_ANALYTICS = "https://ssl.google-analytics.com";
     
     private static final String GOOGLE_STORAGE = "https://storage.googleapis.com";
-    public static final String GOOGLE_FONTS = "https://fonts.googleapis.com";
+    private static final String GOOGLE_FONTS = "https://fonts.googleapis.com";
+    private static final String CUSTOM_DOMAIN_STORAGE = "https://ai-custom-domains.storage.googleapis.com";
 
     private final String policy;
 
@@ -40,7 +41,8 @@ public class ContentSecurityPolicy {
         append(sb, "font-src", SELF,
                 
             // We use the droid sans font
-            GOOGLE_FONTS
+            GOOGLE_FONTS,
+            CUSTOM_DOMAIN_STORAGE
         );
         
         append(sb, "script-src", SELF,
@@ -54,14 +56,21 @@ public class ContentSecurityPolicy {
                 
             // Required for retrieving the news feed, 
             // remove after transition to new web site.
-            "about.activityinfo.org"
+            "about.activityinfo.org",
+                
+            // Required by SyrianRefugeeResponse.org
+            "data.unhcr.org",
+            CUSTOM_DOMAIN_STORAGE
         );
         append(sb, "style-src", SELF, 
             
             // GWT makes extensive use of inline style-sheets
             UNSAFE_INLINE,
                 
-            GOOGLE_FONTS
+            GOOGLE_FONTS,
+            
+            // resources for custom domains
+            CUSTOM_DOMAIN_STORAGE
         );
         
         append(sb, "connect-src", SELF);
