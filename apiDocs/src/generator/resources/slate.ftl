@@ -7,20 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>ActivityInfo API Reference</title>
 
-    <link href="screen.css" rel="stylesheet" media="screen" />
-    <link href="print.css" rel="stylesheet" media="print" />
-    <script src="slate.js"></script>
+    <link href="assets/screen.css" rel="stylesheet" media="screen" />
+    <link href="assets/print.css" rel="stylesheet" media="print" />
+    <script src="assets/slate.js"></script>
 </head>
 
 <body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;python&quot;]">
 <a href="#" id="nav-button">
       <span>
         NAV
-        <img src="images/navbar.png" />
+        <img src="assets/navbar.png" />
       </span>
 </a>
 <div class="tocify-wrapper">
-    <img src="logo.png" />
+    <img src="assets/logo.png" />
     <div class="lang-selector">
         <#list languages as lang>
         <a href="#" data-language-name="${lang}">${lang}</a>

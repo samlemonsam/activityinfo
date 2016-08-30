@@ -66,8 +66,12 @@ war {
         return !file.name.startsWith('guava-gwt') &&
                 !file.name.startsWith('gwt-user')
     }
-    from project(':ui:app').tasks.getByName('compileGwt').outputs
-    exclude("**/*.symbolMap")
+    from(project(':apiDocs').outputDir) {
+        into 'apidocs'   
+    }
+    from(project(':ui:app').tasks.getByName('compileGwt')) {
+        exclude("**/*.symbolMap")
+    }
 }
 
 
@@ -126,6 +130,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
 tasks.compileGwt.dependsOn ":i18n:jar"
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 tasks.warTemplate.enabled = false
+tasks.war.dependsOn ':apiDocs:build'
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
