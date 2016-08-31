@@ -19,6 +19,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.CommandTestCase2;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.store.FormCatalog;
@@ -79,7 +80,7 @@ public class XFormResourceTest extends CommandTestCase2 {
         objectifyService = ObjectifyService.begin();
 
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
-        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class), authProvider);
+        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class), authProvider, new PermissionOracle(injector.getProvider(EntityManager.class), null));
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);
 

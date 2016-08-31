@@ -12,6 +12,8 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.endpoint.rest.UpdateValueVisibilityChecker;
 import org.activityinfo.service.lookup.ReferenceChoice;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
@@ -20,20 +22,22 @@ import org.activityinfo.store.query.impl.Updater;
 
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 
 public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
-    private static final Logger LOGGER = Logger.getLogger(ResourceLocatorSyncImpl.class.getName());
+    //private static final Logger LOGGER = Logger.getLogger(ResourceLocatorSyncImpl.class.getName());
 
     private Provider<FormCatalog> catalog;
     private Provider<AuthenticatedUser> authenticatedUser;
+    private PermissionOracle permissionOracle;
 
     @Inject
-    public ResourceLocatorSyncImpl(Provider<FormCatalog> catalog, Provider<AuthenticatedUser> authenticatedUser) {
+    public ResourceLocatorSyncImpl(Provider<FormCatalog> catalog, Provider<AuthenticatedUser> authenticatedUser,
+                                   PermissionOracle permissionOracle) {
         this.catalog = catalog;
         this.authenticatedUser = authenticatedUser;
+        this.permissionOracle = permissionOracle;
     }
 
     @Override
@@ -76,7 +80,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public void persist(FormInstance formInstance) {
-        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId());
+        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
         updater.execute(formInstance);
     }
 }

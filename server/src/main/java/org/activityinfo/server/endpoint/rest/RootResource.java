@@ -65,12 +65,17 @@ public class RootResource {
     private Provider<FormCatalog> catalog;
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
+    private PermissionOracle permissionOracle;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
                         Provider<FormCatalog> catalog,
                         DispatcherSync dispatcher,
-                        DeploymentConfiguration config, Provider<AuthenticatedUser> userProvider, ServerSideAuthProvider authProvider) {
+                        DeploymentConfiguration config,
+                        Provider<AuthenticatedUser> userProvider,
+                        ServerSideAuthProvider authProvider,
+                        PermissionOracle permissionOracle
+    ) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -78,6 +83,7 @@ public class RootResource {
         this.config = config;
         this.userProvider = userProvider;
         this.authProvider = authProvider;
+        this.permissionOracle = permissionOracle;
     }
 
     @Path("/adminEntity/{id}")
@@ -177,7 +183,7 @@ public class RootResource {
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId());
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
         try {
             updater.execute(jsonElement.getAsJsonObject());
         } catch (InvalidUpdateException e) {

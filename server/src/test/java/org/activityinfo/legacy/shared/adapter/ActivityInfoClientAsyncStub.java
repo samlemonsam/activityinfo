@@ -12,7 +12,10 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.server.authentication.AuthenticationModuleStub;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
+import org.activityinfo.server.endpoint.rest.UpdateValueVisibilityChecker;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.hrd.HrdFormAccessor;
@@ -29,10 +32,12 @@ import java.util.List;
 public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     private Provider<EntityManager> entityManager;
+    private PermissionOracle permissionOracle;
 
     @Inject
-    public ActivityInfoClientAsyncStub(Provider<EntityManager> entityManager) {
+    public ActivityInfoClientAsyncStub(Provider<EntityManager> entityManager, PermissionOracle permissionOracle) {
         this.entityManager = entityManager;
+        this.permissionOracle = permissionOracle;
     }
 
     private FormCatalog newCatalog() {
@@ -117,7 +122,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, 1);
+            Updater updater = new Updater(catalog, currentUserId(), new UpdateValueVisibilityChecker(permissionOracle));
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -132,11 +137,15 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         return Promise.resolved(Collections.<FormHistoryEntry>emptyList());
     }
 
+    private int currentUserId() {
+        return AuthenticationModuleStub.getCurrentUser().getUserId();
+    }
+
     @Override
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, 1);
+            Updater updater = new Updater(catalog, currentUserId(), new UpdateValueVisibilityChecker(permissionOracle));
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
             return Promise.resolved(null);

@@ -186,7 +186,7 @@ public class FormResource {
         
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId());
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
         updater.create(formId, jsonObject.getAsJsonObject());
         
         return Response.ok().build();
@@ -202,7 +202,7 @@ public class FormResource {
 
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId());
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
         updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
 
         return Response.ok().build();
@@ -229,7 +229,7 @@ public class FormResource {
                 xlsForm.write(outputStream);
             }
         };
-        
+
         return Response.ok(output, "application/vnd.ms-excel").build();
     }
     

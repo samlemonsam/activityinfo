@@ -134,6 +134,10 @@ public class PermissionOracle {
         }
     }
 
+    public void assertEditAllowed(AttachmentValue value, int userId) {
+        assertEditAllowed(value, em.get().find(User.class, userId));
+    }
+
     public void assertEditAllowed(AttachmentValue value, User user) {
         if(!isEditAllowed(value, user)) {
             throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +

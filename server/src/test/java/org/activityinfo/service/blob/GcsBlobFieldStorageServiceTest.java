@@ -31,7 +31,6 @@ import com.google.inject.Inject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -42,7 +41,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -75,7 +73,8 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
     public static final int USER_WITHOUT_ACCESS_TO_DB_1 = 22;
 
     private final LocalServiceTestHelper localServiceTestHelper = new LocalServiceTestHelper(
-            new LocalBlobstoreServiceTestConfig(), new LocalDatastoreServiceTestConfig());
+            new LocalBlobstoreServiceTestConfig(), new LocalDatastoreServiceTestConfig().
+            setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
     @Inject
     GcsBlobFieldStorageService blobService;
@@ -208,7 +207,7 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
 
         int activityId = 1;
 
-        ResourceId attachmentFieldId = ResourceId.generateFieldId(BarcodeType.TYPE_CLASS);
+        ResourceId attachmentFieldId = ResourceId.generateFieldId(AttachmentType.TYPE_CLASS);
         FormClass formClass = addAttachmentField(activityId, attachmentFieldId);
 
         blobId = BlobId.generate();
@@ -241,24 +240,27 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
 
         assertResolves(locator.persist(instance));
 
-        assertInstanceExists(instance.getId());
+        assertInstanceExists(formClass.getId(), instance.getId());
 
         AuthenticationModuleStub.setUserId(USER_WITHOUT_ACCESS_TO_DB_1);
 
         int anotherActivityId = 32;
-        ResourceId newAttachmentFieldId = ResourceId.generateFieldId(BarcodeType.TYPE_CLASS);
+        ResourceId newAttachmentFieldId = ResourceId.generateFieldId(AttachmentType.TYPE_CLASS);
         addAttachmentField(anotherActivityId, newAttachmentFieldId);
 
         instance.setId(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()));
         instance.setClassId(CuidAdapter.activityFormClass(anotherActivityId));
         instance.set(newAttachmentFieldId, attachmentValue);
+        instance.set(field(instance.getClassId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(instance.getClassId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(partnerField(anotherActivityId), partnerInstanceId(1));
 
         boolean persisted = true;
         try {
             assertResolves(locator.persist(instance)); // this must fail because of blob permission check
         } catch (RuntimeException e) {
             e.printStackTrace();
-            if (e.getCause() instanceof IllegalAccessCommandException) {
+            if (e.getCause() instanceof WebApplicationException) {
                 persisted = false;
             }
         }
@@ -276,10 +278,10 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
                 .setVisible(true));
 
         assertResolves(locator.persist(formClass));
-        return formClass;
+        return assertResolves(locator.getFormClass(formClass.getId())); // re-fetch
     }
 
-    private FormInstance assertInstanceExists(ResourceId instanceId) {
-        return assertResolves(locator.getFormInstance(null, instanceId));
+    private FormInstance assertInstanceExists(ResourceId formId, ResourceId instanceId) {
+        return assertResolves(locator.getFormInstance(formId, instanceId));
     }
 }

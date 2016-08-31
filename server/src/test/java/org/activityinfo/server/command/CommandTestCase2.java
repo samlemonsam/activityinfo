@@ -40,6 +40,7 @@ import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.gwtrpc.CommandServlet2;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
@@ -104,7 +105,7 @@ public class CommandTestCase2 {
     @Before
     public final void setUpResourceLocator() {
         locator = new ResourceLocatorAdaptor(
-                new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class)));
+                new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class), injector.getInstance(PermissionOracle.class)));
     }
 
     protected void setUser(int userId) {

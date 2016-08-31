@@ -44,10 +44,16 @@ public class Updater {
     
     private final FormCatalog catalog;
     private int userId;
+    private ValueVisibilityChecker visibilityChecker;
 
     public Updater(FormCatalog catalog, int userId) {
+        this(catalog, userId, ValueVisibilityChecker.NULL);
+    }
+
+    public Updater(FormCatalog catalog, int userId, ValueVisibilityChecker visibilityChecker) {
         this.catalog = catalog;
         this.userId = userId;
+        this.visibilityChecker = visibilityChecker;
     }
 
 
@@ -398,7 +404,6 @@ public class Updater {
         RecordUpdate update = new RecordUpdate();
         update.setUserId(userId);
         update.setRecordId(formInstance.getId());
-        update.setUserId(userId);
 
         for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
             if(!entry.getKey().asString().equals("classId")) {
@@ -440,9 +445,12 @@ public class Updater {
         JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
         for (FormField formField : formClass.getFields()) {
             if(!(formField.getType() instanceof CalculatedFieldType)) {
+
                 if (fieldValues.has(formField.getName())) {
                     JsonElement updatedValueElement = fieldValues.get(formField.getName());
                     FieldValue updatedValue = formField.getType().parseJsonValue(updatedValueElement);
+
+                    visibilityChecker.assertVisible(formField.getType(), updatedValue, userId);
                     update.getChangedFieldValues().put(formField.getId(), updatedValue);
 
                 } else if (create) {
