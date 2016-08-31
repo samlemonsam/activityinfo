@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
@@ -27,6 +28,7 @@ public class ContentSecurityServlet extends HttpServlet {
 
     private final ServerSideAuthProvider authProvider;
 
+    @Inject
     public ContentSecurityServlet(ServerSideAuthProvider authProvider) {
         this.authProvider = authProvider;
     }
