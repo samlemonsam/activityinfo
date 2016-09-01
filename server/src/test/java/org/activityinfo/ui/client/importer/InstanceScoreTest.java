@@ -58,11 +58,11 @@ import static org.junit.Assert.assertThat;
  * @author yuriyz on 5/20/14.
  */
 @RunWith(InjectionSupport.class)
-@OnDataSet("/dbunit/nfi-import.db.xml")
 public class InstanceScoreTest extends AbstractImporterTest {
 
     private static final ResourceId ADMINISTRATIVE_UNIT_FIELD = field(locationFormClass(2), CuidAdapter.ADMIN_FIELD);
 
+    @OnDataSet("/dbunit/nfi-import.db.xml")
     @Test
     public void adminEntityScoring() throws IOException {
         setUser(3);
