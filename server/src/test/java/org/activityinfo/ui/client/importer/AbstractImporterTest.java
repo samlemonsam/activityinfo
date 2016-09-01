@@ -150,7 +150,7 @@ public class AbstractImporterTest extends CommandTestCase2 {
         throw new RuntimeException("No imported column with header " + header);
     }
 
-    public static void dumpList(final String title, Iterable<?> items) {
+    protected void dumpList(final String title, Iterable<?> items) {
         System.out.println(title + ":");
         System.out.println("-----------------------");
         System.out.println(Joiner.on("\n").join(items));
