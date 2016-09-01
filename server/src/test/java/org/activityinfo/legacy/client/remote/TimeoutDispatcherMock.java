@@ -24,23 +24,25 @@ package org.activityinfo.legacy.client.remote;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author yuriyz on 10/27/2014.
  */
 public class TimeoutDispatcherMock extends AbstractDispatcher {
 
-    private int executeCounter = 0;
+    private AtomicInteger executeCounter = new AtomicInteger(0);
 
     @Override
     public <T extends CommandResult> void execute(Command<T> command, AsyncCallback<T> callback) {
-        executeCounter++;
-        callback.onFailure(new CommandException());
+        executeCounter.incrementAndGet();
+        callback.onFailure(new UnexpectedCommandException());
     }
 
     public int getExecuteCounter() {
-        return executeCounter;
+        return executeCounter.get();
     }
 }
 
