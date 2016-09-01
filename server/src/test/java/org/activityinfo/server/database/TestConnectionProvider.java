@@ -100,6 +100,8 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
                     throw new Error("No database name provided");
                 }
             }
+
+            LOGGER.info("Database : " + DATABASE_NAME + ", username: " + USERNAME);
             
         } catch (Exception e) {
             e.printStackTrace();

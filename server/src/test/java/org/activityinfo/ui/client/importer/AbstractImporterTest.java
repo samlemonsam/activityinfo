@@ -19,6 +19,7 @@ import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.ui.client.component.importDialog.Importer;
+import org.junit.After;
 import org.junit.Before;
 
 import java.util.List;
@@ -44,6 +45,11 @@ public class AbstractImporterTest extends CommandTestCase2 {
         // don't sink our test
 
         GWTMockUtilities.disarm();
+    }
+
+    @After
+    public void after() {
+        GWTMockUtilities.restore();
     }
 
     protected <T> T runScheduledAndAssertResolves(Promise<T> promise) {
