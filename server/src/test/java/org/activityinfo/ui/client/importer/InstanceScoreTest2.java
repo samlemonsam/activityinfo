@@ -47,22 +47,24 @@ import static org.junit.Assert.assertThat;
 @OnDataSet("/dbunit/nfi-import.db.xml")
 public class InstanceScoreTest2 extends CommandTestCase2 {
 
-    private static final ResourceId ADMINISTRATIVE_UNIT_FIELD = field(locationFormClass(2), CuidAdapter.ADMIN_FIELD);
+    private static final ResourceId ADMINISTRATIVE_UNIT_FIELD = field(ImportWithMultiClassRangeTest.SCHOOL_FORM_CLASS, CuidAdapter.ADMIN_FIELD);
 
     private AsyncFormTreeBuilder formTreeBuilder;
-    private StubScheduler scheduler;
     private ImportModel importModel;
     private Importer importer;
     private FormTree formTree;
 
     @Before
     public void before() {
-        formTreeBuilder = new AsyncFormTreeBuilder(locator);
-        scheduler = new StubScheduler();
 
         setUser(3);
 
+        formTreeBuilder = new AsyncFormTreeBuilder(locator);
+
+        System.out.println("input: " + ImportWithMultiClassRangeTest.SCHOOL_FORM_CLASS);
         formTree = assertResolves(formTreeBuilder.apply(ImportWithMultiClassRangeTest.SCHOOL_FORM_CLASS));
+
+        System.out.println("Root id: " + formTree.getRootFormClass().getId());
         FormTreePrettyPrinter.print(formTree);
 
         importModel = new ImportModel(formTree);

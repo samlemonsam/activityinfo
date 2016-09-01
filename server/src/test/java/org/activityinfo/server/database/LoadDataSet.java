@@ -70,7 +70,7 @@ public class LoadDataSet extends Statement {
         LOGGER.info("Removing all rows");
         removeAllRows();
 
-        LOGGER.info("DBUnit: loading " + name + " into the database.");
+        LOGGER.info("DBUnit: loading " + name + " into the database: " + connectionProvider.get().getMetaData().getURL());
         IDataSet data = loadDataSet();
 
         List<Throwable> errors = new ArrayList<Throwable>();
