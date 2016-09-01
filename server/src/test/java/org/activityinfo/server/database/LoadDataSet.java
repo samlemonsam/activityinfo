@@ -65,6 +65,8 @@ public class LoadDataSet extends Statement {
     @Override
     public void evaluate() throws Throwable {
 
+        System.out.println("ConnectionProvider class: " + connectionProvider);
+
         JdbcScheduler.get().forceCleanup();
 
         LOGGER.info("Removing all rows");
