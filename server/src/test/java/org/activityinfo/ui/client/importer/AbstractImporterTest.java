@@ -5,6 +5,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.testing.StubScheduler;
 import com.google.gwt.junit.GWTMockUtilities;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.activityinfo.core.shared.importing.model.ColumnAction;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
@@ -22,6 +24,8 @@ import org.activityinfo.ui.client.component.importDialog.Importer;
 import org.junit.After;
 import org.junit.Before;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
@@ -36,8 +40,13 @@ public class AbstractImporterTest extends CommandTestCase2 {
     protected List<ImportTarget> targets;
     protected Importer importer;
 
+    @Inject
+    Provider<Connection> connectionProvider;
+
     @Before
     public void setupAdapters() {
+        System.out.println("Database url: " + databaseUrl());
+
         formTreeBuilder = new AsyncFormTreeBuilder(locator);
         scheduler = new StubScheduler();
 
@@ -45,6 +54,14 @@ public class AbstractImporterTest extends CommandTestCase2 {
         // don't sink our test
 
         GWTMockUtilities.disarm();
+    }
+
+    private String databaseUrl() {
+        try {
+            return connectionProvider.get().getMetaData().getURL();
+        } catch (SQLException e) {
+            return "unknown";
+        }
     }
 
     @After
