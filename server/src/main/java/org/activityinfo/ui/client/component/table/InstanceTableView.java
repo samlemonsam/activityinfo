@@ -94,7 +94,7 @@ public class InstanceTableView implements IsWidget, RequiresResize {
         if (!persistedColumnNames.isEmpty()) {
             List<FieldColumn> toSelect = Lists.newArrayList();
             for (FieldColumn column : columns) {
-                if (!Strings.isNullOrEmpty(column.getHeader()) && persistedColumnNames.contains(column.getHeader())) {
+                if (!Strings.isNullOrEmpty(column.get().getHeader()) && persistedColumnNames.contains(column.get().getHeader())) {
                     toSelect.add(column);
                 }
             }

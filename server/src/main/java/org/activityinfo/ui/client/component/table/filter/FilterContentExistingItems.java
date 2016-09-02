@@ -185,7 +185,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
             @Override
             public Promise<List<RowView>> get() {
                 final QueryModel model = table.getDataLoader().newQueryModel();
-                model.selectField(column.getFieldPaths().get(0));
+                model.selectField(column.get().getFieldPaths().get(0));
 
                 final Promise<List<RowView>> result = new Promise<>();
                 table.getResourceLocator().getTable(model).subscribe(new Observer<ColumnSet>() {
@@ -201,7 +201,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                                 // only unique values
                                 for (int row = 0; row < columnSet.getNumRows(); row++) {
                                     RowView rowView = new RowView(row, columnSet.getColumns());
-                                    Object value = rowView.getValue(column.getNode().getFieldId().asString());
+                                    Object value = rowView.getValue(column.get().getNode().getFieldId().asString());
                                     String valueStr = value != null ? value.toString() : "";
                                     if (!Strings.isNullOrEmpty(valueStr) && !values.contains(valueStr)) {
                                         values.add(valueStr);
@@ -219,7 +219,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     }
 
     private void initByFilterVisit() {
-        final ExprNode node = column.getFilter();
+        final ExprNode node = column.get().getFilter();
         if (node != null) {
             final VisitConstantsVisitor initializationVisitor = new VisitConstantsVisitor() {
                 @Override
@@ -308,8 +308,8 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                 int size = set.size();
                 for (int i = 0; i < size; i++) {
                     RowView row = set.get(i);
-                    String id = column.getNode().getFieldId().asString();
-                    boolean isNumber = column.getNode().getType() instanceof QuantityType;
+                    String id = column.get().getNode().getFieldId().asString();
+                    boolean isNumber = column.get().getNode().getType() instanceof QuantityType;
 
                     Object value = row.getValue(id);
                     if (value != null && !Strings.isNullOrEmpty(value.toString())) {

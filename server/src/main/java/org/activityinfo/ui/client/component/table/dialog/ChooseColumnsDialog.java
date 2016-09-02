@@ -178,7 +178,7 @@ public class ChooseColumnsDialog {
                 final String value = filterColumnTable.getValue();
                 final ArrayList<FieldColumn> columnsToShow = Lists.newArrayList();
                 for (FieldColumn column : tableView.getColumns()) {
-                    final String headerLowercased = column.getHeader().toLowerCase();
+                    final String headerLowercased = column.get().getHeader().toLowerCase();
                     if (Strings.isNullOrEmpty(value) || headerLowercased.contains(value.toLowerCase())) {
                         columnsToShow.add(column);
                     }
@@ -199,7 +199,7 @@ public class ChooseColumnsDialog {
                 new TextCell()) {
             @Override
             public String getValue(FieldColumn object) {
-                return object.getHeader();
+                return object.get().getHeader();
             }
         };
         labelColumn.setSortable(false);

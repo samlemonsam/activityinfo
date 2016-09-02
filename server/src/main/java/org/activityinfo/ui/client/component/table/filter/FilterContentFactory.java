@@ -41,7 +41,7 @@ public class FilterContentFactory {
     }
 
     public static FilterContent create(FieldColumn column, InstanceTable table, FilterPanel popup) {
-        FieldType type = column.getNode().getField().getType();
+        FieldType type = column.get().getNode().getField().getType();
         if (type == LocalDateType.INSTANCE) {
             return new FilterContentDate(column);
         } else if (type instanceof AttachmentType) {

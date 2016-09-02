@@ -93,7 +93,7 @@ public class FilterContentDate extends Composite implements FilterContent {
     }
 
     private void initByFilterVisit() {
-        final ExprNode node = column.getFilter();
+        final ExprNode node = column.get().getFilter();
         if (node != null) {
             final List<LocalDate> dates = Lists.newArrayList();
             final VisitConstantsVisitor initializationVisitor = new VisitConstantsVisitor() {
@@ -177,7 +177,7 @@ public class FilterContentDate extends Composite implements FilterContent {
             try {
                 String min = currentRange.getMinLocalDate().toString();
                 String max = currentRange.getMaxLocalDate().toString();
-                String id = column.getNode().getFieldId().asString();
+                String id = column.get().getNode().getFieldId().asString();
                 return ExprParser.parse("('"+ min + "'<=" + id + ") && (" + id + " <= '" + max + "')");
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, e.getMessage(), e);

@@ -115,7 +115,7 @@ public class InstanceTable implements IsWidget {
         for (FieldColumn column : columns) {
             final FilterCellAction filterAction = new FilterCellAction(this, column);
             table.addColumn(column, new FilterHeader(column, filterAction));
-            dataLoader.getFields().addAll(column.getFieldPaths());
+            dataLoader.getFields().addAll(column.get().getFieldPaths());
         }
 
         reload();
@@ -131,8 +131,8 @@ public class InstanceTable implements IsWidget {
     public ExprNode getFilter() {
         List<ExprNode> arguments = Lists.newArrayList();
         for (FieldColumn column : columns) {
-            if (column.getFilter() != null) {
-                arguments.add(column.getFilter());
+            if (column.get().getFilter() != null) {
+                arguments.add(column.get().getFilter());
             }
         }
 

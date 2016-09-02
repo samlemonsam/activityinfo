@@ -38,6 +38,6 @@ public class FilterHeader extends Header<String> {
 
     @Override
     public String getValue() {
-        return headerColumn.getHeader();
+        return headerColumn.get().getHeader();
     }
 }

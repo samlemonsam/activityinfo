@@ -278,6 +278,35 @@ public class FormTree {
         return rootFields;
     }
 
+    public List<ColumnNode> getColumnNodes() {
+        List<ColumnNode> columns = Lists.newArrayList();
+        Map<ResourceId, ColumnNode> columnMap = Maps.newHashMap();
+
+        enumerateColumns(getRootFields(), columns, columnMap);
+        return columns;
+    }
+
+    private void enumerateColumns(List<FormTree.Node> fields, List<ColumnNode> columns, Map<ResourceId, ColumnNode> columnMap) {
+        for (FormTree.Node node : fields) {
+
+            if (node.getType() instanceof SubFormReferenceType) { // skip subForm fields
+                continue;
+            }
+
+            if (node.isReference()) {
+                enumerateColumns(node.getChildren(), columns, columnMap);
+            } else {
+                if (columnMap.containsKey(node.getFieldId())) {
+                    columnMap.get(node.getFieldId()).addFieldPath(node.getPath());
+                } else {
+                    ColumnNode col = new ColumnNode(node);
+                    columnMap.put(node.getFieldId(), col);
+                    columns.add(col);
+                }
+            }
+        }
+    }
+
     public List<FieldPath> getRootPaths() {
         List<FieldPath> paths = Lists.newArrayList();
         for (Node node : rootFields) {

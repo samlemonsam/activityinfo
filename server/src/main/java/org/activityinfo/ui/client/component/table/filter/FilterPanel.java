@@ -150,7 +150,7 @@ public class FilterPanel extends Composite {
         if (filterContent != null) { // may be null in case user is fast enough to click button before items loaded
             filterContent.clear();
         }
-        column.setFilter(null);
+        column.get().setFilter(null);
         table.getTable().redrawHeaders();
         table.reload();
         popup.hide();
@@ -158,7 +158,7 @@ public class FilterPanel extends Composite {
 
     @UiHandler("okButton")
     public void onOk(ClickEvent event) {
-        column.setFilter(getFilter());
+        column.get().setFilter(getFilter());
         table.getTable().redrawHeaders();
         table.reload();
         popup.hide();

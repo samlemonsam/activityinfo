@@ -157,7 +157,7 @@ public class InstanceTableDataLoader {
         queryModel.setFilter(table.getFilter());
 
         for (FieldColumn column : table.getColumns()) {
-            queryModel.selectField(column.getNode().getFieldId()).as(column.getNode().getFieldId().asString());
+            queryModel.selectField(column.get().getNode().getFieldId()).as(column.get().getNode().getFieldId().asString());
         }
 
         Observable<ColumnSet> observable = table.getResourceLocator().getTable(queryModel);
@@ -199,7 +199,7 @@ public class InstanceTableDataLoader {
 
     public QueryModel newQueryModel() {
         QueryModel queryModel = new QueryModel(table.getRootFormClass().getId());
-        queryModel.selectResourceId().as("@id");
+        queryModel.selectResourceId().as("id");
         return queryModel;
     }
 
