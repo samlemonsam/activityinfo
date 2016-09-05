@@ -121,6 +121,11 @@ final class SiteTreeGrid extends EditorTreeGrid<ModelData> implements SiteGridPa
     }
 
     @Override
+    public void addDoubleClickListener(SelectionChangedListener<SiteDTO> listener) {
+        // NOOP
+    }
+
+    @Override
     public void refresh() {
         getTreeStore().removeAll();
         getLoader().load();
