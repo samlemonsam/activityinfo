@@ -255,7 +255,7 @@ public class FormField extends FormElement implements Serializable {
             field.setVisible(jsonObject.get("visible").getAsBoolean());
         }
         if(jsonObject.has("required")) {
-            field.setVisible(jsonObject.get("required").getAsBoolean());
+            field.setRequired(jsonObject.get("required").getAsBoolean());
         }
         
         String type;

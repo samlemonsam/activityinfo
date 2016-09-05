@@ -364,8 +364,11 @@ public class FormClass implements FormElementContainer, Serializable {
         }
         
         if(object.has("elements")) {
-            JsonArray elementsArray = object.get("elements").getAsJsonArray();
-            formClass.elements.addAll(fromJsonArray(elementsArray));
+            JsonElement elements = object.get("elements");
+            if(elements.isJsonArray()) {
+                JsonArray elementsArray = elements.getAsJsonArray();
+                formClass.elements.addAll(fromJsonArray(elementsArray));
+            }
         }
         return formClass;
     }

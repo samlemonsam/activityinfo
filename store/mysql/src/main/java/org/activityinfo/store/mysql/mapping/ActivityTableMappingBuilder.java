@@ -59,7 +59,7 @@ public class ActivityTableMappingBuilder {
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
         mapping.formClass.setLabel(activity.getName());
-        mapping.formClass.setDatabaseId(activity.getId());
+        mapping.formClass.setDatabaseId(activity.getDatabaseId());
         mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.SITE_DOMAIN, "siteId");
 
         if(activity.getReportingFrequency() == Activity.REPORT_ONCE) {
