@@ -26,10 +26,7 @@ import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.Style.SelectionMode;
 import com.extjs.gxt.ui.client.Style.SortDir;
 import com.extjs.gxt.ui.client.data.*;
-import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.LoadListener;
-import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
-import com.extjs.gxt.ui.client.event.SelectionChangedListener;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
@@ -91,7 +88,7 @@ final class FlatSiteGridPanel extends ContentPanel implements SiteGridPanelView 
         loader.setSortDir(SortDir.DESC);
         pagingToolBar.bind(loader);
 
-        listStore = new ListStore<SiteDTO>(loader);
+        listStore = new ListStore<>(loader);
 
         if (editorGrid == null) {
             editorGrid = new EditorGrid<SiteDTO>(listStore, columnModel);
@@ -100,7 +97,7 @@ final class FlatSiteGridPanel extends ContentPanel implements SiteGridPanelView 
             editorGrid.setClicksToEdit(ClicksToEdit.TWO);
             editorGrid.setStripeRows(true);
 
-            GridSelectionModel<SiteDTO> sm = new GridSelectionModel<SiteDTO>();
+            final GridSelectionModel<SiteDTO> sm = new GridSelectionModel<SiteDTO>();
             sm.setSelectionMode(SelectionMode.SINGLE);
             sm.addSelectionChangedListener(new SelectionChangedListener<SiteDTO>() {
 
@@ -112,6 +109,17 @@ final class FlatSiteGridPanel extends ContentPanel implements SiteGridPanelView 
             editorGrid.setSelectionModel(sm);
 
             new QuickTip(editorGrid);
+            
+            editorGrid.addListener(Events.RowDoubleClick, new Listener<GridEvent>() {
+
+                @Override
+                public void handleEvent(GridEvent be) {
+                    SiteDTO site = listStore.getAt(be.getRowIndex());
+                    SelectionChangedEvent<SiteDTO> event = new SelectionChangedEvent<>(sm, site);
+                    fireEvent(Events.RowDoubleClick, event);
+                }
+            });
+            
 
             add(editorGrid, new BorderLayoutData(Style.LayoutRegion.CENTER));
             layout();
@@ -129,6 +137,11 @@ final class FlatSiteGridPanel extends ContentPanel implements SiteGridPanelView 
     @Override
     public void addSelectionChangeListener(SelectionChangedListener<SiteDTO> listener) {
         addListener(Events.SelectionChange, listener);
+    }
+
+    @Override
+    public void addDoubleClickListener(SelectionChangedListener<SiteDTO> listener) {
+        addListener(Events.RowDoubleClick, listener);
     }
 
     private class SiteProxy extends RpcProxy<PagingLoadResult<SiteDTO>> {

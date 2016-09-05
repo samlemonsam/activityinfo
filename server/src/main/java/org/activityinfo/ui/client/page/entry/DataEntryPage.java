@@ -162,6 +162,13 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                 onSiteSelected(se);
             }
         });
+        
+        gridPanel.addRowDoubleClickListener(new SelectionChangedListener<SiteDTO>() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent<SiteDTO> se) {
+                editSite(se.getSelectedItem());
+            }
+        });
 
         detailTab = new DetailTab(dispatcher);
 
@@ -217,7 +224,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.add(groupingComboBox);
 
         toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.newSite(), IconImageBundle.ICONS.add());
-        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.edit(), IconImageBundle.ICONS.edit());
+        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.update(), IconImageBundle.ICONS.edit());
         toolBar.addDeleteButton(I18N.CONSTANTS.deleteSite());
 
         toolBar.add(new SeparatorToolItem());
@@ -466,16 +473,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             });
 
         } else if (UIActions.EDIT.equals(actionId)) {
-            final SiteDTO selection = gridPanel.getSelection();
-            SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
-            launcher.editSite(selection, new SiteDialogCallback() {
-
-                @Override
-                public void onSaved() {
-                    gridPanel.refresh();
-                    filterPane.getSet().applyBaseFilter(filter);
-                }
-            });
+            editSite(gridPanel.getSelection());
+            
         }else if (UIActions.OPEN_TABLE.equals(actionId)) {
             navigateToNewInterface();
             
@@ -500,7 +499,19 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         }
     }
-    
+
+    private void editSite(SiteDTO site) {
+        SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
+        launcher.editSite(site, new SiteDialogCallback() {
+
+            @Override
+            public void onSaved() {
+                gridPanel.refresh();
+                filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
+            }
+        });
+    }
+
     private Optional<Integer> getCurrentActivityId() {
         Filter filter = currentPlace.getFilter();
         Set<Integer> activities = filter.getRestrictions(DimensionType.Activity);

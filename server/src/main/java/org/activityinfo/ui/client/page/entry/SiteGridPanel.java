@@ -35,7 +35,10 @@ import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.page.entry.column.ColumnModelProvider;
 import org.activityinfo.ui.client.page.entry.column.DefaultColumnModelProvider;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingModel;
@@ -130,14 +133,7 @@ public final class SiteGridPanel extends ContentPanel {
 
         } else {
             SiteTreeGrid treeGrid = new SiteTreeGrid(dispatcher, grouping, filter, columnModel);
-            treeGrid.addSelectionChangeListener(new SelectionChangedListener<SiteDTO>() {
-
-                @Override
-                public void selectionChanged(SelectionChangedEvent<SiteDTO> se) {
-                    fireEvent(Events.SelectionChange, se);
-                }
-
-            });
+            
             installGrid(treeGrid);
         }
     }
@@ -145,7 +141,10 @@ public final class SiteGridPanel extends ContentPanel {
     public void addSelectionChangedListener(SelectionChangedListener<SiteDTO> listener) {
         addListener(Events.SelectionChange, listener);
     }
-
+    public void addRowDoubleClickListener(SelectionChangedListener<SiteDTO> listener) {
+        addListener(Events.RowDoubleClick, listener);
+    }
+    
     private void installGrid(SiteGridPanelView grid) {
         this.grid = grid;
 
@@ -158,6 +157,12 @@ public final class SiteGridPanel extends ContentPanel {
             @Override
             public void selectionChanged(SelectionChangedEvent<SiteDTO> se) {
                 fireEvent(Events.SelectionChange, se);
+            }
+        });
+        grid.addDoubleClickListener(new SelectionChangedListener<SiteDTO>() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent<SiteDTO> se) {
+                fireEvent(Events.RowDoubleClick, se);
             }
         });
     }
