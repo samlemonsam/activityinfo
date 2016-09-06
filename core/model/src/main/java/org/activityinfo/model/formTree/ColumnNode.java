@@ -31,7 +31,7 @@ public class ColumnNode {
         this.fieldPaths = Lists.newArrayList(fieldPath);
     }
 
-    public String getValue(Object value) {
+    public String getValueAsString(Object value) {
         if (value != null) {
             return value.toString();
         }

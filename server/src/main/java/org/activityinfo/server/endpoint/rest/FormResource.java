@@ -5,6 +5,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.gson.*;
 import org.activityinfo.api.client.FormRecordSetBuilder;
+import org.activityinfo.core.shared.Pair;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -34,6 +35,7 @@ import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
+import org.activityinfo.xlsform.XlsColumnSetWriter;
 import org.activityinfo.xlsform.XlsFormBuilder;
 
 import javax.inject.Provider;
@@ -305,17 +307,38 @@ public class FormResource {
         return Response.ok(output).type(JSON_CONTENT_TYPE).build();
     }
 
+    @GET
+    @Path("query/columns.xls")
+    @Produces("application/vnd.ms-excel")
+    public Response queryColumnsAsXls(@Context UriInfo uriInfo) {
+        final Pair<FormTree, ColumnSet> pair = queryColumnSet(uriInfo);
+
+        final StreamingOutput output = new StreamingOutput() {
+            @Override
+            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+                new XlsColumnSetWriter().addSheet(pair.getA(), pair.getB()).write(outputStream);
+            }
+        };
+
+        return Response.ok(output, "application/vnd.ms-excel").build();
+    }
 
     private ColumnSet query(final UriInfo uriInfo) {
+        return queryColumnSet(uriInfo).getB();
+    }
+
+    private Pair<FormTree, ColumnSet> queryColumnSet(final UriInfo uriInfo) {
 
         assertVisible(formId);
 
         final QueryModel queryModel = new QueryModel(formId);
+        final FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
+        final FormTree tree = treeBuilder.queryTree(formId);
+
         if(uriInfo.getQueryParameters().isEmpty()) {
             LOGGER.info("No query fields provided, querying all.");
             queryModel.selectResourceId().as("@id");
-            FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
-            FormTree tree = treeBuilder.queryTree(formId);
+
             for (FormTree.Node leaf : tree.getLeaves()) {
                 if(includeInDefaultQuery(leaf)) {
                     queryModel.selectField(leaf.getPath()).as(formatId(leaf));
@@ -330,7 +353,7 @@ public class FormResource {
         }
 
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
-        return builder.build(queryModel);
+        return new Pair<>(tree, builder.build(queryModel));
     }
 
     private boolean includeInDefaultQuery(FormTree.Node leaf) {

@@ -46,7 +46,7 @@ public class FieldColumn extends Column<RowView, String> {
 
     @Override
     public String getValue(RowView rowView) {
-        return column.getValue(getFieldValue(rowView));
+        return column.getValueAsString(getFieldValue(rowView));
     }
 
     @Override
