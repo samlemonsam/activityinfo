@@ -218,7 +218,7 @@ public class RootResource {
     
     @Path("/catalog")
     public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
-        return new CatalogResource(catalog);
+        return new CatalogResource(catalog, userProvider);
     }
     
 }

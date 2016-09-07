@@ -95,7 +95,7 @@ public class ResourceStoreStub implements ResourceStore {
         }
 
         @Override
-        public List<CatalogEntry> getChildren(String parentId) {
+        public List<CatalogEntry> getChildren(String parentId, int userId) {
             return Collections.emptyList();
         }
 

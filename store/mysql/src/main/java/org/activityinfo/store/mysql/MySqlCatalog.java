@@ -166,12 +166,12 @@ public class MySqlCatalog implements FormCatalog {
     }
 
     @Override
-    public List<CatalogEntry> getChildren(String parentId) {
+    public List<CatalogEntry> getChildren(String parentId, int userId) {
         
         try {
             List<CatalogEntry> entries = new ArrayList<>();
             entries.addAll(geodbFolder.getChildren(parentId));
-            entries.addAll(databasesFolder.getChildren(parentId));
+            entries.addAll(databasesFolder.getChildren(parentId, userId));
 
             return entries;
             

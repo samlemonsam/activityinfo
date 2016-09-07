@@ -3,6 +3,7 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.inject.Provider;
+import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.service.store.FormCatalog;
 
@@ -19,9 +20,11 @@ import java.util.List;
 public class CatalogResource {
 
     private Provider<FormCatalog> catalog;
+    private Provider<AuthenticatedUser> userProvider;
 
-    public CatalogResource(Provider<FormCatalog> catalog) {
+    public CatalogResource(Provider<FormCatalog> catalog, Provider<AuthenticatedUser> userProvider) {
         this.catalog = catalog;
+        this.userProvider = userProvider;
     }
 
     @GET
@@ -31,7 +34,7 @@ public class CatalogResource {
         if(Strings.isNullOrEmpty(parentId)) {
             entries = catalog.get().getRootEntries();
         } else {
-            entries = catalog.get().getChildren(parentId);
+            entries = catalog.get().getChildren(parentId, userProvider.get().getUserId());
         }
         return Response.ok()
             .type(MediaType.APPLICATION_JSON_TYPE)

@@ -32,7 +32,7 @@ public class GeodbFolder {
     }
 
     public List<CatalogEntry> getChildren(String parentId) throws SQLException {
-        if(parentId.equals(GEODB_ID)) {
+        if(parentId.equals(GEODB_ID.asString())) {
             return queryCountries();
         } else if(parentId.startsWith(COUNTRY_ID_PREFIX)) {
             return queryCountryForms(parentId.substring(COUNTRY_ID_PREFIX.length()));

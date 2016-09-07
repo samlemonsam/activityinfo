@@ -24,5 +24,5 @@ public interface FormCatalog extends FormClassProvider {
     
     List<CatalogEntry> getRootEntries();
     
-    List<CatalogEntry> getChildren(String parentId);
+    List<CatalogEntry> getChildren(String parentId, int userId);
 }

@@ -54,7 +54,7 @@ class FormCatalogStub implements FormCatalog {
     }
 
     @Override
-    public List<CatalogEntry> getChildren(String parentId) {
+    public List<CatalogEntry> getChildren(String parentId, int userId) {
         throw new UnsupportedOperationException();
     }
 
