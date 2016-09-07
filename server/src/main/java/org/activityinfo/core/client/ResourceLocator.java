@@ -2,12 +2,10 @@ package org.activityinfo.core.client;
 
 
 import org.activityinfo.api.client.FormHistoryEntry;
-import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.AsyncFormClassProvider;
-import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.IsResource;
@@ -63,25 +61,7 @@ public interface ResourceLocator extends AsyncFormClassProvider {
 
     Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor);
 
-    Promise<Void> persistOperation(List<PromiseExecutionOperation> operations);
-
     Promise<Void> persistOperation(List<PromiseExecutionOperation> resources, @Nullable PromisesExecutionMonitor monitor);
-
-    /**
-     * 
-     * @param criteria
-     * @deprecated use {@link #queryTable(ColumnModel)}
-     */
-    @Deprecated
-    Promise<QueryResult<FormInstance>> queryInstances(InstanceQuery criteria);
-
-    /**
-     * Retrieves the form instances that match the given criteria.
-     * @param criteria
-     * @deprecated use {@link #queryTable(ColumnModel)}
-     */
-    @Deprecated
-    Promise<List<FormInstance>> queryInstances(Criteria criteria);
 
     Promise<Void> remove(ResourceId formId, ResourceId resourceId);
 

@@ -4,11 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
 import org.activityinfo.api.client.*;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.QueryResult;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -29,7 +25,6 @@ import org.activityinfo.promise.PromisesExecutionGuard;
 import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +91,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
             @Nullable
             @Override
             public List<FormInstance> apply(@Nullable Void aVoid) {
-                List<FormInstance> instances = new ArrayList<FormInstance>();
+                List<FormInstance> instances = Lists.newArrayList();
                 for (FormRecord record : records.get().getRecords()) {
                     instances.add(FormInstance.toFormInstance(subFormClass.get(), record));
                 }
@@ -160,35 +155,8 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<Void> persistOperation(List<PromiseExecutionOperation> operations) {
-        return persistOperation(operations, null);
-    }
-
-    @Override
     public Promise<Void> persistOperation(List<PromiseExecutionOperation> operations, @Nullable PromisesExecutionMonitor monitor) {
         return PromisesExecutionGuard.newInstance().withMonitor(monitor).executeSerially(operations);
-    }
-
-    public Promise<QueryResult<FormInstance>> queryInstances(InstanceQuery criteria) {
-        return queryInstances(criteria.getCriteria()).then(new InstanceQueryResultAdapter<FormInstance>(criteria));
-    }
-
-    @Override
-    public Promise<List<FormInstance>> queryInstances(Criteria criteria) {
-        if(criteria instanceof ClassCriteria) {
-            return getFormClass(((ClassCriteria) criteria).getClassId()).join(new Function<FormClass, Promise<List<FormInstance>>>() {
-                @Nullable
-                @Override
-                public Promise<List<FormInstance>> apply(@Nullable FormClass input) {
-                    InstanceQueryAdapter adapter = new InstanceQueryAdapter();
-                    QueryModel queryModel = adapter.build(input);
-
-                    return client.queryTableColumns(queryModel).then(adapter.toFormInstances());
-                }
-            });
-        } else {
-            return Promise.rejected(new UnsupportedOperationException("criteria: " + criteria));
-        }
     }
 
     public Promise<Void> remove(ResourceId formId, ResourceId resourceId) {
