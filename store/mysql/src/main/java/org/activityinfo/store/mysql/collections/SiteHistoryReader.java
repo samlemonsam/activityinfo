@@ -115,10 +115,13 @@ public class SiteHistoryReader {
                         parseRef(jsonEntry.getValue(), CuidAdapter.LOCATION_DOMAIN));
 
             } else if(fieldName.startsWith("I")) {
-                if(!fieldName.contains("M")) {
+                int mIndex = fieldName.indexOf("M");
+                if(mIndex == -1) {
                     int indicatorId = Integer.parseInt(fieldName.substring(1));
                     ResourceId fieldId = CuidAdapter.indicatorField(indicatorId);
                     valueMap.put(fieldId, parseQuantity(jsonEntry.getValue()));
+                } else { // old history
+                    valueMap.put(ResourceId.valueOf(fieldName), parseQuantity(jsonEntry.getValue()));
                 }
             }
         }

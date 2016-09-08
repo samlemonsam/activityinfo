@@ -151,9 +151,11 @@ public class RecordHistoryBuilder {
                 // Identify changes to the record values compared to the previous 
                 // version.
                 for (FormField field : formClass.getFields()) {
-                    FieldValue oldValue = currentState.get(field.getId());
-                    if(version.getValues().containsKey(field.getId())) {
+                    if (version.getValues().containsKey(field.getId())) {
+
+                        FieldValue oldValue = currentState.get(field.getId());
                         FieldValue newValue = version.getValues().get(field.getId());
+
                         if (!Objects.equals(oldValue, newValue)) {
                             FieldDelta fieldDelta = new FieldDelta();
                             fieldDelta.field = field;
@@ -164,6 +166,33 @@ public class RecordHistoryBuilder {
                         currentState.put(field.getId(),  newValue);
                     }
                 }
+
+                // special handling for old legacy history
+                for (Map.Entry<ResourceId, FieldValue> entry : version.getValues().entrySet()) {
+                    ResourceId fieldId = entry.getKey();
+                    String fieldIdAsString = fieldId.asString();
+
+                    if (fieldIdAsString.startsWith("I") && fieldIdAsString.contains("M")) { // e.g. I309566527M2016-8
+
+                        FieldValue oldValue = currentState.get(fieldId);
+                        FieldValue newValue = version.getValues().get(fieldId);
+
+                        if (!Objects.equals(oldValue, newValue)) {
+
+                            String month = fieldIdAsString.substring(fieldIdAsString.indexOf("M") + 1);
+
+                            FieldDelta fieldDelta = new FieldDelta();
+                            fieldDelta.field = new FormField(fieldId);
+                            fieldDelta.field.setLabel(month);
+                            fieldDelta.field.setType(new QuantityType());
+                            fieldDelta.oldValue = oldValue;
+                            fieldDelta.newValue = newValue;
+                            delta.changes.add(fieldDelta);
+                        }
+                        currentState.put(fieldId,  newValue);
+                    }
+                }
+
             }
             deltas.add(delta);
         }
