@@ -255,12 +255,12 @@ public class RecordHistoryBuilder {
         for (ResourceId formId : type.getRange()) {
             Optional<FormAccessor> form = catalog.getForm(formId);
             if(form.isPresent()) {
-                ResourceId labelFieldId = findLabelField(form.get().getFormClass());
-                if(labelFieldId == null) {
+                Optional<ResourceId> labelFieldId = findLabelField(form.get().getFormClass());
+                if (labelFieldId.isPresent()) {
                     for (ResourceId recordId : value.getResourceIds()) {
                         Optional<FormRecord> record = form.get().get(recordId);
                         if (record.isPresent()) {
-                            JsonElement labelValue = record.get().getFields().get(labelFieldId.asString());
+                            JsonElement labelValue = record.get().getFields().get(labelFieldId.get().asString());
                             if(labelValue.isJsonPrimitive()) {
                                 labelMap.put(recordId, labelValue.getAsString());
                             }
@@ -282,13 +282,13 @@ public class RecordHistoryBuilder {
         return list;
     }
     
-    private ResourceId findLabelField(FormClass formClass) {
+    private Optional<ResourceId> findLabelField(FormClass formClass) {
         for (FormField field : formClass.getFields()) {
             if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
-                return field.getId();
+                return Optional.of(field.getId());
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     private String render(EnumType type, EnumValue value) {
