@@ -9,6 +9,7 @@ import org.activityinfo.api.client.FormValueChangeBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -256,14 +257,22 @@ public class RecordHistoryBuilder {
             Optional<FormAccessor> form = catalog.getForm(formId);
             if(form.isPresent()) {
                 Optional<ResourceId> labelFieldId = findLabelField(form.get().getFormClass());
-                if (labelFieldId.isPresent()) {
-                    for (ResourceId recordId : value.getResourceIds()) {
-                        Optional<FormRecord> record = form.get().get(recordId);
-                        if (record.isPresent()) {
-                            JsonElement labelValue = record.get().getFields().get(labelFieldId.get().asString());
-                            if(labelValue.isJsonPrimitive()) {
-                                labelMap.put(recordId, labelValue.getAsString());
-                            }
+
+                for (ResourceId recordId : value.getResourceIds()) {
+                    Optional<FormRecord> record = form.get().get(recordId);
+                    if (record.isPresent()) {
+                        JsonElement labelValue = null;
+
+                        if (labelFieldId.isPresent()) {
+                            labelValue = record.get().getFields().get(labelFieldId.get().asString());
+                        }
+
+                        if (labelValue == null) {
+                            labelValue = record.get().getFields().get(CuidAdapter.field(formId, CuidAdapter.NAME_FIELD).asString());
+                        }
+
+                        if (labelValue != null && labelValue.isJsonPrimitive()) {
+                            labelMap.put(recordId, labelValue.getAsString());
                         }
                     }
                 }
