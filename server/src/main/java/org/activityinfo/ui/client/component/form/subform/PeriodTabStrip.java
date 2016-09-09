@@ -25,7 +25,9 @@ import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -49,29 +51,44 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
 
         @Template("<li><a href=\"javascript:\" data-cursor=\"{0}\">{1}</a></li>")
         SafeHtml button(int cursorChange, String label);
-        
+
         @Template("<ul class=\"nav nav-pills\">{0}</ul>")
         SafeHtml tabList(SafeHtml tabs);
-        
+
     }
-    
+
     private static final Templates TEMPLATES = GWT.create(Templates.class);
 
     private SubFormKind kind;
-    private int tabCount = 5;
+    private int tabCount;
     private PeriodCursor cursor;
     private Tab value;
-    
+
     public PeriodTabStrip(SubFormKind kind) {
         super(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
         Preconditions.checkNotNull(kind);
 
+        tabCount = initialTabCount(kind);
+
         setKind(kind);
         sinkEvents(Event.CLICK);
-        
+
         addDomHandler(this, ClickEvent.getType());
         render();
+    }
+
+    private int initialTabCount(SubFormKind kind) {
+        switch (kind) {
+            case DAILY:
+            case BIWEEKLY:
+                return 3;
+            case WEEKLY:
+            case MONTHLY:
+                return 4;
+        }
+
+        return 5;
     }
 
     public void setKind(SubFormKind kind) {
@@ -104,17 +121,45 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
 
     private void render() {
         SafeHtmlBuilder list = new SafeHtmlBuilder();
-        list.append(TEMPLATES.button(-5, "<<"));
+        list.append(TEMPLATES.button(-tabCount, "<<"));
         list.append(TEMPLATES.button(-1, "<"));
 
-        for(int i=0;i<tabCount;++i) {
+        for (int i = 0; i < tabCount; ++i) {
             Tab tab = cursor.get(i);
             String cssClass = tab.equals(getValue()) ? "active" : "";
             list.append(TEMPLATES.tab(tab.getId(), tab.getLabel(), cssClass));
         }
         list.append(TEMPLATES.button(+1, ">"));
-        list.append(TEMPLATES.button(+5, ">>"));
+        list.append(TEMPLATES.button(+tabCount, ">>"));
         getElement().setInnerSafeHtml(TEMPLATES.tabList(list.toSafeHtml()));
+
+        recalculateTabCount();
+    }
+
+    private void recalculateTabCount() {
+        final int[] counter = new int[]{0};
+        Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                counter[0]++;
+                NodeList<Element> buttons = getElement().getElementsByTagName("li");
+                if (buttons.getLength() > 0) {
+                    Element firstButton = buttons.getItem(0);
+                    Element lastButton = buttons.getItem(buttons.getLength() - 1);
+
+                    if (firstButton.getAbsoluteTop() != lastButton.getAbsoluteTop()) {
+                        tabCount--;
+                        render();
+                    }
+                    return false;
+                }
+                if (counter[0] > 10) { // safe exit
+                    return false;
+                }
+
+                return true;
+            }
+        }, 500);
     }
 
     @Override
@@ -147,7 +192,7 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Tab> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
-    
+
     @Override
     public void onClick(ClickEvent event) {
         Element element = event.getNativeEvent().getEventTarget().cast();
