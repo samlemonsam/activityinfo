@@ -5,6 +5,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.hrd.entity.FormEntity;
@@ -66,9 +67,24 @@ public class QueryVersions implements Work<List<RecordVersion>> {
             version.setUserId(snapshot.getUserId());
             version.setTime(snapshot.getTime().getTime());
             version.setType(snapshot.getType());
+
+            if (formClass.isSubForm()) {
+                version.setSubformKind(formClass.getSubFormKind());
+                version.setSubformKey(subformKey(snapshot));
+            }
+
             version.getValues().putAll(snapshot.getRecord().toFieldValueMap(formClass));
             versions.add(version);
         }
         return versions;
+    }
+
+    private String subformKey(FormRecordSnapshotEntity snapshot) {
+        if (formClass.getSubFormKind() == SubFormKind.REPEATING) {
+            return "";
+        } else { // period
+            int indexOf = snapshot.getRecordId().asString().indexOf(snapshot.getParentRecordId());
+            return snapshot.getRecordId().asString().substring(indexOf + snapshot.getParentRecordId().length() + 1);
+        }
     }
 }

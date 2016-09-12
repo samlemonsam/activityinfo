@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql;
 
+import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
@@ -9,6 +10,7 @@ import org.activityinfo.api.client.FormValueChangeBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -43,6 +45,8 @@ public class RecordHistoryBuilder {
         private FormField field;
         private FieldValue oldValue;
         private FieldValue newValue;
+        private SubFormKind subFormKind;
+        private String subFormKey;
     }
     
     
@@ -161,6 +165,12 @@ public class RecordHistoryBuilder {
                             fieldDelta.field = field;
                             fieldDelta.oldValue = oldValue;
                             fieldDelta.newValue = newValue;
+
+                            if (!Strings.isNullOrEmpty(version.getSubformKey())) { // subforms
+                                fieldDelta.subFormKey = version.getSubformKey();
+                                fieldDelta.subFormKind = version.getSubformKind();
+                            }
+
                             delta.changes.add(fieldDelta);
                         }
                         currentState.put(field.getId(),  newValue);
@@ -242,6 +252,8 @@ public class RecordHistoryBuilder {
         FormValueChangeBuilder builder = new FormValueChangeBuilder();
         builder.setFieldId(delta.field.getId().asString());
         builder.setFieldLabel(delta.field.getLabel());
+        builder.setSubFormKey(delta.subFormKey);
+        builder.setSubFormKind(delta.subFormKind != null ? delta.subFormKind.name() : null);
         builder.setOldValueLabel(renderValue(delta.field, delta.oldValue));
         builder.setNewValueLabel(renderValue(delta.field, delta.newValue));
         return builder;

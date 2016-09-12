@@ -133,7 +133,14 @@ public class SiteHistoryTab extends TabItem {
         if(!entry.getValues().isEmpty()) {
             html.appendHtmlConstant("<ul style='margin:0px 0px 10px 20px; font-size: 11px;'>");
             for (FormValueChange change : entry.getValues()) {
+
                 html.appendHtmlConstant("<li>");
+
+                if (!Strings.isNullOrEmpty(change.getSubFormKey())) {
+                    html.appendEscaped(change.getSubFormKey());
+                    html.appendEscaped(", ");
+                }
+
                 html.appendEscaped(change.getFieldLabel());
                 html.appendEscaped(": ");
                 html.appendEscaped(change.getNewValueLabel());

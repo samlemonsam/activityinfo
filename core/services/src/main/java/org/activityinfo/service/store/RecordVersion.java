@@ -1,5 +1,6 @@
 package org.activityinfo.service.store;
 
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
@@ -18,7 +19,10 @@ public class RecordVersion {
     private long formVersion;
     
     private RecordChangeType type;
-    
+
+    private SubFormKind subformKind;
+    private String subformKey;
+
     private final Map<ResourceId, FieldValue> values = new HashMap<>();
 
     /**
@@ -88,5 +92,21 @@ public class RecordVersion {
 
     public void setType(RecordChangeType type) {
         this.type = type;
+    }
+
+    public SubFormKind getSubformKind() {
+        return subformKind;
+    }
+
+    public void setSubformKind(SubFormKind subformKind) {
+        this.subformKind = subformKind;
+    }
+
+    public String getSubformKey() {
+        return subformKey;
+    }
+
+    public void setSubformKey(String subformKey) {
+        this.subformKey = subformKey;
     }
 }

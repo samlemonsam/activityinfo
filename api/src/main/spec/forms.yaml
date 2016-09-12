@@ -539,6 +539,12 @@ definitions:
       newValueLabel:
         type: string
         description: human-readable string of the new value of the field
+      subFormKind:
+        type: string
+        description: subform kind
+      subFormKey:
+        type: string
+        description: subform key
 
   FormCatalogEntry:
     type: object
