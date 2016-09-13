@@ -82,6 +82,13 @@ public class RecordHistoryBuilder {
             }
         }
 
+        Collections.sort(deltas, new Comparator<RecordDelta>() {
+            @Override
+            public int compare(RecordDelta o1, RecordDelta o2) {
+                return Long.compare(o1.version.getTime(), o2.version.getTime());
+            }
+        });
+
         // Query users involved in the changes
         Map<Long, User> userMap = queryUsers(deltas);
         
