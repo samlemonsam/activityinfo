@@ -1,8 +1,8 @@
 package org.activityinfo.store.mysql;
 
-import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import org.activityinfo.api.client.FormHistoryEntryBuilder;
