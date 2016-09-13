@@ -1,6 +1,6 @@
 package org.activityinfo.server.command.handler;
 
-import com.google.appengine.repackaged.com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;

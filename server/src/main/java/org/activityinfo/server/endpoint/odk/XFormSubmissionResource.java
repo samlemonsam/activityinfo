@@ -1,9 +1,9 @@
 package org.activityinfo.server.endpoint.odk;
 
 import com.google.api.client.util.Maps;
-import com.google.appengine.repackaged.com.google.api.client.util.Strings;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import com.google.inject.Inject;
