@@ -36,7 +36,8 @@ class ColumnArrayView implements ColumnView {
                 return getDouble(row);
             case BOOLEAN:
                 return getBoolean(row);
-            case GEOGRAPHIC:
+            case GEOGRAPHIC_AREA:
+            case GEOGRAPHIC_POINT:
                 return getExtents(row);
         }
         throw new UnsupportedOperationException();

@@ -73,7 +73,7 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
         valueUpdater.update(getValue());
     }
 
-    private GeoPoint getValue() {
+    protected GeoPoint getValue() {
         Double latitude = latitudeBox.getValue();
         Double longitude = longitudeBox.getValue();
         if (latitude == null || longitude == null) {

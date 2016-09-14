@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.form.field;
  */
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -36,6 +37,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
@@ -154,25 +156,81 @@ public class FormFieldWidgetFactory {
         throw new UnsupportedOperationException();
     }
 
-    private Promise<? extends FormFieldWidget> createReferenceWidget(FormField field, ValueUpdater updater) {
+    private Promise<? extends FormFieldWidget> createReferenceWidget(FormField field, final ValueUpdater updater) {
         if (field.isSubPropertyOf(ApplicationProperties.HIERARCHIAL)) {
             return HierarchyFieldWidget.create(resourceLocator, (ReferenceType) field.getType(), updater);
         } else {
-            return createSimpleListWidget((ReferenceType) field.getType(), updater);
+            final ReferenceType type = (ReferenceType) field.getType();
+            if (type.getRange().isEmpty()) {
+                return Promise.resolved(NullFieldWidget.INSTANCE);
+            }
+            if (type.getRange().size() > 1) {
+                return Promise.rejected(new UnsupportedOperationException("TODO"));
+            }
+
+            final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+
+            final Promise<FormFieldWidget> widget = new Promise<>();
+
+            resourceLocator.getFormClass(formId).then(new Function<FormClass, Void>() {
+                @Override
+                public Void apply(FormClass formClass) {
+                    Optional<FormField> geoPointField = getGeoPointField(formClass);
+
+                    final Promise<? extends FormFieldWidget> widgetPromise;
+                    if (geoPointField.isPresent()) { // if has geoPoint then show geo widget and propose map UI
+                        widgetPromise = createMapWidget(type, updater, geoPointField.get());
+                    } else { // no geo point, fallback to list
+                        widgetPromise = createSimpleListWidget(type, updater);
+                    }
+
+                    widgetPromise.then(new Function<FormFieldWidget, Object>() {
+                        @Override
+                        public Object apply(FormFieldWidget input) {
+                            widget.resolve(input);
+                            return null;
+                        }
+                    });
+                    return null;
+                }
+            });
+
+            return widget;
         }
     }
 
-    private Promise<? extends FormFieldWidget> createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
-        if (type.getRange().isEmpty()) {
-            return Promise.resolved(NullFieldWidget.INSTANCE);
-        }
-        if(type.getRange().size() > 1) {
-            return Promise.rejected(new UnsupportedOperationException("TODO"));
-        }
+    private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, FormField geoField) {
         QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
-        
+        queryModel.selectField(geoField.getId());
+
+        return resourceLocator
+                .queryTable(queryModel)
+                .then(new Function<ColumnSet, FormFieldWidget>() {
+                    @Override
+                    public FormFieldWidget apply(ColumnSet input) {
+                        return new NullFieldWidget();
+                    }
+                });
+
+    }
+
+    private Optional<FormField> getGeoPointField(FormClass formClass) {
+        for (FormField field : formClass.getFields()) {
+            if (field.getType() instanceof GeoPointType) {
+                return Optional.of(field);
+            }
+        }
+        return Optional.absent();
+    }
+
+    private Promise<? extends FormFieldWidget> createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
+
+        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr("label").as("label");
+
         return resourceLocator
                 .queryTable(queryModel)
                 .then(new Function<ColumnSet, FormFieldWidget>() {

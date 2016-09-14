@@ -5,7 +5,7 @@ import org.activityinfo.model.type.geo.Extents;
 /**
  * Area column view
  */
-public class GeoColumnView implements ColumnView {
+public class GeoAreaColumnView implements GeoColumn {
 
     /**
      * Stores the Minimum Bounding Rectangle (MBR) of each row as a block of (x1,y1,x2,y2)
@@ -13,7 +13,7 @@ public class GeoColumnView implements ColumnView {
     private double[] coordinates;
     private int numRows;
 
-    public GeoColumnView() {
+    public GeoAreaColumnView() {
     }
 
     /**
@@ -21,7 +21,7 @@ public class GeoColumnView implements ColumnView {
      * @param coordinates an array of the coordinates of the minimum bounding rectangles (MBRs) 
      *                    of each row ordered as (x1,y1,x2,y2)
      */
-    public GeoColumnView(double[] coordinates) {
+    public GeoAreaColumnView(double[] coordinates) {
         this.coordinates = coordinates;
         this.numRows = coordinates.length / 4;
     }
@@ -29,7 +29,7 @@ public class GeoColumnView implements ColumnView {
 
     @Override
     public ColumnType getType() {
-        return ColumnType.GEOGRAPHIC;
+        return ColumnType.GEOGRAPHIC_AREA;
     }
 
     @Override

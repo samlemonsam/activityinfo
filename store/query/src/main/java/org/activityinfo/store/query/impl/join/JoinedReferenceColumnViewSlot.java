@@ -67,7 +67,7 @@ public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
                 return joinDoubleColumn(nestedColumn.get(), left);
             case BOOLEAN:
                 return joinBooleanColumn(nestedColumn.get(), left);
-            case GEOGRAPHIC:
+            case GEOGRAPHIC_AREA:
                 break;
         }
         

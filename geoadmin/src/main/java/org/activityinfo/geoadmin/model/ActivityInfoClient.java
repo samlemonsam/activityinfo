@@ -357,7 +357,7 @@ public class ActivityInfoClient implements FormClassProvider {
                 coordinates[i] = coord.getAsDouble();
             }
         }
-        return new GeoColumnView(coordinates);
+        return new GeoAreaColumnView(coordinates);
     }
 
 
