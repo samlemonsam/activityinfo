@@ -1169,6 +1169,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Matching references...")
     String matchingReferences();
 
+    @DefaultStringValue("Matched references")
+    String matchedReferences();
+
     @DefaultStringValue("Message")
     String message();
 
@@ -1664,4 +1667,13 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Daily Sub-Form")
     String dailySubform();
+
+    @DefaultStringValue("Select")
+    String select();
+
+    @DefaultStringValue("Please choose the reference value by geographical location.")
+    String chooseReferenceByGeoPoint();
+
+    @DefaultStringValue("Choose reference value")
+    String chooseReferenceValue();
 }

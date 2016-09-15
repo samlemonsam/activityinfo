@@ -56,8 +56,10 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.attachment.AttachmentUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
+import org.activityinfo.ui.client.component.form.field.map.MapItem;
 
 import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * @author yuriyz on 1/28/14.
@@ -164,7 +166,7 @@ public class FormFieldWidgetFactory {
             if (type.getRange().isEmpty()) {
                 return Promise.resolved(NullFieldWidget.INSTANCE);
             }
-            if (type.getRange().size() > 1) {
+            if(type.getRange().size() > 1) {
                 return Promise.rejected(new UnsupportedOperationException("TODO"));
             }
 
@@ -199,7 +201,7 @@ public class FormFieldWidgetFactory {
         }
     }
 
-    private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, FormField geoField) {
+    private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, final FormField geoField) {
         QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
@@ -210,7 +212,8 @@ public class FormFieldWidgetFactory {
                 .then(new Function<ColumnSet, FormFieldWidget>() {
                     @Override
                     public FormFieldWidget apply(ColumnSet input) {
-                        return new NullFieldWidget();
+                        Set<MapItem> items = MapItem.items(new OptionSet(input), geoField.getId().asString());
+                        return new ReferenceMapWidget(items, valueUpdater);
                     }
                 });
 

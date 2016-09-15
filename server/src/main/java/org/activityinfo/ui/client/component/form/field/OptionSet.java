@@ -34,4 +34,8 @@ public class OptionSet {
     public ResourceId getRecordId(int i) {
         return ResourceId.valueOf(getId(i));
     }
+
+    public ColumnView getColumnView(String name) {
+        return columnSet.getColumnView(name);
+    }
 }
