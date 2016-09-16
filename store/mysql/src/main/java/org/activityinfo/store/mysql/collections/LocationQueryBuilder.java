@@ -58,7 +58,7 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
     @Override
     public void execute() {
         if (!hasWhereSet) {
-            baseTableBuilder.where("base.workflowStatusId != 'rejected'");
+            baseTableBuilder.where(tableMapping.getBaseFilter() + " AND base.workflowStatusId != 'rejected'");
         }
 
         // Emit all of the base columns 

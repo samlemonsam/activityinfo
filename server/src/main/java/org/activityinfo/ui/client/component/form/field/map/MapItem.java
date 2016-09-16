@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.ui.client.component.form.field.OptionSet;
+import org.discotools.gwt.leaflet.client.types.LatLng;
 
 import java.util.Collection;
 import java.util.Set;
@@ -76,6 +77,14 @@ public class MapItem {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public boolean hasLatLng() {
+        return latitude != Double.NaN && longitude != Double.NaN;
+    }
+
+    public LatLng getLatLng() {
+        return new LatLng(latitude, longitude);
     }
 
     @Override
