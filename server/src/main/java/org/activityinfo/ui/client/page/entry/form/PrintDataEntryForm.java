@@ -30,7 +30,9 @@ import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
+import com.google.common.base.Strings;
 import com.google.gwt.dom.client.IFrameElement;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
 import org.activityinfo.i18n.shared.I18N;
@@ -42,11 +44,8 @@ import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 
 import java.util.List;
 
-import static com.google.gwt.safehtml.shared.SafeHtmlUtils.htmlEscape;
-
 public class PrintDataEntryForm extends Window {
 
-    private StringBuilder html;
     private Frame frame;
     private Dispatcher dispatcher;
 
@@ -139,10 +138,7 @@ public class PrintDataEntryForm extends Window {
     }
 
     private String render(ActivityFormDTO activity) {
-
-        String contents = getFormContents();
-
-        contents = contents.replace("{$activityName}", htmlEscape(activity.getName()))
+        return getFormContents().replace("{$activityName}", htmlEscape(activity.getName()))
                            .replace("{$databaseName}", htmlEscape(activity.getDatabaseName()))
                            .replace("{$activityName}", htmlEscape(activity.getName()))
                            .replace("{$projectName}", addProjects(activity))
@@ -150,10 +146,6 @@ public class PrintDataEntryForm extends Window {
                            .replace("{$indicators}", addIndicators(activity))
                            .replace("{$attributes}", addAttributes(activity))
                            .replace("{$location}", location(activity));
-
-        html = new StringBuilder();
-        html.append(contents);
-        return html.toString();
     }
 
     private String location(ActivityFormDTO activity) {
@@ -230,6 +222,10 @@ public class PrintDataEntryForm extends Window {
         builder.append("<td>&nbsp;</td>");
         builder.append("<td>" + htmlEscape(indicator.getUnits()) + "</td>");
         builder.append("</tr>");
+    }
+
+    private static String htmlEscape(String html) {
+        return SafeHtmlUtils.htmlEscape(Strings.nullToEmpty(html));
     }
 
     private String addAttributes(ActivityFormDTO activity) {
