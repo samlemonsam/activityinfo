@@ -109,6 +109,7 @@ public class MapEditor extends ContentPanel implements ReportElementEditor<MapRe
 
             @Override
             public void onValueChange(ValueChangeEvent<MapLayer> event) {
+                MapEditor.this.mapReportElement.setFilter(event.getValue().getFilter());
                 reportEventBus.fireChange();
             }
         });
