@@ -23,7 +23,9 @@ public class ContentSecurityPolicy {
     
     private static final String CUSTOM_DOMAIN_STORAGE = "https://ai-custom-domains.storage.googleapis.com";
 
-    private static final String MAPBOX_TILES = "https://*.tiles.mapbox.com";
+    private static final String HTTPS_ONLY = "https:";
+    
+    private static final String MAPBOX_TILES = "*.tiles.mapbox.com";
     
     private final String policy;
 
@@ -34,13 +36,15 @@ public class ContentSecurityPolicy {
         append(sb, "img-src", SELF, 
             
             // We use data: images extensively
-            DATA, 
+            DATA,
+
+            HTTPS_ONLY,
+            MAPBOX_TILES,
                 
             // Google analytics add images to the page to track
             // Events
-            GOOGLE_ANALYTICS,
-                
-            MAPBOX_TILES
+            GOOGLE_ANALYTICS
+
         
         );
         
@@ -57,6 +61,7 @@ public class ContentSecurityPolicy {
             // Unfortunately GWT makes extensive use of inline
             // scripts so we need to allow this
             UNSAFE_INLINE, 
+            UNSAFE_EVAL,
                 
             // Allow google analytics scripts
             GOOGLE_ANALYTICS, 
