@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -89,7 +90,12 @@ public class MapPanel implements IsWidget {
         root.addAttachHandler(new AttachEvent.Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
-                init();
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        init();
+                    }
+                });
             }
         });
 
@@ -156,8 +162,8 @@ public class MapPanel implements IsWidget {
 
     private void selectOnMap(MapItem mapItem) {
         //map.fitBounds(new LatLngBounds().extend(latLng));
-        map.panTo(mapItem.getLatLng());
         map.setView(mapItem.getLatLng(), ZOOM_LEVEL, true);
+        //map.panTo(mapItem.getLatLng());
     }
 
     public void addTableSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
