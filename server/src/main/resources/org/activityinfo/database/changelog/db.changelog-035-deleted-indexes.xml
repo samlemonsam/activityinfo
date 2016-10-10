@@ -105,4 +105,13 @@
             END
         </sql>
     </changeSet>
+    <changeSet author="yuriyz" id="36-05">
+        <comment>
+            Improve query performance on adminentity table
+        </comment>
+        <createIndex tableName="adminentity" indexName="adminentity_id_and_deleted">
+            <column name="deleted"/>
+            <column name="AdminLevelId"/>
+        </createIndex>
+  </changeSet>
 </databaseChangeLog>
