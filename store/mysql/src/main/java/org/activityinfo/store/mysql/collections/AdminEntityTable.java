@@ -33,7 +33,7 @@ public class AdminEntityTable implements SimpleTable {
      */
     private static final Cache<Integer, AdminLevel> LEVEL_CACHE = CacheBuilder.newBuilder()
             .concurrencyLevel(10)
-            .expireAfterWrite(1, TimeUnit.HOURS)
+            .expireAfterWrite(10, TimeUnit.HOURS)
             .build();
 
     @Override
