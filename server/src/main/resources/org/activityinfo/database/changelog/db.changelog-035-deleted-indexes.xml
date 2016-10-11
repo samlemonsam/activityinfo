@@ -113,5 +113,8 @@
             <column name="deleted"/>
             <column name="AdminLevelId"/>
         </createIndex>
+        <sql>
+            UPDATE adminlevel SET version = 1 WHERE version = 0
+        </sql>
   </changeSet>
 </databaseChangeLog>
