@@ -116,5 +116,14 @@
         <sql>
             UPDATE adminlevel SET version = 1 WHERE version = 0
         </sql>
-  </changeSet>
+    </changeSet>
+    <changeSet author="yuriyz" id="36-06">
+        <comment>
+            Improve query performance on userpermission table
+        </comment>
+        <createIndex tableName="userpermission" indexName="userpermission_databaseid_and_userid">
+            <column name="DatabaseId"/>
+            <column name="UserId"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
