@@ -126,4 +126,14 @@
             <column name="UserId"/>
         </createIndex>
     </changeSet>
+    <changeSet author="yuriyz" id="36-07">
+        <comment>
+            Improve query performance of site table
+        </comment>
+        <createIndex tableName="site" indexName="site_deleted_activityid_siteid">
+            <column name="deleted"/>
+            <column name="ActivityId"/>
+            <column name="SiteId"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
