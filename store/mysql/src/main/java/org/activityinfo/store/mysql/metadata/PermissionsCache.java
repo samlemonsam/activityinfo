@@ -48,7 +48,7 @@ public class PermissionsCache {
                 userId);
 
         Stopwatch started = Stopwatch.createStarted();
-        LOGGER.fine("Query: " + query);
+        LOGGER.info("Query: " + query);
 
         try(ResultSet rs = executor.query(query)) {
 
@@ -73,7 +73,7 @@ public class PermissionsCache {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            LOGGER.fine("Completed in " + started.elapsed(TimeUnit.MILLISECONDS) + "ms");
+            LOGGER.info("Completed in " + started.elapsed(TimeUnit.MILLISECONDS) + "ms");
         }
 
         return permission;
