@@ -65,6 +65,7 @@ public class SchemaCsvWriter {
     private void writeHeaders() {
         writeLine("DatabaseId",
                 "DatabaseName",
+                "FormVersion",
                 "ActivityId",
                 "ActivityCategory",
                 "ActivityName",
@@ -72,8 +73,10 @@ public class SchemaCsvWriter {
                 "AttributeGroup/IndicatorId",
                 "Category",
                 "Name",
+                "Mandatory",
                 "Description",
                 "Units",
+                "MultipleAllowed",
                 "AttributeId",
                 "AttributeValue",
                 "Code",
@@ -83,6 +86,7 @@ public class SchemaCsvWriter {
     private void writeElementLine(ActivityFormDTO activity, IndicatorDTO indicator) {
         writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
+                activity.getClassicView() ? "2.0" : "3.0",
                 activity.getId(),
                 activity.getCategory(),
                 activity.getName(),
@@ -90,8 +94,10 @@ public class SchemaCsvWriter {
                 indicator.getId(),
                 indicator.getCategory(),
                 indicator.getName(),
+                toString(indicator.isMandatory()),
                 indicator.getDescription(),
                 indicator.getUnits(),
+                null,
                 null,
                 null,
                 indicator.getNameInExpression(),
@@ -99,9 +105,12 @@ public class SchemaCsvWriter {
         );
     }
 
+
+
     private void writeElementLine(ActivityFormDTO activity, AttributeGroupDTO attribGroup, AttributeDTO attrib) {
         writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
+                activity.getClassicView() ? "2.0" : "3.0",
                 activity.getId(),
                 activity.getCategory(),
                 activity.getName(),
@@ -109,12 +118,22 @@ public class SchemaCsvWriter {
                 attribGroup.getId(),
                 null,
                 attribGroup.getName(),
+                toString(attribGroup.isMandatory()),
                 null,
                 null,
+                toString(attribGroup.isMultipleAllowed()),
                 attrib.getId(),
                 attrib.getName(),
                 null,
                 null);
+    }
+
+    private String toString(boolean value) {
+        if(value) {
+            return "Yes";
+        } else {
+            return "No";
+        }
     }
 
     private void writeLine(Object... columns) {
