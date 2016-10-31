@@ -164,6 +164,9 @@ public class CollectionScan {
         // If the collection cannot provide a cache version, then it is not safe to cache columns 
         // from this collection
         if (cacheVersion == 0) {
+
+            LOGGER.severe(this.collectionId + " has zero-valued version.");
+
             return Collections.emptySet();
         }
 

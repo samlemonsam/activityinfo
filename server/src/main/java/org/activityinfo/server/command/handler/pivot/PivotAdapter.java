@@ -232,40 +232,44 @@ public class PivotAdapter {
 
     public PivotSites.PivotResult execute() throws SQLException {
 
-        for (Activity activity : activities) {
-            UserPermission userPermission = session.getActivityLoader().getPermission(activity.getId(), userId);
-            if(userPermission.isView()) {
-                Optional<ExprNode> permissionFilter = permissionFilter(userPermission);
-                switch (command.getValueType()) {
-                    case INDICATOR:
-                        executeIndicatorValuesQuery(activity, activity.getSelfLink(), permissionFilter);
-                        for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
-                            executeIndicatorValuesQuery(activity, linkedActivity, permissionFilter);
-                        }
-                        break;
-                    case TOTAL_SITES:
-                        executeSiteCountQuery(activity, activity.getSelfLink(), permissionFilter);
-                        for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
-                            executeSiteCountQuery(activity, linkedActivity, permissionFilter);
-                        }
-                        break;
+        try {
+            for (Activity activity : activities) {
+                UserPermission userPermission = session.getActivityLoader().getPermission(activity.getId(), userId);
+                if (userPermission.isView()) {
+                    Optional<ExprNode> permissionFilter = permissionFilter(userPermission);
+                    switch (command.getValueType()) {
+                        case INDICATOR:
+                            executeIndicatorValuesQuery(activity, activity.getSelfLink(), permissionFilter);
+                            for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
+                                executeIndicatorValuesQuery(activity, linkedActivity, permissionFilter);
+                            }
+                            break;
+                        case TOTAL_SITES:
+                            executeSiteCountQuery(activity, activity.getSelfLink(), permissionFilter);
+                            for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
+                                executeSiteCountQuery(activity, linkedActivity, permissionFilter);
+                            }
+                            break;
+                    }
                 }
             }
-        }
 
-        if(command.isPivotedBy(DimensionType.Target) &&
-           command.getValueType() == PivotSites.ValueType.INDICATOR) {
-           
-            for (Integer databaseId : databases.keySet()) {
-                executeTargetValuesQuery(databaseId);
+            if (command.isPivotedBy(DimensionType.Target) &&
+                command.getValueType() == PivotSites.ValueType.INDICATOR) {
+
+                for (Integer databaseId : databases.keySet()) {
+                    executeTargetValuesQuery(databaseId);
+                }
             }
-        }
 
-        LOGGER.info(String.format("Pivot timings: metadata %s, trees: %s, query: %s, aggregate: %s",
+            return new PivotSites.PivotResult(createBuckets());
+
+        } finally {
+
+            LOGGER.info(String.format("Pivot timings: metadata %s, trees: %s, query: %s, aggregate: %s",
                 metadataTime, treeTime, queryTime, aggregateTime));
 
-
-        return new PivotSites.PivotResult(createBuckets());
+        }
     }
 
     private Optional<ExprNode> permissionFilter(UserPermission userPermission) {
