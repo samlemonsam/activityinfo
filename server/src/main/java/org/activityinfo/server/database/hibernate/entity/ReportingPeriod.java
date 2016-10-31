@@ -34,6 +34,7 @@ public class ReportingPeriod implements java.io.Serializable, Deleteable {
 
     private int id;
     private Site site;
+    private Activity activity;
     private Date date1;
     private Date date2;
     private String comments;
@@ -41,11 +42,9 @@ public class ReportingPeriod implements java.io.Serializable, Deleteable {
     private Date dateCreated;
     private Date dateEdited;
     private Date dateDeleted;
-
     private Set<IndicatorValue> indicatorValues = new HashSet<IndicatorValue>(0);
 
     public ReportingPeriod() {
-
         Date now = new Date();
         this.dateCreated = now;
         this.dateEdited = now;
@@ -74,6 +73,7 @@ public class ReportingPeriod implements java.io.Serializable, Deleteable {
 
     public void setSite(Site site) {
         this.site = site;
+        this.activity = site.getActivity();
     }
 
     @Temporal(TemporalType.DATE)
@@ -169,6 +169,16 @@ public class ReportingPeriod implements java.io.Serializable, Deleteable {
     @Override
     public void delete() {
         setDateDeleted(new Date());
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ActivityId", nullable = false)
+    public Activity getActivity() {
+        return activity;
+    }
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 
     @Override

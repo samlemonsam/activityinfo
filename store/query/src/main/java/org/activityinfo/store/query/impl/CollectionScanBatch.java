@@ -191,7 +191,7 @@ public class CollectionScanBatch {
      * Executes the batch
      */
     public void execute() throws Exception {
-        
+
         // Before hitting the database, retrieve what we can from the cache
         resolveFromCache();
         
@@ -229,6 +229,13 @@ public class CollectionScanBatch {
                 Map<String, Object> cached = memcacheService.getAll(toFetch).get();
 
                 LOGGER.info("Retrieved " + cached.size() + "/" + toFetch.size() + " requested keys from memcache.");
+
+                for (String key : toFetch) {
+                    if(!cached.containsKey(key)) {
+                        LOGGER.severe("Cache Miss: " + key);
+                    }
+                }
+
 
                 // Now populate the individual collection scans with what we got back from memcache 
                 // with a little luck nothing will be left to query directly from the database

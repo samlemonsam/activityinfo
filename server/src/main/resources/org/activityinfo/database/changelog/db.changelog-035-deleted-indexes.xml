@@ -136,4 +136,27 @@
             <column name="SiteId"/>
         </createIndex>
     </changeSet>
+    <changeSet author="alex" id="36-08">
+        <comment>
+            Improve query performance of monthly reports scan by pushing down values
+            form site table.
+        </comment>
+        <sql>
+            alter table reportingperiod add column activityId int
+        </sql>
+        <sql>
+            update reportingperiod set activityId = (select activityid from site s where s.siteid = reportingperiod.siteid)
+        </sql>
+        <sql>
+            alter table reportingperiod add column deleted bit(1) not null default 0
+        </sql>
+        <sql>
+            update reportingperiod set activityId = (select deleted from site s where s.siteid = reportingperiod.siteid);
+        </sql>
+        <createIndex tableName="reportingperiod" indexName="reportingperiod_deleted_activity_sort">
+            <column name="deleted"/>
+            <column name="ActivityId"/>
+            <column name="ReportingPeriodId"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
