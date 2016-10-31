@@ -159,4 +159,23 @@
             <column name="ReportingPeriodId"/>
         </createIndex>
     </changeSet>
+    <changeSet id="36-09" author="alex">
+        <comment>
+            Improve query performance of location admin links
+        </comment>
+        <sql>
+            alter table locationadminlink add column adminLevelId int
+        </sql>
+        <sql>
+            update locationadminlink set adminlevelid = (select adminlevelid from adminentity e where e.adminentityid=locationadminlink.adminentityid)
+        </sql>
+        <sql splitStatements="false" endDelimiter="//">
+            CREATE TRIGGER locationadminlink
+            BEFORE INSERT
+            ON locationadminlink FOR EACH ROW
+            BEGIN
+            SET NEW.adminlevelId = (SELECT adminlevelid FROM adminentity e WHERE e.adminentityId=NEW.adminentityId);
+            END
+        </sql>
+    </changeSet>
 </databaseChangeLog>
