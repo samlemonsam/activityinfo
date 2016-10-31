@@ -178,4 +178,17 @@
             END
         </sql>
     </changeSet>
+    <changeSet id="36-10" author="alex">
+        <comment>
+            Enforce consistency rules in denormalized reportingperiod values
+        </comment>
+        <sql splitStatements="false" endDelimiter="//">
+            CREATE TRIGGER reportingperiod
+            BEFORE INSERT
+            ON reportingperiod FOR EACH ROW
+            BEGIN
+            SET NEW.activityId = (SELECT activityId FROM site s WHERE s.siteId=NEW.siteId);
+            END
+        </sql>
+    </changeSet>
 </databaseChangeLog>
