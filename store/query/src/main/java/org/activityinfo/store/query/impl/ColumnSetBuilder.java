@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.form.FormClass;
@@ -25,28 +26,47 @@ public class ColumnSetBuilder {
 
     private final CollectionCatalog resourceStore;
     private final FormTreeBuilder formTreeService;
+    private Function<ColumnView, ColumnView> filter;
+    private Map<String, Slot<ColumnView>> columnViews;
+    private Slot<ColumnView> columnForRowCount;
 
     public ColumnSetBuilder(CollectionCatalog resourceStore) {
         this.resourceStore = resourceStore;
         this.formTreeService = new FormTreeBuilder(resourceStore);
     }
 
-    public ColumnSet build(QueryModel table) {
+    public ColumnSet build(QueryModel queryModel) {
 
+        // We want to make at most one pass over every collection we need to scan,
+        // so first queue up all necessary work before executing
+        CollectionScanBatch batch = new CollectionScanBatch(resourceStore);
+
+        // Enqueue the columns we need
+        enqueue(queryModel, batch);
+
+        // Now execute the batch
+        try {
+            batch.execute();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to execute query batch", e);
+        }
+
+        return build();
+    }
+
+
+    public void enqueue(QueryModel table, CollectionScanBatch batch) {
         ResourceId classId = table.getRowSources().get(0).getRootFormClass();
         FormTree tree = formTreeService.queryTree(classId);
 
         FormClass formClass = tree.getRootFormClass();
         Preconditions.checkNotNull(formClass);
 
-        // We want to make at most one pass over every collection we need to scan,
-        // so first queue up all necessary work before executing
-        CollectionScanBatch batch = new CollectionScanBatch(resourceStore);
         QueryEvaluator evaluator = new QueryEvaluator(tree, formClass, batch);
 
-        Function<ColumnView, ColumnView> filter = evaluator.filter(table.getFilter());
+        filter = evaluator.filter(table.getFilter());
 
-        Map<String, Slot<ColumnView>> columnViews = Maps.newHashMap();
+        columnViews = Maps.newHashMap();
         for(ColumnModel column : table.getColumns()) {
             Slot<ColumnView> view;
             try {
@@ -58,31 +78,28 @@ public class ColumnSetBuilder {
             columnViews.put(column.getId(), view);
         }
 
-        Slot<ColumnView> columnForRowCount = null;
+        columnForRowCount = null;
 
         if(columnViews.isEmpty()) {
-            // handle empty queries as a special case: we still need the 
+            // handle empty queries as a special case: we still need the
             // row count so query the id
             columnForRowCount = batch.addResourceIdColumn(formClass);
-
         }
+    }
 
-        // Now execute the batch
-        try {
-            batch.execute();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to execute query batch", e);
-        }
+    public ColumnSet build() {
 
-        LOGGER.info("Execution complete.");
 
+        LOGGER.info("Query execution complete.");
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
 
         // Package the results
-        
+
         int numRows = -1;
         if(columnForRowCount != null) {
             numRows = columnForRowCount.get().numRows();
-        } 
+        }
         Map<String, ColumnView> dataMap = Maps.newHashMap();
         for (Map.Entry<String, Slot<ColumnView>> entry : columnViews.entrySet()) {
             ColumnView view = filter.apply(entry.getValue().get());
@@ -97,7 +114,9 @@ public class ColumnSetBuilder {
                 }
             }
         }
-        
+
+        LOGGER.info("Joining and Filtering complete in " + stopwatch);
+
         return new ColumnSet(numRows, dataMap);
     }
 
