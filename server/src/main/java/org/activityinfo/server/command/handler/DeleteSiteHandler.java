@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.DeleteSite;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.server.database.hibernate.entity.ReportingPeriod;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -33,6 +34,11 @@ public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
         
         site.setDateDeleted(new Date());
         site.setVersion(site.getActivity().incrementSiteVersion());
+
+        entityManager.createNativeQuery("update reportingperiod set deleted = 1 WHERE siteId = ?")
+                .setParameter(1, site.getId())
+                .executeUpdate();
+
 
         logHistory(user, site);
         
