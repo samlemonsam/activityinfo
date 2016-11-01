@@ -21,6 +21,10 @@ public class PrimaryKeyMap implements Serializable {
         }
     }
 
+    public int size() {
+        return map.size();
+    }
+
     /**
      *
      * Returns the row index corresponding to the given foreign key, if there

@@ -4,6 +4,7 @@ import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
@@ -17,15 +18,9 @@ import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
 import org.activityinfo.store.query.impl.eval.JoinNode;
 import org.activityinfo.store.query.impl.eval.NodeMatch;
-import org.activityinfo.store.query.impl.join.ForeignKeyMap;
-import org.activityinfo.store.query.impl.join.JoinLink;
-import org.activityinfo.store.query.impl.join.JoinedColumnViewSlot;
-import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
+import org.activityinfo.store.query.impl.join.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +44,8 @@ public class CollectionScanBatch {
      */
     private Map<ResourceId, CollectionScan> tableMap = Maps.newHashMap();
 
+    private Map<JoinLinkKey, JoinLink> joinLinks = new HashMap<>();
+    private Map<JoinedColumnKey, JoinedColumnViewSlot> joinedColumns = new HashMap<>();
 
     public CollectionScanBatch(CollectionCatalog store) {
         this.store = store;
@@ -138,7 +135,14 @@ public class CollectionScanBatch {
                 throw new UnsupportedOperationException("type: " + match.getType());
         }
 
-        return new JoinedColumnViewSlot(links, column);
+        JoinedColumnKey key = new JoinedColumnKey(links, column);
+        JoinedColumnViewSlot slot = joinedColumns.get(key);
+        if(slot == null) {
+            slot = new JoinedColumnViewSlot(links, column);
+            joinedColumns.put(key, slot);
+        }
+
+        return slot;
     }
 
     private JoinLink addJoinLink(JoinNode node) {
@@ -148,13 +152,19 @@ public class CollectionScanBatch {
         Slot<ForeignKeyMap> foreignKey = left.addForeignKey(node.getReferenceField());
         Slot<PrimaryKeyMap> primaryKey = right.addPrimaryKey();
 
-        return new JoinLink(foreignKey, primaryKey);
+        JoinLinkKey joinLinkKey = new JoinLinkKey(foreignKey, primaryKey);
+        JoinLink joinLink = joinLinks.get(joinLinkKey);
+
+        if(joinLink == null) {
+            joinLink = new JoinLink(foreignKey, primaryKey, node.toString());
+            joinLinks.put(joinLinkKey, joinLink);
+        }
+        return joinLink;
     }
 
     public Slot<ColumnView> getDataColumn(FormClass formClass, ExprNode fieldExpr) {
         return getTable(formClass.getId()).addField(fieldExpr);
     }
-
 
     /**
      * Adds a request for a "constant" column to the query batch. We don't actually need any data from
@@ -226,16 +236,11 @@ public class CollectionScanBatch {
             if(!toFetch.isEmpty()) {
                 // Do a big giant memcache call and rely on appengine to parallelize as
                 // needed
+                Stopwatch stopwatch = Stopwatch.createStarted();
                 Map<String, Object> cached = memcacheService.getAll(toFetch).get();
 
-                LOGGER.info("Retrieved " + cached.size() + "/" + toFetch.size() + " requested keys from memcache.");
-
-                for (String key : toFetch) {
-                    if(!cached.containsKey(key)) {
-                        LOGGER.severe("Cache Miss: " + key);
-                    }
-                }
-
+                LOGGER.info("Retrieved " + cached.size() + "/" + toFetch.size() + " requested keys from memcache in " +
+                        stopwatch);
 
                 // Now populate the individual collection scans with what we got back from memcache 
                 // with a little luck nothing will be left to query directly from the database

@@ -39,7 +39,8 @@ public class CollectionScan {
     private Map<ExprNode, PendingSlot<ColumnView>> columnMap = Maps.newHashMap();
     private Map<String, PendingSlot<ForeignKeyMap>> foreignKeyMap = Maps.newHashMap();
 
-    private Optional<PendingSlot<Integer>> rowCount = Optional.absent();
+    private PrimaryKeySlot primaryKeySlot = null;
+    private PendingSlot<Integer> rowCount = null;
 
     public CollectionScan(ResourceCollection collection) {
         this.collection = collection;
@@ -67,7 +68,10 @@ public class CollectionScan {
      * @return a slot where the value can be found after the query completes
      */
     public Slot<PrimaryKeyMap> addPrimaryKey() {
-        return new PrimaryKeySlot(addResourceId());
+        if(primaryKeySlot == null) {
+            primaryKeySlot = new PrimaryKeySlot(addResourceId());
+        }
+        return primaryKeySlot;
     }
 
     /**
@@ -77,10 +81,10 @@ public class CollectionScan {
      * @return a slot where the value can be found after the query completes
      */
     public Slot<Integer> addCount() {
-        if(!rowCount.isPresent()) {
-            rowCount = Optional.of(new PendingSlot<Integer>());
+        if(rowCount == null) {
+            rowCount = new PendingSlot<>();
         }
-        return rowCount.get();
+        return rowCount;
     }
 
     /**
@@ -101,27 +105,6 @@ public class CollectionScan {
         PendingSlot<ColumnView> slot = new PendingSlot<>();
         columnMap.put(fieldExpr, slot);
         return slot;
-    }
-
-    private FormField resolveField(FormClass formClass, ExprNode fieldExpr) {
-        if(fieldExpr instanceof SymbolExpr) {
-            SymbolExpr symbol = (SymbolExpr) fieldExpr;
-            ResourceId fieldId = ResourceId.valueOf(symbol.getName());
-            return formClass.getField(fieldId);
-
-        } else if(fieldExpr instanceof CompoundExpr) {
-            CompoundExpr compound = (CompoundExpr) fieldExpr;
-            FormField parent = resolveField(formClass, compound.getValue());
-            if(!(parent.getType() instanceof RecordFieldType)) {
-                throw new IllegalArgumentException("Cannot resolve " + compound + ": field " + parent.getId() +
-                        " is not record-valued.");
-            }
-            FormClass parentFormClass = ((RecordFieldType) parent.getType()).getFormClass();
-            return resolveField(parentFormClass, compound.getField());
-
-        } else {
-            throw new UnsupportedOperationException("fieldExpr: " + fieldExpr);
-        }
     }
 
 
@@ -180,7 +163,7 @@ public class CollectionScan {
             toFetch.add(fkCacheKey(fieldId));
         }
 
-        if (rowCount.isPresent()) {
+        if (rowCount != null) {
             toFetch.add(rowCountKey());
         }
 
@@ -200,9 +183,9 @@ public class CollectionScan {
                 columnMap.remove(fieldId);
 
                 // resolve the rowCount slot if still needed
-                if (rowCount.isPresent()) {
-                    rowCount.get().set(view.numRows());
-                    rowCount = Optional.absent();
+                if (rowCount != null) {
+                    rowCount.set(view.numRows());
+                    rowCount = null;
                 }
             }
         }
@@ -217,10 +200,10 @@ public class CollectionScan {
         }
 
         // Do we need a row count?
-        if(rowCount.isPresent()) {
+        if(rowCount != null) {
             Integer count = (Integer)cached.get(rowCountKey());
             if(count != null) {
-                rowCount.get().set(count);
+                rowCount.set(count);
             }
         }
     }
@@ -234,7 +217,7 @@ public class CollectionScan {
         // check to see if we still need to hit the database after being populated by the cache
         if(columnMap.isEmpty() && 
            foreignKeyMap.isEmpty() &&
-           !rowCount.isPresent()) {
+           rowCount == null) {
             return;
         }
 
@@ -252,7 +235,7 @@ public class CollectionScan {
         // Only add a row count observer IF it has been requested AND 
         // we aren't loading any other columns
         RowCountBuilder rowCountBuilder = null;
-        if (rowCount.isPresent() && columnMap.isEmpty()) {
+        if (rowCount != null && columnMap.isEmpty()) {
             rowCountBuilder = new RowCountBuilder();
             queryBuilder.addResourceId(rowCountBuilder);
         }
@@ -266,11 +249,11 @@ public class CollectionScan {
         queryBuilder.execute();
 
         // Update the row count if hasn't been already loaded from the cache
-        if(rowCount.isPresent() && !rowCount.get().isSet()) {
+        if(rowCount != null && !rowCount.isSet()) {
             if(rowCountBuilder != null) {
-                rowCount.get().set(rowCountBuilder.getCount());
+                rowCount.set(rowCountBuilder.getCount());
             } else {
-                rowCount.get().set(rowCountFromColumn(columnMap));
+                rowCount.set(rowCountFromColumn(columnMap));
             }
         }
 
@@ -294,8 +277,8 @@ public class CollectionScan {
         if(!columnMap.isEmpty()) {
             toPut.put(rowCountKey(), rowCountFromColumn(columnMap));
 
-        } else if(rowCount.isPresent()) {
-            toPut.put(rowCountKey(), rowCount.get().get());
+        } else if(rowCount != null) {
+            toPut.put(rowCountKey(), rowCount.get());
         }
         return toPut;
     }
