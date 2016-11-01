@@ -191,4 +191,15 @@
             END
         </sql>
     </changeSet>
+    <changeSet author="alex" id="36-11">
+        <comment>
+            Correctly sync delete flag on reportingperiod with site table
+        </comment>
+        <sql>
+            update reportingperiod set deleted = IFNULL((select deleted from site s where s.siteid = reportingperiod.siteid), 0)
+        </sql>
+        <sql>
+            update reportingperiod set activityId = (select activityid from site s where s.siteid = reportingperiod.siteid)
+        </sql>
+    </changeSet>
 </databaseChangeLog>
