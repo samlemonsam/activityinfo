@@ -4,6 +4,7 @@ import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,7 +22,10 @@ import org.activityinfo.store.query.impl.eval.NodeMatch;
 import org.activityinfo.store.query.impl.join.*;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +40,7 @@ public class CollectionScanBatch {
     private static final Logger LOGGER = Logger.getLogger(CollectionScanBatch.class.getName());
     
     private final AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
-    private final List<Future<?>> pendingCaching = new ArrayList<>();
+    private final List<Future<Set<String>>> pendingCaching = new ArrayList<>();
 
     private final CollectionCatalog store;
 
@@ -269,5 +273,36 @@ public class CollectionScanBatch {
         } catch (Exception e) {
             LOGGER.severe("Failed to start memcache put for " + scan);
         }
+    }
+
+    /**
+     * Wait for caching to finish, if there is time left in this request.
+     */
+    public void waitForCachingToFinish() {
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        int columnCount = 0;
+
+        for (Future<Set<String>> future : pendingCaching) {
+            if(!future.isDone()) {
+                long remainingMillis = ApiProxy.getCurrentEnvironment().getRemainingMillis();
+                if (remainingMillis > 100) {
+                    try {
+                        Set<String> cachedKeys = future.get(remainingMillis - 50, TimeUnit.MILLISECONDS);
+                        columnCount += cachedKeys.size();
+
+                    } catch (InterruptedException | TimeoutException e) {
+                        LOGGER.warning("Ran out of time while waiting for caching of results to complete.");
+                        return;
+
+                    } catch (ExecutionException e) {
+                        LOGGER.log(Level.WARNING, "Exception caching results of query", e);
+                    }
+                }
+            }
+        }
+
+        LOGGER.info("Waited " + stopwatch + " for " + columnCount + " columns to finish caching.");
     }
 }
