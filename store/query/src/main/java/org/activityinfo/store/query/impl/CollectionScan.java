@@ -48,6 +48,10 @@ public class CollectionScan {
         this.cacheVersion = collection.cacheVersion();
     }
 
+    public ResourceId getCollectionId() {
+        return collectionId;
+    }
+
     /**
      * Includes the resourceId in the table scan
      *

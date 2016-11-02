@@ -21,6 +21,7 @@ import org.activityinfo.store.query.impl.eval.NodeMatch;
 import org.activityinfo.store.query.impl.join.*;
 
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +35,8 @@ public class CollectionScanBatch {
 
     private static final Logger LOGGER = Logger.getLogger(CollectionScanBatch.class.getName());
     
-    private AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
+    private final AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
+    private final List<Future<?>> pendingCaching = new ArrayList<>();
 
     private final CollectionCatalog store;
 
@@ -208,12 +210,12 @@ public class CollectionScanBatch {
         // Now hit the database for anything remaining...
         for(CollectionScan scan : tableMap.values()) {
             scan.execute();
-        }
-        
-        // And of course save the results to the cache
-        cacheResult();
-    }
 
+            // Send separate (async) cache put requests after each collection to avoid
+            // having to serialize everything at once and risking OutOfMemoryErrors
+            cache(scan);
+        }
+     }
 
 
     /**
@@ -255,20 +257,17 @@ public class CollectionScanBatch {
     }
 
 
-    private void cacheResult() {
-        Map<String, Object> toPut = Maps.newHashMap();
+    private void cache(CollectionScan scan) {
+        try {
+            Map<String, Object> toPut = scan.getValuesToCache();
+            if(!toPut.isEmpty()) {
+                Future<Set<String>> result = memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600),
+                        MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 
-        for (CollectionScan collectionScan : tableMap.values()) {
-            toPut.putAll(collectionScan.getValuesToCache());
-        }
-        
-        if(!toPut.isEmpty()) {
-            // put asynchronously
-            try {
-                memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600), MemcacheService.SetPolicy.SET_ALWAYS);
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Failed to start memcache put: " + e.getMessage(), e);
+                pendingCaching.add(result);
             }
+        } catch (Exception e) {
+            LOGGER.severe("Failed to start memcache put for " + scan);
         }
     }
 }
