@@ -4,7 +4,9 @@ import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,6 +26,13 @@ public class ContentSecurityServlet extends HttpServlet {
     
     private static final Logger LOGGER = Logger.getLogger(ContentSecurityPolicy.class.getName());
 
+    private final ServerSideAuthProvider authProvider;
+
+    @Inject
+    public ContentSecurityServlet(ServerSideAuthProvider authProvider) {
+        this.authProvider = authProvider;
+    }
+
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -34,6 +43,13 @@ public class ContentSecurityServlet extends HttpServlet {
         JsonObject report = request.get("csp-report").getAsJsonObject();
 
         StringBuilder message = new StringBuilder();
+        
+        if(authProvider.isAuthenticated()) {
+            message.append("User: ").append(authProvider.get().getEmail());
+        } else {
+            message.append("User: ").append("Not authenticated.");
+        }
+        
         message.append("Content-Security Violation\n");
 
         for (Map.Entry<String, JsonElement> entry : report.entrySet()) {

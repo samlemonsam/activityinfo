@@ -98,6 +98,15 @@ public class RelevanceExpressionTest {
         eval(String.format("notContainsAny({%s},{%s})", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Male").getId()), false, instance);
         eval(String.format("notContainsAny({%s},{%s},{%s})", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Male").getId(), enumValue(GENDER_FIELD_ID, "Female").getId()), false, instance);
 
+        instance.set(GENDER_FIELD_ID, new EnumValue());
+
+        eval(String.format("{%s}=={%s}", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Female").getId()), false, instance);
+
+        eval(String.format("containsAll({%s},{%s})", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Male").getId()), false, instance);
+        eval(String.format("containsAll({%s},{%s})", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Female").getId()), false, instance);
+
+        eval(String.format("containsAny({%s},{%s})", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Male").getId()), false, instance);
+        eval(String.format("containsAny({%s},{%s})", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Female").getId()), false, instance);
     }
 
     @Test

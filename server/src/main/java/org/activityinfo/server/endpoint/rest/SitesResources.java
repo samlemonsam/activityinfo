@@ -9,6 +9,7 @@ import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.date.Month;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.number.QuantityType;
@@ -166,6 +167,8 @@ public class SitesResources {
                             }
                             if (form.getIndicatorById(indicatorId).getType() == AttachmentType.TYPE_CLASS) {
                                 json.writeObjectField(Integer.toString(indicatorId), AttachmentValue.fromJson(stringValue).getValues());
+                            } else if (form.getIndicatorById(indicatorId).getType() == ReferenceType.TYPE_CLASS) {
+                                continue;
                             } else {
                                 json.writeStringField(Integer.toString(indicatorId), stringValue);
                             }

@@ -23,6 +23,7 @@ package org.activityinfo.server.report.generator.map;
  */
 
 import com.google.common.collect.Lists;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
@@ -66,12 +67,19 @@ public abstract class PointLayerGenerator<T extends PointMapLayer> implements La
 
     private GetSites queryFor(Filter effectiveFilter, PointMapLayer layer) {
         Filter layerFilter = new Filter(effectiveFilter, layer.getFilter());
+
+        boolean allMonthly = true;
+
         for (int id : layer.getIndicatorIds()) {
             Indicator indicator = indicators.get(id);
             if (indicator.getAggregation() == IndicatorDTO.AGGREGATE_SITE_COUNT) {
                 layerFilter.addRestriction(DimensionType.Activity, indicator.getActivity().getId());
             } else {
                 layerFilter.addRestriction(DimensionType.Indicator, indicator.getId());
+            }
+
+            if (allMonthly) {
+                allMonthly = indicator.getActivity().getReportingFrequency() == ActivityFormDTO.REPORT_MONTHLY;
             }
         }
 
@@ -83,6 +91,11 @@ public abstract class PointLayerGenerator<T extends PointMapLayer> implements La
         query.setFetchAdminEntities(true);
         query.setFetchAllIndicators(false);
         query.setFetchIndicators(physicalIndicators(layer));
+
+        if (allMonthly) {
+            query.setFetchAllReportingPeriods(true);
+            query.setFetchLinks(false);
+        }
 
         return query;
     }

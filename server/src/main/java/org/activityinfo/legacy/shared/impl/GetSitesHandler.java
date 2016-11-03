@@ -52,6 +52,7 @@ import org.activityinfo.model.form.FormFieldType;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.Quantity;
@@ -210,6 +211,14 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
             query.from(Tables.REPORTING_PERIOD, "period")
                 .leftJoin(Tables.SITE, "site").on("site.SiteId=period.SiteId");
 
+            LocalDate filterMinDate = command.getFilter().getEndDateRange().getMinLocalDate();
+            LocalDate filterMaxDate = command.getFilter().getEndDateRange().getMaxLocalDate();
+            if (filterMinDate != null) {
+                query.where("period.Date1").greaterThanOrEqualTo(filterMinDate);
+            }
+            if (filterMaxDate != null) {
+                query.where("period.Date2").lessThanOrEqualTo(filterMaxDate);
+            }
 
         } else {
             query.from(Tables.SITE);
@@ -250,7 +259,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         }
 
         applyPermissions(query, context);
-        applyFilter(query, command.getFilter());
+        applyFilter(query, command);
 
         Optional<Integer> adminLevelId = adminLevelId(command.getSortInfo().getSortField());
          if (command.isFetchAdminEntities() && adminLevelId.isPresent() ) {
@@ -368,7 +377,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
 
 
         applyPermissions(query, context);
-        applyFilter(query, command.getFilter());
+        applyFilter(query, command);
 
         return query;
     }
@@ -442,7 +451,8 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
         return Optional.absent();
     }
 
-    private void applyFilter(SqlQuery query, Filter filter) {
+    private void applyFilter(SqlQuery query, GetSites command) {
+        Filter filter = command.getFilter();
         if (filter != null) {
             if (filter.getRestrictedDimensions() != null && filter.getRestrictedDimensions().size() > 0) {
                 query.onlyWhere(" AND (");
@@ -510,8 +520,11 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                 }
                 query.onlyWhere(")");
             }
-            applyDateRangeFilter("site.Date1", filter.getEndDateRange(), query);
-            applyDateRangeFilter("site.Date2", filter.getEndDateRange(), query);
+
+            if (!command.isFetchAllReportingPeriods()) { // it does not make sense to filter monthly activity by site dates (filter by reporting period instead)
+                applyDateRangeFilter("site.Date1", filter.getEndDateRange(), query);
+                applyDateRangeFilter("site.Date2", filter.getEndDateRange(), query);
+            }
         }
     }
 
@@ -735,6 +748,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                             }
                         } else if (indicatorType == FieldTypeClass.FREE_TEXT ||
                                 indicatorType == FieldTypeClass.NARRATIVE ||
+                                indicatorType == ReferenceType.TYPE_CLASS ||
                                 indicatorType == AttachmentType.TYPE_CLASS) {
                             if(!row.isNull("TextValue")) {
                                 indicatorValue = row.getString("TextValue");

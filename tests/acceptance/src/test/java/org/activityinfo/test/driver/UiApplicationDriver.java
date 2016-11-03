@@ -283,6 +283,8 @@ public class UiApplicationDriver extends ApplicationDriver {
 
         BsModal dialog = applicationPage.navigateToDesignTab().newDatabase();
 
+        Sleep.sleepSeconds(10);
+
         dialog.form().findFieldByLabel("Use an existing database as a template").getElement().click();
         dialog.click("Next »", "Create a new database");
 
@@ -1002,7 +1004,7 @@ public class UiApplicationDriver extends ApplicationDriver {
         DatabasesPage databasesPage = designTab.showDatabasesGrid();
         databasesPage.rename(aliasTable.getAlias(oldName), newName, newDescription);
 
-        Sleep.sleepSeconds(2);
+        Sleep.sleepSeconds(10);
 
         // validate values are changed in table
         Assert.assertNotNull(databasesPage.grid().findCell(newName));

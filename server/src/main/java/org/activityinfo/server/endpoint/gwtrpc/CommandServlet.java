@@ -168,6 +168,13 @@ public class CommandServlet extends RemoteServiceServlet implements RemoteComman
             // throw new InvalidAuthTokenException("Auth Tokens do not match, possible XSRF attack");
             // }
         }
+
+        // If we invoke get() it would set anonymous user (AI-1436) which is not wanted behavior,
+        // throw exception if token is not set.
+        if (authProvider.isNull()) {
+            throw new InvalidAuthTokenException();
+        }
+
         return true;
     }
 }

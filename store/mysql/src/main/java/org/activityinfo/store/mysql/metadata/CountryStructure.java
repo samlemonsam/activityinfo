@@ -21,7 +21,7 @@ public class CountryStructure {
      */
     private static final Cache<Integer, CountryStructure> INSTANCE_CACHE = CacheBuilder
             .newBuilder()
-            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .expireAfterWrite(10, TimeUnit.HOURS)
             .build();
     
     

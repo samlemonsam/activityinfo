@@ -59,8 +59,13 @@ public class ContainsAllFunction extends ExprFunction {
         }
 
         Set<ResourceId> arg1 = Sets.newHashSet(Casting.toSet(arguments.get(0)));
+        boolean arg1IsEmpty = arg1.isEmpty();
         for (int i = 1; i < arguments.size(); i++) {
-            arg1.removeAll(Casting.toSet(arguments.get(i)));
+            Set<ResourceId> nextArg = Casting.toSet(arguments.get(i));
+            if (!nextArg.isEmpty() && arg1IsEmpty) {
+                return BooleanFieldValue.FALSE;
+            }
+            arg1.removeAll(nextArg);
         }
 
         return BooleanFieldValue.valueOf(arg1.isEmpty());

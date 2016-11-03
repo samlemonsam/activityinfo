@@ -199,9 +199,7 @@ public class ActivityLoader {
 
     private Map<Integer, Activity> loadFromMySql(Set<Integer> activityIds) throws SQLException {
 
-        if(activityIds.size() > 5) {
-            LOGGER.warning("Loading " + activityIds.size() + " activities...");
-        }
+        LOGGER.fine("Loading " + activityIds.size() + " activities...");
         
         if(!activityIds.isEmpty()) {
 

@@ -118,8 +118,8 @@ public class SchemaImporter {
 
     // columns
     private Column activityCategory;
+    private Column formVersion;
     private Column activityName;
-
     private SourceTable source;
     private Column formFieldType;
     private Column fieldName;
@@ -286,6 +286,7 @@ public class SchemaImporter {
         ActivityFormDTO activity = activityMap.get(name + category);
         if (activity == null) {
             activity = new ActivityFormDTO();
+            activity.setClassicView(!formVersion.get(row).startsWith("3"));
             activity.set("databaseId", db.getId());
             activity.setName(name);
             activity.setCategory(category);
@@ -355,6 +356,7 @@ public class SchemaImporter {
         hasSkippedAttributes = false;
         missingColumns.clear();
         activityCategory = findColumn("ActivityCategory", "", 255);
+        formVersion = findColumn("FormVersion", "2.0");
         activityName = findColumn("ActivityName", 45);
         locationType = findColumn("LocationType", defaultLocationType.getName());
         formFieldType = findColumn("FormFieldType", "quantity");

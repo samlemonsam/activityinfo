@@ -161,12 +161,14 @@ public class RelevanceRowPresenter {
         }
 
         GwtUtil.addTooltipToOptions(view.getFormfield().getElement(), 100, formFields);
+        view.getFormfield().setTitle(getSelectedFormField().getLabel());
 
         view.getFormfield().addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 initFunction();
                 initValueWidgetLater();
+                view.getFormfield().setTitle(getSelectedFormField().getLabel());
             }
         });
     }
@@ -232,6 +234,7 @@ public class RelevanceRowPresenter {
             String itemValue = listBox.getValue(i);
             if (!Strings.isNullOrEmpty(itemValue) && itemValue.equals(value)) {
                 listBox.setSelectedIndex(i);
+                listBox.setTitle(listBox.getItemText(i));
                 return;
             }
         }

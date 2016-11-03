@@ -105,4 +105,35 @@
             END
         </sql>
     </changeSet>
+    <changeSet author="yuriyz" id="36-05">
+        <comment>
+            Improve query performance on adminentity table
+        </comment>
+        <createIndex tableName="adminentity" indexName="adminentity_id_and_deleted">
+            <column name="deleted"/>
+            <column name="AdminLevelId"/>
+        </createIndex>
+        <sql>
+            UPDATE adminlevel SET version = 1 WHERE version = 0
+        </sql>
+    </changeSet>
+    <changeSet author="yuriyz" id="36-06">
+        <comment>
+            Improve query performance on userpermission table
+        </comment>
+        <createIndex tableName="userpermission" indexName="userpermission_databaseid_and_userid">
+            <column name="DatabaseId"/>
+            <column name="UserId"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="yuriyz" id="36-07">
+        <comment>
+            Improve query performance of site table
+        </comment>
+        <createIndex tableName="site" indexName="site_deleted_activityid_siteid">
+            <column name="deleted"/>
+            <column name="ActivityId"/>
+            <column name="SiteId"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

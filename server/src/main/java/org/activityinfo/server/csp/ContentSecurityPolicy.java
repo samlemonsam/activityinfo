@@ -18,8 +18,15 @@ public class ContentSecurityPolicy {
     private static final String GOOGLE_ANALYTICS = "https://ssl.google-analytics.com";
     
     private static final String GOOGLE_STORAGE = "https://storage.googleapis.com";
-    public static final String GOOGLE_FONTS = "https://fonts.googleapis.com";
+    private static final String GOOGLE_FONTS = "https://fonts.googleapis.com";
+    private static final String GOOGLE_FONTS_STATIC = "https://fonts.gstatic.com";
+    
+    private static final String CUSTOM_DOMAIN_STORAGE = "https://ai-custom-domains.storage.googleapis.com";
 
+    private static final String HTTPS_ONLY = "https:";
+    
+    private static final String MAPBOX_TILES = "*.tiles.mapbox.com";
+    
     private final String policy;
 
     public ContentSecurityPolicy() {
@@ -29,18 +36,24 @@ public class ContentSecurityPolicy {
         append(sb, "img-src", SELF, 
             
             // We use data: images extensively
-            DATA, 
+            DATA,
+
+            HTTPS_ONLY,
+            MAPBOX_TILES,
                 
             // Google analytics add images to the page to track
             // Events
             GOOGLE_ANALYTICS
+
         
         );
         
         append(sb, "font-src", SELF,
-                
+            SELF,
             // We use the droid sans font
-            GOOGLE_FONTS
+            GOOGLE_FONTS,
+            GOOGLE_FONTS_STATIC,
+            CUSTOM_DOMAIN_STORAGE
         );
         
         append(sb, "script-src", SELF,
@@ -48,20 +61,28 @@ public class ContentSecurityPolicy {
             // Unfortunately GWT makes extensive use of inline
             // scripts so we need to allow this
             UNSAFE_INLINE, 
+            UNSAFE_EVAL,
                 
             // Allow google analytics scripts
             GOOGLE_ANALYTICS, 
                 
             // Required for retrieving the news feed, 
             // remove after transition to new web site.
-            "about.activityinfo.org"
+            "about.activityinfo.org",
+                
+            // Required by SyrianRefugeeResponse.org
+            "data.unhcr.org",
+            CUSTOM_DOMAIN_STORAGE
         );
         append(sb, "style-src", SELF, 
             
             // GWT makes extensive use of inline style-sheets
             UNSAFE_INLINE,
                 
-            GOOGLE_FONTS
+            GOOGLE_FONTS,
+            
+            // resources for custom domains
+            CUSTOM_DOMAIN_STORAGE
         );
         
         append(sb, "connect-src", SELF);

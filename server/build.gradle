@@ -81,7 +81,7 @@ test {
     systemProperty "testDatabasePassword", localMySqlPassword
 
     maxParallelForks = Runtime.runtime.availableProcessors()
-    
+
     doFirst {
         testLogging {
             showStandardStreams = false
