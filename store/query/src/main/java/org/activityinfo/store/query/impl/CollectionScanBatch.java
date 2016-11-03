@@ -4,6 +4,7 @@ import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,6 +22,10 @@ import org.activityinfo.store.query.impl.eval.NodeMatch;
 import org.activityinfo.store.query.impl.join.*;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +39,8 @@ public class CollectionScanBatch {
 
     private static final Logger LOGGER = Logger.getLogger(CollectionScanBatch.class.getName());
     
-    private AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
+    private final AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
+    private final List<Future<Set<String>>> pendingCaching = new ArrayList<>();
 
     private final CollectionCatalog store;
 
@@ -208,12 +214,12 @@ public class CollectionScanBatch {
         // Now hit the database for anything remaining...
         for(CollectionScan scan : tableMap.values()) {
             scan.execute();
-        }
-        
-        // And of course save the results to the cache
-        cacheResult();
-    }
 
+            // Send separate (async) cache put requests after each collection to avoid
+            // having to serialize everything at once and risking OutOfMemoryErrors
+            cache(scan);
+        }
+     }
 
 
     /**
@@ -255,20 +261,48 @@ public class CollectionScanBatch {
     }
 
 
-    private void cacheResult() {
-        Map<String, Object> toPut = Maps.newHashMap();
+    private void cache(CollectionScan scan) {
+        try {
+            Map<String, Object> toPut = scan.getValuesToCache();
+            if(!toPut.isEmpty()) {
+                Future<Set<String>> result = memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600),
+                        MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 
-        for (CollectionScan collectionScan : tableMap.values()) {
-            toPut.putAll(collectionScan.getValuesToCache());
+                pendingCaching.add(result);
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Failed to start memcache put for " + scan);
         }
-        
-        if(!toPut.isEmpty()) {
-            // put asynchronously
-            try {
-                memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600), MemcacheService.SetPolicy.SET_ALWAYS);
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Failed to start memcache put: " + e.getMessage(), e);
+    }
+
+    /**
+     * Wait for caching to finish, if there is time left in this request.
+     */
+    public void waitForCachingToFinish() {
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        int columnCount = 0;
+
+        for (Future<Set<String>> future : pendingCaching) {
+            if(!future.isDone()) {
+                long remainingMillis = ApiProxy.getCurrentEnvironment().getRemainingMillis();
+                if (remainingMillis > 100) {
+                    try {
+                        Set<String> cachedKeys = future.get(remainingMillis - 50, TimeUnit.MILLISECONDS);
+                        columnCount += cachedKeys.size();
+
+                    } catch (InterruptedException | TimeoutException e) {
+                        LOGGER.warning("Ran out of time while waiting for caching of results to complete.");
+                        return;
+
+                    } catch (ExecutionException e) {
+                        LOGGER.log(Level.WARNING, "Exception caching results of query", e);
+                    }
+                }
             }
         }
+
+        LOGGER.info("Waited " + stopwatch + " for " + columnCount + " columns to finish caching.");
     }
 }

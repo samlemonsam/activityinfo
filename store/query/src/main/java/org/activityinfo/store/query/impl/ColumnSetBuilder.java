@@ -89,13 +89,7 @@ public class ColumnSetBuilder {
 
     public ColumnSet build() {
 
-
-        LOGGER.info("Query execution complete.");
-
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
         // Package the results
-
         int numRows = -1;
         if(columnForRowCount != null) {
             numRows = columnForRowCount.get().numRows();
@@ -114,8 +108,6 @@ public class ColumnSetBuilder {
                 }
             }
         }
-
-        LOGGER.info("Joining and Filtering complete in " + stopwatch);
 
         return new ColumnSet(numRows, dataMap);
     }

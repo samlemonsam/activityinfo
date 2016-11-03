@@ -272,7 +272,11 @@ public class PivotAdapter {
 
             executeQueryBatch();
 
-            return new PivotSites.PivotResult(createBuckets());
+            PivotSites.PivotResult result = new PivotSites.PivotResult(createBuckets());
+
+            batch.waitForCachingToFinish();
+
+            return result;
 
         } finally {
 
