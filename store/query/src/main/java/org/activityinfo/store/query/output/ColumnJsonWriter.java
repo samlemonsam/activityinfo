@@ -75,6 +75,8 @@ public class ColumnJsonWriter {
             case NUMBER:
                 writer.name("value").value(view.getDouble(0));
                 break;
+            case BOOLEAN:
+                writer.name("value").value(view.getBoolean(0));
         }
     }
     
@@ -104,8 +106,17 @@ public class ColumnJsonWriter {
             case NUMBER:
                 writeDoubleValues(view);
                 break;
+            case BOOLEAN:
+                writeBooleanValues(view);
+                break;
         }
         writer.endArray();
+    }
+
+    private void writeBooleanValues(ColumnView view) throws IOException {
+        for (int i = 0; i < view.numRows(); i++) {
+            writer.value(view.getBoolean(i));
+        }
     }
 
     private void writeStringValues(ColumnView view) throws IOException {
