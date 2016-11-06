@@ -179,15 +179,6 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     }
 
     @JsonProperty @JsonView(DTOViews.Schema.class)
-    public String getTypeJson() {
-        return get("typeJson");
-    }
-
-    public void setTypeJson(String typeJson) {
-        set("typeJson", typeJson);
-    }
-
-    @JsonProperty @JsonView(DTOViews.Schema.class)
     public String getExpression() {
         return get("expression");
     }
@@ -395,14 +386,6 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
             }
             field.setType(new QuantityType().setUnits(units));
 
-        } else if (getTypeId().equals(SubFormReferenceType.TYPE_CLASS.getId())) {
-            if(getTypeJson() != null) {
-                Record typeRecord = Resources.recordFromJson(getTypeJson());
-                field.setType(SubFormReferenceType.TYPE_CLASS.deserializeType(typeRecord));
-            } else {
-                field.setType(SubFormReferenceType.TYPE_CLASS.createType());
-            }
-            
         } else {
             field.setType(getType().createType());
 

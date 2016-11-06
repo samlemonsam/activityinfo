@@ -183,7 +183,6 @@ public class MapGenerator extends ListGenerator<MapReportElement> {
             indicatorDTO.setType(FormFieldType.valueOf(indicator.getType()));
             indicatorDTO.setExpression(indicator.getExpression());
             indicatorDTO.setRelevanceExpression(indicator.getRelevanceExpression());
-            indicatorDTO.setTypeJson(indicator.getTypeJson());
 
             indicatorDTOs.add(indicatorDTO);
         }

@@ -156,7 +156,6 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            typeJson: null
 
           - id: $score
             code: score        
@@ -170,8 +169,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            typeJson: null
-            
+
           - id: $contact
             name: contact
             code: contact
@@ -184,8 +182,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            typeJson: null
-            
+
           - id: $description
             name: description
             code: description
