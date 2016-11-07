@@ -8,8 +8,10 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 
 import java.util.List;
 
@@ -36,13 +38,13 @@ public class Templates {
         items.add(new TypeClassTemplate(QuantityType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeQuantity()));
         items.add(new TypeClassTemplate(TextType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeText()));
         items.add(new TypeClassTemplate(NarrativeType.TYPE_CLASS,  I18N.CONSTANTS.fieldTypeNarrative()));
-  //      items.add(new TypeClassTemplate(LocalDateType.TYPE_CLASS));
+        items.add(new TypeClassTemplate(LocalDateType.TYPE_CLASS, I18N.CONSTANTS.date()));
   //      items.add(new TypeClassTemplate(LocalDateIntervalType.TYPE_CLASS));
 
         items.add(new CheckboxTemplate());
         items.add(new RadioButtonTemplate());
 
-    //    items.add(new TypeClassTemplate(GeoPointType.TYPE_CLASS));
+        items.add(new TypeClassTemplate(GeoPointType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeGeographicPoint()));
         items.add(new TypeClassTemplate(BarcodeType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeBarcode()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.IMAGE, I18N.CONSTANTS.image()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.ATTACHMENT, I18N.CONSTANTS.attachment()));
