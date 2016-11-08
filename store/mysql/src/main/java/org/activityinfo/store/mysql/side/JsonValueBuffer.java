@@ -2,12 +2,13 @@ package org.activityinfo.store.mysql.side;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ParametrizedFieldType;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.service.store.CursorObserver;
 
 import java.sql.ResultSet;
@@ -22,9 +23,10 @@ public class JsonValueBuffer implements ValueBuffer {
     private FieldValue value = null;
     private final List<CursorObserver<FieldValue>> observers = Lists.newArrayList();
 
-    private final ParametrizedFieldType type;
+    private final FieldType type;
+    private final JsonParser parser = new JsonParser();
 
-    public JsonValueBuffer(ParametrizedFieldType type) {
+    public JsonValueBuffer(FieldType type) {
         this.type = type;
     }
 
@@ -36,16 +38,10 @@ public class JsonValueBuffer implements ValueBuffer {
     @Override
     public void set(ResultSet rs) throws SQLException {
         String json = rs.getString(STRING_VALUE_COLUMN);
-        if (!Strings.isNullOrEmpty(json)) {
-            if (type instanceof AttachmentType) {
-                value = AttachmentValue.fromJson(json);
-            } else if (type instanceof ReferenceType) {
-                value = ReferenceValue.fromJson(json);
-            } else {
-                throw new UnsupportedOperationException("Unsupported type: " + type + ", json: " + json);
-            }
-        } else {
+        if (Strings.isNullOrEmpty(json)) {
             value = null;
+        } else {
+            value = type.parseJsonValue(parser.parse(json));
         }
     }
 

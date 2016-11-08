@@ -14,6 +14,7 @@ import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityField;
@@ -74,11 +75,8 @@ public class SideColumnBuilder {
         } else if(type instanceof EnumType) {
             return new AttributeBuffer((EnumType) type);
 
-        } else if (type instanceof ReferenceType || type instanceof AttachmentType) {
-            return new JsonValueBuffer((ParametrizedFieldType) type);
-
         } else {
-            throw new IllegalArgumentException("type: " + type);
+            return new JsonValueBuffer(type);
         }
     }
 

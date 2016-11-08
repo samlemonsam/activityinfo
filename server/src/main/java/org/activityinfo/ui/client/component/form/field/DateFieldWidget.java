@@ -79,7 +79,8 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
         this.valueUpdater = valueUpdater;
         this.eventBus = eventBus;
         this.fieldId = fieldId;
-        this.dateBox = new DateBox(new DatePicker(), null, createFormat());
+        this.dateBox = new DateBox(new DatePicker(), null,
+                new DateBox.DefaultFormat(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)));
         this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
@@ -102,10 +103,6 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
     @Override
     public boolean isValid() {
         return true;
-    }
-
-    public static DateBox.Format createFormat() {
-        return new DateBox.DefaultFormat(DateTimeFormat.getFormat(FORMAT));
     }
 
     @Override

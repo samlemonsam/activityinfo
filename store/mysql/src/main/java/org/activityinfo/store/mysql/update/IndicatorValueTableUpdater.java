@@ -115,9 +115,8 @@ public class IndicatorValueTableUpdater {
     }
 
     private void executeJsonUpdate(QueryExecutor executor, IndicatorUpdate update) {
-        IsRecord record = (IsRecord) update.value;
         executor.update("REPLACE INTO indicatorvalue (reportingPeriodId, indicatorId, TextValue) VALUES (?, ?, ?)",
-                Arrays.asList(reportingPeriodId, update.indicatorId, Resources.toJson(record.asRecord())));
+                Arrays.asList(reportingPeriodId, update.indicatorId, update.value.toJsonElement().toString()));
     }
 
     private void executeQuantityUpdate(QueryExecutor executor, IndicatorUpdate update) {

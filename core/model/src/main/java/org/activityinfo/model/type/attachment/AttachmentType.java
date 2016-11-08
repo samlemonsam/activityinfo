@@ -120,6 +120,9 @@ public class AttachmentType implements ParametrizedFieldType {
 
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
+        if(value instanceof JsonObject) {
+            value = ((JsonObject) value).get("values");
+        }
         AttachmentValue fieldValue = new AttachmentValue();
         JsonArray array = (JsonArray) value;
         for (JsonElement attachmentItem : array) {
