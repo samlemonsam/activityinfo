@@ -7,6 +7,7 @@ import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
 
 import java.util.List;
@@ -94,16 +95,29 @@ public class QueryModel {
         return filter;
     }
 
+    @JsonProperty("filter")
+    public String getFilterAsString() {
+        if(filter == null) {
+            return null;
+        } else {
+            return filter.toString();
+        }
+    }
+
     @JsonSetter
     public void setFilter(String filterExpression) {
-        this.filter = ExprParser.parse(filterExpression);
+        if(filterExpression == null) {
+            this.filter = null;
+        } else {
+            this.filter = ExprParser.parse(filterExpression);
+        }
     }
 
     public void setFilter(ExprValue filter) {
         if(filter == null) {
             this.filter = null;
         } else {
-            this.filter = ExprParser.parse(filter.getExpression());
+            setFilter(filter.getExpression());
         }
     }
     

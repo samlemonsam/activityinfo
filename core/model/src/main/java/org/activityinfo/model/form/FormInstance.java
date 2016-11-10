@@ -25,6 +25,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.model.type.geo.GeoPoint;
@@ -196,6 +198,8 @@ public class FormInstance implements IsResource {
         Object value = propertyBag.get(fieldId.asString());
         if (value instanceof String && fieldType instanceof NarrativeType) {
             return NarrativeValue.valueOf((String) value);
+        } else if(value instanceof String && fieldType instanceof BarcodeType) {
+            return BarcodeValue.valueOf((String)value);
         }
         return get(fieldId);
     }

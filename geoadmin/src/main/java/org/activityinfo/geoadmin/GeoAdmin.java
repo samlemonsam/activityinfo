@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.geoadmin.model.Country;
 
@@ -30,6 +31,10 @@ import java.util.prefs.Preferences;
  *
  */
 public class GeoAdmin extends JFrame {
+
+    static {
+        LocaleProxy.initialize();
+    }
 
     private static final String OPEN_TABS = "open_tabs";
     private static final String ACTIVE_TAB = "active_tab";
@@ -161,7 +166,7 @@ public class GeoAdmin extends JFrame {
         if(args.length == 1) {
             endpoint = args[0];
         } else {
-            endpoint = "https://beta-api-dot-activityinfoeu.appspot.com/resources";
+            endpoint = "https://www.activityinfo.org/resources";
         }
 
         if(!tryLoadCredentialsFromHomeDir(endpoint)) {

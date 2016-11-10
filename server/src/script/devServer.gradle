@@ -68,6 +68,8 @@ task appengineDevMode(type: JavaExec) {
     classpath sourceSets.main.resources.srcDirs
     classpath project(":i18n").sourceSets.main.java.srcDirs
     classpath project(":i18n").sourceSets.main.resources.srcDirs
+    classpath project(":core:model").sourceSets.main.java.srcDirs
+    classpath project(":core:model").sourceSets.main.resources.srcDirs
 
     // Compiled java classes and libraries second
     classpath sourceSets.main.runtimeClasspath
