@@ -7,7 +7,7 @@
   <userdatabase DatabaseId="1470" FullName="Cost per service level for UNHCR Chad" Name="UNHCR LCCA Chad 2014" CountryId="291" OwnerUserId="9944" version="1415310640622"/>
   <partnerindatabase PartnerId="1734" DatabaseId="1470"/>
   <partner PartnerId="1734" FullName="The Survey Staff :-)" name="Survey Staff"/>
-  <activity ActivityId="11218" AllowEdit="false" Name="Chad Waterpoint data collection" ReportingFrequency="0" SortOrder="1" DatabaseId="1470" LocationTypeId="50573" published="0"/>
+  <activity ActivityId="11218" AllowEdit="false" Name="Chad Waterpoint data collection" ReportingFrequency="0" SortOrder="1" DatabaseId="1470" LocationTypeId="50573" published="0" classicView="0"/>
   <indicator IndicatorId="90811" Aggregation="0" dateDeleted="2014-11-06 15:42:57.0" name="I1. Scannez le code barre" SortOrder="7" ActivityId="11218" mandatory="false" Type="FREE_TEXT" nameInExpression="Barecode" calculatedAutomatically="false"/>
   <indicator IndicatorId="90836" Aggregation="0" name="D1. Num&#233;ro du point d&apos;eau" SortOrder="6" ActivityId="11218" mandatory="false" Type="FREE_TEXT" nameInExpression="Waterpoint number" calculatedAutomatically="false"/>
   <indicator IndicatorId="90837" Aggregation="0" name="D2. Num&#233;ro de l&apos;&#233;quipe d&apos;enqu&#234;teur" SortOrder="7" ActivityId="11218" mandatory="false" Type="FREE_TEXT" nameInExpression="Surveyor team number" calculatedAutomatically="false"/>
