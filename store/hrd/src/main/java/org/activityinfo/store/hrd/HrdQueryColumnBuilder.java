@@ -6,11 +6,13 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
@@ -21,6 +23,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     private FormClass formClass;
     private List<CursorObserver<ResourceId>> idObservers = Lists.newArrayList();
     private List<FieldObserver> fieldObservers = Lists.newArrayList();
+    private List<CursorObserver<FieldValue>> parentFieldObservers = null;
     private List<CursorObserver<?>> observers = Lists.newArrayList();
 
     HrdQueryColumnBuilder(FormClass formClass) {
@@ -43,17 +46,20 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
 
         FieldObserver fieldObserver;
         if(fieldId.equals(FormClass.PARENT_FIELD_ID)) {
-            fieldObserver = new FieldObserver(FormClass.PARENT_FIELD_ID.asString(),
-                    FieldConverters.forParentField(), observer);
+            if(parentFieldObservers == null) {
+                parentFieldObservers = new ArrayList<>();
+            }
+            parentFieldObservers.add(observer);
 
         } else {
 
             FormField field = formClass.getField(fieldId);
             FieldConverter converter = FieldConverters.forType(field.getType());
             fieldObserver = new FieldObserver(field.getName(), converter, observer);
+            fieldObservers.add(fieldObserver);
+
         }
 
-        fieldObservers.add(fieldObserver);
         observers.add(observer);
     }
 
@@ -72,6 +78,12 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
             }
             for (FieldObserver fieldObserver : fieldObservers) {
                 fieldObserver.onNext(entity.getFieldValues());
+            }
+            if(parentFieldObservers != null) {
+                ReferenceValue parent = new ReferenceValue(ResourceId.valueOf(entity.getParentRecordId()));
+                for (CursorObserver<FieldValue> parentFieldObserver : parentFieldObservers) {
+                    parentFieldObserver.onNext(parent);
+                }
             }
         }
         
