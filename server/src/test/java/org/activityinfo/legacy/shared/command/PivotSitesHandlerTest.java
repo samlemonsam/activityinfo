@@ -290,6 +290,18 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         assertThat().thereIsOneBucketWithValue(3600);
     }
 
+
+    @Test
+    public void testAdminJoin() {
+        withAdminDimension(new AdminDimension(1));
+        filter.addRestriction(DimensionType.Activity, asList(1, 2));
+
+        execute();
+
+    }
+
+
+
     @Test
     public void testPartnerPivot() {
 
@@ -501,9 +513,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
         assertThat().thereIsOneBucketWithValue(15100.8);
     }
-
-
-
 
 
     @Test

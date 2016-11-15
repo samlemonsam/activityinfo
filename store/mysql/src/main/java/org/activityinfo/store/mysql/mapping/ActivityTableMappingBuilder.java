@@ -119,8 +119,8 @@ public class ActivityTableMappingBuilder {
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
         mapping.baseTable = "reportingperiod";
-        mapping.baseFromClause = "reportingperiod base LEFT JOIN site on (site.siteId=base.siteId)";
-        mapping.baseFilter = "site.deleted=0 AND site.activityId=" + activity.getId();
+        mapping.baseFromClause = "reportingperiod base";
+        mapping.baseFilter = "base.deleted=0 AND base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.reportingPeriodFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
         mapping.formClass.setLabel(activity.getName() + " Monthly Reports");

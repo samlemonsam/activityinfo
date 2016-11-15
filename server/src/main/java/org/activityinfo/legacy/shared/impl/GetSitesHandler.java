@@ -522,7 +522,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
             }
 
             if (!command.isFetchAllReportingPeriods()) { // it does not make sense to filter monthly activity by site dates (filter by reporting period instead)
-                applyDateRangeFilter("site.Date1", filter.getEndDateRange(), query);
+                applyDateRangeFilter("site.Date1", filter.getStartDateRange(), query);
                 applyDateRangeFilter("site.Date2", filter.getEndDateRange(), query);
             }
         }

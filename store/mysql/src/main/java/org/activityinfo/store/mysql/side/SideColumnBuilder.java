@@ -102,15 +102,14 @@ public class SideColumnBuilder {
             // Reporting periods
             sql.append("SELECT rp.reportingPeriodId, iv.indicatorId, iv.value, iv.textValue").append(newLine);
             sql.append("FROM reportingperiod rp").append(newLine);
-            sql.append("LEFT JOIN site site ON (site.siteId = rp.siteId)").append(newLine);
             sql.append("LEFT JOIN indicatorvalue iv ON (rp.reportingPeriodId = iv.reportingPeriodId ");
             sql.append("  AND iv.indicatorId IN (");
             Joiner.on(", ").appendTo(sql, fieldMap.keySet());
             sql.append("))").append(newLine);
             if(siteId.isPresent()) {
-                sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
+                sql.append("WHERE rp.SiteId=").append(siteId.get()).append(newLine);
             } else {
-                sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
+                sql.append("WHERE rp.deleted=0 AND rp.activityId=").append(activityId).append(newLine);
             }
             sql.append("ORDER BY rp.reportingPeriodId");
         }

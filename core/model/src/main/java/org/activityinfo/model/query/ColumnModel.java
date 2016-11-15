@@ -7,7 +7,9 @@ import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
 
 /**
@@ -47,6 +49,15 @@ public class ColumnModel implements IsRecord {
 
     public ExprNode getExpression() {
         return expression;
+    }
+
+    @JsonProperty("expression")
+    public String getExpressionAsString() {
+        if(expression == null) {
+            return null;
+        } else {
+            return expression.toString();
+        }
     }
 
     public ColumnModel setExpression(ExprNode expression) {

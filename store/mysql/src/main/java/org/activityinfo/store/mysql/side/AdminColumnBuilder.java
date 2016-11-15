@@ -48,10 +48,9 @@ public class AdminColumnBuilder {
     public void execute(QueryExecutor executor) throws SQLException {
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT location.locationid, link.adminEntityId, e.adminLevelId").append(NEW_LINE);
+        sql.append("SELECT location.locationid, link.adminEntityId, link.adminLevelId").append(NEW_LINE);
         sql.append("FROM location").append(NEW_LINE);
         sql.append("LEFT JOIN locationadminlink link ON (location.locationid = link.locationId)").append(NEW_LINE);
-        sql.append("LEFT JOIN adminentity e ON (link.adminEntityId=e.adminEntityId)").append(NEW_LINE);
         sql.append("WHERE location.locationTypeId=").append(locationTypeId).append(NEW_LINE);
         sql.append("ORDER BY location.locationId");
 
@@ -76,9 +75,6 @@ public class AdminColumnBuilder {
                     int levelIndex = Arrays.binarySearch(adminLevels, levelId);
                     if(levelIndex >= 0) {
                         adminEntity[levelIndex] = entityId;
-                    } else {
-//                        throw new RuntimeException(String.format("AdminEntity %d has invalid adminLevelId %d." +
-//                                "Expected range: %s", entityId, levelId, Arrays.toString(adminLevels)));
                     }
                 }
             }
@@ -103,7 +99,7 @@ public class AdminColumnBuilder {
                 int parentIndex = adminParentMap[i];
                 if(parentIndex != -1) {
                     // remove the parent from the result -- it is redundant information
-                    adminEntity[i] = 0;
+                    adminEntity[parentIndex] = 0;
                 }
             }
         }

@@ -60,7 +60,6 @@ task appengineExplodeDevMode(type: Copy) {
 task appengineDevMode(type: JavaExec) {
     dependsOn appengineDownloadSdk
     dependsOn appengineExplodeDevMode
-    dependsOn compileJava
 
     main = 'com.google.gwt.dev.DevMode'
     
@@ -71,12 +70,14 @@ task appengineDevMode(type: JavaExec) {
     classpath project(":i18n").sourceSets.main.resources.srcDirs
     classpath project(":apiClient:gwt").sourceSets.main.java.srcDirs
     classpath project(":apiClient:gwt").sourceSets.generated.java.srcDirs
+    classpath project(":core:model").sourceSets.main.java.srcDirs
+    classpath project(":core:model").sourceSets.main.resources.srcDirs
 
     // Compiled java classes and libraries second
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.gwt
     classpath configurations.gwtSdk
-    
+
 
     args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
     args '-war', "${buildDir}/explodedDevMode"

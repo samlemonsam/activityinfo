@@ -36,6 +36,10 @@ public class GeoAdmin extends JFrame {
         LocaleProxy.initialize();
     }
 
+    static {
+        LocaleProxy.initialize();
+    }
+
     private static final String OPEN_TABS = "open_tabs";
     private static final String ACTIVE_TAB = "active_tab";
 
@@ -166,7 +170,7 @@ public class GeoAdmin extends JFrame {
         if(args.length == 1) {
             endpoint = args[0];
         } else {
-            endpoint = "https://beta-api-dot-activityinfoeu.appspot.com/resources";
+            endpoint = "https://www.activityinfo.org/resources";
         }
 
         if(!tryLoadCredentialsFromHomeDir(endpoint)) {

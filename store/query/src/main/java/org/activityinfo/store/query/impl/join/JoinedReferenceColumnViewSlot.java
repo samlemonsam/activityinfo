@@ -46,13 +46,13 @@ public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
         // in the LEFT table, mapping[i] gives us the corresponding
         // row in the RIGHT table.
 
-        int left[] = links.get(0).buildMapping();
+        int left[] = links.get(0).copyOfMapping();
 
 
         // If we have intermediate tables, we have to follow the links...
 
         for(int j=1;j<links.size();++j) {
-            int right[] = links.get(j).buildMapping();
+            int right[] = links.get(j).mapping();
             for(int i=0;i!=left.length;++i) {
                 if(left[i] != -1) {
                     left[i] = right[left[i]];
@@ -111,5 +111,24 @@ public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
             }
         }
         return new BooleanColumnView(array);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JoinedReferenceColumnViewSlot that = (JoinedReferenceColumnViewSlot) o;
+
+        if (!links.equals(that.links)) return false;
+        return nestedColumn.equals(that.nestedColumn);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = links.hashCode();
+        result = 31 * result + nestedColumn.hashCode();
+        return result;
     }
 }

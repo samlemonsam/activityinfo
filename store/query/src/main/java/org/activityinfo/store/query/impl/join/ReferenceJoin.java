@@ -3,19 +3,26 @@ package org.activityinfo.store.query.impl.join;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.impl.Slot;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Holds the foreignKey / primaryKeyMap columns required
  * to evaluate a join between a LEFT and a RIGHT table via a Reference field.
  */
 public class ReferenceJoin {
+
     private Slot<ForeignKeyMap> foreignKey;
     private Slot<PrimaryKeyMap> primaryKeyMap;
+    private String debugName;
 
-    public ReferenceJoin(Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap) {
+    private int mapping[] = null;
+
+    public ReferenceJoin(Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap, String debugName) {
         this.foreignKey = foreignKey;
         this.primaryKeyMap = primaryKeyMap;
+        this.debugName = debugName;
     }
 
     /**
@@ -48,15 +55,29 @@ public class ReferenceJoin {
      * @return builds an array which maps each row in the left table
      * to the corresponding row in the right table.
      */
-    public int[] buildMapping() {
-        ForeignKeyMap fk = foreignKey.get();
-        PrimaryKeyMap pk = primaryKeyMap.get();
+    public int[] mapping() {
 
-        int mapping[] = new int[fk.getNumRows()];
-        for(int i=0;i!=mapping.length;++i) {
-            Collection<ResourceId> foreignKeys = fk.getKeys(i);
-            mapping[i] = pk.getUniqueRowIndex(foreignKeys);
+        if(mapping == null) {
+            ForeignKeyMap fk = foreignKey.get();
+            PrimaryKeyMap pk = primaryKeyMap.get();
+
+            mapping = new int[fk.getNumRows()];
+            for (int i = 0; i != mapping.length; ++i) {
+                Collection<ResourceId> foreignKeys = fk.getKeys(i);
+                mapping[i] = pk.getUniqueRowIndex(foreignKeys);
+            }
         }
-        return mapping;
+
+        return Arrays.copyOf(mapping, mapping.length);
+    }
+
+    public int[] copyOfMapping() {
+        int[] mapping = mapping();
+        return Arrays.copyOf(mapping, mapping.length);
+    }
+
+    @Override
+    public String toString() {
+        return debugName;
     }
 }
