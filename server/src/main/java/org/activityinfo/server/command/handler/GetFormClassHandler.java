@@ -53,7 +53,7 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
     }
 
     private String readJson(Activity activity, ActivityFormDTO activityDTO) {
-        if (activity.getGzFormClass() != null) {
+        if (!activity.isClassicView() && activity.getGzFormClass() != null) {
             try (Reader reader = new InputStreamReader(
                     new GZIPInputStream(
                             new ByteArrayInputStream(activity.getGzFormClass())), Charsets.UTF_8)) {
@@ -64,7 +64,7 @@ public class GetFormClassHandler implements CommandHandler<GetFormClass> {
                 throw new UnexpectedCommandException(e);
             }
 
-        } else if (activity.getFormClass() != null) {
+        } else if (!activity.isClassicView() && activity.getFormClass() != null) {
             return activity.getFormClass();
 
         } else {
