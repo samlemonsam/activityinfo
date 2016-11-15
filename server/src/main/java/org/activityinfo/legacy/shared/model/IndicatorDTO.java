@@ -367,6 +367,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         field.setLabel(getName());
         field.setDescription(getDescription());
         field.setRelevanceConditionExpression(getRelevanceExpression());
+        field.setRequired(isMandatory());
 
         String code = getNameInExpression();
         if(!Strings.isNullOrEmpty(code)) {
