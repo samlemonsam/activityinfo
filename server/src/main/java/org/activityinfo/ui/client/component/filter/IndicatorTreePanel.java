@@ -269,11 +269,6 @@ public class IndicatorTreePanel extends ContentPanel {
             } else if (parent instanceof IndicatorGroup) {
 
                 callback.onSuccess(createIndicatorList((IndicatorGroup) parent));
-            
-            } else if (parent instanceof SubFormModel) {
-                
-                loadFields(((SubFormModel) parent).getSubFormId()).then(callback);    
-         
             }
         }
     }
@@ -331,11 +326,6 @@ public class IndicatorTreePanel extends ContentPanel {
                         indicator.setId(CuidAdapter.getLegacyIdFromCuid(formField.getId()));
                         indicator.setName(formField.getLabel());
                         children.add(indicator);
-                    } else if(formField.getType() instanceof SubFormReferenceType) {
-                        SubFormModel subFormModel = new SubFormModel();
-                        subFormModel.setName(formField.getLabel());
-                        subFormModel.setSubFormId(((SubFormReferenceType) formField.getType()).getClassId());
-                        children.add(subFormModel);
                     }
                 }
                 return children;
