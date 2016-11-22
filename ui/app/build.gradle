@@ -3,7 +3,17 @@ apply plugin: 'gwt'
 
 gwt {
     gwtVersion = project.gwtVersion
-    modules 'org.activityinfo.ui.App'
+    modules 'com.sencha.gxt.edash.Edash'
+    maxHeapSize "5g"
+}
+
+repositories {
+    maven { url 'https://maven.sencha.com/repo/gxt-gpl-release/' }
+}
+
+task explodedWar(type: Copy) {
+    from 'src/main/webapp'
+    into "$buildDir/exploded"
 }
 
 dependencies {
@@ -11,14 +21,54 @@ dependencies {
     compile libraries.gwt.i18nServer
     gwt libraries.gwt.user
     gwt libraries.gwt.guava
+    gwt libraries.gwt.guice
     gwt project(':ui:style')
     gwt project(':ui:icons')
     gwt project(':i18n')
+    gwt group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
+    gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
+    gwt group: 'com.sencha.gxt', name: 'gxt-theme-edash', version: '4.0.0'
+
+
 }
 
 idea {
     module {
         scopes.PROVIDED.plus += [ configurations.gwt ]
     }
+}
+
+
+task simpleDevMode(type: JavaExec) {
+    dependsOn explodedWar
+
+    main = 'com.google.gwt.dev.DevMode'
+
+    // Java sources first, so that changes get picked up on refresh
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+//    args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
+    args '-war', "${buildDir}/exploded"
+    args '-startupUrl', 'login'
+    args 'com.sencha.gxt.edash.Edash'
+
+//    doFirst {
+//        // The SDK root is only available after appengineDownloadSdk runs
+//        def sdkRoot = System.getProperty('appengine.sdk.root')
+//        classpath "${sdkRoot}/lib/appengine-tools-api.jar"
+//        jvmArgs "-javaagent:${sdkRoot}/lib/agent/appengine-agent.jar"
+//
+//        // Write the application configuration pointing to the development database
+//        writeConfiguration mysql.localDev
+//        jvmArgs "-Dactivityinfo.config=${configFile}"
+//        jvmArgs "-Xdebug"
+//        jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
+//    }
 }
 
