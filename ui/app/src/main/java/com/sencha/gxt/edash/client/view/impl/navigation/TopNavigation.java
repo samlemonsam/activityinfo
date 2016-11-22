@@ -46,7 +46,7 @@ import com.sencha.gxt.core.client.Style.AnchorAlignment;
 import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.edash.client.place.CompanyNewsPlace;
 import com.sencha.gxt.edash.client.place.KpiOverviewPlace;
-import com.sencha.gxt.edash.client.place.PerformancePlace;
+import com.sencha.gxt.edash.client.place.TablePlace;
 import com.sencha.gxt.edash.client.place.ProfitAndLossPlace;
 import com.sencha.gxt.widget.core.client.button.IconButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
@@ -108,7 +108,7 @@ public class TopNavigation extends BaseNavigation {
       performance.addSelectionHandler(new SelectionHandler<Item>() {
         @Override
         public void onSelection(SelectionEvent<Item> event) {
-          placeController.goTo(new PerformancePlace());
+          placeController.goTo(new TablePlace());
         }
       });
       profitAndLoss.addSelectionHandler(new SelectionHandler<Item>() {

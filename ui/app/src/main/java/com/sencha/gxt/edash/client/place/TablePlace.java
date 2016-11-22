@@ -40,29 +40,29 @@ package com.sencha.gxt.edash.client.place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.place.shared.Prefix;
 
-public class PerformancePlace extends BasePlace {
+public class TablePlace extends BasePlace {
 
-  @Prefix("quarterly")
-  public static class Tokenizer implements PlaceTokenizer<PerformancePlace> {
+  @Prefix("table")
+  public static class Tokenizer implements PlaceTokenizer<TablePlace> {
 
     @Override
-    public PerformancePlace getPlace(String token) {
-      return new PerformancePlace(token);
+    public TablePlace getPlace(String token) {
+      return new TablePlace(token);
     }
 
     @Override
-    public String getToken(PerformancePlace place) {
+    public String getToken(TablePlace place) {
       return place.company;
     }
   }
 
   private String company;
 
-  public PerformancePlace() {
+  public TablePlace() {
     this("");
   }
 
-  public PerformancePlace(String company) {
+  public TablePlace(String company) {
     this.company = company;
   }
 
@@ -75,7 +75,7 @@ public class PerformancePlace extends BasePlace {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    PerformancePlace that = (PerformancePlace) o;
+    TablePlace that = (TablePlace) o;
 
     if (company != null ? !company.equals(that.company) : that.company != null) return false;
 

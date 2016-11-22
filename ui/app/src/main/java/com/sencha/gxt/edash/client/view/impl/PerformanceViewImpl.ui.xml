@@ -182,10 +182,6 @@
         </c:BorderLayoutContainer>
       </gxt:ContentPanel>
     </c:child>
-
-    <c:child layoutData="{vld}">
-      <impl:StatementsContainer ui:field="statementsContainer" />
-    </c:child>
   </c:VerticalLayoutContainer>
 
 </ui:UiBinder>

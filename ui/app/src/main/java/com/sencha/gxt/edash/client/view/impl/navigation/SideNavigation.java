@@ -59,7 +59,7 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.edash.client.place.CompanyNewsPlace;
 import com.sencha.gxt.edash.client.place.KpiOverviewPlace;
-import com.sencha.gxt.edash.client.place.PerformancePlace;
+import com.sencha.gxt.edash.client.place.TablePlace;
 import com.sencha.gxt.edash.client.place.ProfitAndLossPlace;
 import com.sencha.gxt.theme.base.client.listview.ListViewCustomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
@@ -144,7 +144,7 @@ public class SideNavigation extends BaseNavigation implements PlaceChangeEvent.H
       final ListStore<Navigation> store = new ListStore<Navigation>(keyProvider);
 
       store.add(new Navigation("Kpi Overview", new KpiOverviewPlace(), resources.style().kpiIcon()));
-      store.add(new Navigation("Performance", new PerformancePlace(), resources.style().performanceIcon()));
+      store.add(new Navigation("Performance", new TablePlace(), resources.style().performanceIcon()));
       store.add(new Navigation("Profit & Loss", new ProfitAndLossPlace(), resources.style().profitLossIcon()));
       store.add(new Navigation("Company News", new CompanyNewsPlace(), resources.style().newsIcon()));
 

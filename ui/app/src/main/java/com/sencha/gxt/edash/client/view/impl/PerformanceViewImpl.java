@@ -66,7 +66,7 @@ import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.data.shared.event.StoreFilterEvent;
 import com.sencha.gxt.data.shared.event.StoreFilterEvent.StoreFilterHandler;
 import com.sencha.gxt.edash.client.LoggingAsyncCallback;
-import com.sencha.gxt.edash.client.place.PerformancePlace;
+import com.sencha.gxt.edash.client.place.TablePlace;
 import com.sencha.gxt.edash.client.view.PerformanceView;
 import com.sencha.gxt.edash.client.widget.chart.CandleStickSeries;
 import com.sencha.gxt.edash.shared.model.CompanyStats;
@@ -119,8 +119,6 @@ public class PerformanceViewImpl implements PerformanceView {
   Label maxminLabel;
   @UiField
   Label volumeLabel;
-  @UiField
-  StatementsContainer statementsContainer;
 
   private Widget widget;
 
@@ -180,7 +178,7 @@ public class PerformanceViewImpl implements PerformanceView {
   public void setCompany(String company) {
     if (company == null || "".equals(company)) {
       if (!uniqueCompanies.isEmpty()) {
-        placeController.goTo(new PerformancePlace(uniqueCompanies.iterator().next()));
+        placeController.goTo(new TablePlace(uniqueCompanies.iterator().next()));
         return;
       }
     }
@@ -293,13 +291,12 @@ public class PerformanceViewImpl implements PerformanceView {
     }
     companyButton.setText(goTo);
     updateCheckBoxes();
-    placeController.goTo(new PerformancePlace(goTo));
+    placeController.goTo(new TablePlace(goTo));
   }
 
 
   @Override
   public void setStatements(List<ReportDownload> reportDownloads) {
-    statementsContainer.setReportDownloads(reportDownloads);
   }
 
   private Set<String> getUniqueCompanies(List<Performance> performanceList) {
@@ -327,7 +324,7 @@ public class PerformanceViewImpl implements PerformanceView {
           }
           item.setChecked(true);
           companyButton.setText(companyName);
-          placeController.goTo(new PerformancePlace(companyName));
+          placeController.goTo(new TablePlace(companyName));
         }
       });
       companyMenu.add(item);

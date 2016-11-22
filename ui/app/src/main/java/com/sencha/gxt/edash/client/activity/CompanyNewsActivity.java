@@ -42,7 +42,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sencha.gxt.edash.client.place.CompanyNewsPlace;
-import com.sencha.gxt.edash.client.place.PerformancePlace;
 import com.sencha.gxt.edash.client.view.CompanyNewsView;
 import com.sencha.gxt.edash.shared.EdashServiceAsync;
 import com.sencha.gxt.edash.shared.model.News;

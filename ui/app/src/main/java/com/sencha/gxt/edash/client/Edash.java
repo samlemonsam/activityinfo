@@ -44,8 +44,10 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.edash.client.ioc.EdashGuiGinjector;
+import com.sencha.gxt.edash.client.login.LoginPanel;
 
 public class Edash implements EntryPoint {
 
@@ -62,10 +64,14 @@ public class Edash implements EntryPoint {
 
       @Override
       public void onSuccess() {
+//
+//        EdashGuiGinjector ginjector = GWT.create(EdashGuiGinjector.class);
+//        ginjector.applicationController().start(RootPanel.get());
 
-        EdashGuiGinjector ginjector = GWT.create(EdashGuiGinjector.class);
-        ginjector.applicationController().start(RootPanel.get());
 
+        LoginPanel panel = new LoginPanel();
+
+        RootLayoutPanel.get().add(panel);
       }
     });
   }

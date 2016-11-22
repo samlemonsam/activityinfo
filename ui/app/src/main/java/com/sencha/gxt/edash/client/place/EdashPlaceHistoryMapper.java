@@ -43,7 +43,7 @@ import com.google.gwt.place.shared.WithTokenizers;
 
 @WithTokenizers({
     KpiOverviewPlace.Tokenizer.class,
-    PerformancePlace.Tokenizer.class,
+    TablePlace.Tokenizer.class,
     ProfitAndLossPlace.Tokenizer.class,
     CompanyNewsPlace.Tokenizer.class
 })

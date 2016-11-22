@@ -81,7 +81,7 @@ public class EdashActivityMapper implements ActivityMapper {
     if (place instanceof KpiOverviewPlace) {
       activity = kpiOverviewActivityProvider.get();
     }
-    if (place instanceof PerformancePlace) {
+    if (place instanceof TablePlace) {
       activity = performanceActivityProvider.get();
     }
     if (place instanceof ProfitAndLossPlace) {

@@ -42,7 +42,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sencha.gxt.edash.client.LoggingAsyncCallback;
-import com.sencha.gxt.edash.client.place.PerformancePlace;
+import com.sencha.gxt.edash.client.place.TablePlace;
 import com.sencha.gxt.edash.client.view.PerformanceView;
 import com.sencha.gxt.edash.shared.EdashServiceAsync;
 import com.sencha.gxt.edash.shared.model.CompanyStats;
@@ -52,7 +52,7 @@ import com.sencha.gxt.edash.shared.model.ReportDownload;
 import javax.inject.Inject;
 import java.util.List;
 
-public class PerformanceActivity extends BaseActivity<PerformancePlace> implements PerformanceView.Delegate {
+public class PerformanceActivity extends BaseActivity<TablePlace> implements PerformanceView.Delegate {
 
   @Inject
   private PerformanceView view;
@@ -87,7 +87,7 @@ public class PerformanceActivity extends BaseActivity<PerformancePlace> implemen
   }
 
   @Override
-  public void setPlace(PerformancePlace place) {
+  public void setPlace(TablePlace place) {
     super.setPlace(place);
     if (place.getCompany() == null || "".equals(place.getCompany())) {
       return;
