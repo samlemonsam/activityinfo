@@ -11,10 +11,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class EnumType implements ParametrizedFieldType {
 
@@ -85,6 +82,13 @@ public class EnumType implements ParametrizedFieldType {
         this.cardinality = cardinality;
         this.values = values != null ? values : new ArrayList<EnumItem>();
     }
+
+
+    public EnumType(Cardinality cardinality, EnumItem... values) {
+        this.cardinality = cardinality;
+        this.values = Arrays.asList(values);
+    }
+
 
     public Cardinality getCardinality() {
         return cardinality;

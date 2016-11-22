@@ -1,0 +1,15 @@
+﻿"DatabaseId","DatabaseName","FormId","FormName","SubForm","SubFormType","FieldId","FieldCode","FieldType","FieldName","FieldDescription","Units","Expression","References","Choice Id","Choice Label"
+1,"Survey DB","FORM1",,,,F1,"NAME","FREE_TEXT","What is your name?","The head of household's name",,,,,
+1,"Survey DB","FORM1",,,,F2,"AGE","QUANTITY","What is your age?",,"years",,,,
+1,"Survey DB","FORM1",,,,F3,"GENDER","Single Select","Gender of head of household",,,,,GF,"Female"
+1,"Survey DB","FORM1",,,,F3,"GENDER","Single Select","Gender of head of household",,,,,GM,"Male"
+1,"Survey DB","FORM1",,,,F4,,"Single Select",,,,,,PY,"Yes"
+1,"Survey DB","FORM1",,,,F4,,"Single Select",,,,,,PN,"No"
+1,"Survey DB","FORM1",,,,F5,,"NARRATIVE","Remarks",,,,,,
+1,"Survey DB","FORM1",,"Household members","repeating",F21,,"FREE_TEXT","Name",,,,,,
+1,"Survey DB","FORM1",,"Household members","repeating",F22,,"QUANTITY","Age",,"years",,,,
+1,"Survey DB","FORM1",,"Household members","repeating",F23,,"Single Select","Gender",,,,,GF,"Female"
+1,"Survey DB","FORM1",,"Household members","repeating",F23,,"Single Select","Gender",,,,,GM,"Male"
+1,"Survey DB","FORM1",,"Household members","repeating",F24,,"Multiple Select","Vaccinations",,,,,V1,"Measles"
+1,"Survey DB","FORM1",,"Household members","repeating",F24,,"Multiple Select","Vaccinations",,,,,V2,"Mumps"
+1,"Survey DB","FORM1",,"Household members","repeating",F24,,"Multiple Select","Vaccinations",,,,,V3,"Rubella"

@@ -68,8 +68,11 @@ public class DatabaseResource {
     @GET
     @Path("schema-v3.csv")
     public Response getDatabaseSchemaV3() {
-        SchemaCsvWriterV3 writer = new SchemaCsvWriterV3(dispatcher, catalog.get());
-        writer.write(databaseId);
+
+        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
+
+        SchemaCsvWriterV3 writer = new SchemaCsvWriterV3(catalog.get());
+        writer.writeForms(db);
 
         return writeCsv("schema-v3_" + databaseId + ".csv", writer.toString());
     }

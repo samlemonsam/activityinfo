@@ -88,8 +88,9 @@ public class FormField extends FormElement implements Serializable {
         return relevanceConditionExpression;
     }
 
-    public void setRelevanceConditionExpression(String relevanceConditionExpression) {
+    public FormField setRelevanceConditionExpression(String relevanceConditionExpression) {
         this.relevanceConditionExpression = relevanceConditionExpression;
+        return this;
     }
 
     /**

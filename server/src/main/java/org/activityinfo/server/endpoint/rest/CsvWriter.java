@@ -2,19 +2,21 @@ package org.activityinfo.server.endpoint.rest;
 
 
 public class CsvWriter {
-    
+
+    /**
+     * Writes a byte order mark that should help spreadsheet software detect the UTF-8 character set.
+     */
+    public static final char BYTEORDER_MARK = '\ufeff';
+
     private StringBuilder csv;
 
     public CsvWriter() {
         this.csv = new StringBuilder();
-        writeByteOrderMark();
+        csv.append(BYTEORDER_MARK);
     }
     
-    /**
-     * Writes a byte order mark that should help spreadsheet software detect the UTF-8 character set.
-     */
     private void writeByteOrderMark() {
-        csv.append('\ufeff');
+        csv.append(BYTEORDER_MARK);
     }
 
     public void writeLine(Object... columns) {

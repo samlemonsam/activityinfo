@@ -1,13 +1,14 @@
 package org.activityinfo.server.endpoint.rest;
 
 
-import org.activityinfo.legacy.shared.command.GetSchema;
+import com.google.common.annotations.VisibleForTesting;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
+import org.activityinfo.model.formTree.BatchFormClassProvider;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -17,8 +18,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.service.store.FormCatalog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -207,30 +206,30 @@ public class SchemaCsvWriterV3 {
         public abstract Object value(FieldContext context, FormField field, EnumItem enumItem);
     }
 
-    
-    
-    private final CsvWriter csv = new CsvWriter();
-    private final DispatcherSync dispatcher;
-    private FormCatalog catalog;
 
-    public SchemaCsvWriterV3(DispatcherSync dispatcher, FormCatalog catalog) {
-        this.dispatcher = dispatcher;
+
+    private final CsvWriter csv = new CsvWriter();
+    private BatchFormClassProvider catalog;
+
+    public SchemaCsvWriterV3(BatchFormClassProvider catalog) {
         this.catalog = catalog;
     }
-    public void write(int databaseId) {
 
-        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
-
-        writeHeaders();
-
+    public void writeForms(UserDatabaseDTO db) {
         List<ResourceId> formIds = new ArrayList<>();
-        
+
         for (ActivityDTO activity : db.getActivities()) {
             if(activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
                 formIds.add(CuidAdapter.activityFormClass(activity.getId()));
             }
         }
 
+        writeForms(db, formIds);
+    }
+
+    @VisibleForTesting
+    void writeForms(UserDatabaseDTO db, List<ResourceId> formIds) {
+        writeHeaders();
         Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(formIds);
         for (ResourceId formId : formIds) {
             FormClass formClass = formClasses.get(formId);
@@ -276,7 +275,7 @@ public class SchemaCsvWriterV3 {
 
         for (FormField subField : subFormClass.getFields()) {
             if (subField.getType() instanceof EnumType) {
-                writeEnumItems(subFormContext, subField, ((EnumType) field.getType()).getValues());
+                writeEnumItems(subFormContext, subField, ((EnumType) subField.getType()).getValues());
             } else {
                 writeField(subFormContext, subField);
             }
