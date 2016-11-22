@@ -23,12 +23,14 @@ public class DatabaseTargetForm implements Serializable {
 
     private int databaseId;
     private String databaseName;
+    private long schemaVersion;
     private List<FormField> indicatorFields = Lists.newArrayList();
     private Map<Integer, FormField> fieldMap = Maps.newHashMap();
     
-    public DatabaseTargetForm(int databaseId, String databaseName) {
+    public DatabaseTargetForm(int databaseId, String databaseName, long schemaVersion) {
         this.databaseId = databaseId;
         this.databaseName = databaseName;
+        this.schemaVersion = schemaVersion;
     }
 
     public void addIndicator(int id, String name, String units) {
@@ -69,6 +71,7 @@ public class DatabaseTargetForm implements Serializable {
         mapping.setBaseFilter("databaseId = " + databaseId);
         mapping.setDatabaseId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.TARGET_INSTANCE_DOMAIN, "TargetId");
+        mapping.setSchemaVersion(schemaVersion);
         
         FormField nameField = new FormField(CuidAdapter.field(classId, CuidAdapter.NAME_FIELD));
         nameField.setCode("name");

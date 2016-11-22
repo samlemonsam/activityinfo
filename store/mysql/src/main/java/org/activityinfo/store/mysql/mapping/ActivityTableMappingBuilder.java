@@ -50,7 +50,7 @@ public class ActivityTableMappingBuilder {
         if(activity.getSerializedFormClass() != null) {
             return newForm(activity);
         }
-        
+
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
         mapping.baseTable = "site";
@@ -58,6 +58,7 @@ public class ActivityTableMappingBuilder {
         mapping.baseFilter = "base.deleted=0     AND base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
+        mapping.formClass.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
         mapping.formClass.setLabel(activity.getName());
         mapping.formClass.setDatabaseId(activity.getDatabaseId());
         mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.SITE_DOMAIN, "siteId");

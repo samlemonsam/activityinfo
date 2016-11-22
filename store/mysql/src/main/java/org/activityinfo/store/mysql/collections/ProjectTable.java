@@ -41,6 +41,7 @@ public class ProjectTable implements SimpleTable {
         mapping.setBaseFilter("dateDeleted IS NULL AND databaseId=" + databaseId);
         mapping.setDeleteMethod(DeleteMethod.SOFT_BY_DATE);
         mapping.setVersion(databaseVersionMap.getSchemaVersion(databaseId));
+        mapping.setSchemaVersion(1L); // Schema is static
         
         FormField nameField = new FormField(field(formId, NAME_FIELD))
                 .setRequired(true)

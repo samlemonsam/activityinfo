@@ -155,6 +155,10 @@ public class TableMappingBuilder {
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod);
     }
 
+    public void setSchemaVersion(long schemaVersion) {
+        formClass.setSchemaVersion(schemaVersion);
+    }
+
     public void setVersion(long version) {
         this.version = version;
     }

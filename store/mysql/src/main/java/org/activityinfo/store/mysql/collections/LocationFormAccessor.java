@@ -120,6 +120,10 @@ public class LocationFormAccessor implements FormAccessor {
         mapping.addUnmappedField(adminField);
         mapping.addGeoPoint(pointField);
 
+        // TODO: The schema of a location type can actually change if we add additional
+        // admin levels to a country.
+        mapping.setSchemaVersion(1L);
+
 //        if(BETA.ENABLE_BOOLEAN_FIELDS) {
 //            mapping.add(new FieldMapping(visible, "workflowStatusId", new FieldValueConverter() {
 //                @Override

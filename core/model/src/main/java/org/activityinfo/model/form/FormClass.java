@@ -46,6 +46,8 @@ public class FormClass implements FormElementContainer, Serializable {
     private ResourceId parentFormId = null;
     private SubFormKind subFormKind = null;
 
+    private long schemaVersion;
+
     public FormClass(ResourceId id) {
         Preconditions.checkNotNull(id);
         this.id = id;
@@ -142,6 +144,17 @@ public class FormClass implements FormElementContainer, Serializable {
     public FormClass setLabel(String label) {
         this.label = label;
         return this;
+    }
+
+    /**
+     * @return the version of this form schema
+     */
+    public long getSchemaVersion() {
+        return schemaVersion;
+    }
+
+    public void setSchemaVersion(long schemaVersion) {
+        this.schemaVersion = schemaVersion;
     }
 
     public String getDescription() {
@@ -305,6 +318,7 @@ public class FormClass implements FormElementContainer, Serializable {
     public JsonObject toJsonObject() {
         JsonObject object = new JsonObject();
         object.addProperty("id", id.asString());
+        object.addProperty("schemaVersion", schemaVersion);
         
         if(databaseId != null) {
             object.addProperty("databaseId", databaseId.asString());
@@ -347,7 +361,11 @@ public class FormClass implements FormElementContainer, Serializable {
         }
         
         FormClass formClass = new FormClass(id);
-        
+
+        if(object.has("schemaVersion")) {
+            formClass.setSchemaVersion(object.get("schemaVersion").getAsLong());
+        }
+
         if(object.has("databaseId")) {
             formClass.setDatabaseId(ResourceId.valueOf(object.get("databaseId").getAsString()));
         }
