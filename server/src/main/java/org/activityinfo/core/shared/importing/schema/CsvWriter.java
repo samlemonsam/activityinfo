@@ -1,4 +1,4 @@
-package org.activityinfo.server.endpoint.rest;
+package org.activityinfo.core.shared.importing.schema;
 
 
 public class CsvWriter {

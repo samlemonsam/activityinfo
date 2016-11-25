@@ -198,13 +198,19 @@ public class MySqlCatalog implements FormCatalog {
         if(formClass.getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Only update of activity's schemas is currently supported
             Optional<FormAccessor> collection = getForm(formClass.getId());
-            if(!collection.isPresent()) {
-                throw new UnsupportedOperationException("Activity " + formClass.getId() + " does not exist.");
+            if(collection.isPresent()) {
+                collection.get().updateFormClass(formClass);
+            } else {
+                createFormSchema(formClass);
             }
-            collection.get().updateFormClass(formClass);
         } else {
             HrdCatalog catalog = new HrdCatalog();
             catalog.create(formClass);
         }
+    }
+
+    private void createFormSchema(FormClass formClass) {
+
+
     }
 }

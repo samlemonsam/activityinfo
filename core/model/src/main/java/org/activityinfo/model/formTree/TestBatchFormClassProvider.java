@@ -5,6 +5,7 @@ import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TestBatchFormClassProvider implements BatchFormClassProvider {
@@ -34,5 +35,11 @@ public class TestBatchFormClassProvider implements BatchFormClassProvider {
 
     public void add(FormClass formClass) {
         map.put(formClass.getId(), formClass);
+    }
+
+    public void addAll(List<FormClass> formClasses) {
+        for (FormClass formClass : formClasses) {
+            add(formClass);
+        }
     }
 }

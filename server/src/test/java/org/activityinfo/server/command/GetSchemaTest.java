@@ -33,7 +33,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
+import org.activityinfo.core.shared.importing.schema.SchemaCsvWriter;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;

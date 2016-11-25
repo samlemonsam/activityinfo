@@ -1,0 +1,15 @@
+﻿"DatabaseId","DatabaseName","FormVersion","FormId","FormName","SubForm","SubFormType","FieldId","FieldCode","FieldType","FieldName","FieldDescription","Required","Units","Expression","References","Choice Id","Choice Label"
+1,"Survey DB","3.0","FORM1","Household Survey",,,F1,"NAME","FREE_TEXT","What is your name?","The head of household's name",true,,,,,
+1,"Survey DB","3.0","FORM1","Household Survey",,,F2,"AGE","QUANTITY","What is your age?",,true,"years",,,,
+1,"Survey DB","3.0","FORM1","Household Survey",,,F3,"GENDER","Single Select","Gender of head of household",,true,,,,GF,"Female"
+1,"Survey DB","3.0","FORM1","Household Survey",,,F3,"GENDER","Single Select","Gender of head of household",,true,,,,GM,"Male"
+1,"Survey DB","3.0","FORM1","Household Survey",,,F4,,"Single Select","Are you currently pregnant?",,true,,,,PY,"Yes"
+1,"Survey DB","3.0","FORM1","Household Survey",,,F4,,"Single Select","Are you currently pregnant?",,true,,,,PN,"No"
+1,"Survey DB","3.0","FORM1","Household Survey",,,F5,,"NARRATIVE","Remarks",,false,,,,,
+1,"Survey DB","3.0","FORM1","Household Survey","Household members","repeating",F21,,"FREE_TEXT","Name",,true,,,,,
+1,"Survey DB","3.0","FORM1","Household Survey","Household members","repeating",F22,,"QUANTITY","Age",,true,"years",,,,
+1,"Survey DB","3.0","FORM1","Household Survey","Household members","repeating",F23,,"Single Select","Gender",,true,,,,GF,"Female"
+1,"Survey DB","3.0","FORM1","Household Survey","Household members","repeating",F23,,"Single Select","Gender",,true,,,,GM,"Male"
+1,"Survey DB","3.0","FORM1","Household Survey","Household members","repeating",F24,,"Multiple Select","Vaccinations",,false,,,,V1,"Measles"
+1,"Survey DB","3.0","FORM1","Household Survey","Household members","repeating",F24,,"Multiple Select","Vaccinations",,false,,,,V2,"Mumps"
+1,"Survey DB","3.0","FORM1","Household Survey","Household members","repeating",F24,,"Multiple Select","Vaccinations",,false,,,,V3,"Rubella"

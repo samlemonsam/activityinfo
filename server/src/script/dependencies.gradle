@@ -10,7 +10,7 @@ dependencies {
     compile project(':io:xform')
     compile project(':io:match')
     compile project(':io:xlsform')
-    
+
     compile project(':store:mysql')
     compile project(':store:hrd')
 

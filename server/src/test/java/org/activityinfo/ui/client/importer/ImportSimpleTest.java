@@ -24,7 +24,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

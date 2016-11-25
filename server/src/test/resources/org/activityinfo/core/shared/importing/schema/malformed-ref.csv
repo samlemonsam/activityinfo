@@ -1,0 +1,8 @@
+DatabaseId	DatabaseName	FormVersion	FormId	FormName	SubForm	SubFormType	FieldId	FieldCode	FieldType	FieldName	FieldDescription	Required	Units	Expression	References	Choice Id	Choice Label
+6140	00Subforms	3	a0000079648	Imported1			a00000796480000000012	date1	LOCAL_DATE	Start Date		true
+6140	00Subforms	3	a0000079648	Imported1			a00000796480000000013	date2	LOCAL_DATE	End Date		true
+6140	00Subforms	3	a0000079648	Imported1			a00000796480000000007	partner	REFERENCE	Partner		true
+6140	00Subforms	3	a0000079648	Imported1			a00000796480000000008	project	REFERENCE	Project		false
+6140	00Subforms	3	a0000079648	Imported1	Repeating Sub-Form	repeating	i0534318861		FREE_TEXT	Name		false
+6140	00Subforms	3	a0000079648	Imported1	Repeating Sub-Form	repeating	i0682721708		QUANTITY	Age		false	years
+6140	00Subforms	3	a0000079648	Imported1			a00000796480000000014	comments	NARRATIVE	Comments		false

@@ -7,6 +7,7 @@ import com.google.common.io.Resources;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.TestOutput;
+import org.activityinfo.core.shared.importing.schema.SchemaImporterV2;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
@@ -17,8 +18,8 @@ import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
+import org.activityinfo.core.shared.importing.schema.SchemaCsvWriter;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.easymock.EasyMock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +35,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
-public class SchemaImporterTest extends CommandTestCase2 {
+public class SchemaImporterV2Test extends CommandTestCase2 {
 
 
     @Test
@@ -70,7 +71,7 @@ public class SchemaImporterTest extends CommandTestCase2 {
 
     @Test // AI-678 : Database import duplicates fields
     public void duplicatesTest() throws IOException {
-        SchemaImporter schemaImporter = new SchemaImporter(getDispatcher(), db(), warningTemplates());
+        SchemaImporterV2 schemaImporter = new SchemaImporterV2(getDispatcher(), db(), warningTemplates());
         schemaImporter.parseColumns(source("schema_ai_678.txt"));
         schemaImporter.processRows();
 
@@ -100,8 +101,8 @@ public class SchemaImporterTest extends CommandTestCase2 {
         return schema.getDatabaseById(1);
     }
 
-    private SchemaImporter.WarningTemplates warningTemplates() {
-        SchemaImporter.WarningTemplates templates = EasyMock.createNiceMock(SchemaImporter.WarningTemplates.class);
+    private SchemaImporterV2.WarningTemplates warningTemplates() {
+        SchemaImporterV2.WarningTemplates templates = EasyMock.createNiceMock(SchemaImporterV2.WarningTemplates.class);
         EasyMock.replay(templates);
         return templates;
     }
@@ -120,8 +121,8 @@ public class SchemaImporterTest extends CommandTestCase2 {
             throw new AssertionError("database not created");
         }
 
-        SchemaImporter importer = new SchemaImporter(getDispatcher(), db, warningTemplates());
-        importer.setProgressListener(new SchemaImporter.ProgressListener() {
+        SchemaImporterV2 importer = new SchemaImporterV2(getDispatcher(), db, warningTemplates());
+        importer.setProgressListener(new SchemaImporterV2.ProgressListener() {
 
             @Override
             public void submittingBatch(int batchNumber, int batchCount) {

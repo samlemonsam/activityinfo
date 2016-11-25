@@ -1,6 +1,7 @@
 package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
 import java.util.Date;
@@ -243,4 +244,16 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Unknown value: {0}. Each selection of 'Multiple selection' control must have separate column " +
             "with allowed values: TRUE, FALSE or no value (which is considered as FALSE)")
     String unknownMultiEnumValue(String value);
+
+    @DefaultMessage("Required field ''{0}'' is missing in row {1}")
+    String requiredFieldMissing(String fieldName, int rowIndex);
+
+    @DefaultMessage("You didn''t provide a column named ''{0}'', so we''ll default to ''{1}''.")
+    String missingWithDefault(String columnName, String defaultValue);
+
+    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the id of the form " +
+            "to reference, is required.")
+    String referenceFieldRequiresRange(String fieldTypeName, String columnName);
+
+
 }

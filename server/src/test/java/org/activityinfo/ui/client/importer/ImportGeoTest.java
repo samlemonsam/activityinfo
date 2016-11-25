@@ -13,7 +13,7 @@ import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;

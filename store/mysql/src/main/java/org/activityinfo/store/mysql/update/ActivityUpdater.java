@@ -34,8 +34,8 @@ public class ActivityUpdater {
                 fieldMap.put(activityField.getFormField().getId(), activityField);
             }
         }
-
     }
+
 
     public void update(FormClass formClass) {
         updateActivityRow(formClass);

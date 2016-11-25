@@ -1,8 +1,11 @@
-package org.activityinfo.ui.client.component.importDialog.data;
+package org.activityinfo.core.shared.importing.data;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.io.Resources;
+import org.activityinfo.core.shared.importing.source.PastedRow;
+import org.activityinfo.core.shared.importing.source.PastedTable;
+import org.activityinfo.core.shared.importing.source.RowParser;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.junit.Test;
 

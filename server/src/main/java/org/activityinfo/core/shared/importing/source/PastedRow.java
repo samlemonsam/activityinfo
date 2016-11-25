@@ -1,8 +1,7 @@
-package org.activityinfo.ui.client.component.importDialog.data;
+package org.activityinfo.core.shared.importing.source;
 
 
 import com.google.common.base.Strings;
-import org.activityinfo.core.shared.importing.source.SourceRow;
 
 import java.util.List;
 

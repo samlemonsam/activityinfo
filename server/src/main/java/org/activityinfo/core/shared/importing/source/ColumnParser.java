@@ -1,4 +1,4 @@
-package org.activityinfo.core.shared.criteria;
+package org.activityinfo.core.shared.importing.source;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,9 +21,34 @@ package org.activityinfo.core.shared.criteria;
  * #L%
  */
 
+import com.google.common.collect.Lists;
+
+import java.util.List;
+
 /**
- * @author yuriyz on 4/4/14.
+ * @author yuriyz on 5/21/14.
  */
-public interface HasCriteria {
-    Criteria getCriteria();
+public class ColumnParser {
+
+    private final PastedRow row;
+    private List<SourceColumn> columns;
+
+    public ColumnParser(PastedRow row) {
+        this.row = row;
+    }
+
+    public PastedRow getRow() {
+        return row;
+    }
+
+    public List<SourceColumn> parseColumns() {
+        columns = Lists.newArrayList();
+        for (int i = 0; i != row.getColumnCount(); ++i) {
+            SourceColumn column = new SourceColumn();
+            column.setIndex(i);
+            column.setHeader(row.getColumnValue(i).trim());
+            columns.add(column);
+        }
+        return columns;
+    }
 }

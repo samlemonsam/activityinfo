@@ -1,4 +1,4 @@
-package org.activityinfo.server.endpoint.rest;
+package org.activityinfo.core.shared.importing.schema;
 
 
 import com.google.common.annotations.VisibleForTesting;
@@ -26,6 +26,9 @@ import java.util.Map;
 public class SchemaCsvWriterV3 {
 
 
+    public static final String MULTIPLE_SELECT = "Multiple Select";
+    public static final String SINGLE_SELECT = "Single Select";
+
     private class FieldContext {
 
         private UserDatabaseDTO db;
@@ -47,7 +50,7 @@ public class SchemaCsvWriterV3 {
     };
 
     
-    private enum Column {
+    public enum Column {
         DATABASE_ID("DatabaseId") {
             @Override
             public Object value(FieldContext context, FormField field, EnumItem enumItem) {
@@ -59,6 +62,13 @@ public class SchemaCsvWriterV3 {
             @Override
             public Object value(FieldContext context, FormField field, EnumItem enumItem) {
                 return context.db.getName();
+            }
+        },
+
+        FORM_VERSION("FormVersion") {
+            @Override
+            public Object value(FieldContext context, FormField field, EnumItem enumItem) {
+                return "3.0";
             }
         },
         
@@ -115,9 +125,9 @@ public class SchemaCsvWriterV3 {
             public Object value(FieldContext context, FormField field, EnumItem enumItem) {
                 if(field.getType() instanceof EnumType) {
                     if(((EnumType) field.getType()).getCardinality() == Cardinality.MULTIPLE) {
-                        return "Multiple Select";
+                        return MULTIPLE_SELECT;
                     } else {
-                        return "Single Select";
+                        return SINGLE_SELECT;
                     }
                 }
                 return field.getType().getTypeClass().getId();
@@ -135,6 +145,13 @@ public class SchemaCsvWriterV3 {
             @Override
             public Object value(FieldContext context, FormField field, EnumItem enumItem) {
                 return field.getDescription();
+            }
+        },
+
+        FIELD_REQUIRED("Required") {
+            @Override
+            public Object value(FieldContext context, FormField field, EnumItem enumItem) {
+                return field.isRequired();
             }
         },
         
@@ -164,7 +181,7 @@ public class SchemaCsvWriterV3 {
             public Object value(FieldContext context, FormField field, EnumItem enumItem) {
                 if(field.getType() instanceof ReferenceType) {
                     ReferenceType type = (ReferenceType) field.getType();
-                    if(type.getRange().size() > 1) {
+                    if(type.getRange().size() > 0) {
                         ResourceId formId = type.getRange().iterator().next();
                         return formId.asString();
                     }
@@ -240,7 +257,6 @@ public class SchemaCsvWriterV3 {
         }
     }
 
-
     private void writeHeaders() {
         Column[] columns = Column.values();
         Object[] headers = new Object[columns.length];
@@ -251,7 +267,6 @@ public class SchemaCsvWriterV3 {
 
         csv.writeLine(headers);
     }
-
 
     private void writeForm(UserDatabaseDTO db, FormClass formClass) {
         FieldContext context = new FieldContext(db, formClass);
