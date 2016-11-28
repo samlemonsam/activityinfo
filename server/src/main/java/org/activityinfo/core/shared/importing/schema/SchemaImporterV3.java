@@ -112,6 +112,10 @@ public class SchemaImporterV3 extends SchemaImporter {
     }
 
     public boolean processRows() {
+        formMap.clear();
+        subFormMap.clear();
+        enumMap.clear();
+
         fatalError = false;
         for (SourceRow row : source.getRows()) {
 

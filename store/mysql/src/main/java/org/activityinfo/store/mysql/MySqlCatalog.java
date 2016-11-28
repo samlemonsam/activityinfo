@@ -18,6 +18,7 @@ import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.DatabaseCache;
+import org.activityinfo.store.mysql.update.ActivityUpdater;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -210,7 +211,10 @@ public class MySqlCatalog implements FormCatalog {
     }
 
     private void createFormSchema(FormClass formClass) {
-
+        int activityId = CuidAdapter.getLegacyIdFromCuid(formClass.getId());
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId());
+        ActivityUpdater updater = new ActivityUpdater(activityId, databaseId, executor);
+        updater.insert(formClass);
 
     }
 }

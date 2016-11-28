@@ -9,6 +9,7 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -16,6 +17,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
@@ -53,7 +55,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public static void initDatabase() throws Throwable {
         resetDatabase("catalog-test.db.xml");
     }
-    
+
     @Test
     public void testCountry() {
         query(CountryTable.FORM_CLASS_ID, "label", "code");
@@ -428,6 +430,23 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("toDate"), hasValues("2012-01-01"));
         assertThat(column(targetValue12451), hasValues(9999));
         assertThat(column("partner.name"), hasValues("NRC"));
+    }
+
+    @Test
+    public void createForm() {
+        KeyGenerator generator = new KeyGenerator();
+        int activityId = generator.generateInt();
+
+        FormClass formClass = new FormClass(CuidAdapter.activityFormClass(activityId));
+        formClass.setDatabaseId(1);
+        formClass.addElement(new FormField(CuidAdapter.generateIndicatorId())
+                .setType(TextType.INSTANCE)
+                .setLabel("Name")
+                .setRequired(true));
+
+
+        catalog.createOrUpdateFormSchema(formClass);
+
     }
 
 }
