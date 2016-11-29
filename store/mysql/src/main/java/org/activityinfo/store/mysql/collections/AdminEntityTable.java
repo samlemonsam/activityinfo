@@ -112,4 +112,8 @@ public class AdminEntityTable implements SimpleTable {
         }
         return Optional.absent();
     }
+
+    public static void clearCache() {
+        LEVEL_CACHE.invalidateAll();
+    }
 }

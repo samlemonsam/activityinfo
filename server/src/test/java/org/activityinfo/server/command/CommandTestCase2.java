@@ -48,6 +48,8 @@ import org.activityinfo.server.endpoint.gwtrpc.RemoteExecutionContext;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
+import org.activityinfo.store.mysql.collections.AdminEntityTable;
+import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -81,6 +83,10 @@ public class CommandTestCase2 {
     public void setUpDatastore() {
         helper.setUp();
         ofy = ObjectifyService.begin();
+
+        // Clear up MySQL catalog caches
+        CountryStructure.clearCache();
+        AdminEntityTable.clearCache();
     }
 
     @After
