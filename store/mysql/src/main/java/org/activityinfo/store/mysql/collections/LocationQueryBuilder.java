@@ -39,6 +39,7 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
         hasWhereSet = true;
         baseTableBuilder.where("base." + tableMapping.getPrimaryKey().getColumnName() + "=" + CuidAdapter.getLegacyIdFromCuid(resourceId)
                 + " AND base.workflowStatusId != 'rejected'");
+        adminColumnBuilder.only(resourceId);
     }
 
     @Override
