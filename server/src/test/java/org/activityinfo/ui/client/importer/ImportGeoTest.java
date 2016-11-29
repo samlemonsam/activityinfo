@@ -58,7 +58,9 @@ public class ImportGeoTest extends AbstractImporterTest {
                 hasProperty("label", Matchers.equalTo("Name")),
                 hasProperty("label", Matchers.equalTo("Alternate Name")),
                 hasProperty("label", Matchers.equalTo("Region Name")),
+                hasProperty("label", Matchers.equalTo("Region Code")),
                 hasProperty("label", Matchers.equalTo("District Name")),
+                hasProperty("label", Matchers.equalTo("District Code")),
                 hasProperty("label", Matchers.equalTo("Latitude")),
                 hasProperty("label", Matchers.equalTo("Longitude"))));
 
