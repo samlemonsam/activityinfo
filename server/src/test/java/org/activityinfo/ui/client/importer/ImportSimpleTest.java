@@ -148,7 +148,6 @@ public class ImportSimpleTest extends AbstractImporterTest {
 
         assertMapping("Partner", "Partner Name");
         assertMapping("district name", "District Name");
-        //assertMapping("upazila", "Upzilla Name");
     }
 
     private void assertMapping(String sourceColumnLabel, String targetColumnLabel) {

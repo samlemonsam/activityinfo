@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.update;
 
-import com.google.appengine.api.search.Results;
 import com.google.appengine.repackaged.com.google.api.client.util.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -9,6 +8,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -80,7 +80,7 @@ public class ActivityUpdater {
         insert.value("activityId", activityId);
         insert.value("databaseId", databaseId);
         insert.value("name", formClass.getLabel(), 255);
-        insert.value("formClass", formClass.toJsonString());
+        insert.value("formClass", validateNewFormClass(formClass).toJsonString());
         insert.value("version", newVersion);
         insert.value("schemaVersion", newVersion);
         insert.value("classicView", 0);
@@ -89,6 +89,29 @@ public class ActivityUpdater {
         insert.value("reportingFrequency", 0);
         insert.value("sortOrder", 0);
         insert.execute(executor);
+    }
+
+    private FormClass validateNewFormClass(FormClass formClass) {
+
+        Map<ResourceId, FormField> fieldMap = new HashMap<>();
+        for (FormField field : formClass.getFields()) {
+            fieldMap.put(field.getId(), field);
+        }
+
+        ResourceId partnerFieldId = CuidAdapter.partnerField(activityId);
+        FormField partnerField = fieldMap.get(partnerFieldId);
+        if(partnerField == null) {
+            partnerField = new FormField(partnerFieldId);
+            partnerField.setLabel("Partner");
+            partnerField.setVisible(true);
+            partnerField.setRequired(true);
+            formClass.getElements().add(0, partnerField);
+        }
+
+        // Ensure partner type is correct:
+        partnerField.setType(new ReferenceType(Cardinality.SINGLE, CuidAdapter.partnerFormClass(databaseId)));
+
+        return formClass;
     }
 
     private void updateActivityRow(FormClass formClass) {

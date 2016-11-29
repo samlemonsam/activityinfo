@@ -14,6 +14,7 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -432,21 +433,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("partner.name"), hasValues("NRC"));
     }
 
-    @Test
-    public void createForm() {
-        KeyGenerator generator = new KeyGenerator();
-        int activityId = generator.generateInt();
 
-        FormClass formClass = new FormClass(CuidAdapter.activityFormClass(activityId));
-        formClass.setDatabaseId(1);
-        formClass.addElement(new FormField(CuidAdapter.generateIndicatorId())
-                .setType(TextType.INSTANCE)
-                .setLabel("Name")
-                .setRequired(true));
-
-
-        catalog.createOrUpdateFormSchema(formClass);
-
-    }
 
 }

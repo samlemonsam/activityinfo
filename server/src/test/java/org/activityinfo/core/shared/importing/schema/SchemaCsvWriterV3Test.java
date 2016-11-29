@@ -48,7 +48,15 @@ public class SchemaCsvWriterV3Test {
         LocaleProxy.initialize();
 
         database = new UserDatabaseDTO(1, "Survey DB");
+        formClassProvider = new TestBatchFormClassProvider();
 
+        setupSurveyForm();
+        setupMonthly();
+
+        expectedSurveyExport = readExport("survey.csv");
+    }
+
+    private void setupSurveyForm() {
         surveyForm = new FormClass(ResourceId.valueOf("FORM1"));
         surveyForm.setLabel("Household Survey");
         surveyForm.addElement(new FormField(ResourceId.valueOf("F1"))
@@ -117,15 +125,11 @@ public class SchemaCsvWriterV3Test {
                 .setLabel("Household members")
                 .setType(new SubFormReferenceType(subFormClass.getId())));
 
-        formClassProvider = new TestBatchFormClassProvider();
         formClassProvider.add(surveyForm);
         formClassProvider.add(subFormClass);
-
-        expectedSurveyExport = readExport("survey.csv");
     }
 
-    @Before
-    public void setupMonthly() {
+    private void setupMonthly() {
 
 
         washForm = new FormClass(ResourceId.valueOf("FORM3"));
@@ -167,7 +171,6 @@ public class SchemaCsvWriterV3Test {
                 .setType(new SubFormReferenceType(subFormClass.getId())));
 
 
-        formClassProvider = new TestBatchFormClassProvider();
         formClassProvider.add(washForm);
         formClassProvider.add(subFormClass);
     }

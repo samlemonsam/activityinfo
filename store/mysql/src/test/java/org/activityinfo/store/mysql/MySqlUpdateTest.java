@@ -1,8 +1,11 @@
 package org.activityinfo.store.mysql;
 
 import com.google.gson.JsonObject;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.Before;
 import org.junit.Test;
@@ -155,5 +158,31 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         updater.executeChange(change);
 
         query(activityFormClass(ADVOCACY), "_id", "partner");
+    }
+
+    @Test
+    public void createForm() {
+        KeyGenerator generator = new KeyGenerator();
+        int activityId = generator.generateInt();
+
+        FormClass formClass = new FormClass(CuidAdapter.activityFormClass(activityId));
+        formClass.setDatabaseId(1);
+        formClass.setLabel("New Form");
+        formClass.addElement(new FormField(CuidAdapter.generateIndicatorId())
+                .setType(TextType.INSTANCE)
+                .setLabel("Name")
+                .setRequired(true));
+
+
+        catalog.createOrUpdateFormSchema(formClass);
+
+        System.out.println("Created activity " + activityId);
+
+//        FormClass reform = catalog.getFormClass(formClass.getId());
+//
+//        // Ensure that partner field is automatically added
+//        FormField partnerField = reform.getField(CuidAdapter.partnerField(activityId));
+//
+//        assertThat(partnerField.getType(), instanceOf(ReferenceType.class));
     }
 }

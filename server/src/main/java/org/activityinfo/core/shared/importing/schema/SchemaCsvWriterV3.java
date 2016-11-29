@@ -277,10 +277,19 @@ public class SchemaCsvWriterV3 {
                 writeEnumItems(context, field, ((EnumType) field.getType()).getValues());
             } else if(field.getType() instanceof SubFormReferenceType) {
                 writeSubForm(context, field);
-            } else {
+            } else if(!isBuiltinField(formClass, field)) {
                 writeField(context, field);
             }
         }
+    }
+
+    private boolean isBuiltinField(FormClass formClass, FormField field) {
+        if(formClass.getId().getDomain() != CuidAdapter.ACTIVITY_DOMAIN) {
+            return false;
+        }
+        int activityId = CuidAdapter.getLegacyIdFromCuid(formClass.getId());
+        return field.getId().equals(CuidAdapter.partnerField(activityId)) ||
+                field.getId().equals(CuidAdapter.projectField(activityId));
     }
 
     private void writeSubForm(FieldContext context, FormField field) {
