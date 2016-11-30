@@ -30,7 +30,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000013");
         changeObject.addProperty("@class", activityFormClass(1).asString());
-        changeObject.addProperty("partner", partnerInstanceId(1).asString());
+        changeObject.addProperty("partner", partnerRecordId(1).asString());
         changeObject.addProperty("date1", "2015-01-01");
         changeObject.addProperty("date2", "2015-01-01");
         changeObject.addProperty("BENE", 45000);
@@ -50,7 +50,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSite() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
-        changeObject.addProperty("partner", partnerInstanceId(2).asString());
+        changeObject.addProperty("partner", partnerRecordId(2).asString());
 
         Updater updater = new Updater(catalog, userId);
         updater.executeChange(changeObject);
@@ -110,7 +110,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSiteWithMultipleProperties() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
-        changeObject.addProperty("partner", partnerInstanceId(2).asString());
+        changeObject.addProperty("partner", partnerRecordId(2).asString());
         changeObject.addProperty("BENE", 2100);
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
 
@@ -150,7 +150,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         JsonObject change = new JsonObject();
         change.addProperty("@id", CuidAdapter.cuid(SITE_DOMAIN, newId).asString());
         change.addProperty("@class", activityFormClass(ADVOCACY).asString());
-        change.addProperty("partner", partnerInstanceId(1).asString());
+        change.addProperty("partner", partnerRecordId(1).asString());
         change.addProperty("date1", "2015-01-01");
         change.addProperty("date2", "2015-01-31");
 

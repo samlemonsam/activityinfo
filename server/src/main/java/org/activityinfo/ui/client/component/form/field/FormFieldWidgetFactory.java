@@ -202,7 +202,8 @@ public class FormFieldWidgetFactory {
     }
 
     private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, final FormField geoField) {
-        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
+        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+        QueryModel queryModel = new QueryModel(formId);
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
         queryModel.selectField(geoField.getId());
@@ -212,7 +213,7 @@ public class FormFieldWidgetFactory {
                 .then(new Function<ColumnSet, FormFieldWidget>() {
                     @Override
                     public FormFieldWidget apply(ColumnSet input) {
-                        Set<MapItem> items = MapItem.items(new OptionSet(input), geoField.getId().asString());
+                        Set<MapItem> items = MapItem.items(formId, new OptionSet(input), geoField.getId().asString());
                         return new ReferenceMapWidget(items, valueUpdater);
                     }
                 });
@@ -230,7 +231,8 @@ public class FormFieldWidgetFactory {
 
     private Promise<? extends FormFieldWidget> createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
 
-        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
+        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+        QueryModel queryModel = new QueryModel(formId);
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
 
@@ -248,17 +250,19 @@ public class FormFieldWidgetFactory {
                             return NullFieldWidget.INSTANCE;
                         }
 
+                        OptionSet instances = new OptionSet(input);
+
                         if (size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons
-                            return new CheckBoxFieldWidget(type, new OptionSet(input), valueUpdater);
+                            return new CheckBoxFieldWidget(type, instances, valueUpdater);
 
                         } else if (size < MEDIUM_BALANCE_NUMBER) {
                             // Dropdown list
-                            return new ComboBoxFieldWidget(new OptionSet(input), valueUpdater);
+                            return new ComboBoxFieldWidget(formId, instances, valueUpdater);
 
                         } else {
                             // Suggest box
-                            return new SuggestBoxWidget(new OptionSet(input), valueUpdater);
+                            return new SuggestBoxWidget(formId, instances, valueUpdater);
                         }
                     }
                 });

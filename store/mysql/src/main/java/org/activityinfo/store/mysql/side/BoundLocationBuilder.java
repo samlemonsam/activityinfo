@@ -4,6 +4,7 @@ package org.activityinfo.store.mysql.side;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -30,7 +31,7 @@ public class BoundLocationBuilder {
     }
 
     public void execute(QueryExecutor executor) throws SQLException {
-        String sql = "SELECT s.siteId,  t.boundAdminLevelId, s.locationId, e.adminEntityId " +
+        String sql = "SELECT s.siteId,  t.boundAdminLevelId, s.locationId, e.adminEntityId, l.locationTypeId " +
                 "FROM site s " +
                 "LEFT JOIN location l ON (s.locationId = l.locationId) " +
                 "LEFT JOIN locationtype t ON (l.locationTypeId = t.locationTypeId) " +
@@ -52,13 +53,19 @@ public class BoundLocationBuilder {
                     // There will be duplicates
                     if (siteId != lastSiteId) {
                         int locationId = rs.getInt(3);
-                        emit(new ReferenceValue(CuidAdapter.locationInstanceId(locationId)));
+                        emit(new ReferenceValue(
+                                new RecordRef(
+                                    CuidAdapter.locationFormClass(rs.getInt(5)),
+                                    CuidAdapter.locationInstanceId(locationId))));
                     }
                 } else {
                     // Bound admin level id 
                     int entityId = rs.getInt(4);
                     if(!rs.wasNull()) {
-                        emit(new ReferenceValue(CuidAdapter.entity(entityId)));
+                        emit(new ReferenceValue(
+                                new RecordRef(
+                                    CuidAdapter.adminLevelFormClass(boundLevelId),
+                                    CuidAdapter.entity(entityId))));
                     }
                 }
                 lastSiteId = siteId;

@@ -206,6 +206,8 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         blobService.setTestBucketName();
 
         int activityId = 1;
+        int databaseId = 1;
+        int locationType = 10;
 
         ResourceId attachmentFieldId = ResourceId.generateFieldId(AttachmentType.TYPE_CLASS);
         FormClass formClass = addAttachmentField(activityId, attachmentFieldId);
@@ -231,9 +233,9 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
         instance.set(attachmentFieldId, attachmentValue);
-        instance.set(locationField(activityId), locationInstanceId(1));
-        instance.set(partnerField(activityId), partnerInstanceId(1));
-        instance.set(projectField(activityId), projectInstanceId(1));
+        instance.set(locationField(activityId), locationRef(CuidAdapter.locationFormClass(locationType), 1));
+        instance.set(partnerField(activityId), partnerRef(databaseId, 1));
+        instance.set(projectField(activityId), projectRef(databaseId, 1));
         instance.set(field(formClass.getId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(formClass.getId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(formClass.getId(), COMMENT_FIELD), "My comment");
@@ -253,7 +255,7 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         instance.set(newAttachmentFieldId, attachmentValue);
         instance.set(field(instance.getClassId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(instance.getClassId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(partnerField(anotherActivityId), partnerInstanceId(1));
+        instance.set(partnerField(anotherActivityId), partnerRef(databaseId, 1));
 
         boolean persisted = true;
         try {

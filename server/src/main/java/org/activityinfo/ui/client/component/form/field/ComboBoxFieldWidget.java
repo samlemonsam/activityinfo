@@ -29,9 +29,11 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -40,9 +42,11 @@ import java.util.Set;
 public class ComboBoxFieldWidget implements ReferenceFieldWidget {
 
     private final ListBox dropBox;
+    private ResourceId formId;
     private final ValueUpdater<ReferenceValue> valueUpdater;
 
-    public ComboBoxFieldWidget(final OptionSet range, final ValueUpdater<ReferenceValue> valueUpdater) {
+    public ComboBoxFieldWidget(ResourceId formId, final OptionSet range, final ValueUpdater<ReferenceValue> valueUpdater) {
+        this.formId = formId;
         this.valueUpdater = valueUpdater;
         dropBox = new ListBox(false);
         dropBox.addStyleName("form-control");
@@ -81,19 +85,24 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
     }
 
     private ReferenceValue updatedValue() {
-        Set<ResourceId> value = Sets.newHashSet();
+        Set<RecordRef> refs = Sets.newHashSet();
         int selectedIndex = dropBox.getSelectedIndex();
         if(selectedIndex != -1) {
-            value.add(ResourceId.valueOf(dropBox.getValue(selectedIndex)));
+            refs.add(new RecordRef(formId, ResourceId.valueOf(dropBox.getValue(selectedIndex))));
         }
-        return new ReferenceValue(value);
+        return new ReferenceValue(refs);
     }
 
     @Override
     public Promise<Void> setValue(ReferenceValue value) {
+
+        Set<String> selectedRecords = new HashSet<>();
+        for (RecordRef recordRef : value.getReferences()) {
+            selectedRecords.add(recordRef.getRecordId().asString());
+        }
+
         for(int i=0;i!=dropBox.getItemCount();++i) {
-            ResourceId id = ResourceId.valueOf(dropBox.getValue(i));
-            if(value.getResourceIds().contains(id)) {
+            if(selectedRecords.contains(dropBox.getValue(i))) {
                 dropBox.setSelectedIndex(i);
                 break;
             }

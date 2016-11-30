@@ -11,7 +11,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
 import javax.annotation.Nonnull;
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -20,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The smallest logical unit of data entry.
  */
-public class FormField extends FormElement implements Serializable {
+public class FormField extends FormElement {
 
     private final ResourceId id;
     private String code;
@@ -194,27 +193,6 @@ public class FormField extends FormElement implements Serializable {
     }
 
     @Override
-    public Record asRecord() {
-        assert type != null : id + " has no type";
-
-        Record record = new Record();
-        record.set("id", id.asString());
-        record.set("code", code);
-        record.set("description", description);
-        record.set("label", label);
-        record.set("type", toRecord(type));
-        record.set("required", required);
-        record.set("visible", visible);
-        record.set("relevanceConditionExpression", relevanceConditionExpression);
-
-        if(!superProperties.isEmpty()) {
-            record.set("superProperties", new ReferenceValue(superProperties).asRecord());
-        }
-
-        return record;
-    }
-
-    @Override
     public JsonObject toJsonObject() {
         JsonObject object = new JsonObject();
         object.addProperty("id", id.asString());
@@ -290,38 +268,6 @@ public class FormField extends FormElement implements Serializable {
             record.set("parameters", ((ParametrizedFieldType)type).getParameters());
         }
         return record;
-    }
-
-    public static FormField fromRecord(@Nonnull Record record) {
-        FormField formField = new FormField(ResourceId.valueOf(record.getString("id")))
-                .setDescription(record.isString("description"))
-                .setLabel(Strings.nullToEmpty(record.isString("label")))
-                .setType(typeFromRecord(record.getRecord("type")))
-                .setVisible(record.getBoolean("visible", true))
-                .setRequired(record.getBoolean("required", false));
-
-        if (record.has("relevanceConditionExpression")) {
-            formField.setRelevanceConditionExpression(record.getString("relevanceConditionExpression"));
-        }
-        if (record.has("superProperties")) {
-            ReferenceValue superProperties = ReferenceValue.fromRecord(record.getRecord("superProperties"));
-            formField.setSuperProperties(superProperties.getResourceIds());
-        }
-        if (record.has("code")) {
-            formField.setCode(record.getString("code"));
-        }
-
-        return formField;
-    }
-
-    private static FieldType typeFromRecord(Record record) {
-        String typeClassId = record.getString("typeClass");
-        FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(typeClassId);
-        if(typeClass instanceof ParametrizedFieldTypeClass) {
-            return ((ParametrizedFieldTypeClass)typeClass).deserializeType(record.getRecord("parameters"));
-        } else {
-            return typeClass.createType();
-        }
     }
 
 }

@@ -1,7 +1,6 @@
 package org.activityinfo.store.query.impl;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -13,17 +12,10 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.resource.*;
-import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.enumerated.EnumItem;
-import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 
@@ -157,7 +149,7 @@ public class Updater {
                 FieldValue fieldValue;
                 try {
                     fieldValue = parseFieldValue(field, changeObject.get(fieldName));
-                } catch (InvalidUpdateException e) {
+                } catch (Exception e) {
                     throw new InvalidUpdateException(format("Invalid value for field '%s' (id: %s, code: %s): %s",
                             field.getLabel(),
                             field.getId(),
@@ -211,98 +203,9 @@ public class Updater {
     }
 
     private static FieldValue parseFieldValue(FormField field, JsonElement jsonValue) {
-        if(jsonValue.isJsonNull()) {
-            return null;
-
-        } else if(isTypedRecord(jsonValue)) {
-            return parseTypedRecord(field, jsonValue.getAsJsonObject());
-            
-        } else if(field.getType() instanceof TextType) {
-            return TextValue.valueOf(jsonValue.getAsString());
-            
-        } else if(field.getType() instanceof QuantityType) {
-            return parseQuantity(field, jsonValue);
-            
-        } else if(field.getType() instanceof EnumType) {
-            return parseEnumValue((EnumType) field.getType(), jsonValue.getAsString());
-        
-        } else if(field.getType() instanceof ReferenceType) {
-            return new ReferenceValue(ResourceId.valueOf(jsonValue.getAsString()));    
-        
-        } else if(field.getType() instanceof LocalDateType) {
-            return parseDate(jsonValue.getAsString());    
-            
-        } else if(field.getType() instanceof NarrativeType) {
-            return NarrativeValue.valueOf(jsonValue.getAsString());
-            
-        }
-        throw new InvalidUpdateException("Unsupported type: " + field.getType().getTypeClass().getId());
+        return field.getType().parseJsonValue(jsonValue);
     }
 
-    private static boolean isTypedRecord(JsonElement jsonValue) {
-        if(jsonValue.isJsonObject()) {
-            return jsonValue.getAsJsonObject().has("@type");
-        }
-        return false;
-    }
-
-
-    private static FieldValue parseTypedRecord(FormField field, JsonObject jsonObject) {
-        Record record = Resources.recordFromJson(jsonObject);
-        FieldValue fieldValue = TypeRegistry.get().deserializeFieldValue(record);
-        
-        if(!field.getType().getTypeClass().equals(fieldValue.getTypeClass())) {
-            throw new InvalidUpdateException(String.format(
-                    "Expected record of type %s for field '%s' (id: %s) but a record of type %s was provided", 
-                        field.getType().getTypeClass().getId(),
-                        field.getLabel(), 
-                        field.getId().asString(),
-                        record.get("@type")));
-        }
-
-        return fieldValue;
-    }
-
-    private static FieldValue parseQuantity(FormField field, JsonElement jsonValue) {
-        QuantityType quantityType = (QuantityType) field.getType();
-
-        if(!jsonValue.isJsonPrimitive()) {
-            throw new InvalidUpdateException("Quantity fields must be encoded as JSON number, found: %s", jsonValue);
-        }
-        if(jsonValue.getAsJsonPrimitive().isNumber()) {
-            return new Quantity(jsonValue.getAsDouble(), quantityType.getUnits());
-            
-        } else if(jsonValue.getAsJsonPrimitive().isString()) {
-            try {
-                return new Quantity(Double.parseDouble(jsonValue.getAsString()), quantityType.getUnits());
-            } catch (NumberFormatException e) {
-                throw new InvalidUpdateException("Invalid number: " + e.getMessage(), e);
-            }
-            
-        } else {
-            throw new InvalidUpdateException("Expected number, found: " + jsonValue);
-        }
-    }
-
-    private static FieldValue parseDate(String jsonValue) {
-        return org.activityinfo.model.type.time.LocalDate.parse(jsonValue);
-    }
-
-    private static FieldValue parseEnumValue(EnumType type, String jsonValue) {
-        for (EnumItem enumItem : type.getValues()) {
-            if(enumItem.getId().asString().equals(jsonValue)) {
-                return new EnumValue(enumItem.getId());
-            }
-        }
-        for (EnumItem enumItem : type.getValues()) {
-            if(enumItem.getLabel().equals(jsonValue)) {
-                return new EnumValue(enumItem.getId());
-            }
-        }
-        
-        throw new InvalidUpdateException(format("Invalid enum value '%s', expected one of: %s", 
-                jsonValue, Joiner.on(", ").join(type.getValues())));
-    }
 
     public void execute(RecordUpdate update) {
         Optional<FormAccessor> collection = catalog.lookupForm(update.getRecordId());
@@ -390,10 +293,6 @@ public class Updater {
         // TODO: check type-class specific properties
     }
 
-    public void execute(IsResource resource) {
-        execute(FormInstance.fromResource(resource.asResource()));
-    }
-    
     public void execute(FormInstance formInstance) {
 
         Optional<FormAccessor> collection = catalog.getForm(formInstance.getClassId());

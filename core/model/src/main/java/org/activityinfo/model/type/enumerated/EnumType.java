@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
@@ -22,19 +22,6 @@ public class EnumType implements ParametrizedFieldType {
         @Override
         public String getId() {
             return "enumerated";
-        }
-
-        @Override
-        public FieldType deserializeType(Record typeParameters) {
-
-            Cardinality cardinality = Cardinality.valueOf(typeParameters.getString("cardinality"));
-
-            List<EnumItem> enumItems = Lists.newArrayList();
-            List<Record> enumValueRecords = typeParameters.getRecordList("values");
-            for(Record record : enumValueRecords) {
-                enumItems.add(EnumItem.fromRecord(record));
-            }
-            return new EnumType(cardinality, enumItems);
         }
 
 
@@ -60,11 +47,6 @@ public class EnumType implements ParametrizedFieldType {
         @Override
         public FormClass getParameterFormClass() {
             return new FormClass(ResourceIdPrefixType.TYPE.id("enum"));
-        }
-
-        @Override
-        public EnumValue deserialize(Record record) {
-            return EnumValue.fromRecord(record);
         }
 
     };
@@ -126,17 +108,8 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
-    public Record getParameters() {
-
-        List<Record> enumValueRecords = Lists.newArrayList();
-        for(EnumItem enumItem : getValues()) {
-            enumValueRecords.add(enumItem.asRecord());
-        }
-
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("cardinality", cardinality.name())
-                .set("values", enumValueRecords);
+    public FormInstance getParameters() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

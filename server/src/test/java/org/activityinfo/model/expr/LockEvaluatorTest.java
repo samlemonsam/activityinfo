@@ -35,6 +35,7 @@ import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.lock.LockEvaluator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -52,6 +53,7 @@ import static junit.framework.Assert.assertEquals;
 @OnDataSet("/dbunit/schema2.db.xml")
 public class LockEvaluatorTest extends CommandTestCase2 {
 
+    private static final int DATABASE_ID = 1;
     private static final int ACTIVITY_ID = 1;
 
     private FormClass formClass;
@@ -113,7 +115,11 @@ public class LockEvaluatorTest extends CommandTestCase2 {
         instance.set(BuiltinFields.getEndDateField(formClass).getId(), endDate);
 
         if (projectId != -1) {
-            instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PROJECT_FIELD), new ReferenceValue(CuidAdapter.projectInstanceId(projectId)));
+            instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PROJECT_FIELD),
+                    new ReferenceValue(
+                            new RecordRef(
+                                    CuidAdapter.projectFormClass(DATABASE_ID),
+                                    CuidAdapter.projectInstanceId(projectId))));
         }
         return instance;
     }

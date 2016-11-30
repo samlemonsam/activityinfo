@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
@@ -19,7 +20,7 @@ class InitialSelection {
         this.hierarchy = hierarchy;
     }
 
-    public Promise<Void> fetch(ResourceLocator locator, Set<ResourceId> recordIds) {
+    public Promise<Void> fetch(ResourceLocator locator, Set<RecordRef> recordIds) {
         if(recordIds == null || recordIds.isEmpty()) {
             return Promise.done();
         } else {
@@ -27,7 +28,7 @@ class InitialSelection {
         }
     }
 
-    private Promise<Void> fetchLabelAndParentIds(final ResourceLocator locator, Set<ResourceId> recordIds) {
+    private Promise<Void> fetchLabelAndParentIds(final ResourceLocator locator, Set<RecordRef> recordIds) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
         
 //        QueryModel queryModel = new QueryModel();

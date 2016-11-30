@@ -2,6 +2,7 @@ package org.activityinfo.model.type.number;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
@@ -43,7 +44,11 @@ public class Quantity implements FieldValue, IsRecord {
 
     @Override
     public JsonElement toJsonElement() {
-        return new JsonPrimitive(value);
+        if(Double.isNaN(value)) {
+            return JsonNull.INSTANCE;
+        } else {
+            return new JsonPrimitive(value);
+        }
     }
 
     @Override

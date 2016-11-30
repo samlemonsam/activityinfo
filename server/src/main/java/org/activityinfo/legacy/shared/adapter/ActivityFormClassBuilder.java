@@ -36,7 +36,7 @@ public class ActivityFormClassBuilder {
         return new FormField(CuidAdapter.field(classId, CuidAdapter.PARTNER_FIELD))
                 .setLabel(I18N.CONSTANTS.partner())
                 .setCode("partner")
-                .setType(ReferenceType.single(CuidAdapter.partnerFormClass(activity.getDatabaseId())))
+                .setType(ReferenceType.single(CuidAdapter.partnerFormId(activity.getDatabaseId())))
 //                .setVisible(activity.isEditAllAllowed() && activity.getPartnerRange().size() > 1)
                 .setVisible(true)
                 .setRequired(true);

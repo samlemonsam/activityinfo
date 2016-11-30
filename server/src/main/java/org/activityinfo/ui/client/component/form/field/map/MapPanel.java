@@ -25,7 +25,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.reports.content.MapboxLayers;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 import org.activityinfo.ui.client.style.table.CellTableResources;
@@ -177,7 +176,7 @@ public class MapPanel implements IsWidget {
     public Optional<ReferenceValue> getValue() {
         MapItem selectedItem = getSelectedItem();
         if (selectedItem != null) {
-            return Optional.of(new ReferenceValue(ResourceId.valueOf(selectedItem.getId())));
+            return Optional.of(new ReferenceValue(selectedItem.getId()));
         }
         return Optional.absent();
     }

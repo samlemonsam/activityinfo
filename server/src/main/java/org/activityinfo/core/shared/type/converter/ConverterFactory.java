@@ -3,6 +3,7 @@ package org.activityinfo.core.shared.type.converter;
 import org.activityinfo.core.shared.type.formatter.DateFormatter;
 import org.activityinfo.core.shared.type.formatter.QuantityFormatterFactory;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.util.logging.Logger;
@@ -63,6 +64,19 @@ public class ConverterFactory {
     }
 
     public Converter createStringConverter(FieldTypeClass fieldType) {
+        if (fieldType == FieldTypeClass.QUANTITY) {
+            return stringToQuantityFormatter;
+        } else if (fieldType == FieldTypeClass.LOCAL_DATE) {
+            return StringToDateConverter.INSTANCE;
+        } else if (fieldType == FieldTypeClass.FREE_TEXT || fieldType == FieldTypeClass.NARRATIVE) {
+            return NullConverter.INSTANCE;
+        } else if (fieldType == EnumType.TYPE_CLASS) {
+            return NullConverter.INSTANCE;
+        }
+        throw new UnsupportedOperationException(fieldType.getId());
+    }
+
+    public Converter<String, FieldValue> createFieldValueParser(FieldTypeClass fieldType) {
         if (fieldType == FieldTypeClass.QUANTITY) {
             return stringToQuantityFormatter;
         } else if (fieldType == FieldTypeClass.LOCAL_DATE) {

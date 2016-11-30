@@ -1,14 +1,13 @@
 package org.activityinfo.store.mysql.metadata;
 
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.store.mysql.mapping.AttributeConverter;
 import org.activityinfo.store.mysql.mapping.FieldValueConverter;
 import org.activityinfo.store.mysql.mapping.QuantityConverter;
-import org.activityinfo.store.mysql.mapping.ReferenceConverter;
 import org.activityinfo.store.mysql.mapping.TextConverter;
 
 import java.io.Serializable;
@@ -62,7 +61,7 @@ public class ActivityField implements Serializable {
 
     public FieldValueConverter getConverter() {
         if(isAttributeGroup()) {
-            return new ReferenceConverter(CuidAdapter.ATTRIBUTE_DOMAIN);
+            return new AttributeConverter();
         } else if(formField.getType() instanceof QuantityType) {
             QuantityType type = (QuantityType) formField.getType();
             return new QuantityConverter(type.getUnits());

@@ -2,87 +2,40 @@ package org.activityinfo.model.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**
  * A Field Value containing the value of {@code ReferenceType} or
  * {@code EnumType}
  */
-public class ReferenceValue implements FieldValue, IsRecord, HasSetFieldValue {
+public class ReferenceValue implements FieldValue {
 
-    public static final ReferenceValue EMPTY = new ReferenceValue(Collections.<ResourceId>emptySet());
+    public static final ReferenceValue EMPTY = new ReferenceValue();
 
-    private final Set<ResourceId> resourceIds;
+    private final Set<RecordRef> references;
 
-    public ReferenceValue(ResourceId resourceId) {
-        this.resourceIds = ImmutableSet.of(resourceId);
+    public ReferenceValue(RecordRef recordRef) {
+        this.references = ImmutableSet.of(recordRef);
     }
 
-    public ReferenceValue(ResourceId... resourceIds) {
-        this.resourceIds = ImmutableSet.copyOf(resourceIds);
+    public ReferenceValue(RecordRef... recordRefs) {
+        this.references = ImmutableSet.copyOf(recordRefs);
     }
 
-    public ReferenceValue(Iterable<ResourceId> resourceIds) {
-        this.resourceIds = ImmutableSet.copyOf(resourceIds);
+    public ReferenceValue(Iterable<RecordRef> references) {
+        this.references = ImmutableSet.copyOf(references);
     }
 
-    public Set<ResourceId> getResourceIds() {
-        return resourceIds;
+    public Set<RecordRef> getReferences() {
+        return references;
     }
 
-    public ResourceId getResourceId() {
-        return Iterables.getOnlyElement(resourceIds);
-    }
-
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set(TYPE_CLASS_FIELD_NAME, ReferenceType.TYPE_CLASS.getId());
-
-        if(resourceIds.size() == 1) {
-            record.set("value", resourceIds.iterator().next().asString());
-        } else if(resourceIds.size() > 1) {
-            record.set("value", toStringList(resourceIds));
-        }
-        return record;
-    }
-
-    private List<String> toStringList(Set<ResourceId> resourceIds) {
-        List<String> strings = Lists.newArrayList();
-        for(ResourceId resourceId : resourceIds) {
-            strings.add(resourceId.asString());
-        }
-        return strings;
-    }
-
-    public static ReferenceValue fromRecord(Record record) {
-        String id = record.isString("value");
-        if(id != null) {
-            return new ReferenceValue(ResourceId.valueOf(id));
-        }
-        List<String> strings = record.getStringList("value");
-        Set<ResourceId> ids = Sets.newHashSet();
-        for(String string : strings) {
-            ids.add(ResourceId.valueOf(string));
-        }
-        return new ReferenceValue(ids);
-    }
-
-    public static ReferenceValue fromJson(String json) {
-        return fromRecord(Resources.recordFromJson(json));
+    public RecordRef getOnlyReference() {
+        return Iterables.getOnlyElement(references);
     }
 
     @Override
@@ -92,16 +45,17 @@ public class ReferenceValue implements FieldValue, IsRecord, HasSetFieldValue {
 
     @Override
     public JsonElement toJsonElement() {
-        if(resourceIds.isEmpty()) {
+
+        if(references.size() == 0) {
             return JsonNull.INSTANCE;
-            
-        } else if(resourceIds.isEmpty()) {
-            return new JsonPrimitive(resourceIds.iterator().next().asString());
-        
+
+        } else if(references.size() == 1) {
+            return references.iterator().next().toJsonElement();
+
         } else {
             JsonArray array = new JsonArray();
-            for (ResourceId resourceId : resourceIds) {
-                array.add(new JsonPrimitive(resourceId.asString()));
+            for (RecordRef reference : references) {
+                array.add(reference.toJsonElement());
             }
             return array;
         }
@@ -114,17 +68,17 @@ public class ReferenceValue implements FieldValue, IsRecord, HasSetFieldValue {
 
         ReferenceValue that = (ReferenceValue) o;
 
-        return !(resourceIds != null ? !resourceIds.equals(that.resourceIds) : that.resourceIds != null);
+        return !(references != null ? !references.equals(that.references) : that.references != null);
 
     }
 
     @Override
     public int hashCode() {
-        return resourceIds != null ? resourceIds.hashCode() : 0;
+        return references != null ? references.hashCode() : 0;
     }
 
     @Override
     public String toString() {
-        return resourceIds.toString();
+        return references.toString();
     }
 }

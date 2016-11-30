@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  */
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonObject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -35,8 +36,6 @@ import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormLabel;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.ParametrizedFieldTypeClass;
@@ -292,8 +291,8 @@ public class PropertiesPresenter {
             public void onFieldUpdated(FormField field, FieldValue newValue) {
                 super.onFieldUpdated(field, newValue);
                 ParametrizedFieldType parametrizedFieldType = (ParametrizedFieldType) formField.getType();
-                Record param = parametrizedFieldType.getParameters();
-                param.set(field.getId(), newValue);
+                JsonObject param = parametrizedFieldType.getParametersAsJson();
+                param.add(field.getId().asString(), newValue.toJsonElement());
                 ParametrizedFieldTypeClass typeClass = (ParametrizedFieldTypeClass) parametrizedFieldType.getTypeClass();
                 if (formField.getType() instanceof CalculatedFieldType && newValue instanceof ExprValue) {
                     // for calculated fields we updated expression directly because it is handled via ExprFieldType
@@ -310,7 +309,7 @@ public class PropertiesPresenter {
             ParametrizedFieldType parametrizedType = (ParametrizedFieldType) formField.getType();
             currentDesignWidget.asWidget().setVisible(true);
             currentDesignWidget.getModel().setValidationFormClass(fieldWidgetContainer.getFormDesigner().getRootFormClass());
-            currentDesignWidget.show(Resources.createResource(parametrizedType.getParameters())).then(new AsyncCallback<Void>() {
+            currentDesignWidget.show(parametrizedType.getParameters()).then(new AsyncCallback<Void>() {
 
 
                 @Override

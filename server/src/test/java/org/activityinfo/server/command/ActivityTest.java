@@ -373,10 +373,12 @@ public class ActivityTest extends CommandTestCase2 {
     public void newFormWithoutDates() {
         
         // Create an activity in the same way that the Design Presenter does...
-        
+
+        int databaseId = 1;
+
         ActivityDTO newEntity = new ActivityDTO();
         newEntity.setName("My Form");
-        newEntity.set("databaseId", 1);
+        newEntity.set("databaseId", databaseId);
         newEntity.set("classicView", false);
         newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
         newEntity.set("locationTypeId", 2 /* Nullary location type for RDC in schema.db.xml */);
@@ -403,7 +405,7 @@ public class ActivityTest extends CommandTestCase2 {
         
         // Now submit a new entry without dates...
         FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(formId), formId);
-        newInstance.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerInstanceId(1));
+        newInstance.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerRef(databaseId, 1));
 
         assertResolves(locator.persist(newInstance));
     }

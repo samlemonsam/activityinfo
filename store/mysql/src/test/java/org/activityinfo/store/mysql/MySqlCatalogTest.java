@@ -9,16 +9,13 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
@@ -165,7 +162,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
                 "partner.label", "location.label", "location.visible", "BENE", "cause", "project", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
-        assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
+        assertThat(column("partner"), hasValues(partnerRecordId(1), partnerRecordId(1), partnerRecordId(2)));
         assertThat(column("partner.label"), hasValues("NRC", "NRC", "Solidarites"));
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
@@ -203,7 +200,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         ResourceId formClass = CuidAdapter.activityFormClass(1);
         RecordUpdate update = new RecordUpdate();
         update.setRecordId(cuid(SITE_DOMAIN, 1));
-        update.set(field(formClass, PARTNER_FIELD), new ReferenceValue(CuidAdapter.partnerInstanceId(2)));
+        update.set(field(formClass, PARTNER_FIELD), new ReferenceValue(CuidAdapter.partnerRecordId(2)));
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 
@@ -213,7 +210,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
-        assertThat(column("partner"), hasValues(partnerInstanceId(2), partnerInstanceId(1), partnerInstanceId(2)));
+        assertThat(column("partner"), hasValues(partnerRecordId(2), partnerRecordId(1), partnerRecordId(2)));
         assertThat(column("BENE"), hasValues(900, 3600, 10000));
         assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
     }

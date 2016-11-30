@@ -6,6 +6,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
@@ -80,7 +81,9 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
                 fieldObserver.onNext(entity.getFieldValues());
             }
             if(parentFieldObservers != null) {
-                ReferenceValue parent = new ReferenceValue(ResourceId.valueOf(entity.getParentRecordId()));
+                ResourceId parentRecordId = ResourceId.valueOf(entity.getParentRecordId());
+                RecordRef parentRef = new RecordRef(formClass.getParentFormId().get(), parentRecordId);
+                ReferenceValue parent = new ReferenceValue(parentRef);
                 for (CursorObserver<FieldValue> parentFieldObserver : parentFieldObservers) {
                     parentFieldObserver.onNext(parent);
                 }

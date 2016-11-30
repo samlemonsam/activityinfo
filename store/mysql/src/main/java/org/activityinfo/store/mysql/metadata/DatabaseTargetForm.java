@@ -92,7 +92,7 @@ public class DatabaseTargetForm implements Serializable {
         FormField partnerField = new FormField(CuidAdapter.field(classId, CuidAdapter.PARTNER_FIELD));
         partnerField.setLabel(I18N.CONSTANTS.partner());
         partnerField.setCode("partner");
-        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormClass(databaseId)));
+        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormId(databaseId)));
         
         FormField projectField = new FormField(CuidAdapter.field(classId, CuidAdapter.PROJECT_FIELD));
         projectField.setLabel(I18N.CONSTANTS.project());

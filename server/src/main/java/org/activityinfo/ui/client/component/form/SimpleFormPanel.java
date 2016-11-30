@@ -17,7 +17,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.lock.LockEvaluator;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -102,10 +101,6 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
 
     public FormModel getModel() {
         return model;
-    }
-
-    public Promise<Void> show(final Resource instance) {
-        return show(FormInstance.fromResource(instance));
     }
 
     @Override
@@ -268,7 +263,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private boolean isEmpty(FieldValue value) {
         return value == null ||
                 (value instanceof EnumValue && ((EnumValue) value).getResourceIds().isEmpty()) ||
-                (value instanceof ReferenceValue && ((ReferenceValue) value).getResourceIds().isEmpty()) ||
+                (value instanceof ReferenceValue && ((ReferenceValue) value).getReferences().isEmpty()) ||
                 (value instanceof AttachmentValue && ((AttachmentValue) value).getValues().isEmpty());
     }
 

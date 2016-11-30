@@ -281,7 +281,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
                     if (command.isCopyPartners()) {
 
                         // as defined in ActivityFormClassBuilder.build() in reference range we stick to db id
-                        ResourceId partnerId = CuidAdapter.partnerFormClass(targetDb.getId());
+                        ResourceId partnerId = CuidAdapter.partnerFormId(targetDb.getId());
                         targetRange.add(partnerId);
                         typeIdMapping.put(next, partnerId);
                     }

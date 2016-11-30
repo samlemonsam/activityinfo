@@ -1,9 +1,9 @@
 package org.activityinfo.store.mysql.side;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -29,6 +29,7 @@ public class AdminColumnBuilder {
     private List<CursorObserver<FieldValue>> observers = new ArrayList<>();
 
     private final int[] adminLevels;
+    private final ResourceId[] adminLevelFormIds;
     private final int[] adminParentMap;
 
     private ResourceId locationId;
@@ -37,6 +38,10 @@ public class AdminColumnBuilder {
         this.locationTypeId = locationTypeId;
         this.country = country;
         this.adminLevels = country.getAdminLevelIdArray();
+        this.adminLevelFormIds = new ResourceId[adminLevels.length];
+        for (int i = 0; i < adminLevels.length; i++) {
+            adminLevelFormIds[i] = CuidAdapter.adminLevelFormClass(adminLevels[i]);
+        }
         this.adminParentMap = country.buildParentIndexMap(adminLevels);
     }
 
@@ -119,11 +124,11 @@ public class AdminColumnBuilder {
 
         // Now emit the field value
         if(nonNull) {
-            Set<ResourceId> entityIds = new HashSet<>();
+            Set<RecordRef> entityIds = new HashSet<>();
             for (int i = 0; i < adminEntity.length; i++) {
                 int entityId = adminEntity[i];
                 if(entityId != 0) {
-                    entityIds.add(CuidAdapter.entity(entityId));
+                    entityIds.add(new RecordRef(adminLevelFormIds[i], CuidAdapter.entity(entityId)));
                 }
             }
             emit(new ReferenceValue(entityIds));

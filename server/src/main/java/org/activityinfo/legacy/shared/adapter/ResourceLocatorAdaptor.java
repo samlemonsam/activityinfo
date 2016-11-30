@@ -11,7 +11,6 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -107,18 +106,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
 
     @Override
-    public Promise<Void> persist(IsResource resource) {
-        if(resource instanceof FormClass) {
-            return client.updateFormSchema(resource.getId().asString(), (FormClass)resource);
-
-        } else if(resource instanceof FormInstance) {
-            FormInstance instance = (FormInstance) resource;
-            return client.createRecord(
-                    instance.getClassId().asString(),
-                    buildUpdate(instance))
-                    .thenDiscardResult();
-        }
-        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    public Promise<Void> persist(FormInstance instance) {
+        return client.createRecord(
+                instance.getClassId().asString(),
+                buildUpdate(instance))
+                .thenDiscardResult();
     }
 
     @Override
@@ -141,15 +133,15 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<Void> persist(List<? extends IsResource> resources) {
-        return persist(resources, null);
+    public Promise<Void> persist(List<FormInstance> formInstances) {
+        return persist(formInstances, null);
     }
 
     @Override
-    public Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor) {
+    public Promise<Void> persist(List<FormInstance> formInstances, @Nullable PromisesExecutionMonitor monitor) {
         List<Promise<Void>> promises = Lists.newArrayList();
-        for (IsResource resource : resources) {
-            promises.add(persist(resource));
+        for (FormInstance instance : formInstances) {
+            promises.add(persist(instance));
         }
         return Promise.waitAll(promises);
     }

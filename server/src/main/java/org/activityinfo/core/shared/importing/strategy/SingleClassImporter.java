@@ -11,6 +11,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -118,7 +119,7 @@ public class SingleClassImporter implements FieldImporter {
         validateInstance(row, validationResults);
         for (ValidationResult result : validationResults) {
             if (result.isPersistable() && result.getInstanceId() != null) {
-                instance.set(fieldId, result.getInstanceId());
+                instance.set(fieldId, new ReferenceValue(result.getRef()));
                 break;
             }
         }

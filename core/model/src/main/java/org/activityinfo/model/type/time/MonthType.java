@@ -22,7 +22,6 @@ package org.activityinfo.model.type.time;
  */
 
 import com.google.gson.JsonElement;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.*;
 
 /**
@@ -35,10 +34,6 @@ public class MonthType implements FieldType, TemporalType {
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass() {
-        @Override
-        public MonthValue deserialize(Record record) {
-            return new MonthValue(record.getInt("year"), record.getInt("month"));
-        }
 
         @Override
         public String getId() {

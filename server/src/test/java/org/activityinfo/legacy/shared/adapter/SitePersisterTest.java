@@ -9,6 +9,7 @@ import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.time.LocalDate;
@@ -28,6 +29,7 @@ import static org.junit.Assert.assertThat;
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 public class SitePersisterTest extends CommandTestCase2 {
 
+    private static final int DATABASE_ID = 1;
     private static final ResourceId PEAR_Activity = CuidAdapter.activityFormClass(1);
     private static final ResourceId CONTENU_DI_KIT_FIELD = CuidAdapter.attributeGroupField(2);
     private static final ResourceId CONTENU_DI_KIT_FIELD_ATTR_VALUE = CuidAdapter.attributeId(3);
@@ -38,15 +40,21 @@ public class SitePersisterTest extends CommandTestCase2 {
         FormClass formClass = assertResolves(locator.getFormClass(PEAR_Activity));
 
         FormInstance siteFormInstance = new FormInstance(CuidAdapter.generateSiteCuid(), formClass.getId());
-        siteFormInstance.set(CONTENU_DI_KIT_FIELD, CONTENU_DI_KIT_FIELD_ATTR_VALUE);
+        siteFormInstance.set(CONTENU_DI_KIT_FIELD, new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
 
         // built-in values
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), 
-                new ReferenceValue(CuidAdapter.partnerInstanceId(1)));
+                new ReferenceValue(
+                        new RecordRef(
+                                CuidAdapter.partnerFormId(DATABASE_ID),
+                                CuidAdapter.partnerRecordId(1))));
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
         siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),
-                new ReferenceValue(CuidAdapter.locationInstanceId(1)));
+                new ReferenceValue(
+                        new RecordRef(
+                            CuidAdapter.locationFormClass(1),
+                            CuidAdapter.locationInstanceId(1))));
 
         assertResolves(locator.persist(siteFormInstance));
 

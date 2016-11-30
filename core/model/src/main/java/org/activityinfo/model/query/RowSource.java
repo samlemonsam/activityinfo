@@ -1,10 +1,10 @@
 package org.activityinfo.model.query;
 
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
 
-public class RowSource implements IsRecord {
+public class RowSource {
 
     private ResourceId rootFormClass;
 
@@ -42,16 +42,19 @@ public class RowSource implements IsRecord {
         return rootFormClass != null ? rootFormClass.hashCode() : 0;
     }
 
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("rootFormClass", rootFormClass);
-        return record;
+
+    public JsonElement toJsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("rootFormId", rootFormClass.asString());
+
+        return object;
     }
 
-    public static RowSource fromRecord(Record record) {
+
+    public static RowSource fromJson(JsonObject object) {
         RowSource source = new RowSource();
-        source.setRootFormClass(record.getResourceId("rootFormClass"));
+        source.setRootFormClass(ResourceId.valueOf(object.get("rootFormId").getAsString()));
         return source;
     }
+
 }

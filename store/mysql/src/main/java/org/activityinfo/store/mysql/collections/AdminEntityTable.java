@@ -94,7 +94,7 @@ public class AdminEntityTable implements SimpleTable {
         mapping.setVersion(level.getVersion());
         
         if(parent != null) {
-            mapping.add(new FieldMapping(parent, "adminEntityParentId", new ReferenceConverter(ADMIN_ENTITY_DOMAIN)));
+            mapping.add(new FieldMapping(parent, "adminEntityParentId", new ReferenceConverter(formId, ADMIN_ENTITY_DOMAIN)));
         }
         return mapping.build();
     }

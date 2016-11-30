@@ -150,7 +150,7 @@ public class Activity implements Serializable {
     }
     
     public ResourceId getPartnerFormClassId() {
-        return CuidAdapter.partnerFormClass(databaseId);
+        return CuidAdapter.partnerFormId(databaseId);
     }
 
     public ResourceId getLocationFormClassId() {

@@ -14,6 +14,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeValue;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.time.LocalDate;
@@ -25,8 +26,6 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Set;
 
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
@@ -59,13 +58,15 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     public static final int IRUMU = 21;
 
+    public static final int TERRITOIRE = 2;
+
     
     @Test
     @OnDataSet("/dbunit/jordan-locations.db.xml")
     public void getLocation() {
         ResourceId classId = locationFormClass(50512);
         FormInstance instance = assertResolves(locator.getFormInstance(classId, locationInstanceId(1590565828)));
-        Set<ResourceId> adminUnits = instance.getReferences(field(classId, ADMIN_FIELD));
+        ReferenceValue adminUnits = (ReferenceValue) instance.get(field(classId, ADMIN_FIELD));
         System.out.println(adminUnits);
     }
 
@@ -78,9 +79,9 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
-        instance.set(locationField(NFI_DIST_ID), locationInstanceId(1));
-        instance.set(partnerField(NFI_DIST_ID), partnerInstanceId(1));
-        instance.set(projectField(NFI_DIST_ID), projectInstanceId(1));
+        instance.set(locationField(NFI_DIST_ID), locationRef(VILLAGE_CLASS, 1));
+        instance.set(partnerField(NFI_DIST_ID), partnerRef(PEAR_DATABASE_ID, 1));
+        instance.set(projectField(NFI_DIST_ID), projectRef(PEAR_DATABASE_ID, 1));
         instance.set(field(NFI_DIST_FORM_CLASS, START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(NFI_DIST_FORM_CLASS, END_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(NFI_DIST_FORM_CLASS, COMMENT_FIELD), NarrativeValue.valueOf("My comment"));
@@ -118,7 +119,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS), HEALTH_CENTER_CLASS);
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "CS Ubuntu");
         instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new GeoPoint(-1, 13));
-        instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entity(IRUMU));
+        instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entityRef(TERRITOIRE, IRUMU));
 
         assertResolves(locator.persist(instance));
 
@@ -140,6 +141,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         result = execute(query);
         assertThat(result.getData(), IsEmptyCollection.empty());
     }
+
 
     @Test
     public void siteDeletion() {

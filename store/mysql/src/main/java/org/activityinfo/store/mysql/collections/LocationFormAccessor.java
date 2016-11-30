@@ -11,10 +11,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -334,8 +331,8 @@ public class LocationFormAccessor implements FormAccessor {
         Set<Integer> set = Sets.newHashSet();
         ReferenceValue value = (ReferenceValue) update.getChangedFieldValues().get(adminFieldId);
         if(value != null) {
-            for (ResourceId resourceId : value.getResourceIds()) {
-                set.add(CuidAdapter.getLegacyIdFromCuid(resourceId));
+            for (RecordRef ref : value.getReferences()) {
+                set.add(CuidAdapter.getLegacyIdFromCuid(ref.getRecordId()));
             }
         }
         return set;

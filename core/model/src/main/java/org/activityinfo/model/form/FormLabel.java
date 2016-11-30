@@ -3,7 +3,6 @@ package org.activityinfo.model.form;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -46,16 +45,6 @@ public class FormLabel extends FormElement {
     public FormLabel setVisible(boolean visible) {
         this.visible = visible;
         return this;
-    }
-
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("id", id.asString());
-        record.set("label", label);
-        record.set("type", "label");
-        record.set("visible", visible);
-        return record;
     }
 
     @Override

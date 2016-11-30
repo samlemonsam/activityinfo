@@ -21,15 +21,13 @@ package org.activityinfo.model.type.subform;
 * #L%
 */
 
-import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.number.Quantity;
 
 /**
  * @author yuriyz on 12/03/2014.
@@ -52,13 +50,6 @@ public class SubFormReferenceType implements ParametrizedFieldType {
         }
 
         @Override
-        public SubFormReferenceType deserializeType(Record typeParameters) {
-            String classId = typeParameters.isString("classReference");
-            return new SubFormReferenceType()
-                    .setClassId(Strings.isNullOrEmpty(classId) ? null : ResourceId.valueOf(classId));
-        }
-
-        @Override
         public FieldType deserializeType(JsonObject parametersObject) {
             ResourceId formId;
             if(parametersObject.has("classReference")) {
@@ -74,13 +65,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
             return new FormClass(ResourceIdPrefixType.TYPE.id("subform"));
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return Quantity.fromRecord(record);
-        }
-        
-        
-        
+
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
@@ -119,10 +104,8 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public Record getParameters() {
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("classReference", classId != null ? classId.asString() : "");
+    public FormInstance getParameters() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

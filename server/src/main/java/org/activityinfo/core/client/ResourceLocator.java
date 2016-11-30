@@ -8,7 +8,6 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.AsyncFormClassProvider;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.IsResource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
@@ -52,13 +51,13 @@ public interface ResourceLocator extends AsyncFormClassProvider {
      * @return a Promise that resolves when the persistance operation completes
      * successfully.
      */
-    Promise<Void> persist(IsResource resource);
+    Promise<Void> persist(FormInstance resource);
 
     Promise<Void> persist(FormClass formClass);
     
-    Promise<Void> persist(List<? extends IsResource> resources);
+    Promise<Void> persist(List<FormInstance> formInstances);
 
-    Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor);
+    Promise<Void> persist(List<FormInstance> formInstances, @Nullable PromisesExecutionMonitor monitor);
 
     Promise<Void> persistOperation(List<PromiseExecutionOperation> resources, @Nullable PromisesExecutionMonitor monitor);
 

@@ -1,13 +1,11 @@
 package org.activityinfo.model.query;
 
+import com.google.gson.JsonObject;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
@@ -15,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonSetter;
 /**
  * Defines a Column within a query
  */
-public class ColumnModel implements IsRecord {
+public class ColumnModel {
 
     public static final String ID_SYMBOL = "_id";
     public static final String CLASS_SYMBOL = "_class";
@@ -83,18 +81,19 @@ public class ColumnModel implements IsRecord {
         return setExpression(path.toExpr());
     }
 
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("id", id);
-        record.set("expression", expression != null ? expression.asExpression() : null);
-        return record;
+
+    public JsonObject toJsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("id", id);
+        object.addProperty("expression", getExpressionAsString());
+        return object;
     }
 
-    public static ColumnModel fromRecord(Record record) {
+    public static ColumnModel fromJson(JsonObject object) {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setId(record.getString("id"));
-        columnModel.setExpression(record.getString("expression"));
+        columnModel.setId(object.get("id").getAsString());
+        columnModel.setExpression(object.get("expression").getAsString());
         return columnModel;
     }
+
 }

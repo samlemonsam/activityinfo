@@ -3,9 +3,7 @@ package org.activityinfo.model.type;
 
 import com.google.gson.JsonElement;
 
-import java.io.Serializable;
-
-public interface FieldType extends Serializable {
+public interface FieldType {
 
     /**
      * @return the {@code FieldTypeClass} of which this {@code FieldType}

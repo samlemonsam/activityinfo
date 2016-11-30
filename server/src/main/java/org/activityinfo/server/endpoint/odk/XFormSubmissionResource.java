@@ -16,10 +16,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.geo.GeoPoint;
@@ -138,7 +135,7 @@ public class XFormSubmissionResource {
                     int newLocationId = new KeyGenerator().generateInt();
                     ResourceId locationFormClassId = Iterables.getOnlyElement(((ReferenceType) fieldType).getRange());
                     int locationTypeId = getLegacyIdFromCuid(locationFormClassId);
-                    FieldValue fieldValue = new ReferenceValue(locationInstanceId(newLocationId));
+                    FieldValue fieldValue = new ReferenceValue(new RecordRef(locationFormClassId, locationInstanceId(newLocationId)));
                     String name = OdkHelper.extractText(nameField.get());
 
                     if (Strings.isNullOrEmpty(name)) {
@@ -192,7 +189,9 @@ public class XFormSubmissionResource {
             .entity("No partner selected").build());
         }
 
-        formInstance.set(partnerFieldId, new ReferenceValue(choices.get(0).getId()));
+        formInstance.set(partnerFieldId, new ReferenceValue(new RecordRef(
+                Iterables.getOnlyElement(partnerFieldType.getRange()),
+                choices.get(0).getId())));
     }
 
     private FieldValue tryParse(FormInstance formInstance, FormField formField, Element element, boolean legacy) {

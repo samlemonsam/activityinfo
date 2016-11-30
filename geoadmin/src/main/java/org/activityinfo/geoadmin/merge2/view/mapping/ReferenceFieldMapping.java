@@ -1,20 +1,19 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
-import com.google.common.base.Function;
+import com.google.appengine.repackaged.com.google.common.collect.Iterables;
 import org.activityinfo.geoadmin.merge2.model.ReferenceMatch;
 import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulSet;
 
-import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Maps a source field to a reference target field using a set of key field pairs.
@@ -77,8 +76,8 @@ public class ReferenceFieldMapping implements FieldMapping {
     public FieldValue mapFieldValue(int sourceIndex) {
         int keyIndex = sourceKeySet.getKeyIndexOfSourceRow(sourceIndex);
         ResourceId targetId = lookupTable.get().getTargetMatchId(keyIndex);
-        
-        return new ReferenceValue(targetId);
+        ResourceId targetFormId = Iterables.getOnlyElement(((ReferenceType) targetReferenceField.getType()).getRange());
+        return new ReferenceValue(new RecordRef(targetFormId, targetId));
     }
 
     @Override

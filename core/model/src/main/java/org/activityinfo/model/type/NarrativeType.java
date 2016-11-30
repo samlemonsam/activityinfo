@@ -1,7 +1,6 @@
 package org.activityinfo.model.type;
 
 import com.google.gson.JsonElement;
-import org.activityinfo.model.resource.Record;
 
 /**
  * Value type that represents a FieldType containing paragraph-like text.
@@ -23,10 +22,6 @@ public class NarrativeType implements FieldType {
             return INSTANCE;
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return NarrativeValue.fromRecord(record);
-        }
     };
 
     private NarrativeType() {

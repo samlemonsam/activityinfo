@@ -2,12 +2,13 @@ package org.activityinfo.model.form;
 
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.eval.*;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.ErrorValue;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 
 import java.util.Map;
@@ -23,7 +24,7 @@ public class FormEvalContext implements EvalContext {
     private final Map<String, ValueSource> fieldMap = Maps.newHashMap();
 
 
-    private Resource formInstance;
+    private FormInstance formInstance;
 
     public FormEvalContext(FormClass formClass) {
         for (FormField field : formClass.getFields()) {
@@ -47,22 +48,13 @@ public class FormEvalContext implements EvalContext {
     }
 
 
-    public FormEvalContext(FormClass formClass, Resource resource) {
-        this(formClass);
-        setInstance(resource);
-    }
-
     public FormEvalContext(FormClass formClass, FormInstance instance) {
         this(formClass);
-        setInstance(instance.asResource());
-    }
-
-    public void setInstance(Resource resource) {
-        this.formInstance = resource;
+        setInstance(instance);
     }
 
     public void setInstance(FormInstance instance) {
-        setInstance(instance.asResource());
+        this.formInstance = instance;
     }
 
     public ResourceId getId() {
@@ -109,8 +101,7 @@ public class FormEvalContext implements EvalContext {
         ValueSource valueSource = symbolMap.get(symbolName);
         if (valueSource == null) {
             // todo : we must fix it, here as temporary solution if symbol name can't be resolved we consider it as ReferenceValue
-            return new ConstantValue(new ReferenceValue(ResourceId.valueOf(symbolName)));
-//            throw new RuntimeException("Unknown symbol '" + symbolName + "'");
+            return new ConstantValue(new EnumValue(ResourceId.valueOf(symbolName)));
         }
         return valueSource;
     }

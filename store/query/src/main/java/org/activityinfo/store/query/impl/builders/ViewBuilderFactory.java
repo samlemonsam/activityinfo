@@ -95,8 +95,8 @@ public class ViewBuilderFactory {
         public String readString(FieldValue value) {
             if(value instanceof ReferenceValue) {
                 ReferenceValue ref = (ReferenceValue) value;
-                if(ref.getResourceIds().size() == 1) {
-                    return ref.getResourceId().asString();
+                if(ref.getReferences().size() == 1) {
+                    return ref.getOnlyReference().getRecordId().asString();
                 }
             }
             return null;

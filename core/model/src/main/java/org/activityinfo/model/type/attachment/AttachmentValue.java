@@ -24,7 +24,6 @@ package org.activityinfo.model.type.attachment;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * @author yuriyz on 8/6/14.
  */
-public class AttachmentValue implements FieldValue, IsRecord {
+public class AttachmentValue implements FieldValue {
 
     private final List<Attachment> values = Lists.newArrayList();
 
@@ -67,14 +66,6 @@ public class AttachmentValue implements FieldValue, IsRecord {
         }
         return result;
     }
-
-    @Override
-    public Record asRecord() {
-        return new Record()
-                .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
-                .set("values", getValuesAsRecords());
-    }
-
 
     @Override
     public JsonElement toJsonElement() {

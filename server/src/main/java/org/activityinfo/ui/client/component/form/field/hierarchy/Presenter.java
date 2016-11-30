@@ -13,6 +13,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
@@ -53,13 +54,13 @@ class Presenter {
         valueUpdater.update(getValue());
     }
 
-    public Promise<Void> setInitialSelection(Iterable<ResourceId> resourceIds) {
-        return setInitialSelection(new ReferenceValue(resourceIds));
+    public Promise<Void> setInitialSelection(Iterable<RecordRef> refs) {
+        return setInitialSelection(new ReferenceValue(refs));
     }
 
     public Promise<Void> setInitialSelection(ReferenceValue value) {
         final InitialSelection initialSelection = new InitialSelection(tree);
-        return initialSelection.fetch(locator, value.getResourceIds()).then(new Function<Void, Void>() {
+        return initialSelection.fetch(locator, value.getReferences()).then(new Function<Void, Void>() {
 
             @Nullable
             @Override
@@ -96,15 +97,15 @@ class Presenter {
     private ReferenceValue getValue() {
         // We want to store the values in a normalized fashion -
         // store only the leaf nodes, their parents are redundant
-        Set<ResourceId> instanceIds = Sets.newHashSet();
+        Set<RecordRef> refs = Sets.newHashSet();
         Set<ResourceId> parentIds = Sets.newHashSet();
         for(Choice choice : selection.values()) {
-            instanceIds.add(choice.getId());
+            refs.add(choice.getRef());
             if(choice.hasParent()) {
                 parentIds.add(choice.getParentId());
             }
         }
-        return new ReferenceValue(instanceIds);
+        return new ReferenceValue(refs);
     }
 
     private void clearChildren(Level parent) {

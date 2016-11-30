@@ -2,7 +2,6 @@ package org.activityinfo.ui.client.component.form.field;
 
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -23,11 +22,7 @@ public class EnumFieldWidget implements FormFieldWidget<EnumValue> {
             if (size > FormFieldWidgetFactory.SMALL_BALANCE_NUMBER && size <= FormFieldWidgetFactory.MEDIUM_BALANCE_NUMBER) {
                 return new EnumComboboxWidget(enumType, valueUpdater);
             } else if (size > FormFieldWidgetFactory.MEDIUM_BALANCE_NUMBER) {
-                if (enumType.getCardinality() == Cardinality.SINGLE) {
-                    return new EnumSuggestBoxWidget(enumType, valueUpdater);
-                } else {
-                    return new EnumComboboxWidget(enumType, valueUpdater);
-                }
+                return new EnumComboboxWidget(enumType, valueUpdater);
             }
         }
         return new EnumListFieldWidget(enumType, valueUpdater, fieldWidgetMode);

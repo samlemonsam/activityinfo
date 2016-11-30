@@ -321,8 +321,8 @@ public class RecordHistoryBuilder {
             if(form.isPresent()) {
                 Optional<ResourceId> labelFieldId = findLabelField(form.get().getFormClass());
 
-                for (ResourceId recordId : value.getResourceIds()) {
-                    Optional<FormRecord> record = form.get().get(recordId);
+                for (RecordRef ref : value.getReferences()) {
+                    Optional<FormRecord> record = form.get().get(ref.getRecordId());
                     if (record.isPresent()) {
                         JsonElement labelValue = null;
 
@@ -335,7 +335,7 @@ public class RecordHistoryBuilder {
                         }
 
                         if (labelValue != null && labelValue.isJsonPrimitive()) {
-                            labelMap.put(recordId, labelValue.getAsString());
+                            labelMap.put(ref.getRecordId(), labelValue.getAsString());
                         }
                     }
                 }
@@ -343,10 +343,10 @@ public class RecordHistoryBuilder {
         }
 
         List<String> list = new ArrayList<>();
-        for (ResourceId recordId : value.getResourceIds()) {
-            String label = labelMap.get(recordId);
+        for (RecordRef ref : value.getReferences()) {
+            String label = labelMap.get(ref.getRecordId());
             if(label == null) {
-                list.add(recordId.asString());
+                list.add(ref.toQualifiedString());
             } else {
                 list.add(label);
             }

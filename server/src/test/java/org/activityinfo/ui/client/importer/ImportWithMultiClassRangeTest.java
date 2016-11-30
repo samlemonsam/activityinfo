@@ -10,6 +10,7 @@ import org.activityinfo.core.server.type.converter.JvmConverterFactory;
 import org.activityinfo.core.shared.form.tree.Hierarchy;
 import org.activityinfo.core.shared.form.tree.HierarchyPrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
@@ -26,15 +27,16 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
-import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
@@ -211,7 +213,13 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
         Promise<FormInstance> record = locator.getFormInstance(SCHOOL_FORM_CLASS, id);
         ReferenceValue value = (ReferenceValue) record.get().get(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.ADMIN_FIELD));
-        return value.getResourceIds();
+
+        Set<ResourceId> recordIds = new HashSet<>();
+        for (RecordRef recordRef : value.getReferences()) {
+            recordIds.add(recordRef.getRecordId());
+        }
+
+        return recordIds;
     }
 
     public static Set<ResourceId> set(ResourceId... resourceIds) {

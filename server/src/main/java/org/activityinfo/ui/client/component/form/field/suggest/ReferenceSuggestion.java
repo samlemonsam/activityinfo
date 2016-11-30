@@ -3,27 +3,21 @@ package org.activityinfo.ui.client.component.form.field.suggest;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormInstanceLabeler;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.RecordRef;
 
-public class Suggestion implements SuggestOracle.Suggestion {
+public class ReferenceSuggestion implements SuggestOracle.Suggestion {
 
     private final String label;
-    private final ResourceId id;
+    private final RecordRef ref;
 
-    public Suggestion(String label, ResourceId id) {
+    public ReferenceSuggestion(String label, RecordRef ref) {
         this.label = label;
-        this.id = id;
+        this.ref = ref;
     }
 
-    public Suggestion(FormInstance instance) {
+    public ReferenceSuggestion(FormInstance instance) {
         this.label = FormInstanceLabeler.getLabel(instance);
-        this.id = instance.getId();
-    }
-
-    public Suggestion(EnumItem item) {
-        this.label = item.getLabel();
-        this.id = item.getId();
+        this.ref = new RecordRef(instance.getClassId(), instance.getId());
     }
 
     @Override
@@ -36,7 +30,7 @@ public class Suggestion implements SuggestOracle.Suggestion {
         return label;
     }
 
-    public ResourceId getId() {
-        return id;
+    public RecordRef getRef() {
+        return ref;
     }
 }

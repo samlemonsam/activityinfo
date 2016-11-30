@@ -1,13 +1,13 @@
 package org.activityinfo.model.type;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 
@@ -36,14 +36,6 @@ public class ReferenceType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(Record parameters) {
-            ReferenceType type = new ReferenceType();
-            type.setCardinality(Cardinality.valueOf(parameters.getString("cardinality")));
-            type.setRange(parameters.getStringList("range"));
-            return type;
-        }
-
-        @Override
         public FieldType deserializeType(JsonObject parametersObject) {
             
             Set<ResourceId> range = new HashSet<>();
@@ -65,14 +57,8 @@ public class ReferenceType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldValue deserialize(Record record) {
-            return ReferenceValue.fromRecord(record);
-        }
-
-        @Override
         public FormClass getParameterFormClass() {
-            FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id(getId()));
-            return formClass;
+            return new FormClass(ResourceIdPrefixType.TYPE.id(getId()));
         }
     }
 
@@ -96,21 +82,29 @@ public class ReferenceType implements ParametrizedFieldType {
 
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
-        if(value instanceof JsonPrimitive) {
-            ResourceId id = ResourceId.valueOf(value.getAsString());
-            return new ReferenceValue(id);
-        } else if(value instanceof JsonArray) {
-            Set<ResourceId> ids = new HashSet<>();
+
+        if(value.isJsonNull()) {
+            return new ReferenceValue();
+        } else if(value.isJsonArray()) {
             JsonArray array = (JsonArray) value;
+            Set<RecordRef> refs = new HashSet<>();
             for (JsonElement jsonElement : array) {
-                ResourceId id = ResourceId.valueOf(jsonElement.getAsString());
-                ids.add(id);
+                refs.add(parseRef(jsonElement.getAsString()));
             }
-            return new ReferenceValue(ids);
+            return new ReferenceValue(refs);
         } else {
-            return null;
+            return new ReferenceValue(parseRef(value.getAsString()));
         }
-        
+    }
+
+    private RecordRef parseRef(String ref) {
+        int separator = ref.indexOf(':');
+        if(separator == -1) {
+            ResourceId formId = Iterables.getOnlyElement(range);
+            return new RecordRef(formId, ResourceId.valueOf(ref));
+        } else {
+            return RecordRef.fromQualifiedString(ref);
+        }
     }
 
     public Cardinality getCardinality() {
@@ -151,11 +145,8 @@ public class ReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public Record getParameters() {
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("range", toArray(range))
-                .set("cardinality", cardinality);
+    public FormInstance getParameters() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

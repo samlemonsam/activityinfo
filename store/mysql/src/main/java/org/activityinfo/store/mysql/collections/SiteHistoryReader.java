@@ -10,6 +10,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.time.LocalDate;
@@ -104,15 +105,15 @@ public class SiteHistoryReader {
 
             } else if(fieldName.equals("partnerId")) {
                 valueMap.put(fieldId(CuidAdapter.PARTNER_FIELD), 
-                        parseRef(jsonEntry.getValue(), CuidAdapter.PARTNER_DOMAIN));
+                        parseRef(jsonEntry.getValue(), activity.getPartnerFormClassId(), CuidAdapter.PARTNER_DOMAIN));
 
             } else if(fieldName.equals("projectId")) {
                 valueMap.put(fieldId(CuidAdapter.PROJECT_FIELD),
-                        parseRef(jsonEntry.getValue(), CuidAdapter.PROJECT_DOMAIN));
+                        parseRef(jsonEntry.getValue(), activity.getProjectFormClassId(), CuidAdapter.PROJECT_DOMAIN));
 
             } else if(fieldName.equals("locationId")) {
                 valueMap.put(fieldId(CuidAdapter.LOCATION_FIELD),
-                        parseRef(jsonEntry.getValue(), CuidAdapter.LOCATION_DOMAIN));
+                        parseRef(jsonEntry.getValue(), activity.getLocationFormClassId(), CuidAdapter.LOCATION_DOMAIN));
 
             } else if(fieldName.startsWith("I")) {
                 int mIndex = fieldName.indexOf("M");
@@ -128,13 +129,13 @@ public class SiteHistoryReader {
         return valueMap;
     }
 
-    private FieldValue parseRef(JsonElement value, char domain) {
+    private FieldValue parseRef(JsonElement value, ResourceId formId, char domain) {
         if(value.isJsonObject()) {
             JsonObject object = value.getAsJsonObject();
             if(object.get("type").getAsString().equals("Integer")) {
                 int id = object.get("value").getAsInt();
                 ResourceId recordId = CuidAdapter.cuid(domain, id);
-                return new ReferenceValue(recordId);
+                return new ReferenceValue(new RecordRef(formId, recordId));
             }
         }
         return null;

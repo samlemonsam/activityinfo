@@ -2,14 +2,15 @@ package org.activityinfo.model.query;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.expr.ExprValue;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
@@ -20,7 +21,7 @@ import java.util.List;
  * Describes a Table to be constructed from a
  * FormTree.
  */
-public class QueryModel implements IsRecord {
+public class QueryModel {
 
     private final List<RowSource> rowSources = Lists.newArrayList();
     private final List<ColumnModel> columns = Lists.newArrayList();
@@ -173,39 +174,51 @@ public class QueryModel implements IsRecord {
         }
         return sb.toString();
     }
-
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("rowSources", Resources.asRecordList(rowSources));
-        record.set("columns", Resources.asRecordList(columns));
-        record.set("filter", filter != null ? filter.asExpression() : null);
-        return record;
-    }
     
     public String toJsonString() {
-        return Resources.toJson(asRecord());
+        return toJsonElement().getAsString();
     }
 
-    public static QueryModel fromRecord(Record record) {
+    public static QueryModel fromJson(String json) {
         QueryModel queryModel = new QueryModel();
 
-        for (Record rowResource : record.getRecordList("rowSources")) {
-            queryModel.getRowSources().add(RowSource.fromRecord(rowResource));
+        JsonParser jsonParser = new JsonParser();
+        JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
+
+        JsonArray rowSources = jsonObject.getAsJsonArray("rowSources");
+        for (JsonElement rowSource : rowSources) {
+            queryModel.getRowSources().add(RowSource.fromJson(rowSource.getAsJsonObject()));
         }
 
-        for (Record columns : record.getRecordList("columns")) {
-            queryModel.getColumns().add(ColumnModel.fromRecord(columns));
+        for (JsonElement column : jsonObject.getAsJsonArray("columns")) {
+            queryModel.getColumns().add(ColumnModel.fromJson(column.getAsJsonObject()));
         }
 
-        String filter = record.isString("filter");
-        if (!Strings.isNullOrEmpty(filter)) {
-            queryModel.setFilter(filter);
+        if(jsonObject.has("filter")) {
+            String filter = jsonObject.get("filter").getAsString();
+            if (!Strings.isNullOrEmpty(filter)) {
+                queryModel.setFilter(filter);
+            }
         }
         return queryModel;
     }
 
-    public static QueryModel fromJson(String json) {
-        return fromRecord(Resources.recordFromJson(json));
+    public JsonObject toJsonElement() {
+
+        JsonArray sourcesArray = new JsonArray();
+        for (RowSource rowSource : rowSources) {
+            sourcesArray.add(rowSource.toJsonElement());
+        }
+
+        JsonArray columnsArray = new JsonArray();
+        for (ColumnModel column : columns) {
+            columnsArray.add(column.toJsonElement());
+        }
+
+        JsonObject object = new JsonObject();
+        object.add("rowSources", sourcesArray);
+        object.add("columns", columnsArray);
+        return object;
     }
 }
 

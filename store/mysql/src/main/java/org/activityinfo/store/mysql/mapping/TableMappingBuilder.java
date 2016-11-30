@@ -85,7 +85,7 @@ public class TableMappingBuilder {
     }
 
     public void addReferenceField(FormField field, final char domain, String columnName) {
-        add(new FieldMapping(field, columnName, new ReferenceConverter(domain)));
+        add(new FieldMapping(field, columnName, new ReferenceConverter(formClass.getId(), domain)));
     }
     
     public void addGeoAreaField(FormField field) {

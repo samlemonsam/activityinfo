@@ -33,7 +33,7 @@ public class FieldConverters {
         } else if (type instanceof BarcodeType) {
             return BARCODE;
         } else if(type instanceof ReferenceType) {
-            return REFERENCE;
+            return new ReferenceFieldConverter((ReferenceType) type);
         } else if(type instanceof NarrativeType) {
             return NARRATIVE;
         } else if(type instanceof GeoPointType) {
@@ -44,21 +44,7 @@ public class FieldConverters {
             return recordType(type);
         }
     }
-    
-    public static FieldConverter<?> forParentField() {
-        return new FieldConverter<ReferenceValue>() {
-            @Override
-            public Object toHrdProperty(ReferenceValue value) {
-                return value.getResourceId().asString();
-            }
 
-            @Override
-            public ReferenceValue toFieldValue(Object hrdValue) {
-                return new ReferenceValue(ResourceId.valueOf((String)hrdValue));
-            }
-        };
-    }
-    
     public static FieldConverter<Quantity> quantity(final QuantityType type) {
         return new FieldConverter<Quantity>() {
 
@@ -100,19 +86,30 @@ public class FieldConverters {
             return BarcodeValue.valueOf((String)hrdValue);
         }
     };
-    
-    public static final FieldConverter<ReferenceValue> REFERENCE = new FieldConverter<ReferenceValue>() {
-    
+
+
+    private static class ReferenceFieldConverter implements FieldConverter<ReferenceValue> {
+
+        private ResourceId formId;
+
+        private ReferenceFieldConverter(ReferenceType type) {
+            if(type.getRange().size() == 1) {
+                this.formId = type.getRange().iterator().next();
+            } else {
+                this.formId = null;
+            }
+        }
+
         @Override
         public Object toHrdProperty(ReferenceValue value) {
-            if (value.getResourceIds().isEmpty()) {
+            if (value.getReferences().isEmpty()) {
                 return null;
-            } else if (value.getResourceIds().size() == 1) {
-                return value.getResourceId().asString();
+            } else if (value.getReferences().size() == 1) {
+                return value.getOnlyReference().toQualifiedString();
             } else {
                 List<String> ids = new ArrayList<>();
-                for (ResourceId resourceId : value.getResourceIds()) {
-                    ids.add(resourceId.asString());
+                for (RecordRef ref : value.getReferences()) {
+                    ids.add(ref.toQualifiedString());
                 }
                 return ids;
             }
@@ -120,18 +117,31 @@ public class FieldConverters {
 
         @Override
         public ReferenceValue toFieldValue(Object hrdValue) {
-            Set<ResourceId> resourceIdSet = new HashSet<>();
+            Set<RecordRef> refSet = new HashSet<>();
             if (hrdValue instanceof String) {
-                resourceIdSet.add(ResourceId.valueOf((String) hrdValue));
+                refSet.add(parseRef((String) hrdValue));
             } else if (hrdValue instanceof List) {
                 List<?> list = (List<?>) hrdValue;
                 for (Object id : list) {
                     if (id instanceof String) {
-                        resourceIdSet.add(ResourceId.valueOf((String) id));
+                        refSet.add(parseRef((String) id));
                     }
                 }
             }
-            return new ReferenceValue(resourceIdSet);
+            return new ReferenceValue(refSet);
+        }
+
+        private RecordRef parseRef(String hrdValue) {
+            int separatorPos = hrdValue.indexOf(':');
+            if(separatorPos == -1) {
+                if(formId == null) {
+                    throw new RuntimeException("Encountered legacy unqualified reference in a reference with" +
+                            " multiple ranges. Ref: " + hrdValue);
+                }
+                return new RecordRef(formId, ResourceId.valueOf(hrdValue));
+            } else {
+                return RecordRef.fromQualifiedString(hrdValue);
+            }
         }
     };
     

@@ -109,7 +109,7 @@ public class ActivityUpdater {
         }
 
         // Ensure partner type is correct:
-        partnerField.setType(new ReferenceType(Cardinality.SINGLE, CuidAdapter.partnerFormClass(databaseId)));
+        partnerField.setType(new ReferenceType(Cardinality.SINGLE, CuidAdapter.partnerFormId(databaseId)));
 
         return formClass;
     }

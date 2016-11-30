@@ -9,6 +9,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.*;
 import org.activityinfo.store.hrd.entity.FormEntity;
@@ -60,7 +61,7 @@ public class SiteFormAccessor implements FormAccessor {
 
             String partnerFilter = String.format("%s=%s",
                     CuidAdapter.partnerField(activity.getId()),
-                    CuidAdapter.partnerInstanceId(databasePermission.getPartnerId()));
+                    CuidAdapter.partnerRecordId(databasePermission.getPartnerId()));
 
             if(databasePermission.isViewAll()) {
                 permissions.setVisible(true);
@@ -152,10 +153,10 @@ public class SiteFormAccessor implements FormAccessor {
                 attributeValues.update(change.getKey(), change.getValue());
             } else if(change.getKey().equals(CuidAdapter.locationField(activity.getId()))) {
                 ReferenceValue value = (ReferenceValue) change.getValue();
-                if(value.getResourceId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
+                if(value.getOnlyReference().getRecordId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
                     baseTable.set(change.getKey(), change.getValue());
                 } else {
-                    baseTable.set(change.getKey(), dummyLocationReference(value.getResourceId()));
+                    baseTable.set(change.getKey(), dummyLocationReference(value.getOnlyReference()));
                 }
             } else {
                 baseTable.set(change.getKey(), change.getValue());
@@ -204,12 +205,12 @@ public class SiteFormAccessor implements FormAccessor {
     }
 
 
-    private FieldValue dummyLocationReference(ResourceId resourceId)  {
+    private FieldValue dummyLocationReference(RecordRef ref)  {
         if(activity.getAdminLevelId() == null) {
             throw new IllegalStateException("Location type is not bound, but value is admin entity");
         }
         
-        int adminEntityId = CuidAdapter.getLegacyIdFromCuid(resourceId);
+        int adminEntityId = CuidAdapter.getLegacyIdFromCuid(ref.getRecordId());
         
         try {
 
@@ -220,7 +221,10 @@ public class SiteFormAccessor implements FormAccessor {
 
             try (ResultSet rs = queryExecutor.query(sql)) {
                 if (rs.next()) {
-                    return new ReferenceValue(CuidAdapter.locationInstanceId(rs.getInt(1)));
+                    return new ReferenceValue(
+                            new RecordRef(
+                                    CuidAdapter.locationFormClass(activity.getLocationTypeId()),
+                                    CuidAdapter.locationInstanceId(rs.getInt(1))));
                 }
             }
 
@@ -241,7 +245,11 @@ public class SiteFormAccessor implements FormAccessor {
                 adminEntityId = queryAdminParent(adminEntityId);
             }
 
-            return new ReferenceValue(locationId);
+            return new ReferenceValue(
+                    new RecordRef(
+                            CuidAdapter.locationFormClass(activity.getLocationTypeId()),
+                            locationId));
+
         } catch (SQLException e) {
             throw new RuntimeException("Failed to create dummy location row", e);
         }

@@ -89,7 +89,7 @@ public class ReferenceMapWidget implements FormFieldWidget<ReferenceValue> {
     }
 
     private String getLabel(ReferenceValue value) {        ;
-        return MapItem.byId(items, value.getResourceId().asString()).get().getLabel();
+        return MapItem.byId(items, value.getOnlyReference().getRecordId().asString()).get().getLabel();
     }
 
     @Override

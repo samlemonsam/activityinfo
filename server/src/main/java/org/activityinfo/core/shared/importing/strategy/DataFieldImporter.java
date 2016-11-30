@@ -12,6 +12,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.BuiltinFields;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.promise.Promise;
 
 import java.util.Collections;
@@ -25,7 +26,7 @@ public class DataFieldImporter implements FieldImporter {
 
     private ColumnAccessor source;
     private ImportTarget target;
-    private Converter converter;
+    private Converter<String, FieldValue> converter;
     private FormTree.Node node;
     private ImportModel model;
 
