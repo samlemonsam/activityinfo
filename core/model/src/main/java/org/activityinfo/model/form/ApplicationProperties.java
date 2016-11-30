@@ -1,4 +1,4 @@
-package org.activityinfo.core.shared.application;
+package org.activityinfo.model.form;
 
 import org.activityinfo.model.resource.ResourceId;
 

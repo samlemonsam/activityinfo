@@ -205,9 +205,12 @@ public class FormField extends FormElement {
         
         object.addProperty("type", type.getTypeClass().getId());
 
-        JsonArray superPropertiesArray = new JsonArray();
-        for (ResourceId superProperty : superProperties) {
-            superPropertiesArray.add(new JsonPrimitive(superProperty.asString()));
+        if(!superProperties.isEmpty()) {
+            JsonArray superPropertiesArray = new JsonArray();
+            for (ResourceId superProperty : superProperties) {
+                superPropertiesArray.add(new JsonPrimitive(superProperty.asString()));
+            }
+            object.add("superProperties", superPropertiesArray);
         }
 
         if(type instanceof ParametrizedFieldType) {
@@ -235,6 +238,13 @@ public class FormField extends FormElement {
         }
         if(jsonObject.has("required")) {
             field.setRequired(jsonObject.get("required").getAsBoolean());
+        }
+
+        if(jsonObject.has("superProperties")) {
+            JsonArray superPropertiesArray = jsonObject.get("superProperties").getAsJsonArray();
+            for (JsonElement jsonElement : superPropertiesArray) {
+                field.addSuperProperty(ResourceId.valueOf(jsonElement.getAsString()));
+            }
         }
         
         String type;
