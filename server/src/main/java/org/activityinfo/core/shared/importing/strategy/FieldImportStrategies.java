@@ -2,7 +2,7 @@ package org.activityinfo.core.shared.importing.strategy;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.core.client.type.converter.JsConverterFactory;
-import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.core.shared.type.converter.FieldParserFactory;
 import org.activityinfo.model.formTree.FormTree;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class FieldImportStrategies {
 
     private List<FieldImportStrategy> strategies = Lists.newArrayList();
 
-    private FieldImportStrategies(ConverterFactory converterFactory) {
+    private FieldImportStrategies(FieldParserFactory converterFactory) {
         strategies.add(new GeographicPointImportStrategy(converterFactory));
         strategies.add(new SingleClassReferenceStrategy());
         strategies.add(new DataFieldImportStrategy(converterFactory));
@@ -32,7 +32,7 @@ public class FieldImportStrategies {
     }
 
     // server side may provide own convertor here explicitly : JvmConverterFactory.get()
-    public static FieldImportStrategies get(ConverterFactory converterFactory) {
+    public static FieldImportStrategies get(FieldParserFactory converterFactory) {
         if(INSTANCE == null) {
             INSTANCE = new FieldImportStrategies(converterFactory);
         }

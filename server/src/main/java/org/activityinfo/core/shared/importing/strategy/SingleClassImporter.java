@@ -11,6 +11,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
@@ -99,15 +100,16 @@ public class SingleClassImporter implements FieldImporter {
         for (int i = 0; i != sources.size(); ++i) {
             if (score.getImported()[i] == null) {
                 if(required) {
-                    results.add(ValidationResult.error("required missing").setInstanceId(instanceId));
+                    results.add(ValidationResult.error("required missing").setRef(new RecordRef(rangeFormId, instanceId)));
                 } else {
-                    results.add(ValidationResult.missing().setInstanceId(instanceId));
+                    results.add(ValidationResult.missing().setRef(new RecordRef(rangeFormId, instanceId)));
                 }
             } else if (bestMatchIndex == -1) {
                 results.add(ValidationResult.error("No match"));
             } else {
                 String matched = scoreSource.getReferenceValues().get(bestMatchIndex)[i];
-                results.add(ValidationResult.converted(matched, score.getBestScores()[i]).setInstanceId(instanceId));
+                results.add(ValidationResult.converted(matched, score.getBestScores()[i])
+                        .setRef(new RecordRef(rangeFormId, instanceId)));
             }
         }
     }
@@ -118,7 +120,7 @@ public class SingleClassImporter implements FieldImporter {
         final List<ValidationResult> validationResults = Lists.newArrayList();
         validateInstance(row, validationResults);
         for (ValidationResult result : validationResults) {
-            if (result.isPersistable() && result.getInstanceId() != null) {
+            if (result.isPersistable() && result.getRef() != null) {
                 instance.set(fieldId, new ReferenceValue(result.getRef()));
                 break;
             }

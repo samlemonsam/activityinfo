@@ -1,21 +1,19 @@
 package org.activityinfo.core.client.type.converter;
 
-import org.activityinfo.core.client.type.formatter.JsDateFormatterFactory;
 import org.activityinfo.core.client.type.formatter.JsQuantityFormatterFactory;
-import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.core.shared.type.converter.FieldParserFactory;
 
 /**
  * Creates a converter for a specific field type
  */
 public class JsConverterFactory {
 
-    private static ConverterFactory INSTANCE;
+    private static FieldParserFactory INSTANCE;
 
-    public static ConverterFactory get() {
+    public static FieldParserFactory get() {
         if(INSTANCE == null) {
-            INSTANCE = new ConverterFactory(
+            INSTANCE = new FieldParserFactory(
                     new JsQuantityFormatterFactory(),
-                    new JsDateFormatterFactory().create(),
                     new JsCoordinateNumberFormatter());
         }
         return INSTANCE;

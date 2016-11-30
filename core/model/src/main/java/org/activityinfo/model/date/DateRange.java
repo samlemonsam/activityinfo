@@ -46,6 +46,11 @@ public class DateRange implements Serializable {
         this.end = end;
     }
 
+    public DateRange(org.activityinfo.model.type.time.LocalDate start, org.activityinfo.model.type.time.LocalDate end) {
+        this.start = start.atMidnightInMyTimezone();
+        this.end = end.atMidnightInMyTimezone();
+    }
+
     public Date getStart() {
         return start;
     }

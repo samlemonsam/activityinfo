@@ -2,7 +2,7 @@ package org.activityinfo.core.shared.importing.source;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.core.shared.importing.match.ColumnTypeGuesser;
-import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.core.shared.type.converter.FieldParserFactory;
 
 import java.util.Date;
 import java.util.List;
@@ -89,7 +89,7 @@ public class PastedTable implements SourceTable {
         return parsedRows;
     }
 
-    public void guessColumnsType(ConverterFactory converterFactory) {
+    public void guessColumnsType(FieldParserFactory converterFactory) {
         ensureRowsParsed();
         for (int i = 0; i < columns.size(); i++) {
             columns.get(i).setGuessedType(new ColumnTypeGuesser(columnRowValues(i), converterFactory).guessType());
