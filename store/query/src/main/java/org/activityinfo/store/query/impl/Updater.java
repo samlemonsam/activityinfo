@@ -104,14 +104,14 @@ public class Updater {
         
 
         FormClass formClass = collection.get().getFormClass();
-        RecordUpdate update = parseChange(formClass, changeObject);
+        RecordUpdate update = parseChange(formClass, changeObject, this.userId);
 
 
         executeUpdate(collection.get(), update);
     }
 
     @VisibleForTesting
-    static RecordUpdate parseChange(FormClass formClass, JsonObject changeObject) {
+    static RecordUpdate parseChange(FormClass formClass, JsonObject changeObject, int userId) {
         
         // This resource exists, make sure the existing class matches the provided @class
         // if given explicitly
@@ -127,6 +127,7 @@ public class Updater {
         }
 
         RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
         update.setRecordId(parseId(changeObject, "@id"));
         update.setDeleted(parseDeletedFlag(changeObject));
 

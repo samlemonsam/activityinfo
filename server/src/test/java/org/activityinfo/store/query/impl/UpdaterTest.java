@@ -100,7 +100,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.add("Q1", JsonNull.INSTANCE);
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, );
 
         assertTrue(update.getChangedFieldValues().containsKey(fieldId));
     }
@@ -116,7 +116,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", 41.3);
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, );
         
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -132,7 +132,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "41.3");
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, );
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -148,7 +148,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "4.1.3");
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, );
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -164,7 +164,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "Hello world");
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, );
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
