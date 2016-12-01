@@ -22,7 +22,9 @@ package org.activityinfo.model.type.subform;
 */
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -51,11 +53,17 @@ public class SubFormReferenceType implements ParametrizedFieldType {
 
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
-            ResourceId formId;
+            JsonElement formIdElement;
             if(parametersObject.has("classReference")) {
-                formId = ResourceId.valueOf(parametersObject.get("classReference").getAsString());
+                formIdElement = parametersObject.get("classReference");
             } else {
-                formId = ResourceId.valueOf(parametersObject.get("formId").getAsString());
+                formIdElement = parametersObject.get("formId");
+            }
+            ResourceId formId;
+            if(formIdElement.isJsonNull()) {
+                formId = null;
+            } else {
+                formId = ResourceId.valueOf(formIdElement.getAsString());
             }
             return new SubFormReferenceType(formId);
         }
@@ -111,7 +119,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     @Override
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
-        object.addProperty("formId", classId.asString());
+        object.add("formId", classId == null ? JsonNull.INSTANCE : new JsonPrimitive(classId.asString()));
         return object;
     }
 
