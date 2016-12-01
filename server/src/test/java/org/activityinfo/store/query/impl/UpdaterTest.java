@@ -1,6 +1,5 @@
 package org.activityinfo.store.query.impl;
 
-import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -11,14 +10,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.service.store.FormAccessor;
-import org.activityinfo.service.store.FormCatalog;
-import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -169,13 +163,5 @@ public class UpdaterTest {
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
 
-
-    private FormCatalog emptyCatalog() {
-        FormCatalog catalog = EasyMock.createMock(FormCatalog.class);
-        expect(catalog.lookupForm(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<FormAccessor>absent());
-        expect(catalog.getForm(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<FormAccessor>absent());
-        replay(catalog);
-        return catalog;
-    }
 
 }

@@ -23,7 +23,6 @@ package org.activityinfo.model.date;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Preconditions;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 
 import java.io.Serializable;
@@ -157,17 +156,13 @@ public class EpiWeek implements Serializable {
         Date date = new LocalDate(getYear(), 1, 1).atMidnightInMyTimezone();
         int dayInYearInsideWeek = getWeekInYear() * 7 - 4;
 
-        if (GWT.isClient()) {
-            CalendarUtil.addDaysToDate(date, dayInYearInsideWeek);
-            DayOfWeek dateOfWeek = DayOfWeek.dayOfWeek(date);
+        CalendarUtil.addDaysToDate(date, dayInYearInsideWeek);
+        DayOfWeek dateOfWeek = DayOfWeek.dayOfWeek(date);
 
-            Date startDate = CalendarUtil.copyDate(date);
-            CalendarUtil.addDaysToDate(startDate, -dateOfWeek.getValue());
-            Date endDate = CalendarUtil.copyDate(date);
-            CalendarUtil.addDaysToDate(endDate, 6 - dateOfWeek.getValue());
-            return new DateRange(startDate, endDate);
-        } else {
-            throw new UnsupportedOperationException("todo");
-        }
+        Date startDate = CalendarUtil.copyDate(date);
+        CalendarUtil.addDaysToDate(startDate, -dateOfWeek.getValue());
+        Date endDate = CalendarUtil.copyDate(date);
+        CalendarUtil.addDaysToDate(endDate, 6 - dateOfWeek.getValue());
+        return new DateRange(startDate, endDate);
     }
 }
