@@ -1,6 +1,6 @@
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
-import com.google.appengine.repackaged.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.activityinfo.geoadmin.merge2.model.ReferenceMatch;
 import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;

@@ -1,6 +1,6 @@
 package org.activityinfo.store.mysql.update;
 
-import com.google.appengine.repackaged.com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.form.FormClass;

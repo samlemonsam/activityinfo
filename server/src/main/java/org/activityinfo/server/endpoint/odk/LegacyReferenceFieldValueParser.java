@@ -1,6 +1,6 @@
 package org.activityinfo.server.endpoint.odk;
 
-import com.google.appengine.repackaged.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
