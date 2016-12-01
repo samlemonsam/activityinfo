@@ -7,8 +7,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.core.shared.form.tree.Hierarchy;
-import org.activityinfo.core.shared.form.tree.HierarchyPrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
@@ -19,7 +17,6 @@ import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -87,9 +84,6 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
         FormTree formTree = assertResolves(formTreeBuilder.apply(NFI_DISTRIBUTION_FORM_CLASS));
         FormTreePrettyPrinter.print(formTree);
-
-        Hierarchy hierarchy = new Hierarchy(formTree.getNodeByPath(new FieldPath(CuidAdapter.locationField(33))));
-        HierarchyPrettyPrinter.prettyPrint(hierarchy);
 
         importModel = new ImportModel(formTree);
         importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));

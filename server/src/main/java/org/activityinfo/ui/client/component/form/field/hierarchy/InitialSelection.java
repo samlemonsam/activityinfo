@@ -1,12 +1,16 @@
 package org.activityinfo.ui.client.component.form.field.hierarchy;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,54 +32,41 @@ class InitialSelection {
         }
     }
 
-    private Promise<Void> fetchLabelAndParentIds(final ResourceLocator locator, Set<RecordRef> recordIds) {
-        return Promise.rejected(new UnsupportedOperationException("TODO"));
-        
-//        QueryModel queryModel = new QueryModel();
-//        for (Level level : hierarchy.getLevels()) {
-//            queryModel.addRowSource(level.getClassId());
-//        }
-//        queryModel.selectResourceId().as("id");
-//        queryModel.selectExpr("label").as("label");
-//        queryModel.selectExpr("parent").as("parent");
-//        queryModel.setFilter(Exprs.idEqualTo(recordIds));
-//        
-//        queryModel.setFilter();
-//        
-//        InstanceQuery query = InstanceQuery
-//                .select(LABEL_PROPERTY, PARENT_PROPERTY)
-//                .where(new IdCriteria(null, recordIds))
-//                .build();
-//
-//        return locator.query(query)
-//                  .join(new Function<List<Projection>, Promise<Void>>() {
-//                      @Override
-//                      public Promise<Void> apply(List<Projection> projections) {
-//
-//                          Set<ResourceId> parents = populateSelection(projections);
-//                          if (parents.isEmpty()) {
-//                              return Promise.done();
-//                          } else {
-//                              return fetchLabelAndParentIds(locator, parents);
-//                          }
-//                      }
-//                  });
+    private Promise<Void> fetchLabelAndParentIds(final ResourceLocator locator, final Set<RecordRef> references) {
+
+
+        List<Promise<Void>> promises = new ArrayList<>();
+        for (RecordRef reference : references) {
+            promises.add(locator.getFormInstance(reference.getFormId(), reference.getRecordId())
+                    .join(new Function<FormInstance, Promise<Void>>() {
+
+                        @Nullable
+                        @Override
+                        public Promise<Void> apply(@Nullable FormInstance instance) {
+                            Set<RecordRef> parentsToFetch = populateSelection(instance);
+                            if (parentsToFetch.isEmpty()) {
+                                return Promise.done();
+                            } else {
+                                return fetchLabelAndParentIds(locator, parentsToFetch);
+                            }
+                        }
+                    }));
+        }
+
+        return Promise.waitAll(promises);
     }
 
-    private Set<ResourceId> populateSelection(List<Choice> choices) {
-        Set<ResourceId> parents = Sets.newHashSet();
-        for(Choice choice : choices) {
-            Level level = hierarchy.getLevel(choice.getRootClassId());
-            if(level != null) {
-                selection.put(choice.getRootClassId(), choice);
-                if(!level.isRoot()) {
-                    ResourceId parentId = choice.getParentId();
-                    assert parentId != null;
-                    parents.add(parentId);
-                }
+    private Set<RecordRef> populateSelection(FormInstance instance) {
+        Set<RecordRef> parents = Sets.newHashSet();
+
+        Level level = hierarchy.getLevel(instance.getFormId());
+        if(level != null) {
+            Choice choice = level.toChoice(instance);
+            selection.put(choice.getRef().getFormId(), choice);
+            if(!level.isRoot()) {
+                parents.add(choice.getParentRef());
             }
         }
-        parents.removeAll(selection.keySet());
         return parents;
     }
 

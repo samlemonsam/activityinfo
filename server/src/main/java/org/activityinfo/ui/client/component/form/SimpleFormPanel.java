@@ -109,7 +109,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
 
         final Promise<Void> result = new Promise<>();
 
-        model.loadFormClassWithDependentSubForms(instance.getClassId()).then(new Function<Void, Void>() {
+        model.loadFormClassWithDependentSubForms(instance.getFormId()).then(new Function<Void, Void>() {
             @Override
             public Void apply(Void input) {
                 buildForm(model.getRootFormClass()).then(new Function<Void, Object>() {

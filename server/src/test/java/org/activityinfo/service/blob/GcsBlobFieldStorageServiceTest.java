@@ -253,8 +253,8 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         instance.setId(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()));
         instance.setClassId(CuidAdapter.activityFormClass(anotherActivityId));
         instance.set(newAttachmentFieldId, attachmentValue);
-        instance.set(field(instance.getClassId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(field(instance.getClassId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(instance.getFormId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(instance.getFormId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(partnerField(anotherActivityId), partnerRef(databaseId, 1));
 
         boolean persisted = true;

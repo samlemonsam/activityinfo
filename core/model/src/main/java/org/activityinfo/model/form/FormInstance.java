@@ -100,7 +100,7 @@ public class FormInstance {
     }
 
 
-    public ResourceId getClassId() {
+    public ResourceId getFormId() {
         return classId;
     }
 
@@ -211,7 +211,7 @@ public class FormInstance {
     }
 
     public FormInstance copy() {
-        final FormInstance copy = new FormInstance(getId(), getClassId());
+        final FormInstance copy = new FormInstance(getId(), getFormId());
         copy.fieldMap.putAll(fieldMap);
         return copy;
     }

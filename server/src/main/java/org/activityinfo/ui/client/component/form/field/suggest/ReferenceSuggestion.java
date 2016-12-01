@@ -17,7 +17,7 @@ public class ReferenceSuggestion implements SuggestOracle.Suggestion {
 
     public ReferenceSuggestion(FormInstance instance) {
         this.label = FormInstanceLabeler.getLabel(instance);
-        this.ref = new RecordRef(instance.getClassId(), instance.getId());
+        this.ref = new RecordRef(instance.getFormId(), instance.getId());
     }
 
     @Override

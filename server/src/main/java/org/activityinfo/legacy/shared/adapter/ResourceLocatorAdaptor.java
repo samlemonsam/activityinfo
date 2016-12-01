@@ -108,7 +108,7 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<Void> persist(FormInstance instance) {
         return client.createRecord(
-                instance.getClassId().asString(),
+                instance.getFormId().asString(),
                 buildUpdate(instance))
                 .thenDiscardResult();
     }

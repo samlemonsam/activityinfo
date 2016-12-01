@@ -85,7 +85,7 @@ public class FormRecord {
     public static FormRecord fromInstance(FormInstance instance) {
         FormRecord record = new FormRecord();
         record.recordId = instance.getId().asString();
-        record.formId = instance.getClassId().asString();
+        record.formId = instance.getFormId().asString();
         record.fields = new JsonObject();
 
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {

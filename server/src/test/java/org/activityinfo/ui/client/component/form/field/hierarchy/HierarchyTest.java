@@ -93,14 +93,14 @@ public class HierarchyTest extends CommandTestCase2 {
 
     private void prettyPrintWidgets(Hierarchy tree) {
         for(Level level : tree.getLevels()) {
-            System.out.println(widgets.get(level.getClassId()));
+            System.out.println(widgets.get(level.getFormId()));
         }
     }
 
     private void createWidgets(Hierarchy tree) {
         Map<ResourceId, MockLevelWidget> levels = new HashMap<>();
         for(Level level : tree.getLevels()) {
-            levels.put(level.getClassId(), new MockLevelWidget(level.getLabel()));
+            levels.put(level.getFormId(), new MockLevelWidget(level.getLabel()));
         }
         this.widgets = levels;
     }

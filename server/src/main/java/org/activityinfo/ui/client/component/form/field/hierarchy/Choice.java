@@ -7,32 +7,19 @@ import org.activityinfo.model.type.RecordRef;
  * 
  */
 public class Choice {
-    private ResourceId formId;
-    private ResourceId id;
-    private String label;
-    private ResourceId parentId;
     private RecordRef ref;
+    private String label;
+    private RecordRef parentRef;
 
     public Choice(ResourceId formId, ResourceId id, String label) {
-        this.formId = formId;
-        this.id = id;
         this.label = label;
         this.ref = new RecordRef(formId, id);
     }
 
-    public Choice(ResourceId formId, ResourceId id, String label, ResourceId parentId) {
-        this.formId = formId;
-        this.id = id;
+    public Choice(ResourceId formId, ResourceId id, String label, RecordRef parentRef) {
         this.label = label;
-        this.parentId = parentId;
-    }
-
-    public ResourceId getRootClassId() {
-        return formId;
-    }
-
-    public ResourceId getId() {
-        return id;
+        this.ref = new RecordRef(formId, id);
+        this.parentRef = parentRef;
     }
 
     public RecordRef getRef() {
@@ -43,11 +30,12 @@ public class Choice {
         return label;
     }
 
-    public ResourceId getParentId() {
-        return parentId;
+    public RecordRef getParentRef() {
+        assert parentRef != null;
+        return parentRef;
     }
 
     public boolean hasParent() {
-        return parentId != null;
+        return parentRef != null;
     }
 }

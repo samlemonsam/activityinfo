@@ -295,9 +295,9 @@ public class Updater {
 
     public void execute(FormInstance formInstance) {
 
-        Optional<FormAccessor> collection = catalog.getForm(formInstance.getClassId());
+        Optional<FormAccessor> collection = catalog.getForm(formInstance.getFormId());
         if(!collection.isPresent()) {
-            throw new InvalidUpdateException("No such formId: " + formInstance.getClassId());
+            throw new InvalidUpdateException("No such formId: " + formInstance.getFormId());
         }
 
         RecordUpdate update = new RecordUpdate();

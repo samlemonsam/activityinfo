@@ -12,6 +12,8 @@ import javax.annotation.Nonnull;
  */
 public class RecordRef {
 
+    public static final char SEPARATOR = ':';
+
     @Nonnull
     private ResourceId formId;
 
@@ -44,7 +46,7 @@ public class RecordRef {
     }
 
     public String toQualifiedString() {
-        return formId.asString() + ":" + recordId.asString();
+        return formId.asString() + SEPARATOR + recordId.asString();
     }
 
     public JsonElement toJsonElement() {
@@ -52,7 +54,7 @@ public class RecordRef {
     }
 
     public static RecordRef fromQualifiedString(@Nonnull  String string) {
-        int separatorPos = string.indexOf(':');
+        int separatorPos = string.indexOf(SEPARATOR);
         if(separatorPos == -1) {
             throw new IllegalStateException("Malformed record ref: " + string);
         }
@@ -67,5 +69,10 @@ public class RecordRef {
         int result = formId.hashCode();
         result = 31 * result + recordId.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RecordRef<" + formId.asString() + ":" + recordId.asString() + ">";
     }
 }
