@@ -274,8 +274,10 @@ public class RecordHistoryBuilder {
         FormValueChangeBuilder builder = new FormValueChangeBuilder();
         builder.setFieldId(delta.field.getId().asString());
         builder.setFieldLabel(delta.field.getLabel());
-        builder.setSubFormKey(delta.subFormKey);
-        builder.setSubFormKind(delta.subFormKind != null ? delta.subFormKind.name() : null);
+        if(delta.subFormKey != null) {
+            builder.setSubFormKey(delta.subFormKey);
+            builder.setSubFormKind(delta.subFormKind != null ? delta.subFormKind.name() : null);
+        }
         builder.setOldValueLabel(renderValue(delta.field, delta.oldValue));
         builder.setNewValueLabel(renderValue(delta.field, delta.newValue));
         return builder;
