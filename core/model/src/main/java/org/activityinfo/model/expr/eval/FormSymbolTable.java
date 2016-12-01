@@ -80,6 +80,9 @@ public class FormSymbolTable {
             Optional<FormField> parentField = formClass.getParentField();
             if(parentField.isPresent()) {
                 return parentField.get();
+            } else {
+                throw new RuntimeException("Form " + this.formClass.getLabel() +
+                        " [" + this.formClass.getId() + "] is not a subform.");
             }
         }
         

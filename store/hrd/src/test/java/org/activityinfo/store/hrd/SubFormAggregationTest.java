@@ -9,6 +9,7 @@ import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -69,7 +70,7 @@ public class SubFormAggregationTest {
 
         FormClass monthlyForm = new FormClass(ResourceId.generateId());
         monthlyForm.setParentFormId(siteForm.getId());
-        monthlyForm.setParentFormId(siteForm.getId());
+        monthlyForm.setSubFormKind(SubFormKind.MONTHLY);
 
         siteForm.setLabel("Household interview");
         FormField villageField = siteForm.addField()
