@@ -112,7 +112,7 @@ public class FormTree {
          *
          * @return for Reference fields, the range of this field
          */
-        public Set<ResourceId> getRange() {
+        public Collection<ResourceId> getRange() {
             if(field.getType() instanceof ReferenceType) {
                 return ((ReferenceType) field.getType()).getRange();
                 

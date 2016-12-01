@@ -6,7 +6,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
 
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -49,7 +48,7 @@ public class FormTreeBuilder {
      * formClassId, add it's children.
      *
      */
-    private void fetchChildren(FormTree.Node parent, Set<ResourceId> formClassIds)  {
+    private void fetchChildren(FormTree.Node parent, Iterable<ResourceId> formClassIds)  {
         for(ResourceId childClassId : formClassIds) {
             FormClass childClass = store.getFormClass(childClassId);
             assert childClass != null;

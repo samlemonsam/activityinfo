@@ -20,8 +20,8 @@ import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 
 public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
@@ -46,7 +46,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
-    public List<ReferenceChoice> getReferenceChoices(Set<ResourceId> range) {
+    public List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range) {
 
         QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(range));
         queryModel.selectResourceId().as("id");

@@ -65,7 +65,7 @@ public class ReferenceType implements ParametrizedFieldType {
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
     private Cardinality cardinality;
-    private final Set<ResourceId> range = Sets.newHashSet();
+    private final List<ResourceId> range = Lists.newArrayList();
 
     public ReferenceType() {
     }
@@ -119,7 +119,7 @@ public class ReferenceType implements ParametrizedFieldType {
     /**
      * @return the set of FormClasses to which fields of this type can refer.
      */
-    public Set<ResourceId> getRange() {
+    public Collection<ResourceId> getRange() {
         return range;
     }
 
@@ -130,15 +130,7 @@ public class ReferenceType implements ParametrizedFieldType {
         return this;
     }
 
-    private ReferenceType setRange(List<String> range) {
-        this.range.clear();
-        for(String id : range) {
-            this.range.add(ResourceId.valueOf(id));
-        }
-        return this;
-    }
-
-    public ReferenceType setRange(Set<ResourceId> range) {
+    public ReferenceType setRange(Collection<ResourceId> range) {
         this.range.clear();
         this.range.addAll(range);
         return this;

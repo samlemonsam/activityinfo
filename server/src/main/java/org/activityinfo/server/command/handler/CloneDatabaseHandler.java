@@ -272,8 +272,8 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         if (fieldType instanceof ReferenceType) {
             ReferenceType sourceType = (ReferenceType) fieldType;
 
-            Set<ResourceId> sourceRange = sourceType.getRange();
-            Set<ResourceId> targetRange = new HashSet<>();
+            Collection<ResourceId> sourceRange = sourceType.getRange();
+            Collection<ResourceId> targetRange = new HashSet<>();
 
             ResourceId next = sourceRange.iterator().next();
             switch (next.getDomain()) {

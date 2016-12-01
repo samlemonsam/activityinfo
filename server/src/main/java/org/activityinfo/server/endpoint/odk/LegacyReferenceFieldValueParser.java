@@ -7,13 +7,13 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 
-import java.util.Set;
+import java.util.Collection;
 
 class LegacyReferenceFieldValueParser implements FieldValueParser {
     final private char domain;
     private final ResourceId formId;
 
-    LegacyReferenceFieldValueParser(Set<ResourceId> range) {
+    LegacyReferenceFieldValueParser(Collection<ResourceId> range) {
         formId = Iterables.getOnlyElement(range);
         domain = Character.toLowerCase(formId.getDomain());
     }
