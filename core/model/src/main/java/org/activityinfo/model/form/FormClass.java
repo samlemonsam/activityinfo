@@ -17,7 +17,6 @@ import org.activityinfo.model.type.ReferenceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +27,7 @@ import java.util.Set;
  * {@code Resources} which fulfill the contract described by a {@code FormClass}
  * are called {@code FormInstances}.
  */
-public class FormClass implements FormElementContainer, Serializable {
+public class FormClass implements FormElementContainer {
 
 
     public static final ResourceId PARENT_FIELD_ID = ResourceId.valueOf("@parent");

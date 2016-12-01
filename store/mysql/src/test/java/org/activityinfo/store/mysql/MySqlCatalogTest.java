@@ -13,7 +13,6 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.service.store.FormAccessor;
@@ -197,10 +196,13 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void testSingleSiteResource() throws IOException {
+
+        int databaseId = 1;
         ResourceId formClass = CuidAdapter.activityFormClass(1);
         RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
         update.setRecordId(cuid(SITE_DOMAIN, 1));
-        update.set(field(formClass, PARTNER_FIELD), new ReferenceValue(CuidAdapter.partnerRecordId(2)));
+        update.set(field(formClass, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 

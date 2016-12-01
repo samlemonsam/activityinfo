@@ -8,6 +8,9 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.collections.BETA;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 
@@ -43,7 +46,7 @@ public class Activity implements Serializable {
 
     boolean classicView;
 
-    FormClass serializedFormClass;
+    FormClassHolder serializedFormClass = new FormClassHolder();
 
 
     List<ActivityField> fields = Lists.newArrayList();
@@ -258,6 +261,30 @@ public class Activity implements Serializable {
     }
 
     public FormClass getSerializedFormClass() {
-        return serializedFormClass;
+        return serializedFormClass.value;
+    }
+
+    /**
+     * Helper class to allow the FormClass value to be serialized with JSON instead of Java Serialization.
+     */
+    static class FormClassHolder implements Serializable {
+
+        FormClass value;
+
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            if(value == null) {
+                out.writeBoolean(false);
+            } else {
+                out.writeBoolean(true);
+                out.writeUTF(value.toJsonString());
+            }
+        }
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+            if(in.readBoolean()) {
+                this.value = FormClass.fromJson(in.readUTF());
+            } else {
+                this.value = null;
+            }
+        }
     }
 }

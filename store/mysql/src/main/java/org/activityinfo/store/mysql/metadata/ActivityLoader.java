@@ -274,7 +274,7 @@ public class ActivityLoader {
                         classicActivityIds.add(activity.getId());
                     } else {
                         addFields(activity, serializedFormClass);
-                        activity.serializedFormClass = serializedFormClass;
+                        activity.serializedFormClass.value = serializedFormClass;
                     }
 
                     activityMap.put(activity.getId(), activity);

@@ -1,5 +1,7 @@
 package org.activityinfo.store.mysql.metadata;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -10,6 +12,9 @@ import org.activityinfo.store.mysql.mapping.FieldValueConverter;
 import org.activityinfo.store.mysql.mapping.QuantityConverter;
 import org.activityinfo.store.mysql.mapping.TextConverter;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class ActivityField implements Serializable {
@@ -18,12 +23,12 @@ public class ActivityField implements Serializable {
     int sortOrder;
     int aggregation = 0;
     private final String category;
-    private final FormField formField;
+    private final FieldHolder formField = new FieldHolder();
 
     public ActivityField(int id, String category, FormField formField, int sortOrder) {
         this.id = id;
         this.category = category;
-        this.formField = formField;
+        this.formField.value = formField;
         this.sortOrder = sortOrder;
     }
 
@@ -36,7 +41,7 @@ public class ActivityField implements Serializable {
     }
 
     public FormField getFormField() {
-        return formField;
+        return formField.value;
     }
 
     public boolean isIndicator() {
@@ -44,14 +49,14 @@ public class ActivityField implements Serializable {
     }
 
     public boolean isAttributeGroup() {
-        return formField.getType() instanceof EnumType;
+        return formField.value.getType() instanceof EnumType;
     }
     
     public String getColumnName() {
         if(isAttributeGroup()) {
             return "attributeId";
         } else {
-            if(formField.getType() instanceof QuantityType) {
+            if(formField.value.getType() instanceof QuantityType) {
                 return "Value";
             } else {
                 return "TextValue";
@@ -62,8 +67,8 @@ public class ActivityField implements Serializable {
     public FieldValueConverter getConverter() {
         if(isAttributeGroup()) {
             return new AttributeConverter();
-        } else if(formField.getType() instanceof QuantityType) {
-            QuantityType type = (QuantityType) formField.getType();
+        } else if(formField.value.getType() instanceof QuantityType) {
+            QuantityType type = (QuantityType) formField.value.getType();
             return new QuantityConverter(type.getUnits());
         } else {
             return TextConverter.INSTANCE;
@@ -71,11 +76,11 @@ public class ActivityField implements Serializable {
     }
 
     public boolean isCalculated() {
-        return formField.getType() instanceof CalculatedFieldType;
+        return formField.value.getType() instanceof CalculatedFieldType;
     }
 
     public ResourceId getResourceId() {
-        return formField.getId();
+        return formField.value.getId();
     }
 
     public int getSortOrder() {
@@ -84,5 +89,17 @@ public class ActivityField implements Serializable {
 
     public int getAggregation() {
         return aggregation;
+    }
+
+    public static class FieldHolder implements Serializable {
+
+        private FormField value;
+
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            out.writeUTF(value.toJsonObject().toString());
+        }
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+            this.value = FormField.fromJson((JsonObject)new JsonParser().parse(in.readUTF()));
+        }
     }
 }
