@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.impl;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -15,6 +16,9 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
@@ -203,7 +207,27 @@ public class Updater {
     }
 
     private static FieldValue parseFieldValue(FormField field, JsonElement jsonValue) {
-        return field.getType().parseJsonValue(jsonValue);
+        if(field.getType() instanceof EnumType) {
+            return parseEnumValue((EnumType)field.getType(), jsonValue.getAsString());
+        } else {
+            return field.getType().parseJsonValue(jsonValue);
+        }
+    }
+
+    private static FieldValue parseEnumValue(EnumType type, String jsonValue) {
+        for (EnumItem enumItem : type.getValues()) {
+            if(enumItem.getId().asString().equals(jsonValue)) {
+                return new EnumValue(enumItem.getId());
+            }
+        }
+        for (EnumItem enumItem : type.getValues()) {
+            if(enumItem.getLabel().equals(jsonValue)) {
+                return new EnumValue(enumItem.getId());
+            }
+        }
+
+        throw new InvalidUpdateException(format("Invalid enum value '%s', expected one of: %s",
+                jsonValue, Joiner.on(", ").join(type.getValues())));
     }
 
 
