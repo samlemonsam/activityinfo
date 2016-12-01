@@ -38,6 +38,8 @@ public class SubFormAggregationTest {
                 .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
     private Closeable objectify;
 
+    private int userId = 1;
+
     @Before
     public void setUp() {
         helper.setUp();
@@ -95,24 +97,29 @@ public class SubFormAggregationTest {
         catalog.create(monthlyForm);
 
         RecordUpdate v1 = new RecordUpdate();
+        v1.setUserId(userId);
         v1.setRecordId(ResourceId.generateSubmissionId(siteForm));
         v1.set(villageField.getId(), TextValue.valueOf("Rutshuru"));
 
         RecordUpdate v2 = new RecordUpdate();
+        v2.setUserId(userId);
         v2.setRecordId(ResourceId.generateSubmissionId(siteForm));
         v2.set(villageField.getId(), TextValue.valueOf("Beni"));
 
         RecordUpdate month1 = new RecordUpdate();
+        month1.setUserId(userId);
         month1.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month1.setParentId(v1.getRecordId());
         month1.set(countField.getId(), new Quantity(40, "households"));
 
         RecordUpdate month2 = new RecordUpdate();
+        month2.setUserId(userId);
         month2.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month2.setParentId(v1.getRecordId());
         month2.set(countField.getId(), new Quantity(30, "households"));
 
         RecordUpdate month3 = new RecordUpdate();
+        month3.setUserId(userId);
         month3.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month3.setParentId(v2.getRecordId());
         month3.set(countField.getId(), new Quantity(47, "households"));
