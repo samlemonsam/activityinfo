@@ -38,7 +38,7 @@ public class ReferenceType implements ParametrizedFieldType {
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
             
-            Set<ResourceId> range = new HashSet<>();
+            List<ResourceId> range = new ArrayList<>();
             JsonArray rangeArray = parametersObject.get("range").getAsJsonArray();
             for (JsonElement rangeElement : rangeArray) {
                 String formId;
