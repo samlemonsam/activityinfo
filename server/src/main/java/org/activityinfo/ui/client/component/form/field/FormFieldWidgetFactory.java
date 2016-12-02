@@ -101,10 +101,6 @@ public class FormFieldWidgetFactory {
         return createWidget(formClass, field, valueUpdater, null, null);
     }
 
-    public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater, @Nullable EventBus eventBus) {
-        return createWidget(formClass, field, valueUpdater, null, eventBus);
-    }
-
     public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field,
                                                            ValueUpdater valueUpdater, FormClass validationFormClass, @Nullable EventBus eventBus) {
         FieldType type = field.getType();
@@ -252,7 +248,7 @@ public class FormFieldWidgetFactory {
 
                         OptionSet instances = new OptionSet(formId, input);
 
-                        if (size < SMALL_BALANCE_NUMBER) {
+                        if (size > 0 && size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons
                             return new CheckBoxFieldWidget(type, instances, valueUpdater);
 
