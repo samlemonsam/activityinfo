@@ -39,12 +39,19 @@ public class PropertiesPanel {
 
     private final FluentElement container;
 
+    private int formIndex = 0;
+
     public PropertiesPanel(FluentElement container) {
+        this(container, 0);
+    }
+
+    public PropertiesPanel(FluentElement container, int formIndex) {
         this.container = container;
+        this.formIndex = formIndex;
     }
 
     public BsFormPanel form() {
-        return new BsFormPanel(container.find().div(withClass("panel-body")).first());
+        return new BsFormPanel(container.find().div(withClass("panel-body")).first(), formIndex);
     }
 
     public FluentElement getContainer() {
@@ -73,6 +80,10 @@ public class PropertiesPanel {
         form().findFieldByLabel(fieldLabel).fill(value);
     }
 
+    public void selectProperty(String fieldLabel, String value) {
+        form().findFieldByLabel(fieldLabel).select(value);
+    }
+
     public void setLabel(String label) {
         setProperty(I18N.CONSTANTS.labelFieldLabel(), label);
     }
@@ -82,5 +93,11 @@ public class PropertiesPanel {
         form().getForm().find().button(XPathBuilder.withText(I18N.CONSTANTS.defineRelevanceLogic())).clickWhenReady();
 
         return new RelevanceDialog(BsModal.waitForModal(container));
+    }
+
+    public ChooseFormDialog chooseFormDialog() {
+        form().getForm().find().button(XPathBuilder.withText(I18N.CONSTANTS.add())).clickWhenReady();
+
+        return new ChooseFormDialog(BsModal.waitForModal(container));
     }
 }

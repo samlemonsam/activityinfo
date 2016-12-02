@@ -35,14 +35,14 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.service.store.BatchingFormTreeBuilder;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.store.mysql.MySqlSession;
+import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.mysql.metadata.UserPermission;
-import org.activityinfo.store.query.impl.CollectionScanBatch;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.FormScanBatch;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;
@@ -51,7 +51,7 @@ import java.util.logging.Logger;
 
 import static java.util.Collections.*;
 import static org.activityinfo.model.expr.Exprs.*;
-import static org.activityinfo.model.legacy.CuidAdapter.partnerInstanceId;
+import static org.activityinfo.model.legacy.CuidAdapter.partnerRecordId;
 
 /**
  * Executes a legacy PivotSites query against the new API
@@ -61,7 +61,7 @@ public class PivotAdapter {
     private static final Logger LOGGER = Logger.getLogger(PivotAdapter.class.getName());
     public static final String SITE_ID_KEY = "__site_id";
 
-    private final MySqlSession session;
+    private final MySqlCatalog session;
     private final PivotSites command;
     private final Filter filter;
     private final int userId;
@@ -80,7 +80,7 @@ public class PivotAdapter {
 
     private Multimap<String, String> attributeFilters = HashMultimap.create();
 
-    private CollectionScanBatch batch;
+    private FormScanBatch batch;
     private List<Runnable> queryResultHandlers = new ArrayList<>();
 
     private final Map<Object, Accumulator> buckets = Maps.newHashMap();
@@ -92,8 +92,8 @@ public class PivotAdapter {
 
 
 
-    public PivotAdapter(CollectionCatalog catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
-        this.session = (MySqlSession) catalog;
+    public PivotAdapter(FormCatalog catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
+        this.session = (MySqlCatalog) catalog;
         this.command = command;
         this.filter = command.getFilter();
         this.userId = userId;
@@ -122,9 +122,9 @@ public class PivotAdapter {
             }
         }
 
-        this.batch = new CollectionScanBatch(catalog);
+        this.batch = new FormScanBatch(catalog);
     }
-
+    
     private Map<Integer, Activity> loadMetadata() throws SQLException {
         if(filter.isRestricted(DimensionType.Activity)) {
             return session.getActivityLoader().load(filter.getRestrictions(DimensionType.Activity));
@@ -293,7 +293,7 @@ public class PivotAdapter {
         } else {
             ExprNode partnerFilter = Exprs.equals(
                 new SymbolExpr("partner"),
-                new ConstantExpr(partnerInstanceId(userPermission.getPartnerId()).asString()));
+                new ConstantExpr(partnerRecordId(userPermission.getPartnerId()).asString()));
 
             return Optional.of(partnerFilter);
         }
@@ -483,8 +483,8 @@ public class PivotAdapter {
                 for (Activity activity : activities) {
                     for (ActivityField indicator : selectedIndicators(activity)) {
 
-                        ColumnView measureView = columnSet.getColumnView(alias(indicator));
-                        DimensionCategory indicatorCategory = null;
+                ColumnView measureView = columnSet.getColumnView(alias(indicator));
+                DimensionCategory indicatorCategory = null;
 
                         if (indicatorDimension.isPresent()) {
                             indicatorCategory = indicatorDimension.get().category(indicator);

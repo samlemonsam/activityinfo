@@ -1,7 +1,9 @@
 package org.activityinfo.model.type.primitive;
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
 
 /**
  * A value type representing a single line of unicode text
@@ -29,6 +31,14 @@ public class TextType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        if(value == null) {
+            return null;
+        }
+        return TextValue.valueOf(value.getAsString());
     }
 
     @Override

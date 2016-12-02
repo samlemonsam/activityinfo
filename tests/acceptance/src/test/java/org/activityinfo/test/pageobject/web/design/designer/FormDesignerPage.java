@@ -28,6 +28,8 @@ import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.WebDriver;
 
+import java.util.List;
+
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withClass;
 import static org.activityinfo.test.pageobject.api.XPathBuilder.withText;
 
@@ -39,20 +41,50 @@ public class FormDesignerPage {
     public static final String DROP_TARGET_CLASS = "dragdrop-dropTarget";
 
     private final FluentElement container;
+    private DropPanel rootDropPanel;
 
     public FormDesignerPage(FluentElement container) {
         this.container = container;
+        this.rootDropPanel = new DropPanel(container.find().div(
+                withClass(FormDesignerPage.DROP_TARGET_CLASS), withClass("main-panel")).first());
     }
 
-    public DropPanel dropTarget() {
-        return new DropPanel(container.find().div(withClass(FormDesignerPage.DROP_TARGET_CLASS)).first());
+    public DropPanel rootDropTarget() {
+        return rootDropPanel;
     }
 
-    public PropertiesPanel properties() {
-        return new PropertiesPanel(container.find().div(withClass("panel-heading")).
-                ancestor().div(withClass("panel")).first());
+    public DropPanel dropPanel(String containerLabel) {
+        if ("root".equalsIgnoreCase(containerLabel)) {
+            return rootDropPanel;
+        } else {
+            return subTarget(containerLabel);
+        }
     }
-    
+
+    private DropPanel subTarget(String label) {
+        return new DropPanel(container.find().h3(withText(label)).
+                ancestor().div(withClass("dragdrop-draggable")).descendants().div(
+                withClass(FormDesignerPage.DROP_TARGET_CLASS), withClass("section-widget-container")).first());
+    }
+
+    private List<FluentElement> dropTargets() {
+        return container.find().div(withClass(FormDesignerPage.DROP_TARGET_CLASS)).asList().list();
+    }
+
+    public PropertiesPanel fieldProperties() {
+        List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
+        return new PropertiesPanel(panels.get(0), 0);
+    }
+
+    public PropertiesPanel containerProperties() {
+        List<FluentElement> panels = container.find().div(withClass("panel")).waitForList().list();
+        return new PropertiesPanel(panels.get(0), 1);
+    }
+
+    private void selectTab(String tabText) {
+        container.find().b(withText(tabText)).first().clickWhenReady();
+    }
+
     public FieldPalette fields() {
         return new FieldPalette(container.find()
                 .h4(withText(I18N.CONSTANTS.fields()))
@@ -61,7 +93,7 @@ public class FormDesignerPage {
     }
 
     public DesignerField selectFieldByLabel(String label) {
-        DesignerField designerField = dropTarget().fieldByLabel(label);
+        DesignerField designerField = rootDropTarget().fieldByLabel(label);
         designerField.element().clickWhenReady();
         return designerField;
     }
@@ -85,6 +117,6 @@ public class FormDesignerPage {
     public void setRelevance(String fieldLabel, DataTable dataTable, AliasTable alias) {
         selectFieldByLabel(fieldLabel);
 
-        properties().relevanceDialog().set(dataTable, alias);
+        fieldProperties().relevanceDialog().set(dataTable, alias);
     }
 }

@@ -1,22 +1,22 @@
 package org.activityinfo.model.type;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A type that represents a link or reference to another {@code Resource}
  */
 public class ReferenceType implements ParametrizedFieldType {
-
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
 
@@ -36,36 +36,75 @@ public class ReferenceType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(Record parameters) {
+        public FieldType deserializeType(JsonObject parametersObject) {
+            
+            List<ResourceId> range = new ArrayList<>();
+            JsonArray rangeArray = parametersObject.get("range").getAsJsonArray();
+            for (JsonElement rangeElement : rangeArray) {
+                String formId;
+                if(rangeElement.isJsonPrimitive()) {
+                    formId = rangeElement.getAsString();                    
+                } else {
+                    formId = rangeElement.getAsJsonObject().get("formId").getAsString();
+                }
+                range.add(ResourceId.valueOf(formId));
+            }
+            
             ReferenceType type = new ReferenceType();
-            type.setCardinality(Cardinality.valueOf(parameters.getString("cardinality")));
-            type.setRange(parameters.getStringList("range"));
+            type.setCardinality(Cardinality.valueOf(parametersObject.get("cardinality")));    
+            type.setRange(range);
             return type;
         }
 
         @Override
-        public FieldValue deserialize(Record record) {
-            return ReferenceValue.fromRecord(record);
-        }
-
-        @Override
         public FormClass getParameterFormClass() {
-            FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("ref"));
-            return formClass;
+            return new FormClass(ResourceIdPrefixType.TYPE.id(getId()));
         }
-    };
+    }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
     private Cardinality cardinality;
-    private Set<ResourceId> range;
+    private final List<ResourceId> range = Lists.newArrayList();
 
     public ReferenceType() {
+    }
+
+    public ReferenceType(Cardinality cardinality, ResourceId rangeFormId) {
+        this.cardinality = cardinality;
+        this.range.add(rangeFormId);
     }
 
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+
+        if(value.isJsonNull()) {
+            return new ReferenceValue();
+        } else if(value.isJsonArray()) {
+            JsonArray array = (JsonArray) value;
+            Set<RecordRef> refs = new HashSet<>();
+            for (JsonElement jsonElement : array) {
+                refs.add(parseRef(jsonElement.getAsString()));
+            }
+            return new ReferenceValue(refs);
+        } else {
+            return new ReferenceValue(parseRef(value.getAsString()));
+        }
+    }
+
+    private RecordRef parseRef(String ref) {
+        int separator = ref.indexOf(':');
+        if(separator == -1) {
+            ResourceId formId = Iterables.getOnlyElement(range);
+            return new RecordRef(formId, ResourceId.valueOf(ref));
+        } else {
+            return RecordRef.fromQualifiedString(ref);
+        }
     }
 
     public Cardinality getCardinality() {
@@ -80,36 +119,41 @@ public class ReferenceType implements ParametrizedFieldType {
     /**
      * @return the set of FormClasses to which fields of this type can refer.
      */
-    public Set<ResourceId> getRange() {
+    public Collection<ResourceId> getRange() {
         return range;
     }
 
 
     public ReferenceType setRange(ResourceId formClassId) {
-        this.range = Collections.singleton(formClassId);
+        this.range.clear();
+        this.range.add(formClassId);
         return this;
     }
 
-    private void setRange(List<String> range) {
-        Set<ResourceId> formClassIds = Sets.newHashSet();
-        for(String id : range) {
-            formClassIds.add(ResourceId.valueOf(id));
-        }
-        setRange(formClassIds);
-    }
-
-
-    public ReferenceType setRange(Set<ResourceId> range) {
-        this.range = range;
+    public ReferenceType setRange(Collection<ResourceId> range) {
+        this.range.clear();
+        this.range.addAll(range);
         return this;
     }
 
     @Override
-    public Record getParameters() {
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("range", toArray(range))
-                .set("cardinality", cardinality);
+    public FormInstance getParameters() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        object.addProperty("cardinality", cardinality.name().toLowerCase());
+        
+        JsonArray rangeArray = new JsonArray();
+        for (ResourceId formId : range) {
+            JsonObject rangeObject = new JsonObject();
+            rangeObject.addProperty("formId", formId.asString());
+            rangeArray.add(rangeObject);
+        }
+        object.add("range", rangeArray);
+        return object;
     }
 
     @Override

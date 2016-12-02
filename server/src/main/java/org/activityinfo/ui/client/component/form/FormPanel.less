@@ -1,5 +1,6 @@
 @import "../../style/defines";
 @import (reference) "../../style/bootstrap/grid";
+@import (reference) "../../style/bootstrap/variables";
 
 //// we have to wrap the form panel in a container/row
 //// in the form dialog, otherwise the nested rows don't work properly
@@ -36,6 +37,24 @@
 .dropFileUpload {
   cursor: pointer;
   opacity: 0.0;
+}
+
+.subformPanel {
+  border-width: 1px;
+  border-style: solid;
+  border-color: @modal-content-border-color;
+  border-radius: @border-radius-base;
+
+  margin: 3px;
+
+  div {
+    margin-left : 3px;
+    margin-right : 3px;
+  }
+}
+
+.subformTabs {
+  margin-top: 3px;
 }
 
 

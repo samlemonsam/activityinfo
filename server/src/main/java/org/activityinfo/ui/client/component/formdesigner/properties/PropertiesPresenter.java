@@ -22,7 +22,7 @@ package org.activityinfo.ui.client.component.formdesigner.properties;
  */
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -34,10 +34,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resources;
+import org.activityinfo.model.form.FormLabel;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.ParametrizedFieldTypeClass;
@@ -49,10 +47,9 @@ import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
-import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
 import org.activityinfo.ui.client.component.formdesigner.skip.RelevanceDialog;
 
 import java.util.List;
@@ -71,13 +68,18 @@ public class PropertiesPresenter {
     private HandlerRegistration codeKeyUpHandler;
     private HandlerRegistration requiredValueChangeHandler;
     private HandlerRegistration visibleValueChangeHandler;
+
+    // relevance
     private HandlerRegistration relevanceButtonClickHandler;
     private HandlerRegistration relevanceEnabledValueHandler;
     private HandlerRegistration relevanceEnabledIfValueHandler;
 
-    public PropertiesPresenter(PropertiesPanel view, FormDesigner formDesigner) {
-        this.view = view;
+    private final ReferencePropertiesPresenter referencePresenter;
+
+    public PropertiesPresenter(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
+        this.view = formDesigner.getFormDesignerPanel().getPropertiesPanel();
+        this.referencePresenter = new ReferencePropertiesPresenter(view.getReferenceProperties());
 
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
@@ -85,15 +87,12 @@ public class PropertiesPresenter {
                 WidgetContainer widgetContainer = event.getSelectedItem();
                 if (widgetContainer instanceof FieldWidgetContainer) {
                     show((FieldWidgetContainer) widgetContainer);
+                } else if (widgetContainer instanceof LabelWidgetContainer) {
+                    show((LabelWidgetContainer) widgetContainer);
                 }
             }
         });
-        formDesigner.getEventBus().addHandler(HeaderSelectionEvent.TYPE, new HeaderSelectionEvent.Handler() {
-            @Override
-            public void handle(HeaderSelectionEvent event) {
-                show(event.getSelectedItem());
-            }
-        });
+
         reset();
     }
 
@@ -101,16 +100,30 @@ public class PropertiesPresenter {
         return view;
     }
 
-    private void reset() {
+    public void reset() {
+        reset(true);
+    }
+
+    public void reset(boolean resetContainer) {
+
+        if (resetContainer) {
+            formDesigner.getContainerPresenter().reset();
+        }
+
         if (currentDesignWidget != null) {
             view.getPanel().remove(currentDesignWidget);
             currentDesignWidget = null;
         }
 
+        referencePresenter.reset();
+
         view.getRequiredGroup().setVisible(false);
         view.getVisibleGroup().setVisible(false);
         view.getRelevanceGroup().setVisible(false);
         view.getCodeGroup().setVisible(false);
+
+        view.getLabel().setValue("");
+        view.getDescription().setValue("");
 
         if (labelKeyUpHandler != null) {
             labelKeyUpHandler.removeHandler();
@@ -124,31 +137,67 @@ public class PropertiesPresenter {
         if (requiredValueChangeHandler != null) {
             requiredValueChangeHandler.removeHandler();
         }
-        if (relevanceButtonClickHandler != null) {
-            relevanceButtonClickHandler.removeHandler();
-        }
         if (visibleValueChangeHandler != null) {
             visibleValueChangeHandler.removeHandler();
         }
+
         if (relevanceEnabledValueHandler != null) {
             relevanceEnabledValueHandler.removeHandler();
         }
         if (relevanceEnabledIfValueHandler != null) {
             relevanceEnabledIfValueHandler.removeHandler();
         }
+        if (relevanceButtonClickHandler != null) {
+            relevanceButtonClickHandler.removeHandler();
+        }
+    }
+
+    private void show(final LabelWidgetContainer widgetContainer) {
+        reset();
+
+        formDesigner.getFormDesignerPanel().setPropertiesPanelVisible();
+
+        final FormLabel formLabel = widgetContainer.getFormLabel();
+
+        view.setVisible(true);
+        view.getLabelGroup().setVisible(true);
+
+        view.getRequiredGroup().setVisible(false);
+        view.getVisibleGroup().setVisible(false);
+        view.getRelevanceGroup().setVisible(false);
+        view.getCodeGroup().setVisible(false);
+        view.getDescriptionGroup().setVisible(false);
+        view.getReferenceProperties().setVisible(false);
+
+        view.getLabel().setValue(Strings.nullToEmpty(formLabel.getLabel()));
+
+        validateLabel();
+
+        labelKeyUpHandler = view.getLabel().addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                if (validateLabel()) {
+                    formLabel.setLabel(view.getLabel().getValue());
+                    widgetContainer.syncWithModel();
+                }
+            }
+        });
     }
 
     private void show(final FieldWidgetContainer fieldWidgetContainer) {
         reset();
 
+        formDesigner.getFormDesignerPanel().setPropertiesPanelVisible();
+
         final FormField formField = fieldWidgetContainer.getFormField();
-        boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getFormClass().getId(), formField.getId());
+        boolean isBuiltIn = FormDesigner.isBuiltin(formDesigner.getModel().getRootFormClass().getId(), formField.getId());
 
         view.setVisible(true);
         view.getRequiredGroup().setVisible(true);
         view.getVisibleGroup().setVisible(true);
         view.getRelevanceGroup().setVisible(!isBuiltIn);
         view.getCodeGroup().setVisible(true);
+        view.getDescriptionGroup().setVisible(true);
 
         view.getLabel().setValue(Strings.nullToEmpty(formField.getLabel()));
         view.getDescription().setValue(Strings.nullToEmpty(formField.getDescription()));
@@ -232,15 +281,18 @@ public class PropertiesPresenter {
             }
         });
 
+        referencePresenter.show(fieldWidgetContainer);
+
         ResourceLocator locator = fieldWidgetContainer.getFormDesigner().getResourceLocator();
-        currentDesignWidget = new SimpleFormPanel(locator, new HorizontalFieldContainer.Factory(),
+        currentDesignWidget = new SimpleFormPanel(locator, fieldWidgetContainer.getFormDesigner().getStateProvider(),
+                new HorizontalFieldContainer.Factory(),
                 new FormFieldWidgetFactory(locator, FieldWidgetMode.NORMAL), false) {
             @Override
             public void onFieldUpdated(FormField field, FieldValue newValue) {
                 super.onFieldUpdated(field, newValue);
                 ParametrizedFieldType parametrizedFieldType = (ParametrizedFieldType) formField.getType();
-                Record param = parametrizedFieldType.getParameters();
-                param.set(field.getId(), newValue);
+                JsonObject param = parametrizedFieldType.getParametersAsJson();
+                param.add(field.getId().asString(), newValue.toJsonElement());
                 ParametrizedFieldTypeClass typeClass = (ParametrizedFieldTypeClass) parametrizedFieldType.getTypeClass();
                 if (formField.getType() instanceof CalculatedFieldType && newValue instanceof ExprValue) {
                     // for calculated fields we updated expression directly because it is handled via ExprFieldType
@@ -256,8 +308,8 @@ public class PropertiesPresenter {
         if (formField.getType() instanceof ParametrizedFieldType) {
             ParametrizedFieldType parametrizedType = (ParametrizedFieldType) formField.getType();
             currentDesignWidget.asWidget().setVisible(true);
-            currentDesignWidget.setValidationFormClass(fieldWidgetContainer.getFormDesigner().getFormClass());
-            currentDesignWidget.show(Resources.createResource(parametrizedType.getParameters())).then(new AsyncCallback<Void>() {
+            currentDesignWidget.getModel().setValidationFormClass(fieldWidgetContainer.getFormDesigner().getRootFormClass());
+            currentDesignWidget.show(parametrizedType.getParameters()).then(new AsyncCallback<Void>() {
 
 
                 @Override
@@ -273,6 +325,7 @@ public class PropertiesPresenter {
         } else {
             currentDesignWidget.asWidget().setVisible(false);
         }
+
         view.getPanel().add(currentDesignWidget);
     }
 
@@ -294,7 +347,7 @@ public class PropertiesPresenter {
         } else {
 
             // check whether code is unique
-            List<FormField> formFields = Lists.newArrayList(fieldWidgetContainer.getFormDesigner().getFormClass().getFields());
+            List<FormField> formFields = fieldWidgetContainer.getFormDesigner().getModel().getAllFormsFields();
             formFields.remove(fieldWidgetContainer.getFormField());
 
             for (FormField formField : formFields) {
@@ -339,30 +392,5 @@ public class PropertiesPresenter {
 //        } else if (!view.getRelevanceExpression().getClassName().contains("hide")) {
 //            view.getRelevanceExpression().addClassName("hide");
 //        }
-    }
-
-    public void show(final HeaderPresenter headerPresenter) {
-        reset();
-
-        final FormClass formClass = headerPresenter.getFormClass();
-
-        view.setVisible(true);
-        view.getLabel().setValue(Strings.nullToEmpty(formClass.getLabel()));
-        view.getDescription().setValue(Strings.nullToEmpty(formClass.getDescription()));
-        labelKeyUpHandler = view.getLabel().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                formClass.setLabel(view.getLabel().getValue());
-                headerPresenter.show();
-            }
-        });
-
-        descriptionKeyUpHandler = view.getDescription().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                formClass.setDescription(view.getDescription().getValue());
-                headerPresenter.show();
-            }
-        });
     }
 }

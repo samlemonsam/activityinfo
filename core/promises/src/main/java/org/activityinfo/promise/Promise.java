@@ -6,6 +6,7 @@ import com.google.common.base.Functions;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import javax.annotation.Nullable;
@@ -243,6 +244,9 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public final void reject(Throwable caught) {
+
+        GWT.log("Promise rejected", caught);
+        
         if (state != State.PENDING) {
             return;
         }

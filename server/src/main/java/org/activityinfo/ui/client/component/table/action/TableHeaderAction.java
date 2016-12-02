@@ -32,9 +32,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
  */
 public interface TableHeaderAction {
 
-    public static final String ACTION_ATTRIBUTE = "header_action";
+    String ACTION_ATTRIBUTE = "header_action";
 
-    public interface Template extends SafeHtmlTemplates {
+    interface Template extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<button class='btn btn-default btn-xs' type='button' tabindex='-1' header_action='{0}'><span class='{1}'></span> {2}</button>")
         SafeHtml enabled(String uniqueId, String icon, String text);
 
@@ -47,11 +47,11 @@ public interface TableHeaderAction {
         SafeHtml rightAlignedButton(String uniqueId, String icon, String text);
     }
 
-    public static final Template TEMPLATE = GWT.create(Template.class);
+    Template TEMPLATE = GWT.create(Template.class);
 
-    public void execute();
+    void execute();
 
-    public void render(Cell.Context context, String value, SafeHtmlBuilder sb);
+    void render(Cell.Context context, String value, SafeHtmlBuilder sb);
 
-    public String getUniqueId();
+    String getUniqueId();
 }

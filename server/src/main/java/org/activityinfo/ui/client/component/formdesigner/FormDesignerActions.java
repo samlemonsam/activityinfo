@@ -21,13 +21,18 @@ package org.activityinfo.ui.client.component.formdesigner;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.promise.Promise;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yuriyz on 7/14/14.
@@ -56,12 +61,21 @@ public class FormDesignerActions {
         return this;
     }
 
+    private List<FormClass> getFormClassesForPersistence() {
+        List<FormClass> classesToPersist = Lists.newArrayList();
+        for (FormClass subForm : formDesigner.getModel().getSubforms()) {
+            classesToPersist.add(subForm);
+        }
+        classesToPersist.add(formDesigner.getRootFormClass()); // order is important, subform classes must be saved first
+        return classesToPersist;
+    }
+
     public Promise<Void> save() {
 
         formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saving());
         formDesignerPanel.getSaveButton().setEnabled(false);
 
-        Promise<Void> promise = formDesigner.getResourceLocator().persist(formDesigner.getFormClass());
+        Promise<Void> promise = persist(getFormClassesForPersistence());
         promise.then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -71,13 +85,28 @@ public class FormDesignerActions {
 
             @Override
             public void onSuccess(Void result) {
-                formDesignerPanel.getSaveButton().setText(I18N.CONSTANTS.save());
-                formDesignerPanel.getSaveButton().setEnabled(true);
-                formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saved());
-                formDesigner.getSavedGuard().setSaved(true);
+                // delay a bit to show user progress
+                Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+                    @Override
+                    public boolean execute() {
+                        formDesignerPanel.getSaveButton().setText(I18N.CONSTANTS.save());
+                        formDesignerPanel.getSaveButton().setEnabled(true);
+                        formDesignerPanel.getStatusMessage().setHTML(I18N.CONSTANTS.saved());
+                        formDesigner.getSavedGuard().setSaved(true);
+                        return false;
+                    }
+                }, 500);
             }
         });
         return promise;
+    }
+
+    private Promise<Void> persist(List<FormClass> formClasses) {
+        List<Promise<Void>> promises = new ArrayList<>();
+        for (FormClass formClass : formClasses) {
+            promises.add(formDesigner.getResourceLocator().persist(formClass));
+        }
+        return Promise.waitAll(promises);
     }
 
     private void showFailureDelayed(final Throwable caught) {

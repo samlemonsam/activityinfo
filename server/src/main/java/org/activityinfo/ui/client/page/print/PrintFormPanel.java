@@ -7,6 +7,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.inject.Inject;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -30,7 +31,7 @@ import javax.inject.Provider;
 public class PrintFormPanel extends FlowPanel {
 
     @Inject
-    public PrintFormPanel(final ResourceLocator resourceLocator) {
+    public PrintFormPanel(final ResourceLocator resourceLocator, final StateProvider stateProvider) {
 
         BaseStylesheet.INSTANCE.ensureInjected();
         
@@ -40,6 +41,7 @@ public class PrintFormPanel extends FlowPanel {
 
         SimpleFormPanel formPanel = new SimpleFormPanel(
                 resourceLocator,
+                stateProvider,
                 new VerticalFieldContainer.Factory(),
                 new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.NORMAL));
 
@@ -55,7 +57,7 @@ public class PrintFormPanel extends FlowPanel {
 
             @Override
             public Promise<FormInstance> get() {
-                return resourceLocator.getFormInstance(parseInstanceId());
+                return resourceLocator.getFormInstance(null, parseInstanceId());
             }
         });
         

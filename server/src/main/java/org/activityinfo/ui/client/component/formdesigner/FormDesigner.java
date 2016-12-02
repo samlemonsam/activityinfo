@@ -21,30 +21,24 @@ package org.activityinfo.ui.client.component.formdesigner;
  * #L%
  */
 
-import com.allen_sauer.gwt.dnd.client.DragController;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.allen_sauer.gwt.dnd.client.PickupDragController;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormElement;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
-import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.drop.DropPanelDropController;
-import org.activityinfo.ui.client.component.formdesigner.drop.ForwardDropController;
+import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerRegistry;
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
+import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPropertiesPresenter;
 import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPresenter;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,29 +48,36 @@ import java.util.Set;
 public class FormDesigner {
 
     private final EventBus eventBus = new SimpleEventBus();
+    private final StateProvider stateProvider;
     private final ResourceLocator resourceLocator;
-    private final FormClass formClass;
     private final PropertiesPresenter propertiesPresenter;
+    private final ContainerPropertiesPresenter containerPresenter;
     private final HeaderPresenter headerPresenter;
     private final FormDesignerPanel formDesignerPanel;
     private final FormFieldWidgetFactory formFieldWidgetFactory;
     private final FormSavedGuard savedGuard;
     private final FormDesignerActions formDesignerActions;
+    private final DropControllerRegistry dropControllerRegistry;
+    private final FormDesignerModel model;
 
-    public FormDesigner(@Nonnull FormDesignerPanel formDesignerPanel, @Nonnull ResourceLocator resourceLocator, @Nonnull FormClass formClass) {
-        this.formDesignerPanel = formDesignerPanel;
+    public FormDesigner(@Nonnull ResourceLocator resourceLocator, @Nonnull FormClass rootFormClass, @Nonnull StateProvider stateProvider) {
         this.resourceLocator = resourceLocator;
-        this.formClass = formClass;
+        this.stateProvider = stateProvider;
 
-        propertiesPresenter = new PropertiesPresenter(formDesignerPanel.getPropertiesPanel(), this);
+        this.model = new FormDesignerModel(rootFormClass);
+        this.dropControllerRegistry = new DropControllerRegistry(this);
+        this.formDesignerPanel = new FormDesignerPanel(rootFormClass, this);
+        this.formDesignerPanel.getFieldPalette().makeDraggable(dropControllerRegistry.getDragController());
+
+        containerPresenter = new ContainerPropertiesPresenter(this);
+        propertiesPresenter = new PropertiesPresenter(this);
 
         formFieldWidgetFactory = new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.DESIGN);
 
-        ForwardDropController forwardDropController = new ForwardDropController(formDesignerPanel.getDropPanel());
-        forwardDropController.add(new DropPanelDropController(formDesignerPanel.getDropPanel(), this));
+        dropControllerRegistry.register(rootFormClass.getId(), formDesignerPanel.getDropPanel(), this);
 
-        formDesignerPanel.getFieldPalette().bind(eventBus, forwardDropController);
         formDesignerPanel.bind(eventBus);
+        model.bind(eventBus);
 
         headerPresenter = new HeaderPresenter(this);
         headerPresenter.show();
@@ -84,6 +85,10 @@ public class FormDesigner {
         savedGuard = new FormSavedGuard(this);
 
         formDesignerActions = FormDesignerActions.create(this);
+    }
+
+    public DropControllerRegistry getDropControllerRegistry() {
+        return dropControllerRegistry;
     }
 
     public FormDesignerActions getFormDesignerActions() {
@@ -106,36 +111,44 @@ public class FormDesigner {
         return resourceLocator;
     }
 
-    public FormClass getFormClass() {
-        return formClass;
+    public FormClass getRootFormClass() {
+        return getModel().getRootFormClass();
     }
 
     public FormFieldWidgetFactory getFormFieldWidgetFactory() {
         return formFieldWidgetFactory;
     }
 
-    public DragController getDragController() {
-        return formDesignerPanel.getFieldPalette().getDragController();
+    public PickupDragController getDragController() {
+        return dropControllerRegistry.getDragController();
     }
 
-    public void updateFieldOrder() {
+    public ContainerPropertiesPresenter getContainerPresenter() {
+        return containerPresenter;
+    }
 
-        Map<ResourceId, FormField> fieldMap = Maps.newHashMap();
-        for(FormField field : formClass.getFields()) {
-            fieldMap.put(field.getId(), field);
+    public PropertiesPresenter getPropertiesPresenter() {
+        return propertiesPresenter;
+    }
+
+    public HeaderPresenter getHeaderPresenter() {
+        return headerPresenter;
+    }
+
+    public FormDesignerModel getModel() {
+        return model;
+    }
+
+    public StateProvider getStateProvider() {
+        return stateProvider;
+    }
+
+    public WidgetContainer getWidgetContainer(ResourceId resourceId) {
+        Map<ResourceId, WidgetContainer> map = getFormDesignerPanel().getContainerMap();
+        if (map.containsKey(resourceId)) {
+            return map.get(resourceId);
         }
-
-        // update the order of the model
-        List<FormElement> elements = Lists.newArrayList();
-        FlowPanel panel = formDesignerPanel.getDropPanel();
-        for(int i=0;i!=panel.getWidgetCount();++i) {
-            Widget widget = panel.getWidget(i);
-            String fieldId = widget.getElement().getAttribute(FieldWidgetContainer.DATA_FIELD_ID);
-            elements.add(fieldMap.get(ResourceId.valueOf(fieldId)));
-        }
-
-        formClass.getElements().clear();
-        formClass.getElements().addAll(elements);
+        return dropControllerRegistry.getDropController(resourceId).getContainerMap().get(resourceId);
     }
 
     public static Set<ResourceId> builtinFields(ResourceId formClassId) {
@@ -150,5 +163,12 @@ public class FormDesigner {
 
     public static boolean isBuiltin(ResourceId formClassId, ResourceId fieldId) {
         return builtinFields(formClassId).contains(fieldId);
+    }
+
+    public static boolean isBuiltinExceptDateFields(ResourceId formClassId, ResourceId fieldId) {
+        Set<ResourceId> builtIn = builtinFields(formClassId);
+        builtIn.remove(CuidAdapter.field(formClassId, CuidAdapter.START_DATE_FIELD));
+        builtIn.remove(CuidAdapter.field(formClassId, CuidAdapter.END_DATE_FIELD));
+        return builtIn.contains(fieldId);
     }
 }

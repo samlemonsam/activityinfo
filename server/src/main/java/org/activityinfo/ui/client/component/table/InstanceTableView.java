@@ -13,14 +13,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.widget.AlertPanel;
 import org.activityinfo.ui.client.widget.loading.TableLoadingIndicator;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -36,10 +34,10 @@ public class InstanceTableView implements IsWidget, RequiresResize {
 
     private final ResourceLocator resourceLocator;
     private final StateProvider stateProvider;
+
     private final HTMLPanel panel;
     private List<FieldColumn> columns;
     private List<FieldColumn> selectedColumns;
-    private Collection<FormClass> rootFormClasses;
 
     @UiField
     DivElement emRuler;
@@ -58,16 +56,15 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     private static InstanceTableViewUiBinder ourUiBinder = GWT.create(InstanceTableViewUiBinder.class);
 
     public InstanceTableView(ResourceLocator resourceLocator, StateProvider stateProvider) {
+
         InstanceTableStyle.INSTANCE.ensureInjected();
+
         this.resourceLocator = resourceLocator;
         this.stateProvider = stateProvider;
+
         this.table = new InstanceTable(this);
         this.loadingIndicator = table.getLoadingIndicator();
         this.panel = ourUiBinder.createAndBindUi(this);
-    }
-
-    public void setCriteria(Criteria criteria) {
-        table.setCriteria(criteria);
     }
 
     public void setColumns(final List<FieldColumn> columns) {
@@ -97,7 +94,7 @@ public class InstanceTableView implements IsWidget, RequiresResize {
         if (!persistedColumnNames.isEmpty()) {
             List<FieldColumn> toSelect = Lists.newArrayList();
             for (FieldColumn column : columns) {
-                if (!Strings.isNullOrEmpty(column.getHeader()) && persistedColumnNames.contains(column.getHeader())) {
+                if (!Strings.isNullOrEmpty(column.get().getHeader()) && persistedColumnNames.contains(column.get().getHeader())) {
                     toSelect.add(column);
                 }
             }
@@ -143,14 +140,6 @@ public class InstanceTableView implements IsWidget, RequiresResize {
     public void onResize() {
     }
 
-    public String getFormClassLabel() {
-        if (rootFormClasses != null && !rootFormClasses.isEmpty()) {
-            final FormClass formClass = rootFormClasses.iterator().next();
-            return formClass.getLabel();
-        }
-        return "";
-    }
-
     public List<FieldColumn> getColumns() {
         if (columns == null) {
             columns = Lists.newArrayList();
@@ -169,14 +158,15 @@ public class InstanceTableView implements IsWidget, RequiresResize {
         return resourceLocator;
     }
 
-    public void setRootFormClasses(Collection<FormClass> rootFormClasses) {
-        this.rootFormClasses = rootFormClasses;
-        if (rootFormClasses != null && !rootFormClasses.isEmpty()) {
-            table.setRootFormClass(rootFormClasses.iterator().next());
-        }
+    public void setRootFormClass(FormClass rootFormClass) {
+        table.setRootFormClass(rootFormClass);
+    }
+
+    public FormClass getRootFormClass() {
+        return table.getRootFormClass();
     }
 
     public StateProvider getStateProvider() {
-        return stateProvider;
+        return stateProvider;    
     }
 }

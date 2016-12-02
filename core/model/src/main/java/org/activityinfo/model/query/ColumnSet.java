@@ -1,7 +1,6 @@
 package org.activityinfo.model.query;
 
 import com.google.common.base.Joiner;
-import org.activityinfo.model.query.ColumnView;
 
 import javax.annotation.Nonnull;
 import java.util.Map;

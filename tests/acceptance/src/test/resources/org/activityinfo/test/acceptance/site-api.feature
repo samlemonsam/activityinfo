@@ -139,7 +139,7 @@ Feature: Site API
         category: null
         published: 1
         locationType:
-          id: 100000
+          id: $any
           name: Country
           adminLevelId: null
         lockedPeriods: [ ]
@@ -156,7 +156,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            
+
           - id: $score
             code: score        
             name: score
@@ -169,7 +169,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            
+
           - id: $contact
             name: contact
             code: contact
@@ -182,7 +182,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            
+
           - id: $description
             name: description
             code: description
@@ -194,8 +194,8 @@ Feature: Site API
             calculatedAutomatically: false
             expression: null
             category: null
-            mandatory: false  
-            
+            mandatory: false
+
         attributeGroups: 
           - id: $donor
             name: donor

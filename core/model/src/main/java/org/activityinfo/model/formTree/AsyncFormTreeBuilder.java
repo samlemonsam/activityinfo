@@ -84,7 +84,7 @@ public class AsyncFormTreeBuilder implements Function<ResourceId, Promise<FormTr
                 } else {
                     childNode = node.addChild(formClass, field);
                 }
-                if(childNode.isReference() && !formClass.hasSubformField()) {
+                if(childNode.isReference()) {
                     queueNextRequests(childNode);
                 }
             }

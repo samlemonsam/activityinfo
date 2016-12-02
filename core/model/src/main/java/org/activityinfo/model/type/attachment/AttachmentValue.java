@@ -22,7 +22,8 @@ package org.activityinfo.model.type.attachment;
  */
 
 import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.IsRecord;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * @author yuriyz on 8/6/14.
  */
-public class AttachmentValue implements FieldValue, IsRecord {
+public class AttachmentValue implements FieldValue {
 
     private final List<Attachment> values = Lists.newArrayList();
 
@@ -41,6 +42,7 @@ public class AttachmentValue implements FieldValue, IsRecord {
     public FieldTypeClass getTypeClass() {
         return AttachmentType.TYPE_CLASS;
     }
+
 
     public AttachmentValue() {
     }
@@ -66,10 +68,12 @@ public class AttachmentValue implements FieldValue, IsRecord {
     }
 
     @Override
-    public Record asRecord() {
-        return new Record()
-                .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
-                .set("values", getValuesAsRecords());
+    public JsonElement toJsonElement() {
+        JsonArray array = new JsonArray();
+        for (Attachment value : values) {
+            array.add(value.toJsonElement());
+        }
+        return array;
     }
 
     public static AttachmentValue fromRecord(Record record) {
@@ -85,6 +89,22 @@ public class AttachmentValue implements FieldValue, IsRecord {
         return fromRecord(Resources.recordFromJson(json));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AttachmentValue that = (AttachmentValue) o;
+
+        return !(values != null ? !values.equals(that.values) : that.values != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return values != null ? values.hashCode() : 0;
+    }
+
     public static AttachmentValue fromJsonSilently(String json) {
         try {
             return fromJson(json);
@@ -92,4 +112,6 @@ public class AttachmentValue implements FieldValue, IsRecord {
             return null;
         }
     }
+
+
 }

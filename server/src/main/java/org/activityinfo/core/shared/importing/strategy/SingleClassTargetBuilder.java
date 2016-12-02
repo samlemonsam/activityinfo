@@ -1,17 +1,14 @@
 package org.activityinfo.core.shared.importing.strategy;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.core.shared.criteria.FormClassSet;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by alex on 4/4/14.
- */
 public class SingleClassTargetBuilder {
 
     private final FormTree.Node rootField;
@@ -31,7 +28,7 @@ public class SingleClassTargetBuilder {
         Map<FieldPath, Integer> referenceValues = targetCollector.getPathMap(mappings, sourceColumns);
         List<FieldImporterColumn> fieldImporterColumns = targetCollector.fieldImporterColumns(mappings);
 
-        ResourceId rangeClassId = FormClassSet.of(rootField.getRange()).unique();
+        ResourceId rangeClassId = Iterables.getOnlyElement(rootField.getRange());
 
         return new SingleClassImporter(rangeClassId, rootField.getField().isRequired(),
                 sourceColumns, referenceValues, fieldImporterColumns, rootField.getFieldId());

@@ -1,19 +1,19 @@
 package org.activityinfo.server.endpoint.odk;
 
 import com.google.common.collect.Iterables;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.BodyElement;
 import org.activityinfo.io.xform.form.Input;
+import org.activityinfo.model.resource.ResourceId;
 
-import java.util.Set;
+import java.util.Collection;
 
 public class ReferenceBuilder implements OdkFormFieldBuilder {
 
 
-    private final Set<ResourceId> range;
+    private final Collection<ResourceId> range;
 
-    public ReferenceBuilder(Set<ResourceId> range) {
+    public ReferenceBuilder(Collection<ResourceId> range) {
         this.range = range;
     }
 

@@ -36,7 +36,7 @@ public class FieldProfile {
         if(columnView == null) {
             return false;
         }
-        return columnView.getType() == ColumnType.GEOGRAPHIC;
+        return columnView.getType() == ColumnType.GEOGRAPHIC_AREA;
     }
 
     public Set<String> uniqueValues() {

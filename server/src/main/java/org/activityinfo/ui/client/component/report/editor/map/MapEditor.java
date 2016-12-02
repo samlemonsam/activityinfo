@@ -33,6 +33,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Element;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -55,6 +56,7 @@ public class MapEditor extends ContentPanel implements ReportElementEditor<MapRe
 
     private final Dispatcher dispatcher;
     private final ReportEventBus reportEventBus;
+    private ResourceLocator locator;
     private final EventBus eventBus;
 
     // Contained widgets
@@ -65,8 +67,9 @@ public class MapEditor extends ContentPanel implements ReportElementEditor<MapRe
     private AbsoluteLayout layout;
 
     @Inject
-    public MapEditor(Dispatcher dispatcher, EventBus eventBus) {
+    public MapEditor(Dispatcher dispatcher, ResourceLocator locator, EventBus eventBus) {
         this.dispatcher = dispatcher;
+        this.locator = locator;
         this.eventBus = eventBus;
         this.reportEventBus = new ReportEventBus(eventBus, this);
 
@@ -118,7 +121,7 @@ public class MapEditor extends ContentPanel implements ReportElementEditor<MapRe
     }
 
     protected void createLayersWidget() {
-        layersWidget = new LayersWidget(dispatcher, eventBus, optionsPanel);
+        layersWidget = new LayersWidget(dispatcher, locator, eventBus, optionsPanel);
 
         // positioning is actually only set when setSize() is called below
         add(layersWidget, new AbsoluteData());

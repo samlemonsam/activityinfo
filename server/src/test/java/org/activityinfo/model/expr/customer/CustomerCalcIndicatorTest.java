@@ -26,7 +26,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
@@ -81,13 +80,12 @@ import static org.junit.Assert.assertThat;
 public class CustomerCalcIndicatorTest extends CommandTestCase2 {
 
 
-
-
     public static final Dimension INDICATOR_DIMENSION = new Dimension(DimensionType.Indicator);
 
     public static final Dimension YEAR_DIMENSION = new DateDimension(DateUnit.YEAR);
 
     public static final double EPSILON = 0.000000000000001;
+    
     FormClass formClass;
     private KeyGenerator keyGenerator = new KeyGenerator();
 
@@ -362,10 +360,9 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
         CreateResult createResult = execute(CreateEntity.Activity(db, act));
         ResourceId classId = activityFormClass(createResult.getNewId());
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(classId));
+        FormClass formClass = assertResolves(locator.getFormClass(classId));
 
-        FormField typeField = new FormField(quantityId());
+        FormField typeField = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
         typeField.setType(new EnumType(Cardinality.SINGLE,
                 Arrays.asList(new EnumItem(EnumItem.generateId(), "Budgeted"),
                         new EnumItem(EnumItem.generateId(), "Spent"))));
@@ -480,9 +477,9 @@ public class CustomerCalcIndicatorTest extends CommandTestCase2 {
         formClass.addElement(initialSoftField);
         formClass.addElement(initialTotalField);
 
-        assertResolves(resourceLocator.persist(formClass));
+        assertResolves(locator.persist(formClass));
 
-        FormClass reform = assertResolves(resourceLocator.getFormClass(formClass.getId()));
+        FormClass reform = assertResolves(locator.getFormClass(formClass.getId()));
         assertHasFieldWithLabel(reform, "Expenditure");
         assertHasFieldWithLabel(reform, "Allocation watter programme");
         assertHasFieldWithLabel(reform, "Initial Cost - Not specified");

@@ -21,16 +21,19 @@ package org.activityinfo.model.type.attachment;
  * #L%
  */
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
 
 /**
  * @author yuriyz on 8/6/14.
@@ -52,18 +55,12 @@ public class AttachmentType implements ParametrizedFieldType {
             return new AttachmentType(Cardinality.SINGLE, Kind.ATTACHMENT);
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return AttachmentValue.fromRecord(record);
-        }
 
         @Override
-        public AttachmentType deserializeType(Record typeParameters) {
-            EnumValue cardinalityValue = (EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("cardinality"));
-            EnumValue kindValue = (EnumValue) EnumType.TYPE_CLASS.deserialize(typeParameters.getRecord("kind"));
-            return new AttachmentType(
-                    Cardinality.valueOf(cardinalityValue.getValueId().asString()),
-                    Kind.valueOf(kindValue.getValueId().asString()));
+        public FieldType deserializeType(JsonObject parametersObject) {
+            Cardinality cardinality = Cardinality.valueOf(parametersObject.get("cardinality"));
+            Kind kind = Kind.valueOf(JsonParsing.fromEnumValue(parametersObject.get("kind")));
+            return new AttachmentType(cardinality, kind);
         }
 
         @Override
@@ -106,6 +103,28 @@ public class AttachmentType implements ParametrizedFieldType {
         return TYPE_CLASS;
     }
 
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        if(value instanceof JsonObject) {
+            value = ((JsonObject) value).get("values");
+        }
+        AttachmentValue fieldValue = new AttachmentValue();
+        JsonArray array = (JsonArray) value;
+        for (JsonElement attachmentItem : array) {
+            JsonObject attachmentObject = (JsonObject) attachmentItem;
+            String mimeType = attachmentObject.get("mimeType").getAsString();
+            String filename = attachmentObject.get("filename").getAsString();
+            String blobId = attachmentObject.get("blobId").getAsString();
+
+            Attachment attachment = new Attachment(mimeType, filename, blobId);
+            attachment.setWidth(attachmentObject.get("width").getAsInt());
+            attachment.setHeight(attachmentObject.get("height").getAsInt());
+            
+            fieldValue.getValues().add(attachment);
+        }
+        return fieldValue;
+    }
+
     public Cardinality getCardinality() {
         return cardinality;
     }
@@ -119,11 +138,16 @@ public class AttachmentType implements ParametrizedFieldType {
     }
 
     @Override
-    public Record getParameters() {
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("cardinality", new EnumValue(ResourceId.valueOf(cardinality.name())).asRecord())
-                .set("kind", new EnumValue(ResourceId.valueOf(kind.name())).asRecord());
+    public FormInstance getParameters() {
+        return new FormInstance(null, getTypeClass().getParameterFormClass().getId());
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        object.addProperty("cardinality", cardinality.name().toLowerCase());
+        object.addProperty("kind", kind.name().toLowerCase());
+        return object;
     }
 
     @Override

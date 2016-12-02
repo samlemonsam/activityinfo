@@ -44,7 +44,9 @@ public class RelevancePanelPresenter {
 
     public RelevancePanelPresenter(final FieldWidgetContainer fieldWidgetContainer) {
         this.fieldWidgetContainer = fieldWidgetContainer;
-        this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getFormClass());
+
+        // todo this will not work with subforms!!!
+        this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getModel());
 
         if (fieldWidgetContainer.getFormField().hasRelevanceConditionExpression()) {
             List<RowData> build = rowDataBuilder.build(fieldWidgetContainer.getFormField().getRelevanceConditionExpression());
@@ -106,7 +108,6 @@ public class RelevancePanelPresenter {
     private List<RowData> createRowDataList() {
         final List<RowData> result = Lists.newArrayList();
         final int widgetCount = view.getRootPanel().getWidgetCount();
-        final FormClass formClass = fieldWidgetContainer.getFormDesigner().getFormClass();
 
         for (int i = 0; i < widgetCount; i++) {
             RelevanceRow row = (RelevanceRow) view.getRootPanel().getWidget(i);
@@ -114,7 +115,7 @@ public class RelevancePanelPresenter {
             if (value == null) {
                 throw new NullPointerException("Null value is not allowed.");
             }
-            result.add(RowDataFactory.create(row, value, formClass));
+            result.add(RowDataFactory.create(row, map.get(row).getValue(), fieldWidgetContainer.getFormDesigner().getModel()));
         }
         return result;
     }

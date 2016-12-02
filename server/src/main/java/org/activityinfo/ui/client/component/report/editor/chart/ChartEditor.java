@@ -31,6 +31,7 @@ import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.RenderElement.Format;
@@ -49,6 +50,7 @@ public class ChartEditor extends LayoutContainer implements ReportElementEditor<
 
     private final EventBus eventBus;
     private final Dispatcher dispatcher;
+    private ResourceLocator locator;
 
     private ActionToolBar toolBar;
 
@@ -65,9 +67,10 @@ public class ChartEditor extends LayoutContainer implements ReportElementEditor<
     private PivotChartReportElement model = new PivotChartReportElement();
 
     @Inject
-    public ChartEditor(EventBus eventBus, Dispatcher service) {
+    public ChartEditor(EventBus eventBus, Dispatcher service, ResourceLocator locator) {
         this.eventBus = eventBus;
         this.dispatcher = service;
+        this.locator = locator;
 
         setLayout(new BorderLayout());
 
@@ -81,7 +84,7 @@ public class ChartEditor extends LayoutContainer implements ReportElementEditor<
 
     private void createWest() {
 
-        filterPane = new PivotFilterPanel(eventBus, dispatcher);
+        filterPane = new PivotFilterPanel(eventBus, dispatcher, locator);
 
         BorderLayoutData west = new BorderLayoutData(Style.LayoutRegion.WEST, 0.30f);
         west.setCollapsible(true);

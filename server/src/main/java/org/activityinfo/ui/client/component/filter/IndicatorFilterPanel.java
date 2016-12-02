@@ -28,6 +28,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
@@ -39,8 +40,8 @@ public class IndicatorFilterPanel extends IndicatorTreePanel implements FilterPa
     private Timer delayedEvent;
 
 
-    public IndicatorFilterPanel(Dispatcher service, boolean multipleSelection) {
-        super(service, multipleSelection);
+    public IndicatorFilterPanel(Dispatcher service, ResourceLocator resourceLocator) {
+        super(service, resourceLocator);
 
 
         addCheckChangedListener(new Listener<TreePanelEvent>() {

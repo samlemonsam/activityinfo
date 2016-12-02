@@ -33,9 +33,9 @@ public class OdkModule extends AbstractRestModule {
     @Override
     protected void configureResources() {
         // in separate classes for now because of the prefix-less urls..
-        bindResource(FormResource.class);
+        bindResource(XFormResources.class);
         bindResource(FormListResource.class);
         bindResource(DbFormListResource.class);
-        bindResource(FormSubmissionResource.class);
+        bindResource(XFormSubmissionResource.class);
     }
 }

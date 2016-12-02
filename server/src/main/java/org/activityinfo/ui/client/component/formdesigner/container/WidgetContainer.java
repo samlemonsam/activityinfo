@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.component.formdesigner.container;
  */
 
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 
 /**
@@ -29,9 +30,15 @@ import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
  */
 public interface WidgetContainer {
 
-    public Widget asWidget();
+    Widget asWidget();
 
-    public Widget getDragHandle();
+    Widget getDragHandle();
 
-    public FormDesigner getFormDesigner();
+    FormDesigner getFormDesigner();
+
+    ResourceId getParentId();
+
+    void syncWithModel();
+
+    void syncWithModel(boolean force);
 }

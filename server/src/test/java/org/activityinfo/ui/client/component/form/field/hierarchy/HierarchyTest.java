@@ -8,15 +8,12 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.LocationClassAdapter;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -51,21 +48,20 @@ public class HierarchyTest extends CommandTestCase2 {
 
     @Test
     public void buildViewModelTest() {
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass campForm = assertResolves(resourceLocator.getFormClass(CAMP_CLASS));
+        FormClass campForm = assertResolves(locator.getFormClass(CAMP_CLASS));
 
-        FormField adminField = campForm.getField(LocationClassAdapter.getAdminFieldId(CAMP_CLASS));
+        FormField adminField = campForm.getField(CuidAdapter.field(CAMP_CLASS, CuidAdapter.ADMIN_FIELD));
 
-        Set<ResourceId> fieldValue = Collections.singleton(entity(325703));
+        Set<RecordRef> fieldValue = Collections.singleton(new RecordRef(CAMP_DISTRICT_CLASS, entity(325703)));
 
-        Hierarchy tree = assertResolves(Hierarchy.get(resourceLocator, (ReferenceType) adminField.getType()));
+        Hierarchy tree = assertResolves(Hierarchy.get(locator, (ReferenceType) adminField.getType()));
         prettyPrintTree(tree);
 
         assertThat(tree.getRoots(), hasSize(1));
 
         createWidgets(tree);
 
-        Presenter presenter = new Presenter(resourceLocator, tree, widgets, new ValueUpdater() {
+        Presenter presenter = new Presenter(locator, tree, widgets, new ValueUpdater() {
             @Override
             public void update(Object value) {
                 System.out.println("VALUE = " + value);
@@ -76,7 +72,7 @@ public class HierarchyTest extends CommandTestCase2 {
         assertThat(presenter.getSelectionLabel(CAMP_DISTRICT_CLASS), equalTo("District 5"));
 
         // now try to get options for the root level
-        List<Projection> choices = assertResolves(widgets.get(REGION).choices.get());
+        List<Choice> choices = assertResolves(widgets.get(REGION).choices.get());
         System.out.println(choices);
 
         assertThat(choices, hasSize(3));
@@ -90,21 +86,21 @@ public class HierarchyTest extends CommandTestCase2 {
 
         assertThat(widgets.get(GOVERNORATE_ID).choices, Matchers.notNullValue());
 
-        List<Projection> governorateChoices = assertResolves(widgets.get(GOVERNORATE_ID).choices.get());
+        List<Choice> governorateChoices = assertResolves(widgets.get(GOVERNORATE_ID).choices.get());
         System.out.println(governorateChoices);
         assertThat(governorateChoices, hasSize(4));
     }
 
     private void prettyPrintWidgets(Hierarchy tree) {
         for(Level level : tree.getLevels()) {
-            System.out.println(widgets.get(level.getClassId()));
+            System.out.println(widgets.get(level.getFormId()));
         }
     }
 
     private void createWidgets(Hierarchy tree) {
         Map<ResourceId, MockLevelWidget> levels = new HashMap<>();
         for(Level level : tree.getLevels()) {
-            levels.put(level.getClassId(), new MockLevelWidget(level.getLabel()));
+            levels.put(level.getFormId(), new MockLevelWidget(level.getLabel()));
         }
         this.widgets = levels;
     }
@@ -133,7 +129,7 @@ public class HierarchyTest extends CommandTestCase2 {
             this.label = label;
         }
 
-        private Supplier<Promise<List<Projection>>> choices;
+        private Supplier<Promise<List<Choice>>> choices;
 
         @Override
         public void clearSelection() {
@@ -151,21 +147,21 @@ public class HierarchyTest extends CommandTestCase2 {
         }
 
         @Override
-        public void setSelection(Projection selection) {
-            this.selection = selection.getStringValue(ApplicationProperties.LABEL_PROPERTY);
+        public void setSelection(Choice selection) {
+            this.selection = selection.getLabel();
         }
 
         @Override
-        public void setChoices(Supplier<Promise<List<Projection>>> choices) {
+        public void setChoices(Supplier<Promise<List<Choice>>> choices) {
             this.choices = choices;
         }
 
         public void setSelection(String label) {
-            List<Projection> choices = assertResolves(this.choices.get());
-            for(Projection projection : choices) {
-                if(Objects.equals(projection.getStringValue(ApplicationProperties.LABEL_PROPERTY), label)) {
+            List<Choice> choices = assertResolves(this.choices.get());
+            for(Choice choice : choices) {
+                if(Objects.equals(choice.getLabel(), label)) {
                     this.selection = label;
-                    SelectionEvent.fire(this, projection);
+                    SelectionEvent.fire(this, choice);
                     return;
                 }
             }
@@ -173,7 +169,7 @@ public class HierarchyTest extends CommandTestCase2 {
         }
 
         @Override
-        public HandlerRegistration addSelectionHandler(SelectionHandler<Projection> handler) {
+        public HandlerRegistration addSelectionHandler(SelectionHandler<Choice> handler) {
             return eventBus.addHandler(SelectionEvent.getType(), handler);
         }
 

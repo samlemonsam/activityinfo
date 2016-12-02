@@ -24,10 +24,14 @@ package org.activityinfo.ui.client.component.formdesigner.drop;
 import com.allen_sauer.gwt.dnd.client.DragContext;
 import com.allen_sauer.gwt.dnd.client.VetoDragException;
 import com.allen_sauer.gwt.dnd.client.drop.DropController;
+import com.google.api.client.util.Maps;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * DnD library doesn't support multiple drop controllers for the same drop panel. As workaround we forward calls.
@@ -93,5 +97,14 @@ public class ForwardDropController implements DropControllerExtended {
         for (DropControllerExtended dropController : controllers) {
             dropController.setPositionerToEnd();
         }
+    }
+
+    @Override
+    public Map<ResourceId, WidgetContainer> getContainerMap() {
+        Map<ResourceId, WidgetContainer> map = Maps.newHashMap();
+        for (DropControllerExtended dropController : controllers) {
+            map.putAll(dropController.getContainerMap());
+        }
+        return map;
     }
 }

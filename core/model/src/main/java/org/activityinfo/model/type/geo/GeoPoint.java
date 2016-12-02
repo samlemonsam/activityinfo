@@ -1,5 +1,7 @@
 package org.activityinfo.model.type.geo;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.RecordFieldValue;
@@ -33,6 +35,14 @@ public class GeoPoint implements GeoFieldValue, IsRecord, RecordFieldValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return GeoPointType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("latitude", latitude);
+        object.addProperty("longitude", longitude);
+        return object;
     }
 
     @Override

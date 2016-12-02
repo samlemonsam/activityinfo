@@ -100,6 +100,8 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
                     throw new Error("No database name provided");
                 }
             }
+
+            LOGGER.info("Database : " + DATABASE_NAME + ", username: " + USERNAME);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -134,14 +136,16 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
     @Override
     public Connection get() {
         try {
-            return  openConnection();
+            return openConnection();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
     
     private static String connectionUrl(String dbName) {
-        return String.format("jdbc:mysql://localhost/%s?useUnicode=true&characterEncoding=UTF-8", dbName);
+        String connectionUrl = String.format("jdbc:mysql://localhost/%s?useUnicode=true&characterEncoding=UTF-8", dbName);
+        System.out.println("TestConnectionProvider url: " + connectionUrl);
+        return connectionUrl;
     }
 
     private static void initializeDatabase() throws SQLException, LiquibaseException {

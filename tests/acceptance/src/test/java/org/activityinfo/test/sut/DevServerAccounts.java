@@ -30,7 +30,7 @@ public class DevServerAccounts implements Accounts {
     private static final Logger LOGGER = Logger.getLogger(DevServerAccounts.class.getName());
 
 
-    private static final String DEV_PASSWORD = "notasecret";
+    private static String DEV_PASSWORD = "notasecret";
 
     private final Meter users = Metrics.REGISTRY.meter("registeredUsers");
 

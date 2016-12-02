@@ -7,23 +7,21 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.*;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,10 +38,18 @@ public class Updater {
     
     private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
     
-    private final CollectionCatalog catalog;
+    private final FormCatalog catalog;
+    private int userId;
+    private ValueVisibilityChecker visibilityChecker;
 
-    public Updater(CollectionCatalog catalog) {
+    public Updater(FormCatalog catalog, int userId) {
+        this(catalog, userId, ValueVisibilityChecker.NULL);
+    }
+
+    public Updater(FormCatalog catalog, int userId, ValueVisibilityChecker visibilityChecker) {
         this.catalog = catalog;
+        this.userId = userId;
+        this.visibilityChecker = visibilityChecker;
     }
 
 
@@ -78,7 +84,7 @@ public class Updater {
         ResourceId resourceId = parseId(changeObject, "@id");
 
         // First determine whether the resource already exists. 
-        Optional<ResourceCollection> collection = catalog.lookupCollection(resourceId);
+        Optional<FormAccessor> collection = catalog.lookupForm(resourceId);
         
         if(!collection.isPresent()) {
             // If the resource is not present, then we need the @class attribute in order to 
@@ -89,7 +95,7 @@ public class Updater {
             } 
             
             ResourceId collectionId = parseId(changeObject, "@class");
-            collection = catalog.getCollection(collectionId);
+            collection = catalog.getForm(collectionId);
             
             if(!collection.isPresent()) {
                 throw new InvalidUpdateException(format("@class '%s' does not exist.", collectionId));
@@ -98,19 +104,18 @@ public class Updater {
         
 
         FormClass formClass = collection.get().getFormClass();
-        ResourceUpdate update = parseChange(formClass, changeObject);
+        RecordUpdate update = parseChange(formClass, changeObject, this.userId);
 
 
         executeUpdate(collection.get(), update);
     }
 
     @VisibleForTesting
-    static ResourceUpdate parseChange(FormClass formClass, JsonObject changeObject) {
+    static RecordUpdate parseChange(FormClass formClass, JsonObject changeObject, int userId) {
         
         // This resource exists, make sure the existing class matches the provided @class
         // if given explicitly
         validateExplicitClassAttribute(formClass, changeObject);
-
 
         // Build a lookup map to resolve the field name used in the JSON request.
         Map<String, FormField> idMap = new HashMap<>();
@@ -121,8 +126,9 @@ public class Updater {
             codeMap.put(formField.getCode(), formField);
         }
 
-        ResourceUpdate update = new ResourceUpdate();
-        update.setResourceId(parseId(changeObject, "@id"));
+        RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
+        update.setRecordId(parseId(changeObject, "@id"));
         update.setDeleted(parseDeletedFlag(changeObject));
 
         for(Map.Entry<String, JsonElement> change : changeObject.entrySet()) {
@@ -148,7 +154,7 @@ public class Updater {
                 FieldValue fieldValue;
                 try {
                     fieldValue = parseFieldValue(field, changeObject.get(fieldName));
-                } catch (InvalidUpdateException e) {
+                } catch (Exception e) {
                     throw new InvalidUpdateException(format("Invalid value for field '%s' (id: %s, code: %s): %s",
                             field.getLabel(),
                             field.getId(),
@@ -202,81 +208,11 @@ public class Updater {
     }
 
     private static FieldValue parseFieldValue(FormField field, JsonElement jsonValue) {
-        if(jsonValue.isJsonNull()) {
-            return null;
-
-        } else if(isTypedRecord(jsonValue)) {
-            return parseTypedRecord(field, jsonValue.getAsJsonObject());
-            
-        } else if(field.getType() instanceof TextType) {
-            return TextValue.valueOf(jsonValue.getAsString());
-            
-        } else if(field.getType() instanceof QuantityType) {
-            return parseQuantity(field, jsonValue);
-            
-        } else if(field.getType() instanceof EnumType) {
-            return parseEnumValue((EnumType) field.getType(), jsonValue.getAsString());
-        
-        } else if(field.getType() instanceof ReferenceType) {
-            return new ReferenceValue(ResourceId.valueOf(jsonValue.getAsString()));    
-        
-        } else if(field.getType() instanceof LocalDateType) {
-            return parseDate(jsonValue.getAsString());    
-            
-        } else if(field.getType() instanceof NarrativeType) {
-            return NarrativeValue.valueOf(jsonValue.getAsString());
-            
-        }
-        throw new InvalidUpdateException("Unsupported type: " + field.getType().getTypeClass().getId());
-    }
-
-    private static boolean isTypedRecord(JsonElement jsonValue) {
-        if(jsonValue.isJsonObject()) {
-            return jsonValue.getAsJsonObject().has("@type");
-        }
-        return false;
-    }
-
-
-    private static FieldValue parseTypedRecord(FormField field, JsonObject jsonObject) {
-        Record record = Resources.recordFromJson(jsonObject);
-        FieldValue fieldValue = TypeRegistry.get().deserializeFieldValue(record);
-        
-        if(!field.getType().getTypeClass().equals(fieldValue.getTypeClass())) {
-            throw new InvalidUpdateException(String.format(
-                    "Expected record of type %s for field '%s' (id: %s) but a record of type %s was provided", 
-                        field.getType().getTypeClass().getId(),
-                        field.getLabel(), 
-                        field.getId().asString(),
-                        record.get("@type")));
-        }
-
-        return fieldValue;
-    }
-
-    private static FieldValue parseQuantity(FormField field, JsonElement jsonValue) {
-        QuantityType quantityType = (QuantityType) field.getType();
-
-        if(!jsonValue.isJsonPrimitive()) {
-            throw new InvalidUpdateException("Quantity fields must be encoded as JSON number, found: %s", jsonValue);
-        }
-        if(jsonValue.getAsJsonPrimitive().isNumber()) {
-            return new Quantity(jsonValue.getAsDouble(), quantityType.getUnits());
-            
-        } else if(jsonValue.getAsJsonPrimitive().isString()) {
-            try {
-                return new Quantity(Double.parseDouble(jsonValue.getAsString()), quantityType.getUnits());
-            } catch (NumberFormatException e) {
-                throw new InvalidUpdateException("Invalid number: " + e.getMessage(), e);
-            }
-            
+        if(field.getType() instanceof EnumType) {
+            return parseEnumValue((EnumType)field.getType(), jsonValue.getAsString());
         } else {
-            throw new InvalidUpdateException("Expected number, found: " + jsonValue);
+            return field.getType().parseJsonValue(jsonValue);
         }
-    }
-
-    private static FieldValue parseDate(String jsonValue) {
-        return org.activityinfo.model.type.time.LocalDate.parse(jsonValue);
     }
 
     private static FieldValue parseEnumValue(EnumType type, String jsonValue) {
@@ -290,25 +226,36 @@ public class Updater {
                 return new EnumValue(enumItem.getId());
             }
         }
-        
-        throw new InvalidUpdateException(format("Invalid enum value '%s', expected one of: %s", 
+
+        throw new InvalidUpdateException(format("Invalid enum value '%s', expected one of: %s",
                 jsonValue, Joiner.on(", ").join(type.getValues())));
     }
 
-    public void execute(ResourceUpdate update) {
-        Optional<ResourceCollection> collection = catalog.lookupCollection(update.getResourceId());
+
+    public void execute(RecordUpdate update) {
+        Optional<FormAccessor> collection = catalog.lookupForm(update.getRecordId());
         if(!collection.isPresent()) {
-            throw new InvalidUpdateException("No such resource: " + update.getResourceId());
+            throw new InvalidUpdateException("No such resource: " + update.getRecordId());
         }
 
         executeUpdate(collection.get(), update);
     }
 
-    private void executeUpdate(ResourceCollection collection, ResourceUpdate update) {
+    private void executeUpdate(FormAccessor collection, RecordUpdate update) {
         
         FormClass formClass = collection.getFormClass();
-        Optional<Resource> existingResource = collection.get(update.getResourceId());
+        Optional<FormRecord> existingResource = collection.get(update.getRecordId());
 
+        validateUpdate(formClass, existingResource, update);
+        
+        if(existingResource.isPresent()) {
+            collection.update(update);
+        } else {
+            collection.add(update);
+        }
+    }
+
+    public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, RecordUpdate update) {
         LOGGER.info("Loaded existingResource " + existingResource);
 
         Map<ResourceId, FormField> fieldMap = new HashMap<>();
@@ -329,21 +276,15 @@ public class Updater {
             
             valueMap.put(field.getId(), updatedValue);
         }
-
+        
         // Verify that all required fields are provided for new resources
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
                 if (formField.isRequired() && valueMap.get(formField.getId()) == null) {
-                    throw new InvalidUpdateException("Required field '%s' [%s] is missing",
-                            formField.getCode(), formField.getId());
+                    throw new InvalidUpdateException("Required field '%s' [%s] is missing from record with schema %s",
+                            formField.getCode(), formField.getId(), formClass.getId().asString());
                 }
             }
-        }
-        
-        if(existingResource.isPresent()) {
-            collection.update(update);
-        } else {
-            collection.add(update);
         }
     }
 
@@ -358,6 +299,13 @@ public class Updater {
                                 field.getId(), field.getCode()));
             }
         } else {
+            if ( field.getType() instanceof CalculatedFieldType) {
+                throw new InvalidUpdateException(
+                        format("Field %s ('%s') is a calculated field and its value cannot be set. Found %s",
+                                field.getId(),
+                                field.getLabel(),
+                                updatedValue));
+            }
             if (!field.getType().getTypeClass().equals(updatedValue.getTypeClass())) {
                 throw new InvalidUpdateException(
                         format("Updated value for field %s ('%s') has invalid type. Expected %s, found %s.",
@@ -370,4 +318,71 @@ public class Updater {
         // TODO: check type-class specific properties
     }
 
+    public void execute(FormInstance formInstance) {
+
+        Optional<FormAccessor> collection = catalog.getForm(formInstance.getFormId());
+        if(!collection.isPresent()) {
+            throw new InvalidUpdateException("No such formId: " + formInstance.getFormId());
+        }
+
+        RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
+        update.setRecordId(formInstance.getId());
+
+        for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
+            if(!entry.getKey().asString().equals("classId")) {
+                update.set(entry.getKey(), entry.getValue());
+            }
+        }
+        executeUpdate(collection.get(), update);
+    }
+
+
+    public void create(ResourceId formId, JsonObject jsonObject) {
+        String id = jsonObject.get("id").getAsString();
+        createOrUpdate(formId, ResourceId.valueOf(id), jsonObject, true);
+    }
+
+    public void execute(ResourceId formId, ResourceId recordId, JsonObject jsonObject) {
+        createOrUpdate(formId, recordId, jsonObject, false);
+    }
+
+    private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonObject jsonObject, boolean create) {
+        Optional<FormAccessor> collection = catalog.getForm(formId);
+        if(!collection.isPresent()) {
+            throw new InvalidUpdateException("No such formId: " + formId);
+        }
+
+        RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
+        update.setRecordId(recordId);
+
+        if(jsonObject.has("deleted") && !jsonObject.get("deleted").isJsonNull()) {
+            update.setDeleted(jsonObject.get("deleted").getAsBoolean());
+        }
+
+        if (jsonObject.has("parentRecordId") && !jsonObject.get("parentRecordId").isJsonNull()) {
+            update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").getAsString()));
+        }
+
+        FormClass formClass = collection.get().getFormClass();
+        JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
+        for (FormField formField : formClass.getFields()) {
+            if(!(formField.getType() instanceof CalculatedFieldType)) {
+
+                if (fieldValues.has(formField.getName())) {
+                    JsonElement updatedValueElement = fieldValues.get(formField.getName());
+                    FieldValue updatedValue = formField.getType().parseJsonValue(updatedValueElement);
+
+                    visibilityChecker.assertVisible(formField.getType(), updatedValue, userId);
+                    update.getChangedFieldValues().put(formField.getId(), updatedValue);
+
+                } else if (create) {
+                    update.getChangedFieldValues().put(formField.getId(), null);
+                }
+            }
+        }
+
+        executeUpdate(collection.get(), update);
+    }
 }

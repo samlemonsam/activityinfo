@@ -6,7 +6,10 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.opengis.feature.type.PropertyDescriptor;
+
+import java.util.Date;
 
 public enum AttributeTypeAdapters implements AttributeTypeAdapter {
 
@@ -29,6 +32,13 @@ public enum AttributeTypeAdapters implements AttributeTypeAdapter {
         public FieldType createType() {
             return TextType.INSTANCE;
         }
+    },
+    
+    DATE {
+        @Override
+        public FieldType createType() {
+            return LocalDateType.INSTANCE;
+        }
     };
 
 
@@ -43,6 +53,8 @@ public enum AttributeTypeAdapters implements AttributeTypeAdapter {
             return AREA;
         } else if (Number.class.isAssignableFrom(type)) {
             return QUANTITY;
+        } else if (Date.class.isAssignableFrom(type)) {
+            return DATE;
         } else {
             throw new IllegalArgumentException(type.getName());
         }

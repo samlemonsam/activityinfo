@@ -21,9 +21,12 @@ package org.activityinfo.model.date;
  * #L%
  */
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Preconditions;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Each epi week begins on a Sunday and ends on a Saturday.
@@ -33,17 +36,52 @@ import java.io.Serializable;
  * @author yuriyz on 02/26/2015.
  */
 public class EpiWeek implements Serializable {
+
+    public static final int WEEKS_IN_YEAR = 52;
+
     private int weekInYear;
     private int year;
 
+    /**
+     * Uninitialized epi week.
+     */
     public EpiWeek() {
+    }
+
+    public EpiWeek(EpiWeek week) {
+        this(week.getWeekInYear(), week.getYear());
     }
 
     public EpiWeek(int weekInYear, int year) {
         this.weekInYear = weekInYear;
         this.year = year;
-        Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
-        Preconditions.checkState(year > 0, "Year must be more than zero. Year: " + year);
+
+        normalize();
+        checkState();
+    }
+
+    private void normalize() {
+        while (weekInYear > WEEKS_IN_YEAR) {
+            year++;
+            weekInYear -= WEEKS_IN_YEAR;
+        }
+        while (weekInYear < 1) {
+            year--;
+            weekInYear += WEEKS_IN_YEAR;
+        }
+    }
+
+    private void checkState() {
+        checkState(true, true);
+    }
+
+    private void checkState(boolean checkYear, boolean checkWeek) {
+        if (checkWeek) {
+            Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
+        }
+        if (checkYear) {
+            Preconditions.checkState(year > 0, "Year must be more than zero. Year: " + year);
+        }
     }
 
     public int getWeekInYear() {
@@ -52,7 +90,7 @@ public class EpiWeek implements Serializable {
 
     public EpiWeek setWeekInYear(int weekInYear) {
         this.weekInYear = weekInYear;
-        Preconditions.checkState(weekInYear >= 1 && weekInYear <= 53, "Bug! Week number must be between [1..53] but is " + weekInYear);
+        checkState(false, true);
         return this;
     }
 
@@ -62,18 +100,30 @@ public class EpiWeek implements Serializable {
 
     public EpiWeek setYear(int year) {
         this.year = year;
-        Preconditions.checkState(year > 0, "Year must be more than zero. Year: " + year);
+        checkState(true, false);
         return this;
     }
+
+    public EpiWeek plus(int count) {
+        return new EpiWeek(weekInYear + count, year);
+    }
+
+    public EpiWeek next() {
+        return plus(+1);
+    }
+
+    public EpiWeek previous() {
+        return plus(-1);
+    }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         EpiWeek epiWeek = (EpiWeek) o;
-        if (weekInYear != epiWeek.weekInYear) return false;
-        if (year != epiWeek.year) return false;
-        return true;
+        return weekInYear == epiWeek.weekInYear && year == epiWeek.year;
     }
 
     @Override
@@ -85,9 +135,34 @@ public class EpiWeek implements Serializable {
 
     @Override
     public String toString() {
-        return "EpiWeek{" +
-                "weekInYear=" + weekInYear +
-                ", year=" + year +
-                '}';
+        return year + "W" + weekInYear;
+    }
+
+    /**
+     * @param epiWeekAsString (e.g. 2015W1, 2016W30)
+     * @return epi week
+     */
+    public static EpiWeek parse(String epiWeekAsString) {
+        String[] tokens = epiWeekAsString.split("W");
+        if (tokens.length != 2) {
+            throw new NumberFormatException();
+        }
+        String year = tokens[0];
+        String weekInYear = tokens[1];
+        return new EpiWeek(Integer.parseInt(weekInYear), Integer.parseInt(year));
+    }
+
+    public DateRange getDateRange() {
+        Date date = new LocalDate(getYear(), 1, 1).atMidnightInMyTimezone();
+        int dayInYearInsideWeek = getWeekInYear() * 7 - 4;
+
+        CalendarUtil.addDaysToDate(date, dayInYearInsideWeek);
+        DayOfWeek dateOfWeek = DayOfWeek.dayOfWeek(date);
+
+        Date startDate = CalendarUtil.copyDate(date);
+        CalendarUtil.addDaysToDate(startDate, -dateOfWeek.getValue());
+        Date endDate = CalendarUtil.copyDate(date);
+        CalendarUtil.addDaysToDate(endDate, 6 - dateOfWeek.getValue());
+        return new DateRange(startDate, endDate);
     }
 }

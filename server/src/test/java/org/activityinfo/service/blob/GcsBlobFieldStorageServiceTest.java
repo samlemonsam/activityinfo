@@ -31,8 +31,6 @@ import com.google.inject.Inject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
-import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -43,7 +41,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -76,7 +73,8 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
     public static final int USER_WITHOUT_ACCESS_TO_DB_1 = 22;
 
     private final LocalServiceTestHelper localServiceTestHelper = new LocalServiceTestHelper(
-            new LocalBlobstoreServiceTestConfig(), new LocalDatastoreServiceTestConfig());
+            new LocalBlobstoreServiceTestConfig(), new LocalDatastoreServiceTestConfig().
+            setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
     @Inject
     GcsBlobFieldStorageService blobService;
@@ -85,7 +83,6 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
     private AuthenticatedUser noAccessUser;
     private BlobId blobId;
     private ResourceId resourceId = CuidAdapter.activityFormClass(1);
-    private ResourceLocatorAdaptor locator;
 
     @BeforeClass
     public static void setupI18N() {
@@ -99,7 +96,6 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
 
         localServiceTestHelper.setUp();
         blobService.setTestBucketName();
-        locator = new ResourceLocatorAdaptor(getDispatcher());
 
         user = new AuthenticatedUser("x", 1, "user1@user.com");
         noAccessUser = new AuthenticatedUser("x", 3, "stefan@user.com");
@@ -210,8 +206,10 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         blobService.setTestBucketName();
 
         int activityId = 1;
+        int databaseId = 1;
+        int locationType = 10;
 
-        ResourceId attachmentFieldId = ResourceId.generateFieldId(BarcodeType.TYPE_CLASS);
+        ResourceId attachmentFieldId = ResourceId.generateFieldId(AttachmentType.TYPE_CLASS);
         FormClass formClass = addAttachmentField(activityId, attachmentFieldId);
 
         blobId = BlobId.generate();
@@ -235,33 +233,36 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
         instance.set(attachmentFieldId, attachmentValue);
-        instance.set(locationField(activityId), locationInstanceId(1));
-        instance.set(partnerField(activityId), partnerInstanceId(1));
-        instance.set(projectField(activityId), projectInstanceId(1));
+        instance.set(locationField(activityId), locationRef(CuidAdapter.locationFormClass(locationType), 1));
+        instance.set(partnerField(activityId), partnerRef(databaseId, 1));
+        instance.set(projectField(activityId), projectRef(databaseId, 1));
         instance.set(field(formClass.getId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(formClass.getId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(formClass.getId(), COMMENT_FIELD), "My comment");
 
         assertResolves(locator.persist(instance));
 
-        assertInstanceExists(instance.getId());
+        assertInstanceExists(formClass.getId(), instance.getId());
 
         AuthenticationModuleStub.setUserId(USER_WITHOUT_ACCESS_TO_DB_1);
 
         int anotherActivityId = 32;
-        ResourceId newAttachmentFieldId = ResourceId.generateFieldId(BarcodeType.TYPE_CLASS);
+        ResourceId newAttachmentFieldId = ResourceId.generateFieldId(AttachmentType.TYPE_CLASS);
         addAttachmentField(anotherActivityId, newAttachmentFieldId);
 
         instance.setId(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()));
         instance.setClassId(CuidAdapter.activityFormClass(anotherActivityId));
         instance.set(newAttachmentFieldId, attachmentValue);
+        instance.set(field(instance.getFormId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(instance.getFormId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(partnerField(anotherActivityId), partnerRef(databaseId, 1));
 
         boolean persisted = true;
         try {
             assertResolves(locator.persist(instance)); // this must fail because of blob permission check
         } catch (RuntimeException e) {
             e.printStackTrace();
-            if (e.getCause() instanceof IllegalAccessCommandException) {
+            if (e.getCause() instanceof WebApplicationException) {
                 persisted = false;
             }
         }
@@ -279,10 +280,10 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
                 .setVisible(true));
 
         assertResolves(locator.persist(formClass));
-        return formClass;
+        return assertResolves(locator.getFormClass(formClass.getId())); // re-fetch
     }
 
-    private FormInstance assertInstanceExists(ResourceId instanceId) {
-        return assertResolves(locator.getFormInstance(instanceId));
+    private FormInstance assertInstanceExists(ResourceId formId, ResourceId instanceId) {
+        return assertResolves(locator.getFormInstance(formId, instanceId));
     }
 }

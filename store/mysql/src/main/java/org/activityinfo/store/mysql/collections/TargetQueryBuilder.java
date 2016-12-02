@@ -15,7 +15,6 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -66,7 +65,7 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
     }
 
     @Override
-    public void execute() throws IOException {
+    public void execute() {
         
         // First do base columns (like dates, project, partner, etc)
         if(baseCursorBuilder.hasObservers()) {
@@ -120,7 +119,7 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
                 }
 
             } catch (SQLException e) {
-                throw new IOException(e);
+                throw new RuntimeException(e);
             }
         }
     }

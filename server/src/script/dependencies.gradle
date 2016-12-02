@@ -4,11 +4,16 @@
 dependencies {
     compile project(':core:model')
     compile project(':core:services')
+    compile project(':apiClient:gwt')
+    
     compile project(':i18n')
     compile project(':io:xform')
     compile project(':io:match')
-    
+    compile project(':io:xlsform')
+
     compile project(':store:mysql')
+    compile project(':store:hrd')
+
     gwt project(':ui:icons')
 
     testCompile project(':core:model').sourceSets.test.output

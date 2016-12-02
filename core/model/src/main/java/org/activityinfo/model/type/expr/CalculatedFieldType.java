@@ -1,12 +1,16 @@
 package org.activityinfo.model.type.expr;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.ParametrizedFieldTypeClass;
 
@@ -31,13 +35,16 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(Record parameters) {
-            CalculatedFieldType type = new CalculatedFieldType();
-            Record expr = parameters.isRecord("expression");
-            if(expr != null) {
-                type.setExpression(ExprValue.fromRecord(expr));
+        public FieldType deserializeType(JsonObject parametersObject) {
+            JsonElement exprElement = parametersObject.get("expression");
+            if(exprElement == null) {
+                return new CalculatedFieldType();
+            } else if(exprElement.isJsonObject()) {
+                JsonObject exprObject = exprElement.getAsJsonObject();
+                return new CalculatedFieldType(JsonParsing.toNullableString(exprObject.get("value")));
+            } else {
+                return new CalculatedFieldType(JsonParsing.toNullableString(exprElement));
             }
-            return type;
         }
 
         @Override
@@ -99,13 +106,24 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     }
 
     @Override
-    public Record getParameters() {
-        Record record = new Record();
-        record.set("classId", getTypeClass().getParameterFormClass().getId());
-        if(expression != null) {
-            record.set("expression", expression.asRecord());
+    public FieldValue parseJsonValue(JsonElement value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FormInstance getParameters() {
+        FormInstance instance = new FormInstance(null, getTypeClass().getParameterFormClass().getId());
+        instance.set(ResourceId.valueOf("expression"), expression);
+        return instance;
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        if (expression != null) {
+            object.addProperty("expression", expression.getExpression());
         }
-        return record;
+        return object;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.activityinfo.model.type;
 
 import com.google.common.collect.Maps;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -26,7 +25,7 @@ public class TypeRegistry {
     private static TypeRegistry INSTANCE;
 
     public static TypeRegistry get() {
-        if(INSTANCE == null) {
+        if (INSTANCE == null) {
             INSTANCE = new TypeRegistry();
         }
         return INSTANCE;
@@ -53,6 +52,9 @@ public class TypeRegistry {
     }
 
     private void register(FieldTypeClass typeClass) {
+        if (typeMap.containsKey(typeClass.getId())) {
+            throw new RuntimeException("Type already registered: " + typeClass);
+        }
         typeMap.put(typeClass.getId().toUpperCase(), typeClass);
     }
 
@@ -68,26 +70,5 @@ public class TypeRegistry {
         return typeMap.values();
     }
 
-    public FieldValue deserializeFieldValue(Record record) {
-        String typeClassId = record.getString(FieldValue.TYPE_CLASS_FIELD_NAME);
-        FieldTypeClass typeClass = getTypeClass(typeClassId);
-        if(typeClass instanceof RecordFieldTypeClass) {
-            return ((RecordFieldTypeClass) typeClass).deserialize(record);
-        } else {
-            throw new UnsupportedOperationException(typeClassId + " cannot be deserialized from a Record");
-        }
-    }
 
-
-    public static FieldValue readField(Record record, String name, FieldTypeClass typeClass) {
-        Record fieldValue = record.isRecord(name);
-        if(fieldValue == null) {
-            return null;
-        }
-        String typeClassId = fieldValue.isString(FieldValue.TYPE_CLASS_FIELD_NAME);
-        if(!typeClass.getId().equals(typeClassId)) {
-            return null;
-        }
-        return ((RecordFieldTypeClass) typeClass).deserialize(record);
-    }
 }

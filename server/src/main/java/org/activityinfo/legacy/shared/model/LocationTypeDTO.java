@@ -146,6 +146,9 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
     }
 
     public List<AdminLevelDTO> getAdminLevels() {
+        if (adminLevels == null) {
+            adminLevels = new ArrayList<>();
+        }
         return adminLevels;
     }
 

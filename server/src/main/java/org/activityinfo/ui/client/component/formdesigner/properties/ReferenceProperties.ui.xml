@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+
+  <g:HTMLPanel addStyleNames="form-group" width="100%">
+    <label class="control-label col-xs-4">
+      <ui:text from='{i18n.reference}'/>
+    </label>
+    <div class="col-xs-8">
+      <g:ListBox name="referenceListBox" ui:field="listBox"
+                 multipleSelect="true" width="100%" addStyleNames="form-control"/>
+    </div>
+
+    <div class="col-xs-4"/>
+    <!-- reserve space-->
+    <div class="col-xs-8">
+      <g:Button addStyleNames="btn btn-default btn-xs" ui:field="addButton">
+        <ui:text from='{i18n.add}'/>
+      </g:Button>
+      <g:Button addStyleNames="btn btn-default btn-xs" ui:field="removeButton" enabled="false">
+        <ui:text from='{i18n.remove}'/>
+      </g:Button>
+
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

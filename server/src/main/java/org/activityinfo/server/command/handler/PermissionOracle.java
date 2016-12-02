@@ -1,13 +1,15 @@
 package org.activityinfo.server.command.handler;
 
-import com.google.appengine.repackaged.com.google.api.client.util.Preconditions;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.server.database.hibernate.entity.*;
@@ -19,6 +21,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 
 public class PermissionOracle {
 
@@ -79,7 +83,20 @@ public class PermissionOracle {
                     database.getId()));
         }
     }
+    
+    public void assertDesignPrivileges(FormClass formClass, User user) {
+        assertDesignPrivileges(lookupDatabase(formClass), user);
+    }
 
+    private UserDatabase lookupDatabase(FormClass formClass) {
+        ResourceId databaseId = formClass.getDatabaseId();
+        
+        if(databaseId.getDomain() == DATABASE_DOMAIN) {
+            return em.get().getReference(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+        }
+        throw new IllegalArgumentException(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
+                "a database", formClass.getLabel(), formClass.getId(), formClass.getDatabaseId()));
+    }
 
     public void assertManagePartnerAllowed(UserDatabase database, User user) {
         if (!isManagePartnersAllowed(database, user)) {
@@ -117,10 +134,14 @@ public class PermissionOracle {
         }
     }
 
+    public void assertEditAllowed(AttachmentValue value, int userId) {
+        assertEditAllowed(value, em.get().find(User.class, userId));
+    }
+
     public void assertEditAllowed(AttachmentValue value, User user) {
         if(!isEditAllowed(value, user)) {
             throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +
-                    " attachment %s", user.getId(), value.asRecord().toString()));
+                    " attachment %s", user.getId(), value.toJsonElement().toString()));
         }
     }
 
@@ -302,6 +323,31 @@ public class PermissionOracle {
         this.blobService = blobService;
         return this;
     }
-
     
+    public boolean isViewAllowed(Activity activity, User user) {
+        if(activity.getPublished() > 0) {
+            return true;
+        }
+        return isViewAllowed(activity.getDatabase(), user);
+    }
+
+
+    public void assertViewAllowed(Activity activity, User user) {
+        if (!isViewAllowed(activity, user)) {
+            throw new IllegalAccessCommandException("User " + user.getId() + " does not have permission to " +
+                    "view activity " + activity.getId());
+        }
+    }
+    
+    public void assertViewAllowed(FormClass formClass, User user) {
+        UserDatabase database = lookupDatabase(formClass);
+        if(!isViewAllowed(database, user)) {
+            throw new IllegalAccessCommandException("User " + user.getId() + " does not have permission to " +
+                    "view form class " + formClass.getId() + " in database " + database.getId());
+        }
+    }
+
+    public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {
+        assertDesignPrivileges(formClass, em.get().getReference(User.class, user.getId()));
+    }
 }

@@ -7,7 +7,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.server.command.ResourceLocatorSync;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;

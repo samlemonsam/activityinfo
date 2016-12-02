@@ -26,12 +26,13 @@ import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author yuriyz on 10/05/2015.
  */
-public class ResourceLock implements IsRecord { // it's not Resource because we are going to keep lock inside payload of FormClass
+public class ResourceLock implements IsRecord, Serializable { // it's not Resource because we are going to keep lock inside payload of FormClass
 
     private ResourceId id;
     private ResourceId ownerId;

@@ -43,7 +43,7 @@ public class XFormReader {
     }
 
     public void setDatabaseId(int databaseId) {
-        this.formClass.setOwnerId(CuidAdapter.databaseId(databaseId));
+        this.formClass.setDatabaseId(CuidAdapter.databaseId(databaseId));
     }
 
 

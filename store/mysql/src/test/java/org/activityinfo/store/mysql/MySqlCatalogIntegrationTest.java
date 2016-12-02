@@ -12,7 +12,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.junit.BeforeClass;
@@ -31,7 +31,7 @@ public class MySqlCatalogIntegrationTest {
 
     private static DbUnit dbunit;
     private static ColumnSetBuilder columnSetBuilder;
-    private static CollectionCatalog catalogProvider;
+    private static FormCatalog catalogProvider;
 
     @BeforeClass
     public static void setup() throws Throwable {
@@ -58,7 +58,7 @@ public class MySqlCatalogIntegrationTest {
         FormTree formTree = new FormTreeBuilder(catalogProvider).queryTree(activityFormClass(33));
         FormTreePrettyPrinter.print(formTree);
 
-        FormClass formClass = catalogProvider.getCollection(activityFormClass(33)).get().getFormClass();
+        FormClass formClass = catalogProvider.getForm(activityFormClass(33)).get().getFormClass();
         for(FormField field : formClass.getFields()) {
             if(field.getType() instanceof QuantityType) {
                 model.selectField(field.getId()).as("I" + CuidAdapter.getLegacyIdFromCuid(field.getId()));

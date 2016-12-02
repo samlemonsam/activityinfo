@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.activityinfo.geoadmin.source.FeatureSourceCollection.FIELD_ID_PREFIX;
+import static org.activityinfo.geoadmin.source.FeatureSourceAccessor.FIELD_ID_PREFIX;
 
 
 public class FeatureQueryBuilder implements ColumnQueryBuilder {
@@ -77,8 +77,13 @@ public class FeatureQueryBuilder implements ColumnQueryBuilder {
 
     
     @Override
-    public void execute() throws IOException {
-        SimpleFeatureIterator it = featureSource.getFeatures().features();
+    public void execute() {
+        SimpleFeatureIterator it;
+        try {
+            it = featureSource.getFeatures().features();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         while(it.hasNext()) {
             SimpleFeature feature = it.next();
             ResourceId id = ResourceId.valueOf(feature.getID());

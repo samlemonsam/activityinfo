@@ -25,7 +25,10 @@ package org.activityinfo.test.driver;
  * @author yuriyz on 06/09/2015.
  */
 public enum ControlType {
-    RADIO_BUTTONS("radiobuttons"),
+    TEXT("text"),
+    QUANTITY("quantity"),
+    DATE("date"),
+    RADIO_BUTTONS("radio"),
     CHECK_BOXES("checkboxes"),
     SUGGEST_BOX("suggestbox"),
     DROP_DOWN("dropdown");

@@ -1,5 +1,7 @@
 package org.activityinfo.model.type.primitive;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -12,6 +14,11 @@ public enum BooleanFieldValue implements FieldValue {
         return BooleanType.TYPE_CLASS;
     }
 
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(asBoolean());
+    }
+
     public boolean asBoolean() {
         return this == TRUE;
     }
@@ -19,4 +26,6 @@ public enum BooleanFieldValue implements FieldValue {
     public static BooleanFieldValue valueOf(boolean value) {
         return value ? TRUE : FALSE;
     }
+    
+    
 }

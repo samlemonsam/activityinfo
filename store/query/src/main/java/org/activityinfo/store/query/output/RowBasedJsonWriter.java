@@ -105,7 +105,7 @@ public class RowBasedJsonWriter {
                     }
                 };
             
-            case GEOGRAPHIC:
+            case GEOGRAPHIC_AREA:
                 return new FieldWriter() {
                     @Override
                     public void write(int rowIndex) throws IOException {
@@ -118,6 +118,21 @@ public class RowBasedJsonWriter {
                         writer.value(extents.getY1());
                         writer.value(extents.getX2());
                         writer.value(extents.getY2());
+                        writer.endArray();
+                        writer.endObject();
+                    }
+                };
+            case GEOGRAPHIC_POINT:
+                return new FieldWriter() {
+                    @Override
+                    public void write(int rowIndex) throws IOException {
+                        Extents extents = view.getExtents(rowIndex);
+                        writer.name(id);
+                        writer.beginObject();
+                        writer.name("extents");
+                        writer.beginArray();
+                        writer.value(extents.getX1());
+                        writer.value(extents.getY1());
                         writer.endArray();
                         writer.endObject();
                     }

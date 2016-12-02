@@ -13,11 +13,11 @@ import java.util.Map;
  */
 public class PrimaryKeyMap implements Serializable {
 
-    private final Map<ResourceId, Integer> map = new HashMap<>();
+    private final Map<String, Integer> map = new HashMap<>();
 
     public PrimaryKeyMap(ColumnView id) {
         for (int i = 0; i < id.numRows(); i++) {
-            map.put(ResourceId.valueOf(id.getString(i)), i);
+            map.put(id.getString(i), i);
         }
     }
 
@@ -34,7 +34,7 @@ public class PrimaryKeyMap implements Serializable {
     public int getUniqueRowIndex(Collection<ResourceId> foreignKeys) {
         int matchingRowIndex = -1;
         for(ResourceId foreignKey : foreignKeys) {
-            Integer rowIndex = map.get(foreignKey);
+            Integer rowIndex = map.get(foreignKey.asString());
             if(rowIndex != null) {
                 if(matchingRowIndex == -1) {
                     matchingRowIndex = rowIndex;
@@ -45,5 +45,18 @@ public class PrimaryKeyMap implements Serializable {
             }
         }
         return matchingRowIndex;
+    }
+    
+    public int getRowIndex(String id) {
+        Integer rowIndex = map.get(id);
+        if(rowIndex == null) {
+            return -1;
+        } else {
+            return rowIndex;
+        }
+    }
+    
+    public int getNumRows() {
+        return map.size();
     }
 }

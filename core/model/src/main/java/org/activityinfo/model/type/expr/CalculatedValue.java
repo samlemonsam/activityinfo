@@ -21,6 +21,8 @@ package org.activityinfo.model.type.expr;
  * #L%
  */
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -42,6 +44,11 @@ public class CalculatedValue implements FieldValue, IsRecord {
     @Override
     public FieldTypeClass getTypeClass() {
         return CalculatedFieldType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return JsonNull.INSTANCE;
     }
 
     @Override

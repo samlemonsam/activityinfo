@@ -25,19 +25,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
-import org.activityinfo.legacy.shared.command.GetFormClass;
-import org.activityinfo.legacy.shared.command.UpdateFormClass;
+import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.command.result.FormClassResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
+import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
-import org.activityinfo.legacy.shared.impl.CommandHandlerAsync;
-import org.activityinfo.legacy.shared.impl.ExecutionContext;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -54,25 +50,27 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.server.endpoint.gwtrpc.RemoteExecutionContext;
+import org.activityinfo.service.store.FormCatalog;
 
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.activityinfo.model.legacy.CuidAdapter.BUILTIN_FIELDS;
+import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
 
 /**
  * @author yuriyz on 11/17/2014.
  */
-public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, CreateResult> {
+public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
     private static final Logger LOGGER = Logger.getLogger(CloneDatabaseHandler.class.getName());
 
     private final EntityManager em;
     private final PermissionOracle permissionOracle;
     private final KeyGenerator generator = new KeyGenerator();
+    private final Provider<FormCatalog> formCatalog;
 
     // Mappings old id (source db) -> new id (target/newly created db)
     private final Map<Integer, Activity> activityMapping = Maps.newHashMap();
@@ -84,19 +82,18 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
     private UserDatabase sourceDb;
 
     @Inject
-    public CloneDatabaseHandler(Injector injector) {
+    public CloneDatabaseHandler(Injector injector, Provider<FormCatalog> formCatalog) {
         this.em = injector.getInstance(EntityManager.class);
         this.permissionOracle = injector.getInstance(PermissionOracle.class);
+        this.formCatalog = formCatalog;
     }
 
     @Override
-    public void execute(CloneDatabase command, ExecutionContext context, final AsyncCallback<CreateResult> callback) {
-
-        final User user = ((RemoteExecutionContext) context).retrieveUserEntity();
-
+    public CommandResult execute(CloneDatabase command, User user) throws CommandException {
+        
         this.command = command;
-        this.targetDb = createDatabase(command, user);
-        this.sourceDb = em.find(UserDatabase.class, command.getSourceDatabaseId());
+        this.targetDb = createDatabase(this.command, user);
+        this.sourceDb = em.find(UserDatabase.class, this.command.getSourceDatabaseId());
 
         createDefaultPartner(user);
 
@@ -105,32 +102,21 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
         }
 
         // 1. copy partners and keep mapping between old and new partners
-        if (command.isCopyPartners() || command.isCopyUserPermissions()) {
+        if (this.command.isCopyPartners() || this.command.isCopyUserPermissions()) {
             copyPartners();
         }
 
         // 2. copy user permissions : without design privileges the user shouldn't be able to see the list of users.
-        if (command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
+        if (this.command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
             copyUserPermissions();
         }
 
         List<Promise<Void>> promises = new ArrayList<>();
 
         // 3. copy forms and form data
-        promises.add(copyFormData(context));
-
-
-        Promise.waitAll(promises).then(new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                callback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                callback.onSuccess(new CreateResult(targetDb.getId()));
-            }
-        });
+        copyFormData();
+        
+        return new CreateResult(targetDb.getId());
     }
 
     private void createDefaultPartner(User user) {
@@ -167,7 +153,7 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
         em.persist(targetDb);
     }
 
-    private Promise<Void> copyFormData(final ExecutionContext context) {
+    private void copyFormData() {
 
         // first copy all activities without payload (indicators, attributes)
         for (Activity activity : sourceDb.getActivities()) {
@@ -176,89 +162,32 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
 
         final List<Promise<VoidResult>> copyPromises = new ArrayList<>();
         for (Activity activity : sourceDb.getActivities()) {
-            final ResourceId sourceFormClass = CuidAdapter.activityFormClass(activity.getId());
-            final ResourceId targetFormClass = CuidAdapter.activityFormClass(activityMapping.get(activity.getId()).getId());
+            final ResourceId sourceFormId = activityFormClass(activity.getId());
+            final ResourceId targetFormId = activityFormClass(activityMapping.get(activity.getId()).getId());
 
-            // copy form class
-            copyPromises.add(copyFormClass(context, sourceFormClass, targetFormClass));
-
-            // if the new countryId of the target database is different than the countryId of sourceDatabase,
-            // copyData must be false -> skip data copy
-            if (command.isCopyData() && sourceDb.getCountry().getId() == targetDb.getCountry().getId()) {
-                // site form instances
-                // todo : commenting it temporary until we have nice idea how to implement it in scalable manner. (AI-787)
-                // copyPromises.add(copySiteFormInstances(context, activity, newActivity));
-            }
+            copyFormClass(sourceFormId, targetFormId);
         }
-        return Promise.waitAll(copyPromises);
     }
 
-//    private Promise<VoidResult> copySiteFormInstances(final ExecutionContext context, Activity sourceActivity, final Activity targetActivity) {
-//        Filter filter = new Filter();
-//        filter.addRestriction(DimensionType.Activity, sourceActivity.getId());
-//
-//        GetSites query = new GetSites();
-//        query.setFilter(filter);
-//
-//        final Promise<ActivityFormDTO> activityForm = new Promise<>();
-//        context.execute(new GetActivityForm(sourceActivity.getId()), activityForm);
-//
-//        final Promise<SiteResult> fetchSitesPromise = new Promise<>();
-//        context.execute(query, fetchSitesPromise);
-//
-//        return Promise.waitAll(activityForm, fetchSitesPromise).join(new Function<Void, Promise<VoidResult>>() {
-//            @Nullable
-//            @Override
-//            public Promise<VoidResult> apply(@Nullable Void input) {
-//
-//                for (SiteDTO site : fetchSitesPromise.get().getData()) {
-//                    SiteBinding binding = new SiteBinding(activityForm.get());
-//
-//                    // adapt id and classId to targetActivity
-//                    FormInstance formInstance = binding.newInstance(site)
-//                            .setId(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, targetActivity.getId()))
-//                            .setClassId(CuidAdapter.activityFormClass(targetActivity.getId()));
-//
-//                    // persist
-//                    new SitePersister(new DispatchAdapter(context)).persist(formInstance);
-//                }
-//                return Promise.resolved(VoidResult.INSTANCE);
-//            }
-//        });
-//    }
+    private void copyFormClass(final ResourceId sourceFormId,
+                               final ResourceId targetFormId) {
 
-    private Promise<VoidResult> copyFormClass(final ExecutionContext context, final ResourceId sourceFormClassId, final ResourceId targetFormClassId) {
-        final Promise<VoidResult> promise = new Promise<>();
-        context.execute(new GetFormClass(sourceFormClassId), new AsyncCallback<FormClassResult>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                LOGGER.log(Level.SEVERE, caught.getMessage(), caught);
-                promise.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(FormClassResult sourceFormClass) {
-                FormClass targetFormClass = cloneFormClass(sourceFormClass.getFormClass(), new FormClass(targetFormClassId));
-
-                context.execute(new UpdateFormClass(targetFormClass), promise);
-            }
-        });
-        return promise;
-    }
-
-    private FormClass cloneFormClass(FormClass sourceFormClass, FormClass targetFormClass) {
+        FormClass sourceFormClass = formCatalog.get().getFormClass(sourceFormId);
+        FormClass targetFormClass = new FormClass(targetFormId);
+        
         targetFormClass.setLabel(sourceFormClass.getLabel());
         targetFormClass.setDescription(sourceFormClass.getDescription());
-        targetFormClass.setParentId(CuidAdapter.databaseId(targetDb.getId()));
+        targetFormClass.setDatabaseId(CuidAdapter.databaseId(targetDb.getId()));
 
         sourceIdToTargetFormElementMapping.clear();
         copyFormElements(sourceFormClass, targetFormClass, sourceFormClass.getId(), targetFormClass.getId());
         correctRelevanceConditions(targetFormClass);
-
-        return targetFormClass;
+        
+        formCatalog.get().getForm(targetFormId).get().updateFormClass(targetFormClass);
     }
 
-    private void copyFormElements(FormElementContainer sourceContainer, FormElementContainer targetContainer, ResourceId sourceClassId, ResourceId targetClassId) {
+    private void copyFormElements(FormElementContainer sourceContainer, FormElementContainer targetContainer, 
+                                  ResourceId sourceFormId, ResourceId targetFormId) {
         for (FormElement element : sourceContainer.getElements()) {
             if (element instanceof FormSection) {
                 FormSection sourceSection = (FormSection) element;
@@ -268,10 +197,10 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
                 targetContainer.addElement(targetSection);
                 sourceIdToTargetFormElementMapping.put(sourceSection, targetSection);
 
-                copyFormElements(sourceSection, targetSection, sourceClassId, targetClassId);
+                copyFormElements(sourceSection, targetSection, sourceFormId, targetFormId);
             } else if (element instanceof FormField) {
                 FormField sourceField = (FormField) element;
-                FormField targetField = new FormField(targetFieldId(sourceField, sourceClassId, targetClassId));
+                FormField targetField = new FormField(targetFieldId(sourceField, sourceFormId, targetFormId));
 
                 targetField.setType(targetFieldType(sourceField));
                 targetField.setCode(sourceField.getCode());
@@ -343,8 +272,8 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
         if (fieldType instanceof ReferenceType) {
             ReferenceType sourceType = (ReferenceType) fieldType;
 
-            Set<ResourceId> sourceRange = sourceType.getRange();
-            Set<ResourceId> targetRange = new HashSet<>();
+            Collection<ResourceId> sourceRange = sourceType.getRange();
+            Collection<ResourceId> targetRange = new HashSet<>();
 
             ResourceId next = sourceRange.iterator().next();
             switch (next.getDomain()) {
@@ -352,7 +281,7 @@ public class CloneDatabaseHandler implements CommandHandlerAsync<CloneDatabase, 
                     if (command.isCopyPartners()) {
 
                         // as defined in ActivityFormClassBuilder.build() in reference range we stick to db id
-                        ResourceId partnerId = CuidAdapter.partnerFormClass(targetDb.getId());
+                        ResourceId partnerId = CuidAdapter.partnerFormId(targetDb.getId());
                         targetRange.add(partnerId);
                         typeIdMapping.put(next, partnerId);
                     }

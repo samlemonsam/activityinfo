@@ -22,6 +22,8 @@ package org.activityinfo.model.type.geo;
  * #L%
  */
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -306,6 +308,23 @@ public class Extents implements Serializable, IsRecord {
             record.set("maxLon", maxLon);
         }
         return record;
+    }
+    
+    public JsonElement toJsonElement() {
+        JsonObject object = new JsonObject();
+        if (!Double.isNaN(minLat)) {
+            object.addProperty("minLat", minLat);
+        }
+        if (!Double.isNaN(maxLat)) {
+            object.addProperty("maxLat", maxLat);
+        }
+        if (!Double.isNaN(minLon)) {
+            object.addProperty("minLon", minLon);
+        }
+        if (!Double.isNaN(maxLon)) {
+            object.addProperty("maxLon", maxLon);
+        }
+        return object;
     }
 
     public static Extents fromRecord(Record record) {

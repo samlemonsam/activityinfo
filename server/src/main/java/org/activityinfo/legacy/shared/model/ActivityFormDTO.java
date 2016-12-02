@@ -345,17 +345,24 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         return !Strings.isNullOrEmpty(getCategory());
     }
 
+    public List<IndicatorGroup> groupIndicators() {
+        return groupIndicators(false);
+    }
+
     /**
      * Convenience method that creates a list of IndicatorGroups from this
      * Activity's list of Indicators, based on the Indicator's category
      * property.
      */
-    public List<IndicatorGroup> groupIndicators() {
+    public List<IndicatorGroup> groupIndicators(boolean categoryNullToEmpty) {
         List<IndicatorGroup> groups = new ArrayList<IndicatorGroup>();
         Map<String, IndicatorGroup> map = new HashMap<String, IndicatorGroup>();
 
         for (IndicatorDTO indicator : indicators) {
             String category = indicator.getCategory();
+            if (categoryNullToEmpty) {
+                category = Strings.nullToEmpty(category);
+            }
             IndicatorGroup group = map.get(category);
             if (group == null) {
                 group = new IndicatorGroup(category);

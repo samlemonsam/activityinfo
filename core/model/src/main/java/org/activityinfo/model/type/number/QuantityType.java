@@ -1,22 +1,23 @@
 package org.activityinfo.model.type.number;
 
+import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ParametrizedFieldType;
-import org.activityinfo.model.type.ParametrizedFieldTypeClass;
-import org.activityinfo.model.type.RecordFieldTypeClass;
-
-import java.io.Serializable;
+import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.primitive.TextValue;
 
 /**
  * A value types that describes a real-valued quantity and its units.
  */
-public class QuantityType implements ParametrizedFieldType, Serializable {
+public class QuantityType implements ParametrizedFieldType {
 
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
@@ -35,9 +36,8 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
         }
 
         @Override
-        public QuantityType deserializeType(Record typeParameters) {
-            return new QuantityType()
-                    .setUnits(typeParameters.isString("units"));
+        public FieldType deserializeType(JsonObject parametersObject) {
+            return new QuantityType(JsonParsing.toNullableString(parametersObject.get("units")));
         }
 
         @Override
@@ -51,11 +51,7 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
             return formClass;
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return Quantity.fromRecord(record);
-        }
-    };
+    }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
@@ -83,10 +79,26 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
     }
 
     @Override
-    public Record getParameters() {
-        return new Record()
-                .set("units", units)
-                .set("classId", getTypeClass().getParameterFormClass().getId());
+    public FieldValue parseJsonValue(JsonElement value) {
+        if(value instanceof JsonNull) {
+            return new Quantity(Double.NaN, units);
+        } else {
+            return new Quantity(value.getAsDouble(), units);
+        }
+    }
+
+    @Override
+    public FormInstance getParameters() {
+        FormInstance instance = new FormInstance(null, getTypeClass().getParameterFormClass().getId());
+        instance.set(ResourceId.valueOf("units"), TextValue.valueOf(units));
+        return instance;
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        object.addProperty("units", Strings.nullToEmpty(units));
+        return object;
     }
 
     @Override

@@ -49,7 +49,11 @@ public class MySqlCursorBuilder implements CursorBuilder {
     }
     
     public void only(ResourceId resourceId) {
-        query.where(tableMapping.getPrimaryKey().getColumnName() + "=" + CuidAdapter.getLegacyIdFromCuid(resourceId));
+        query.where("base." + tableMapping.getPrimaryKey().getColumnName() + "=" + CuidAdapter.getLegacyIdFromCuid(resourceId));
+    }
+
+    public void where(String where) {
+        query.where(where);
     }
 
     @Override

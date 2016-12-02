@@ -8,7 +8,9 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
@@ -31,9 +33,8 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
 
         setUser(BAVON_USER_ID);
 
-        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
-
         FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(1)));
+        int databaseId = 1;
 
         ResourceId partnerFieldId = CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD);
         FormField partnerField = formClass.getField(partnerFieldId);
@@ -45,7 +46,11 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),
-                new ReferenceValue(CuidAdapter.locationInstanceId(1)));
+                new ReferenceValue(
+                        new RecordRef(
+                            CuidAdapter.locationFormClass(1),
+                            CuidAdapter.locationInstanceId(1))));
+        instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 1));
 
         assertResolves(locator.persist(instance));
     }
@@ -55,8 +60,7 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
 
         setUser(9944);
 
-        ResourceLocatorAdaptor locator = new ResourceLocatorAdaptor(getDispatcher());
-
+        int databaseId = 1470;
         FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(11218)));
 
         ResourceId locationFieldId = CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD);
@@ -67,6 +71,8 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
         FormInstance instance = new FormInstance(CuidAdapter.newLegacyFormInstanceId(formClass.getId()), formClass.getId());
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
+        instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 1734));
+        instance.set(ResourceId.valueOf("Q0000031845"), new EnumValue(CuidAdapter.attributeField(166617)));
 
         assertResolves(locator.persist(instance));
 

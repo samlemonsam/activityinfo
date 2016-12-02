@@ -36,8 +36,7 @@ class Forms implements FormClassProvider {
 
     private FormClass form(String name) {
         return new FormClass(ResourceId.valueOf(name))
-                .setLabel(name)
-                .setOwnerId(ResourceId.ROOT_ID);
+                .setLabel(name);
     }
 
     private FormField textField(String label) {

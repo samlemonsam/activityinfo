@@ -3,11 +3,12 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
+import org.activityinfo.api.client.FormRecordSetBuilder;
+import org.activityinfo.core.shared.Pair;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -15,7 +16,6 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -24,23 +24,28 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.CollectionPermissions;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.store.hrd.HrdFormAccessor;
+import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
+import org.activityinfo.xlsform.XlsColumnSetWriter;
+import org.activityinfo.xlsform.XlsFormBuilder;
 
 import javax.inject.Provider;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -50,16 +55,21 @@ public class FormResource {
 
     private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
 
-    private final Provider<CollectionCatalog> catalog;
+    private final Provider<FormCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
+    private final PermissionOracle permissionOracle;
 
-    private final ResourceId resourceId;
+    private final ResourceId formId;
     private final Gson prettyPrintingGson;
 
-    public FormResource(ResourceId resourceId, Provider<CollectionCatalog> catalog, Provider<AuthenticatedUser> userProvider) {
-        this.resourceId = resourceId;
+    public FormResource(ResourceId formId,
+                        Provider<FormCatalog> catalog,
+                        Provider<AuthenticatedUser> userProvider, 
+                        PermissionOracle permissionOracle) {
+        this.formId = formId;
         this.catalog = catalog;
         this.userProvider = userProvider;
+        this.permissionOracle = permissionOracle;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -68,18 +78,163 @@ public class FormResource {
      * @return this collection's {@link org.activityinfo.model.form.FormClass}
      */
     @GET
-    @Path("class")
-    public Response getFormClass() {
+    @Path("schema")
+    public Response getFormSchema() {
 
-        assertVisible(resourceId);
+        assertVisible(formId);
 
-        FormClass formClass = catalog.get().getFormClass(resourceId);
+        FormClass formClass = catalog.get().getFormClass(formId);
 
-        JsonObject object = Resources.toJsonObject(formClass.asResource());
+        JsonObject object = formClass.toJsonObject();
 
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
     }
+    
+    @PUT
+    @Path("schema")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateFormSchema(String updatedSchemaJson) {
 
+        FormClass formClass = FormClass.fromJson(updatedSchemaJson);
+        
+        // Check first to see if this collection exists
+        Optional<FormAccessor> collection = catalog.get().getForm(formClass.getId());
+        if(collection.isPresent()) {
+            FormClass existingFormClass = collection.get().getFormClass();
+            permissionOracle.assertDesignPrivileges(existingFormClass, userProvider.get());
+
+            collection.get().updateFormClass(formClass);
+
+        } else {
+            // Check that we have the permission to create in this database
+            permissionOracle.assertDesignPrivileges(formClass, userProvider.get());
+
+            ((MySqlCatalog)catalog.get()).createOrUpdateFormSchema(formClass);
+        }
+        
+        return Response.ok().build();
+    }
+    
+    @GET
+    @Path("record/{recordId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRecord(@PathParam("recordId") String recordId) {
+        
+        FormAccessor collection = assertVisible(formId);
+
+
+        Optional<FormRecord> record = collection.get(ResourceId.valueOf(recordId));
+        if(!record.isPresent()) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("Record " + recordId + " does not exist.")
+                    .build();
+        }
+
+        return Response.ok()
+                .entity(record.get().toJsonElement().toString())
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build();
+    }
+
+    @GET
+    @Path("record/{recordId}/history")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
+
+        assertVisible(formId);
+
+        RecordHistoryBuilder builder = new RecordHistoryBuilder((MySqlCatalog) catalog.get());
+        JsonArray array = builder.build(formId, ResourceId.valueOf(recordId));
+
+        return Response.ok()
+                .entity(array.toString())
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build();
+    }
+
+
+    @GET
+    @Path("records")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRecords(@QueryParam("parentId") String parentId) {
+
+        assertVisible(formId);
+        
+        Optional<FormAccessor> collection = catalog.get().getForm(formId);
+        if(!collection.isPresent()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
+        Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
+
+        FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
+        recordSet.setFormId(formId.asString());
+        
+        for (FormRecord record : records) {
+            recordSet.addRecord(record);
+        }        
+        return Response.ok(recordSet.toJsonString(), MediaType.APPLICATION_JSON_TYPE).build();
+    }
+    
+    @POST
+    @Path("records")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createRecord(String body) {
+        
+        assertVisible(formId);
+        
+        JsonElement jsonObject = new JsonParser().parse(body);
+
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+        updater.create(formId, jsonObject.getAsJsonObject());
+        
+        return Response.ok().build();
+    }
+
+    @PUT
+    @Path("record/{recordId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateRecord(@PathParam("recordId") String recordId, String body) {
+
+        assertVisible(formId);
+
+        JsonElement jsonObject = new JsonParser().parse(body);
+
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+        updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
+
+        return Response.ok().build();
+    }
+    
+    @GET
+    @Path("class")
+    public Response getFormClass() {
+        return getFormSchema();
+    }
+
+    @GET
+    @Path("form.xls")
+    public Response getXlsForm() {
+        assertVisible(formId);
+
+        final XlsFormBuilder xlsForm = new XlsFormBuilder(catalog.get());
+        xlsForm.build(formId);
+
+        StreamingOutput output = new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+                xlsForm.write(outputStream);
+            }
+        };
+
+        return Response.ok(output, "application/vnd.ms-excel").build();
+    }
+    
     /**
      *
      * @return a list of {@link org.activityinfo.model.form.FormClass}es that includes the {@code FormClass}
@@ -108,10 +263,10 @@ public class FormResource {
     }
 
     private FormTree fetchTree() {
-        assertVisible(resourceId);
+        assertVisible(formId);
 
         FormTreeBuilder builder = new FormTreeBuilder(catalog.get());
-        return builder.queryTree(resourceId);
+        return builder.queryTree(formId);
     }
 
     @GET
@@ -152,17 +307,38 @@ public class FormResource {
         return Response.ok(output).type(JSON_CONTENT_TYPE).build();
     }
 
+    @GET
+    @Path("query/columns.xls")
+    @Produces("application/vnd.ms-excel")
+    public Response queryColumnsAsXls(@Context UriInfo uriInfo) {
+        final Pair<FormTree, ColumnSet> pair = queryColumnSet(uriInfo);
+
+        final StreamingOutput output = new StreamingOutput() {
+            @Override
+            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+                new XlsColumnSetWriter().addSheet(pair.getA(), pair.getB()).write(outputStream);
+            }
+        };
+
+        return Response.ok(output, "application/vnd.ms-excel").build();
+    }
 
     private ColumnSet query(final UriInfo uriInfo) {
+        return queryColumnSet(uriInfo).getB();
+    }
 
-        assertVisible(resourceId);
+    private Pair<FormTree, ColumnSet> queryColumnSet(final UriInfo uriInfo) {
 
-        final QueryModel queryModel = new QueryModel(resourceId);
+        assertVisible(formId);
+
+        final QueryModel queryModel = new QueryModel(formId);
+        final FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
+        final FormTree tree = treeBuilder.queryTree(formId);
+
         if(uriInfo.getQueryParameters().isEmpty()) {
             LOGGER.info("No query fields provided, querying all.");
             queryModel.selectResourceId().as("@id");
-            FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
-            FormTree tree = treeBuilder.queryTree(resourceId);
+
             for (FormTree.Node leaf : tree.getLeaves()) {
                 if(includeInDefaultQuery(leaf)) {
                     queryModel.selectField(leaf.getPath()).as(formatId(leaf));
@@ -177,7 +353,7 @@ public class FormResource {
         }
 
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
-        return builder.build(queryModel);
+        return new Pair<>(tree, builder.build(queryModel));
     }
 
     private boolean includeInDefaultQuery(FormTree.Node leaf) {
@@ -206,15 +382,15 @@ public class FormResource {
         return node.getField().getCode() == null ? node.getField().getLabel() : node.getField().getCode();
     }
 
-    private void assertVisible(ResourceId collectionId) {
-        Optional<ResourceCollection> collection = this.catalog.get().getCollection(resourceId);
+    private FormAccessor assertVisible(ResourceId collectionId) {
+        Optional<FormAccessor> collection = this.catalog.get().getForm(formId);
         if(!collection.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.NOT_FOUND)
                             .entity(format("Collection %s does not exist.", collectionId.asString()))
                             .build());
         }
-        CollectionPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
+        FormPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
         if(!permissions.isVisible()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.FORBIDDEN)
@@ -222,5 +398,6 @@ public class FormResource {
                             .build());
 
         }
+        return collection.get();
     }
 }

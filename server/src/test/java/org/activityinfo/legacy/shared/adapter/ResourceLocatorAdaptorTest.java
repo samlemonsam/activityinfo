@@ -1,48 +1,35 @@
 package org.activityinfo.legacy.shared.adapter;
 
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.application.ApplicationProperties;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.IdCriteria;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
-import org.activityinfo.model.formTree.FieldPath;
-import org.activityinfo.model.formTree.TFormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NarrativeValue;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.time.LocalDate;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
-import org.hamcrest.Matchers;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.collection.IsEmptyCollection;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
-import static org.activityinfo.core.shared.criteria.ParentCriteria.isChildOf;
-import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getAdminFieldId;
-import static org.activityinfo.legacy.shared.adapter.LocationClassAdapter.getNameFieldId;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
@@ -71,127 +58,70 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
     public static final int IRUMU = 21;
 
+    public static final int TERRITOIRE = 2;
 
-    private ResourceLocatorAdaptor resourceLocator;
-
-    @Before
-    public final void setup() {
-        resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-    }
-
-    @Test
-    public void simpleAdminEntityQuery() {
-        assertThat(queryByClass(adminLevelFormClass(PROVINCE_ADMIN_LEVEL_ID)), Matchers.hasSize(4));
-    }
-
-    @Test
-    public void simplePartnerQuery() {
-        assertThat(queryByClass(partnerFormClass(PEAR_DATABASE_ID)), Matchers.hasSize(3));
-    }
-
-    @Test
-    public void simpleLocationQuery() {
-        assertThat(queryByClass(locationFormClass(HEALTH_CENTER_LOCATION_TYPE)), Matchers.hasSize(4));
-    }
-
+    
     @Test
     @OnDataSet("/dbunit/jordan-locations.db.xml")
     public void getLocation() {
         ResourceId classId = locationFormClass(50512);
-        FormInstance instance = assertResolves(resourceLocator.getFormInstance(locationInstanceId(1590565828)));
-        Set<ResourceId> adminUnits = instance.getReferences(field(classId, ADMIN_FIELD));
+        FormInstance instance = assertResolves(locator.getFormInstance(classId, locationInstanceId(1590565828)));
+        ReferenceValue adminUnits = (ReferenceValue) instance.get(field(classId, ADMIN_FIELD));
         System.out.println(adminUnits);
-
     }
 
-    // This negative test tested case when nullary location does not exist for given locationtype.
-    // Now on GetSchemaHandler we insert nullary locationtype with location if it is absent.
-    //
-//    java.lang.NullPointerException
-//    at org.activityinfo.legacy.shared.model.LocationDTO.getId(LocationDTO.java:117)
-//    at org.activityinfo.legacy.shared.adapter.SitePersister.persist(SitePersister.java:86)
-    //
-//    @Test
-//    public void persistSiteException() {
-//
-//        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
-//                NFI_DIST_FORM_CLASS);
-//
-//        Promise<Void> result;
-//
-//        result = resourceLocator.persist(instance);
-//        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
-//
-//        result = resourceLocator.persist(Arrays.asList(instance, instance));
-//        assertThat(result.getState(), equalTo(Promise.State.REJECTED));
-//    }
 
     @Test
     @OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
     public void persistSiteWithCalculatedIndicators() {
-        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
-                NFI_DIST_FORM_CLASS);
+        int siteId = new KeyGenerator().generateInt();
+        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, siteId), NFI_DIST_FORM_CLASS);
 
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
-        instance.set(locationField(NFI_DIST_ID), locationInstanceId(1));
-        instance.set(partnerField(NFI_DIST_ID), partnerInstanceId(1));
-        instance.set(projectField(NFI_DIST_ID), projectInstanceId(1));
+        instance.set(locationField(NFI_DIST_ID), locationRef(VILLAGE_CLASS, 1));
+        instance.set(partnerField(NFI_DIST_ID), partnerRef(PEAR_DATABASE_ID, 1));
+        instance.set(projectField(NFI_DIST_ID), projectRef(PEAR_DATABASE_ID, 1));
         instance.set(field(NFI_DIST_FORM_CLASS, START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(NFI_DIST_FORM_CLASS, END_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(field(NFI_DIST_FORM_CLASS, COMMENT_FIELD), "My comment");
+        instance.set(field(NFI_DIST_FORM_CLASS, COMMENT_FIELD), NarrativeValue.valueOf("My comment"));
 
-        assertResolves(resourceLocator.persist(instance));
+        assertResolves(locator.persist(instance));
 
-        TFormTree formTree = new TFormTree(assertResolves(new AsyncFormTreeBuilder(resourceLocator).apply(NFI_DIST_FORM_CLASS)));
-        InstanceQuery query = new InstanceQuery(Lists.newArrayList(formTree.getRootPaths()), new IdCriteria(instance.getId()));
+        FormInstance firstRead = assertResolves(locator.getFormInstance(NFI_DIST_FORM_CLASS, instance.getId()));
 
-        Projection firstRead = singleSiteProjection(query);
-
-        assertEquals(new Quantity(1), firstRead.getValue(path(indicatorField(1))));
-        assertEquals(new Quantity(2), firstRead.getValue(path(indicatorField(2))));
-        assertEquals(new Quantity(3), firstRead.getValue(path(indicatorField(11))));
-        assertEquals(new Quantity(0.5), firstRead.getValue(path(indicatorField(12))));
-
+        assertThat(firstRead.get(indicatorField(1)), equalTo((FieldValue)new Quantity(1, "menages")));
+        assertThat(firstRead.get(indicatorField(2)), equalTo((FieldValue)new Quantity(2, "menages")));
+        
         // set indicators to null
         instance.set(indicatorField(1).asString(), null);
         instance.set(indicatorField(2).asString(), null);
 
         // persist it
-        assertResolves(resourceLocator.persist(instance));
+        assertResolves(locator.persist(instance));
 
         // read from server
-        Projection secondRead = singleSiteProjection(query);
+        FormInstance secondRead = assertResolves(locator.getFormInstance(NFI_DIST_FORM_CLASS, instance.getId()));
 
-        assertEquals(null, secondRead.getValue(path(indicatorField(1)))); // BENE
-        assertEquals(null, secondRead.getValue(path(indicatorField(2)))); // BACHE
+        assertThat(secondRead.get(indicatorField(1)), nullValue()); // BENE
+        assertThat(secondRead.get(indicatorField(2)), nullValue()); // BACHE
+
         
-        // Both BENE+BACHE and BENE/BACHE should be missing, because both
-        // BENE and BACHE are missing
-        assertEquals(null, secondRead.getValue(path(indicatorField(11))));
-        assertEquals(null, secondRead.getValue(path(indicatorField(12))));
-    }
-
-    private FieldPath path(ResourceId... fieldIds) {
-        return new FieldPath(fieldIds);
-    }
-
-    private Projection singleSiteProjection(InstanceQuery query) {
-        List<Projection> projections = assertResolves(resourceLocator.query(query));
-        assertEquals(projections.size(), 1);
-        return projections.get(0);
+//        // Both BENE+BACHE and BENE/BACHE should be missing, because both
+//        // BENE and BACHE are missing
+//        assertEquals(null, secondRead.getValue(path(indicatorField(11))));
+//        assertEquals(null, secondRead.getValue(path(indicatorField(12))));
     }
 
     @Test
     public void persistLocation() {
 
-        FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS),
-                HEALTH_CENTER_CLASS);
+        FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS), HEALTH_CENTER_CLASS);
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "CS Ubuntu");
         instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new GeoPoint(-1, 13));
-        instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entity(IRUMU));
+        instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entityRef(TERRITOIRE, IRUMU));
 
-        assertResolves(resourceLocator.persist(instance));
+        assertResolves(locator.persist(instance));
 
         // ensure that everything worked out
         GetLocations query = new GetLocations(getLegacyIdFromCuid(instance.getId()));
@@ -205,31 +135,52 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertThat(location.getLongitude(), equalTo(13d));
 
         // remove location
-        assertResolves(resourceLocator.remove(instance.getId()));
+        assertResolves(locator.remove(HEALTH_CENTER_CLASS, instance.getId()));
 
         // check whether location is removed
         result = execute(query);
         assertThat(result.getData(), IsEmptyCollection.empty());
     }
 
+
     @Test
     public void siteDeletion() {
 
-        InstanceQuery query = new InstanceQuery(asList(new FieldPath(getNameFieldId(VILLAGE_CLASS))),
-                new ClassCriteria(NFI_DIST_FORM_CLASS));
+        QueryModel query = new QueryModel(NFI_DIST_FORM_CLASS);
+        query.selectResourceId().as("id");
+        query.selectField(CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.NAME_FIELD));
 
-        List<Projection> projections = assertResolves(resourceLocator.query(query));
-        assertThat(projections.size(), equalTo(3));
+        ColumnSet columnSet = assertResolves(locator.queryTable(query));
+        assertThat(columnSet.getNumRows(), equalTo(3));
 
-        final Projection firstProjection = projections.get(0);
+        final ResourceId firstRecordId = ResourceId.valueOf(columnSet.getColumnView("id").getString(0));
 
-        assertResolves(resourceLocator.remove(firstProjection.getRootInstanceId()));
+        assertResolves(locator.remove(NFI_DIST_FORM_CLASS, firstRecordId));
 
-        projections = assertResolves(resourceLocator.query(query));
-        assertThat(projections.size(), equalTo(2)); // size is reduced
-        assertThat(projections, not(hasItem(firstProjection)));
-
+        columnSet = assertResolves(locator.queryTable(query));
+        assertThat(columnSet.getNumRows(), equalTo(2)); // size is reduced
+        assertThat(columnSet.getColumnView("id"), not(hasValue(firstRecordId)));
     }
+
+    private Matcher<ColumnView> hasValue(final ResourceId recordId) {
+        return new TypeSafeMatcher<ColumnView>() {
+            @Override
+            protected boolean matchesSafely(ColumnView columnView) {
+                for (int i = 0; i < columnView.numRows(); i++) {
+                    if(columnView.getString(i).equals(recordId.asString())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("column with ").appendValue(recordId.asString());
+            }
+        };
+    }
+
 
     @Test
     public void updateLocation() {
@@ -239,10 +190,10 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 //        <locationAdminLink locationId="1" adminEntityId="2"/>
 //        <locationAdminLink locationId="1" adminEntityId="12"/>
 
-        FormInstance instance = assertResolves(resourceLocator.getFormInstance(locationInstanceId(1)));
+        FormInstance instance = assertResolves(locator.getFormInstance(HEALTH_CENTER_CLASS, locationInstanceId(1)));
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "New Penekusu");
 
-        assertResolves(resourceLocator.persist(instance));
+        assertResolves(locator.persist(instance));
 
         GetLocations query = new GetLocations(1);
         LocationResult result = execute(query);
@@ -252,119 +203,26 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertThat(location.getLocationTypeId(), equalTo(1));
         assertThat(location.getLatitude(), equalTo(27.323));
         assertThat(location.getLongitude(), equalTo(1.532));
-        assertThat(location.getAdminEntity(1).getId(), equalTo(2));
-        assertThat(location.getAdminEntity(2).getId(), equalTo(12));
+        assertThat(location.getAdminEntity(1).getId(), equalTo(2)); // 12 admin level is not returned because we eliminate redundant information org.activityinfo.store.mysql.side.AdminColumnBuilder.emit(int[])
     }
-
-    @Test
-    public void projection() {
-
-        // fields to request
-        FieldPath locationName = new FieldPath(LocationClassAdapter.getNameFieldId(HEALTH_CENTER_CLASS));
-        FieldPath locationAdminUnit = new FieldPath(LocationClassAdapter.getAdminFieldId(HEALTH_CENTER_CLASS));
-        FieldPath locationAdminUnitName = new FieldPath(locationAdminUnit,
-                AdminLevelClassAdapter.getNameFieldId(PROVINCE_CLASS));
-
-
-        List<Projection> projections = assertResolves(resourceLocator.query(
-                new InstanceQuery(
-                        Lists.newArrayList(locationName, locationAdminUnitName),
-                        new ClassCriteria(HEALTH_CENTER_CLASS))));
-
-        System.out.println(Joiner.on("\n").join(projections));
-    }
-
-    private List<FormInstance> queryByClass(ResourceId classId) {
-        Promise<List<FormInstance>> promise = resourceLocator.queryInstances(new ClassCriteria(classId));
-
-        List<FormInstance> list = assertResolves(promise);
-
-        System.out.println(Joiner.on("\n").join(list));
-        return list;
-    }
-
-
-    @Test
-    public void locationProjection() {
-
-        ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
-        FieldPath villageName = new FieldPath(getNameFieldId(VILLAGE_CLASS));
-        FieldPath provinceName = new FieldPath(
-                getAdminFieldId(VILLAGE_CLASS),
-                field(PROVINCE_CLASS, CuidAdapter.NAME_FIELD));
-
-        List<Projection> projections = assertResolves(adapter.query(
-                new InstanceQuery(
-                        asList(villageName, provinceName),
-                        new ClassCriteria(VILLAGE_CLASS))));
-
-        System.out.println(Joiner.on("\n").join(projections));
-
-        assertThat(projections.size(), equalTo(4));
-        assertThat(projections.get(0).getStringValue(provinceName), equalTo("Sud Kivu"));
-    }
-
 
     @Test
     public void deleteLocation() {
 
-        ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
         ResourceId instanceToDelete = CuidAdapter.locationInstanceId(1);
-        assertResolves(adapter.remove(Arrays.asList(instanceToDelete)));
+        assertResolves(locator.remove(CuidAdapter.locationFormClass(1), instanceToDelete));
 
-        List<FormInstance> formInstances = assertResolves(adapter.queryInstances(new ClassCriteria(CuidAdapter.locationFormClass(1))));
+        QueryModel queryModel = new QueryModel(CuidAdapter.locationFormClass(1));
+        queryModel.selectResourceId().as("id");
 
-        for (FormInstance instance : formInstances) {
-            if (instance.getId().equals(instanceToDelete)) {
+        ColumnSet columnSet = assertResolves(locator.queryTable(queryModel));
+        ColumnView idColumn = columnSet.getColumnView("id");
+
+        for (int i = 0; i < idColumn.numRows(); i++) {
+            if(idColumn.getString(i).equals(instanceToDelete.asString())) {
                 throw new AssertionError();
             }
         }
-    }
-
-    @Test
-    public void siteProjections() {
-
-        ResourceId partnerClassId = CuidAdapter.partnerFormClass(PEAR_DATABASE_ID);
-
-        ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
-        FieldPath villageName = new FieldPath(getNameFieldId(VILLAGE_CLASS));
-        FieldPath provinceName = new FieldPath(getAdminFieldId(VILLAGE_CLASS), field(PROVINCE_CLASS, CuidAdapter.NAME_FIELD));
-        FieldPath partnerName = new FieldPath(field(CuidAdapter.activityFormClass(NFI_DIST_ID), PARTNER_FIELD), field(partnerClassId, NAME_FIELD));
-        FieldPath indicator1 = new FieldPath(indicatorField(1));
-        FieldPath startDate = new FieldPath(field(NFI_DIST_FORM_CLASS, CuidAdapter.START_DATE_FIELD));
-        FieldPath endDate = new FieldPath(field(NFI_DIST_FORM_CLASS, CuidAdapter.END_DATE_FIELD));
-
-
-        List<Projection> projections = assertResolves(adapter.query(
-                new InstanceQuery(
-                        asList(partnerName, villageName, provinceName, indicator1, endDate),
-                        new ClassCriteria(NFI_DIST_FORM_CLASS))));
-
-        System.out.println(Joiner.on("\n").join(projections));
-
-        final Projection firstProjection = projections.get(0);
-        assertThat(projections.size(), equalTo(3));
-        assertThat(firstProjection.getStringValue(provinceName), equalTo("Sud Kivu"));
-        assertEquals(firstProjection.getValue(startDate), null);
-        assertEquals(firstProjection.getValue(endDate), new LocalDate(2009, 1, 2));
-    }
-
-    @Test
-    public void geodb() {
-
-        ResourceLocatorAdaptor adapter = new ResourceLocatorAdaptor(getDispatcher());
-
-        FormInstance geodbFolder = assertResolves(adapter.getFormInstance(FolderListAdapter.GEODB_ID));
-
-        List<FormInstance> countries = assertResolves(adapter.queryInstances(isChildOf(geodbFolder.getId())));
-        assertThat(countries, Matchers.hasSize(1));
-
-        FormInstance rdc = countries.get(0);
-        assertThat(rdc.getString(ApplicationProperties.COUNTRY_NAME_FIELD), equalTo("Rdc"));
-
-        List<FormInstance> levels = assertResolves(adapter.queryInstances(isChildOf(rdc.getId())));
-        System.out.println(levels);
-
     }
 
 }

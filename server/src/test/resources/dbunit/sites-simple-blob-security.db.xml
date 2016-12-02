@@ -134,8 +134,8 @@
   <!-- PEAR Activity 1 : NFI Distribution -->
 
   <activity activityId="1" databaseId="1" name="NFI" category="NFI Cluster"
-            reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"
-            published="0"/>
+            reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="10"
+            published="0" classicView="0"/>
 
 
   <attributeGroupInActivity activityId="1"
@@ -178,7 +178,7 @@
 
   <activity activityId="2" databaseId="1"
             name="Distribution de Kits Scolaire" reportingFrequency="0"
-            allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+            allowEdit="1" sortOrder="1" locationTypeId="1" published="0" classicView="0"/>
 
   <locationType locationTypeId="1" countryId="1" name="localite" version="3" locationVersion="3"
                 databaseId="1" reuse="1"/>
@@ -199,7 +199,7 @@
 
   <activity activityId="41" databaseId="4" name="Public Activity"
             reportingFrequency="1" allowEdit="1" sortOrder="1" locationTypeId="3"
-            published="2"/>
+            published="2" classicView="0"/>
 
 
   <project projectId="1" name="Project X" description="A project"
@@ -209,12 +209,12 @@
 
   <activity activityId="3" databaseId="2"
             name="Appui aux centres de santé" reportingFrequency="1" allowEdit="1"
-            sortOrder="1" locationTypeId="1" published="0"/>
+            sortOrder="1" locationTypeId="1" published="0" classicView="0"/>
 
   <!-- Once activity -->
   <activity activityId="32" databaseId="2" name="Activity"
-            reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"
-            published="0"/>
+            reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="10"
+            published="0" classicView="0"/>
 
   <!-- Appui CS Indicator 1: Utilisation Rate -->
 
@@ -225,7 +225,7 @@
 
   <activity activityId="4" databaseId="2"
             name="Reunification of child soliders" reportingFrequency="1"
-            allowEdit="1" sortOrder="1" locationTypeId="3" published="0"/>
+            allowEdit="1" sortOrder="1" locationTypeId="3" published="0" classicView="0"/>
 
   <indicator indicatorId="6" activityId="4" name="Number of children"
              calculatedAutomatically="0"
@@ -234,7 +234,7 @@
 
   <activity activityId="5" databaseId="2" name="Kivu water distribution"
             reportingFrequency="1" allowEdit="1" sortOrder="1" locationTypeId="3"
-            published="0"/>
+            published="0" classicView="0"/>
 
   <lockedPeriod LockedPeriodId="1" enabled="true" toDate="2009-01-02"
                 fromDate="2009-01-01" name="woei" UserDatabaseId="1"/>

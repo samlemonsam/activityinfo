@@ -1,5 +1,7 @@
 package org.activityinfo.model.query;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
 
 public class RowSource {
@@ -39,4 +41,20 @@ public class RowSource {
     public int hashCode() {
         return rootFormClass != null ? rootFormClass.hashCode() : 0;
     }
+
+
+    public JsonElement toJsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("rootFormId", rootFormClass.asString());
+
+        return object;
+    }
+
+
+    public static RowSource fromJson(JsonObject object) {
+        RowSource source = new RowSource();
+        source.setRootFormClass(ResourceId.valueOf(object.get("rootFormId").getAsString()));
+        return source;
+    }
+
 }

@@ -24,8 +24,8 @@ package org.activityinfo.ui.client.component.table.filter;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.criteria.Criteria;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -41,7 +41,7 @@ public class FilterContentFactory {
     }
 
     public static FilterContent create(FieldColumn column, InstanceTable table, FilterPanel popup) {
-        FieldType type = column.getNode().getField().getType();
+        FieldType type = column.get().getNode().getField().getType();
         if (type == LocalDateType.INSTANCE) {
             return new FilterContentDate(column);
         } else if (type instanceof AttachmentType) {
@@ -58,11 +58,6 @@ public class FilterContentFactory {
             }
 
             @Override
-            public Criteria getCriteria() {
-                return null;
-            }
-
-            @Override
             public void clear() {
             }
 
@@ -73,6 +68,11 @@ public class FilterContentFactory {
 
             @Override
             public void setChangeHandler(ValueChangeHandler handler) {
+            }
+
+            @Override
+            public ExprNode getFilter() {
+                return null;
             }
         };
     }

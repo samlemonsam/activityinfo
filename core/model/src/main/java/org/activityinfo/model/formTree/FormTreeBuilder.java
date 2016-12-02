@@ -1,12 +1,11 @@
 package org.activityinfo.model.formTree;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
-import org.activityinfo.model.type.ReferenceType;
 
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -26,12 +25,17 @@ public class FormTreeBuilder {
         FormTree tree = new FormTree();
         FormClass rootClass = store.getFormClass(rootFormClassId);
 
+        Optional<FormField> parentField = rootClass.getParentField();
+        if(parentField.isPresent()) {
+            FormTree.Node node = tree.addRootField(rootClass, parentField.get());
+            fetchChildren(node, rootClass.getParentFormId().asSet());
+        }
+        
         // Add fields defined by this FormClass
         for(FormField field : rootClass.getFields()) {
             FormTree.Node node = tree.addRootField(rootClass, field);
-            if(field.getType() instanceof ReferenceType) {
-                ReferenceType referenceType = (ReferenceType) field.getType();
-                fetchChildren(node, referenceType.getRange());
+            if(node.isReference()) {
+                fetchChildren(node, node.getRange());
             } else if(field.getType() instanceof RecordFieldType) {
                 addChildren(node, ((RecordFieldType) field.getType()).getFormClass());
             }
@@ -44,7 +48,7 @@ public class FormTreeBuilder {
      * formClassId, add it's children.
      *
      */
-    private void fetchChildren(FormTree.Node parent, Set<ResourceId> formClassIds)  {
+    private void fetchChildren(FormTree.Node parent, Iterable<ResourceId> formClassIds)  {
         for(ResourceId childClassId : formClassIds) {
             FormClass childClass = store.getFormClass(childClassId);
             assert childClass != null;

@@ -22,10 +22,17 @@ package org.activityinfo.ui.client.component.formdesigner.drop;
  */
 
 import com.allen_sauer.gwt.dnd.client.drop.DropController;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
+
+import java.util.Map;
 
 /**
  * @author yuriyz on 11/13/2014.
  */
 public interface DropControllerExtended extends DropController {
+
     void setPositionerToEnd();
+
+    Map<ResourceId, WidgetContainer> getContainerMap();
 }

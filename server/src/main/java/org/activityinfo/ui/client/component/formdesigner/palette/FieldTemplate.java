@@ -29,10 +29,10 @@ import org.activityinfo.model.form.FormField;
  *
  * @author yuriyz on 07/07/2014.
  */
-public interface FieldTemplate {
+public interface FieldTemplate extends Template<FormField> {
 
-    public String getLabel();
+    String getLabel();
 
-    public FormField createField();
+    FormField create();
 
 }

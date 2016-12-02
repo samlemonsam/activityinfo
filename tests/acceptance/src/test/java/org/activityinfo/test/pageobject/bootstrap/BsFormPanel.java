@@ -31,6 +31,7 @@ import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.ControlType;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
+import org.activityinfo.test.pageobject.api.XPathBuilder;
 import org.activityinfo.test.pageobject.web.components.Form;
 import org.activityinfo.test.ui.ImagePathProvider;
 import org.joda.time.LocalDate;
@@ -49,16 +50,27 @@ public class BsFormPanel extends Form {
 
     private final FluentElement form;
     private BsField current;
+    private int index;
 
     public BsFormPanel(FluentElement form) {
+        this(form, 0);
+    }
+
+    public BsFormPanel(FluentElement form, int index) {
         this.form = form;
+        this.index = index;
     }
 
     @Override
     public BsField findFieldByLabel(String labelText) {
         Optional<FluentElement> element = form.find().label(withText(labelText)).ancestor().div(withClass("form-group")).firstIfPresent();
         if (element.isPresent()) {
-            return new BsField(element.get());
+            List<FluentElement> list = form.find().label(withText(labelText)).ancestor().div(withClass("form-group")).asList().list();
+            if (index < list.size()) {
+                return new BsField(list.get(index));
+            } else {
+                return new BsField(element.get());
+            }
         }
 
         element = form.find().label(withText(labelText)).ancestor().span(withClass("radio")).firstIfPresent();
@@ -67,6 +79,32 @@ public class BsFormPanel extends Form {
         }
 
         throw new AssertionError(String.format("The form panel has no field with label %s", labelText));
+    }
+
+    /**
+     * Useful for repeating subforms where we may have many fields with the same label.
+     *
+     * @param labelText label text
+     * @return all fields by label
+     */
+    public List<BsField> findFieldsByLabel(String labelText) {
+        List<BsField> result = Lists.newArrayList();
+
+        XPathBuilder div = form.find().label(withText(labelText)).ancestor().div(withClass("form-group"));
+        if (div.firstIfPresent().isPresent()) {
+            for (FluentElement element : div.waitForList().list()) {
+                result.add(new BsField(element));
+            }
+            return result;
+        }
+
+        XPathBuilder label = form.find().label(withText(labelText)).ancestor().span(withClass("radio"));
+        if (label.firstIfPresent().isPresent()) {
+            for (FluentElement element : label.waitForList().list()) {
+                result.add(new BsField(element));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -145,8 +183,10 @@ public class BsFormPanel extends Form {
         }
 
         public void fill(String value, String controlType) {
-            if ("radio".equals(controlType)) {
+            if ("radio".equalsIgnoreCase(controlType) || "dropdown".equalsIgnoreCase(controlType)) {
                 select(value);
+            } else if ("date".equalsIgnoreCase(controlType)) {
+                fill(org.joda.time.LocalDate.parse(value));
             } else {
                 fill(value);
             }
@@ -349,6 +389,16 @@ public class BsFormPanel extends Form {
 
         public String getFirstBlobLink() {
             return getBlobLinks().get(0);
+        }
+
+        public String getValue(ControlType controlType) {
+            switch (controlType) {
+                case TEXT:
+                case QUANTITY:
+                case DATE:
+                    return input().attribute("value");
+            }
+            throw new RuntimeException("Unsupported control type: " + controlType);
         }
     }
 }

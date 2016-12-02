@@ -13,7 +13,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.QuerySyntaxException;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 
@@ -24,13 +24,13 @@ public class ColumnSetBuilder {
 
     public static final Logger LOGGER = Logger.getLogger(ColumnSetBuilder.class.getName());
 
-    private final CollectionCatalog resourceStore;
+    private final FormCatalog resourceStore;
     private final FormTreeBuilder formTreeService;
     private Function<ColumnView, ColumnView> filter;
     private Map<String, Slot<ColumnView>> columnViews;
     private Slot<ColumnView> columnForRowCount;
 
-    public ColumnSetBuilder(CollectionCatalog resourceStore) {
+    public ColumnSetBuilder(FormCatalog resourceStore) {
         this.resourceStore = resourceStore;
         this.formTreeService = new FormTreeBuilder(resourceStore);
     }
@@ -39,7 +39,7 @@ public class ColumnSetBuilder {
 
         // We want to make at most one pass over every collection we need to scan,
         // so first queue up all necessary work before executing
-        CollectionScanBatch batch = new CollectionScanBatch(resourceStore);
+        FormScanBatch batch = new FormScanBatch(resourceStore);
 
         // Enqueue the columns we need
         enqueue(queryModel, batch);
@@ -55,7 +55,7 @@ public class ColumnSetBuilder {
     }
 
 
-    public void enqueue(QueryModel table, CollectionScanBatch batch) {
+    public void enqueue(QueryModel table, FormScanBatch batch) {
         ResourceId classId = table.getRowSources().get(0).getRootFormClass();
         FormTree tree = formTreeService.queryTree(classId);
 

@@ -8,11 +8,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.RangeChangeEvent;
-import org.activityinfo.core.client.ProjectionKeyProvider;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.CriteriaIntersection;
+import org.activityinfo.legacy.client.state.StateProvider;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.FunctionCallNode;
+import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.table.action.*;
 import org.activityinfo.ui.client.component.table.filter.FilterCellAction;
@@ -37,9 +37,10 @@ public class InstanceTable implements IsWidget {
     public static final int COLUMN_WIDTH = 10;
 
     private final ResourceLocator resourceLocator;
+    private final StateProvider stateProvider;
 
-    private final CellTable<Projection> table;
-    private final MultiSelectionModel<Projection> selectionModel = new MultiSelectionModel<>(new ProjectionKeyProvider());
+    private final CellTable<RowView> table;
+    private final MultiSelectionModel<RowView> selectionModel = new MultiSelectionModel<>(new RowViewKeyProvider());
     private final List<TableHeaderAction> headerActions;
     private final InstanceTableView tableView;
     private final InstanceTableDataLoader dataLoader;
@@ -47,17 +48,19 @@ public class InstanceTable implements IsWidget {
     private final TableLoadingIndicator loadingIndicator = new TableLoadingIndicator()
             .setHideOnSuccess(true);
 
-    private Criteria criteria;
     private FormClass rootFormClass;
+    private List<FieldColumn> columns = Lists.newArrayList();
 
     public InstanceTable(InstanceTableView tableView) {
         this.tableView = tableView;
         this.resourceLocator = tableView.getResourceLocator();
         this.columnStatePersister = new ColumnStatePersister(tableView.getStateProvider());
+        this.stateProvider = tableView.getStateProvider();
+
         CellTableResources.INSTANCE.cellTableStyle().ensureInjected();
 
         final TableHeaderActionBrowserEventHandler headerActionEventHandler = new TableHeaderActionBrowserEventHandler(this);
-        table = new CellTable<Projection>(Integer.MAX_VALUE, CellTableResources.INSTANCE) {
+        table = new CellTable<RowView>(Integer.MAX_VALUE, CellTableResources.INSTANCE) {
             @Override
             protected void onBrowserEvent2(Event event) {
                 super.onBrowserEvent2(event);
@@ -100,25 +103,20 @@ public class InstanceTable implements IsWidget {
         actions.add(new EditHeaderAction(this));
         actions.add(new PrintFormAction(this));
         actions.add(new ImportHeaderAction(this));
+        actions.add(new ExportHeaderAction(this));
         actions.add(new ChooseColumnsHeaderAction(this));
         return actions;
     }
 
-    public void setCriteria(Criteria criteria) {
-        this.criteria = criteria;
-    }
-
-    public Criteria getCriteria() {
-        return criteria;
-    }
-
     public void setColumns(List<FieldColumn> columns) {
         removeAllColumns();
-        dataLoader.reset();
+        this.dataLoader.reset();
+        this.columns = Lists.newArrayList(columns);
+
         for (FieldColumn column : columns) {
             final FilterCellAction filterAction = new FilterCellAction(this, column);
             table.addColumn(column, new FilterHeader(column, filterAction));
-            dataLoader.getFields().addAll(column.getFieldPaths());
+            dataLoader.getFields().addAll(column.get().getFieldPaths());
         }
 
         reload();
@@ -131,6 +129,25 @@ public class InstanceTable implements IsWidget {
         }
     }
 
+    public ExprNode getFilter() {
+        List<ExprNode> arguments = Lists.newArrayList();
+        for (FieldColumn column : columns) {
+            if (column.get().getFilter() != null) {
+                arguments.add(column.get().getFilter());
+            }
+        }
+
+        if (arguments.isEmpty()) {
+            return null;
+        }
+
+        if (arguments.size() == 1) {
+            return arguments.iterator().next();
+        }
+
+        return new FunctionCallNode(AndFunction.INSTANCE, arguments);
+    }
+
     public InstanceTableDataLoader getDataLoader() {
         return dataLoader;
     }
@@ -139,22 +156,7 @@ public class InstanceTable implements IsWidget {
         dataLoader.reload();
     }
 
-    public Criteria buildQueryCriteria() {
-        // we want the intersection of the base (class) criteria and
-        // each of the column filters: the rows that satisfy the class AND
-        // the Col1 filter AND Col2 filter
-        final List<Criteria> intersection = Lists.newArrayList(criteria);
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            final FieldColumn column = (FieldColumn) table.getColumn(i);
-            final Criteria columnCriteria = column.getCriteria();
-            if (columnCriteria != null) {
-                intersection.add(columnCriteria);
-            }
-        }
-        return new CriteriaIntersection(intersection);
-    }
-
-    public MultiSelectionModel<Projection> getSelectionModel() {
+    public MultiSelectionModel<RowView> getSelectionModel() {
         return selectionModel;
     }
 
@@ -163,7 +165,11 @@ public class InstanceTable implements IsWidget {
         return table;
     }
 
-    public CellTable<Projection> getTable() {
+    public List<FieldColumn> getColumns() {
+        return columns;
+    }
+
+    public CellTable<RowView> getTable() {
         return table;
     }
 
@@ -191,6 +197,10 @@ public class InstanceTable implements IsWidget {
         return loadingIndicator;
     }
 
+    public StateProvider getStateProvider() {
+        return stateProvider;
+    }
+    
     public void loadMore() {
         dataLoader.loadMore();
     }

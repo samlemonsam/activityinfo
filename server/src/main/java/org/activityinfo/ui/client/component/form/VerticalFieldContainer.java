@@ -27,13 +27,11 @@ public class VerticalFieldContainer implements FieldContainer {
         this.field = formField;
         this.fieldWidget = fieldWidget;
         formGroup = new FormGroup()
-                .label(formField.getLabel())
+                .label(field.getLabel())
                 .description(formField.getDescription())
                 .validationStateType(ValidationStateType.ERROR)
                 .addWidget(fieldWidget);
-
     }
-
 
     @Override
     public FormField getField() {

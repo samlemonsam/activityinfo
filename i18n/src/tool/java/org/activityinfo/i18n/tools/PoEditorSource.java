@@ -62,7 +62,7 @@ public class PoEditorSource implements TranslationSource {
         for (ResourceClassTerm term : terms) {
             updates.add(new PoTermUpdate(term.getKey(), term.getDefaultTranslation()));
         }
-        
+
         PoEditorClient client = new PoEditorClient(apiToken);
         PoUploadResponse response = client.upload(projectId, updates, sync);
 

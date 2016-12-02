@@ -25,10 +25,7 @@ package org.activityinfo.server.database;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.logging.Logger;
 
 /**
@@ -55,7 +52,9 @@ public class DatabaseCleaner {
             Statement statement = connection.createStatement();
             statement.execute("SET foreign_key_checks = 0");
 
-            ResultSet tables = connection.getMetaData().getTables(null, null, null, new String[]{"TABLE"});
+            DatabaseMetaData metaData = connection.getMetaData();
+            System.out.println("DatabaseCleaner - url : " + metaData.getURL());
+            ResultSet tables = metaData.getTables(null, null, null, new String[]{"TABLE"});
             try {
                 while (tables.next()) {
                     String tableName = tables.getString(3);

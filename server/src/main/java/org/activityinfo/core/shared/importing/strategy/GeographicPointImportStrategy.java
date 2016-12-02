@@ -2,10 +2,10 @@ package org.activityinfo.core.shared.importing.strategy;
 
 import com.google.common.base.Objects;
 import org.activityinfo.core.shared.importing.model.ImportModel;
-import org.activityinfo.core.shared.type.converter.ConverterFactory;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.core.shared.type.converter.FieldParserFactory;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.type.FieldTypeClass;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,9 +15,9 @@ public class GeographicPointImportStrategy implements FieldImportStrategy {
 
     static final TargetSiteId LATITUDE = new TargetSiteId("latitude");
     static final TargetSiteId LONGITUDE = new TargetSiteId("longitude");
-    private final ConverterFactory converterFactory;
+    private final FieldParserFactory converterFactory;
 
-    public GeographicPointImportStrategy(ConverterFactory converterFactory) {
+    public GeographicPointImportStrategy(FieldParserFactory converterFactory) {
         this.converterFactory = converterFactory;
     }
 

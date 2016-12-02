@@ -23,16 +23,18 @@ package org.activityinfo.ui.client.component.table.filter;
 
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.IsWidget;
-import org.activityinfo.core.shared.criteria.HasCriteria;
+import org.activityinfo.model.expr.ExprNode;
 
 /**
  * @author yuriyz on 4/3/14.
  */
-public interface FilterContent extends HasCriteria, IsWidget {
+public interface FilterContent extends IsWidget {
 
-    public void clear();
+    void clear();
 
-    public boolean isValid();
+    boolean isValid();
 
-    public void setChangeHandler(ValueChangeHandler handler);
+    void setChangeHandler(ValueChangeHandler handler);
+
+    ExprNode getFilter();
 }

@@ -1,12 +1,12 @@
 package org.activityinfo.model.expr.eval;
 
-import org.activityinfo.model.resource.Resource;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 
 public interface ValueSource {
 
-    FieldValue getValue(Resource instance, EvalContext context);
+    FieldValue getValue(FormInstance instance, EvalContext context);
 
     FieldType resolveType(EvalContext context);
 

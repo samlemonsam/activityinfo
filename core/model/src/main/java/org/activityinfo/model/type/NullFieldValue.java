@@ -21,6 +21,9 @@ package org.activityinfo.model.type;
  * #L%
  */
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+
 /**
  * @author yuriyz on 8/14/14.
  */
@@ -31,5 +34,10 @@ public class NullFieldValue implements FieldValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return NullFieldType.INSTANCE;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return JsonNull.INSTANCE;
     }
 }

@@ -86,7 +86,7 @@ public class SiteDialog extends Window {
 
     public SiteDialog(Dispatcher dispatcher, ActivityFormDTO activity, EventBus eventBus) {
         this.dispatcher = dispatcher;
-        this.resourceLocator = new ResourceLocatorAdaptor(dispatcher);
+        this.resourceLocator = new ResourceLocatorAdaptor();
         this.activity = activity;
         this.eventBus = eventBus;
 

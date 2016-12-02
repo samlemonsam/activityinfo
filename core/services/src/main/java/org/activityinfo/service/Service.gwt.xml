@@ -25,6 +25,7 @@
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
   <inherits name='org.activityinfo.model.Model'/>
+  <inherits name='org.activityinfo.api.ApiClient'/>
 
   <source path="store"/>
   <source path="blob"/>

@@ -51,6 +51,13 @@ import java.util.List;
  */
 public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
 
+    /**
+     * Disable checking field symbols until it is updated to include 
+     * subforms.
+     */
+    private static final boolean SYMBOL_CHECKING_DISABLED = true;
+    
+    
     private static OurUiBinder uiBinder = GWT
             .create(OurUiBinder.class);
 
@@ -113,11 +120,13 @@ public class ExprFieldWidget implements FormFieldWidget<ExprValue> {
             // try to check variable names
             List<SymbolExpr> symbolExprList = Lists.newArrayList();
             gatherSymbolExprs(expr, symbolExprList);
-            List<String> existingIndicatorCodes = existingFieldCodes();
-            for (SymbolExpr placeholderExpr : symbolExprList) {
-                if (!existingIndicatorCodes.contains(placeholderExpr.getName())) {
-                    showError(I18N.MESSAGES.doesNotExist(placeholderExpr.getName()));
-                    return false;
+            if(!SYMBOL_CHECKING_DISABLED) {
+                List<String> existingIndicatorCodes = existingFieldCodes();
+                for (SymbolExpr placeholderExpr : symbolExprList) {
+                    if (!existingIndicatorCodes.contains(placeholderExpr.getName())) {
+                        showError(I18N.MESSAGES.doesNotExist(placeholderExpr.getName()));
+                        return false;
+                    }
                 }
             }
 

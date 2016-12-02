@@ -7,7 +7,10 @@ import org.activityinfo.model.type.geo.Extents;
  */
 public class BooleanColumnView implements ColumnView {
   
-  private final int values[];
+  private int values[];
+
+  public BooleanColumnView() {
+  }
 
   public BooleanColumnView(int[] values) {
     this.values = values;

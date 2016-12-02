@@ -42,6 +42,9 @@ class JsonChecker {
                 if (actual.getTextValue().equals(placeholders.resolveName(expected))) {
                     return;
                 }
+                if (expected.asText().equalsIgnoreCase("$any")) {
+                    return;
+                }
                 throw e;
             }
 

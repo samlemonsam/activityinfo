@@ -1,16 +1,18 @@
 package org.activityinfo.store.mysql;
 
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.io.Resources;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.ExprValue;
-import org.activityinfo.service.store.CollectionCatalog;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.After;
@@ -25,13 +27,18 @@ public abstract class AbstractMySqlTest {
 
 
     private final LocalServiceTestHelper helper =
-            new LocalServiceTestHelper(new LocalMemcacheServiceTestConfig());
+            new LocalServiceTestHelper(
+                    new LocalMemcacheServiceTestConfig(),
+                    new LocalDatastoreServiceTestConfig()
+                        .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
 
     public static DbUnit dbunit;
     public static ColumnSetBuilder executor;
     public ColumnSet columnSet;
-    public static CollectionCatalog catalogProvider;
+    public static MySqlCatalog catalog;
+    
+    private Closeable objectify;
 
     @BeforeClass
     public static void initLocale() throws Throwable {
@@ -39,26 +46,27 @@ public abstract class AbstractMySqlTest {
         LocaleProxy.initialize();
     }
 
-
     @Before
     public void setUp() {
         helper.setUp();
+        objectify = ObjectifyService.begin();
     }
 
     @After
     public void tearDown() {
+        objectify.close();
         helper.tearDown();
     }
     
-    public static void resetDatabase() throws Throwable {
+    public static void resetDatabase(String resourceName) throws Throwable {
 
         System.out.println("Running setup...");
         dbunit = new DbUnit();
         dbunit.openDatabase();
         dbunit.dropAllRows();
-        dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "catalog-test.db.xml"));
-        catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        executor = new ColumnSetBuilder(catalogProvider);
+        dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, resourceName));
+        catalog = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
+        executor = new ColumnSetBuilder(catalog);
         CountryStructure.clearCache();
     }
 

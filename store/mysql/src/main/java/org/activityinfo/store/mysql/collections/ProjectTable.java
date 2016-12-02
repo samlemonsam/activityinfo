@@ -30,19 +30,20 @@ public class ProjectTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId classId) throws SQLException {
-        int databaseId = CuidAdapter.getLegacyIdFromCuid(classId);
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException {
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(formId);
 
-        TableMappingBuilder mapping = TableMappingBuilder.newMapping(classId, "partner");
+        TableMappingBuilder mapping = TableMappingBuilder.newMapping(formId, "partner");
         mapping.setFormLabel("Project");
-        mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
+        mapping.setDatabaseId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.PROJECT_DOMAIN, "projectId");
         mapping.setFromClause("project base");
         mapping.setBaseFilter("dateDeleted IS NULL AND databaseId=" + databaseId);
         mapping.setDeleteMethod(DeleteMethod.SOFT_BY_DATE);
         mapping.setVersion(databaseVersionMap.getSchemaVersion(databaseId));
+        mapping.setSchemaVersion(1L); // Schema is static
         
-        FormField nameField = new FormField(field(classId, NAME_FIELD))
+        FormField nameField = new FormField(field(formId, NAME_FIELD))
                 .setRequired(true)
                 .setLabel("Name")
                 .setCode("label")
@@ -51,7 +52,7 @@ public class ProjectTable implements SimpleTable {
         mapping.addTextField(nameField, "name");
 
 
-        FormField fullNameField = new FormField(field(classId, FULL_NAME_FIELD))
+        FormField fullNameField = new FormField(field(formId, FULL_NAME_FIELD))
                 .setLabel("Description")
                 .setRequired(false)
                 .setType(TextType.INSTANCE);

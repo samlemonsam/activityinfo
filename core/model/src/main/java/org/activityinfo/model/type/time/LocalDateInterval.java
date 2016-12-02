@@ -1,5 +1,7 @@
 package org.activityinfo.model.type.time;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -40,6 +42,14 @@ public class LocalDateInterval implements FieldValue, IsRecord {
     @Override
     public FieldTypeClass getTypeClass() {
         return LocalDateIntervalType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("start", startDate.toString());
+        object.addProperty("end", endDate.toString());
+        return object;
     }
 
     @Override

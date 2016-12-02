@@ -1,6 +1,8 @@
 package org.activityinfo.model.type.geo;
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -22,6 +24,7 @@ public class GeoArea implements GeoFieldValue, IsRecord {
     public GeoArea(Extents envelope) {
         this.envelope = envelope;
     }
+
 
     public Extents getEnvelope() {
         return envelope;
@@ -50,6 +53,16 @@ public class GeoArea implements GeoFieldValue, IsRecord {
         return record;
     }
 
+
+    @Override
+    public JsonElement toJsonElement() {
+        JsonObject object = new JsonObject();
+        object.addProperty("blobId", blobId);
+        object.add("bbox", envelope.toJsonElement());
+        return object;
+    }
+    
+    
     public static FieldValue fromRecord(Record record) {
         Extents bbox = null;
         Record bboxRecord = record.isRecord("bbox");
@@ -59,4 +72,5 @@ public class GeoArea implements GeoFieldValue, IsRecord {
         String blobId = record.isString("blobId");
         return new GeoArea(bbox, blobId);
     }
+
 }

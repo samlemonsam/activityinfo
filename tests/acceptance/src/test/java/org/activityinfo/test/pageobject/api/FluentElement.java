@@ -220,6 +220,13 @@ public class FluentElement {
         actions.perform();
     }
 
+    public FluentElement moveOver() {
+        Actions actions = new Actions(webDriver);
+        actions.moveToElement(element);
+        actions.perform();
+        return this;
+    }
+
     public FluentElement activeElement() {
         return new FluentElement(webDriver, webDriver.switchTo().activeElement());
     }

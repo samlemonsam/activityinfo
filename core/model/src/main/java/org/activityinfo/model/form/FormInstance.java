@@ -22,22 +22,21 @@ package org.activityinfo.model.form;
  */
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import org.activityinfo.model.resource.*;
-import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.model.type.barcode.BarcodeValue;
-import org.activityinfo.model.type.enumerated.EnumValue;
+import com.google.gson.JsonElement;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,12 +47,12 @@ import java.util.Set;
  *
  * @author yuriyz on 1/29/14.
  */
-public class FormInstance implements IsResource {
+public class FormInstance {
 
     private ResourceId id;
     private ResourceId classId;
-    private ResourceId ownerId;
-    private PropertyBag propertyBag;
+    private ResourceId parentRecordId;
+    private Map<ResourceId, FieldValue> fieldMap;
 
     /**
      * Constructs a new FormInstance. To obtain an id for a new instance
@@ -66,11 +65,26 @@ public class FormInstance implements IsResource {
         Preconditions.checkNotNull(id, classId);
         this.id = id;
         this.classId = classId;
-        this.ownerId = classId;
-        this.propertyBag = new PropertyBag();
+        this.parentRecordId = classId;
+        this.fieldMap = new HashMap<>();
     }
 
-    @Override
+    public static FormInstance toFormInstance(FormClass formClass, FormRecord record) {
+        FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
+
+        if (record.getParentRecordId() != null) {
+            instance.setParentRecordId(ResourceId.valueOf(record.getParentRecordId()));
+        }
+
+        for (FormField field : formClass.getFields()) {
+            JsonElement fieldValue = record.getFields().get(field.getName());
+            if(fieldValue != null && !fieldValue.isJsonNull()) {
+                instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+            }
+        }
+        return instance;
+    }
+
     public ResourceId getId() {
         return id;
     }
@@ -85,82 +99,37 @@ public class FormInstance implements IsResource {
         return this;
     }
 
-    public static FormInstance fromResource(Resource resource) {
-        FormInstance instance = new FormInstance(resource.getId(), resource.getResourceId("classId"));
-        if (resource.getOwnerId() != null) { // owner may be null for FieldTypes
-            instance.setOwnerId(resource.getOwnerId());
-        }
-        instance.propertyBag.setAll(resource);
-        return instance;
-    }
 
-    @Override
-    public Resource asResource() {
-        Resource resource = Resources.createResource();
-        resource.setId(id);
-        resource.setOwnerId(ownerId);
-        resource.set("classId", classId);
-        resource.setAll(propertyBag);
-        return resource;
-    }
-
-    public ResourceId getClassId() {
+    public ResourceId getFormId() {
         return classId;
     }
 
-    public FormInstance setOwnerId(ResourceId ownerId) {
-        assert ownerId != null;
-        this.ownerId = ownerId;
+    public FormInstance setParentRecordId(ResourceId parentRecordId) {
+        assert parentRecordId != null;
+        this.parentRecordId = parentRecordId;
         return this;
     }
 
-    public ResourceId getOwnerId() {
-        return ownerId;
-    }
-
-    public Map<ResourceId, Object> getValueMap() {
-        Map<ResourceId, Object> valueMap = Maps.newHashMap();
-        for(Object key : propertyBag.getProperties().keySet()) {
-            String fieldName = (String)key;
-            ResourceId fieldId = ResourceId.valueOf(fieldName);
-            Object value = propertyBag.get(fieldName);
-
-            if(value instanceof String) {
-                valueMap.put(fieldId, value);
-            } else if(value instanceof Record) {
-                valueMap.put(fieldId,
-                        TypeRegistry.get().deserializeFieldValue((Record)value));
-            } else {
-                throw new UnsupportedOperationException("value: " + value);
-            }
-        }
-        return Collections.unmodifiableMap(valueMap);
+    public ResourceId getParentRecordId() {
+        return parentRecordId;
     }
 
     public Map<ResourceId, FieldValue> getFieldValueMap() {
-        Map<ResourceId, FieldValue> valueMap = Maps.newHashMap();
-        for(Object key : propertyBag.getProperties().keySet()) {
-            ResourceId fieldId = ResourceId.valueOf((String) key);
-            valueMap.put(fieldId, get(fieldId));
-        }
-        return valueMap;
+        return new HashMap<>(fieldMap);
     }
 
     public void removeAll(Set<ResourceId> fieldIds) {
         for (ResourceId fieldId : fieldIds) {
-            propertyBag.remove(fieldId.asString());
+            fieldMap.remove(fieldId);
         }
     }
 
-    public FormInstance set(@Nonnull ResourceId fieldId, ResourceId referenceId) {
-        return set(fieldId, new ReferenceValue(referenceId));
-    }
 
     public FormInstance set(@Nonnull ResourceId fieldId, String value) {
         if(value == null) {
-            propertyBag.remove(fieldId.asString());
+            fieldMap.remove(fieldId);
         } else {
-            propertyBag.set(fieldId.asString(), value);
+            fieldMap.put(fieldId, TextValue.valueOf(value));
         }
         return this;
     }
@@ -175,76 +144,33 @@ public class FormInstance implements IsResource {
     }
 
     public FormInstance set(@Nonnull ResourceId fieldId, boolean value) {
-        propertyBag.set(fieldId.asString(), value);
+        fieldMap.put(fieldId, BooleanFieldValue.valueOf(value));
         return this;
     }
 
     public FormInstance set(@Nonnull ResourceId fieldId, FieldValue fieldValue) {
-        propertyBag.set(fieldId, fieldValue);
+        fieldMap.put(fieldId, fieldValue);
         return this;
     }
 
     public FormInstance set(@Nonnull ResourceId fieldId, AiLatLng latLng) {
-        propertyBag.set(fieldId, new GeoPoint(latLng.getLat(), latLng.getLng()));
+        fieldMap.put(fieldId, new GeoPoint(latLng.getLat(), latLng.getLng()));
         return this;
     }
 
-
-    public void set(@Nonnull ResourceId fieldId, Set<ResourceId> references) {
-        set(fieldId, new ReferenceValue(references));
-    }
-
     public FieldValue get(ResourceId fieldId, FieldType fieldType) {
-        Object value = propertyBag.get(fieldId.asString());
-        if (value instanceof String && fieldType instanceof NarrativeType) {
-            return NarrativeValue.valueOf((String) value);
-        } else if(value instanceof String && fieldType instanceof BarcodeType) {
-            return BarcodeValue.valueOf((String)value);
+        FieldValue value = fieldMap.get(fieldId);
+        if(value != null && value.getTypeClass() == fieldType.getTypeClass()) {
+            return value;
+        } else {
+            return null;
         }
-        return get(fieldId);
     }
 
     public FieldValue get(ResourceId fieldId) {
-        Object value = propertyBag.get(fieldId.asString());
-        if(value == null) {
-            return null;
-        } else if(value instanceof String) {
-            return TextValue.valueOf((String) value);
-        } else if(value instanceof Boolean) {
-            Boolean booleanValue = (Boolean) value;
-            return BooleanFieldValue.valueOf(booleanValue);
-        } else if(value instanceof Record) {
-            Record record = (Record)value;
-            return TypeRegistry.get().deserializeFieldValue(record);
-        }else if(value instanceof Double) {
-            return new Quantity((Double) value);
-        } else {
-            throw new UnsupportedOperationException(fieldId.asString() + " = " + value);
-        }
+        return fieldMap.get(fieldId);
     }
 
-
-    public void set(ResourceId fieldId, Object value) {
-        if(value instanceof Date) {
-            set(fieldId, new LocalDate((Date)value));
-        } else if(value instanceof com.bedatadriven.rebar.time.calendar.LocalDate) {
-            com.bedatadriven.rebar.time.calendar.LocalDate rebarDate = (com.bedatadriven.rebar.time.calendar.LocalDate) value;
-            set(fieldId, new LocalDate(rebarDate.getYear(), rebarDate.getMonthOfYear(), rebarDate.getDayOfMonth()));
-        } else if(value instanceof String) {
-            set(fieldId, (String)value);
-        } else if(value instanceof Number) {
-            set(fieldId, ((Number)value).doubleValue());
-        } else if(value instanceof AiLatLng) {
-            AiLatLng latLng = (AiLatLng) value;
-            set(fieldId, new GeoPoint(latLng.getLat(), latLng.getLng()));
-        } else if(value instanceof Boolean) {
-            set(fieldId, value == Boolean.TRUE);
-        } else if(value instanceof FieldValue) {
-            set(fieldId, (FieldValue)value);
-        } else {
-            throw new UnsupportedOperationException(value.getClass().getName());
-        }
-    }
 
     /**
      * Returns the value of {@code fieldId} if the value is present and of
@@ -259,39 +185,22 @@ public class FormInstance implements IsResource {
         }
     }
 
-    public ResourceId getInstanceId(ResourceId fieldId) {
-        final FieldValue value = get(fieldId);
-        if (value instanceof ReferenceValue) {
-            Set<ResourceId> ids = ((ReferenceValue) value).getResourceIds();
-            if (!ids.isEmpty()) {
-                return ids.iterator().next();
-            }
+    public String getString(ResourceId fieldId) {
+        FieldValue value = fieldMap.get(fieldId);
+        if(value instanceof HasStringValue) {
+            return ((HasStringValue) value).asString();
         }
         return null;
     }
 
-    public String getString(ResourceId fieldId) {
-        return propertyBag.isString(fieldId.asString());
-    }
-
     public LocalDate getDate(ResourceId fieldId) {
-        final Object value = get(fieldId);
+        FieldValue value = get(fieldId);
         if (value instanceof LocalDate) {
             return (LocalDate) value;
         }
         return null;
     }
 
-    public Set<ResourceId> getReferences(ResourceId fieldId) {
-        FieldValue value = get(fieldId);
-        if(value instanceof ReferenceValue) {
-            return ((ReferenceValue) value).getResourceIds();
-        } else if(value instanceof EnumValue) {
-            return ((EnumValue) value).getResourceIds();
-        }else {
-            return Collections.emptySet();
-        }
-    }
 
     public Double getDouble(ResourceId fieldId) {
         FieldValue value = get(fieldId);
@@ -302,8 +211,8 @@ public class FormInstance implements IsResource {
     }
 
     public FormInstance copy() {
-        final FormInstance copy = new FormInstance(getId(), getClassId());
-        copy.propertyBag.setAll(propertyBag);
+        final FormInstance copy = new FormInstance(getId(), getFormId());
+        copy.fieldMap.putAll(fieldMap);
         return copy;
     }
 
@@ -316,13 +225,45 @@ public class FormInstance implements IsResource {
         return null;
     }
 
+    public int size() {
+        return fieldMap.size();
+    }
+
     @Override
     public String toString() {
         return "FormInstance{" +
                 "id=" + id +
                 ", classId=" + classId +
-                ", valueMap=" + propertyBag +
+                ", parentRecordId=" + parentRecordId +
+                ", fieldMap=" + fieldMap +
                 '}';
     }
 
+    public boolean isEmpty() {
+        return fieldMap.isEmpty();
+    }
+
+    public boolean isEmpty(String... fieldsToIgnore) {
+        Map<ResourceId, FieldValue> copy = new HashMap<>(fieldMap);
+        for (String field : fieldsToIgnore) {
+            copy.remove(ResourceId.valueOf(field));
+        }
+        return copy.isEmpty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FormInstance instance = (FormInstance) o;
+
+        return !(id != null ? !id.equals(instance.id) : instance.id != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

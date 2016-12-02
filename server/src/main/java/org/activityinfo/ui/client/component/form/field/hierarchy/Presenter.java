@@ -6,22 +6,21 @@ import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.application.ApplicationProperties;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.CriteriaIntersection;
-import org.activityinfo.core.shared.criteria.FieldCriteria;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Observer;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Models the selection of hierarchy
@@ -29,8 +28,7 @@ import java.util.Set;
 class Presenter {
 
     private Map<ResourceId, LevelView> widgetMap = new HashMap<>();
-    private Map<ResourceId, Projection> selection = new HashMap<>();
-//    private List<HandlerRegistration> registrations = new ArrayList<>();
+    private Map<ResourceId, Choice> selection = new HashMap<>();
     private ResourceLocator locator;
     private Hierarchy tree;
     private ValueUpdater<ReferenceValue> valueUpdater;
@@ -42,9 +40,9 @@ class Presenter {
         this.valueUpdater = valueUpdater;
         this.widgetMap.putAll(widgets);
         for(final Map.Entry<ResourceId, LevelView> entry : widgetMap.entrySet()) {
-            entry.getValue().addSelectionHandler(new SelectionHandler<Projection>() {
+            entry.getValue().addSelectionHandler(new SelectionHandler<Choice>() {
                 @Override
-                public void onSelection(SelectionEvent<Projection> event) {
+                public void onSelection(SelectionEvent<Choice> event) {
                     onUserSelection(tree.getLevel(entry.getKey()), event.getSelectedItem());
                 }
             });
@@ -56,20 +54,20 @@ class Presenter {
         valueUpdater.update(getValue());
     }
 
-    public Promise<Void> setInitialSelection(Iterable<ResourceId> resourceIds) {
-        return setInitialSelection(new ReferenceValue(resourceIds));
+    public Promise<Void> setInitialSelection(Iterable<RecordRef> refs) {
+        return setInitialSelection(new ReferenceValue(refs));
     }
 
     public Promise<Void> setInitialSelection(ReferenceValue value) {
         final InitialSelection initialSelection = new InitialSelection(tree);
-        return initialSelection.fetch(locator, value.getResourceIds()).then(new Function<Void, Void>() {
+        return initialSelection.fetch(locator, value.getReferences()).then(new Function<Void, Void>() {
 
             @Nullable
             @Override
             public Void apply(@Nullable Void input) {
                 selection.putAll(initialSelection.getSelection());
                 for (Level level : tree.getLevels()) {
-                    LevelView view = widgetMap.get(level.getClassId());
+                    LevelView view = widgetMap.get(level.getFormId());
                     if (level.isRoot() || hasSelection(level.getParent())) {
                         view.setEnabled(true);
                         view.setChoices(choices(level));
@@ -86,11 +84,11 @@ class Presenter {
     }
 
 
-    private void onUserSelection(Level level, Projection selectedItem) {
+    private void onUserSelection(Level level, Choice selectedItem) {
         if(selectedItem == null) {
-            this.selection.remove(level.getClassId());
+            this.selection.remove(level.getFormId());
         } else {
-            this.selection.put(level.getClassId(), selectedItem);
+            this.selection.put(level.getFormId(), selectedItem);
         }
         clearChildren(level);
         fireValueChanged();
@@ -99,29 +97,28 @@ class Presenter {
     private ReferenceValue getValue() {
         // We want to store the values in a normalized fashion -
         // store only the leaf nodes, their parents are redundant
-        Set<ResourceId> instanceIds = Sets.newHashSet();
-        Set<ResourceId> parentIds = Sets.newHashSet();
-        for(Projection projection : selection.values()) {
-            instanceIds.add(projection.getRootInstanceId());
-            Set<ResourceId> parentId = projection.getReferenceValue(ApplicationProperties.PARENT_PROPERTY);
-            if(!parentId.isEmpty()) {
-                parentIds.add(parentId.iterator().next());
+        Set<RecordRef> refs = Sets.newHashSet();
+        Set<RecordRef> parentIds = Sets.newHashSet();
+        for(Choice choice : selection.values()) {
+            refs.add(choice.getRef());
+            if(choice.hasParent()) {
+                parentIds.add(choice.getParentRef());
             }
         }
-        return new ReferenceValue(instanceIds);
+        return new ReferenceValue(refs);
     }
 
     private void clearChildren(Level parent) {
-        Projection parentSelection = selection.get(parent.getClassId());
+        Choice parentChoice = selection.get(parent.getFormId());
         for(Level child : parent.getChildren()) {
-            selection.remove(child.getClassId());
-            clearViewSelection(parentSelection, child);
+            selection.remove(child.getFormId());
+            clearViewSelection(parentChoice, child);
             clearChildren(child);
         }
     }
 
-    private void clearViewSelection(Projection parentSelection, Level child) {
-        LevelView view = widgetMap.get(child.getClassId());
+    private void clearViewSelection(Choice parentSelection, Level child) {
+        LevelView view = widgetMap.get(child.getFormId());
         view.clearSelection();
         if(parentSelection != null) {
             view.setChoices(choices(child));
@@ -132,38 +129,67 @@ class Presenter {
     }
 
     public boolean hasSelection(Level level) {
-        return selection.containsKey(level.getClassId());
+        return selection.containsKey(level.getFormId());
     }
 
     public String getSelectionLabel(ResourceId classId) {
         assert selection.containsKey(classId) : "No selection";
-        return selection.get(classId).getStringValue(ApplicationProperties.LABEL_PROPERTY);
+        return selection.get(classId).getLabel();
     }
 
-    public Projection getSelection(Level level) {
-        assert selection.containsKey(level.getClassId());
-        return selection.get(level.getClassId());
+    public Choice getSelection(Level level) {
+        assert selection.containsKey(level.getFormId());
+        return selection.get(level.getFormId());
     }
+    
+    private Supplier<Promise<List<Choice>>> choices(final Level level) {
 
-    private Supplier<Promise<List<Projection>>> choices(Level level) {
-        final InstanceQuery.Builder query = InstanceQuery
-                .select(ApplicationProperties.LABEL_PROPERTY, ApplicationProperties.PARENT_PROPERTY,
-                        level.getParentFieldId());
+        final QueryModel queryModel = new QueryModel(level.getFormId());
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr("label").as("label");
 
-        if(level.isRoot()) {
-            query.where(new ClassCriteria(level.getClassId()));
-        } else {
-            Projection selectedParent = getSelection(level.getParent());
-
-            query.where(new CriteriaIntersection(
-                    new ClassCriteria(level.getClassId()),
-                    new FieldCriteria(level.getParentFieldId(), new ReferenceValue(selectedParent.getRootInstanceId()))));
+        if(!level.isRoot()) {
+            Choice selectedParent = getSelection(level.getParent());
+            queryModel.selectExpr("parent").as("parent");
+            queryModel.setFilter(Exprs.equals(new SymbolExpr("parent"), Exprs.idConstant(selectedParent.getRef().getRecordId())));
         }
 
-        return new Supplier<Promise<List<Projection>>>() {
+        return new Supplier<Promise<List<Choice>>>() {
             @Override
-            public Promise<List<Projection>> get() {
-                return locator.query(query.build());
+            public Promise<List<Choice>> get() {
+
+                final Promise<List<Choice>> result = new Promise<>();
+                locator.getTable(queryModel).transform(new Function<ColumnSet, List<Choice>>() {
+                    @Nullable
+                    @Override
+                    public List<Choice> apply(ColumnSet input) {
+                        ColumnView id = input.getColumnView("id");
+                        ColumnView label = input.getColumnView("label");
+                        ColumnView parent = input.getColumnView("parent");
+
+                        List<Choice> choices = new ArrayList<>();
+                        for (int i = 0; i < input.getNumRows(); i++) {
+                            if(parent == null) {
+
+                               choices.add(new Choice(level.getFormId(),
+                                        ResourceId.valueOf(id.getString(i)),
+                                        label.getString(i)));
+                            } else {
+                                choices.add(new Choice(level.getFormId(),
+                                        ResourceId.valueOf(id.getString(i)),
+                                        label.getString(i),
+                                        new RecordRef(level.getParent().getFormId(), ResourceId.valueOf(parent.getString(i)))));
+                            }
+                        }
+                        return choices;
+                    }
+                }).subscribe(new Observer<List<Choice>>() {
+                    @Override
+                    public void onChange(Observable<List<Choice>> observable) {
+                        result.resolve(observable.get());    
+                    }
+                });
+                return result;
             }
         };
     }

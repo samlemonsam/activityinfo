@@ -11,15 +11,13 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.service.store.CollectionPermissions;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
-import org.activityinfo.store.mysql.collections.DatabaseTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.query.impl.Updater;
@@ -37,41 +35,31 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.activityinfo.store.mysql.ColumnSetMatchers.hasAllNullValuesWithLengthOf;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 
 public class MySqlCatalogTest extends AbstractMySqlTest {
 
     public static final int CATASTROPHE_NATURELLE_ID = 1;
+    
+    protected int userId = 1;
  
     @BeforeClass
     public static void initDatabase() throws Throwable {
-        resetDatabase();
+        resetDatabase("catalog-test.db.xml");
     }
-    
+
     @Test
     public void testCountry() {
         query(CountryTable.FORM_CLASS_ID, "label", "code");
         assertThat(column("label"), hasValues("Rdc"));
         assertThat(column("code"), hasValues("CD"));
     }
-
-    @Test
-    public void testDatabase() {
-        query(DatabaseTable.FORM_CLASS_ID, "label", "description", "country", "country.label", "country.code");
-        assertThat(column("label"), hasValues("PEAR", "PEAR Plus", "Alpha", "Public"));
-        assertThat(column("description"), hasAllNullValuesWithLengthOf(4));
-        assertThat(column("country"), hasValues("c0000000001", "c0000000001", "c0000000001", "c0000000001"));
-        assertThat(column("country.label"), hasValues("Rdc", "Rdc", "Rdc", "Rdc"));
-        assertThat(column("country.code"), hasValues("CD", "CD", "CD", "CD"));
-    }
-
+    
     @Test
     public void testLocation() {
 
@@ -91,10 +79,25 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("territoire.province.name"), hasValues("Sud Kivu", null, "Ituri", "Sud Kivu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
         assertThat(column("province._id"), hasValues("z0000000002", "z0000000001", "z0000000004", "z0000000002"));
-        assertThat(column("visible"), hasValues(true, true, true, true));
-
-
     }
+    
+    @Test
+    public void testBoundLocation() {
+        ResourceId formClassId = CuidAdapter.activityFormClass(41);
+        FormTree tree = this.queryFormTree(formClassId);
+        FormTree.Node locationNode = tree.getRootField(CuidAdapter.locationField(41));
+
+        FormTreePrettyPrinter.print(tree);
+
+        assertTrue(locationNode.getRange().contains(CuidAdapter.adminLevelFormClass(2)));
+        assertTrue(locationNode.getRange().contains(CuidAdapter.locationFormClass(1)));
+
+        query(formClassId, "territoire.name", "territoire.province.name");
+        
+        assertThat(column("_id"), hasValues("s0000009001", "s0000009002", "s0000009003"));
+        assertThat(column("territoire.name"), hasValues("Bukavu", "Walungu", "Shabunda"));
+        assertThat(column("territoire.province.name"), hasValues("Sud Kivu", "Sud Kivu", "Sud Kivu"));
+    }   
 
     @Test
     public void testLocationPoints() {
@@ -126,7 +129,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
 
     private FormTree queryFormTree(ResourceId classId) {
-        FormTreeBuilder builder = new FormTreeBuilder(catalogProvider);
+        FormTreeBuilder builder = new FormTreeBuilder(catalog);
         FormTree formTree = builder.queryTree(classId);
         JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
         formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
@@ -158,10 +161,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
                 "partner.label", "location.label", "location.visible", "BENE", "cause", "project", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
-        assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
+        assertThat(column("partner"), hasValues(partnerRecordId(1), partnerRecordId(1), partnerRecordId(2)));
         assertThat(column("partner.label"), hasValues("NRC", "NRC", "Solidarites"));
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
-        assertThat(column("location.visible"), hasValues(true, true, true));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
         assertThat(column("project.name"), hasValues("USAID", "USAID", "RRMP"));
@@ -194,20 +196,23 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void testSingleSiteResource() throws IOException {
+
+        int databaseId = 1;
         ResourceId formClass = CuidAdapter.activityFormClass(1);
-        ResourceUpdate update = new ResourceUpdate();
-        update.setResourceId(cuid(SITE_DOMAIN, 1));
-        update.set(field(formClass, PARTNER_FIELD), new ReferenceValue(CuidAdapter.partnerInstanceId(2)));
+        RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
+        update.setRecordId(cuid(SITE_DOMAIN, 1));
+        update.set(field(formClass, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 
-        Updater updater = new Updater(catalogProvider);
+        Updater updater = new Updater(catalog, userId);
         updater.execute(update);
 
         query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
-        assertThat(column("partner"), hasValues(partnerInstanceId(2), partnerInstanceId(1), partnerInstanceId(2)));
+        assertThat(column("partner"), hasValues(partnerRecordId(2), partnerRecordId(1), partnerRecordId(2)));
         assertThat(column("BENE"), hasValues(900, 3600, 10000));
         assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
     }
@@ -215,7 +220,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void siteFormClassWithNullaryLocations() {
 
-        FormClass formClass = catalogProvider.getCollection(activityFormClass(ADVOCACY)).get().getFormClass();
+        FormClass formClass = catalog.getForm(activityFormClass(ADVOCACY)).get().getFormClass();
        
         // Make a list of field codes
         Set<String> codes = new HashSet<>();
@@ -228,7 +233,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testReportingPeriod() {
 
-        FormTreeBuilder treeBuilder = new FormTreeBuilder(catalogProvider);
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog);
         FormTree formTree = treeBuilder.queryTree(CuidAdapter.reportingPeriodFormClass(3));
 
         FormTreePrettyPrinter.print(formTree);
@@ -281,8 +286,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void ownerPermissions() {
         
         int ownerUserId = 1;
-        CollectionPermissions permissions = 
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(ownerUserId);
+        FormPermissions permissions = 
+                catalog.getForm(activityFormClass(1)).get().getPermissions(ownerUserId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -293,8 +298,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void noPermissions() {
         int userId = 21;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
@@ -306,8 +311,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void revokedPermissions() {
         int christianUserId = 5;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(christianUserId);
+        FormPermissions permissions =
+                catalog.getForm(activityFormClass(1)).get().getPermissions(christianUserId);
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
@@ -318,8 +323,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void editPartnerPermissions() {
         int userId = 4;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -332,8 +337,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void editAllPermissions() {
         int userId = 3;
 
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -344,8 +349,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void viewAllPermissions() {
         int userId = 2;
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(activityFormClass(1)).get().getPermissions(userId);
+        FormPermissions permissions =
+                catalog.getForm(activityFormClass(1)).get().getPermissions(userId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
@@ -355,8 +360,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void publicPermission() {
         ResourceId publicFormClassId = activityFormClass(41);
-        CollectionPermissions permissions =
-                catalogProvider.getCollection(publicFormClassId).get().getPermissions(999);
+        FormPermissions permissions =
+                catalog.getForm(publicFormClassId).get().getPermissions(999);
         
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.getVisibilityFilter(), nullValue());
@@ -371,7 +376,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         ResourceId provinceId = adminLevelFormClass(1);
         ResourceId monthlyId = reportingPeriodFormClass(4000);
         
-        Map<ResourceId, FormClass> formClasses = catalogProvider.getFormClasses(
+        Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(
                 asList(activity1, activity2, provinceId, monthlyId));
 
         FormClass activityFormClass1 = formClasses.get(activity1);
@@ -392,7 +397,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void batchOpenAdminLevels() {
 
-        Map<ResourceId, FormClass> formClasses = catalogProvider.getFormClasses(asList(
+        Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(asList(
                 adminLevelFormClass(1),
                 adminLevelFormClass(2)));
 
@@ -407,7 +412,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void nonExistingSite() {
 
-        Optional<ResourceCollection> collection = catalogProvider.lookupCollection(CuidAdapter.locationFormClass(9444441));
+        Optional<FormAccessor> collection = catalog.lookupForm(CuidAdapter.locationFormClass(9444441));
     
         assertFalse(collection.isPresent());
     }
@@ -426,5 +431,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column(targetValue12451), hasValues(9999));
         assertThat(column("partner.name"), hasValues("NRC"));
     }
+
+
 
 }

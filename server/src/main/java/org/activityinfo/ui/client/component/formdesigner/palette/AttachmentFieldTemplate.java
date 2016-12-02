@@ -45,7 +45,7 @@ public class AttachmentFieldTemplate implements FieldTemplate {
     }
 
     @Override
-    public FormField createField() {
+    public FormField create() {
         AttachmentType type = (AttachmentType) AttachmentType.TYPE_CLASS.createType();
         type.setKind(kind);
 

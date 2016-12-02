@@ -31,7 +31,7 @@ import com.google.gwt.core.client.GWT;
 @Source("FormDesigner.less")
 public interface FormDesignerStyles extends Stylesheet{
 
-    public static final FormDesignerStyles INSTANCE = GWT.create(FormDesignerStyles.class);
+    FormDesignerStyles INSTANCE = GWT.create(FormDesignerStyles.class);
 
     @ClassName("widget-container")
     String widgetContainer();
@@ -42,11 +42,26 @@ public interface FormDesignerStyles extends Stylesheet{
     @ClassName("spacer")
     String spacer();
 
+    @ClassName("spacer-normal")
+    String spacerNormal();
+
+    @ClassName("spacer-forbidden")
+    String spacerForbidden();
+
     @ClassName("header-container")
     String headerContainer();
 
     @ClassName("main-panel")
     String mainPanel();
+
+    @ClassName("section-widget-container")
+    String sectionWidgetContainer();
+
+    @ClassName("section-widget-container-selected")
+    String sectionWidgetContainerSelected();
+
+    @ClassName("section-label")
+    String sectionLabel();
 
 
 }

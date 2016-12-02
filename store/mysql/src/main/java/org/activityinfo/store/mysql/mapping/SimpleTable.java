@@ -13,7 +13,7 @@ public interface SimpleTable {
 
     boolean accept(ResourceId formClassId);
 
-    TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) throws SQLException;
+    TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException;
 
     /**
      * Map a resourceId to it's collection

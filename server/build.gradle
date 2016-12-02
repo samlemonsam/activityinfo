@@ -1,5 +1,6 @@
 
 evaluationDependsOn ":ui:app"
+evaluationDependsOn ":apiClient:gwt"
 
 apply plugin: 'gwt'
 apply plugin: 'war'
@@ -65,8 +66,12 @@ war {
         return !file.name.startsWith('guava-gwt') &&
                 !file.name.startsWith('gwt-user')
     }
-    from project(':ui:app').tasks.getByName('compileGwt').outputs
-    exclude("**/*.symbolMap")
+    from(project(':apiDocs').outputDir) {
+        into 'apidocs'   
+    }
+    from(project(':ui:app').tasks.getByName('compileGwt')) {
+        exclude("**/*.symbolMap")
+    }
 }
 
 
@@ -125,6 +130,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
 tasks.compileGwt.dependsOn ":i18n:jar"
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 tasks.warTemplate.enabled = false
+tasks.war.dependsOn ':apiDocs:build'
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
@@ -157,17 +163,22 @@ task downloadBuild {
 task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
     description = "Deploys a build to the staging environment"
     
-//    if(project.buildNumber != 'dev') {
-//        dependsOn downloadBuild
-//        explodedAppDirectory = project.file(downloadBuild.warDir)
-//    } else {
+    def appVersion;
+
+    if(project.buildNumber != 'dev') {
+        dependsOn downloadBuild
+        explodedAppDirectory = project.file(downloadBuild.warDir)
+        appVersion = "b${project.buildNumber}"
+        
+    } else {
         dependsOn 'appengineExplodeApp'
-//    }
+        appVersion = 'qa'
+    }
     
     dependsOn appengineDownloadSdk
 
 
-    extraOptions = ["--application=${environment.projectId}", '--version=pivot']
+    extraOptions = ["--application=${environment.projectId}", "--version=${appVersion}"]
     oauth2 = true
     
     doFirst {
@@ -176,18 +187,6 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
         }
     }
 }
-
-task deployBetaApi(type: com.google.appengine.task.appcfg.UpdateTask) {
-
-    dependsOn appengineDownloadSdk
-    dependsOn appengineExplodeApp
-
-    extraOptions = ["--application=activityinfoeu", '--version=beta-api']
-    oauth2 = true
-
-}
-
-
 
 appengineUpdateQueues {
     extraOptions = ["--application=${environment.projectId}" ]
@@ -204,13 +203,6 @@ task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"
     dependsOn appengineDownloadSdk
 
-    extraOptions = ["--application=${environment.projectId}", '--version=1']
-    oauth2 = true
-}
-
-task rollbackBetaApi(type: com.google.appengine.task.appcfg.RollbackTask) {
-    dependsOn appengineDownloadSdk
-
-    extraOptions = ["--application=activityinfoeu", '--version=beta-api']
+    extraOptions = ["--application=${environment.projectId}", '--version=qa']
     oauth2 = true
 }

@@ -20,6 +20,8 @@
   <inherits name="org.activityinfo.model.Model"/>
   <inherits name="com.google.common.cache.Cache"/>
 
+  <inherits name="org.activityinfo.api.ApiClient"/>
+  
   <source path='client'/>
   <source path='shared'/>
 

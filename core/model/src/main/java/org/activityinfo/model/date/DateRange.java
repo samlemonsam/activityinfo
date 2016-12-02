@@ -34,6 +34,7 @@ import java.util.Date;
  * @author yuriyz on 02/05/2015.
  */
 public class DateRange implements Serializable {
+
     private Date start;
     private Date end;
 
@@ -43,6 +44,11 @@ public class DateRange implements Serializable {
     public DateRange(Date start, Date end) {
         this.start = start;
         this.end = end;
+    }
+
+    public DateRange(org.activityinfo.model.type.time.LocalDate start, org.activityinfo.model.type.time.LocalDate end) {
+        this.start = start.atMidnightInMyTimezone();
+        this.end = end.atMidnightInMyTimezone();
     }
 
     public Date getStart() {
@@ -84,9 +90,11 @@ public class DateRange implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         DateRange dateRange = (DateRange) o;
         if (end != null ? !end.equals(dateRange.end) : dateRange.end != null) return false;
         if (start != null ? !start.equals(dateRange.start) : dateRange.start != null) return false;
+
         return true;
     }
 

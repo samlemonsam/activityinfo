@@ -5,10 +5,13 @@ import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.expr.functions.EqualFunction;
 import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.expr.functions.OrFunction;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Functions for programatically building expressions
@@ -56,5 +59,17 @@ public class Exprs {
 
     public static ExprNode idConstant(ResourceId id) {
         return new ConstantExpr(id.asString());
+    }
+    
+    public static ExprNode idEqualTo(ResourceId id) {
+        return equals(symbol(ColumnModel.ID_SYMBOL), idConstant(id));
+    }
+    
+    public static ExprNode idEqualTo(Set<ResourceId> ids) {
+        List<ExprNode> conditions = new ArrayList<>();
+        for (ResourceId id : ids) {
+            conditions.add(idEqualTo(id));
+        }
+        return anyTrue(conditions);
     }
 }

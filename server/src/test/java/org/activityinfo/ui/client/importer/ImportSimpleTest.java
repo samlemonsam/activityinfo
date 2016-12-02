@@ -5,26 +5,26 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreePrettyPrinter;
+import org.activityinfo.core.shared.importing.match.ColumnMappingGuesser;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.promise.Promise;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
-import org.activityinfo.core.shared.importing.match.ColumnMappingGuesser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +45,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
     private static final ResourceId TRAINING_PROGRAM_CLASS = CuidAdapter.activityFormClass(2);
 
 
-    private static final ResourceId BRAC_PARTNER_RESOURCE_ID = CuidAdapter.partnerInstanceId(1);
+    private static final ResourceId BRAC_PARTNER_RESOURCE_ID = CuidAdapter.partnerRecordId(1);
 
     public static final int MODHUPUR = 24;
 
@@ -67,7 +67,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         assertThat(source.getRows().size(), equalTo(63));
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
         dumpList("COLUMNS", source.getColumns());
 
@@ -77,7 +77,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         importModel.setColumnAction(columnIndex("MEMBER_NO_ADULT_FEMALE"), target("NumAdultFemale"));
         importModel.setColumnAction(columnIndex("_CREATION_DATE"), target("Start Date"));
         importModel.setColumnAction(columnIndex("_SUBMISSION_DATE"), target("End Date"));
-        importModel.setColumnAction(columnIndex("district"), target("District Name"));
+        importModel.setColumnAction(columnIndex("district name"), target("District Name"));
         importModel.setColumnAction(columnIndex("upazila"), target("Upzilla Name"));
         importModel.setColumnAction(columnIndex("Partner"), target("Partner Name"));
 
@@ -112,12 +112,12 @@ public class ImportSimpleTest extends AbstractImporterTest {
                 Resources.toString(getResource("org/activityinfo/core/shared/importing/qis.csv"), Charsets.UTF_8));
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
         importModel.setColumnAction(columnIndex("MEMBER_NO_ADULT_FEMALE"), target("NumAdultMale"));
         importModel.setColumnAction(columnIndex("MEMBER_NO_ADULT_FEMALE"), target("NumAdultFemale"));
         importModel.setColumnAction(columnIndex("_CREATION_DATE"), target("Start Date"));
         importModel.setColumnAction(columnIndex("_SUBMISSION_DATE"), target("End Date"));
-        importModel.setColumnAction(columnIndex("district"), target("District Name"));
+        importModel.setColumnAction(columnIndex("district name"), target("District Name"));
         importModel.setColumnAction(columnIndex("upazila"), target("Upzilla Name"));
        // importModel.setColumnAction(columnIndex("Partner"), target("Partner Name"));
 
@@ -137,7 +137,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
                 Resources.toString(getResource("org/activityinfo/core/shared/importing/qis.csv"), Charsets.UTF_8));
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
         dumpList("COLUMNS", source.getColumns());
         dumpList("FIELDS", importer.getImportTargets());
@@ -147,8 +147,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         guesser.guess();
 
         assertMapping("Partner", "Partner Name");
-        assertMapping("district", "District Name");
-        //assertMapping("upazila", "Upzilla Name");
+        assertMapping("district name", "District Name");
     }
 
     private void assertMapping(String sourceColumnLabel, String targetColumnLabel) {

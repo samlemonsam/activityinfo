@@ -25,7 +25,8 @@ package org.activityinfo.model.resource;
  * @author yuriyz on 7/21/14.
  */
 public enum ResourceIdPrefixType {
-    TYPE("_type");
+    TYPE("_type"),
+    SUBFORM("_subform");
 
     public static final String SEPARATOR = ":";
 

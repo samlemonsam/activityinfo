@@ -32,9 +32,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerConstants;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.widget.ConfirmDialog;
 import org.activityinfo.ui.client.widget.ModalDialog;
@@ -44,8 +47,6 @@ import org.activityinfo.ui.client.widget.Templates;
  * @author yuriyz on 7/14/14.
  */
 public class FieldWidgetContainer implements WidgetContainer {
-
-    public static final String DATA_FIELD_ID = "data-field-id";
 
     public interface LabelTemplate extends SafeHtmlTemplates {
         @Template("<span style='color: red;'> *</span>")
@@ -57,18 +58,20 @@ public class FieldWidgetContainer implements WidgetContainer {
     private FormDesigner formDesigner;
     private FormFieldWidget formFieldWidget;
     private FormField formField;
-    private final WidgetContainerPanel widgetContainer;
+    private final FieldPanel fieldPanel;
+    private final ResourceId parentId;
 
-    public FieldWidgetContainer(final FormDesigner formDesigner, FormFieldWidget formFieldWidget, final FormField formField) {
+    public FieldWidgetContainer(final FormDesigner formDesigner, FormFieldWidget formFieldWidget, final FormField formField, final ResourceId parentId) {
         this.formDesigner = formDesigner;
         this.formFieldWidget = formFieldWidget;
         this.formField = formField;
-        widgetContainer = new WidgetContainerPanel(formDesigner);
-        widgetContainer.getWidgetContainer().add(formFieldWidget);
-        widgetContainer.getRemoveButton().addClickHandler(new ClickHandler() {
-            @Override
+        this.parentId = parentId;
+
+        fieldPanel = new FieldPanel(formDesigner);
+        fieldPanel.getWidgetContainer().add(formFieldWidget);
+        fieldPanel.getRemoveButton().addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                if (FormDesigner.isBuiltin(formDesigner.getFormClass().getId(), formField.getId())) {
+                if (FormDesigner.isBuiltinExceptDateFields(parentId, formField.getId())) {
                     HTML dialogContent = new HTML(Templates.WARNING_MESSAGE_TEMPLATE.html(I18N.CONSTANTS.notAllowedToRemoveBuiltinField()));
                     new ModalDialog(dialogContent, I18N.CONSTANTS.warning()).
                             hideCancelButton().
@@ -76,25 +79,39 @@ public class FieldWidgetContainer implements WidgetContainer {
                             show();
                     return;
                 }
-                ConfirmDialog.confirm(new DeleteFormFieldAction(widgetContainer.getFocusPanel(), formDesigner) {
+                ConfirmDialog.confirm(new DeleteWidgetContainerAction(fieldPanel.getFocusPanel(), formDesigner) {
                     @Override
                     public void onComplete() {
                         super.onComplete();
-                        formDesigner.getFormClass().remove(formField);
+                        FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
+                        formClass.remove(formField);
+                        formDesigner.getPropertiesPresenter().reset(false);
                     }
                 });
             }
         });
-        widgetContainer.getFocusPanel().addClickHandler(new ClickHandler() {
+
+        fieldPanel.setClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 formDesigner.getEventBus().fireEvent(new WidgetContainerSelectionEvent(FieldWidgetContainer.this));
             }
         });
-        // Workaround(alex): store field id with widget so we can update model order after
-        // drag and drop
-        widgetContainer.asWidget().getElement().setAttribute(DATA_FIELD_ID, formField.getId().asString());
+        this.formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
+            @Override
+            public void handle(WidgetContainerSelectionEvent event) {
+                WidgetContainer selectedItem = event.getSelectedItem();
+                fieldPanel.setSelected(selectedItem.asWidget().equals(fieldPanel.asWidget()));
+            }
+        });
+
+        fieldPanel.asWidget().getElement().setAttribute(FormDesignerConstants.DATA_FIELD_ID, formField.getId().asString());
         syncWithModel();
+    }
+
+    @Override
+    public ResourceId getParentId() {
+        return parentId;
     }
 
     public void syncWithModel() {
@@ -113,20 +130,24 @@ public class FieldWidgetContainer implements WidgetContainer {
         if (!formField.isVisible()) {
             labelHtml = "<del>" + labelHtml + "</del>";
         }
-        widgetContainer.getLabel().setHTML(labelHtml);
+        fieldPanel.getLabel().setHTML(labelHtml);
         formFieldWidget.setType(formField.getType());
     }
 
     @Override
+    public void syncWithModel(boolean force) {
+        syncWithModel();
+    }
+
+    @Override
     public Widget asWidget() {
-        return widgetContainer.asWidget();
+        return fieldPanel.asWidget();
     }
 
     @Override
     public Widget getDragHandle() {
-        return widgetContainer.getDragHandle();
+        return fieldPanel.getDragHandle();
     }
-
 
     public FormFieldWidget getFormFieldWidget() {
         return formFieldWidget;

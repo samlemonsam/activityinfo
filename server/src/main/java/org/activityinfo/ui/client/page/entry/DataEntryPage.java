@@ -39,11 +39,13 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.monitor.MaskingAsyncMonitor;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.*;
@@ -68,11 +70,12 @@ import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
-import org.activityinfo.ui.client.page.instance.InstancePage;
-import org.activityinfo.ui.client.page.instance.InstancePlace;
 import org.activityinfo.ui.client.page.report.ExportDialog;
+import org.activityinfo.ui.client.page.resource.ResourcePage;
+import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -84,6 +87,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private final Dispatcher dispatcher;
     private final EventBus eventBus;
+    private final StateProvider stateProvider;
 
     private GroupingComboBox groupingComboBox;
 
@@ -105,12 +109,17 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private ActionToolBar toolBar;
     private ContentPanel betaLinkPanel;
+    private ResourceLocator resourceLocator;
 
 
     @Inject
-    public DataEntryPage(final EventBus eventBus, Dispatcher dispatcher) {
+    public DataEntryPage(final EventBus eventBus, 
+                         Dispatcher dispatcher, ResourceLocator resourceLocator, 
+                         StateProvider stateProvider) {
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
+        this.stateProvider = stateProvider;
+        this.resourceLocator = resourceLocator;
 
         setLayout(new BorderLayout());
 
@@ -153,6 +162,13 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                 onSiteSelected(se);
             }
         });
+        
+        gridPanel.addRowDoubleClickListener(new SelectionChangedListener<SiteDTO>() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent<SiteDTO> se) {
+                editSite(se.getSelectedItem());
+            }
+        });
 
         detailTab = new DetailTab(dispatcher);
 
@@ -163,7 +179,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         attachmentsTab = new AttachmentsTab(dispatcher, eventBus);
 
-        siteHistoryTab = new SiteHistoryTab(dispatcher);
+        siteHistoryTab = new SiteHistoryTab(resourceLocator);
 
         tabPanel = new CollapsibleTabPanel();
         tabPanel.add(detailTab);
@@ -208,7 +224,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.add(groupingComboBox);
 
         toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.newSite(), IconImageBundle.ICONS.add());
-        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.edit(), IconImageBundle.ICONS.edit());
+        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.update(), IconImageBundle.ICONS.edit());
         toolBar.addDeleteButton(I18N.CONSTANTS.deleteSite());
 
         toolBar.add(new SeparatorToolItem());
@@ -410,7 +426,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             public void onSuccess(ActivityFormDTO form) {
                 // make sure we haven't navigated away by the time the request comes back
                 Optional<Integer> currentActivityId = getCurrentActivityId();
-                if(!currentActivityId.isPresent() || currentActivityId.get() != activityId) {
+                if(!currentActivityId.isPresent() || !Objects.equals(currentActivityId.get(), activityId)) {
                     return;
                 }
                 if(form.getReportingFrequency() != ActivityFormDTO.REPORT_ONCE) {
@@ -446,7 +462,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         if (UIActions.ADD.equals(actionId)) {
 
-            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus);
+            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
             formHelper.addSite(filter, new SiteDialogCallback() {
 
                 @Override
@@ -457,16 +473,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             });
 
         } else if (UIActions.EDIT.equals(actionId)) {
-            final SiteDTO selection = gridPanel.getSelection();
-            SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus);
-            launcher.editSite(selection, new SiteDialogCallback() {
-
-                @Override
-                public void onSaved() {
-                    gridPanel.refresh();
-                    filterPane.getSet().applyBaseFilter(filter);
-                }
-            });
+            editSite(gridPanel.getSelection());
+            
         }else if (UIActions.OPEN_TABLE.equals(actionId)) {
             navigateToNewInterface();
             
@@ -491,7 +499,19 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         }
     }
-    
+
+    private void editSite(SiteDTO site) {
+        SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
+        launcher.editSite(site, new SiteDialogCallback() {
+
+            @Override
+            public void onSaved() {
+                gridPanel.refresh();
+                filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
+            }
+        });
+    }
+
     private Optional<Integer> getCurrentActivityId() {
         Filter filter = currentPlace.getFilter();
         Set<Integer> activities = filter.getRestrictions(DimensionType.Activity);
@@ -508,7 +528,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             ResourceId formClassId = CuidAdapter.activityFormClass(activityId.get());
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(formClassId, InstancePage.TABLE_PAGE_ID)));
+                    new ResourcePlace(formClassId, ResourcePage.TABLE_PAGE_ID)));
         }
     }
 
@@ -549,7 +569,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     protected void doImport() {
         final int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
-        final ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(dispatcher);
+        final ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor();
         ImportPresenter.showPresenter(CuidAdapter.activityFormClass(activityId), resourceLocator)
                        .then(new SuccessCallback<ImportPresenter>() {
                            @Override

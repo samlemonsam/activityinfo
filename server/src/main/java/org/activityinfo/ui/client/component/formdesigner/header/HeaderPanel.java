@@ -34,17 +34,17 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class HeaderPanel extends Composite {
 
-    private static OurUiBinder uiBinder = GWT
-            .create(OurUiBinder.class);
+    private static final OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
+
+    interface OurUiBinder extends UiBinder<Widget, HeaderPanel> {
+    }
+
     @UiField
     HTML label;
     @UiField
     FocusPanel focusPanel;
     @UiField
     HTML description;
-
-    interface OurUiBinder extends UiBinder<Widget, HeaderPanel> {
-    }
 
     public HeaderPanel() {
         initWidget(uiBinder.createAndBindUi(this));

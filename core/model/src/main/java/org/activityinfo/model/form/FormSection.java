@@ -2,9 +2,9 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.Record;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -34,8 +34,9 @@ public class FormSection extends FormElement implements FormElementContainer {
         return label;
     }
 
-    public void setLabel(String label) {
+    public FormSection setLabel(String label) {
         this.label = label;
+        return this;
     }
 
     @Override
@@ -49,16 +50,30 @@ public class FormSection extends FormElement implements FormElementContainer {
         return this;
     }
 
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("id", id.asString());
-        record.set("label", label);
-        record.set("type", "section");
-        record.set("elements", Resources.asRecordList(getElements()));
-        return record;
+    public FormSection insertElement(int index, FormElement element) {
+        elements.add(index, element);
+        return this;
     }
 
+    @Override
+    public JsonElement toJsonObject() {
+        JsonObject object = new JsonObject();
+        object.addProperty("id", id.asString());
+        object.addProperty("label", label);
+        object.addProperty("type", "section");
+        object.add("elements", FormClass.toJsonArray(elements));
+        return object;
+    }
+
+    public static FormSection fromJson(JsonObject jsonObject) {
+        FormSection section = new FormSection(ResourceId.valueOf(jsonObject.get("id").getAsString()));
+        section.setLabel(jsonObject.get("label").getAsString());
+        if(jsonObject.has("elements")) {
+            section.getElements().addAll(FormClass.fromJsonArray(jsonObject.get("elements").getAsJsonArray()));
+        }
+        return section;
+    }
+    
     @Override
     public String toString() {
         return "FormSection{" +
@@ -66,4 +81,5 @@ public class FormSection extends FormElement implements FormElementContainer {
                 ", label=" + label +
                 '}';
     }
+
 }

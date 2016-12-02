@@ -34,18 +34,20 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.container.SectionWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.drop.NullValueUpdater;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPanel;
 import org.activityinfo.ui.client.component.formdesigner.palette.FieldPalette;
+import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPropertiesPanel;
 import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPanel;
 import org.activityinfo.ui.client.page.HasNavigationCallback;
 import org.activityinfo.ui.client.page.NavigationCallback;
@@ -58,7 +60,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Main Form designer panel. Must be created via FormDesigner class
+ *
  * @author yuriyz on 07/04/2014.
+ * @see org.activityinfo.ui.client.component.formdesigner.FormDesigner
  */
 public class FormDesignerPanel extends Composite implements ScrollHandler, HasNavigationCallback, FormSavedGuard.HasSavedGuard {
 
@@ -91,8 +96,18 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     HTML spacer;
     @UiField
     HTML paletteSpacer;
+    @UiField
+    ContainerPropertiesPanel containerPropertiesPanel;
+    @UiField
+    HTMLPanel palettePanel;
 
-    public FormDesignerPanel(final ResourceLocator resourceLocator, @Nonnull final FormClass formClass) {
+    /**
+     * Main FormDesigner panel. It must be created via FormDesigner only.
+     *
+     * @param formClass    form class
+     * @param formDesigner form designer
+     */
+    protected FormDesignerPanel(@Nonnull final FormClass formClass, final FormDesigner formDesigner) {
         FormDesignerStyles.INSTANCE.ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         propertiesPanel.setVisible(false);
@@ -107,14 +122,13 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                final FormDesigner formDesigner = new FormDesigner(FormDesignerPanel.this, resourceLocator, formClass);
                 savedGuard = formDesigner.getSavedGuard();
                 List<Promise<Void>> promises = Lists.newArrayList();
-                buildWidgetContainers(formDesigner, formClass, 0, promises);
+                buildWidgetContainers(formDesigner, formClass, formClass, 0, promises);
                 Promise.waitAll(promises).then(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        // ugly but we still have exception like: unsupportedoperationexception: domain is not supported.
+                        // ugly but we still have exceptions like: unsupportedoperationexception: domain is not supported.
                         fillPanel(formClass, formDesigner);
                     }
 
@@ -138,6 +152,16 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         });
     }
 
+    public void setContainerPropertiesPanelVisible() {
+        containerPropertiesPanel.setVisible(true);
+        propertiesPanel.setVisible(false);
+    }
+
+    public void setPropertiesPanelVisible() {
+        propertiesPanel.setVisible(true);
+        containerPropertiesPanel.setVisible(false);
+    }
+
     private void fillPanel(final FormClass formClass, final FormDesigner formDesigner) {
 
         formClass.traverse(formClass, new TraverseFunction() {
@@ -149,11 +173,28 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                     if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
                         Widget widget = widgetContainer.asWidget();
                         formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
-                        dropPanel.add(widget);
+
+                        FlowPanel parentDropPanel = (FlowPanel) formDesigner.getDropControllerRegistry().getDropController(widgetContainer.getParentId()).getDropTarget();
+                        parentDropPanel.add(widget);
+                    }
+                    if (formField.getType() instanceof SubFormReferenceType) {
+                        ResourceId subFormId = ((SubFormReferenceType) formField.getType()).getClassId();
+                        FormClass subForm = (FormClass) formDesigner.getModel().getElementContainer(subFormId);
+                        if(subForm == null) {
+                            throw new IllegalStateException("Subform " + subFormId + " does not exist.");
+                        }
+                        fillPanel(subForm, formDesigner);
                     }
                 } else if (element instanceof FormSection) {
                     FormSection section = (FormSection) element;
                     WidgetContainer widgetContainer = containerMap.get(section.getId());
+                    Widget widget = widgetContainer.asWidget();
+                    formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
+                    dropPanel.add(widget);
+
+                } else if (element instanceof FormLabel) {
+                    FormLabel label = (FormLabel) element;
+                    WidgetContainer widgetContainer = containerMap.get(label.getId());
                     Widget widget = widgetContainer.asWidget();
                     formDesigner.getDragController().makeDraggable(widget, widgetContainer.getDragHandle());
                     dropPanel.add(widget);
@@ -165,23 +206,47 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         });
     }
 
-    private void buildWidgetContainers(final FormDesigner formDesigner, FormElementContainer container, int depth, List<Promise<Void>> promises) {
+    private void buildWidgetContainers(final FormDesigner formDesigner, final FormElementContainer container, final FormClass owner, final int depth, final List<Promise<Void>> promises) {
         for (FormElement element : container.getElements()) {
             if (element instanceof FormSection) {
                 FormSection formSection = (FormSection) element;
-                containerMap.put(formSection.getId(), new SectionWidgetContainer(formDesigner, formSection));
-                buildWidgetContainers(formDesigner, formSection, depth + 1, promises);
+                containerMap.put(formSection.getId(), FieldsHolderWidgetContainer.section(formDesigner, formSection, container.getId()));
+                buildWidgetContainers(formDesigner, formSection, owner, depth + 1, promises);
+            } else if (element instanceof FormLabel) {
+                FormLabel label = (FormLabel) element;
+                containerMap.put(label.getId(), new LabelWidgetContainer(formDesigner, label, container.getId()));
             } else if (element instanceof FormField) {
                 final FormField formField = (FormField) element;
-                Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(formDesigner.getFormClass(), formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
-                    @Nullable
-                    @Override
-                    public Void apply(@Nullable FormFieldWidget input) {
-                        containerMap.put(formField.getId(), new FieldWidgetContainer(formDesigner, input, formField));
-                        return null;
+                if (formField.getType() instanceof SubFormReferenceType) { // subform
+                    SubFormReferenceType subform = (SubFormReferenceType) formField.getType();
+
+                    Promise<Void> promise = formDesigner.getResourceLocator().getFormClass(subform.getClassId()).then(new Function<FormClass, Void>() {
+                        @Override
+                        public Void apply(FormClass subform) {
+                            formDesigner.getModel().registerSubform(formField.getId(), subform);
+                            containerMap.put(formField.getId(), FieldsHolderWidgetContainer.subform(formDesigner, subform, container.getId()));
+                            buildWidgetContainers(formDesigner, subform, subform, depth + 1, promises);
+                            return null;
+                        }
+                    });
+                    promises.add(promise);
+
+                } else { // regular formfield
+
+                    if (formField.getId().asString().startsWith("_")) { // skip if form field is built-in
+                        continue;
                     }
-                });
-                promises.add(promise);
+
+                    Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(owner, formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+                        @Nullable
+                        @Override
+                        public Void apply(@Nullable FormFieldWidget input) {
+                            containerMap.put(formField.getId(), new FieldWidgetContainer(formDesigner, input, formField, container.getId()));
+                            return null;
+                        }
+                    });
+                    promises.add(promise);
+                }
             }
         }
     }
@@ -194,29 +259,32 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     int previousVerticalScrollPosition = 0;
     private void calcSpacerHeight() {
         int verticalScrollPosition = scrollAncestor.getVerticalScrollPosition();
-        if (verticalScrollPosition > Metrics.MAX_VERTICAL_SCROLL_POSITION) {
-            int height = verticalScrollPosition - Metrics.MAX_VERTICAL_SCROLL_POSITION;
+        int panelHeight = dropPanel.getOffsetHeight();
 
-            int panelHeight = dropPanel.getOffsetHeight();
+        // properties spacer
+        if (verticalScrollPosition > FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION) {
+            int height = verticalScrollPosition - FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION;
+
             int propertiesColumnHeight = propertiesPanel.getOffsetHeight() + spacer.getOffsetHeight();
             if (propertiesColumnHeight > panelHeight && verticalScrollPosition > previousVerticalScrollPosition) {
-                // AI-924 : avoid never ending scrolls
-                return;
+                return; // AI-924 : avoid never ending scrolls
             }
 
-//            int selectedWidgetTop = 0;
-//            if (selectedWidgetContainer != null) {
-//                selectedWidgetTop = selectedWidgetContainer.asWidget().getAbsoluteTop();
-//            }
-//            if (selectedWidgetTop < 0) {
-//                height = height + selectedWidgetTop;
-//            }
-
-            //GWT.log("verticalPos = " + verticalScrollPosition + ", height = " + height + ", selectedWidgetTop = " + selectedWidgetTop);
             spacer.setHeight(height + "px");
-            paletteSpacer.setHeight(height + "px");
         } else {
             spacer.setHeight("0px");
+        }
+
+        // palette spacer
+        if (verticalScrollPosition > FormDesignerConstants.MAX_VERTICAL_PALETTE_SCROLL_POSITION) {
+            int height = verticalScrollPosition - FormDesignerConstants.MAX_VERTICAL_PALETTE_SCROLL_POSITION;
+
+            int paletteHeight = palettePanel.getOffsetHeight() + paletteSpacer.getOffsetHeight();
+            if (paletteHeight > panelHeight && verticalScrollPosition > previousVerticalScrollPosition) {
+                return; // avoid never ending scrolls
+            }
+            paletteSpacer.setHeight(height + "px");
+        } else {
             paletteSpacer.setHeight("0px");
         }
         previousVerticalScrollPosition = verticalScrollPosition;
@@ -238,8 +306,16 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         return headerPanel;
     }
 
+    public ContainerPropertiesPanel getContainerPropertiesPanel() {
+        return containerPropertiesPanel;
+    }
+
     public FieldPalette getFieldPalette() {
         return fieldPalette;
+    }
+
+    public WidgetContainer getSelectedWidgetContainer() {
+        return selectedWidgetContainer;
     }
 
     public Button getSaveButton() {
@@ -264,4 +340,5 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
             savedGuard.navigate(callback);
         }
     }
+
 }

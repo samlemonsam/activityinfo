@@ -44,7 +44,7 @@ import java.util.Set;
  */
 @Entity
 @NamedQuery(name = "queryMaxSortOrder", query = "select max(e.sortOrder) from Activity e where e.database.id = ?1")
-public class Activity implements Serializable, Deleteable, Orderable {
+public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     private static final int DEFAULT_BATCH_SIZE = 100;
 
@@ -78,8 +78,8 @@ public class Activity implements Serializable, Deleteable, Orderable {
     
     private boolean classicView = true;
 
-    private String formClass;
-    private byte[] gzFormClass;
+    private String formClassJson;
+    private byte[] gzFormClassJson;
 
     public Activity() {
         this.version = 1;
@@ -231,22 +231,24 @@ public class Activity implements Serializable, Deleteable, Orderable {
      * @return the FormClass resource encoded as JSON
      */
     @Lob
+    @Column(name = "formClass")
     @Offline(sync = false)
-    public String getFormClass() {
-        return formClass;
+    public String getJson() {
+        return formClassJson;
     }
 
-    public void setFormClass(String formClass) {
-        this.formClass = formClass;
+    public void setJson(String formClassJson) {
+        this.formClassJson = formClassJson;
     }
 
+    @Column(name = "gzFormClass")
     @Offline(sync = false)
-    public byte[] getGzFormClass() {
-        return gzFormClass;
+    public byte[] getGzJson() {
+        return gzFormClassJson;
     }
 
-    public void setGzFormClass(byte[] gzFormClass) {
-        this.gzFormClass = gzFormClass;
+    public void setGzJson(byte[] gzFormClassJson) {
+        this.gzFormClassJson = gzFormClassJson;
     }
 
     @Column 

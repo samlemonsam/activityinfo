@@ -24,8 +24,8 @@ package org.activityinfo.ui.client.component.formdesigner.drop;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerConstants;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
-import org.activityinfo.ui.client.component.formdesigner.Metrics;
 
 /**
  * @author yuriyz on 7/8/14.
@@ -33,14 +33,36 @@ import org.activityinfo.ui.client.component.formdesigner.Metrics;
 public class Positioner implements IsWidget {
 
     private final HTML widget = new HTML();
+    private boolean forbidded = false;
 
     public Positioner() {
         widget.addStyleName(FormDesignerStyles.INSTANCE.spacer());
-        widget.setHeight(Metrics.SOURCE_CONTROL_HEIGHT_PX + "px");
+        widget.setHeight(FormDesignerConstants.SOURCE_CONTROL_HEIGHT_PX + "px");
+    }
+
+    private void setStyle() {
+
+        widget.removeStyleName(FormDesignerStyles.INSTANCE.spacerNormal());
+        widget.removeStyleName(FormDesignerStyles.INSTANCE.spacerForbidden());
+
+        if (forbidded) {
+            widget.addStyleName(FormDesignerStyles.INSTANCE.spacerForbidden());
+        } else {
+            widget.addStyleName(FormDesignerStyles.INSTANCE.spacerNormal());
+        }
     }
 
     @Override
     public Widget asWidget() {
         return widget;
+    }
+
+    public boolean isForbidded() {
+        return forbidded;
+    }
+
+    public void setForbidded(boolean forbidded) {
+        this.forbidded = forbidded;
+        setStyle();
     }
 }

@@ -106,6 +106,10 @@ public class BsModal extends ModalDialog {
         return new BsFormPanel(windowElement.find().div(withClass("modal-body")).first());
     }
 
+    public SubformContainer subform(String subformName) {
+        return new SubformContainer(form(), subformName);
+    }
+
     public BsModal fill(List<FieldValue> fieldValues) {
         BsFormPanel form = form();
         for (FieldValue value : fieldValues) {
@@ -166,7 +170,7 @@ public class BsModal extends ModalDialog {
         }
     }
 
-    private static boolean isBuiltinLabel(String label) {
+    public static boolean isBuiltinLabel(String label) {
         return label.equalsIgnoreCase("partner") || label.equalsIgnoreCase("comments") ||
                 label.equalsIgnoreCase("start date") || label.equalsIgnoreCase("end date") ||
                 label.equalsIgnoreCase("project");

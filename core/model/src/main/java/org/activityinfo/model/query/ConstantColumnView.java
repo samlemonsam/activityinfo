@@ -1,6 +1,5 @@
 package org.activityinfo.model.query;
 
-import com.google.common.base.Strings;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NullFieldValue;
 import org.activityinfo.model.type.geo.Extents;
@@ -16,7 +15,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
     private ColumnType type;
     private double doubleValue;
     private String stringValue;
-    private boolean booleanValue;
+    private int booleanValue;
     private int numRows;
 
     protected ConstantColumnView() {
@@ -26,7 +25,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
         this.type = ColumnType.NUMBER;
         this.doubleValue = doubleValue;
         this.stringValue = null;
-        this.booleanValue = (doubleValue != 0);
+        this.booleanValue = (doubleValue != 0) ? TRUE : FALSE;
         this.numRows = numRows;
     }
 
@@ -34,7 +33,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
         this.type = ColumnType.STRING;
         this.doubleValue = Double.NaN;
         this.stringValue = value;
-        this.booleanValue = Strings.isNullOrEmpty(value);
+        this.booleanValue = NA;
         this.numRows = numRows;
     }
 
@@ -42,8 +41,18 @@ public class ConstantColumnView implements ColumnView, Serializable {
         this.type = ColumnType.BOOLEAN;
         this.doubleValue = (value ? 1 : 0);
         this.stringValue = null;
-        this.booleanValue = value;
+        this.booleanValue = value ? TRUE : FALSE;
         this.numRows = numRows;
+    }
+    
+    public static ConstantColumnView nullBoolean(int numRows) {
+        ConstantColumnView view = new ConstantColumnView();
+        view.type = ColumnType.BOOLEAN;
+        view.doubleValue = Double.NaN;
+        view.stringValue = null;
+        view.booleanValue = ColumnView.NA;
+        view.numRows = numRows;
+        return view;
     }
 
     public static ConstantColumnView create(int numRows, FieldValue value) {
@@ -99,7 +108,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
 
     @Override
     public int getBoolean(int row) {
-        return booleanValue ? 1 : 0;
+        return booleanValue;
     }
 
     @Override

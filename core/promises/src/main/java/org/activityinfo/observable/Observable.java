@@ -143,4 +143,5 @@ public abstract class Observable<T> {
     public static <T> Observable<List<T>> flatten(List<Observable<T>> list) {
         return flatten(SynchronousScheduler.INSTANCE, list);
     }
+    
 }

@@ -1,6 +1,7 @@
 package org.activityinfo.model.type;
 
-import org.activityinfo.model.resource.Record;
+import com.google.gson.JsonObject;
+import org.activityinfo.model.form.FormInstance;
 
 /**
  * A {@code FieldType} with parameters that further specialize
@@ -12,8 +13,10 @@ public interface ParametrizedFieldType extends FieldType {
      *
      * @return a {@code Record} containing this type's parameters.
      */
-    Record getParameters();
+    FormInstance getParameters();
 
+    JsonObject getParametersAsJson();
+    
     /**
      *
      * @return true if this is a valid type, false if its parameters make it invalid

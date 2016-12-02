@@ -22,14 +22,11 @@ package org.activityinfo.model.date;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
-import com.google.common.collect.Lists;
-import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Calendar;
+import org.junit.Test;
 import java.util.Date;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author yuriyz on 07/06/2015.
@@ -37,34 +34,60 @@ import static junit.framework.Assert.assertEquals;
 public class CalendarUtilsTest {
 
     @Test
-    public void lastFourQuarters() {
-
-        LocalDate date = new LocalDate(2015, 6, 7);
-        ArrayList<LocalDateRange> ranges = Lists.newArrayList(CalendarUtils.getLastFourQuarterMap(date, jvmDateShifter()).values());
-
-        assertEquals(ranges.get(0), new LocalDateRange(new LocalDate(2015, 4, 1), new LocalDate(2015, 6, 30)));
-        assertEquals(ranges.get(1), new LocalDateRange(new LocalDate(2015, 1, 1), new LocalDate(2015, 3, 31)));
-        assertEquals(ranges.get(2), new LocalDateRange(new LocalDate(2014, 10, 1), new LocalDate(2014, 12, 31)));
-        assertEquals(ranges.get(3), new LocalDateRange(new LocalDate(2014, 7, 1), new LocalDate(2014, 9, 30)));
+    public void firstDayOfEpicWeekInYear() {
+        assertFirstDayOfEpicWeekInYear(2017, 2017, 1, 1);
+        assertFirstDayOfEpicWeekInYear(2016, 2016, 1, 3);
+        assertFirstDayOfEpicWeekInYear(2015, 2015, 1, 4);
+        assertFirstDayOfEpicWeekInYear(2014, 2013, 12, 29);
+        assertFirstDayOfEpicWeekInYear(2013, 2012, 12, 30);
+        assertFirstDayOfEpicWeekInYear(2012, 2012, 1, 1);
+        assertFirstDayOfEpicWeekInYear(2011, 2011, 1, 2);
+        assertFirstDayOfEpicWeekInYear(2010, 2010, 1, 3);
+        assertFirstDayOfEpicWeekInYear(2009, 2009, 1, 4);
+        assertFirstDayOfEpicWeekInYear(2008, 2007, 12, 30);
+        assertFirstDayOfEpicWeekInYear(2007, 2006, 12, 31);
     }
 
-    public static DateShifter jvmDateShifter() {
-        return new DateShifter() {
-            @Override
-            public void addMonthsToDate(Date date, int add) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(date);
-                c.add(Calendar.MONTH, add);
-                date.setTime(c.getTime().getTime());
-            }
+    @Test
+    public void weekOfYear() {
+        assertWeekOfYear(2016, 1, 3, 1, 2016);
+        assertWeekOfYear(2015, 1, 1, 53, 2014);
+        assertWeekOfYear(2015, 1, 4, 1, 2015);
+        assertWeekOfYear(2015, 2, 2, 5, 2015);
+        assertWeekOfYear(2013, 1, 1, 1, 2013);
+        assertWeekOfYear(2013, 1, 30, 5, 2013);
+        assertWeekOfYear(2013, 3, 4, 10, 2013);
+        assertWeekOfYear(2013, 7, 31, 31, 2013);
+        assertWeekOfYear(2013, 8, 14, 33, 2013);
+        assertWeekOfYear(2013, 11, 14, 46, 2013);
+        assertWeekOfYear(2013, 12, 11, 50, 2013);
+        assertWeekOfYear(2013, 12, 28, 52, 2013);
+        assertWeekOfYear(2013, 12, 29, 1, 2014);
+        assertWeekOfYear(2013, 12, 30, 1, 2014);
+        assertWeekOfYear(2013, 12, 31, 1, 2014);
+        assertWeekOfYear(2012, 1, 1, 1, 2012);
+        assertWeekOfYear(2012, 1, 2, 1, 2012);
+        assertWeekOfYear(2011, 1, 1, 52, 2010);
+        assertWeekOfYear(2011, 2, 2, 5, 2011);
+        assertWeekOfYear(2011, 4, 27, 17, 2011);
+        assertWeekOfYear(2011, 12, 2, 48, 2011);
+        assertWeekOfYear(2011, 12, 29, 52, 2011);
+        assertWeekOfYear(2011, 12, 31, 52, 2011);
+    }
 
-            @Override
-            public void addDaysToDate(Date date, int add) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(date);
-                c.add(Calendar.DAY_OF_MONTH, add);
-                date.setTime(c.getTime().getTime());
-            }
-        };
+    private static void assertWeekOfYear(int year, int month, int dayOfMonth, int expectedWeek, int expectedYear) {
+        Date date = new LocalDate(year, month, dayOfMonth).atMidnightInMyTimezone();
+        EpiWeek epiWeek = CalendarUtils.epiWeek(date);
+        assertEquals(epiWeek.getWeekInYear(), expectedWeek);
+        assertEquals(epiWeek.getYear(), expectedYear);
+    }
+
+    private Date firstDayOfEpicWeekInYear(int year) {
+        return CalendarUtils.firstDayOfEpicWeekInYear(year);
+    }
+
+    private void assertFirstDayOfEpicWeekInYear(int year, int expectedYear, int expectedMonth, int expectedDayOfMonth) {
+        LocalDate localDate = new LocalDate(expectedYear, expectedMonth, expectedDayOfMonth);
+        assertEquals(firstDayOfEpicWeekInYear(year), localDate.atMidnightInMyTimezone());
     }
 }

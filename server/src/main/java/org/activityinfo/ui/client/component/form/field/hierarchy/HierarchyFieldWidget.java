@@ -36,7 +36,7 @@ public class HierarchyFieldWidget implements ReferenceFieldWidget {
         this.panel = new FlowPanel();
         for(Level level : tree.getLevels()) {
             LevelWidget widget = new LevelWidget(level.getLabel());
-            widgets.put(level.getClassId(), widget);
+            widgets.put(level.getFormId(), widget);
             this.panel.add(widget);
         }
 

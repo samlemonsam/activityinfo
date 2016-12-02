@@ -29,6 +29,8 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 interface SiteGridPanelView {
 
     void addSelectionChangeListener(SelectionChangedListener<SiteDTO> listener);
+    
+    void addDoubleClickListener(SelectionChangedListener<SiteDTO> listener);
 
     void refresh();
 

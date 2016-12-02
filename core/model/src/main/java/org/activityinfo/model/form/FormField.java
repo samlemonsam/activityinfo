@@ -2,12 +2,15 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
 import javax.annotation.Nonnull;
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -16,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The smallest logical unit of data entry.
  */
-public class FormField extends FormElement implements Serializable {
+public class FormField extends FormElement {
 
     private final ResourceId id;
     private String code;
@@ -84,8 +87,9 @@ public class FormField extends FormElement implements Serializable {
         return relevanceConditionExpression;
     }
 
-    public void setRelevanceConditionExpression(String relevanceConditionExpression) {
+    public FormField setRelevanceConditionExpression(String relevanceConditionExpression) {
         this.relevanceConditionExpression = relevanceConditionExpression;
+        return this;
     }
 
     /**
@@ -189,25 +193,83 @@ public class FormField extends FormElement implements Serializable {
     }
 
     @Override
-    public Record asRecord() {
-        assert type != null : id + " has no type";
-
-        Record record = new Record();
-        record.set("id", id.asString());
-        record.set("code", code);
-        record.set("description", description);
-        record.set("label", label);
-        record.set("type", toRecord(type));
-        record.set("required", required);
-        record.set("visible", visible);
-        record.set("relevanceConditionExpression", relevanceConditionExpression);
+    public JsonObject toJsonObject() {
+        JsonObject object = new JsonObject();
+        object.addProperty("id", id.asString());
+        object.addProperty("code", code);
+        object.addProperty("label", label);
+        object.addProperty("description", description);
+        object.addProperty("relevanceCondition", relevanceConditionExpression);
+        object.addProperty("visible", visible);
+        object.addProperty("required", required);
+        
+        object.addProperty("type", type.getTypeClass().getId());
 
         if(!superProperties.isEmpty()) {
-            record.set("superProperties", new ReferenceValue(superProperties).asRecord());
+            JsonArray superPropertiesArray = new JsonArray();
+            for (ResourceId superProperty : superProperties) {
+                superPropertiesArray.add(new JsonPrimitive(superProperty.asString()));
+            }
+            object.add("superProperties", superPropertiesArray);
         }
 
-        return record;
+        if(type instanceof ParametrizedFieldType) {
+            object.add("typeParameters", ((ParametrizedFieldType) type).getParametersAsJson());
+        }
+        
+        return object;
     }
+
+
+    public static FormField fromJson(JsonObject jsonObject) {
+        FormField field = new FormField(ResourceId.valueOf(jsonObject.get("id").getAsString()));
+        field.setLabel(Strings.nullToEmpty(JsonParsing.toNullableString(jsonObject.get("label"))));
+        field.setCode(JsonParsing.toNullableString(jsonObject.get("code")));
+        field.setDescription(JsonParsing.toNullableString(jsonObject.get("description")));
+        
+        if(jsonObject.has("relevanceCondition")) {
+            field.setRelevanceConditionExpression(JsonParsing.toNullableString(jsonObject.get("relevanceCondition")));
+        } else if(jsonObject.has("relevanceConditionExpression")) {
+            field.setRelevanceConditionExpression(JsonParsing.toNullableString(jsonObject.get("relevanceConditionExpression")));
+        }
+        
+        if(jsonObject.has("visible")) {
+            field.setVisible(jsonObject.get("visible").getAsBoolean());
+        }
+        if(jsonObject.has("required")) {
+            field.setRequired(jsonObject.get("required").getAsBoolean());
+        }
+
+        if(jsonObject.has("superProperties")) {
+            JsonArray superPropertiesArray = jsonObject.get("superProperties").getAsJsonArray();
+            for (JsonElement jsonElement : superPropertiesArray) {
+                field.addSuperProperty(ResourceId.valueOf(jsonElement.getAsString()));
+            }
+        }
+        
+        String type;
+        JsonElement typeParameters ;
+        JsonElement typeElement = jsonObject.get("type");
+        
+        if(typeElement.isJsonPrimitive()) {
+            type = typeElement.getAsString();
+            typeParameters = jsonObject.get("typeParameters");
+        } else {
+            JsonObject typeObject = typeElement.getAsJsonObject();
+            type = typeObject.get("typeClass").getAsString();
+            typeParameters = typeObject.get("parameters");
+        }
+        
+        FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(type);
+        if(typeClass instanceof ParametrizedFieldTypeClass && typeParameters != null) {
+            field.setType(((ParametrizedFieldTypeClass) typeClass).deserializeType(typeParameters.getAsJsonObject()));
+        } else {
+            field.setType(typeClass.createType());
+        }
+
+        return field;
+    }
+
 
     private Record toRecord(FieldType type) {
         Record record = new Record();
@@ -218,35 +280,4 @@ public class FormField extends FormElement implements Serializable {
         return record;
     }
 
-    public static FormField fromRecord(Record record) {
-        FormField formField = new FormField(ResourceId.valueOf(record.getString("id")))
-            .setDescription(record.isString("description"))
-            .setLabel(Strings.nullToEmpty(record.isString("label")))
-            .setType(typeFromRecord(record.getRecord("type")))
-            .setVisible(record.getBoolean("visible", true))
-            .setRequired(record.getBoolean("required", false));
-
-        if (record.has("relevanceConditionExpression")) {
-            formField.setRelevanceConditionExpression(record.getString("relevanceConditionExpression"));
-        }
-        if(record.has("superProperties")) {
-            ReferenceValue superProperties = ReferenceValue.fromRecord(record.getRecord("superProperties"));
-            formField.setSuperProperties(superProperties.getResourceIds());
-        }
-        if(record.has("code")) {
-            formField.setCode(record.getString("code"));
-        }
-
-        return formField;
-    }
-
-    private static FieldType typeFromRecord(Record record) {
-        String typeClassId = record.getString("typeClass");
-        FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(typeClassId);
-        if(typeClass instanceof ParametrizedFieldTypeClass) {
-            return ((ParametrizedFieldTypeClass)typeClass).deserializeType(record.getRecord("parameters"));
-        } else {
-            return typeClass.createType();
-        }
-    }
 }

@@ -23,12 +23,14 @@ public class DatabaseTargetForm implements Serializable {
 
     private int databaseId;
     private String databaseName;
+    private long schemaVersion;
     private List<FormField> indicatorFields = Lists.newArrayList();
     private Map<Integer, FormField> fieldMap = Maps.newHashMap();
     
-    public DatabaseTargetForm(int databaseId, String databaseName) {
+    public DatabaseTargetForm(int databaseId, String databaseName, long schemaVersion) {
         this.databaseId = databaseId;
         this.databaseName = databaseName;
+        this.schemaVersion = schemaVersion;
     }
 
     public void addIndicator(int id, String name, String units) {
@@ -67,8 +69,9 @@ public class DatabaseTargetForm implements Serializable {
         mapping.setFormLabel(databaseName + " Targets");
         mapping.setFromClause("target base");
         mapping.setBaseFilter("databaseId = " + databaseId);
-        mapping.setOwnerId(CuidAdapter.databaseId(databaseId));
+        mapping.setDatabaseId(CuidAdapter.databaseId(databaseId));
         mapping.setPrimaryKeyMapping(CuidAdapter.TARGET_INSTANCE_DOMAIN, "TargetId");
+        mapping.setSchemaVersion(schemaVersion);
         
         FormField nameField = new FormField(CuidAdapter.field(classId, CuidAdapter.NAME_FIELD));
         nameField.setCode("name");
@@ -89,7 +92,7 @@ public class DatabaseTargetForm implements Serializable {
         FormField partnerField = new FormField(CuidAdapter.field(classId, CuidAdapter.PARTNER_FIELD));
         partnerField.setLabel(I18N.CONSTANTS.partner());
         partnerField.setCode("partner");
-        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormClass(databaseId)));
+        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormId(databaseId)));
         
         FormField projectField = new FormField(CuidAdapter.field(classId, CuidAdapter.PROJECT_FIELD));
         projectField.setLabel(I18N.CONSTANTS.project());

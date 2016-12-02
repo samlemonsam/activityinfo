@@ -19,6 +19,15 @@
   border-color: #0055ff;
 }
 
+.section-label {
+  border-width: 1px;
+}
+
+.section-label:hover {
+//  border-color: #0055ff;
+//  border-style: dashed;
+}
+
 .widget-container-selected {
   background-color: @state-success-bg;
   border-color: @state-success-text !important;
@@ -26,12 +35,33 @@
   border-width: 1px;
 }
 
+.section-widget-container {
+  min-height: 64px;
+  width: 100%;
+}
+
+.section-widget-container-selected {
+  background-color: @state-info-bg;
+  border-color: @state-info-text !important;
+  border-style: solid;
+  border-width: 1px;
+}
+
+
 .spacer {
-  background-color: @state-success-bg;
-  border-color: @state-success-text !important;
   border-style: dashed;
   border-width: 1px;
   width: 100%;
+}
+
+.spacer-normal {
+  background-color: @state-success-bg;
+  border-color: @state-success-text !important;
+}
+
+.spacer-forbidden {
+  background-color: @state-danger-bg;
+  border-color: @state-danger-text !important;
 }
 
 .header-container {

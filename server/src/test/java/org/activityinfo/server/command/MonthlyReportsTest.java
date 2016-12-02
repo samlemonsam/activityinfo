@@ -23,7 +23,7 @@ package org.activityinfo.server.command;
  */
 
 import org.activityinfo.legacy.shared.command.GetMonthlyReports;
-import org.activityinfo.legacy.shared.command.Month;
+import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.command.UpdateMonthlyReports;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.exception.CommandException;

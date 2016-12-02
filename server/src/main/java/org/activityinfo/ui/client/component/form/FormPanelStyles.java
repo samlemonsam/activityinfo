@@ -33,7 +33,7 @@ import com.google.gwt.core.client.GWT;
 @Strictness(ignoreMissingClasses = true)
 public interface FormPanelStyles extends Stylesheet {
 
-    public static final FormPanelStyles INSTANCE = GWT.create(FormPanelStyles.class);
+    FormPanelStyles INSTANCE = GWT.create(FormPanelStyles.class);
 
     String formPanel();
 
@@ -46,4 +46,8 @@ public interface FormPanelStyles extends Stylesheet {
     String dropFile();
 
     String dropFileUpload();
+
+    String subformPanel();
+
+    String subformTabs();
 }

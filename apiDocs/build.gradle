@@ -1,0 +1,47 @@
+
+description = 'ActivityInfo API Documentation'
+
+ext {
+    outputDir = "$buildDir/html"
+}
+
+sourceSets {
+    // This source set *generates* the client code for GWT
+    generator {
+        java {
+            srcDir 'src/generator/java'
+        }
+        resources {
+            srcDir 'src/generator/resources'
+        }
+    }
+}
+
+dependencies {
+    generatorCompile libraries.guava
+    generatorCompile 'io.swagger:swagger-parser:1.0.19'
+    generatorCompile 'org.pegdown:pegdown:1.6.0'
+    generatorCompile libraries.freemarker
+}
+
+task copyAssets(type: Copy) {
+    from('src/main/assets') 
+    into "$outputDir/assets"
+}
+
+task generateDocs(type: JavaExec) {
+    group = "API"
+    description = 'Generates API Documentation'
+
+    dependsOn 'generatorClasses'
+    dependsOn ':api:compileSpec'
+
+    main = 'org.activityinfo.api.tools.DocGenerator'
+    classpath = sourceSets.generator.runtimeClasspath
+    workingDir = rootProject.projectDir
+    args tasks.getByPath(':api:compileSpec').outputFile
+    args outputDir
+}
+
+build.dependsOn copyAssets
+build.dependsOn generateDocs

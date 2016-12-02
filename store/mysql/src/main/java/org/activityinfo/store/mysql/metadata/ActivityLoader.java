@@ -12,9 +12,9 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -38,8 +38,6 @@ import java.util.zip.GZIPInputStream;
 public class ActivityLoader {
 
     private static final Logger LOGGER = Logger.getLogger(ActivityLoader.class.getName());
-
-    private static final String MEMCACHE_KEY_PREFIX = "activity:metadata:";
 
     private final MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
     private final QueryExecutor executor;
@@ -174,7 +172,7 @@ public class ActivityLoader {
                     
                     // Update the cached activity with the data version number,
                     // which is version seperately from the schema itself.
-                    activity.version = activityVersion.getSiteVersion();
+                    activity.siteVersion = activityVersion.getSiteVersion();
                     
                     loaded.put(activityVersion.getId(), activity);
                 }
@@ -244,28 +242,39 @@ public class ActivityLoader {
                     activity.databaseId = rs.getInt(6);
                     activity.databaseName = rs.getString(7);
                     activity.locationTypeId = rs.getInt(8);
-                    activity.locationTypeIds.add(activity.locationTypeId);
                     activity.locationTypeName = rs.getString(9);
                     activity.adminLevelId = rs.getInt(10);
+                    if(rs.wasNull()) {
+                        activity.adminLevelId = null;
+                    }
                     activity.ownerUserId = rs.getInt(13);
                     activity.published = rs.getInt(14) > 0;
-                    activity.version = rs.getLong(15);
+                    activity.siteVersion = rs.getLong(15);
                     activity.schemaVersion = rs.getLong(16);
                     activity.deleted = rs.getBoolean(17);
                     activity.ownerUserId = rs.getInt(18);
 
 
+                    activity.locationTypeIds.add(activity.locationTypeId);
+                    if(activity.adminLevelId == null) {
+                        activity.locationRange.add(CuidAdapter.locationFormClass(activity.locationTypeId));
+                    } else {
+                        activity.locationRange.add(CuidAdapter.adminLevelFormClass(activity.adminLevelId));
+                    }
+
                     // Only use json form for forms that are explicitly non-classicView,
                     // otherwise we miss aggregation method.
-                    boolean classicView = rs.getBoolean(19);
+                    activity.classicView = rs.getBoolean(19);
+                    
                     FormClass serializedFormClass = null;
-                    if(!classicView) {
+                    if(!activity.classicView) {
                         serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
                     }
                     if (serializedFormClass == null) {
                         classicActivityIds.add(activity.getId());
                     } else {
                         addFields(activity, serializedFormClass);
+                        activity.serializedFormClass.value = serializedFormClass;
                     }
 
                     activityMap.put(activity.getId(), activity);
@@ -278,16 +287,25 @@ public class ActivityLoader {
              * These need to be included in the range so that queries can be correctly run
              */
             try (ResultSet rs = executor.query(
-                    "SELECT DISTINCT S.ActivityId, L.LocationTypeId " +
+                    "SELECT DISTINCT S.ActivityId, L.LocationTypeId, T.BoundAdminLevelId " +
                             "FROM site S " +
                             "LEFT JOIN location L on (S.locationId=L.locationId) " +
+                            "LEFT JOIN locationtype T on (L.locationTypeId=T.LocationTypeId) " +
                             "WHERE S.ActivityId IN " + idList(activityIds))) {
 
                 while(rs.next()) {
                     int activityId = rs.getInt(1);
+                    Activity activity = activityMap.get(activityId);
+
                     int locationTypeId =  rs.getInt(2);
-                    
-                    activityMap.get(activityId).locationTypeIds.add(locationTypeId);
+                    activity.locationTypeIds.add(locationTypeId);
+
+                    int adminLevelId = rs.getInt(3);
+                    if(rs.wasNull()) {
+                        activity.locationRange.add(CuidAdapter.locationFormClass(locationTypeId));                        
+                    } else {
+                        activity.locationRange.add(CuidAdapter.adminLevelFormClass(adminLevelId));
+                    }
                 }
             }
 
@@ -326,7 +344,7 @@ public class ActivityLoader {
 
             Gson gson = new Gson();
             JsonObject object = gson.fromJson(reader, JsonObject.class);
-            return FormClass.fromResource(Resources.resourceFromJson(object));
+            return FormClass.fromJson(object);
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }
@@ -335,6 +353,7 @@ public class ActivityLoader {
     private void addFields(Activity activity, FormClass formClass) {
         int sortOrder = 1;
         for (FormField formField : formClass.getFields()) {
+            activity.fieldsOrder.put(formField.getId(), sortOrder); // include also built-in fields
             switch (formField.getId().getDomain()) {
                 case CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN:
                 case CuidAdapter.INDICATOR_DOMAIN:
@@ -427,6 +446,10 @@ public class ActivityLoader {
                     formField.setType(new QuantityType()
                             .setUnits(rs.getString("units")));
                     break;
+                case "BARCODE":
+                    formField.setType(BarcodeType.INSTANCE);
+                    break;
+                
                 case "FREE_TEXT":
                     formField.setType(TextType.INSTANCE);
                     break;

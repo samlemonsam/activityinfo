@@ -4,16 +4,16 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,13 +52,15 @@ public class ImportGeoTest extends AbstractImporterTest {
         source.parseAllRows();
 
         importModel.setSource(source);
-        importer = new Importer(resourceLocator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
 
         assertThat(importer.getImportTargets(), contains(
                 hasProperty("label", Matchers.equalTo("Name")),
                 hasProperty("label", Matchers.equalTo("Alternate Name")),
                 hasProperty("label", Matchers.equalTo("Region Name")),
+                hasProperty("label", Matchers.equalTo("Region Code")),
                 hasProperty("label", Matchers.equalTo("District Name")),
+                hasProperty("label", Matchers.equalTo("District Code")),
                 hasProperty("label", Matchers.equalTo("Latitude")),
                 hasProperty("label", Matchers.equalTo("Longitude"))));
 

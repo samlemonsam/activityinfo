@@ -34,6 +34,8 @@ import org.activityinfo.ui.client.component.form.FormDialogCallback;
 import org.activityinfo.ui.client.component.table.InstanceTable;
 import org.activityinfo.ui.icons.Icons;
 
+import java.util.List;
+
 /**
  * @author yuriyz on 4/8/14.
  */
@@ -52,11 +54,11 @@ public class NewHeaderAction implements TableHeaderAction {
         final FormClass formClass = table.getRootFormClass();
         final ResourceId instanceId = CuidAdapter.newLegacyFormInstanceId(formClass.getId());
         FormInstance newInstance = new FormInstance(instanceId, formClass.getId());
-        FormDialog dialog = new FormDialog(table.getResourceLocator());
+        FormDialog dialog = new FormDialog(table.getResourceLocator(), table.getStateProvider());
         dialog.setDialogTitle(I18N.CONSTANTS.newSubmission());
         dialog.show(newInstance, new FormDialogCallback() {
             @Override
-            public void onPersisted(FormInstance instance) {
+            public void onPersisted(List<FormInstance> instance) {
                 table.reload();
             }
         });

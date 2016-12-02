@@ -47,8 +47,8 @@ public class TableMappingBuilder {
         this.formClass.setLabel(name);
     }
 
-    public void setOwnerId(ResourceId rootId) {
-        formClass.setOwnerId(rootId);
+    public void setDatabaseId(ResourceId rootId) {
+        formClass.setDatabaseId(rootId);
     }
     
     public void setFromClause(String fromClause) {
@@ -85,7 +85,7 @@ public class TableMappingBuilder {
     }
 
     public void addReferenceField(FormField field, final char domain, String columnName) {
-        add(new FieldMapping(field, columnName, new ReferenceConverter(domain)));
+        add(new FieldMapping(field, columnName, new ReferenceConverter(formClass.getId(), domain)));
     }
     
     public void addGeoAreaField(FormField field) {
@@ -155,6 +155,10 @@ public class TableMappingBuilder {
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod);
     }
 
+    public void setSchemaVersion(long schemaVersion) {
+        formClass.setSchemaVersion(schemaVersion);
+    }
+
     public void setVersion(long version) {
         this.version = version;
     }
@@ -163,9 +167,9 @@ public class TableMappingBuilder {
         Preconditions.checkState(formClass != null, fromClause + ": FormClass is not set");
         Preconditions.checkState(formClass.getLabel() != null, fromClause + ": formClass.label is null");
         Preconditions.checkState(primaryKeyMapping != null, fromClause + ": Primary key is not set");
-        Preconditions.checkState(formClass.getOwnerId() != null, fromClause + ": ownerId is not set");
         return new TableMapping(tableName, fromClause, baseFilter, primaryKeyMapping, mappings, formClass,
                 deleteMethod, insertDefaults, version);
     }
 
+    
 }

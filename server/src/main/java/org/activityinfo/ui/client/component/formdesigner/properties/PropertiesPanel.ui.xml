@@ -3,6 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:a="urn:import:org.activityinfo.ui.client.widget"
              xmlns:f="urn:import:org.activityinfo.ui.client.widget.form"
+             xmlns:prop="urn:import:org.activityinfo.ui.client.component.formdesigner.properties"
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
@@ -23,20 +24,18 @@
     </f:FormGroup>
 
     <!-- Description -->
-    <f:FormGroup label="{i18n.description}" columnLabelWidth="4">
+    <f:FormGroup label="{i18n.description}" columnLabelWidth="4" ui:field="descriptionGroup">
       <a:TextArea ui:field="description" width="100%"/>
     </f:FormGroup>
 
     <!-- Required & ReadOnly -->
-    <g:HTMLPanel addStyleNames="form-group">
-      <g:HTMLPanel ui:field="requiredGroup">
-        <label class="control-label col-xs-4">
-          <ui:text from='{i18n.required}'/>
-        </label>
-        <div class="col-xs-2">
-          <a:CheckBox ui:field="required"/>
-        </div>
-      </g:HTMLPanel>
+    <g:HTMLPanel addStyleNames="form-group" ui:field="requiredGroup" width="100%">
+      <label class="control-label col-xs-4">
+        <ui:text from='{i18n.required}'/>
+      </label>
+      <div class="col-xs-2">
+        <a:CheckBox ui:field="required"/>
+      </div>
     </g:HTMLPanel>
 
     <!-- Visible -->
@@ -45,24 +44,35 @@
     </f:FormGroup>
 
     <!-- Relevance -->
-    <g:HTMLPanel addStyleNames="form-group" ui:field="relevanceGroup">
+    <g:HTMLPanel addStyleNames="form-group" ui:field="relevanceGroup" width="100%">
       <label class="control-label col-xs-4">
         <ui:text from='{i18n.relevance}'/>
       </label>
       <div class="col-xs-8">
-        <g:RadioButton name="relevance" ui:field="relevanceEnabled"><ui:text from='{i18n.relevanceEnabled}'/></g:RadioButton><br/>
-        <g:RadioButton name="relevance" ui:field="relevanceEnabledIf"><ui:text from='{i18n.relevanceEnabledIf}'/></g:RadioButton>
+        <g:RadioButton name="relevance" ui:field="relevanceEnabled">
+          <ui:text from='{i18n.relevanceEnabled}'/>
+        </g:RadioButton>
+        <br/>
+        <g:RadioButton name="relevance" ui:field="relevanceEnabledIf">
+          <ui:text from='{i18n.relevanceEnabledIf}'/>
+        </g:RadioButton>
       </div>
-      <div class="col-xs-8"/> <!-- reserve space-->
-      <div class="col-xs-4">
+
+      <div class="col-xs-4"/>
+      <!-- reserve space-->
+      <div class="col-xs-8">
         <g:Button addStyleNames="btn btn-default btn-xs" ui:field="relevanceButton">
           <ui:text from='{i18n.defineRelevanceLogic}'/>
         </g:Button>
       </div>
-      <div class="col-xs-4"/> <!-- reserve space-->
+
+      <div class="col-xs-4"/>
+      <!-- reserve space-->
       <div class="col-xs-8">
         <span class="hide help-block" ui:field="relevanceExpression"/>
       </div>
     </g:HTMLPanel>
+
+    <prop:ReferenceProperties ui:field="referenceProperties"/>
   </g:HTMLPanel>
 </ui:UiBinder>

@@ -1,5 +1,7 @@
 package org.activityinfo.model.type.primitive;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -26,6 +28,11 @@ public class TextValue implements FieldValue, HasStringValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return TextType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(value);
     }
 
     public String asString() {

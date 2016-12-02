@@ -70,7 +70,6 @@ public class ChooseColumnsDialog {
     private final ListDataProvider<FieldColumn> selectedTableDataProvider = new ListDataProvider<>();
     private final MultiSelectionModel<FieldColumn> selectedSelectionModel = new MultiSelectionModel<>(
             new SimpleKeyProvider<FieldColumn>());
-    private final DataGrid<FieldColumn> selectedTable;
 
     private final ListDataProvider<FieldColumn> tableDataProvider = new ListDataProvider<>();
     private final MultiSelectionModel<FieldColumn> selectionModel = new MultiSelectionModel<>(
@@ -107,8 +106,9 @@ public class ChooseColumnsDialog {
             }
         });
 
-        selectedTable = createTable();
+        DataGrid<FieldColumn> selectedTable = createTable();
         selectedTable.setSelectionModel(selectedSelectionModel);
+
         selectedTableDataProvider.addDataDisplay(selectedTable);
         selectedTableDataProvider.setList(tableView.getSelectedColumns());
         selectedTableDataProvider.refresh();
@@ -178,7 +178,7 @@ public class ChooseColumnsDialog {
                 final String value = filterColumnTable.getValue();
                 final ArrayList<FieldColumn> columnsToShow = Lists.newArrayList();
                 for (FieldColumn column : tableView.getColumns()) {
-                    final String headerLowercased = column.getHeader().toLowerCase();
+                    final String headerLowercased = column.get().getHeader().toLowerCase();
                     if (Strings.isNullOrEmpty(value) || headerLowercased.contains(value.toLowerCase())) {
                         columnsToShow.add(column);
                     }
@@ -199,7 +199,7 @@ public class ChooseColumnsDialog {
                 new TextCell()) {
             @Override
             public String getValue(FieldColumn object) {
-                return object.getHeader();
+                return object.get().getHeader();
             }
         };
         labelColumn.setSortable(false);

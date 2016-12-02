@@ -1,28 +1,28 @@
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.service.store.CollectionPermissions;
+import org.activityinfo.service.store.FormPermissions;
 
 /**
  * Authorizer which grants the same permissions for all users
  */
 public class ConstantAuthorizer implements Authorizer {
-    private final CollectionPermissions permissions;
+    private final FormPermissions permissions;
 
-    public ConstantAuthorizer(CollectionPermissions permissions) {
+    public ConstantAuthorizer(FormPermissions permissions) {
         this.permissions = permissions;
     }
 
     @Override
-    public CollectionPermissions getPermissions(int userId) {
+    public FormPermissions getPermissions(int userId) {
         return permissions;
     }
     
     public static ConstantAuthorizer full() {
-        return new ConstantAuthorizer(CollectionPermissions.full());
+        return new ConstantAuthorizer(FormPermissions.full());
     }
     
     public static ConstantAuthorizer readonly() {
-        return new ConstantAuthorizer(CollectionPermissions.readonly());
+        return new ConstantAuthorizer(FormPermissions.readonly());
     }
     
 }

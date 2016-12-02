@@ -28,24 +28,26 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FocusPanel;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElementContainer;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
 import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
 /**
  * @author yuriyz on 7/11/14.
  */
-public class HeaderPresenter {
+public class HeaderPresenter implements FieldsHolder {
 
     private final FormDesigner formDesigner;
     private final HeaderPanel headerPanel;
     private final FormClass formClass;
 
-    public HeaderPresenter(FormDesigner formDesigner) {
+    public HeaderPresenter(final FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
         this.headerPanel = formDesigner.getFormDesignerPanel().getHeaderPanel();
-        this.formClass = formDesigner.getFormClass();
+        this.formClass = formDesigner.getRootFormClass();
         formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
             @Override
             public void handle(WidgetContainerSelectionEvent event) {
@@ -65,11 +67,15 @@ public class HeaderPresenter {
     }
 
     public void show() {
-        headerPanel.getLabel().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getFormClass().getLabel())));
-        headerPanel.getDescription().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getFormClass().getDescription())));
+        headerPanel.getLabel().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getRootFormClass().getLabel())));
+        headerPanel.getDescription().setHTML(SafeHtmlUtils.fromString(Strings.nullToEmpty(formDesigner.getRootFormClass().getDescription())));
     }
 
     private void onClick() {
+        formDesigner.getPropertiesPresenter().reset();
+        formDesigner.getContainerPresenter().show(this);
+        formDesigner.getFormDesignerPanel().setContainerPropertiesPanelVisible();
+
         formDesigner.getEventBus().fireEvent(new HeaderSelectionEvent(this));
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
@@ -86,5 +92,15 @@ public class HeaderPresenter {
         } else {
             focusPanel.removeStyleName(FormDesignerStyles.INSTANCE.widgetContainerSelected());
         }
+    }
+
+    @Override
+    public FormElementContainer getElementContainer() {
+        return formClass;
+    }
+
+    @Override
+    public void updateUi() {
+        show();
     }
 }

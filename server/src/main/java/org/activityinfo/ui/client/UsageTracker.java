@@ -24,7 +24,6 @@ package org.activityinfo.ui.client;
 
 import com.extjs.gxt.ui.client.event.Listener;
 import com.google.gwt.core.client.JavaScriptException;
-import com.google.gwt.gears.client.Factory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.client.DispatchEventSource;
@@ -52,10 +51,6 @@ public class UsageTracker {
     @Inject
     public UsageTracker(EventBus eventBus,
                         DispatchEventSource commandEventSource) {
-
-        // Note whether this user has gears installed
-        setCustomVar(1, "gears", isGearsInstalled() ? "installed"
-                : "not installed", VISITOR_SCOPE);
 
         // Track internal page movements
         eventBus.addListener(NavigationHandler.NAVIGATION_AGREED,
@@ -93,10 +88,6 @@ public class UsageTracker {
                                 + "/delete");
                     }
                 });
-    }
-
-    private boolean isGearsInstalled() {
-        return Factory.getInstance() != null;
     }
 
     private void trackPageView(String pageName) {

@@ -1,13 +1,17 @@
 package org.activityinfo.model.type.enumerated;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class EnumType implements ParametrizedFieldType {
 
@@ -20,17 +24,19 @@ public class EnumType implements ParametrizedFieldType {
             return "enumerated";
         }
 
-        @Override
-        public FieldType deserializeType(Record typeParameters) {
 
-            Cardinality cardinality = Cardinality.valueOf(typeParameters.getString("cardinality"));
+        @Override
+        public FieldType deserializeType(JsonObject parametersObject) {
+            Cardinality cardinality = Cardinality.valueOf(
+                    parametersObject.get("cardinality").getAsString().toUpperCase());
 
             List<EnumItem> enumItems = Lists.newArrayList();
-            List<Record> enumValueRecords = typeParameters.getRecordList("values");
-            for(Record record : enumValueRecords) {
-                enumItems.add(EnumItem.fromRecord(record));
+            JsonArray enumItemArray = parametersObject.get("values").getAsJsonArray();
+            for(JsonElement record : enumItemArray) {
+                enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
             }
             return new EnumType(cardinality, enumItems);
+        
         }
 
         @Override
@@ -43,10 +49,6 @@ public class EnumType implements ParametrizedFieldType {
             return new FormClass(ResourceIdPrefixType.TYPE.id("enum"));
         }
 
-        @Override
-        public EnumValue deserialize(Record record) {
-            return EnumValue.fromRecord(record);
-        }
     };
 
     private final Cardinality cardinality;
@@ -62,6 +64,13 @@ public class EnumType implements ParametrizedFieldType {
         this.cardinality = cardinality;
         this.values = values != null ? values : new ArrayList<EnumItem>();
     }
+
+
+    public EnumType(Cardinality cardinality, EnumItem... values) {
+        this.cardinality = cardinality;
+        this.values = Arrays.asList(values);
+    }
+
 
     public Cardinality getCardinality() {
         return cardinality;
@@ -81,17 +90,40 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
-    public Record getParameters() {
-
-        List<Record> enumValueRecords = Lists.newArrayList();
-        for(EnumItem enumItem : getValues()) {
-            enumValueRecords.add(enumItem.asRecord());
+    public FieldValue parseJsonValue(JsonElement value) {
+        if(value instanceof JsonPrimitive) {
+            ResourceId id = ResourceId.valueOf(value.getAsString());
+            return new EnumValue(id);
+        } else if(value instanceof JsonArray) {
+            Set<ResourceId> ids = new HashSet<>();
+            JsonArray array = (JsonArray) value;
+            for (JsonElement jsonElement : array) {
+                ResourceId id = ResourceId.valueOf(jsonElement.getAsString());
+                ids.add(id);
+            }
+            return new EnumValue(ids);
+        } else {
+            return null;
         }
+    }
 
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("cardinality", cardinality.name())
-                .set("values", enumValueRecords);
+    @Override
+    public FormInstance getParameters() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        
+        JsonArray enumValueArray = new JsonArray();
+        for (EnumItem enumItem : getValues()) {
+            enumValueArray.add(enumItem.toJsonObject());
+        }
+        
+        JsonObject object = new JsonObject();
+        object.addProperty("cardinality", cardinality.name().toLowerCase());
+        object.add("values", enumValueArray);
+        return object;
     }
 
     @Override

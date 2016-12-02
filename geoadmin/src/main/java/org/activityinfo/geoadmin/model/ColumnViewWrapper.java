@@ -9,8 +9,13 @@ import org.activityinfo.model.type.geo.Extents;
 
 
 public class ColumnViewWrapper implements ColumnView {
+
+    @SuppressWarnings("GwtInconsistentSerializableClass")
     private JsonArray array;
-    private final int numRows;
+    private int numRows;
+
+    public ColumnViewWrapper() {
+    }
 
     public ColumnViewWrapper(int numRows, JsonArray array) {
         this.array = array;
@@ -40,7 +45,7 @@ public class ColumnViewWrapper implements ColumnView {
     @Override
     public String getString(int row) {
         Preconditions.checkPositionIndex(row, numRows);
-        
+
         JsonElement jsonElement = array.get(row);
         if(jsonElement.isJsonNull()) {
             return null;

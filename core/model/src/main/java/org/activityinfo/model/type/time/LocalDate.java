@@ -1,11 +1,16 @@
 package org.activityinfo.model.type.time;
 
 import com.bedatadriven.rebar.time.CalendricalException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -104,6 +109,11 @@ public class LocalDate implements FieldValue, IsRecord, TemporalValue {
         }
         s.append(dayOfMonth);
         return s.toString();
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(toString());
     }
 
     /**
@@ -210,4 +220,26 @@ public class LocalDate implements FieldValue, IsRecord, TemporalValue {
     public LocalDateInterval asInterval() {
         return new LocalDateInterval(this, this);
     }
+
+    public LocalDate plusDays(int count) {
+        Date date = atMidnightInMyTimezone();
+        if (GWT.isClient()) {
+            CalendarUtil.addDaysToDate(date, count);
+            return new LocalDate(date);
+        } else {
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+            c.add(Calendar.DAY_OF_YEAR, count);
+            return new LocalDate(c.getTime());
+        }
+    }
+
+    public LocalDate nextDay() {
+        return plusDays(+1);
+    }
+
+    public LocalDate previousDay() {
+        return plusDays(-1);
+    }
+
 }

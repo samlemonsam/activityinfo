@@ -7,10 +7,10 @@ import java.util.List;
 
 public class JoinedColumnKey {
 
-    private final List<JoinLink> links;
+    private final List<ReferenceJoin> links;
     private final Slot<ColumnView> nestedColumn;
 
-    public JoinedColumnKey(List<JoinLink> links, Slot<ColumnView> nestedColumn) {
+    public JoinedColumnKey(List<ReferenceJoin> links, Slot<ColumnView> nestedColumn) {
         this.links = links;
         this.nestedColumn = nestedColumn;
     }

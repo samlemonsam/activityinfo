@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.component.table.filter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -46,31 +47,37 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Provider;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.ProjectionKeyProvider;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.CriteriaUnion;
-import org.activityinfo.core.shared.criteria.CriteriaVisitor;
-import org.activityinfo.core.shared.criteria.FieldCriteria;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Observer;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.component.table.RowView;
+import org.activityinfo.ui.client.component.table.RowViewKeyProvider;
 import org.activityinfo.ui.client.widget.DataGrid;
 import org.activityinfo.ui.client.widget.DisplayWidget;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.TextBox;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author yuriyz on 4/3/14.
  */
 public class FilterContentExistingItems extends Composite implements FilterContent {
+
+    private static final Logger LOGGER = Logger.getLogger(FilterContentExistingItems.class.getName());
 
     public static final int FILTER_GRID_HEIGHT = 250;
     public static final int CHECKBOX_COLUMN_WIDTH = 20;
@@ -86,19 +93,19 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
     private static FilterContentStringUiBinder uiBinder = GWT.create(FilterContentStringUiBinder.class);
 
-    private final ListDataProvider<Projection> tableDataProvider = new ListDataProvider<>();
-    private final MultiSelectionModel<Projection> selectionModel = new MultiSelectionModel<>(new ProjectionKeyProvider());
+    private final ListDataProvider<RowView> tableDataProvider = new ListDataProvider<>();
+    private final MultiSelectionModel<RowView> selectionModel = new MultiSelectionModel<>(new RowViewKeyProvider());
 
     private final FieldColumn column;
-    private final DataGrid<Projection> filterGrid;
+    private final DataGrid<RowView> filterGrid;
 
-    private List<Projection> allItems;
+    private List<RowView> allItems;
     private ValueChangeHandler changeHandler;
 
     @UiField
     TextBox textBox;
     @UiField
-    LoadingPanel<List<Projection>> loadingPanel;
+    LoadingPanel<List<RowView>> loadingPanel;
     @UiField
     HTMLPanel textBoxContainer;
     @UiField
@@ -119,16 +126,16 @@ public class FilterContentExistingItems extends Composite implements FilterConte
             }
         });
 
-        final Column<Projection, Boolean> checkColumn = new Column<Projection, Boolean>(new CheckboxCell(true, false)) {
+        final Column<RowView, Boolean> checkColumn = new Column<RowView, Boolean>(new CheckboxCell(true, false)) {
             @Override
-            public Boolean getValue(Projection object) {
+            public Boolean getValue(RowView object) {
                 return selectionModel.isSelected(object);
             }
         };
 
         filterGrid = new DataGrid<>(1000, FilterDataGridResources.INSTANCE);
         filterGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager
-                .<Projection>createCheckboxManager());
+                .<RowView>createCheckboxManager());
         filterGrid.addColumn(checkColumn);
         filterGrid.addColumn(column);
         filterGrid.setColumnWidth(checkColumn, CHECKBOX_COLUMN_WIDTH, Style.Unit.PX);
@@ -147,16 +154,16 @@ public class FilterContentExistingItems extends Composite implements FilterConte
 
         tableDataProvider.addDataDisplay(filterGrid);
 
-        loadingPanel.setDisplayWidget(new DisplayWidget<List<Projection>>() {
+        loadingPanel.setDisplayWidget(new DisplayWidget<List<RowView>>() {
             @Override
-            public Promise<Void> show(List<Projection> values) {
+            public Promise<Void> show(List<RowView> values) {
                 allItems = extractItems(values);
                 if (allItems.size() < SEARCH_BOX_PRESENCE_ITEM_COUNT) {
                     textBoxContainer.remove(textBox);
                 }
 
                 filterData();
-                initByCriteriaVisit();
+                initByFilterVisit();
 
                 Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
                     @Override
@@ -174,77 +181,91 @@ public class FilterContentExistingItems extends Composite implements FilterConte
                 return filterGrid;
             }
         });
-        loadingPanel.show(new Provider<Promise<List<Projection>>>() {
+        loadingPanel.show(new Provider<Promise<List<RowView>>>() {
             @Override
-            public Promise<List<Projection>> get() {
-                InstanceQuery query = table.getDataLoader().createInstanceQuery(0, 10000)
-                        .setFilterFieldPath(column.getFieldPaths().get(0));
-                return table.getResourceLocator().query(query);
+            public Promise<List<RowView>> get() {
+                final QueryModel model = table.getDataLoader().newQueryModel();
+                model.selectField(column.get().getFieldPaths().get(0));
+
+                final Promise<List<RowView>> result = new Promise<>();
+                table.getResourceLocator().getTable(model).subscribe(new Observer<ColumnSet>() {
+                    @Override
+                    public void onChange(Observable<ColumnSet> observable) {
+                        if (!observable.isLoading()) {
+                            ColumnSet columnSet = observable.get();
+                            if (columnSet != null) {
+
+                                Set<String> values = Sets.newHashSet();
+                                List<RowView> rows = Lists.newArrayList();
+
+                                // only unique values
+                                for (int row = 0; row < columnSet.getNumRows(); row++) {
+                                    RowView rowView = new RowView(row, columnSet.getColumns());
+                                    Object value = rowView.getValue(column.get().getNode().getFieldId().asString());
+                                    String valueStr = value != null ? value.toString() : "";
+                                    if (!Strings.isNullOrEmpty(valueStr) && !values.contains(valueStr)) {
+                                        values.add(valueStr);
+                                        rows.add(rowView);
+                                    }
+                                }
+                                result.resolve(rows);
+                            }
+                        }
+                    }
+                });
+                return result;
             }
         });
     }
 
-    private void initByCriteriaVisit() {
-        final Criteria criteria = column.getCriteria();
-        if (criteria != null) {
-            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
+    private void initByFilterVisit() {
+        final ExprNode node = column.get().getFilter();
+        if (node != null) {
+            final VisitConstantsVisitor initializationVisitor = new VisitConstantsVisitor() {
                 @Override
-                public void visitFieldCriteria(FieldCriteria fieldCriteria) {
-                    for (Projection projection : allItems) {
-                        final Object valueAsObject = column.getFieldValue(projection);
-                        if (Objects.equals(valueAsObject, fieldCriteria.getValue())) {
-                            selectionModel.setSelected(projection, true);
+                public Object visitConstant(ConstantExpr node) {
+                    String value = constantValueAsString(node);
+                    if (!Strings.isNullOrEmpty(value)) {
+                        for (RowView rowView : allItems) {
+                            final String val = column.getValue(rowView);
+                            if (value.equals(val)) {
+                                selectionModel.setSelected(rowView, true);
+                            }
                         }
                     }
-                }
-
-                @Override
-                public void visitUnion(CriteriaUnion criteriaUnion) {
-                    for (Criteria criteria : criteriaUnion.getElements()) {
-                        criteria.accept(this);
-                    }
+                    return null;
                 }
             };
-            criteria.accept(initializationVisitor);
+            node.accept(initializationVisitor);
         }
     }
 
-    private List<Projection> extractItems(List<Projection> projections) {
-        final SortedMap<String, Projection> labelToProjectionMap = Maps.newTreeMap();
-        for (Projection projection : projections) {
-            final String value = column.getValue(projection).replace(String.valueOf((char) 160), " ").trim();
-            if (!Strings.isNullOrEmpty(value) && !labelToProjectionMap.containsKey(value)) {
-                labelToProjectionMap.put(value, projection);
+    private List<RowView> extractItems(List<RowView> rowViews) {
+        final SortedMap<String, RowView> labelToRowMap = Maps.newTreeMap();
+        for (RowView rowView : rowViews) {
+            final String value = column.getValue(rowView).replace(String.valueOf((char) 160), " ").trim();
+            if (!Strings.isNullOrEmpty(value) && !labelToRowMap.containsKey(value)) {
+                labelToRowMap.put(value, rowView);
             }
         }
-        return Lists.newArrayList(labelToProjectionMap.values());
+        return Lists.newArrayList(labelToRowMap.values());
     }
 
     private void filterData() {
         final String stringFilter = textBox.getValue();
-        final List<Projection> toShow = Lists.newArrayList();
-        for (Projection projection : allItems) {
-            final String value = column.getValue(projection);
+        final List<RowView> toShow = Lists.newArrayList();
+        for (RowView rowView : allItems) {
+            final String value = column.getValue(rowView);
             if (Strings.isNullOrEmpty(stringFilter) || value.toUpperCase().contains(stringFilter.toUpperCase())) {
-                toShow.add(projection);
+                toShow.add(rowView);
             }
         }
         tableDataProvider.setList(toShow);
     }
 
-    @Override
-    public Criteria getCriteria() {
-        final Set<Projection> selectedSet = selectionModel.getSelectedSet();
-        final List<Criteria> criteriaList = Lists.newArrayList();
-        for (Projection projection : selectedSet) {
-            criteriaList.add(new FieldCriteria(column.getNode().getPath(), column.getFieldValue(projection)));
-        }
-        return new CriteriaUnion(criteriaList);
-    }
-
     private void selectAll(boolean selectState) {
-        for (Projection projection : tableDataProvider.getList()) {
-            selectionModel.setSelected(projection, selectState);
+        for (RowView rowView : tableDataProvider.getList()) {
+            selectionModel.setSelected(rowView, selectState);
         }
     }
 
@@ -276,5 +297,49 @@ public class FilterContentExistingItems extends Composite implements FilterConte
     @Override
     public void setChangeHandler(ValueChangeHandler handler) {
         this.changeHandler = handler;
+    }
+
+    @Override
+    public ExprNode getFilter() {
+        if (isValid()) {
+            try {
+                String expr = "";
+                List<RowView> set = Lists.newArrayList(selectionModel.getSelectedSet());
+                int size = set.size();
+                for (int i = 0; i < size; i++) {
+                    RowView row = set.get(i);
+                    String id = column.get().getNode().getFieldId().asString();
+                    boolean isNumber = column.get().getNode().getType() instanceof QuantityType;
+
+                    Object value = row.getValue(id);
+                    if (value != null && !Strings.isNullOrEmpty(value.toString())) {
+
+                        expr += id + "==";
+                        if (!isNumber) {
+                            expr += "'";
+                        }
+                        expr += value.toString();
+                        if (!isNumber) {
+                            expr += "'";
+                        }
+
+                        if (size > 1) {
+                            expr = "(" + expr + ")";
+                        }
+
+                        if ((i + 1) != size) { // if not last
+                            expr += " || ";
+                        }
+                    }
+                }
+                if (size > 1) {
+                    expr = "(" + expr + ")";
+                }
+                return ExprParser.parse(expr);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        return null;
     }
 }

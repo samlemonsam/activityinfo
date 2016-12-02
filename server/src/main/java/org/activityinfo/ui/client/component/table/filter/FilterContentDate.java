@@ -22,6 +22,8 @@ package org.activityinfo.ui.client.component.table.filter;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,13 +35,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.CriteriaUnion;
-import org.activityinfo.core.shared.criteria.CriteriaVisitor;
-import org.activityinfo.core.shared.criteria.FieldDateCriteria;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.LocalDateRange;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.util.Pair;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.style.ElementStyle;
@@ -47,12 +48,17 @@ import org.activityinfo.ui.client.widget.ButtonWithSize;
 import org.activityinfo.ui.client.widget.DateRangePanel;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author yuriyz on 07/03/2015.
  */
 public class FilterContentDate extends Composite implements FilterContent {
+
+    private static final Logger LOGGER = Logger.getLogger(FilterContentDate.class.getName());
 
     interface DateUiBinder extends UiBinder<HTMLPanel, FilterContentDate> {
     }
@@ -77,7 +83,7 @@ public class FilterContentDate extends Composite implements FilterContent {
         addYearRange(0);
         addYearRange(1);
 
-        initByCriteriaVisit();
+        initByFilterVisit();
         rangePanel.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
@@ -86,26 +92,31 @@ public class FilterContentDate extends Composite implements FilterContent {
         });
     }
 
-    private void initByCriteriaVisit() {
-        final Criteria criteria = column.getCriteria();
-        if (criteria != null) {
-            final CriteriaVisitor initializationVisitor = new CriteriaVisitor() {
+    private void initByFilterVisit() {
+        final ExprNode node = column.get().getFilter();
+        if (node != null) {
+            final List<LocalDate> dates = Lists.newArrayList();
+            final VisitConstantsVisitor initializationVisitor = new VisitConstantsVisitor() {
                 @Override
-                public void visitFieldCriteria(FieldDateCriteria fieldCriteria) {
-                    if (fieldCriteria.getFieldPath().equals(column.getNode().getPath())) {
-                        setCurrentRange(fieldCriteria.getRange());
-                        rangePanel.setDateRange(currentRange.asDateRange());
+                public Object visitConstant(ConstantExpr node) {
+                    String value = constantValueAsString(node);
+                    if (!Strings.isNullOrEmpty(value)) {
+                        dates.add(LocalDate.parse(value));
                     }
-                }
-
-                @Override
-                public void visitUnion(CriteriaUnion criteriaUnion) {
-                    for (Criteria criteria : criteriaUnion.getElements()) {
-                        criteria.accept(this);
-                    }
+                    return null;
                 }
             };
-            criteria.accept(initializationVisitor);
+            node.accept(initializationVisitor);
+
+            if (dates.size() == 2) {
+                LocalDate first = dates.get(0);
+                LocalDate second = dates.get(1);
+                LocalDateRange range = first.before(second) ?
+                        new LocalDateRange(first, second) : new LocalDateRange(second, first);
+
+                setCurrentRange(range);
+                rangePanel.setDateRange(currentRange.asDateRange());
+            }
         }
     }
 
@@ -141,14 +152,6 @@ public class FilterContentDate extends Composite implements FilterContent {
     }
 
     @Override
-    public Criteria getCriteria() {
-        if (currentRange != null) {
-            return new FieldDateCriteria(column.getNode().getPath(), currentRange);
-        }
-        return null;
-    }
-
-    @Override
     public void clear() {
         setCurrentRange(null);
         rangePanel.clear();
@@ -166,6 +169,21 @@ public class FilterContentDate extends Composite implements FilterContent {
     public void setCurrentRange(LocalDateRange currentRange) {
         this.currentRange = currentRange;
         rangePanel.setDateRange(currentRange != null ? currentRange.asDateRange() : null);
+    }
+
+    @Override
+    public ExprNode getFilter() {
+        if (currentRange != null) {
+            try {
+                String min = currentRange.getMinLocalDate().toString();
+                String max = currentRange.getMaxLocalDate().toString();
+                String id = column.get().getNode().getFieldId().asString();
+                return ExprParser.parse("('"+ min + "'<=" + id + ") && (" + id + " <= '" + max + "')");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     @Override

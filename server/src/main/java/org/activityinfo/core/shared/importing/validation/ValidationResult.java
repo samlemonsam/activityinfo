@@ -1,7 +1,6 @@
 package org.activityinfo.core.shared.importing.validation;
 
-import org.activityinfo.core.shared.Pair;
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 
 import java.util.List;
 
@@ -20,8 +19,7 @@ public class ValidationResult {
     };
 
     private final State state;
-    private Pair<ResourceId, ResourceId> rangeWithInstanceId;
-    private ResourceId instanceId;
+    private RecordRef ref;
     private String typeConversionErrorMessage;
     private String targetValue;
     private double confidence;
@@ -76,25 +74,17 @@ public class ValidationResult {
         return state == State.OK || (state == State.CONFIDENCE && confidence >= MINIMUM_PERSISTENCE_SCORE);
     }
 
-    public ResourceId getInstanceId() {
-        return instanceId;
-    }
-
-    public ValidationResult setInstanceId(ResourceId instanceId) {
-        this.instanceId = instanceId;
-        return this;
-    }
-
     public boolean hasReferenceMatch() {
-        return instanceId != null;
+        return ref != null;
     }
 
-    public Pair<ResourceId, ResourceId> getRangeWithInstanceId() {
-        return rangeWithInstanceId;
+    public RecordRef getRef() {
+        return ref;
     }
 
-    public void setRangeWithInstanceId(Pair<ResourceId, ResourceId> rangeWithInstanceId) {
-        this.rangeWithInstanceId = rangeWithInstanceId;
+    public ValidationResult setRef(RecordRef ref) {
+        this.ref = ref;
+        return this;
     }
 
     public static boolean isPersistable(List<ValidationResult> results) {

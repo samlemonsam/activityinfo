@@ -5,7 +5,7 @@ import org.ajoberstar.grgit.Grgit
 allprojects {
 
     def repo = Grgit.open(project.rootDir)
-    def majorVersion = "2.11"
+    def majorVersion = "2.12"
 
     
     if(System.env.PIPELINE_VERSION) {

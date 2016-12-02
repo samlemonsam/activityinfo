@@ -17,6 +17,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.expr.ExprFieldType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import java.util.*;
 
@@ -42,7 +43,8 @@ public class FormTree {
         }
 
         public boolean isReference() {
-            return field.getType() instanceof ReferenceType;
+            return field.getType() instanceof ReferenceType ||
+                    field.getType() instanceof SubFormReferenceType;
         }
 
         public boolean isEnum() {
@@ -110,9 +112,15 @@ public class FormTree {
          *
          * @return for Reference fields, the range of this field
          */
-        public Set<ResourceId> getRange() {
+        public Collection<ResourceId> getRange() {
             if(field.getType() instanceof ReferenceType) {
                 return ((ReferenceType) field.getType()).getRange();
+                
+            } else if(field.getType() instanceof SubFormReferenceType) {
+                SubFormReferenceType subFormType = (SubFormReferenceType) field.getType();
+                ResourceId subFormClassId = subFormType.getClassId();
+                return Collections.singleton(subFormClassId);
+                
             } else if(field.getType() instanceof RecordFieldType) {
                 return Collections.singleton(((RecordFieldType) field.getType()).getFormClass().getId());
             } else {
@@ -268,6 +276,35 @@ public class FormTree {
 
     public List<Node> getRootFields() {
         return rootFields;
+    }
+
+    public List<ColumnNode> getColumnNodes() {
+        List<ColumnNode> columns = Lists.newArrayList();
+        Map<ResourceId, ColumnNode> columnMap = Maps.newHashMap();
+
+        enumerateColumns(getRootFields(), columns, columnMap);
+        return columns;
+    }
+
+    private void enumerateColumns(List<FormTree.Node> fields, List<ColumnNode> columns, Map<ResourceId, ColumnNode> columnMap) {
+        for (FormTree.Node node : fields) {
+
+            if (node.getType() instanceof SubFormReferenceType) { // skip subForm fields
+                continue;
+            }
+
+            if (node.isReference()) {
+                enumerateColumns(node.getChildren(), columns, columnMap);
+            } else {
+                if (columnMap.containsKey(node.getFieldId())) {
+                    columnMap.get(node.getFieldId()).addFieldPath(node.getPath());
+                } else {
+                    ColumnNode col = new ColumnNode(node);
+                    columnMap.put(node.getFieldId(), col);
+                    columns.add(col);
+                }
+            }
+        }
     }
 
     public List<FieldPath> getRootPaths() {

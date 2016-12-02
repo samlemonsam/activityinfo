@@ -21,16 +21,15 @@ package org.activityinfo.model.type.subform;
 * #L%
 */
 
-import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.ResourceIdPrefixType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ParametrizedFieldType;
-import org.activityinfo.model.type.ParametrizedFieldTypeClass;
-import org.activityinfo.model.type.RecordFieldTypeClass;
-import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.*;
 
 /**
  * @author yuriyz on 12/03/2014.
@@ -53,10 +52,20 @@ public class SubFormReferenceType implements ParametrizedFieldType {
         }
 
         @Override
-        public SubFormReferenceType deserializeType(Record typeParameters) {
-            String classId = typeParameters.isString("classReference");
-            return new SubFormReferenceType()
-                    .setClassId(Strings.isNullOrEmpty(classId) ? null : ResourceId.valueOf(classId));
+        public FieldType deserializeType(JsonObject parametersObject) {
+            JsonElement formIdElement;
+            if(parametersObject.has("classReference")) {
+                formIdElement = parametersObject.get("classReference");
+            } else {
+                formIdElement = parametersObject.get("formId");
+            }
+            ResourceId formId;
+            if(formIdElement.isJsonNull()) {
+                formId = null;
+            } else {
+                formId = ResourceId.valueOf(formIdElement.getAsString());
+            }
+            return new SubFormReferenceType(formId);
         }
 
         @Override
@@ -64,10 +73,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
             return new FormClass(ResourceIdPrefixType.TYPE.id("subform"));
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return Quantity.fromRecord(record);
-        }
+
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
@@ -100,10 +106,21 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public Record getParameters() {
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("classReference", classId != null ? classId.asString() : "");
+    public FieldValue parseJsonValue(JsonElement value) {
+        // Subforms don't have values in their parent.
+        return null;
+    }
+
+    @Override
+    public FormInstance getParameters() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        object.add("formId", classId == null ? JsonNull.INSTANCE : new JsonPrimitive(classId.asString()));
+        return object;
     }
 
     @Override

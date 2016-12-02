@@ -91,8 +91,8 @@ public class LockedPeriodSet {
             int activityId = CuidAdapter.getLegacyIdFromCuid(formClass.getId());
             int projectId = -1;
             FieldValue projectValue = BuiltinFields.getProjectValue(instance, formClass);
-            if (projectValue instanceof ReferenceValue && !((ReferenceValue) projectValue).getResourceIds().isEmpty() ) {
-                projectId = CuidAdapter.getLegacyIdFromCuid(((ReferenceValue) projectValue).getResourceIds().iterator().next());
+            if (projectValue instanceof ReferenceValue && !((ReferenceValue) projectValue).getReferences().isEmpty() ) {
+                projectId = CuidAdapter.getLegacyIdFromCuid(((ReferenceValue) projectValue).getReferences().iterator().next().getRecordId());
             }
             return isLocked(activityId, new LocalDate(endDate), projectId);
         }

@@ -22,15 +22,20 @@ package org.activityinfo.test.steps.common;
  */
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
+import gherkin.formatter.model.DataTableRow;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
 import org.activityinfo.test.pageobject.web.components.Form;
-import org.activityinfo.test.pageobject.web.design.designer.DesignerFieldPropertyType;
-import org.activityinfo.test.pageobject.web.design.designer.FormDesignerPage;
+import org.activityinfo.test.pageobject.web.design.designer.*;
 import org.openqa.selenium.support.ui.Select;
 
 import javax.inject.Inject;
@@ -190,7 +195,7 @@ public class DesignSteps {
             page.selectFieldByLabel(entry.getValue());
 
             String label = driver.getAliasTable().createAlias(entry.getKey());
-            page.properties().setLabel(label);
+            page.fieldProperties().setLabel(label);
         }
 
         page.save();
@@ -202,5 +207,89 @@ public class DesignSteps {
         FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
         page.setRelevance(driver.getAliasTable().getAlias(fieldName), dataTable, driver.getAliasTable());
         page.save();
+    }
+
+    // accepts table :
+    //| label        | type        | container  |
+    //| MySection    | Section     | root       |
+    //| MyText       | Text        | MySection  |
+    @And("^drop field in:$")
+    public void drop_field_in(DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
+        for (int i = 1; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+
+            List<String> cells = row.getCells();
+
+            String label = cells.get(0);
+            String fieldType = cells.get(1);
+            String containerLabel = cells.get(2);
+
+            DropLabel dropLabel = page.fields().dropLabel(fieldType);
+            DropPanel dropPanel = page.dropPanel(containerLabel);
+
+            dropPanel.dragAndDrop(dropLabel);
+            Sleep.sleepMillis(100);
+
+            if ("root".equalsIgnoreCase(containerLabel) && (
+                    fieldType.equalsIgnoreCase("Section") || fieldType.equalsIgnoreCase("Sub Form"))) {
+                DropPanel containerDropPanel = page.dropPanel(fieldType);
+                containerDropPanel.getContainer().clickWhenReady();
+
+                page.containerProperties().setLabel(label);
+
+            } else {
+                page.selectFieldByLabel(fieldType);
+                page.fieldProperties().setLabel(driver.getAliasTable().createAlias(label));
+            }
+        }
+
+        page.save();
+    }
+
+    @And("^set \"([^\"]*)\" subform to \"([^\"]*)\"$")
+    public void set_subform_to(String subformName, String subformType) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
+        DropPanel dropPanel = page.dropPanel(subformName);
+
+        dropPanel.getContainer().clickWhenReady();
+        page.containerProperties().selectProperty(I18N.CONSTANTS.type(), subformType);
+        page.save();
+    }
+
+    @And("^choose reference for field \"([^\"]*)\"$")
+    public void choose_reference_for_field(String fieldLabel, DataTable dataTable) throws Throwable {
+        FormDesignerPage page = (FormDesignerPage) driver.getCurrentPage();
+
+        page.selectFieldByLabel(driver.alias(fieldLabel));
+
+        PropertiesPanel fieldProperties = page.fieldProperties();
+
+        for (int i = 0; i < dataTable.getGherkinRows().size(); i++) {
+            DataTableRow row = dataTable.getGherkinRows().get(i);
+
+            fieldProperties.chooseFormDialog().set(row.getCells(), driver.getAliasTable());
+        }
+
+        page.save();
+    }
+
+    @Then("^\"([^\"]*)\" field has instances:$")
+    public void field_has_instances(String fieldLabel, List<String> expectedItems) throws Throwable {
+        Preconditions.checkNotNull(driver.getCurrentModal());
+
+        BsFormPanel.BsField field = driver.getCurrentModal().form().findFieldByLabel(driver.getAliasTable().getAlias(fieldLabel));
+
+        expectedItems = Lists.newArrayList(expectedItems);
+        for (String item : Lists.newArrayList(expectedItems)) {
+            expectedItems.add(driver.getAliasTable().createAlias(item));
+        }
+
+        List<String> presentItems = Lists.newArrayList(field.availableItems());
+        presentItems.removeAll(expectedItems);
+
+        assertTrue(presentItems.isEmpty());
     }
 }

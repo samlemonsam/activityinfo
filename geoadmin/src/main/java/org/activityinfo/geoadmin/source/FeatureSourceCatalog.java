@@ -2,25 +2,27 @@ package org.activityinfo.geoadmin.source;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.query.RowSource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CollectionCatalog;
-import org.activityinfo.service.store.ResourceCollection;
+import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormCatalog;
 import org.geotools.data.shapefile.ShapefileDataStore;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
-public class FeatureSourceCatalog implements CollectionCatalog {
+public class FeatureSourceCatalog implements FormCatalog {
 
     public static final String FILE_PREFIX = "file://";
-    private Map<ResourceId, FeatureSourceCollection> sources = new HashMap<>();
+    private Map<ResourceId, FeatureSourceAccessor> sources = new HashMap<>();
     
     public boolean isLocalResource(ResourceId resourceId) {
         return resourceId.asString().startsWith(FILE_PREFIX);
@@ -38,41 +40,41 @@ public class FeatureSourceCatalog implements CollectionCatalog {
     public void add(ResourceId id, String path) throws IOException {
         File shapeFile = new File(path);
         ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL());
-        sources.put(id, new FeatureSourceCollection(id, dataStore.getFeatureSource()));
+        sources.put(id, new FeatureSourceAccessor(id, dataStore.getFeatureSource()));
     }
     
     @Override
-    public Optional<ResourceCollection> getCollection(ResourceId resourceId) {
+    public Optional<FormAccessor> getForm(ResourceId formId) {
 
-        FeatureSourceCollection accessor = sources.get(resourceId);
+        FeatureSourceAccessor accessor = sources.get(formId);
         if(accessor == null) {
 
-            Preconditions.checkArgument(resourceId.asString().startsWith(FILE_PREFIX),
+            Preconditions.checkArgument(formId.asString().startsWith(FILE_PREFIX),
                     "FeatureSourceCatalog supports only resourceIds starting with file://");
 
             try {
-                File shapeFile = new File(resourceId.asString().substring(FILE_PREFIX.length()));
+                File shapeFile = new File(formId.asString().substring(FILE_PREFIX.length()));
                 ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL());
-                accessor = new FeatureSourceCollection(resourceId, dataStore.getFeatureSource());
-                sources.put(resourceId, accessor);
+                accessor = new FeatureSourceAccessor(formId, dataStore.getFeatureSource());
+                sources.put(formId, accessor);
 
             } catch (Exception e) {
-                throw new IllegalArgumentException("Could not load " + resourceId, e);
+                throw new IllegalArgumentException("Could not load " + formId, e);
             }
         }
-        return Optional.<ResourceCollection>of(accessor);
+        return Optional.<FormAccessor>of(accessor);
     }
 
     @Override
-    public Optional<ResourceCollection> lookupCollection(ResourceId resourceId) {
+    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> collectionIds) {
+    public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         Map<ResourceId, FormClass> map = new HashMap<>();
-        for (ResourceId collectionId : collectionIds) {
-            Optional<ResourceCollection> collection = getCollection(collectionId);
+        for (ResourceId collectionId : formIds) {
+            Optional<FormAccessor> collection = getForm(collectionId);
             if(collection.isPresent()) {
                 map.put(collectionId, collection.get().getFormClass());
             }
@@ -81,8 +83,18 @@ public class FeatureSourceCatalog implements CollectionCatalog {
     }
 
     @Override
+    public List<CatalogEntry> getRootEntries() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<CatalogEntry> getChildren(String parentId, int userId) {
+        return null;
+    }
+
+    @Override
     public FormClass getFormClass(ResourceId resourceId) {
-        return getCollection(resourceId).get().getFormClass();
+        return getForm(resourceId).get().getFormClass();
     }
 
 

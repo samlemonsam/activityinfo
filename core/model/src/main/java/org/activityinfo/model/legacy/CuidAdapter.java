@@ -1,7 +1,10 @@
 package org.activityinfo.model.legacy;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceValue;
 
 /**
  * Provides an adapter between legacy ids, which are either random or sequential 32-bit integers but only
@@ -10,7 +13,9 @@ import org.activityinfo.model.resource.ResourceId;
  */
 public class CuidAdapter {
 
-    public static final char COUNTRY_DOMAIN = 'c';
+    public static final char REPEATING_DOMAIN = 'b'; // used for subform repeating
+
+    public static final char COUNTRY_DOMAIN = 'F'; // upper case F, avoid conflict with org.activityinfo.model.resource.ResourceId.GENERATED_ID_DOMAIN = 'c'
 
     public static final char SITE_DOMAIN = 's';
 
@@ -107,6 +112,14 @@ public class CuidAdapter {
         return Integer.parseInt(cuid.substring(1), ResourceId.RADIX);
     }
 
+    public static Optional<Integer> getLegacyIdFromCuidOptional(String cuid) {
+        try {
+            return Optional.of(getLegacyIdFromCuid(cuid));
+        } catch (NumberFormatException e) {
+            return Optional.absent();
+        }
+    }
+
     public static final ResourceId cuid(char domain, int id) {
         return ResourceId.valueOf(domain + block(id));
     }
@@ -116,15 +129,25 @@ public class CuidAdapter {
     }
 
     public static int getLegacyIdFromCuid(ResourceId id) {
-        if(id.getDomain() == '_') {
+        if(id.getDomain() == '_' || id.asString().startsWith(ResourceId.GENERATED_ID_DOMAIN + "_")) {
             return 0;
         } else {
             return getLegacyIdFromCuid(id.asString());
         }
     }
 
-    public static ResourceId partnerInstanceId(int partnerId) {
+    public static boolean isSubformGenerated(ResourceId id) {
+        return id.asString().startsWith("c_");
+    }
+
+    public static ResourceId partnerRecordId(int partnerId) {
         return cuid(PARTNER_DOMAIN, partnerId);
+    }
+
+    public static ReferenceValue partnerRef(int databaseId, int partnerId) {
+        return new ReferenceValue(new RecordRef(
+                CuidAdapter.partnerFormId(databaseId),
+                CuidAdapter.partnerRecordId(partnerId)));
     }
 
     public static ResourceId projectInstanceId(int projectId) {
@@ -146,6 +169,14 @@ public class CuidAdapter {
 
     public static ResourceId locationInstanceId(int locationId) {
         return cuid(LOCATION_DOMAIN, locationId);
+    }
+
+    public static ReferenceValue locationRef(ResourceId locationFormId, int locationId) {
+        return new ReferenceValue(new RecordRef(locationFormId, CuidAdapter.locationInstanceId(locationId)));
+    }
+
+    public static ReferenceValue entityRef(int levelId, int entityId) {
+        return new ReferenceValue(new RecordRef(CuidAdapter.adminLevelFormClass(levelId), entity(entityId)));
     }
 
     public static ResourceId adminLevelFormClass(int adminLevelId) {
@@ -237,7 +268,7 @@ public class CuidAdapter {
      * @param databaseId the id of the database
      * @return the {@code FormClass} ResourceId for a given database's list of partners.
      */
-    public static ResourceId partnerFormClass(int databaseId) {
+    public static ResourceId partnerFormId(int databaseId) {
         return cuid(PARTNER_FORM_CLASS_DOMAIN, databaseId);
     }
 
@@ -301,5 +332,15 @@ public class CuidAdapter {
 
     public static ResourceId targetIndicatorField(int indicatorId) {
         return cuid(TARGET_INDICATOR_FIELD_DOMAIN, indicatorId);
+    }
+
+    public static ResourceId generateIndicatorId() {
+        return indicatorField(new KeyGenerator().generateInt());
+    }
+
+    public static ReferenceValue projectRef(int databaseId, int projectId) {
+        return new ReferenceValue(new RecordRef(
+                CuidAdapter.projectFormClass(databaseId),
+                CuidAdapter.projectInstanceId(projectId)));
     }
 }

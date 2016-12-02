@@ -5,7 +5,11 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.attachment.AttachmentValue;
+import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -22,16 +26,14 @@ import java.util.List;
  */
 public class IndicatorValueTableUpdater {
 
-
     private final int siteId;
     private int reportingPeriodId;
 
     private Date date1;
     private Date date2;
-
-
     
     private static class IndicatorUpdate {
+
         private int indicatorId;
         private FieldValue value;
 
@@ -83,6 +85,14 @@ public class IndicatorValueTableUpdater {
     }
     
     public void insertReportingPeriod(QueryExecutor executor) {
+        
+        // We are relaxing the requirement that all sites have start/end date fields
+        // But we are not ready to remove the date1/date2 fields from the reportingperiod table
+        if(date1 == null) {
+            date1 = new Date(0);
+            date2 = new Date(0);
+        }
+        
         reportingPeriodId = new KeyGenerator().generateInt();
         executor.update("INSERT INTO reportingperiod (siteId, reportingPeriodId, date1, date2, dateCreated, dateEdited) " +
                         "VALUES (?, ?, ?, ?, ?, ?)",
@@ -94,9 +104,18 @@ public class IndicatorValueTableUpdater {
             clearValue(executor, update);
         } else if(update.value instanceof Quantity) {
             executeQuantityUpdate(executor, update);
-        } else if(update.value instanceof TextValue) {
+        } else if(update.value instanceof TextValue || update.value instanceof BarcodeValue) {
             executeTextUpdate(executor, update);
+        } else if(update.value instanceof ReferenceValue ||
+                update.value instanceof LocalDate ||
+                update.value instanceof AttachmentValue) {
+            executeJsonUpdate(executor, update);
         }
+    }
+
+    private void executeJsonUpdate(QueryExecutor executor, IndicatorUpdate update) {
+        executor.update("REPLACE INTO indicatorvalue (reportingPeriodId, indicatorId, TextValue) VALUES (?, ?, ?)",
+                Arrays.asList(reportingPeriodId, update.indicatorId, update.value.toJsonElement().toString()));
     }
 
     private void executeQuantityUpdate(QueryExecutor executor, IndicatorUpdate update) {
@@ -106,7 +125,7 @@ public class IndicatorValueTableUpdater {
     }
     
     private void executeTextUpdate(QueryExecutor executor, IndicatorUpdate update) {
-        TextValue textValue = (TextValue) update.value;
+        HasStringValue textValue = (HasStringValue) update.value;
         executor.update("REPLACE INTO indicatorvalue (reportingPeriodId, indicatorId, TextValue) VALUES (?, ?, ?)",
                 Arrays.asList(reportingPeriodId, update.indicatorId, textValue.asString()));
     }

@@ -2,25 +2,22 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.activityinfo.core.client.InstanceQuery;
-import org.activityinfo.core.client.QueryResult;
+import com.google.gwt.core.shared.GWT;
+import org.activityinfo.api.client.*;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.*;
-import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.shared.adapter.bindings.SiteBinding;
-import org.activityinfo.legacy.shared.adapter.bindings.SiteBindingFactory;
-import org.activityinfo.legacy.shared.command.GetActivityForm;
-import org.activityinfo.legacy.shared.command.GetSites;
-import org.activityinfo.legacy.shared.command.UpdateFormClass;
-import org.activityinfo.legacy.shared.command.result.SiteResult;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.IsResource;
+import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ParametrizedFieldTypeClass;
+import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservablePromise;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromiseExecutionOperation;
 import org.activityinfo.promise.PromisesExecutionGuard;
@@ -28,118 +25,125 @@ import org.activityinfo.promise.PromisesExecutionMonitor;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Exposes a legacy {@code Dispatcher} implementation as new {@code ResourceLocator}
  */
 public class ResourceLocatorAdaptor implements ResourceLocator {
 
-    private final Dispatcher dispatcher;
-    private final ClassProvider classProvider;
+    private ActivityInfoClientAsync client;
 
-    public ResourceLocatorAdaptor(Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-        this.classProvider = new ClassProvider(dispatcher);
+    public ResourceLocatorAdaptor() {
+        if(!GWT.isClient()) {
+            throw new IllegalStateException("Can only be called in client code.");
+        }
+        this.client = new ActivityInfoClientAsyncImpl();
+    }
+
+    public ResourceLocatorAdaptor(ActivityInfoClientAsync client) {
+        this.client = client;
     }
 
     @Override
     public Promise<FormClass> getFormClass(ResourceId classId) {
-        return classProvider.apply(classId);
-    }
-
-    @Override
-    public Promise<FormInstance> getFormInstance(ResourceId instanceId) {
-        if(instanceId.getDomain() == CuidAdapter.SITE_DOMAIN) {
-            final Promise<SiteResult> site = dispatcher.execute(GetSites.byId(CuidAdapter.getLegacyIdFromCuid(instanceId)));
-            final Promise<ActivityFormDTO> form = site.join(new Function<SiteResult, Promise<ActivityFormDTO>>() {
-                @Nullable
-                @Override
-                public Promise<ActivityFormDTO> apply(@Nullable SiteResult input) {
-                    if (input != null) {
-                        List<SiteDTO> data = input.getData();
-                        if (data != null && !data.isEmpty()) {
-                            SiteDTO siteDTO = data.get(0);
-                            if (siteDTO != null) {
-                                return dispatcher.execute(new GetActivityForm(siteDTO.getActivityId()));
-                            }
-                        }
-                    }
-
-                    return Promise.resolved(null);
-                }
-            });
-            return Promise.waitAll(site, form).then(new Function<Void, FormInstance>() {
-                @Nullable
-                @Override
-                public FormInstance apply(@Nullable Void input) {
-                    if (form != null) {
-                        ActivityFormDTO activityFormDTO = form.get();
-                        if (activityFormDTO != null) {
-                            SiteBinding binding = new SiteBindingFactory().apply(activityFormDTO);
-                            if (site != null) {
-                                SiteResult siteResult = site.get();
-                                if (siteResult != null) {
-                                    List<SiteDTO> data = siteResult.getData();
-                                    if (data != null && !data.isEmpty()) {
-                                        SiteDTO siteDTO = data.get(0);
-                                        if (siteDTO != null) {
-                                            return binding.newInstance(siteDTO);
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    return null;
-                }
-            });
+        // TODO: Do not treat type parameters as a FormClass.
+        if(classId.asString().startsWith("_type:")) {
+            String typeId = classId.asString().substring("_type:".length());
+            FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(typeId);
+            ParametrizedFieldTypeClass parametrizedFieldTypeClass = (ParametrizedFieldTypeClass) typeClass;
+            return Promise.resolved(parametrizedFieldTypeClass.getParameterFormClass());
         }
-        return queryInstances(new IdCriteria(instanceId)).then(new SelectSingle());
+        return client.getFormSchema(classId.asString());
     }
 
     @Override
-    public Promise<Void> persist(IsResource resource) {
-        if (resource instanceof FormInstance) {
-            FormInstance instance = (FormInstance) resource;
-            if (instance.getId().getDomain() == CuidAdapter.SITE_DOMAIN) {
-                return new SitePersister(dispatcher).persist(instance);
+    public Observable<ColumnSet> getTable(QueryModel queryModel) {
+        return new ObservablePromise<>(client.queryTableColumns(queryModel));
+    }
 
-            } else if (instance.getId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
-                return new LocationPersister(dispatcher, instance).persist();
+    @Override
+    public Promise<ColumnSet> queryTable(QueryModel queryModel) {
+        return client.queryTableColumns(queryModel);
+    }
+
+    @Override
+    public Promise<FormInstance> getFormInstance(final ResourceId formId, final ResourceId formRecordId) {
+        final Promise<FormClass> formClass = client.getFormSchema(formId.asString());
+        final Promise<FormRecord> record = client.getRecord(formId.asString(), formRecordId.asString());
+
+        return Promise.waitAll(formClass, record).then(new Function<Void, FormInstance>() {
+            @Nullable
+            @Override
+            public FormInstance apply(@Nullable Void input) {
+               return FormInstance.toFormInstance(formClass.get(), record.get());
             }
-        } else if(resource instanceof FormClass) {
-            return dispatcher.execute(new UpdateFormClass((FormClass) resource)).thenDiscardResult();
-        }
-        return Promise.rejected(new UnsupportedOperationException());
+        });
     }
 
     @Override
-    public Promise<Void> persist(List<? extends IsResource> resources) {
-        return persist(resources, null);
-    }
-
-    @Override
-    public Promise<Void> persist(List<? extends IsResource> resources, @Nullable PromisesExecutionMonitor monitor) {
-        final List<PromiseExecutionOperation> operations = Lists.newArrayList();
-        for (final IsResource resource : resources) {
-            operations.add(new PromiseExecutionOperation() {
-                @Override
-                public Promise<Void> apply(Void input) {
-                    return persist(resource);
+    public Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId) {
+        final Promise<FormRecordSet> records = client.getRecords(subFormId.asString(), parentRecordId.asString());
+        final Promise<FormClass> subFormClass = getFormClass(subFormId);
+        return Promise.waitAll(records, subFormClass).then(new Function<Void, List<FormInstance>>() {
+            @Nullable
+            @Override
+            public List<FormInstance> apply(@Nullable Void aVoid) {
+                List<FormInstance> instances = Lists.newArrayList();
+                for (FormRecord record : records.get().getRecords()) {
+                    instances.add(FormInstance.toFormInstance(subFormClass.get(), record));
                 }
-            });
-        }
-        return persistOperation(operations, monitor);
+                return instances;
+            }
+        });
     }
 
     @Override
-    public Promise<Void> persistOperation(List<PromiseExecutionOperation> operations) {
-        return persistOperation(operations, null);
+    public Promise<List<FormHistoryEntry>> getFormRecordHistory(ResourceId formId, ResourceId recordId) {
+        return client.getRecordHistory(formId.asString(), recordId.asString());
+    }
+
+
+    @Override
+    public Promise<Void> persist(FormInstance instance) {
+        return client.createRecord(
+                instance.getFormId().asString(),
+                buildUpdate(instance))
+                .thenDiscardResult();
+    }
+
+    @Override
+    public Promise<Void> persist(FormClass formClass) {
+        return client.updateFormSchema(formClass.getId().asString(), formClass);
+    }
+
+    private NewFormRecordBuilder buildUpdate(FormInstance instance) {
+        NewFormRecordBuilder update = new NewFormRecordBuilder();
+        update.setId(instance.getId().asString());
+        update.setParentRecordId(instance.getParentRecordId().asString());
+
+        for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
+            String field = entry.getKey().asString();
+            if(!field.equals("classId")) {
+                update.setFieldValue(field, entry.getValue().toJsonElement());
+            }
+        }
+        return update;
+    }
+
+    @Override
+    public Promise<Void> persist(List<FormInstance> formInstances) {
+        return persist(formInstances, null);
+    }
+
+    @Override
+    public Promise<Void> persist(List<FormInstance> formInstances, @Nullable PromisesExecutionMonitor monitor) {
+        List<Promise<Void>> promises = Lists.newArrayList();
+        for (FormInstance instance : formInstances) {
+            promises.add(persist(instance));
+        }
+        return Promise.waitAll(promises);
     }
 
     @Override
@@ -147,40 +151,26 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         return PromisesExecutionGuard.newInstance().withMonitor(monitor).executeSerially(operations);
     }
 
-    @Override
-    public Promise<List<FormInstance>> queryInstances(Criteria criteria) {
-        return new QueryExecutor(dispatcher, criteria).execute();
+    public Promise<Void> remove(ResourceId formId, ResourceId resourceId) {
+        FormRecordUpdateBuilder builder = new FormRecordUpdateBuilder();
+        builder.setDeleted(true);
+
+        return client.updateRecord(formId.asString(), resourceId.asString(), builder).thenDiscardResult();
     }
 
     @Override
-    public Promise<List<Projection>> query(final InstanceQuery query) {
-        query.setCriteria(query.getCriteria().copy()); // we don't want to modify original criteria to preserve data
-
-        Joiner joiner = new Joiner(dispatcher, query.getFieldPaths(), query.getCriteria());
-        if (query.isFilterQuery()) {
-            // table filter : fetching unique values for given column
-            query.getCriteria().accept(new RemoveFieldCriteriaVisitor());
-            return joiner.apply(query).join(new ProjectionsByUniqueColumnFilter(query.getFilterFieldPath()));
+    public Promise<Void> remove(ResourceId formId, Collection<ResourceId> resources) {
+        // todo one call instead of multiple
+        List<Promise<Void>> promises = Lists.newArrayList();
+        for (ResourceId resourceId : resources) {
+            promises.add(remove(formId, resourceId));
         }
-        return joiner.apply(query);
+        return Promise.waitAll(promises);
     }
 
     @Override
-    public Promise<QueryResult<Projection>> queryProjection(InstanceQuery query) {
-        return query(query).then(new InstanceQueryResultAdapter(query));
+    public Promise<List<CatalogEntry>> getCatalogEntries(String parentId) {
+        return client.getFormCatalog(parentId);
     }
 
-    public Promise<Void> remove(ResourceId resourceId) {
-        return remove(Collections.singleton(resourceId));
-    }
-
-    @Override
-    public Promise<Void> remove(Collection<ResourceId> resources) {
-        return new Eraser(dispatcher, resources).execute();
-    }
-
-    @Override
-    public Promise<List<FormInstance>> queryInstances(Set<ResourceId> formClassIds) {
-        return queryInstances(ClassCriteria.union(formClassIds));
-    }
 }

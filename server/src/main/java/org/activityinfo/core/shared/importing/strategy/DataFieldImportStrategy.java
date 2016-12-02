@@ -1,8 +1,8 @@
 package org.activityinfo.core.shared.importing.strategy;
 
 import org.activityinfo.core.shared.importing.model.ImportModel;
-import org.activityinfo.core.shared.type.converter.Converter;
-import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.core.shared.type.converter.FieldParserFactory;
+import org.activityinfo.core.shared.type.converter.FieldValueParser;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.attachment.AttachmentType;
 
@@ -17,9 +17,9 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
 
     public static final TargetSiteId VALUE = new TargetSiteId("value");
 
-    private final ConverterFactory converterFactory;
+    private final FieldParserFactory converterFactory;
 
-    public DataFieldImportStrategy(ConverterFactory converterFactory) {
+    public DataFieldImportStrategy(FieldParserFactory converterFactory) {
         this.converterFactory = converterFactory;
     }
 
@@ -45,7 +45,7 @@ public class DataFieldImportStrategy implements FieldImportStrategy {
             column = MissingColumn.INSTANCE;
         }
 
-        Converter converter = converterFactory.createStringConverter(node.getTypeClass());
+        FieldValueParser converter = converterFactory.createStringConverter(node.getType());
 
         return new DataFieldImporter(column, requiredTarget, converter, node, model);
     }

@@ -85,7 +85,7 @@ public class ExprParser {
             return parseGroup();
 
         } else if (token.getType() == TokenType.SYMBOL) {
-            if(isFunction(token)) {
+            if(lexer.hasNext() && lexer.peek().getType() == TokenType.PAREN_START) {
                 return parseFunctionCall(token);
             } else {
                 return new SymbolExpr(token.getString());
@@ -139,10 +139,6 @@ public class ExprParser {
         return token.getType() == TokenType.OPERATOR && PREFIX_OPERATORS.contains(token.getString());
     }
 
-    private boolean isFunction(Token token) {
-        return token.getType() == TokenType.SYMBOL && FUNCTIONS.contains(token.getString()) && lexer.peek().getType() == TokenType.PAREN_START;
-    }
-
     private ExprNode parseGroup() {
         ExprNode expr = parse();
         expectNext(TokenType.PAREN_END, "')'");
@@ -166,11 +162,7 @@ public class ExprParser {
     }
 
     public static ExprNode parse(String expression) {
-        try {
-            ExprParser parser = new ExprParser(new ExprLexer(expression));
-            return parser.parse();
-        } catch(Exception e) {
-            throw new RuntimeException("Failed to parse expression: '" + expression + "'", e);
-        }
+        ExprParser parser = new ExprParser(new ExprLexer(expression));
+        return parser.parse();
     }
 }

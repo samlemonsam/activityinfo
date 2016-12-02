@@ -23,9 +23,9 @@ public class CountryStructure {
             .newBuilder()
             .expireAfterWrite(10, TimeUnit.HOURS)
             .build();
-    
-    
-    private Set<Integer> adminLevels = new HashSet<>();
+
+
+    private List<Integer> adminLevels = new ArrayList<>();
     private Map<Integer, Integer> parentMap = new HashMap<>();
     
     private CountryStructure() {}
@@ -36,7 +36,7 @@ public class CountryStructure {
     
     public static CountryStructure query(QueryExecutor executor, int countryId) throws SQLException {
         
-        // Try first to fetch from the instance-level cache        
+        // Try first to fetch from the instance-level cache
         CountryStructure country = INSTANCE_CACHE.getIfPresent(countryId);
         if(country != null) {
             return country;
@@ -67,12 +67,12 @@ public class CountryStructure {
         return country;
     }
 
-    public Set<Integer> getAdminLevelIds() {
+    public List<Integer> getAdminLevelIds() {
         return adminLevels;
     }
     
-    public Set<ResourceId> getAdminLevelFormClassIds() {
-        Set<ResourceId> set = new HashSet<>();
+    public List<ResourceId> getAdminLevelFormClassIds() {
+        List<ResourceId> set = new ArrayList<>();
         for (Integer adminLevel : adminLevels) {
             set.add(CuidAdapter.adminLevelFormClass(adminLevel));
         }

@@ -7,6 +7,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.mysql.GeodbFolder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -19,10 +20,10 @@ public class CountryTable implements SimpleTable {
 
     public static final String TABLE_NAME = "country";
 
-    public static final ResourceId FORM_CLASS_ID = ResourceId.valueOf("FF8081814AE2C808014AE2C80FE30001");
-    public static final ResourceId NAME_FIELD_ID = ResourceId.valueOf("FF8081814AE2C808014AE2C86AEE0002");
-    public static final ResourceId CODE_FIELD_ID = ResourceId.valueOf("FF8081814AE2C808014AE2CA840D0003");
-    public static final ResourceId BOUNDARY_FIELD_ID = ResourceId.valueOf("FF8081814AE3CC9B014AE3CCB2850001");
+    public static final ResourceId FORM_CLASS_ID = ResourceId.valueOf("country");
+    public static final ResourceId NAME_FIELD_ID = ResourceId.valueOf("name");
+    public static final ResourceId CODE_FIELD_ID = ResourceId.valueOf("code");
+    public static final ResourceId BOUNDARY_FIELD_ID = ResourceId.valueOf("boundary");
 
 
     @Override
@@ -31,7 +32,7 @@ public class CountryTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException {
         FormField nameField = new FormField(NAME_FIELD_ID);
         nameField.setCode("label");
         nameField.setLabel(I18N.CONSTANTS.name());
@@ -41,7 +42,7 @@ public class CountryTable implements SimpleTable {
         isoField.setCode("code");
         isoField.setLabel(I18N.CONSTANTS.codeFieldLabel());
         isoField.setType(TextType.INSTANCE);
-
+    
         FormField boundaryField = new FormField(BOUNDARY_FIELD_ID);
         boundaryField.setCode("boundary");
         boundaryField.setLabel(I18N.CONSTANTS.boundaries());
@@ -52,7 +53,7 @@ public class CountryTable implements SimpleTable {
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);
         mapping.setFormLabel("Country");
         mapping.setPrimaryKeyMapping(CuidAdapter.COUNTRY_DOMAIN, "countryId");
-        mapping.setOwnerId(ResourceId.ROOT_ID);
+        mapping.setDatabaseId(GeodbFolder.GEODB_ID);
         mapping.addTextField(nameField, "name");
         mapping.addTextField(isoField, "iso2");
         mapping.addGeoAreaField(boundaryField);

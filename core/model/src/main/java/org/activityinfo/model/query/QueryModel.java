@@ -1,6 +1,11 @@
 package org.activityinfo.model.query;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -28,11 +33,11 @@ public class QueryModel {
     }
 
     /**
-     * Creates a new TableModel using the given {@code classId} as the
+     * Creates a new TableModel using the given {@code formId} as the
      * root FormClassId
      */
-    public QueryModel(ResourceId classId) {
-        rowSources.add(new RowSource(classId));
+    public QueryModel(ResourceId formId) {
+        rowSources.add(new RowSource(formId));
     }
 
     public List<RowSource> getRowSources() {
@@ -41,6 +46,10 @@ public class QueryModel {
 
     public List<ColumnModel> getColumns() {
         return columns;
+    }
+    
+    public void addRowSource(ResourceId formId) {
+        rowSources.add(new RowSource(formId));
     }
 
     /**
@@ -125,8 +134,9 @@ public class QueryModel {
         this.filter = filter;
     }
 
-    public void addColumn(ColumnModel criteriaColumn) {
+    public QueryModel addColumn(ColumnModel criteriaColumn) {
         columns.add(criteriaColumn);
+        return this;
     }
 
     public void addColumns(List<ColumnModel> requiredColumns) {
@@ -163,6 +173,52 @@ public class QueryModel {
             needsComma = true;
         }
         return sb.toString();
+    }
+    
+    public String toJsonString() {
+        return toJsonElement().toString();
+    }
+
+    public static QueryModel fromJson(String json) {
+        QueryModel queryModel = new QueryModel();
+
+        JsonParser jsonParser = new JsonParser();
+        JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
+
+        JsonArray rowSources = jsonObject.getAsJsonArray("rowSources");
+        for (JsonElement rowSource : rowSources) {
+            queryModel.getRowSources().add(RowSource.fromJson(rowSource.getAsJsonObject()));
+        }
+
+        for (JsonElement column : jsonObject.getAsJsonArray("columns")) {
+            queryModel.getColumns().add(ColumnModel.fromJson(column.getAsJsonObject()));
+        }
+
+        if(jsonObject.has("filter")) {
+            String filter = jsonObject.get("filter").getAsString();
+            if (!Strings.isNullOrEmpty(filter)) {
+                queryModel.setFilter(filter);
+            }
+        }
+        return queryModel;
+    }
+
+    public JsonObject toJsonElement() {
+
+        JsonArray sourcesArray = new JsonArray();
+        for (RowSource rowSource : rowSources) {
+            sourcesArray.add(rowSource.toJsonElement());
+        }
+
+        JsonArray columnsArray = new JsonArray();
+        for (ColumnModel column : columns) {
+            columnsArray.add(column.toJsonElement());
+        }
+
+        JsonObject object = new JsonObject();
+        object.add("rowSources", sourcesArray);
+        object.add("columns", columnsArray);
+        return object;
     }
 }
 

@@ -27,7 +27,6 @@ import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.AbstractHeaderOrFooterBuilder;
-import org.activityinfo.core.shared.Projection;
 import org.activityinfo.ui.client.component.table.action.ButtonActionCell;
 import org.activityinfo.ui.client.component.table.action.TableHeaderAction;
 import org.activityinfo.ui.client.widget.CellTableAffixer;
@@ -35,7 +34,7 @@ import org.activityinfo.ui.client.widget.CellTableAffixer;
 /**
  * @author yuriyz on 4/2/14.
  */
-public class InstanceTableHeaderBuilder extends AbstractHeaderOrFooterBuilder<Projection> {
+public class InstanceTableHeaderBuilder extends AbstractHeaderOrFooterBuilder<RowView> {
 
     public static final int ACTION_ROW_INDEX = 0;
     public static final int COLUMN_ROW_INDEX = 1;

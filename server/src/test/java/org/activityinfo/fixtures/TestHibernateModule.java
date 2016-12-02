@@ -32,7 +32,8 @@ import org.activityinfo.server.database.hibernate.EntityManagerProvider;
 import org.activityinfo.server.database.hibernate.HibernateCatalogProvider;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.validator.HibernateValidator;
@@ -54,7 +55,8 @@ public class TestHibernateModule extends AbstractModule {
     protected void configure() {
 
         bind(EntityManager.class).toProvider(EntityManagerProvider.class).in(TestScoped.class);
-        bind(CollectionCatalog.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
+        bind(MySqlCatalog.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
+        bind(FormCatalog.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
 
         bind(SqlDialect.class).to(MySqlDialect.class);
         bind(Connection.class).toProvider(TestConnectionProvider.class);
@@ -90,7 +92,6 @@ public class TestHibernateModule extends AbstractModule {
             Map<String, String> configOverrides = new HashMap<>();
             configOverrides.put("hibernate.connection.provider_class",
                     TestConnectionProvider.class.getName());
-//            configOverrides.put("hibernate.show_sql", "true");
 
             emf = Persistence.createEntityManagerFactory("ActivityInfo", configOverrides);
 

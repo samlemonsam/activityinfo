@@ -1,14 +1,13 @@
 package org.activityinfo.model.form;
 
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
+import com.google.gson.JsonElement;
 import org.activityinfo.model.resource.ResourceId;
 
-public abstract class FormElement implements IsRecord {
+public abstract class FormElement {
 
     public abstract ResourceId getId();
 
     public abstract String getLabel();
 
-    public abstract Record asRecord();
+    public abstract JsonElement toJsonObject();
 }

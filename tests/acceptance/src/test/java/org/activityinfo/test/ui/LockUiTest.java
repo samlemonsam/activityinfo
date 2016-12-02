@@ -24,6 +24,7 @@ package org.activityinfo.test.ui;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.test.Sleep;
 import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.pageobject.gxt.GxtModal;
 import org.activityinfo.test.pageobject.web.design.LocksPage;
@@ -84,6 +85,8 @@ public class LockUiTest {
         locksPage.grid().clickCell(lockName);
         GxtModal confirmDialog = locksPage.clickDelete();
         confirmDialog.clickButton(I18N.CONSTANTS.yes());
+
+        Sleep.sleepSeconds(1);
 
         assertFalse(locksPage.grid().findCellOptional(lockName).isPresent()); // assert lock is removed
         assertFalse(locksPage.getToolbarMenu().button(I18N.CONSTANTS.delete()).isEnabled()); // assert delete button is disabled

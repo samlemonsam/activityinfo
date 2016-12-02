@@ -21,14 +21,18 @@ package org.activityinfo.ui.client.component.form;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.expr.ExprLexer;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
 import java.util.Set;
@@ -58,9 +62,19 @@ public class RelevanceHandler {
                 ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
                 ExprParser parser = new ExprParser(lexer);
                 ExprNode expr = parser.parse();
-                FieldContainer fieldContainer = simpleFormPanel.getFieldContainer(field.getId());
+                FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
                 if (fieldContainer != null) {
-                    boolean relevant = expr.evaluateAsBoolean(new FormEvalContext(simpleFormPanel.getFormClass(), simpleFormPanel.getInstance()));
+                    FormModel model = simpleFormPanel.getModel();
+                    Optional<FormInstance> instance = model.getWorkingInstance(field.getId(), simpleFormPanel.getSelectedKey(field));
+                    FormClass formClass = model.getClassByField(field.getId());
+                    boolean relevant;
+                    if (instance.isPresent()) {
+                        relevant = expr.evaluateAsBoolean(new FormEvalContext(formClass, instance.get()));
+                    }
+                    else {
+                        relevant = expr.evaluateAsBoolean(new FormEvalContext(formClass, 
+                                new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId())));
+                    }
                     fieldContainer.getFieldWidget().setReadOnly(!relevant);
 
                     if (!relevant) {
@@ -101,7 +115,7 @@ public class RelevanceHandler {
     public void formClassChanged() {
         fieldsWithSkipExpression = Lists.newArrayList();
 
-        for (FormField formField : simpleFormPanel.getFormClass().getFields()) {
+        for (FormField formField : simpleFormPanel.getModel().getAllFormsFields()) {
             if (formField.hasRelevanceConditionExpression()) {
                 fieldsWithSkipExpression.add(formField);
             }

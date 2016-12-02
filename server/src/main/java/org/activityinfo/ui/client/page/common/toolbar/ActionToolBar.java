@@ -130,7 +130,7 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
     public void addExcelExportButton() {
         addButton(UIActions.EXPORT, I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
     }
-
+    
     public void addRefreshButton() {
         addButton(UIActions.REFRESH, I18N.CONSTANTS.refreshPreview(), IconImageBundle.ICONS.refresh());
     }

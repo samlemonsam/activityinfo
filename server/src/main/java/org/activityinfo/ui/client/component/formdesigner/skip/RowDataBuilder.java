@@ -27,15 +27,13 @@ import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.functions.BooleanFunctions;
 import org.activityinfo.model.expr.functions.ComparisonOperator;
 import org.activityinfo.model.expr.functions.ExprFunction;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.HasSetFieldValue;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerModel;
 
 import java.util.List;
 import java.util.Set;
@@ -52,10 +50,10 @@ public class RowDataBuilder {
     public static final ExprFunction DEFAULT_JOIN_FUNCTION = BooleanFunctions.AND;
 
     private List<RowData> rows = Lists.newArrayList(); // keep list, order is important!
-    private FormClass formClass;
+    private FormDesignerModel model;
 
-    public RowDataBuilder(FormClass formClass) {
-        this.formClass = formClass;
+    public RowDataBuilder(FormDesignerModel model) {
+        this.model = model;
     }
 
     public List<RowData> build(String relevanceExpression) {
@@ -84,7 +82,7 @@ public class RowDataBuilder {
             final FunctionCallNode functionCallNode = (FunctionCallNode) node;
 
             if (ExprParser.FUNCTIONS.contains(functionCallNode.getFunction().getId())) {
-                FormField field = formClass.getField(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
+                FormField field = model.getFieldById(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
                 parseRowWithFunction(joinFunction, functionCallNode, field);
                 return;
 
@@ -96,7 +94,7 @@ public class RowDataBuilder {
                 if (arg1 instanceof SymbolExpr) {
 
                     if (isFieldFunction(functionCallNode.getFunction())) {
-                        FormField field = formClass.getField(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
+                        FormField field = model.getFieldById(ResourceId.valueOf(placeholder(unwrap(functionCallNode.getArguments().get(0)))));
 
                         final RowData row = getOrCreateRow(field);
                         row.setFunction(functionCallNode.getFunction());
@@ -135,7 +133,7 @@ public class RowDataBuilder {
                             ExprNode unwrappedArg1 = unwrappedNode.getArguments().get(0);
                             ExprNode unwrappedArg2 = unwrappedNode.getArguments().get(1);
 
-                            final FormField field = formClass.getField(ResourceId.valueOf(placeholder(unwrappedArg1)));
+                            final FormField field = model.getFieldById(ResourceId.valueOf(placeholder(unwrappedArg1)));
 
                             final RowData row = getOrCreateRow(field);
                             row.setFunction(unwrappedNode.getFunction());
@@ -162,20 +160,20 @@ public class RowDataBuilder {
         FieldType type = field.getType();
 
         // start from second element, first one is field id
-        Set<ResourceId> resourceIdSet = Sets.newHashSet();
+        Set<ResourceId> refs = Sets.newHashSet();
         for (int i = 1; i < functionCallNode.getArguments().size(); i++) {
             ExprNode argNode = functionCallNode.getArguments().get(i);
             if (argNode instanceof SymbolExpr) {
                 String symbol = ((SymbolExpr) argNode).getName();
-                resourceIdSet.add(ResourceId.valueOf(symbol));
+                refs.add(ResourceId.valueOf(symbol));
             } else {
                 throw new UnsupportedOperationException("Unknown argument node for function: " + functionCallNode.getFunction().getId());
             }
         }
         if (type instanceof ReferenceType) {
-            row.setValue(new ReferenceValue(resourceIdSet));
+            throw new UnsupportedOperationException("TODO");
         } else if (type instanceof EnumType) {
-            row.setValue(new EnumValue(resourceIdSet));
+            row.setValue(new EnumValue(refs));
         } else {
             throw new UnsupportedOperationException("Unknown value type for function: " + functionCallNode.getFunction().getId());
         }
@@ -218,20 +216,16 @@ public class RowDataBuilder {
         } else if (node instanceof SymbolExpr) {
             ResourceId newItem = ResourceId.valueOf(placeholder(node));
 
-            if (row.getValue() instanceof HasSetFieldValue) { // update existing value
-                HasSetFieldValue oldValue = (HasSetFieldValue) row.getValue();
+            if (row.getValue() instanceof EnumValue) { // update existing value
+                EnumValue oldValue = (EnumValue) row.getValue();
                 Set<ResourceId> newValue = Sets.newHashSet(oldValue.getResourceIds());
                 newValue.add(newItem);
                 if (row.getFormField().getType() instanceof EnumType) {
                     row.setValue(new EnumValue(newValue));
-                } else if (row.getFormField().getType() instanceof ReferenceType) {
-                    row.setValue(new ReferenceValue(newValue));
                 }
             } else { // create value
                 if (row.getFormField().getType() instanceof EnumType) {
                     row.setValue(new EnumValue(newItem));
-                } else if (row.getFormField().getType() instanceof ReferenceType) {
-                    row.setValue(new ReferenceValue(newItem));
                 } else {
                     throw new UnsupportedOperationException(row.getFormField().getType() + " is not supported.");
                 }

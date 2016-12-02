@@ -1,8 +1,9 @@
 package org.activityinfo.core.shared.application;
 
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.form.ApplicationProperties;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.ResourceId;
 
 /**
  * Defines a system-level FormClass of folders

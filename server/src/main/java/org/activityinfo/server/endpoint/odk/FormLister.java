@@ -50,7 +50,7 @@ public class FormLister {
                     form.setVersion(getVersion());
 
                     form.setDownloadUrl(uri.getBaseUriBuilder()
-                            .path(FormResource.class)
+                            .path(XFormResources.class)
                             .path(Integer.toString(activity.getId()))
                             .path("xform")
                             .build());

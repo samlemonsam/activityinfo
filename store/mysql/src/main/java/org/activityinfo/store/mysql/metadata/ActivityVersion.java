@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.metadata;
 
 
-class ActivityVersion {
+public class ActivityVersion {
     private int id;
     private long schemaVersion;
     private long siteVersion;
@@ -13,7 +13,7 @@ class ActivityVersion {
     }
 
     public String getSchemaCacheKey() {
-        return "activity:metadata:" + id + "@" + schemaVersion;
+        return "activity:2:metadata:" + id + "@" + schemaVersion;
     }
 
     public int getId() {

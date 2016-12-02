@@ -37,6 +37,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -63,9 +64,10 @@ import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.DbPage;
 import org.activityinfo.ui.client.page.config.DbPageState;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImportDialog;
-import org.activityinfo.ui.client.page.config.design.importer.SchemaImporter;
-import org.activityinfo.ui.client.page.instance.InstancePage;
-import org.activityinfo.ui.client.page.instance.InstancePlace;
+import org.activityinfo.core.shared.importing.schema.SchemaImporterV2;
+import org.activityinfo.core.shared.importing.schema.SchemaImporterV3;
+import org.activityinfo.ui.client.page.resource.ResourcePage;
+import org.activityinfo.ui.client.page.resource.ResourcePlace;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -79,6 +81,8 @@ import java.util.Objects;
  */
 public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> implements DbPage {
     public static final PageId PAGE_ID = new PageId("design");
+
+
 
     @ImplementedBy(DesignView.class)
     public interface View extends TreeGridView<DesignPresenter, ModelData> {
@@ -101,6 +105,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
     private final EventBus eventBus;
     private final Dispatcher service;
+    private ResourceLocator locator;
     private final View view;
     private final UiConstants messages;
 
@@ -110,12 +115,14 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     @Inject
     public DesignPresenter(EventBus eventBus,
                            Dispatcher service,
+                           ResourceLocator locator,
                            StateProvider stateMgr,
                            View view,
                            UiConstants messages) {
         super(eventBus, service, stateMgr, view);
         this.eventBus = eventBus;
         this.service = service;
+        this.locator = locator;
         this.view = view;
         this.messages = messages;
     }
@@ -248,16 +255,28 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
                ((DbPageState) place).getDatabaseId() == db.getId();
     }
 
+
+    public void exportFullDatabase() {
+        Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
+    }
+
+    public void exportFullDatabaseBeta() {
+        Window.open("/resources/database/" + db.getId() + "/schema-v3.csv", "_blank", null);
+    }
+    
+    public void exportFormAsXlsForm() {
+        Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
+    }
+
     @Override
     public void onUIAction(String actionId) {
         super.onUIAction(actionId);
 
-        if (UIActions.EXPORT.equals(actionId)) {
-            Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
-
-        } else if (UIActions.IMPORT.equals(actionId)) {
-            SchemaImporter importer = new SchemaImporter(service, db);
-            SchemaImportDialog dialog = new SchemaImportDialog(importer);
+        if (UIActions.IMPORT.equals(actionId)) {
+            SchemaImporterV2 importer = new SchemaImporterV2(service, db);
+            SchemaImportDialog dialog = new SchemaImportDialog(
+                    new SchemaImporterV2(service, db),
+                    new SchemaImporterV3(db.getId(), locator));
             dialog.show().then(new Function<Void, Object>() {
                 @Nullable
                 @Override
@@ -269,12 +288,12 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         } else if(UIActions.EDIT.equals(actionId)) {
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(getSelectedFormClassId(), InstancePage.DESIGN_PAGE_ID)));
+                    new ResourcePlace(getSelectedFormClassId(), ResourcePage.DESIGN_PAGE_ID)));
 
         } else if(UIActions.OPEN_TABLE.equals(actionId)) {
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new InstancePlace(getSelectedFormClassId(), InstancePage.TABLE_PAGE_ID)));
+                    new ResourcePlace(getSelectedFormClassId(), ResourcePage.TABLE_PAGE_ID)));
         }
     }
 
@@ -398,7 +417,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 //
 //                    eventBus.fireEvent(new NavigationEvent(
 //                            NavigationHandler.NAVIGATION_REQUESTED,
-//                            new InstancePlace(newActivity.getResourceId(), InstancePage.DESIGN_PAGE_ID)));
+//                            new ResourcePlace(newActivity.getRecordId(), ResourcePage.DESIGN_PAGE_ID)));
 //                }
 //            });
 //

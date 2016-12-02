@@ -68,7 +68,7 @@ public class SiteHistoryProcessor {
         EntityManager em = entityManager.get();
 
 
-        // It's important to use getReference() here rather
+        // It's important to use getOnlyReference() here rather
         // than find() becuase the site might not actually have
         // been sent to the database at this point
         Site site = em.getReference(Site.class, siteId);

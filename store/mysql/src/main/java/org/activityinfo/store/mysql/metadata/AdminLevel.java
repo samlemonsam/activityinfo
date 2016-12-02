@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.metadata;
 
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.service.store.ResourceNotFound;
+import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.ResultSet;
@@ -32,7 +32,7 @@ public class AdminLevel {
                         "WHERE L.AdminLevelId = " + levelId)) {
 
             if (!rs.next()) {
-                throw new ResourceNotFound(CuidAdapter.adminLevelFormClass(levelId));
+                throw new FormNotFoundException(CuidAdapter.adminLevelFormClass(levelId));
             }
             AdminLevel level = new AdminLevel();
             level.id = levelId;

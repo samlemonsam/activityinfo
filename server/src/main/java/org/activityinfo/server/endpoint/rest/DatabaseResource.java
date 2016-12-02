@@ -1,16 +1,20 @@
 package org.activityinfo.server.endpoint.rest;
 
+import com.google.inject.Provider;
+import org.activityinfo.core.shared.importing.schema.SchemaCsvWriter;
+import org.activityinfo.core.shared.importing.schema.SchemaCsvWriterV3;
 import org.activityinfo.io.xform.XFormReader;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.command.UpdateFormClass;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.ws.rs.*;
@@ -21,10 +25,12 @@ import javax.ws.rs.core.UriInfo;
 
 public class DatabaseResource {
 
+    private Provider<FormCatalog> catalog;
     private final DispatcherSync dispatcher;
     private final int databaseId;
 
-    public DatabaseResource(DispatcherSync dispatcher, int databaseId) {
+    public DatabaseResource(Provider<FormCatalog> catalog, DispatcherSync dispatcher, int databaseId) {
+        this.catalog = catalog;
         this.dispatcher = dispatcher;
         this.databaseId = databaseId;
     }
@@ -55,15 +61,33 @@ public class DatabaseResource {
     @Path("schema.csv")
     public Response getDatabaseSchemaCsv() {
         SchemaCsvWriter writer = new SchemaCsvWriter(dispatcher);
-        writer.writeByteOrderMark();
         writer.write(databaseId);
 
+        return writeCsv("schema_" + databaseId + ".csv", writer.toString());
+    }
+
+
+    @GET
+    @Path("schema-v3.csv")
+    public Response getDatabaseSchemaV3() {
+
+        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
+
+        SchemaCsvWriterV3 writer = new SchemaCsvWriterV3(catalog.get());
+        writer.writeForms(db);
+
+        return writeCsv("schema-v3_" + databaseId + ".csv", writer.toString());
+    }
+
+
+    private Response writeCsv(String filename, String text) {
         return Response.ok()
                 .type("text/csv;charset=UTF-8")
-                .header("Content-Disposition", "attachment; filename=schema_" + databaseId + ".csv")
-                .entity(writer.toString())
+                .header("Content-Disposition", "attachment; filename=" + filename)
+                .entity(text)
                 .build();
     }
+    
 
 
     @POST
@@ -85,10 +109,11 @@ public class DatabaseResource {
         XFormReader builder = new XFormReader(xForm);
         FormClass formClass = builder.build();
         formClass.setId(CuidAdapter.activityFormClass(activityId));
-        formClass.setOwnerId(CuidAdapter.databaseId(databaseId));
+        formClass.setDatabaseId(CuidAdapter.databaseId(databaseId));
 
-        dispatcher.execute(new UpdateFormClass(formClass));
-
+        MySqlCatalog formCatalog = (MySqlCatalog) catalog.get();
+        formCatalog.createOrUpdateFormSchema(formClass);
+        
         return Response.created(uri.getAbsolutePathBuilder()
                 .path(RootResource.class).path("forms").path(formClass.getId().asString())
                 .build())

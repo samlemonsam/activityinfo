@@ -16,13 +16,8 @@ import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.test.Sleep;
-import org.activityinfo.test.driver.ApplicationDriver;
-import org.activityinfo.test.driver.DataEntryDriver;
-import org.activityinfo.test.driver.FieldValue;
-import org.activityinfo.test.driver.TableDataParser;
-import org.activityinfo.test.pageobject.bootstrap.BsFormPanel;
-import org.activityinfo.test.pageobject.bootstrap.BsModal;
-import org.activityinfo.test.pageobject.bootstrap.BsTable;
+import org.activityinfo.test.driver.*;
+import org.activityinfo.test.pageobject.bootstrap.*;
 import org.activityinfo.test.pageobject.web.entry.DataEntryTab;
 import org.activityinfo.test.pageobject.web.entry.HistoryEntry;
 import org.activityinfo.test.pageobject.web.entry.TablePage;
@@ -41,12 +36,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 @ScenarioScoped
 public class DataEntrySteps {
+
+    public static final Logger LOGGER = Logger.getLogger(DataEntrySteps.class.getName());
 
     @Inject
     private ApplicationDriver driver;
@@ -115,9 +113,10 @@ public class DataEntrySteps {
 
     }
 
+
     private void dumpChanges(List<HistoryEntry> entries) {
         StringBuilder s = new StringBuilder();
-        for(HistoryEntry entry: entries) {
+        for (HistoryEntry entry : entries) {
             entry.appendTo(s);
         }
         System.out.print(s);
@@ -159,16 +158,16 @@ public class DataEntrySteps {
         List<String> columns = table.getGherkinRows().get(0).getCells();
         List<Integer> columnIndexes = new ArrayList<>();
         List<String> missingColumns = new ArrayList<>();
-        for(String expectedColumn : expectedColumns) {
+        for (String expectedColumn : expectedColumns) {
             int index = columns.indexOf(expectedColumn);
-            if(index == -1) {
+            if (index == -1) {
                 missingColumns.add(expectedColumn);
             } else {
                 columnIndexes.add(index);
             }
         }
 
-        if(!missingColumns.isEmpty()) {
+        if (!missingColumns.isEmpty()) {
             throw new AssertionError("Missing expected columns " + missingColumns + " in table:\n" + table.toString());
         }
 
@@ -325,8 +324,8 @@ public class DataEntrySteps {
     public void new_form_dialog_for_form_has_following_items_for_partner_field(String formName, List<String> expectedPartnerValues) throws Throwable {
         DataEntryDriver dataEntryDriver = driver.startNewSubmission(formName);
         boolean foundPartnerField = false;
-        while(dataEntryDriver.nextField()) {
-            switch(dataEntryDriver.getLabel()) {
+        while (dataEntryDriver.nextField()) {
+            switch (dataEntryDriver.getLabel()) {
                 case "Partner":
                     foundPartnerField = true;
                     List<String> items = Lists.newArrayList(dataEntryDriver.availableValues());
@@ -359,7 +358,7 @@ public class DataEntrySteps {
         dataEntryTab.selectSubmission(0);
         BsModal modal = dataEntryTab.editBetaSubmission();
 
-        Sleep.sleepSeconds(5); // give it a time fetch image serving url and put it to img.src
+        Sleep.sleepSeconds(35); // give it a time fetch image serving url and put it to img.src
         assertTrue(modal.form().findFieldByLabel(driver.getAliasTable().getAlias(imageFieldName)).isBlobImageLoaded());
 
         modal.cancel();
@@ -400,7 +399,7 @@ public class DataEntrySteps {
         String blobLink = firstDownloadableLinkOfFirstSubmission(attachmentFieldName);
 
         URL url = new URL(blobLink);
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.connect();
 
@@ -515,6 +514,163 @@ public class DataEntrySteps {
             }
         }
         throw new AssertionError("No field with name '" + fieldName + "'. Found: " + values);
+    }
+
+    @And("^I open a new form submission on table page$")
+    public void I_open_a_new_form_submission_on_table_page() throws Throwable {
+        driver.tablePage().table().newSubmission();
+    }
+
+    @And("^I enter \"([^\"]*)\" repeating subform values:$")
+    public void I_enter_repeating_subform_values(String repeatingSubformName, DataTable subformValues) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = subformValues.getGherkinRows().get(0);
+
+        addRepetitiveFormsIfNeeded(repeatingSubformName, modal, subformValues.getGherkinRows().size() - 2);
+
+        for (int i = 2; i < subformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = subformValues.getGherkinRows().get(i);
+            for (int j = 0; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+                String value = row.getCells().get(j);
+
+                LOGGER.finest("entering repeating subform values: label: " + label + ", value:" + value);
+
+                modal.form().findFieldsByLabel(label).get(i - 2).fill(value);
+                Sleep.sleepMillis(100);
+            }
+        }
+    }
+
+    private void addRepetitiveFormsIfNeeded(String subformName, BsModal modal, int numberOfRequiredForms) {
+        SubformContainer subform = modal.subform(subformName);
+        int numberOfRepetitiveForms = subform.getRepeatingPanelsCount();
+
+        for (int i = numberOfRepetitiveForms; i < numberOfRequiredForms; i++) {
+            subform.addAnother();
+            Sleep.sleepMillis(400);
+        }
+
+        assertEquals(numberOfRequiredForms, subform.getRepeatingPanelsCount());
+
+    }
+
+    @And("^I save submission$")
+    public void I_save_submission() throws Throwable {
+        currentOpenedForm().save();
+    }
+
+    @And("^I enter values:$")
+    public void I_enter_values(DataTable table) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = table.getGherkinRows().get(0);
+        DataTableRow type = table.getGherkinRows().get(1);
+
+        for (int i = 2; i < table.getGherkinRows().size(); i++) {
+            DataTableRow row = table.getGherkinRows().get(i);
+            for (int j = 0; j < row.getCells().size(); j++) {
+
+                String label = header.getCells().get(j);
+                if (!BsModal.isBuiltinLabel(label)) {
+                    label = driver.getAliasTable().getAlias(label);
+                }
+
+                String value = row.getCells().get(j);
+                if (label.equalsIgnoreCase(I18N.CONSTANTS.partner())) {
+                    value = driver.getAliasTable().getAlias(value);
+                }
+
+                modal.form().findFieldByLabel(label).fill(value, type.getCells().get(j));
+                Sleep.sleepMillis(100);
+            }
+        }
+    }
+
+    private BsModal currentOpenedForm() {
+        return BsModal.find(driver.tablePage().getPage().root());
+    }
+
+    @And("^open edit dialog for entry in new table with field value \"([^\"]*)\"$")
+    public void open_edit_dialog_for_entry_in_new_table_with_field_name_and_value(String fieldValue) throws Throwable {
+        TablePage tablePage = driver.tablePage();
+        tablePage.table().showAllColumns();//.waitUntilColumnShown(driver.getAliasTable().getAlias(fieldName));
+        tablePage.table().waitForCellByText(fieldValue).getContainer().clickWhenReady();
+
+        tablePage.table().editSubmission();
+    }
+
+    @Then("^opened form has repeating subform values:$")
+    public void opened_form_has_repeating_subform_values(DataTable expectedSubformValues) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = expectedSubformValues.getGherkinRows().get(0);
+        DataTableRow type = expectedSubformValues.getGherkinRows().get(1);
+
+        for (int i = 2; i < expectedSubformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = expectedSubformValues.getGherkinRows().get(i);
+            for (int j = 0; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+                String currentValue = modal.form().findFieldsByLabel(label).get(i - 2).getValue(ControlType.fromValue(type.getCells().get(j)));
+                assertEquals(row.getCells().get(j), currentValue);
+            }
+        }
+    }
+
+    @And("^delete item (\\d+) of \"([^\"]*)\" repeating subform$")
+    public void delete_item_of_repeating_subform(int itemIndex, String subformName) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        List<SubformPanel> panels = modal.subform(subformName).getPanels();
+        panels.get(itemIndex - 1).delete();
+
+    }
+
+    @And("^I enter \"([^\"]*)\" subform values:$")
+    public void I_enter_subform_values(String subformName, DataTable subformValues) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = subformValues.getGherkinRows().get(0);
+
+        SubformContainer subform = modal.subform(subformName);
+
+        for (int i = 2; i < subformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = subformValues.getGherkinRows().get(i);
+
+            String keyLabel = row.getCells().get(0);
+            subform.selectKey(keyLabel);
+
+            for (int j = 1; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+
+                modal.form().findFieldByLabel(label).fill(row.getCells().get(j));
+            }
+        }
+    }
+
+    @Then("^opened form has \"([^\"]*)\" subform keyed values:$")
+    public void opened_form_has_subform_keyed_values(String subformName, DataTable expectedSubformValues) throws Throwable {
+        BsModal modal = currentOpenedForm();
+
+        DataTableRow header = expectedSubformValues.getGherkinRows().get(0);
+        DataTableRow type = expectedSubformValues.getGherkinRows().get(1);
+
+        SubformContainer subform = modal.subform(subformName);
+
+        for (int i = 2; i < expectedSubformValues.getGherkinRows().size(); i++) {
+            DataTableRow row = expectedSubformValues.getGherkinRows().get(i);
+
+            String keyLabel = row.getCells().get(0);
+
+            subform.selectKey(keyLabel);
+
+            for (int j = 1; j < header.getCells().size(); j++) {
+                String label = driver.getAliasTable().getAlias(header.getCells().get(j));
+                String currentValue = modal.form().findFieldByLabel(label).getValue(ControlType.fromValue(type.getCells().get(j)));
+                assertEquals(row.getCells().get(j), currentValue);
+            }
+        }
     }
 
     @And("^hide built-in columns$")

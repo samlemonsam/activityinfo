@@ -3,10 +3,14 @@ package org.activityinfo.store.mysql.metadata;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.collections.BETA;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 
@@ -17,7 +21,6 @@ public class Activity implements Serializable {
 
     int activityId;
     int databaseId;
-    int databaseOwnerId;
     String databaseName;
     int reportingFrequency;
     int locationTypeId;
@@ -29,18 +32,27 @@ public class Activity implements Serializable {
      * activity references *multiple* location types
      */
     Set<Integer> locationTypeIds = Sets.newHashSet();
+    Set<ResourceId> locationRange = Sets.newHashSet();
     String category;
     String locationTypeName;
-    int adminLevelId;
+    Integer adminLevelId;
     String name;
     int ownerUserId;
     boolean published;
     long schemaVersion;
-    long version;
+    long siteVersion;
     
     boolean deleted;
-    
+
+    boolean classicView;
+
+    FormClassHolder serializedFormClass = new FormClassHolder();
+
+
     List<ActivityField> fields = Lists.newArrayList();
+    
+    
+    Map<ResourceId, Integer> fieldsOrder = Maps.newHashMap();
 
     /**
      * Map from destination indicator to it source indicators
@@ -48,7 +60,7 @@ public class Activity implements Serializable {
     Multimap<Integer, Integer> linkedIndicators = HashMultimap.create();
     
     Map<Integer, LinkedActivity> linkedActivities = Maps.newHashMap();
-    
+
     public int getId() {
         return activityId;
     }
@@ -69,16 +81,24 @@ public class Activity implements Serializable {
         return category;
     }
 
+    public boolean isClassicView() {
+        return classicView;
+    }
+
     public String getLocationTypeName() {
         return locationTypeName;
     }
 
-    public int getAdminLevelId() {
+    public Integer getAdminLevelId() {
         return adminLevelId;
     }
 
     public List<ActivityField> getFields() {
         return fields;
+    }
+
+    public Map<ResourceId, Integer> getFieldsOrder() {
+        return fieldsOrder;
     }
 
     public String getName() {
@@ -99,7 +119,7 @@ public class Activity implements Serializable {
     }
 
     public long getVersion() {
-        return version;
+        return Math.max(siteVersion, schemaVersion);
     }
 
     public Iterable<ActivityField> getIndicatorFields() {
@@ -133,7 +153,7 @@ public class Activity implements Serializable {
     }
     
     public ResourceId getPartnerFormClassId() {
-        return CuidAdapter.partnerFormClass(databaseId);
+        return CuidAdapter.partnerFormId(databaseId);
     }
 
     public ResourceId getLocationFormClassId() {
@@ -151,11 +171,11 @@ public class Activity implements Serializable {
 
     public Collection<ResourceId> getLocationFormClassIds() {
         if(BETA.ENABLE_LOCATION_UNION_FIELDS) {
-            Set<ResourceId> locationFormClassIds = Sets.newHashSet();
-            for (Integer typeId : locationTypeIds) {
-                locationFormClassIds.add(CuidAdapter.locationFormClass(typeId));
-            }
-            return locationFormClassIds;
+            return locationRange;
+
+        } else if(adminLevelId != null) {
+            return Collections.singleton(CuidAdapter.adminLevelFormClass(adminLevelId));
+
         } else {
             return Collections.singleton(CuidAdapter.locationFormClass(locationTypeId));
         }
@@ -206,7 +226,7 @@ public class Activity implements Serializable {
     }
     
     public ActivityVersion getActivityVersion() {
-        return new ActivityVersion(this.getId(), schemaVersion, version);
+        return new ActivityVersion(this.getId(), schemaVersion, siteVersion);
     }
     
     void addLink(int destinationIndicatorId, int sourceActivityId, int sourceReportingFrequency, int sourceIndicatorId) {
@@ -240,4 +260,31 @@ public class Activity implements Serializable {
         return linked;
     }
 
+    public FormClass getSerializedFormClass() {
+        return serializedFormClass.value;
+    }
+
+    /**
+     * Helper class to allow the FormClass value to be serialized with JSON instead of Java Serialization.
+     */
+    static class FormClassHolder implements Serializable {
+
+        FormClass value;
+
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            if(value == null) {
+                out.writeBoolean(false);
+            } else {
+                out.writeBoolean(true);
+                out.writeUTF(value.toJsonString());
+            }
+        }
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+            if(in.readBoolean()) {
+                this.value = FormClass.fromJson(in.readUTF());
+            } else {
+                this.value = null;
+            }
+        }
+    }
 }

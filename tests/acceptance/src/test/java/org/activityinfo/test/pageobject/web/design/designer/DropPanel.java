@@ -59,6 +59,11 @@ public class DropPanel {
         return this;
     }
 
+    public DropPanel dragAndDrop(DropLabel label) {
+        label.getElement().dragAndDrop(container);
+        return this;
+    }
+
     public int fieldPosition(String fieldLabel) {
         List<DesignerField> fields = fields();
         for (DesignerField field: Lists.newArrayList(fields)) {
@@ -76,5 +81,9 @@ public class DropPanel {
             fields.add(new DesignerField(element));
         }
         return fields;
+    }
+
+    public FluentElement getContainer() {
+        return container;
     }
 }

@@ -15,5 +15,10 @@ public enum DeleteMethod {
      */
     SOFT_BY_BOOLEAN,
 
+    /**
+     * Rows are marked as deleted by a deleted boolean field and dateDeleted field (e.g. site table)
+     */
+    SOFT_BY_DATE_AND_BOOLEAN
+
     
 }

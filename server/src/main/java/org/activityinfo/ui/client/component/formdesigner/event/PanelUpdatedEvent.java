@@ -23,7 +23,7 @@ package org.activityinfo.ui.client.component.formdesigner.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
+import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 
 /**
  * @author yuriyz on 11/13/2014.
@@ -40,10 +40,10 @@ public class PanelUpdatedEvent extends GwtEvent<PanelUpdatedEvent.Handler> {
 
     public static Type<Handler> TYPE = new Type<>();
 
-    private final FieldWidgetContainer widgetContainer;
+    private final WidgetContainer widgetContainer;
     private final EventType type;
 
-    public PanelUpdatedEvent(FieldWidgetContainer widgetContainer, EventType type) {
+    public PanelUpdatedEvent(WidgetContainer widgetContainer, EventType type) {
         this.widgetContainer = widgetContainer;
         this.type = type;
     }
@@ -54,7 +54,7 @@ public class PanelUpdatedEvent extends GwtEvent<PanelUpdatedEvent.Handler> {
         return (Type) TYPE;
     }
 
-    public FieldWidgetContainer getWidgetContainer() {
+    public WidgetContainer getWidgetContainer() {
         return widgetContainer;
     }
 

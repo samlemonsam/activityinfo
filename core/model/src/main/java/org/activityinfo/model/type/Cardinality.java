@@ -21,6 +21,9 @@ package org.activityinfo.model.type;
  * #L%
  */
 
+import com.google.gson.JsonElement;
+import org.activityinfo.model.form.JsonParsing;
+
 /**
  * @author yuriyz on 2/6/14.
  */
@@ -34,5 +37,9 @@ public enum Cardinality {
     /**
      * Any number of instances may be linked to the field
      */
-    MULTIPLE
+    MULTIPLE;
+
+    public static Cardinality valueOf(JsonElement element) {
+        return valueOf(JsonParsing.fromEnumValue(element));
+    }
 }

@@ -26,15 +26,11 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormElement;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.TFormClass;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -44,7 +40,10 @@ import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.database.OnDataSet;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,12 +56,14 @@ import java.util.Map;
 import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
 public class ActivityTest extends CommandTestCase2 {
+    
 
     @Before
     public void setUser() {
@@ -180,8 +181,7 @@ public class ActivityTest extends CommandTestCase2 {
         CreateResult createResult = execute(CreateEntity.Activity(db, act));
         ResourceId classId = activityFormClass(createResult.getNewId());
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(classId));
+        FormClass formClass = assertResolves(locator.getFormClass(classId));
 
         // create three new fields with an order that mixes "attributes" and "indicators"
 
@@ -202,9 +202,9 @@ public class ActivityTest extends CommandTestCase2 {
         newTextField.setType(TextType.INSTANCE);
         formClass.addElement(newTextField);
 
-        assertResolves(resourceLocator.persist(formClass));
+        assertResolves(locator.persist(formClass));
 
-        TFormClass reform = new TFormClass(assertResolves(resourceLocator.getFormClass(formClass.getId())));
+        TFormClass reform = new TFormClass(assertResolves(locator.getFormClass(formClass.getId())));
 
         System.out.println(Joiner.on("\n").join(reform.getFormClass().getFields()));
 
@@ -231,8 +231,7 @@ public class ActivityTest extends CommandTestCase2 {
         CreateResult createResult = execute(CreateEntity.Activity(db, act));
         ResourceId classId = activityFormClass(createResult.getNewId());
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(classId));
+        FormClass formClass = assertResolves(locator.getFormClass(classId));
 
         FormField newField = new FormField(ResourceId.generateFieldId(QuantityType.TYPE_CLASS));
         newField.setLabel("How old are you?");
@@ -244,15 +243,15 @@ public class ActivityTest extends CommandTestCase2 {
         newTextField.setType(TextType.INSTANCE);
         formClass.addElement(newTextField);
 
-        assertResolves(resourceLocator.persist(formClass));
-        FormClass reform = assertResolves(resourceLocator.getFormClass(formClass.getId()));
+        assertResolves(locator.persist(formClass));
+        FormClass reform = assertResolves(locator.getFormClass(formClass.getId()));
         assertHasFieldWithLabel(reform, "How old are you?");
 
         newField.setLabel("How old are you today?");
         // save again
-        assertResolves(resourceLocator.persist(formClass));
+        assertResolves(locator.persist(formClass));
 
-        reform = assertResolves(resourceLocator.getFormClass(formClass.getId()));
+        reform = assertResolves(locator.getFormClass(formClass.getId()));
         assertHasFieldWithLabel(reform, "How old are you today?");
         System.out.println(reform.getFields().toString());
         assertThat(reform.getFields(), hasSize(8));
@@ -265,8 +264,7 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void createAttributeGroup() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
+        FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(1)));
 
         FormField newField = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS));
         newField.setLabel("New Group");
@@ -276,7 +274,7 @@ public class ActivityTest extends CommandTestCase2 {
 
         formClass.getElements().add(newField);
 
-        resourceLocator.persist(formClass);
+        locator.persist(formClass);
 
         // verify that it appears as attribute group
         ActivityFormDTO activity = getActivity(1);
@@ -290,7 +288,7 @@ public class ActivityTest extends CommandTestCase2 {
         newField.setLabel("Do you like ice cream?");
         yes.setLabel("Oui");
         no.setLabel("Non");
-        resourceLocator.persist(formClass);
+        locator.persist(formClass);
 
         group = findGroup(getActivity(1), "Do you like ice cream?");
         assertThat(group.isMultipleAllowed(), equalTo(false));
@@ -300,7 +298,7 @@ public class ActivityTest extends CommandTestCase2 {
 
         // Remove one of our new enum values
         newField.setType(new EnumType(Cardinality.SINGLE, Arrays.asList(yes)));
-        resourceLocator.persist(formClass);
+        locator.persist(formClass);
 
         group = findGroup(getActivity(1), "Do you like ice cream?");
         assertThat(group.isMultipleAllowed(), equalTo(false));
@@ -310,12 +308,11 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void updateIndicator() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        TFormClass formClass = new TFormClass(assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1))));
+        TFormClass formClass = new TFormClass(assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(1))));
 
         FormField beneficiaries = formClass.getFieldByLabel("beneficiaries");
         beneficiaries.setLabel("Number of benes");
-        resourceLocator.persist(formClass.getFormClass());
+        locator.persist(formClass.getFormClass());
 
         ActivityFormDTO activity = getActivity(1);
         assertThat(activity.getIndicatorById(1), hasProperty("name", Matchers.equalTo("Number of benes")));
@@ -325,13 +322,12 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void updateIndicatorWithLongUnits() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        TFormClass formClass = new TFormClass(assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1))));
+        TFormClass formClass = new TFormClass(assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(1))));
 
         FormField beneficiaries = formClass.getFieldByLabel("beneficiaries");
         QuantityType updatedType = new QuantityType().setUnits("imperial tonne with very long qualifying text");
         beneficiaries.setType(updatedType);
-        resourceLocator.persist(formClass.getFormClass());
+        assertResolves(locator.persist(formClass.getFormClass()));
 
         ActivityFormDTO activity = getActivity(1);
         assertThat(activity.getIndicatorById(1), hasProperty("units", Matchers.equalTo(updatedType.getUnits())));
@@ -355,8 +351,7 @@ public class ActivityTest extends CommandTestCase2 {
     @Test
     public void deleteAttributeGroup() {
 
-        ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor(getDispatcher());
-        FormClass formClass = assertResolves(resourceLocator.getFormClass(CuidAdapter.activityFormClass(1)));
+        FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(1)));
 
         // Remove attribute
         ListIterator<FormElement> it = formClass.getElements().listIterator();
@@ -366,12 +361,53 @@ public class ActivityTest extends CommandTestCase2 {
                 it.remove();
             }
         }
-        resourceLocator.persist(formClass);
+        assertResolves(locator.persist(formClass));
 
         // Ensure deleted
         ActivityFormDTO form = execute(new GetActivityForm(1));
         assertTrue("Cause attribute is gone", form.getAttributeGroupById(1) == null);
 
+    }
+    
+    @Test
+    public void newFormWithoutDates() {
+        
+        // Create an activity in the same way that the Design Presenter does...
+
+        int databaseId = 1;
+
+        ActivityDTO newEntity = new ActivityDTO();
+        newEntity.setName("My Form");
+        newEntity.set("databaseId", databaseId);
+        newEntity.set("classicView", false);
+        newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
+        newEntity.set("locationTypeId", 2 /* Nullary location type for RDC in schema.db.xml */);
+        newEntity.set("published", 0);
+        CreateResult createResult = execute(new CreateEntity(newEntity));
+        
+        // Some definitions...
+        int activityId = createResult.getNewId();
+        ResourceId formId = CuidAdapter.activityFormClass(activityId);
+        ResourceId startDateId = CuidAdapter.field(formId, CuidAdapter.START_DATE_FIELD);
+        ResourceId endDateId = CuidAdapter.field(formId, CuidAdapter.END_DATE_FIELD);
+        
+        // Now delete the date fields in the form designer...
+
+        FormClass formClass = assertResolves(locator.getFormClass(formId));
+        formClass.removeField(startDateId);
+        formClass.removeField(endDateId);
+        assertResolves(locator.persist(formClass));
+
+        // Now verify that the form class no longer has the date fields
+        formClass = assertResolves(locator.getFormClass(formId));
+        assertThat(formClass.getFields(), not(hasItem(withId(startDateId))));
+        assertThat(formClass.getFields(), not(hasItem(withId(endDateId))));
+        
+        // Now submit a new entry without dates...
+        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(formId), formId);
+        newInstance.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerRef(databaseId, 1));
+
+        assertResolves(locator.persist(newInstance));
     }
 
     private static void assertHasFieldWithLabel(FormClass formClass, String label) {
@@ -381,5 +417,20 @@ public class ActivityTest extends CommandTestCase2 {
             }
         }
         throw new RuntimeException("No field with label: " + label);
+    }
+    
+    private static Matcher<FormField> withId(final ResourceId id) {
+        return new TypeSafeMatcher<FormField>() {
+            @Override
+            protected boolean matchesSafely(FormField formField) {
+                return formField.getId().equals(id);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("field with id ");
+                description.appendValue(id.asString());
+            }
+        };
     }
 }

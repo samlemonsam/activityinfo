@@ -30,7 +30,7 @@ import org.activityinfo.model.resource.ResourceId;
  */
 public class FieldMessageEvent extends GwtEvent<FieldMessageEvent.Handler> {
 
-    public static interface Handler extends EventHandler {
+    public interface Handler extends EventHandler {
         void handle(FieldMessageEvent event);
     }
 

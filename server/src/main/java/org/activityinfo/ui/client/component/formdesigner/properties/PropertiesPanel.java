@@ -36,8 +36,7 @@ import org.activityinfo.ui.client.widget.form.FormGroup;
  */
 public class PropertiesPanel extends Composite {
 
-    private static OurUiBinder uiBinder = GWT
-            .create(OurUiBinder.class);
+    private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
     interface OurUiBinder extends UiBinder<Widget, PropertiesPanel> {
     }
@@ -72,6 +71,10 @@ public class PropertiesPanel extends Composite {
     FormGroup codeGroup;
     @UiField
     FormGroup labelGroup;
+    @UiField
+    FormGroup descriptionGroup;
+    @UiField
+    ReferenceProperties referenceProperties;
 
     public PropertiesPanel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -135,5 +138,13 @@ public class PropertiesPanel extends Composite {
 
     public FormGroup getLabelGroup() {
         return labelGroup;
+    }
+
+    public FormGroup getDescriptionGroup() {
+        return descriptionGroup;
+    }
+
+    public ReferenceProperties getReferenceProperties() {
+        return referenceProperties;
     }
 }

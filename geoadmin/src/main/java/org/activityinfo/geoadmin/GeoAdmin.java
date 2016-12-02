@@ -31,6 +31,10 @@ import java.util.prefs.Preferences;
  *
  */
 public class GeoAdmin extends JFrame {
+    
+    static {
+        LocaleProxy.initialize();
+    }
 
     static {
         LocaleProxy.initialize();

@@ -1,0 +1,8 @@
+
+
+
+
+task compileSpec(type: org.activityinfo.swagger.CompileSpecTask) {
+    yamlFile = project.file("src/main/spec/forms.yaml")
+    outputFile = project.file("$buildDir/api.json")
+}

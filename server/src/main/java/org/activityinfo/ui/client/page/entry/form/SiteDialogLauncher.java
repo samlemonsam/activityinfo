@@ -23,12 +23,12 @@ package org.activityinfo.ui.client.page.entry.form;
  */
 
 import com.extjs.gxt.ui.client.widget.MessageBox;
-import com.google.common.base.Function;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.DimensionType;
@@ -36,7 +36,6 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -46,17 +45,21 @@ import org.activityinfo.ui.client.component.form.FormDialog;
 import org.activityinfo.ui.client.component.form.FormDialogCallback;
 import org.activityinfo.ui.client.page.entry.location.LocationDialog;
 
+import java.util.List;
+
 public class SiteDialogLauncher {
 
     private final Dispatcher dispatcher;
     private final ResourceLocator resourceLocator;
     private final EventBus eventBus;
+    private final StateProvider stateProvider;
 
-    public SiteDialogLauncher(Dispatcher dispatcher, EventBus eventBus) {
+    public SiteDialogLauncher(Dispatcher dispatcher, EventBus eventBus, StateProvider stateProvider) {
         super();
         this.dispatcher = dispatcher;
         this.eventBus = eventBus;
-        this.resourceLocator = new ResourceLocatorAdaptor(dispatcher);
+        this.resourceLocator = new ResourceLocatorAdaptor();
+        this.stateProvider = stateProvider;
     }
 
     public void addSite(final Filter filter, final SiteDialogCallback callback) {
@@ -120,31 +123,17 @@ public class SiteDialogLauncher {
     }
 
     public void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback, boolean isNew) {
-        showModernFormDialog(formName, instance, callback, isNew, resourceLocator);
+        showModernFormDialog(formName, instance, callback, isNew, resourceLocator, stateProvider);
     }
 
-    public static void showModernFormDialog(final String formName, final FormInstance instance, final SiteDialogCallback callback,
-                                            final boolean isNew, final ResourceLocator resourceLocator) {
-        resourceLocator.getFormClass(instance.getClassId()).then(new Function<FormClass, Object>() {
-            @Override
-            public Object apply(FormClass input) {
-                if (input.hasSubformField()) {
-                    MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.formIsNotSupported2_12(), null);
-                    return null;
-                }
-                showModernFormDialogInternal(formName, instance, callback, isNew, resourceLocator);
-                return null;
-            }
-        });
-    }
-
-    private static void showModernFormDialogInternal(String formName, FormInstance instance, final SiteDialogCallback callback, boolean isNew, ResourceLocator resourceLocator) {
+    public static void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback,
+                                            boolean isNew, ResourceLocator resourceLocator, StateProvider stateProvider) {
         String subtitle = isNew ? I18N.CONSTANTS.newSubmission() : I18N.CONSTANTS.editSubmission();
-        FormDialog dialog = new FormDialog(resourceLocator);
+        FormDialog dialog = new FormDialog(resourceLocator, stateProvider);
         dialog.setDialogTitle(formName, subtitle);
         dialog.show(instance, new FormDialogCallback() {
             @Override
-            public void onPersisted(FormInstance instance) {
+            public void onPersisted(List<FormInstance> instance) {
                 callback.onSaved();
             }
         });
@@ -175,7 +164,7 @@ public class SiteDialogLauncher {
                 }
 
                 if (!activity.getClassicView()) {// modern view
-                    resourceLocator.getFormInstance(site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
+                    resourceLocator.getFormInstance(activity.getFormClassId(), site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
                         @Override
                         public void onSuccess(FormInstance result) {
                             showModernFormDialog(activity.getName(), result, callback, false);

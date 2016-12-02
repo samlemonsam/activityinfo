@@ -22,7 +22,7 @@ package org.activityinfo.legacy.shared.reports.util;
  * #L%
  */
 
-import org.activityinfo.legacy.shared.command.Month;
+import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.MonthCategory;
 import org.activityinfo.legacy.shared.reports.content.YearCategory;

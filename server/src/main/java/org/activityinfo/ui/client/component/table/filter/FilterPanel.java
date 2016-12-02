@@ -33,8 +33,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.core.shared.criteria.Criteria;
-import org.activityinfo.core.shared.criteria.HasCriteria;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
@@ -47,7 +46,7 @@ import org.activityinfo.ui.client.widget.LoadingPanel;
 /**
  * @author yuriyz on 4/3/14.
  */
-public class FilterPanel extends Composite implements HasCriteria {
+public class FilterPanel extends Composite {
 
     interface FilterPanelUiBinder extends UiBinder<HTMLPanel, FilterPanel> {
     }
@@ -74,9 +73,8 @@ public class FilterPanel extends Composite implements HasCriteria {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    @Override
-    public Criteria getCriteria() {
-        return filterContent.getCriteria();
+    public ExprNode getFilter() {
+        return filterContent.getFilter();
     }
 
     public void show(final PopupPanel.PositionCallback positionCallback) {
@@ -152,7 +150,7 @@ public class FilterPanel extends Composite implements HasCriteria {
         if (filterContent != null) { // may be null in case user is fast enough to click button before items loaded
             filterContent.clear();
         }
-        column.setCriteria(null);
+        column.get().setFilter(null);
         table.getTable().redrawHeaders();
         table.reload();
         popup.hide();
@@ -160,7 +158,7 @@ public class FilterPanel extends Composite implements HasCriteria {
 
     @UiHandler("okButton")
     public void onOk(ClickEvent event) {
-        column.setCriteria(getCriteria());
+        column.get().setFilter(getFilter());
         table.getTable().redrawHeaders();
         table.reload();
         popup.hide();

@@ -68,6 +68,8 @@ task appengineDevMode(type: JavaExec) {
     classpath sourceSets.main.resources.srcDirs
     classpath project(":i18n").sourceSets.main.java.srcDirs
     classpath project(":i18n").sourceSets.main.resources.srcDirs
+    classpath project(":apiClient:gwt").sourceSets.main.java.srcDirs
+    classpath project(":apiClient:gwt").sourceSets.generated.java.srcDirs
     classpath project(":core:model").sourceSets.main.java.srcDirs
     classpath project(":core:model").sourceSets.main.resources.srcDirs
 
@@ -75,7 +77,6 @@ task appengineDevMode(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.gwt
     classpath configurations.gwtSdk
-
 
 
     args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'

@@ -345,6 +345,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Edit")
     String edit();
+    
+    @DefaultStringValue("Update")
+    String update();
 
     @DefaultStringValue("Email")
     String email();
@@ -533,7 +536,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Your search did not match any existing sites. Make your search more general or add a new location.")
     String locationSearchNoResults();
 
-    @DefaultStringValue("Site Type")
+    @DefaultStringValue("Location Type")
     String locationType();
 
     @DefaultStringValue("Sites")
@@ -1166,6 +1169,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Matching references...")
     String matchingReferences();
 
+    @DefaultStringValue("Matched references")
+    String matchedReferences();
+
     @DefaultStringValue("Message")
     String message();
 
@@ -1355,6 +1361,12 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
+    @DefaultStringValue("Please select type")
+    String pleaseSelectType();
+
+    @DefaultStringValue("Unfortunately you do not have design privileges to perform this action.")
+    String noDesignPrivileges();
+
     @DefaultStringValue("New Submission")
     String newSubmission();
 
@@ -1364,14 +1376,29 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Barcode")
     String fieldTypeBarcode();
 
+    @DefaultStringValue("Week")
+    String week();
+
     @DefaultStringValue("Calculated")
     String fieldTypeCalculated();
 
     @DefaultStringValue("Multiple selection")
     String multipleSelection();
 
+    @DefaultStringValue("Please select type")
+    String selectType();
+
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
+
+    @DefaultStringValue("Sub type")
+    String subType();
+
+    @DefaultStringValue("Recommended mode for new users")
+    String recommendedMode();
+
+    @DefaultStringValue("Attributes and indicators appear separately")
+    String newFormAsClassicHelpBlock();
 
     @DefaultStringValue("There are no partners defined for this database, so it is not possible to make new submissions at this time.")
     String noPartners();
@@ -1499,7 +1526,31 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Unknown")
     String unknown();
 
-    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right.")
+    @DefaultStringValue("Repeating")
+    String repeating();
+
+    @DefaultStringValue("+ Add another")
+    String addAnother();
+
+    @DefaultStringValue("Tab is not selected.")
+    String subFormTabNotSelected();
+
+    @DefaultStringValue("Failed to load subform instances.")
+    String failedToLoadSubformInstances();
+
+    @DefaultStringValue("Yearly")
+    String yearly();
+
+    @DefaultStringValue("Fortnightly")
+    String fortnightly();
+
+    @DefaultStringValue("Daily")
+    String daily();
+
+    @DefaultStringValue("Hourly")
+    String hourly();
+    
+    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right. <a target=\"_blank\" href=\"http://help.activityinfo.org/m/28175/l/445646-batch-import\" style=\"text-decoration: underline;\">Show me how</a>.")
     String columnMappingHelpLink();
 
     @DefaultStringValue("Show me")
@@ -1563,6 +1614,27 @@ public interface UiConstants extends Constants {
     String clickToLink();
 
 
+
+    @DefaultStringValue("Please select type of subform again and save the subform due to serialization format change.")
+    String pleaseRecreateOutdatedSubfrom();
+
+    @DefaultStringValue("Subform type change forbidden because there are data associated with it.")
+    String subformTypeChangeDisabled();
+
+    @DefaultStringValue("Text")
+    String text();
+
+    @DefaultStringValue("Plain")
+    String plain();
+
+    @DefaultStringValue("Bold")
+    String bold();
+
+    @DefaultStringValue("Reference")
+    String reference();
+
+    @DefaultStringValue("Choose form")
+    String chooseForm();
     @DefaultStringValue("clear")
     String clear();
 
@@ -1572,9 +1644,36 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Link removed")
     String linkRemoved();
 
+    @DefaultStringValue("My databases")
+    String myDatabases();
+
+    @DefaultStringValue("Shared databases")
+    String sharedDatabases();
+
     @DefaultStringValue("You do not have permission to edit the design of this database.")
     String noDbDesignPermissions();
 
-    @DefaultStringValue("Current form contains Sub-Form elements which are supported since 2.12 version. Please upgrade to 2.12 version to be able use it.")
-    String formIsNotSupported2_12();
+    @DefaultStringValue("Repeating Sub-Form")
+    String repeatingSubform();
+
+    @DefaultStringValue("Monthly Sub-Form")
+    String monthlySubform();
+
+    @DefaultStringValue("Weekly Sub-Form")
+    String weeklySubform();
+
+    @DefaultStringValue("Fortnightly Sub-Form")
+    String fortnightlySubform();
+
+    @DefaultStringValue("Daily Sub-Form")
+    String dailySubform();
+
+    @DefaultStringValue("Select")
+    String select();
+
+    @DefaultStringValue("Please choose the reference value by geographical location.")
+    String chooseReferenceByGeoPoint();
+
+    @DefaultStringValue("Choose reference value")
+    String chooseReferenceValue();
 }

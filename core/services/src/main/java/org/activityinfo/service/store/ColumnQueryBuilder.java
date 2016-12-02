@@ -33,5 +33,5 @@ public interface ColumnQueryBuilder {
     /**
      * Fetches the requested columns.
      */
-    void execute() throws IOException;
+    void execute();
 }

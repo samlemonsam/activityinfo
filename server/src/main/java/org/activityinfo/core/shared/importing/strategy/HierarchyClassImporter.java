@@ -24,20 +24,18 @@ package org.activityinfo.core.shared.importing.strategy;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.activityinfo.core.client.InstanceQuery;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.Pair;
-import org.activityinfo.core.shared.Projection;
-import org.activityinfo.core.shared.criteria.ClassCriteria;
-import org.activityinfo.core.shared.criteria.FormClassSet;
 import org.activityinfo.core.shared.importing.source.SourceRow;
 import org.activityinfo.core.shared.importing.validation.ValidationResult;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
@@ -67,19 +65,22 @@ public class HierarchyClassImporter implements FieldImporter {
     @Override
     public Promise<Void> prepare(ResourceLocator locator, List<? extends SourceRow> batch) {
         final List<Promise<Void>> promises = Lists.newArrayList();
-        for (final ResourceId range : FormClassSet.of(rootField.getRange()).getElements()) {
-            InstanceQuery query = new InstanceQuery(Lists.newArrayList(referenceFields.keySet()), new ClassCriteria(range));
-            final Promise<List<Projection>> promise = locator.query(query);
-            promise.then(new Function<List<Projection>, Void>() {
+
+        for (final ResourceId formId : rootField.getRange()) {
+            QueryModel queryModel = new QueryModel(formId);
+            queryModel.selectResourceId().as("_id");
+            for (FieldPath referenceFieldPath : referenceFields.keySet()) {
+                queryModel.selectField(referenceFieldPath).as(referenceFieldPath.toString());
+            }
+            promises.add(locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
                 @Override
-                public Void apply(List<Projection> projections) {
-                    scoreSources.put(range, new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(projections));
+                public Void apply(ColumnSet columnSet) {
+                    scoreSources.put(formId, new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet));
                     return null;
                 }
-            });
-            promises.add(promise.thenDiscardResult());
+            }));
         }
-
+        
         return Promise.waitAll(promises);
     }
 
@@ -115,7 +116,7 @@ public class HierarchyClassImporter implements FieldImporter {
                     } else {
                         String matched = scoreSource.getReferenceValues().get(bestMatchIndex)[i];
                         final ValidationResult converted = ValidationResult.converted(matched, score.getBestScores()[i]);
-                        converted.setRangeWithInstanceId(new Pair<>(range, scoreSource.getReferenceInstanceIds().get(bestMatchIndex)));
+                        converted.setRef(new RecordRef(range, scoreSource.getReferenceInstanceIds().get(bestMatchIndex)));
                         results.add(converted);
                     }
                 } else {
@@ -133,18 +134,18 @@ public class HierarchyClassImporter implements FieldImporter {
         final List<ValidationResult> validationResults = Lists.newArrayList();
         validateInstance(row, validationResults);
 
-        final Map<ResourceId, ResourceId> toSave = Maps.newHashMap();
+        final Map<ResourceId, RecordRef> toSave = Maps.newHashMap();
         for (ValidationResult result : validationResults) {
-            if (result.isPersistable() && result.getRangeWithInstanceId() != null) {
-                ResourceId range = result.getRangeWithInstanceId().getA();
-                ResourceId value = toSave.get(range);
+            if (result.isPersistable() && result.getRef() != null) {
+                ResourceId range = result.getRef().getFormId();
+                RecordRef value = toSave.get(range);
                 if (value == null) {
-                    toSave.put(range, result.getRangeWithInstanceId().getB());
+                    toSave.put(range, result.getRef());
                 }
             }
         }
         if (!toSave.isEmpty()) {
-            instance.set(rootField.getFieldId(), Sets.newHashSet(toSave.values()));
+            instance.set(rootField.getFieldId(), new ReferenceValue(toSave.values()));
             return true;
         }
 

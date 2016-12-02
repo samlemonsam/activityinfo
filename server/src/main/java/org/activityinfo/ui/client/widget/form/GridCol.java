@@ -32,7 +32,7 @@ public class GridCol {
     public static final String COL_LG = "col-lg";
 
     public static final int MAX_COLUMN_COUNT = 12;
-    public static final String DEFAULT_COL = COL_SM;
+    public static final String DEFAULT_COL = COL_XS;
 
     public static String col(int width) {
         return DEFAULT_COL + "-" + width;

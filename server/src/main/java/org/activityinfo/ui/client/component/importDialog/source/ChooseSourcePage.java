@@ -16,7 +16,7 @@ import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.component.importDialog.ImportPage;
 import org.activityinfo.ui.client.component.importDialog.PageChangedEvent;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.activityinfo.ui.client.widget.TextArea;
 
 /**

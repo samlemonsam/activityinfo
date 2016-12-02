@@ -2,8 +2,8 @@ package org.activityinfo.store.mysql.update;
 
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.FieldMapping;
@@ -69,11 +69,11 @@ public class BaseTableUpdater {
     }
 
 
-    public void update(QueryExecutor executor, ResourceUpdate update) {
-        Preconditions.checkArgument(update.getResourceId().getDomain() == mapping.getPrimaryKey().getDomain(),
+    public void update(QueryExecutor executor, RecordUpdate update) {
+        Preconditions.checkArgument(update.getRecordId().getDomain() == mapping.getPrimaryKey().getDomain(),
                 "Resource Id mismatch, expected domain '%c', got id '%s'",
                 mapping.getPrimaryKey().getDomain(),
-                update.getResourceId().asString());
+                update.getRecordId().asString());
 
         // Update delete flag
         if(update.isDeleted()) {
@@ -112,6 +112,11 @@ public class BaseTableUpdater {
                 case SOFT_BY_BOOLEAN:
                     sql.append(" deleted = 1");
                     break;
+                case SOFT_BY_DATE_AND_BOOLEAN:
+                    sql.append(" dateDeleted = ?");
+                    parameters.add(new Date());
+                    sql.append(", deleted = 1");
+                    break;
             }
         } else {
             switch (mapping.getDeleteMethod()) {
@@ -120,6 +125,9 @@ public class BaseTableUpdater {
                     break;                    
                 case SOFT_BY_BOOLEAN:
                     sql.append(" deleted = 0");
+                    break;
+                case SOFT_BY_DATE_AND_BOOLEAN:
+                    sql.append(" dateDeleted = NULL, deleted = 0");
                     break;
             }
         }

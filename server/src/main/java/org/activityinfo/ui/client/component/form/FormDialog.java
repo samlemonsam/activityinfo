@@ -29,12 +29,11 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
-import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.style.ModalStylesheet;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.ModalDialog;
@@ -42,6 +41,7 @@ import org.activityinfo.ui.client.widget.loading.ExceptionOracle;
 import org.activityinfo.ui.client.widget.loading.PageLoadingPanel;
 
 import javax.inject.Provider;
+import java.util.List;
 
 /**
  * @author yuriyz on 3/28/14.
@@ -63,21 +63,18 @@ public class FormDialog {
     private final SimpleFormPanel formPanel;
     private final LoadingPanel<FormInstance> loadingPanel;
 
-    public FormDialog(ResourceLocator resourceLocator) {
+    public FormDialog(ResourceLocator resourceLocator, StateProvider stateProvider) {
         this.resourceLocator = resourceLocator;
 
         ModalStylesheet.INSTANCE.ensureInjected();
 
-
-        formPanel = new SimpleFormPanel(
-                resourceLocator,
-                new VerticalFieldContainer.Factory(),
-                new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.NORMAL));
-
+        formPanel = new SimpleFormPanel(resourceLocator, stateProvider);
 
         loadingPanel = new LoadingPanel<>(new PageLoadingPanel());
         loadingPanel.setDisplayWidget(formPanel);
+
         dialog = new ModalDialog(loadingPanel);
+
         dialog.getPrimaryButton().setText(I18N.CONSTANTS.save());
         dialog.getPrimaryButton().setStyleName("btn btn-primary");
         dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
@@ -108,13 +105,13 @@ public class FormDialog {
     }
 
 
-    public void show(final ResourceId instanceId, FormDialogCallback callback) {
+    public void show(final ResourceId instanceId, final ResourceId formId, FormDialogCallback callback) {
         this.callback = callback;
         loadingPanel.show(new Provider<Promise<FormInstance>>() {
 
             @Override
             public Promise<FormInstance> get() {
-                return resourceLocator.getFormInstance(instanceId);
+                return resourceLocator.getFormInstance(formId, instanceId);
             }
         });
         dialog.show();
@@ -131,21 +128,28 @@ public class FormDialog {
         dialog.getStatusLabel().setText(I18N.CONSTANTS.saving());
         dialog.getPrimaryButton().setEnabled(false);
         formPanel.getRelevanceHandler().resetValuesForFieldsWithAppliedRelevance();
-        resourceLocator.persist(formPanel.getInstance()).then(new AsyncCallback<Void>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                Log.error("Save failed", caught);
-                dialog.getStatusLabel().setText(ExceptionOracle.getExplanation(caught));
-                dialog.getPrimaryButton().setEnabled(true);
-            }
+        try {
+            formPanel.getFormActions().save().then(new AsyncCallback<List<FormInstance>>() {
 
-            @Override
-            public void onSuccess(Void result) {
-                dialog.hide();
-                callback.onPersisted(formPanel.getInstance());
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Log.error("Save failed", caught);
+                    dialog.getStatusLabel().setText(ExceptionOracle.getExplanation(caught));
+                    dialog.getPrimaryButton().setEnabled(true);
+                }
+
+                @Override
+                public void onSuccess(List<FormInstance> result) {
+                    dialog.hide();
+                    callback.onPersisted(result);
+                }
+            });
+        } catch (Exception e) {
+            Log.error("Save failed.", e);
+            dialog.getStatusLabel().setText(ExceptionOracle.getExplanation(e));
+            dialog.getPrimaryButton().setEnabled(true);
+        }
     }
 
 }

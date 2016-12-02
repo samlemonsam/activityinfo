@@ -23,15 +23,9 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.views.EmptyColumnView;
-import org.activityinfo.store.query.impl.views.GeoColumnView;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
@@ -283,17 +277,11 @@ public class ActivityInfoClient implements FormClassProvider {
             }, points);
     }
 
-    public ObjectMapper getObjectMapper() {
-        return new ObjectMapperProvider().getContext(ObjectMapper.class);
-    }
-    
-    
+
     public FormClass getFormClass(int adminLevelId) {
         
         String json = formResource(CuidAdapter.adminLevelFormClass(adminLevelId)).path("class").get(String.class);
-
-
-        return FormClass.fromResource(Resources.resourceFromJson(json));
+        return FormClass.fromJson(json);
     }
 
     public FormTree getFormTree(ResourceId resourceId) {
@@ -325,7 +313,7 @@ public class ActivityInfoClient implements FormClassProvider {
             return queryColumnsRemotely(queryModel);
         }
     }
-    
+
     private ColumnSet queryColumnsRemotely(QueryModel queryModel) {
         String json = client.resource(root)
                 .path("query")
@@ -358,10 +346,25 @@ public class ActivityInfoClient implements FormClassProvider {
         return new ColumnSet(numRows, columnMap);
     }
 
+
+    private ColumnView parseCoordinates(JsonArray coordinateArray) {
+        double[] coordinates = new double[coordinateArray.size()];
+        for (int i = 0; i < coordinateArray.size(); i++) {
+            JsonElement coord = coordinateArray.get(i);
+            if(coord.isJsonNull()) {
+                coordinates[i] = Double.NaN;
+            } else {
+                coordinates[i] = coord.getAsDouble();
+            }
+        }
+        return new GeoAreaColumnView(coordinates);
+    }
+
+
     private ColumnView parseEmpty(int numRows, JsonObject columnValue) {
         String typeName = columnValue.get("type").getAsString();
         ColumnType type = ColumnType.valueOf(typeName);
-        return new EmptyColumnView(numRows, type);
+        return new EmptyColumnView(type, numRows);
     }
 
     public void executeTransaction(TransactionBuilder builder) {
@@ -377,19 +380,6 @@ public class ActivityInfoClient implements FormClassProvider {
         }
     }
     
-    private ColumnView parseCoordinates(JsonArray coordinateArray) {
-        double[] coordinates = new double[coordinateArray.size()];
-        for (int i = 0; i < coordinateArray.size(); i++) {
-            JsonElement coord = coordinateArray.get(i);
-            if(coord.isJsonNull()) {
-                coordinates[i] = Double.NaN;
-            } else {
-                coordinates[i] = coord.getAsDouble();
-            }
-        }
-        return new GeoColumnView(coordinates);
-    }
-
     private WebResource formResource(ResourceId resourceId) {
         return client.resource(root)
                 .path("form")

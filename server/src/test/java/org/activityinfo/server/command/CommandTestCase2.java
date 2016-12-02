@@ -22,19 +22,25 @@ package org.activityinfo.server.command;
  * #L%
  */
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.googlecode.objectify.ObjectifyService;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.client.remote.AbstractDispatcher;
+import org.activityinfo.legacy.shared.adapter.ActivityInfoClientAsyncStub;
+import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.gwtrpc.CommandServlet2;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
@@ -42,10 +48,15 @@ import org.activityinfo.server.endpoint.gwtrpc.RemoteExecutionContext;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
+import org.activityinfo.store.mysql.collections.AdminEntityTable;
+import org.activityinfo.store.mysql.metadata.CountryStructure;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import javax.persistence.EntityManager;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * Test fixture for running hibernate-free commands.
@@ -62,6 +73,27 @@ import javax.persistence.EntityManager;
 })
 public class CommandTestCase2 {
 
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig().
+                    setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
+
+    private Closeable ofy;
+
+    @Before
+    public void setUpDatastore() {
+        helper.setUp();
+        ofy = ObjectifyService.begin();
+
+        // Clear up MySQL catalog caches
+        CountryStructure.clearCache();
+        AdminEntityTable.clearCache();
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        ofy.close();
+        helper.tearDown();
+    }
 
     @BeforeClass
     public static void setupI18N() {
@@ -73,6 +105,14 @@ public class CommandTestCase2 {
 
     @Inject
     protected Injector injector;
+
+    protected ResourceLocatorAdaptor locator;
+    
+    @Before
+    public final void setUpResourceLocator() {
+        locator = new ResourceLocatorAdaptor(
+                new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class), injector.getInstance(PermissionOracle.class)));
+    }
 
     protected void setUser(int userId) {
         AuthenticationModuleStub.setUserId(userId);

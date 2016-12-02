@@ -37,12 +37,13 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.service.DeploymentConfiguration;
-import org.activityinfo.service.store.CollectionCatalog;
+import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
@@ -61,15 +62,20 @@ public class RootResource {
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
-    private Provider<CollectionCatalog> catalog;
+    private Provider<FormCatalog> catalog;
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
+    private PermissionOracle permissionOracle;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
-                        Provider<CollectionCatalog> catalog,
+                        Provider<FormCatalog> catalog,
                         DispatcherSync dispatcher,
-                        DeploymentConfiguration config, Provider<AuthenticatedUser> userProvider, ServerSideAuthProvider authProvider) {
+                        DeploymentConfiguration config,
+                        Provider<AuthenticatedUser> userProvider,
+                        ServerSideAuthProvider authProvider,
+                        PermissionOracle permissionOracle
+    ) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -77,6 +83,7 @@ public class RootResource {
         this.config = config;
         this.userProvider = userProvider;
         this.authProvider = authProvider;
+        this.permissionOracle = permissionOracle;
     }
 
     @Path("/adminEntity/{id}")
@@ -133,7 +140,7 @@ public class RootResource {
 
     @Path("/database/{id}")
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
-        return new DatabaseResource(dispatcher, id);
+        return new DatabaseResource(catalog, dispatcher, id);
     }
 
     @Path("/adminLevel/{id}")
@@ -158,7 +165,7 @@ public class RootResource {
 
     @Path("/form/{id}")
     public FormResource getForm(@PathParam("id") ResourceId id) {
-        return new FormResource(id, catalog, userProvider);
+        return new FormResource(id, catalog, userProvider, new PermissionOracle(entityManager.get()));
     }
     
     @Path("/query")
@@ -176,7 +183,7 @@ public class RootResource {
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
-        Updater updater = new Updater(catalog.get());
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
         try {
             updater.execute(jsonElement.getAsJsonObject());
         } catch (InvalidUpdateException e) {
@@ -209,5 +216,9 @@ public class RootResource {
         return new PivotTestResource( dispatcher, authProvider);
     }
     
+    @Path("/catalog")
+    public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
+        return new CatalogResource(catalog, userProvider);
+    }
     
 }

@@ -21,8 +21,10 @@ package org.activityinfo.model.type.primitive;
  * #L%
  */
 
+import com.google.gson.JsonElement;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldValue;
 
 /**
  * Value type that represents a boolean value, either true or false.
@@ -46,6 +48,11 @@ public class BooleanType implements FieldType {
     @Override
     public FieldTypeClass getTypeClass() {
         return TYPE_CLASS;
+    }
+
+    @Override
+    public FieldValue parseJsonValue(JsonElement value) {
+        return BooleanFieldValue.valueOf(value.getAsBoolean());
     }
 
     /**

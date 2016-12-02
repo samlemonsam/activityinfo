@@ -104,7 +104,7 @@ public class SiteRenderer {
         html.append(":</p>");
         html.append("<table class='indicatorTable' cellspacing='0'>");
         boolean hasContent = false;
-        for (IndicatorGroup group : activity.groupIndicators()) {
+        for (IndicatorGroup group : activity.groupIndicators(true)) {
             boolean groupHasContent = renderIndicatorGroup(html, group, site);
             hasContent = hasContent || groupHasContent;
         }

@@ -74,9 +74,13 @@ public class ModalDialog  {
     @UiField
     InlineLabel statusLabel;
 
-    @UiField Button backButton;
+    @UiField
+    Button backButton;
+
     @UiField
     DivElement dialogDiv;
+
+    private ClickHandler hideHandler;
 
     public ModalDialog() {
         BaseStylesheet.INSTANCE.ensureInjected();
@@ -132,12 +136,23 @@ public class ModalDialog  {
         }
         dialog.removeStyleName("modal-open");
         dialog.getElement().getStyle().setDisplay(Style.Display.NONE);
+        if (hideHandler != null) {
+            hideHandler.onClick(null);
+        }
+    }
+
+    public ClickHandler getHideHandler() {
+        return hideHandler;
+    }
+
+    public void setHideHandler(ClickHandler hideHandler) {
+        this.hideHandler = hideHandler;
     }
 
     public void setDialogTitle(String title) {
         setDialogTitle(SafeHtmlUtils.fromString(title));
     }
-    
+
     public void setDialogTitle(SafeHtml dialogTitleHtml) {
         this.title.setInnerSafeHtml(dialogTitleHtml);
     }

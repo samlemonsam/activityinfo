@@ -3,7 +3,6 @@ package org.activityinfo.store.query.impl.eval;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ColumnFunction;
@@ -11,12 +10,15 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.store.query.impl.CollectionScanBatch;
+import org.activityinfo.store.query.impl.FormScanBatch;
 import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,7 +30,7 @@ import java.util.logging.Logger;
 public class QueryEvaluator {
     private static final Logger LOGGER = Logger.getLogger(QueryEvaluator.class.getName());
 
-    private CollectionScanBatch batch;
+    private FormScanBatch batch;
     private FormTree tree;
     private FormClass rootFormClass;
 
@@ -36,17 +38,13 @@ public class QueryEvaluator {
 
     private NodeMatcher resolver;
 
-    private Map<String, AggregateFunction> aggregateFunctions = Maps.newHashMap();
-
     private Deque<SymbolExpr> evaluationStack = new ArrayDeque<>();
 
-    public QueryEvaluator(FormTree formTree, FormClass rootFormClass, CollectionScanBatch batch) {
+    public QueryEvaluator(FormTree formTree, FormClass rootFormClass, FormScanBatch batch) {
         this.tree = formTree;
         this.resolver = new NodeMatcher(formTree);
         this.rootFormClass = rootFormClass;
         this.batch = batch;
-
-        aggregateFunctions.put("sum", new SumFunction());
     }
 
     public Slot<ColumnView> evaluateExpression(ExprNode expr) {

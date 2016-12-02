@@ -1,6 +1,5 @@
 package org.activityinfo.core.shared.importing.strategy;
 
-import org.activityinfo.core.shared.criteria.FormClassSet;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.model.formTree.FormTree;
 
@@ -56,7 +55,7 @@ public class SingleClassReferenceStrategy implements FieldImportStrategy {
 
     @Override
     public boolean accept(FormTree.Node fieldNode) {
-        return fieldNode.isReference() && FormClassSet.of(fieldNode.getRange()).isSingleton();
+        return fieldNode.isReference() && fieldNode.getRange().size() == 1;
     }
 
     @Override

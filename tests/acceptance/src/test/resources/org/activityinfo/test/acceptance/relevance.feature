@@ -32,8 +32,8 @@ Feature: Relevance
     And I enter:
       | field      | value      | controlType |
       | Partner    | NRC        | radio       |
-      | Start Date | 22-12-2015 | date        |
-      | End Date   | 22-12-2015 | date        |
+      | Start Date | 2015-12-22 | date        |
+      | End Date   | 2015-12-22 | date        |
     When I save the submission
     And I open the table for "Household Survey" in database "Relevance"
     And I edit first row

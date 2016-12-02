@@ -31,13 +31,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormInstanceLabeler;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.widget.RadioButton;
 
@@ -56,14 +50,19 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
     private final ValueUpdater valueUpdater;
     private boolean readOnly;
 
-    public CheckBoxFieldWidget(ReferenceType type, List<FormInstance> range, final ValueUpdater valueUpdater) {
+    public CheckBoxFieldWidget(ReferenceType type, OptionSet range, final ValueUpdater valueUpdater) {
         this.valueUpdater = valueUpdater;
         panel = new FlowPanel();
         controls = new ArrayList<>();
 
         String groupId = Long.toString(new Date().getTime());
-        for (final FormInstance instance : range) {
-            CheckBox checkBox = createControl(groupId, instance, type.getCardinality());
+        for (int i = 0; i < range.getCount(); i++) {
+            CheckBox checkBox = createControl(
+                    groupId, 
+                    range.getRef(i),
+                    range.getLabel(i),
+                    type.getCardinality());
+            
             checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -97,15 +96,14 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
         return true;
     }
 
-    private CheckBox createControl(String groupId, FormInstance instance, Cardinality cardinality) {
+    private CheckBox createControl(String groupId, String choiceId, String label, Cardinality cardinality) {
         final CheckBox checkBox;
-        final String label = FormInstanceLabeler.getLabel(instance);
         if (cardinality == Cardinality.SINGLE) {
             checkBox = new RadioButton(groupId, label);
         } else {
             checkBox = new CheckBox(label);
         }
-        checkBox.setFormValue(instance.getId().asString());
+        checkBox.setFormValue(choiceId);
         return checkBox;
     }
 
@@ -125,10 +123,10 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
 
 
     private ReferenceValue updatedValue() {
-        final Set<ResourceId> value = Sets.newHashSet();
+        final Set<RecordRef> value = Sets.newHashSet();
         for (CheckBox control : controls) {
             if (control.getValue()) {
-                value.add(ResourceId.valueOf(control.getFormValue()));
+                value.add(RecordRef.fromQualifiedString(control.getFormValue()));
             }
         }
         return new ReferenceValue(value);
@@ -136,10 +134,10 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
 
     @Override
     public Promise<Void> setValue(ReferenceValue value) {
-        Set<ResourceId> ids = value.getResourceIds();
+        Set<RecordRef> ids = value.getReferences();
         for (CheckBox entry : controls) {
-            ResourceId resourceId = ResourceId.valueOf(entry.getFormValue());
-            entry.setValue(ids.contains(resourceId));
+            RecordRef ref = RecordRef.fromQualifiedString(entry.getFormValue());
+            entry.setValue(ids.contains(ref));
         }
         return Promise.done();
     }

@@ -57,6 +57,7 @@ public class LocationDialogUiTest {
                 property("locationType", VILLAGE));
 
         ApplicationPage applicationPage = driver.getApplicationPage();
+        applicationPage.openLocaleMenu().selectLocale("Fran\u00e7ais");
         DataEntryTab dataEntryTab = applicationPage.navigateToDataEntryTab();
 
         GxtDataEntryDriver dataEntry = (GxtDataEntryDriver) dataEntryTab

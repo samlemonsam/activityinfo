@@ -1,21 +1,19 @@
 package org.activityinfo.core.server.type.converter;
 
-import org.activityinfo.core.server.formatter.JavaDateFormatterFactory;
 import org.activityinfo.core.server.formatter.JavaTextQuantityFormatterFactory;
-import org.activityinfo.core.shared.type.converter.ConverterFactory;
+import org.activityinfo.core.shared.type.converter.FieldParserFactory;
 
 /**
  * Provides a converter factory using standard JRE classes
  */
 public class JvmConverterFactory {
 
-    private static ConverterFactory INSTANCE;
+    private static FieldParserFactory INSTANCE;
 
-    public static ConverterFactory get() {
+    public static FieldParserFactory get() {
         if(INSTANCE == null) {
-            INSTANCE = new ConverterFactory(
+            INSTANCE = new FieldParserFactory(
                     new JavaTextQuantityFormatterFactory(),
-                    new JavaDateFormatterFactory().create(),
                     new JreNumberFormats());
         }
         return INSTANCE;

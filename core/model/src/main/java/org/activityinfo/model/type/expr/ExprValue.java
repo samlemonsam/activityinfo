@@ -1,5 +1,7 @@
 package org.activityinfo.model.type.expr;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -25,6 +27,11 @@ public class ExprValue implements FieldValue, IsRecord {
     @Override
     public FieldTypeClass getTypeClass() {
         return ExprFieldType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonElement toJsonElement() {
+        return new JsonPrimitive(expression);
     }
 
     @Override

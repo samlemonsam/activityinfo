@@ -42,6 +42,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
@@ -69,6 +70,7 @@ public final class LayersWidget extends LayoutContainer implements HasReportElem
     public static final int WIDTH = 225;
 
     private static final int CONTEXT_MENU_WIDTH = 150;
+    private ResourceLocator locator;
     private final ReportEventBus reportEventBus;
 
     private Dispatcher service;
@@ -86,10 +88,11 @@ public final class LayersWidget extends LayoutContainer implements HasReportElem
     private MenuItem clusterMenuItem;
 
     @Inject
-    public LayersWidget(Dispatcher service, EventBus eventBus, LayerOptionsPanel optionsPanel) {
+    public LayersWidget(Dispatcher service, ResourceLocator locator, EventBus eventBus, LayerOptionsPanel optionsPanel) {
         super();
 
         this.service = service;
+        this.locator = locator;
         this.reportEventBus = new ReportEventBus(eventBus, this);
         this.reportEventBus.listen(new ReportChangeHandler() {
 
@@ -121,7 +124,7 @@ public final class LayersWidget extends LayoutContainer implements HasReportElem
         addLayerButton.addListener(Events.Select, new SelectionListener<ButtonEvent>() {
             @Override
             public void componentSelected(ButtonEvent ce) {
-                final NewLayerWizard wizard = new NewLayerWizard(service);
+                final NewLayerWizard wizard = new NewLayerWizard(service, locator);
                 addLayersDialog = new WizardDialog(wizard);
                 addLayersDialog.show(new WizardCallback() {
 

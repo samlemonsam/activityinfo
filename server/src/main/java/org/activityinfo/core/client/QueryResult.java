@@ -28,16 +28,16 @@ import java.util.List;
  */
 public class QueryResult<T> {
 
-    private final List<T> projections;
+    private final List<T> items;
     private final int totalCount;
 
     public QueryResult(List<T> projections, int totalCount) {
-        this.projections = projections;
+        this.items = projections;
         this.totalCount = totalCount;
     }
 
-    public List<T> getProjections() {
-        return projections;
+    public List<T> getItems() {
+        return items;
     }
 
     public int getTotalCount() {
@@ -47,10 +47,14 @@ public class QueryResult<T> {
     /**
      * Full result where result contains all data (list.size == totalCount)
      *
-     * @param projections projections
+     * @param projections items
      * @return full result where result contains all data (list.size == totalCount)
      */
     public static <T> QueryResult<T> fullResult(List<T> projections) {
         return new QueryResult<>(projections, projections.size());
+    }
+
+    public boolean hasNext(int offset) {
+        return (offset + getItems().size()) < getTotalCount();
     }
 }

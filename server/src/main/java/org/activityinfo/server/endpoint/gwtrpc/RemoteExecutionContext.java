@@ -156,6 +156,8 @@ public class RemoteExecutionContext implements ExecutionContext {
              * Commit the transaction
              */
 
+            LOGGER.info("Committing transaction for " + command);
+            
             try {
                 this.entityManager.flush();
                 this.entityManager.getTransaction().commit();

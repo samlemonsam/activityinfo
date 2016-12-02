@@ -25,8 +25,12 @@
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="com.bedatadriven.rebar.Time"/>
+  <inherits name="org.activityinfo.i18n.I18n"/>
   <inherits name="org.activityinfo.Promises"/>
   <inherits name="com.google.gwt.json.JSON"/>
+  
+
+  <super-source path="jre"/>
 
   <source path="auth"/>
   <source path="date"/>

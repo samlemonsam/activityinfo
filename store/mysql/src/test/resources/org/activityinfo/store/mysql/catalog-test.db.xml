@@ -207,9 +207,6 @@
   <userDatabase databaseId="4" name="Public" countryId="1"
                 ownerUserId="4" lastSchemaUpdate="2009-01-01"/>
 
-  <activity activityId="41" databaseId="4" name="Public Activity"
-            reportingFrequency="1" allowEdit="1" sortOrder="1" locationTypeId="3"
-            published="2"/>
 
 
   <project projectId="1" name="Project X" description="A project"
@@ -491,5 +488,33 @@
     
   <target targetId="6001" databaseId="1" name="Long term goals" partnerId="1" date1="2009-01-01" date2="2012-01-01"/>
   <targetvalue targetId="6001" indicatorId="12451" value="9999"/>
+
+
+  <!-- Bound location type -->
+
+  <activity activityId="41" databaseId="4" name="Public Activity"
+            reportingFrequency="1" allowEdit="1" sortOrder="1" locationTypeId="3"
+            published="2"/>
+  
+  <location locationId="9001" locationTypeId="3" name="Bukavu" timeEdited="600"/>
+  <locationadminlink locationId="9001" adminEntityId="10"/>
+  <locationadminlink locationId="9001" adminEntityId="2"/>
+
+  <location locationId="9002" locationTypeId="3" name="Walungu" timeEdited="600"/>
+  <locationadminlink locationId="9002" adminEntityId="11"/>
+  <locationadminlink locationId="9002" adminEntityId="2"/>
+
+  <site siteId="9001" activityId="41" locationId="9001" partnerId="1"
+        Date1="2009-01-01" Date2="2009-01-31" DateCreated="2009-02-01"
+        DateEdited="2009-02-01" timeEdited="660"/>
+
+  <site siteId="9002" activityId="41" locationId="9002" partnerId="1"
+        Date1="2009-01-01" Date2="2009-01-31" DateCreated="2009-02-01"
+        DateEdited="2009-02-01" timeEdited="660"/>
+
+  <!-- Associated with an OLD location type -->
+  <site siteId="9003" activityId="41" locationId="1" partnerId="1"
+        Date1="2009-01-01" Date2="2009-01-31" DateCreated="2009-02-01"
+        DateEdited="2009-02-01" timeEdited="660"/>
 
 </dataset>

@@ -42,6 +42,7 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -65,6 +66,8 @@ public class LoadDataSet extends Statement {
     @Override
     public void evaluate() throws Throwable {
 
+        System.out.println("ConnectionProvider class: " + connectionProvider);
+
         JdbcScheduler.get().forceCleanup();
 
         LOGGER.info("Removing all rows");
@@ -72,6 +75,7 @@ public class LoadDataSet extends Statement {
 
         LOGGER.info("DBUnit: loading " + name + " into the database.");
         IDataSet data = loadDataSet();
+        LOGGER.info("DBUnit: loaded " + name + ", table names: " + Arrays.toString(data.getTableNames()));
 
         List<Throwable> errors = new ArrayList<Throwable>();
         errors.clear();
@@ -112,6 +116,11 @@ public class LoadDataSet extends Statement {
             IDatabaseConnection dbUnitConnection = new MySqlConnection(
                     connection, null);
             op.execute(dbUnitConnection, dataSet);
+            
+            // Fix for test files
+            try(java.sql.Statement statement = connection.createStatement()) {
+                statement.execute("update indicator set deleted=1 where datedeleted is not null");
+            }
         }
     }
 

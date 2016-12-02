@@ -22,18 +22,22 @@ package org.activityinfo.ui.client.component.form.field;
  */
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.form.ApplicationProperties;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
@@ -52,9 +56,10 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.attachment.AttachmentUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
+import org.activityinfo.ui.client.component.form.field.map.MapItem;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author yuriyz on 1/28/14.
@@ -94,10 +99,6 @@ public class FormFieldWidgetFactory {
 
     public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater) {
         return createWidget(formClass, field, valueUpdater, null, null);
-    }
-
-    public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater, @Nullable EventBus eventBus) {
-        return createWidget(formClass, field, valueUpdater, null, eventBus);
     }
 
     public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field,
@@ -153,22 +154,91 @@ public class FormFieldWidgetFactory {
         throw new UnsupportedOperationException();
     }
 
-    private Promise<? extends FormFieldWidget> createReferenceWidget(FormField field, ValueUpdater updater) {
+    private Promise<? extends FormFieldWidget> createReferenceWidget(FormField field, final ValueUpdater updater) {
         if (field.isSubPropertyOf(ApplicationProperties.HIERARCHIAL)) {
             return HierarchyFieldWidget.create(resourceLocator, (ReferenceType) field.getType(), updater);
         } else {
-            return createSimpleListWidget((ReferenceType) field.getType(), updater);
+            final ReferenceType type = (ReferenceType) field.getType();
+            if (type.getRange().isEmpty()) {
+                return Promise.resolved(NullFieldWidget.INSTANCE);
+            }
+            if(type.getRange().size() > 1) {
+                return Promise.rejected(new UnsupportedOperationException("TODO"));
+            }
+
+            final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+
+            final Promise<FormFieldWidget> widget = new Promise<>();
+
+            resourceLocator.getFormClass(formId).then(new Function<FormClass, Void>() {
+                @Override
+                public Void apply(FormClass formClass) {
+                    Optional<FormField> geoPointField = getGeoPointField(formClass);
+
+                    final Promise<? extends FormFieldWidget> widgetPromise;
+                    if (geoPointField.isPresent()) { // if has geoPoint then show geo widget and propose map UI
+                        widgetPromise = createMapWidget(type, updater, geoPointField.get());
+                    } else { // no geo point, fallback to list
+                        widgetPromise = createSimpleListWidget(type, updater);
+                    }
+
+                    widgetPromise.then(new Function<FormFieldWidget, Object>() {
+                        @Override
+                        public Object apply(FormFieldWidget input) {
+                            widget.resolve(input);
+                            return null;
+                        }
+                    });
+                    return null;
+                }
+            });
+
+            return widget;
         }
     }
 
-    private Promise createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
-        return resourceLocator
-                .queryInstances(type.getRange())
-                .then(new Function<List<FormInstance>, FormFieldWidget>() {
-                    @Override
-                    public FormFieldWidget apply(List<FormInstance> input) {
+    private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, final FormField geoField) {
+        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+        QueryModel queryModel = new QueryModel(formId);
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr("label").as("label");
+        queryModel.selectField(geoField.getId());
 
-                        int size = input.size();
+        return resourceLocator
+                .queryTable(queryModel)
+                .then(new Function<ColumnSet, FormFieldWidget>() {
+                    @Override
+                    public FormFieldWidget apply(ColumnSet input) {
+                        Set<MapItem> items = MapItem.items(formId, new OptionSet(formId, input), geoField.getId().asString());
+                        return new ReferenceMapWidget(items, valueUpdater);
+                    }
+                });
+
+    }
+
+    private Optional<FormField> getGeoPointField(FormClass formClass) {
+        for (FormField field : formClass.getFields()) {
+            if (field.getType() instanceof GeoPointType) {
+                return Optional.of(field);
+            }
+        }
+        return Optional.absent();
+    }
+
+    private Promise<? extends FormFieldWidget> createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
+
+        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+        QueryModel queryModel = new QueryModel(formId);
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr("label").as("label");
+
+        return resourceLocator
+                .queryTable(queryModel)
+                .then(new Function<ColumnSet, FormFieldWidget>() {
+                    @Override
+                    public FormFieldWidget apply(ColumnSet input) {
+
+                        int size = input.getNumRows();
 
                         boolean isProjectField = !type.getRange().isEmpty() &&
                                 type.getRange().iterator().next().getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
@@ -176,17 +246,19 @@ public class FormFieldWidgetFactory {
                             return NullFieldWidget.INSTANCE;
                         }
 
-                        if (size < SMALL_BALANCE_NUMBER) {
+                        OptionSet instances = new OptionSet(formId, input);
+
+                        if (size > 0 && size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons
-                            return new CheckBoxFieldWidget(type, input, valueUpdater);
+                            return new CheckBoxFieldWidget(type, instances, valueUpdater);
 
                         } else if (size < MEDIUM_BALANCE_NUMBER) {
                             // Dropdown list
-                            return new ComboBoxFieldWidget(input, valueUpdater);
+                            return new ComboBoxFieldWidget(formId, instances, valueUpdater);
 
                         } else {
                             // Suggest box
-                            return new SuggestBoxWidget(input, valueUpdater);
+                            return new SuggestBoxWidget(formId, instances, valueUpdater);
                         }
                     }
                 });

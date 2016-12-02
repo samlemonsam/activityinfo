@@ -14,6 +14,8 @@ import java.sql.SQLException;
 
 
 public class UserTable implements SimpleTable {
+    
+    public static final ResourceId USERDB_ID = ResourceId.valueOf("userdb");
 
     private static final String TABLE_NAME = "userlogin";
 
@@ -31,7 +33,7 @@ public class UserTable implements SimpleTable {
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);
         mapping.setFormLabel("Users");
-        mapping.setOwnerId(ResourceId.ROOT_ID);
+        mapping.setDatabaseId(USERDB_ID);
         
         mapping.setPrimaryKeyMapping(CuidAdapter.USER_DOMAIN, "UserId");
         mapping.addTextField(nameField, "name");
@@ -44,7 +46,7 @@ public class UserTable implements SimpleTable {
     }
 
     @Override
-    public TableMapping getMapping(QueryExecutor executor, ResourceId formClassId) {
+    public TableMapping getMapping(QueryExecutor executor, ResourceId formId) {
         return mapping;
     }
 
