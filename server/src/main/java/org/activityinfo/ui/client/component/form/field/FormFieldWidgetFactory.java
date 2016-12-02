@@ -213,7 +213,7 @@ public class FormFieldWidgetFactory {
                 .then(new Function<ColumnSet, FormFieldWidget>() {
                     @Override
                     public FormFieldWidget apply(ColumnSet input) {
-                        Set<MapItem> items = MapItem.items(formId, new OptionSet(input), geoField.getId().asString());
+                        Set<MapItem> items = MapItem.items(formId, new OptionSet(formId, input), geoField.getId().asString());
                         return new ReferenceMapWidget(items, valueUpdater);
                     }
                 });
@@ -250,7 +250,7 @@ public class FormFieldWidgetFactory {
                             return NullFieldWidget.INSTANCE;
                         }
 
-                        OptionSet instances = new OptionSet(input);
+                        OptionSet instances = new OptionSet(formId, input);
 
                         if (size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons

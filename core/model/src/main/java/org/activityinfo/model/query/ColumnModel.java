@@ -91,7 +91,9 @@ public class ColumnModel {
 
     public static ColumnModel fromJson(JsonObject object) {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setId(object.get("id").getAsString());
+        if(!object.get("id").isJsonNull()) {
+            columnModel.setId(object.get("id").getAsString());
+        }
         columnModel.setExpression(object.get("expression").getAsString());
         return columnModel;
     }

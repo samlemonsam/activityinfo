@@ -35,7 +35,7 @@ public class MapItem {
         Set<MapItem> items = Sets.newHashSet();
         for (int i = 0; i < optionSet.getCount(); i++) {
             Extents extents = optionSet.getColumnView(geoPointColumnName).getExtents(i);
-            items.add(new MapItem(new RecordRef(formId, ResourceId.valueOf(optionSet.getId(i))),
+            items.add(new MapItem(new RecordRef(formId, ResourceId.valueOf(optionSet.getRef(i))),
                     optionSet.getLabel(i),
                     extents.getX1(),
                     extents.getY1()));

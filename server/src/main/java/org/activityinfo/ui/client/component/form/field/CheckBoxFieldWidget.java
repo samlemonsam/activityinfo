@@ -59,7 +59,7 @@ public class CheckBoxFieldWidget implements ReferenceFieldWidget {
         for (int i = 0; i < range.getCount(); i++) {
             CheckBox checkBox = createControl(
                     groupId, 
-                    range.getId(i),
+                    range.getRef(i),
                     range.getLabel(i),
                     type.getCardinality());
             

@@ -3,14 +3,13 @@ package org.activityinfo.store.mysql.update;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -126,7 +125,7 @@ public class IndicatorValueTableUpdater {
     }
     
     private void executeTextUpdate(QueryExecutor executor, IndicatorUpdate update) {
-        TextValue textValue = (TextValue) update.value;
+        HasStringValue textValue = (HasStringValue) update.value;
         executor.update("REPLACE INTO indicatorvalue (reportingPeriodId, indicatorId, TextValue) VALUES (?, ?, ?)",
                 Arrays.asList(reportingPeriodId, update.indicatorId, textValue.asString()));
     }

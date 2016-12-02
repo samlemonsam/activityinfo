@@ -13,16 +13,16 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.model.type.barcode.BarcodeValue;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -287,14 +287,8 @@ public class RecordHistoryBuilder {
         if(value == null) {
             return "";
         }
-        if(field.getType() instanceof TextType) {
-            return ((TextValue) value).toString();
-        }
-        if(field.getType() instanceof NarrativeType) {
-            return ((NarrativeValue)value).toString();
-        }
-        if(field.getType() instanceof BarcodeType) {
-            return ((BarcodeValue)value).toString();
+        if(field.getType() instanceof HasStringValue) {
+            return ((HasStringValue) value).asString();
         }
         if(field.getType() instanceof EnumType) {
             return render((EnumType)field.getType(), (EnumValue)value);

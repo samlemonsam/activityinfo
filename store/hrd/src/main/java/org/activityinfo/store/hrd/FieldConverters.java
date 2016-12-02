@@ -169,7 +169,7 @@ public class FieldConverters {
 
         @Override
         public GeoPoint toFieldValue(Object hrdValue) {
-            GeoPoint point = (GeoPoint) hrdValue;
+            GeoPt point = (GeoPt) hrdValue;
             return new GeoPoint(point.getLatitude(), point.getLongitude());
         }
     };
