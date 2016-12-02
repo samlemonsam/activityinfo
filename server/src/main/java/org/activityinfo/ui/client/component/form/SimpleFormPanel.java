@@ -16,7 +16,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.BuiltinFields;
-import org.activityinfo.model.lock.LockEvaluator;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -237,14 +236,14 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         if (BuiltinFields.isBuiltInDate(field.getId())) {
             FormClass rootFormClass = getModel().getRootFormClass();
             DateRange dateRange = BuiltinFields.getDateRange(getModel().getWorkingRootInstance(), rootFormClass);
-
-            if (!rootFormClass.getLocks().isEmpty()) {
-                if (new LockEvaluator(rootFormClass).isLockedSilently(getModel().getWorkingRootInstance())) {
-                    getWidgetCreator().get(BuiltinFields.getStartDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
-                    getWidgetCreator().get(BuiltinFields.getEndDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
-                    return Optional.of(false);
-                }
-            }
+//
+//            if (!rootFormClass.getLocks().isEmpty()) {
+//                if (new LockEvaluator(rootFormClass).isLockedSilently(getModel().getWorkingRootInstance())) {
+//                    getWidgetCreator().get(BuiltinFields.getStartDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+//                    getWidgetCreator().get(BuiltinFields.getEndDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+//                    return Optional.of(false);
+//                }
+//            }
 
             if (!dateRange.isValidWithNull()) {
                 container.setInvalid(I18N.CONSTANTS.inconsistentDateRangeWarning());

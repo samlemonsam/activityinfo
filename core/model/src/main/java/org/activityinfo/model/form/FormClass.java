@@ -11,7 +11,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 
@@ -40,7 +39,6 @@ public class FormClass implements FormElementContainer {
     private String label;
     private String description;
     private final List<FormElement> elements = Lists.newArrayList();
-    private final Set<ResourceLock> locks = Sets.newHashSet();
 
     private ResourceId parentFormId = null;
     private SubFormKind subFormKind = null;
@@ -257,10 +255,6 @@ public class FormClass implements FormElementContainer {
     public FormClass insertElement(int index, FormElement element) {
         elements.add(index, element);
         return this;
-    }
-
-    public Set<ResourceLock> getLocks() {
-        return locks;
     }
 
     public Optional<ResourceId> getParentFormId() {
