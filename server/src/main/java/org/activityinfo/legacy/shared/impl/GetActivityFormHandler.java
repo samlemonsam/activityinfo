@@ -30,7 +30,6 @@ import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -579,11 +578,6 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
         public Promise<ActivityFormDTO> apply(ActivityFormDTO form) {
             List<PartnerDTO> allPartners = form.getPartnerRange();
             Set<PartnerDTO> result = Sets.newHashSet();
-            Optional<PartnerDTO> defaultPartner = UserDatabaseDTO.getDefaultPartner(allPartners);
-
-            if (defaultPartner.isPresent()) {
-                result.add(defaultPartner.get());
-            }
 
             if (form.isEditAllAllowed()) {
                 result.addAll(allPartners);
