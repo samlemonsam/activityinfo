@@ -224,7 +224,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.add(groupingComboBox);
 
         toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.newSite(), IconImageBundle.ICONS.add());
-        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.update(), IconImageBundle.ICONS.edit());
+        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.edit(), IconImageBundle.ICONS.edit());
         toolBar.addDeleteButton(I18N.CONSTANTS.deleteSite());
 
         toolBar.add(new SeparatorToolItem());

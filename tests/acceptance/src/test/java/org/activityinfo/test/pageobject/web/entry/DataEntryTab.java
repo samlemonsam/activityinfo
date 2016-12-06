@@ -94,7 +94,7 @@ public class DataEntryTab {
     }
     
     public DataEntryDriver updateSubmission() {
-        buttonClick(I18N.CONSTANTS.update());
+        buttonClick(I18N.CONSTANTS.edit());
         return new GxtFormDataEntryDriver(new GxtModal(container));
     }
 
