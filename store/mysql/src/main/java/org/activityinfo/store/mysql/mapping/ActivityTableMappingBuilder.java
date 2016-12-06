@@ -218,10 +218,14 @@ public class ActivityTableMappingBuilder {
     }
 
     public void addProjectField() {
+        // For new "beta" forms, we build the form class exactly once,
+        // and at this stage we hide the project field by default.
+
         FormField projectField = new FormField(field(classId, PROJECT_FIELD))
                 .setLabel("Project")
                 .setCode("project")
                 .setType(ReferenceType.single(activity.getProjectFormClassId()))
+                .setVisible(activity.isClassicView())
                 .setRequired(false);
         formClass.addElement(projectField);
         addProjectField(projectField);
