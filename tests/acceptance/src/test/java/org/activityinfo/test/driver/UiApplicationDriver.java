@@ -312,9 +312,6 @@ public class UiApplicationDriver extends ApplicationDriver {
         dataEntryTab.selectSubmission(0);
 
         DataEntryDriver driver = dataEntryTab.updateSubmission();
-        
-        // todo conflict ?
-        //fillForm(driver, FieldValue.toMap(values));
 
         fillForm(FieldValue.toMap(values), driver);
 
