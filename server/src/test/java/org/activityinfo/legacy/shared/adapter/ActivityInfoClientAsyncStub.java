@@ -15,7 +15,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
-import org.activityinfo.server.endpoint.rest.UpdateValueVisibilityChecker;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.hrd.HrdFormAccessor;
@@ -122,7 +122,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, currentUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+            Updater updater = new Updater(catalog, currentUserId(), new BlobAuthorizerStub());
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -145,7 +145,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, currentUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+            Updater updater = new Updater(catalog, currentUserId(), new BlobAuthorizerStub());
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
             return Promise.resolved(null);

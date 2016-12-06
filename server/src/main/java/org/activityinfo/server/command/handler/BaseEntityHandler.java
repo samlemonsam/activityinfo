@@ -33,7 +33,6 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.service.blob.BlobFieldStorageService;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -55,7 +54,7 @@ public class BaseEntityHandler {
 
     public BaseEntityHandler(EntityManager em, Injector injector) {
         this.em = em;
-        this.permissionsOracle = new PermissionOracle(Providers.of(em), injector.getInstance(BlobFieldStorageService.class));
+        this.permissionsOracle = new PermissionOracle(Providers.of(em));
     }
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {

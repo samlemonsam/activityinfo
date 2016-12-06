@@ -15,6 +15,7 @@ import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
@@ -206,7 +207,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.execute(update);
 
         query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");

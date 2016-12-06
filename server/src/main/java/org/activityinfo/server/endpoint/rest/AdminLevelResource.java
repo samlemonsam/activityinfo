@@ -37,6 +37,7 @@ import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.model.*;
 import org.activityinfo.server.util.monitoring.Timed;
+import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.store.FormCatalog;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -63,17 +64,22 @@ public class AdminLevelResource {
     private final Provider<EntityManager> entityManager;
     private final Provider<FormCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
+    private BlobAuthorizer blobAuthorizer;
     private final AdminLevel level;
 
 
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
 
-    public AdminLevelResource(Provider<FormCatalog> catalog, Provider<EntityManager> entityManager, Provider<AuthenticatedUser> userProvider, AdminLevel level) {
+    public AdminLevelResource(Provider<FormCatalog> catalog, Provider<EntityManager> entityManager,
+                              Provider<AuthenticatedUser> userProvider,
+                              BlobAuthorizer blobAuthorizer,
+                              AdminLevel level) {
         super();
         this.catalog = catalog;
         this.entityManager = entityManager;
         this.userProvider = userProvider;
+        this.blobAuthorizer = blobAuthorizer;
         this.level = level;
     }
 
@@ -92,7 +98,7 @@ public class AdminLevelResource {
     @Path("/form")
     public FormResource getForm() {
         return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), catalog, userProvider,
-                new PermissionOracle(entityManager.get()));
+                new PermissionOracle(entityManager.get()), blobAuthorizer);
     }
     
     @DELETE

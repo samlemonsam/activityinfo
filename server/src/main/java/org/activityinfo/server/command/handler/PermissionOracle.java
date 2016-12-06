@@ -1,6 +1,5 @@
 package org.activityinfo.server.command.handler;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
@@ -10,11 +9,7 @@ import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.attachment.Attachment;
-import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.service.blob.BlobFieldStorageService;
-import org.activityinfo.service.blob.BlobId;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -27,18 +22,16 @@ import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 public class PermissionOracle {
 
     private final Provider<EntityManager> em;
-    private BlobFieldStorageService blobService;
 
     private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
 
     @Inject
-    public PermissionOracle(Provider<EntityManager> em, BlobFieldStorageService blobService) {
+    public PermissionOracle(Provider<EntityManager> em) {
         this.em = em;
-        this.blobService = blobService;
     }
 
     public PermissionOracle(EntityManager em) {
-        this(Providers.of(em), null);
+        this(Providers.of(em));
     }
 
     /**
@@ -134,33 +127,7 @@ public class PermissionOracle {
         }
     }
 
-    public void assertEditAllowed(AttachmentValue value, int userId) {
-        assertEditAllowed(value, em.get().find(User.class, userId));
-    }
 
-    public void assertEditAllowed(AttachmentValue value, User user) {
-        if(!isEditAllowed(value, user)) {
-            throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +
-                    " attachment %s", user.getId(), value.toJsonElement().toString()));
-        }
-    }
-
-    public boolean isEditAllowed(AttachmentValue value, User user) {
-        Preconditions.checkNotNull(blobService);
-
-        for (Attachment attachment : value.getValues()) {
-            if (!isEditAllowed(attachment.getBlobId(), user)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isEditAllowed(String blobId, User user) {
-        Preconditions.checkNotNull(blobService);
-
-        return blobService.hasAccess(CuidAdapter.userId(user.getId()), new BlobId(blobId));
-    }
 
     public boolean isEditSiteAllowed(User user, Activity activity, Partner partner) {
         UserPermission permission = getPermissionByUser(activity.getDatabase(), user);
@@ -319,11 +286,6 @@ public class PermissionOracle {
         return new PermissionOracle(em);
     }
 
-    public PermissionOracle using(BlobFieldStorageService blobService) {
-        this.blobService = blobService;
-        return this;
-    }
-    
     public boolean isViewAllowed(Activity activity, User user) {
         if(activity.getPublished() > 0) {
             return true;

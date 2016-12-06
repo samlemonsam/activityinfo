@@ -10,7 +10,6 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.JsonUtil;
 import org.activityinfo.model.form.FormFieldType;
 import org.activityinfo.model.type.attachment.AttachmentType;
-import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
@@ -217,7 +216,7 @@ public class SiteUpdate {
                         Indicator indicator = entityManager.getReference(Indicator.class, indicatorId);
 
                         if (FormFieldType.valueOf(indicator.getType()) == AttachmentType.TYPE_CLASS) {
-                            permissionOracle.assertEditAllowed(AttachmentValue.fromJson((String) value), user);
+                            throw new UnsupportedOperationException("Classic forms may not have attachment fields");
                         }
 
                         valueEntity = new IndicatorValue(period, indicator);

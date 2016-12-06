@@ -17,6 +17,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.RecordChangeType;
 import org.activityinfo.service.store.RecordVersion;
@@ -138,7 +139,7 @@ public class HrdCatalogTest {
                 .setType(TextType.INSTANCE);
 
         HrdCatalog catalog = new HrdCatalog();
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
 
         catalog.create(formClass);
         
