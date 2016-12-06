@@ -34,7 +34,6 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.ApplicationProperties;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -239,12 +238,6 @@ public class FormFieldWidgetFactory {
                     public FormFieldWidget apply(ColumnSet input) {
 
                         int size = input.getNumRows();
-
-                        boolean isProjectField = !type.getRange().isEmpty() &&
-                                type.getRange().iterator().next().getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
-                        if (size == 0 && isProjectField) { // for now hide only project field (AI-1200)
-                            return NullFieldWidget.INSTANCE;
-                        }
 
                         OptionSet instances = new OptionSet(formId, input);
 
