@@ -345,9 +345,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Edit")
     String edit();
-    
-    @DefaultStringValue("Update")
-    String update();
 
     @DefaultStringValue("Email")
     String email();

@@ -192,7 +192,7 @@ public class DataEntryTab {
             public List<HistoryEntry> apply(WebDriver input) {
                 try {
                     List<HistoryEntry> entries = Lists.newArrayList();
-                    FluentElements paragraphs = container.find().div(withClass("details")).p().span().asList();
+                    FluentElements paragraphs = container.find().div(withClass("details")).p().asList();
                     for (FluentElement p : paragraphs) {
                         String text;
                         text = p.text();
@@ -202,7 +202,7 @@ public class DataEntryTab {
                         }
                         if(!text.trim().isEmpty()) {
                             HistoryEntry entry = new HistoryEntry(text);
-                            FluentElements changes = p.find().parent().p().followingSibling().ul().li().asList();
+                            FluentElements changes = p.find().followingSibling().ul().li().asList();
                             for (FluentElement change : changes) {
                                 entry.addChange(change.text());
                             }

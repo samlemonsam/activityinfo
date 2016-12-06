@@ -35,10 +35,8 @@ Feature: Data entry
       | Design            | false |
     When I login as "bob@bedatadriven.com" with my correct password
     Then new form dialog for "NFI Distribution" form has following items for partner field
-      | Default |
       | NRC     |
     Then new form dialog for "Patient Visits" form has following items for partner field
-      | Default |
       | NRC     |
 
   Scenario: Monthly sites are shown independent from locks

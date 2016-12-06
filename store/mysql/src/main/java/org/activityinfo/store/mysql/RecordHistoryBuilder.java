@@ -121,7 +121,7 @@ public class RecordHistoryBuilder {
     }
 
     private void sort(List<RecordDelta> deltas) {
-        Collections.sort(deltas, new Comparator<RecordDelta>() {
+        Collections.sort(deltas, Collections.reverseOrder(new Comparator<RecordDelta>() {
             @Override
             public int compare(RecordDelta o1, RecordDelta o2) {
                 int compare = Integer.compare((int) (o1.version.getTime() / 1000), (int) (o2.version.getTime() / 1000));
@@ -137,7 +137,7 @@ public class RecordHistoryBuilder {
                     return 0;
                 }
             }
-        });
+        }));
     }
 
     private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField) {
