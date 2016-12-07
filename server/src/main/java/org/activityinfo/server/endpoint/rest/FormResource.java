@@ -25,6 +25,7 @@ import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.service.store.FormPermissions;
@@ -58,18 +59,21 @@ public class FormResource {
     private final Provider<FormCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
     private final PermissionOracle permissionOracle;
+    private BlobAuthorizer blobAuthorizer;
 
     private final ResourceId formId;
     private final Gson prettyPrintingGson;
 
     public FormResource(ResourceId formId,
                         Provider<FormCatalog> catalog,
-                        Provider<AuthenticatedUser> userProvider, 
-                        PermissionOracle permissionOracle) {
+                        Provider<AuthenticatedUser> userProvider,
+                        PermissionOracle permissionOracle,
+                        BlobAuthorizer blobAuthorizer) {
         this.formId = formId;
         this.catalog = catalog;
         this.userProvider = userProvider;
         this.permissionOracle = permissionOracle;
+        this.blobAuthorizer = blobAuthorizer;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -188,7 +192,7 @@ public class FormResource {
         
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer);
         updater.create(formId, jsonObject.getAsJsonObject());
         
         return Response.ok().build();
@@ -204,7 +208,7 @@ public class FormResource {
 
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer);
         updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
 
         return Response.ok().build();

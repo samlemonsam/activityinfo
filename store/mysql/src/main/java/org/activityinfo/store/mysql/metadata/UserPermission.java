@@ -9,6 +9,7 @@ public class UserPermission implements Serializable {
     boolean edit;
     boolean editAll;
     int partnerId;
+    boolean design;
 
     public boolean isView() {
         return view;
@@ -36,5 +37,8 @@ public class UserPermission implements Serializable {
         permission.view = true;
         return permission;
     }
-    
+
+    public boolean isDesign() {
+        return design;
+    }
 }

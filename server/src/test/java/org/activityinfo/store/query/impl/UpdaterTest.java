@@ -10,6 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class UpdaterTest {
     @Before
     public void setUp() {
         MockFormCatalog catalog = new MockFormCatalog();
-        updater = new Updater(catalog, userId);
+        updater = new Updater(catalog, userId, new BlobAuthorizerStub());
     }
 
     @Test(expected = InvalidUpdateException.class)

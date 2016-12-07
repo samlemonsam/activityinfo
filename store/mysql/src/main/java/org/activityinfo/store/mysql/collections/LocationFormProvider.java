@@ -5,6 +5,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.metadata.PermissionsCache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,6 +16,12 @@ import java.util.Set;
 
 public class LocationFormProvider implements FormProvider {
 
+    private final PermissionsCache permissionsCache;
+
+    public LocationFormProvider(PermissionsCache permissionsCache) {
+        this.permissionsCache = permissionsCache;
+    }
+
 
     @Override
     public boolean accept(ResourceId formId) {
@@ -23,7 +30,7 @@ public class LocationFormProvider implements FormProvider {
 
     @Override
     public FormAccessor openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
-        return new LocationFormAccessor(executor, formId);
+        return new LocationFormAccessor(executor, formId, permissionsCache);
     }
 
     @Override

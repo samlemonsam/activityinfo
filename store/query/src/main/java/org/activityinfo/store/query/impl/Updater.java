@@ -16,23 +16,28 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.attachment.Attachment;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormPermissions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
 
 /**
  * Validates and authorizes an update received from the client and
- * passes it on the correct collection
+ * passes it on the correct form accessor.
+ *
+ * <p>This class enforces all logical permissions related to the form. </p>
  */
 public class Updater {
     
@@ -40,18 +45,19 @@ public class Updater {
     
     private final FormCatalog catalog;
     private int userId;
-    private ValueVisibilityChecker visibilityChecker;
+    private BlobAuthorizer blobAuthorizer;
 
-    public Updater(FormCatalog catalog, int userId) {
-        this(catalog, userId, ValueVisibilityChecker.NULL);
-    }
+    private boolean enforcePermissions = true;
 
-    public Updater(FormCatalog catalog, int userId, ValueVisibilityChecker visibilityChecker) {
+    public Updater(FormCatalog catalog, int userId, BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
         this.userId = userId;
-        this.visibilityChecker = visibilityChecker;
+        this.blobAuthorizer = blobAuthorizer;
     }
 
+    public void setEnforcePermissions(boolean enforcePermissions) {
+        this.enforcePermissions = enforcePermissions;
+    }
 
     /**
      * Validates and executes a {@code ResourceUpdate} encoded as a json object. The object
@@ -81,33 +87,31 @@ public class Updater {
     
     public void executeChange(JsonObject changeObject) {
         
-        ResourceId resourceId = parseId(changeObject, "@id");
+        ResourceId recordId = parseId(changeObject, "@id");
 
         // First determine whether the resource already exists. 
-        Optional<FormAccessor> collection = catalog.lookupForm(resourceId);
+        Optional<FormAccessor> accessor = catalog.lookupForm(recordId);
         
-        if(!collection.isPresent()) {
-            // If the resource is not present, then we need the @class attribute in order to 
+        if(!accessor.isPresent()) {
+            // If the record id is not present, then we need the @class attribute in order to
             // know where to put the new resource 
             if(!changeObject.has("@class")) {
                 throw new InvalidUpdateException(format(
-                    "Resource with id '%s' does not exist and no '@class' attribute has been provided.", resourceId));
+                    "Resource with id '%s' does not exist and no '@class' attribute has been provided.", recordId));
             } 
             
-            ResourceId collectionId = parseId(changeObject, "@class");
-            collection = catalog.getForm(collectionId);
+            ResourceId formId = parseId(changeObject, "@class");
+            accessor = catalog.getForm(formId);
             
-            if(!collection.isPresent()) {
-                throw new InvalidUpdateException(format("@class '%s' does not exist.", collectionId));
+            if(!accessor.isPresent()) {
+                throw new InvalidUpdateException(format("@class '%s' does not exist.", formId));
             }
         }
-        
 
-        FormClass formClass = collection.get().getFormClass();
+        FormClass formClass = accessor.get().getFormClass();
         RecordUpdate update = parseChange(formClass, changeObject, this.userId);
 
-
-        executeUpdate(collection.get(), update);
+        executeUpdate(accessor.get(), update);
     }
 
     @VisibleForTesting
@@ -241,19 +245,21 @@ public class Updater {
         executeUpdate(collection.get(), update);
     }
 
-    private void executeUpdate(FormAccessor collection, RecordUpdate update) {
+    private void executeUpdate(FormAccessor form, RecordUpdate update) {
         
-        FormClass formClass = collection.getFormClass();
-        Optional<FormRecord> existingResource = collection.get(update.getRecordId());
+        FormClass formClass = form.getFormClass();
+        Optional<FormRecord> existingResource = form.get(update.getRecordId());
 
         validateUpdate(formClass, existingResource, update);
-        
+        authorizeUpdate(form, existingResource, update);
+
         if(existingResource.isPresent()) {
-            collection.update(update);
+            form.update(update);
         } else {
-            collection.add(update);
+            form.add(update);
         }
     }
+
 
     public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, RecordUpdate update) {
         LOGGER.info("Loaded existingResource " + existingResource);
@@ -288,6 +294,29 @@ public class Updater {
         }
     }
 
+    private void authorizeUpdate(FormAccessor form, Optional<FormRecord> existingResource, RecordUpdate update) {
+
+
+        // Check form-level permissions
+        if(enforcePermissions) {
+            FormPermissions permissions = form.getPermissions(userId);
+            if (!permissions.isEditAllowed()) {
+                throw new InvalidUpdateException("User '%d' does not have edit permissions for form '%s'",
+                        userId,
+                        form.getFormClass().getId().asString());
+            }
+        }
+
+        // Check field-level permissions
+        FormClass formClass = form.getFormClass();
+        for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
+            if(change.getValue() instanceof AttachmentValue) {
+                FormField field = formClass.getField(change.getKey());
+                checkBlobPermissions(field, existingResource, (AttachmentValue) change.getValue());
+            }
+        }
+    }
+
     private static void validate(FormField field, FieldValue updatedValue) {
         Preconditions.checkNotNull(field);
         
@@ -315,8 +344,50 @@ public class Updater {
                                 updatedValue.getTypeClass().getId()));
             }
         }
-        // TODO: check type-class specific properties
     }
+
+    /**
+     * Verifies that the user has permission to associate the given blob with this record.
+     *
+     * <p>Updating blob-valued fields is done by the user in two steps. First, the user uploads a file and
+     * receives a unique id for the blob. Then, the user updates a record's field with the blob's unique id. </p>
+     *
+     * <p>Once the blob is associated with the record, then any user with permission to view the record is extended
+     * permission to view the blob. This opens an avenue of attack where by an attacker with seeks to obtain access
+     * to a blob with some id by assigning it to an unrelated record to which they have access.</p>
+     *
+     * <p>For this reason, only users who originally uploaded the blob may assign the blob to a record's field value.</p>
+     */
+    private void checkBlobPermissions(
+            FormField field,
+            Optional<FormRecord> existingResource,
+            AttachmentValue updatedValue) {
+
+        AttachmentType fieldType = (AttachmentType) field.getType();
+
+        // Identity the blob ids that are already associated with this record
+        Set<String> existingBlobIds = new HashSet<>();
+        if(existingResource.isPresent()) {
+            JsonElement existingFieldValue = existingResource.get().getFields().get(field.getId().asString());
+            if(existingFieldValue != null) {
+                AttachmentValue existingValue = fieldType.parseJsonValue(existingFieldValue);
+                for (Attachment attachment : existingValue.getValues()) {
+                    existingBlobIds.add(attachment.getBlobId());
+                }
+            }
+        }
+
+        // Assert that the user owns the blob they are associating with the record
+        for (Attachment attachment : updatedValue.getValues()) {
+            if(!existingBlobIds.contains(attachment.getBlobId())) {
+                if(!blobAuthorizer.isOwner(userId, attachment.getBlobId())) {
+                    throw new InvalidUpdateException(String.format("User %d does not own blob %s",
+                            userId, attachment.getBlobId()));
+                }
+            }
+        }
+    }
+
 
     public void execute(FormInstance formInstance) {
 
@@ -374,7 +445,6 @@ public class Updater {
                     JsonElement updatedValueElement = fieldValues.get(formField.getName());
                     FieldValue updatedValue = formField.getType().parseJsonValue(updatedValueElement);
 
-                    visibilityChecker.assertVisible(formField.getType(), updatedValue, userId);
                     update.getChangedFieldValues().put(formField.getId(), updatedValue);
 
                 } else if (create) {

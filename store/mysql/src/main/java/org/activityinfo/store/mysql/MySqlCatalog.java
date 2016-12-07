@@ -51,7 +51,7 @@ public class MySqlCatalog implements FormCatalog {
         providers.add(new SimpleTableFormProvider(new ProjectTable(databaseCache), FormPermissions.readonly()));
         providers.add(new TargetFormProvider());
         providers.add(new ActivityFormProvider(activityLoader));
-        providers.add(new LocationFormProvider());
+        providers.add(new LocationFormProvider(activityLoader.getPermissionCache()));
         providers.add(new HrdProvider());
 
         geodbFolder = new GeodbFolder(executor);

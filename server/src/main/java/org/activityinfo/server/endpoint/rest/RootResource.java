@@ -43,6 +43,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
@@ -66,6 +67,7 @@ public class RootResource {
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
     private PermissionOracle permissionOracle;
+    private BlobAuthorizer blobAuthorizer;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
@@ -74,8 +76,8 @@ public class RootResource {
                         DeploymentConfiguration config,
                         Provider<AuthenticatedUser> userProvider,
                         ServerSideAuthProvider authProvider,
-                        PermissionOracle permissionOracle
-    ) {
+                        PermissionOracle permissionOracle,
+                        BlobAuthorizer blobAuthorizer) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -84,6 +86,7 @@ public class RootResource {
         this.userProvider = userProvider;
         this.authProvider = authProvider;
         this.permissionOracle = permissionOracle;
+        this.blobAuthorizer = blobAuthorizer;
     }
 
     @Path("/adminEntity/{id}")
@@ -145,7 +148,8 @@ public class RootResource {
 
     @Path("/adminLevel/{id}")
     public AdminLevelResource getAdminLevel(@PathParam("id") int id) {
-        return new AdminLevelResource(catalog, entityManager, userProvider, entityManager.get().find(AdminLevel.class, id));
+        return new AdminLevelResource(catalog, entityManager, userProvider, blobAuthorizer,
+                entityManager.get().find(AdminLevel.class, id));
     }
 
     @Path("/sites")
@@ -165,7 +169,7 @@ public class RootResource {
 
     @Path("/form/{id}")
     public FormResource getForm(@PathParam("id") ResourceId id) {
-        return new FormResource(id, catalog, userProvider, new PermissionOracle(entityManager.get()));
+        return new FormResource(id, catalog, userProvider, new PermissionOracle(entityManager.get()), blobAuthorizer);
     }
     
     @Path("/query")
@@ -183,7 +187,8 @@ public class RootResource {
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(),
+                blobAuthorizer);
         try {
             updater.execute(jsonElement.getAsJsonObject());
         } catch (InvalidUpdateException e) {
