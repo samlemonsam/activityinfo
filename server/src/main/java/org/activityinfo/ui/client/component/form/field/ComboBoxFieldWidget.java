@@ -88,7 +88,7 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
         Set<RecordRef> refs = Sets.newHashSet();
         int selectedIndex = dropBox.getSelectedIndex();
         if(selectedIndex != -1) {
-            refs.add(new RecordRef(formId, ResourceId.valueOf(dropBox.getValue(selectedIndex))));
+            refs.add(RecordRef.fromQualifiedString(dropBox.getValue(selectedIndex)));
         }
         return new ReferenceValue(refs);
     }
