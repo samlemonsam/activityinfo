@@ -1358,12 +1358,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
-    @DefaultStringValue("Please select type")
-    String pleaseSelectType();
-
-    @DefaultStringValue("Unfortunately you do not have design privileges to perform this action.")
-    String noDesignPrivileges();
-
     @DefaultStringValue("New Submission")
     String newSubmission();
 
@@ -1382,20 +1376,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Multiple selection")
     String multipleSelection();
 
-    @DefaultStringValue("Please select type")
-    String selectType();
-
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
-
-    @DefaultStringValue("Sub type")
-    String subType();
-
-    @DefaultStringValue("Recommended mode for new users")
-    String recommendedMode();
-
-    @DefaultStringValue("Attributes and indicators appear separately")
-    String newFormAsClassicHelpBlock();
 
     @DefaultStringValue("There are no partners defined for this database, so it is not possible to make new submissions at this time.")
     String noPartners();
@@ -1523,30 +1505,12 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Unknown")
     String unknown();
 
-    @DefaultStringValue("Repeating")
-    String repeating();
-
     @DefaultStringValue("+ Add another")
     String addAnother();
 
     @DefaultStringValue("Tab is not selected.")
     String subFormTabNotSelected();
 
-    @DefaultStringValue("Failed to load subform instances.")
-    String failedToLoadSubformInstances();
-
-    @DefaultStringValue("Yearly")
-    String yearly();
-
-    @DefaultStringValue("Fortnightly")
-    String fortnightly();
-
-    @DefaultStringValue("Daily")
-    String daily();
-
-    @DefaultStringValue("Hourly")
-    String hourly();
-    
     @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right. <a target=\"_blank\" href=\"http://help.activityinfo.org/m/28175/l/445646-batch-import\" style=\"text-decoration: underline;\">Show me how</a>.")
     String columnMappingHelpLink();
 
@@ -1610,23 +1574,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Click to link")
     String clickToLink();
 
-
-
-    @DefaultStringValue("Please select type of subform again and save the subform due to serialization format change.")
-    String pleaseRecreateOutdatedSubfrom();
-
-    @DefaultStringValue("Subform type change forbidden because there are data associated with it.")
-    String subformTypeChangeDisabled();
-
-    @DefaultStringValue("Text")
-    String text();
-
-    @DefaultStringValue("Plain")
-    String plain();
-
-    @DefaultStringValue("Bold")
-    String bold();
-
     @DefaultStringValue("Reference")
     String reference();
 
@@ -1640,12 +1587,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Link removed")
     String linkRemoved();
-
-    @DefaultStringValue("My databases")
-    String myDatabases();
-
-    @DefaultStringValue("Shared databases")
-    String sharedDatabases();
 
     @DefaultStringValue("You do not have permission to edit the design of this database.")
     String noDbDesignPermissions();

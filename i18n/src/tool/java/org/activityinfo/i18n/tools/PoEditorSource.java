@@ -13,6 +13,7 @@ import org.activityinfo.i18n.tools.po.PoUploadResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Defines the source of the translations as a PoEditor.com project
@@ -84,4 +85,12 @@ public class PoEditorSource implements TranslationSource {
     }
 
 
+    public void dumpNewTerms(List<ResourceClassTerm> terms) throws IOException {
+        Set<String> existingTerms = fetchTerms().keySet();
+        for (ResourceClassTerm term : terms) {
+            if(!existingTerms.contains(term.getKey())) {
+                System.out.println("New term: " + term.getKey());
+            }
+        }
+    }
 }
