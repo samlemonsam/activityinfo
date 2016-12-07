@@ -18,13 +18,19 @@ public class Push {
      */
     private boolean purge;
 
+    private boolean dryRun;
+
     public static void main(String[] args) throws IOException {
         Push task = new Push();
-        
-        if(args.length > 0 && args[0].equals("purge")) {
-            task.purge = true;
+
+        for (String arg : args) {
+            if("purge".equals(arg)) {
+                task.purge = true;
+            } else if("dryRun".equalsIgnoreCase(arg)) {
+                task.dryRun = true;
+            }
         }
-        
+
         task.execute();
     }
 
@@ -38,6 +44,10 @@ public class Push {
             terms.addAll(visitor.getTerms());
         }
 
-       Project.INSTANCE.getTranslationSource().updateTerms(terms, purge);
+        if(dryRun) {
+            Project.INSTANCE.getTranslationSource().dumpNewTerms(terms);
+        } else {
+           // Project.INSTANCE.getTranslationSource().updateTerms(terms, purge);
+        }
     }
 }
