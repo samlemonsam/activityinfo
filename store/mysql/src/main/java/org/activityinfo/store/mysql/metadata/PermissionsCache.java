@@ -42,6 +42,22 @@ public class PermissionsCache {
 
         UserPermission permission = new UserPermission();
 
+        try(ResultSet rs = executor.query("select ownerUserId from userdatabase where databaseId=" + databaseId)) {
+            if(rs.next()) {
+                int ownerUserId = rs.getInt(1);
+                if(ownerUserId == userId) {
+                    permission.viewAll = true;
+                    permission.view = true;
+                    permission.edit = true;
+                    permission.editAll = true;
+                    permission.design = true;
+                    return permission;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         String query = format("select partnerId, AllowViewAll, AllowView, AllowEditAll, AllowEdit " +
                         " from userpermission where databaseId=%d and UserId = %d",
                 databaseId,
@@ -67,6 +83,9 @@ public class PermissionsCache {
                     permission.edit = true;
                 } else if(rs.getBoolean(5)) {
                     permission.edit = true;
+                }
+                if(rs.getBoolean(5)) {
+                    permission.design = true;
                 }
             }
 

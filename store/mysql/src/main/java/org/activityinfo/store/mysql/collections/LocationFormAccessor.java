@@ -23,6 +23,8 @@ import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
+import org.activityinfo.store.mysql.metadata.PermissionsCache;
+import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.SqlInsert;
 import org.activityinfo.store.mysql.update.SqlUpdate;
 
@@ -40,6 +42,9 @@ public class LocationFormAccessor implements FormAccessor {
 
     private QueryExecutor executor;
     private final int locationTypeId;
+    private Integer databaseId;
+    private boolean openWorkflow;
+    private PermissionsCache permissionsCache;
     private final TableMapping mapping;
     private final CountryStructure country;
     private long version;
@@ -48,11 +53,12 @@ public class LocationFormAccessor implements FormAccessor {
     private final ResourceId adminFieldId;
     private final ResourceId pointFieldId;
 
-    public LocationFormAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public LocationFormAccessor(QueryExecutor executor, ResourceId formClassId, PermissionsCache permissionsCache) throws SQLException {
 
         this.executor = executor;
 
         locationTypeId = CuidAdapter.getLegacyIdFromCuid(formClassId);
+        this.permissionsCache = permissionsCache;
         int countryId;
         String name;
 
@@ -63,8 +69,13 @@ public class LocationFormAccessor implements FormAccessor {
                 throw new FormNotFoundException(formClassId);
             }
             countryId = rs.getInt("countryId");
+            openWorkflow = "open".equals(rs.getString("workflowId"));
             Preconditions.checkState(!rs.wasNull());
 
+            databaseId = rs.getInt("databaseId");
+            if(rs.wasNull()) {
+                databaseId = null;
+            }
             name = rs.getString("name");
             version = rs.getLong("version");
         }
@@ -141,6 +152,18 @@ public class LocationFormAccessor implements FormAccessor {
 
     @Override
     public FormPermissions getPermissions(int userId) {
+        if(openWorkflow) {
+            return FormPermissions.full();
+        }
+        if(databaseId != null) {
+            UserPermission permission = permissionsCache.getPermission(userId, databaseId);
+            if (permission.isDesign()) {
+                FormPermissions formPermissions = new FormPermissions();
+                formPermissions.setVisible(true);
+                formPermissions.setEditAllowed(true);
+                return formPermissions;
+            }
+        }
         return FormPermissions.readonly();
     }
 
