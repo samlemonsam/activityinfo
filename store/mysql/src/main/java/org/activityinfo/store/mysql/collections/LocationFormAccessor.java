@@ -69,8 +69,9 @@ public class LocationFormAccessor implements FormAccessor {
                 throw new FormNotFoundException(formClassId);
             }
             countryId = rs.getInt("countryId");
-            openWorkflow = "open".equals(rs.getString("workflowId"));
             Preconditions.checkState(!rs.wasNull());
+
+            openWorkflow = "open".equals(rs.getString("workflowId"));
 
             databaseId = rs.getInt("databaseId");
             if(rs.wasNull()) {
