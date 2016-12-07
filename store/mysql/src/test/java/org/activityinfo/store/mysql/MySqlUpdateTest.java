@@ -70,6 +70,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("name", "Nouveau Irumu");
         
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.setEnforcePermissions(false);
         updater.executeChange(changeObject);
         
         query(adminLevelFormClass(2), "_id", "name");
@@ -85,6 +86,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@deleted", true);
 
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.setEnforcePermissions(false);
         updater.executeChange(changeObject);
 
         query(adminLevelFormClass(2), "_id", "name");

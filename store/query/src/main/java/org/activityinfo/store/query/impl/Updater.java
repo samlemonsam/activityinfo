@@ -47,12 +47,17 @@ public class Updater {
     private int userId;
     private BlobAuthorizer blobAuthorizer;
 
+    private boolean enforcePermissions = true;
+
     public Updater(FormCatalog catalog, int userId, BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
         this.userId = userId;
         this.blobAuthorizer = blobAuthorizer;
     }
 
+    public void setEnforcePermissions(boolean enforcePermissions) {
+        this.enforcePermissions = enforcePermissions;
+    }
 
     /**
      * Validates and executes a {@code ResourceUpdate} encoded as a json object. The object
@@ -293,11 +298,13 @@ public class Updater {
 
 
         // Check form-level permissions
-        FormPermissions permissions = form.getPermissions(userId);
-        if(!permissions.isEditAllowed()) {
-            throw new InvalidUpdateException("User '%d' does not have edit permissions for form '%s'",
-                    userId,
-                    form.getFormClass().getId().asString());
+        if(enforcePermissions) {
+            FormPermissions permissions = form.getPermissions(userId);
+            if (!permissions.isEditAllowed()) {
+                throw new InvalidUpdateException("User '%d' does not have edit permissions for form '%s'",
+                        userId,
+                        form.getFormClass().getId().asString());
+            }
         }
 
         // Check field-level permissions
