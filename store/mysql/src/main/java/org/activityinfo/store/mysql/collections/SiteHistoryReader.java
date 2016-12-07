@@ -1,6 +1,8 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -12,12 +14,16 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.service.store.RecordChangeType;
 import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityField;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -89,12 +95,24 @@ public class SiteHistoryReader {
 
     private Map<ResourceId, FieldValue> parseChanges(JsonObject jsonObject) {
 
+        Map<ResourceId, ResourceId> attributeToFieldMap = new HashMap<>();
+        for (ActivityField activityField : activity.getAttributeAndIndicatorFields()) {
+            if(activityField.getFormField().getType() instanceof EnumType) {
+                EnumType type = (EnumType) activityField.getFormField().getType();
+                for (EnumItem enumItem : type.getValues()) {
+                    attributeToFieldMap.put(enumItem.getId(), activityField.getResourceId());
+                }
+            }
+        }
+
         Map<ResourceId, FieldValue> valueMap = new HashMap<>();
-        
+
+        Multimap<ResourceId, ResourceId> attributeValueMap = HashMultimap.create();
+
         for (Map.Entry<String, JsonElement> jsonEntry : jsonObject.entrySet()) {
             String fieldName = jsonEntry.getKey();
             if(fieldName.equals("comments")) {
-                valueMap.put(fieldId(CuidAdapter.COMMENT_FIELD), 
+                valueMap.put(fieldId(CuidAdapter.COMMENT_FIELD),
                         NarrativeValue.valueOf(parseString(jsonEntry.getValue())));
 
             } else if(fieldName.equals("date1")) {
@@ -104,7 +122,7 @@ public class SiteHistoryReader {
                 valueMap.put(fieldId(CuidAdapter.START_DATE_FIELD), parseDate(jsonEntry.getValue()));
 
             } else if(fieldName.equals("partnerId")) {
-                valueMap.put(fieldId(CuidAdapter.PARTNER_FIELD), 
+                valueMap.put(fieldId(CuidAdapter.PARTNER_FIELD),
                         parseRef(jsonEntry.getValue(), activity.getPartnerFormClassId(), CuidAdapter.PARTNER_DOMAIN));
 
             } else if(fieldName.equals("projectId")) {
@@ -124,9 +142,33 @@ public class SiteHistoryReader {
                 } else { // old history
                     valueMap.put(ResourceId.valueOf(fieldName), parseQuantity(jsonEntry.getValue()));
                 }
+            } else if(fieldName.startsWith("ATTRIB")) {
+                if(parseBoolean(jsonEntry.getValue())) {
+                    int attributeId = Integer.parseInt(fieldName.substring("ATTRIB".length()));
+                    ResourceId attributeCuid = CuidAdapter.attributeId(attributeId);
+                    ResourceId fieldId = attributeToFieldMap.get(attributeCuid);
+                    if (fieldId != null) {
+                        attributeValueMap.put(fieldId, attributeCuid);
+                    }
+                }
             }
         }
+
+        for (ResourceId fieldId : attributeValueMap.keySet()) {
+            valueMap.put(fieldId, new EnumValue(attributeValueMap.get(fieldId)));
+        }
+
         return valueMap;
+    }
+
+    private boolean parseBoolean(JsonElement value) {
+        if(value.isJsonObject()) {
+            JsonObject object = value.getAsJsonObject();
+            if(object.has("value")) {
+                return object.get("value").getAsBoolean();
+            }
+        }
+        return false;
     }
 
     private FieldValue parseRef(JsonElement value, ResourceId formId, char domain) {
