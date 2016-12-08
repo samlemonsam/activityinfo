@@ -22,6 +22,7 @@ package org.activityinfo.ui.client;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.gwt.i18n.client.Dictionary;
 
 public final class ClientContext {
@@ -48,5 +49,14 @@ public final class ClientContext {
      */
     public static String getCommitId() {
         return DICTIONARY.get("commitId");
+    }
+
+    public static String getFeatureFlags() {
+        return Strings.nullToEmpty(DICTIONARY.get("featureFlags"));
+    }
+
+
+    public static boolean isNewFieldsFlagEnabled() {
+        return getFeatureFlags().contains("newfields");
     }
 }

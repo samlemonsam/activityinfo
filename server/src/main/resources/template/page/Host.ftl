@@ -95,7 +95,8 @@
         var ClientContext = {
             version: '$[display.version]',
             commitId: '$[git.commit.id]',
-            title: '${domain.title}'
+            title: '${domain.title}',
+            featureFlags: '${featureFlags!''}'
 
         };
     </script>
