@@ -23,7 +23,7 @@ package org.activityinfo.ui.client.component.formdesigner.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
+import org.activityinfo.ui.client.component.formdesigner.header.HeaderPanel;
 
 /**
  * @author yuriyz on 7/11/14.
@@ -36,9 +36,9 @@ public class HeaderSelectionEvent extends GwtEvent<HeaderSelectionEvent.Handler>
 
     public static Type<Handler> TYPE = new Type<>();
 
-    private final HeaderPresenter selectedItem;
+    private final HeaderPanel selectedItem;
 
-    public HeaderSelectionEvent(HeaderPresenter selectedItem) {
+    public HeaderSelectionEvent(HeaderPanel selectedItem) {
         this.selectedItem = selectedItem;
     }
 
@@ -48,7 +48,7 @@ public class HeaderSelectionEvent extends GwtEvent<HeaderSelectionEvent.Handler>
         return (Type) TYPE;
     }
 
-    public HeaderPresenter getSelectedItem() {
+    public HeaderPanel getSelectedItem() {
         return selectedItem;
     }
 

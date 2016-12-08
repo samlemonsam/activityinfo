@@ -6,7 +6,6 @@ import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.expr.ExprValue;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
 
@@ -61,10 +60,6 @@ public class ColumnModel {
     public ColumnModel setExpression(ExprNode expression) {
         this.expression = expression;
         return this;
-    }
-
-    public ColumnModel setExpression(ExprValue exprValue) {
-        return setExpression(exprValue.getExpression());
     }
 
     @JsonSetter

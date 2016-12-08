@@ -147,7 +147,7 @@ public class XlsFormBuilder {
             CalculatedFieldType calculatedType = (CalculatedFieldType) field.getType();
             fieldRow.createCell(TYPE_COLUMN).setCellValue(XlsFormTypes.CALCULATE);
             fieldRow.createCell(CALCULATION_FIELD)
-                    .setCellValue(calculatedType.getExpressionAsString());
+                    .setCellValue(calculatedType.getExpression());
 
         } else if(type instanceof LocalDateType) {
             fieldRow.createCell(TYPE_COLUMN).setCellValue(XlsFormTypes.DATE);

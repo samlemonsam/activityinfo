@@ -48,7 +48,7 @@ import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSe
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPanel;
 import org.activityinfo.ui.client.component.formdesigner.palette.FieldPalette;
 import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPropertiesPanel;
-import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPanel;
+import org.activityinfo.ui.client.component.formdesigner.properties.FieldEditor;
 import org.activityinfo.ui.client.page.HasNavigationCallback;
 import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.util.GwtUtil;
@@ -83,7 +83,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     @UiField
     FlowPanel dropPanel;
     @UiField
-    PropertiesPanel propertiesPanel;
+    FieldEditor fieldEditor;
     @UiField
     HeaderPanel headerPanel;
     @UiField
@@ -110,7 +110,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     protected FormDesignerPanel(@Nonnull final FormClass formClass, final FormDesigner formDesigner) {
         FormDesignerStyles.INSTANCE.ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        propertiesPanel.setVisible(false);
+        fieldEditor.setVisible(false);
 
         addAttachHandler(new AttachEvent.Handler() {
             @Override
@@ -154,11 +154,11 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
 
     public void setContainerPropertiesPanelVisible() {
         containerPropertiesPanel.setVisible(true);
-        propertiesPanel.setVisible(false);
+        fieldEditor.setVisible(false);
     }
 
     public void setPropertiesPanelVisible() {
-        propertiesPanel.setVisible(true);
+        fieldEditor.setVisible(true);
         containerPropertiesPanel.setVisible(false);
     }
 
@@ -265,7 +265,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         if (verticalScrollPosition > FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION) {
             int height = verticalScrollPosition - FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION;
 
-            int propertiesColumnHeight = propertiesPanel.getOffsetHeight() + spacer.getOffsetHeight();
+            int propertiesColumnHeight = fieldEditor.getOffsetHeight() + spacer.getOffsetHeight();
             if (propertiesColumnHeight > panelHeight && verticalScrollPosition > previousVerticalScrollPosition) {
                 return; // AI-924 : avoid never ending scrolls
             }
@@ -298,8 +298,8 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         return dropPanel;
     }
 
-    public PropertiesPanel getPropertiesPanel() {
-        return propertiesPanel;
+    public FieldEditor getFieldEditor() {
+        return fieldEditor;
     }
 
     public HeaderPanel getHeaderPanel() {

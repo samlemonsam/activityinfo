@@ -5,7 +5,6 @@ import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -40,7 +39,6 @@ public class TypeRegistry {
         register(QuantityType.TYPE_CLASS);
         register(NarrativeType.TYPE_CLASS);
         register(CalculatedFieldType.TYPE_CLASS);
-        register(ExprFieldType.TYPE_CLASS);
         register(LocalDateType.TYPE_CLASS);
         register(LocalDateIntervalType.TYPE_CLASS);
         register(GeoPointType.TYPE_CLASS);

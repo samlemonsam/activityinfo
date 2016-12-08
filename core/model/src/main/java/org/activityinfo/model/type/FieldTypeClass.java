@@ -21,8 +21,6 @@ import org.activityinfo.model.type.time.LocalDateType;
  */
 public interface FieldTypeClass {
 
-    public static final String TYPE_FIELD_NAME = "type";
-
     /**
      *
      * @return a string uniquely identifying this {@code FieldTypeClass}. This

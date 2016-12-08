@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
@@ -270,14 +269,5 @@ public class FormField extends FormElement {
         return field;
     }
 
-
-    private Record toRecord(FieldType type) {
-        Record record = new Record();
-        record.set("typeClass", type.getTypeClass().getId());
-        if(type instanceof ParametrizedFieldType) {
-            record.set("parameters", ((ParametrizedFieldType)type).getParameters());
-        }
-        return record;
-    }
 
 }

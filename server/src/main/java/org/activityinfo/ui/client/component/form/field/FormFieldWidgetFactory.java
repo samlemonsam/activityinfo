@@ -44,7 +44,6 @@ import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
@@ -112,9 +111,6 @@ public class FormFieldWidgetFactory {
 
         } else if (type instanceof TextType) {
             return Promise.resolved(new TextFieldWidget(valueUpdater));
-
-        } else if (type instanceof ExprFieldType) {
-            return Promise.resolved(new ExprFieldWidget(validationFormClass, valueUpdater));
 
         } else if (type instanceof CalculatedFieldType) {
             return Promise.resolved(new CalculatedFieldWidget(valueUpdater));

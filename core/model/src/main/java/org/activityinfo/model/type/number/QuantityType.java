@@ -5,14 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.JsonParsing;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.primitive.TextValue;
 
 /**
  * A value types that describes a real-valued quantity and its units.
@@ -38,17 +32,6 @@ public class QuantityType implements ParametrizedFieldType {
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
             return new QuantityType(JsonParsing.toNullableString(parametersObject.get("units")));
-        }
-
-        @Override
-        public FormClass getParameterFormClass() {
-            FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("quantity"));
-            formClass.addElement(new FormField(ResourceId.valueOf("units"))
-                    .setType(FREE_TEXT.createType())
-                    .setLabel("Units")
-                    .setDescription("Describes the unit of measurement. For example: 'households', 'individuals'," +
-                                    " 'meters', etc."));
-            return formClass;
         }
 
     }
@@ -85,13 +68,6 @@ public class QuantityType implements ParametrizedFieldType {
         } else {
             return new Quantity(value.getAsDouble(), units);
         }
-    }
-
-    @Override
-    public FormInstance getParameters() {
-        FormInstance instance = new FormInstance(null, getTypeClass().getParameterFormClass().getId());
-        instance.set(ResourceId.valueOf("units"), TextValue.valueOf(units));
-        return instance;
     }
 
     @Override

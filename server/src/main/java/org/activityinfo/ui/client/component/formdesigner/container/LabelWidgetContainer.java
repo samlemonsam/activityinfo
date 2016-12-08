@@ -38,7 +38,6 @@ public class LabelWidgetContainer implements WidgetContainer {
                         super.onComplete();
                         FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
                         formClass.remove(formLabel);
-                        formDesigner.getPropertiesPresenter().reset(false);
                     }
                 });
             }

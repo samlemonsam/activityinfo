@@ -191,7 +191,7 @@ public class NodeMatch {
             throw new UnsupportedOperationException(fieldExpr + " is not a calculated field");
         }
         CalculatedFieldType type = (CalculatedFieldType) fieldNode.getField().getType();
-        return type.getExpressionAsString();
+        return type.getExpression();
     }
 
     public FormClass getFormClass() {

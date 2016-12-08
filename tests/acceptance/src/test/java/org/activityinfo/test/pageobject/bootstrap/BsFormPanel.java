@@ -200,7 +200,6 @@ public class BsFormPanel extends Form {
                 input.sendKeys(ImagePathProvider.path(value));
                 Sleep.sleepSeconds(10); // make sure file is uploaded
             } else {
-                String id = input.element().getAttribute("id");
                 input.element().clear();
                 input.sendKeys(value);
             }

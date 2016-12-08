@@ -144,7 +144,7 @@ public class PartialEvaluator<InstanceT> {
             stack.add(field);
             try {
                 CalculatedFieldType calculatedType = (CalculatedFieldType) field.getType();
-                ExprNode calculatedNode = ExprParser.parse(calculatedType.getExpressionAsString());
+                ExprNode calculatedNode = ExprParser.parse(calculatedType.getExpression());
                 return calculatedNode.accept(this);
 
             } finally {

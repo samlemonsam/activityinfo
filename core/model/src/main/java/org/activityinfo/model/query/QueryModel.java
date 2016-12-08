@@ -11,7 +11,6 @@ import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.expr.ExprValue;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
 
@@ -122,14 +121,6 @@ public class QueryModel {
         }
     }
 
-    public void setFilter(ExprValue filter) {
-        if(filter == null) {
-            this.filter = null;
-        } else {
-            setFilter(filter.getExpression());
-        }
-    }
-    
     public void setFilter(ExprNode filter) {
         this.filter = filter;
     }

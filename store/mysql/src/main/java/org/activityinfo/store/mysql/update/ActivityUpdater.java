@@ -200,7 +200,7 @@ public class ActivityUpdater {
         if(formField.getType() instanceof CalculatedFieldType) {
             CalculatedFieldType type = (CalculatedFieldType) formField.getType();
             insert.value("calculatedAutomatically", true);
-            insert.value("expression", type.getExpressionAsString());
+            insert.value("expression", type.getExpression());
         }
         insert.execute(executor);
     }
@@ -265,7 +265,7 @@ public class ActivityUpdater {
         if(existingField.getFormField().getType() instanceof CalculatedFieldType) {
             CalculatedFieldType existingType = (CalculatedFieldType) existingField.getFormField().getType();
             CalculatedFieldType updatedType = (CalculatedFieldType) formField.getType();
-            update.setIfChanged("expression", existingType.getExpressionAsString(), updatedType.getExpressionAsString());
+            update.setIfChanged("expression", existingType.getExpression(), updatedType.getExpression());
         }
 
         update.execute(executor);

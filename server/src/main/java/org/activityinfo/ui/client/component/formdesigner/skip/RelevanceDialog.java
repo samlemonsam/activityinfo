@@ -27,7 +27,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPresenter;
+import org.activityinfo.ui.client.component.formdesigner.properties.FieldEditor;
 import org.activityinfo.ui.client.widget.ModalDialog;
 
 /**
@@ -42,18 +42,17 @@ public class RelevanceDialog {
     private final ModalDialog dialog;
     private final RelevancePanelPresenter presenter;
 
-    public RelevanceDialog(final FieldWidgetContainer fieldWidgetContainer, final PropertiesPresenter propertiesPresenter) {
+    public RelevanceDialog(final FieldWidgetContainer fieldWidgetContainer, final FieldEditor propertiesPresenter) {
         this.formField = fieldWidgetContainer.getFormField();
         this.presenter = new RelevancePanelPresenter(fieldWidgetContainer);
         this.dialog = new ModalDialog(presenter.getView());
         this.dialog.setDialogTitle(I18N.CONSTANTS.defineRelevanceLogic());
         this.dialog.getDialogDiv().getStyle().setWidth(DIALOG_WIDTH, Style.Unit.PX);
-//        this.dialog.getDialogDiv().getStyle().setHeight(DIALOG_HEIGHT, Style.Unit.PX);
         this.dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 presenter.updateFormField();
-                propertiesPresenter.setRelevanceState(formField, false);
+                propertiesPresenter.setRelevanceState(formField, true);
                 dialog.hide();
             }
         });

@@ -129,7 +129,7 @@ public class ChooseFormTreeModel implements TreeViewModel {
     public boolean isLeaf(Object value) {
         if (value instanceof CatalogEntry) {
             CatalogEntry entry = (CatalogEntry) value;
-            if(entry.getType() ==CatalogEntryType.FOLDER) {
+            if(entry.getType() == CatalogEntryType.FOLDER) {
                 return false;
             }
         }

@@ -12,7 +12,6 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.expr.ExprValue;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.junit.After;
@@ -86,7 +85,7 @@ public abstract class AbstractMySqlTest {
         for(String field : fields) {
             queryModel.selectExpr(field).setId(field);
         }
-        queryModel.setFilter(ExprValue.valueOf(filter));
+        queryModel.setFilter(filter);
 
         execute(queryModel);
     }

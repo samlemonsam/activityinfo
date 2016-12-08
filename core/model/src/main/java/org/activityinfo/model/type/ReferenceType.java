@@ -6,10 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
 
 import java.util.*;
 
@@ -56,10 +53,6 @@ public class ReferenceType implements ParametrizedFieldType {
             return type;
         }
 
-        @Override
-        public FormClass getParameterFormClass() {
-            return new FormClass(ResourceIdPrefixType.TYPE.id(getId()));
-        }
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
@@ -134,11 +127,6 @@ public class ReferenceType implements ParametrizedFieldType {
         this.range.clear();
         this.range.addAll(range);
         return this;
-    }
-
-    @Override
-    public FormInstance getParameters() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
