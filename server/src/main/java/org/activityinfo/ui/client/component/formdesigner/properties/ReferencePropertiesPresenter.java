@@ -13,6 +13,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 
 /**
@@ -46,7 +47,9 @@ public class ReferencePropertiesPresenter {
 
     public void show(final FieldWidgetContainer fieldWidgetContainer) {
         final FormField formField = fieldWidgetContainer.getFormField();
-        final boolean isVisible = formField.getType() instanceof ReferenceType;
+        final boolean isVisible =
+                ClientContext.isNewFieldsFlagEnabled() &&
+                formField.getType() instanceof ReferenceType;
 
         view.setVisible(isVisible);
         if (!isVisible) {

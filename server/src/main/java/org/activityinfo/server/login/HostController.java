@@ -25,13 +25,16 @@ package org.activityinfo.server.login;
 import com.bedatadriven.rebar.appcache.server.UserAgentProvider;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
+import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.HostPageModel;
 import org.activityinfo.server.login.model.RootPageModel;
 import org.activityinfo.server.util.monitoring.Count;
 import org.activityinfo.service.DeploymentConfiguration;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -45,10 +48,13 @@ public class HostController {
     public static final String ENDPOINT = "/";
 
     private final ServerSideAuthProvider authProvider;
+    private Provider<EntityManager> entityManager;
 
     @Inject
-    public HostController(DeploymentConfiguration deployConfig, ServerSideAuthProvider authProvider) {
+    public HostController(DeploymentConfiguration deployConfig, ServerSideAuthProvider authProvider,
+                          Provider<EntityManager> entityManager) {
         this.authProvider = authProvider;
+        this.entityManager = entityManager;
     }
 
     @GET 
@@ -76,6 +82,10 @@ public class HostController {
         String appUri = uri.getAbsolutePathBuilder().replaceQuery("").build().toString();
 
         HostPageModel model = new HostPageModel(appUri);
+
+
+        User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
+        model.setFeatureFlags(authenticatedUser.getFeatures());
         
         if(!Strings.isNullOrEmpty(codeServer)) {
             // Running in development mode

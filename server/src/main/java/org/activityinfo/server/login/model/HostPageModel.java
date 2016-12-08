@@ -28,6 +28,7 @@ public class HostPageModel extends PageModel {
     private boolean newUI;
     private String bootstrapScript;
     private String appCacheManifest;
+    private String featureFlags;
     
     public HostPageModel(String appUrl) {
         this.appUrl = appUrl;
@@ -46,6 +47,13 @@ public class HostPageModel extends PageModel {
         this.newUI = newUI;
     }
 
+    public String getFeatureFlags() {
+        return featureFlags;
+    }
+
+    public void setFeatureFlags(String featureFlags) {
+        this.featureFlags = featureFlags;
+    }
 
     public String getBootstrapScript() {
         return bootstrapScript;

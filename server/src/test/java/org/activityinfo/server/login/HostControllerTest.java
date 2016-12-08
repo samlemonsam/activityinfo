@@ -22,15 +22,18 @@ package org.activityinfo.server.login;
  * #L%
  */
 
+import com.google.inject.util.Providers;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
+import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.HostPageModel;
 import org.activityinfo.server.login.model.RootPageModel;
 import org.activityinfo.service.DeploymentConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import java.util.Properties;
@@ -46,6 +49,7 @@ public class HostControllerTest extends ControllerTestCase {
 
     private HostController resource;
     private ServerSideAuthProvider authProvider;
+    private EntityManager entityManager;
 
     @Before
     public void setup() {
@@ -54,7 +58,12 @@ public class HostControllerTest extends ControllerTestCase {
 
         authProvider = new ServerSideAuthProvider();
         authProvider.clear();
-        resource = new HostController(deploymentConfig, authProvider);
+
+        entityManager = createMock(EntityManager.class);
+        expect(entityManager.find(User.class, 3)).andReturn(new User()).anyTimes();
+        replay(entityManager);
+
+        resource = new HostController(deploymentConfig, authProvider, Providers.of(entityManager));
     }
 
     @Test
