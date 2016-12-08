@@ -23,7 +23,7 @@ public class ColumnSetMatchers {
             mismatchDescription.appendValueList("[", ", ", "]", values);
         }
     }
-    
+
     public static TypeSafeMatcher<ColumnView> hasValues(final boolean... values) {
         return new ColumnViewMatcher() {
             @Override
@@ -45,16 +45,16 @@ public class ColumnSetMatchers {
             }
         };
     }
-    
+
     public static TypeSafeMatcher<ColumnView> hasValues(final String... values) {
         return new ColumnViewMatcher() {
             @Override
             protected boolean matchesSafely(ColumnView item) {
-                if(item.numRows() != values.length) {
+                if (item.numRows() != values.length) {
                     return false;
                 }
-                for(int i=0;i!=values.length;++i) {
-                    if(!Objects.equals(item.getString(i), values[i])) {
+                for (int i = 0; i != values.length; ++i) {
+                    if (!Objects.equals(item.getString(i), values[i])) {
                         return false;
                     }
                 }
@@ -68,16 +68,16 @@ public class ColumnSetMatchers {
 
         };
     }
-    
+
     public static TypeSafeMatcher<ColumnView> hasAllNullValuesWithLengthOf(final int length) {
         return new ColumnViewMatcher() {
             @Override
             protected boolean matchesSafely(ColumnView item) {
-                if(item.numRows() != length) {
+                if (item.numRows() != length) {
                     return false;
                 }
-                for(int i=0;i!=length;++i) {
-                    if(item.get(i) != null) {
+                for (int i = 0; i != length; ++i) {
+                    if (item.get(i) != null) {
                         return false;
                     }
                 }
@@ -90,29 +90,29 @@ public class ColumnSetMatchers {
             }
         };
     }
-    
+
     public static TypeSafeMatcher<ColumnView> hasValues(ResourceId... values) {
         String[] strings = new String[values.length];
-        for(int i=0;i!=strings.length;++i) {
+        for (int i = 0; i != strings.length; ++i) {
             strings[i] = values[i].toString();
         }
         return hasValues(strings);
     }
 
-    public static ColumnViewMatcher hasValues(final Integer... values) {
+    public static ColumnViewMatcher hasValues(final Number... values) {
         return new ColumnViewMatcher() {
             @Override
             protected boolean matchesSafely(ColumnView item) {
-                if(item.numRows() != values.length) {
+                if (item.numRows() != values.length) {
                     return false;
                 }
-                for(int i=0;i!=values.length;++i) {
-                    if(values[i] == null) {
-                        if(!Double.isNaN(item.getDouble(i))) {
+                for (int i = 0; i != values.length; ++i) {
+                    if (values[i] == null) {
+                        if (!Double.isNaN(item.getDouble(i))) {
                             return false;
                         }
                     } else {
-                        return values[i] == item.getDouble(i);
+                        return values[i].doubleValue() == item.getDouble(i);
                     }
                 }
                 return true;

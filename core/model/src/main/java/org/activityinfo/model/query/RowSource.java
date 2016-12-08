@@ -6,21 +6,21 @@ import org.activityinfo.model.resource.ResourceId;
 
 public class RowSource {
 
-    private ResourceId rootFormClass;
+    private ResourceId rootFormId;
 
     public RowSource() {
     }
 
-    public RowSource(ResourceId rootFormClass) {
-        this.rootFormClass = rootFormClass;
+    public RowSource(ResourceId rootFormId) {
+        this.rootFormId = rootFormId;
     }
 
-    public ResourceId getRootFormClass() {
-        return rootFormClass;
+    public ResourceId getRootFormId() {
+        return rootFormId;
     }
 
-    public RowSource setRootFormClass(ResourceId rootFormClass) {
-        this.rootFormClass = rootFormClass;
+    public RowSource setRootFormId(ResourceId rootFormId) {
+        this.rootFormId = rootFormId;
         return this;
     }
 
@@ -31,7 +31,7 @@ public class RowSource {
 
         RowSource rowSource = (RowSource) o;
 
-        if (rootFormClass != null ? !rootFormClass.equals(rowSource.rootFormClass) : rowSource.rootFormClass != null)
+        if (rootFormId != null ? !rootFormId.equals(rowSource.rootFormId) : rowSource.rootFormId != null)
             return false;
 
         return true;
@@ -39,13 +39,13 @@ public class RowSource {
 
     @Override
     public int hashCode() {
-        return rootFormClass != null ? rootFormClass.hashCode() : 0;
+        return rootFormId != null ? rootFormId.hashCode() : 0;
     }
 
 
     public JsonElement toJsonElement() {
         JsonObject object = new JsonObject();
-        object.addProperty("rootFormId", rootFormClass.asString());
+        object.addProperty("rootFormId", rootFormId.asString());
 
         return object;
     }
@@ -53,7 +53,7 @@ public class RowSource {
 
     public static RowSource fromJson(JsonObject object) {
         RowSource source = new RowSource();
-        source.setRootFormClass(ResourceId.valueOf(object.get("rootFormId").getAsString()));
+        source.setRootFormId(ResourceId.valueOf(object.get("rootFormId").getAsString()));
         return source;
     }
 

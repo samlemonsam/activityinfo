@@ -66,19 +66,6 @@ class ColumnSetParser {
                             return new ConstantColumnView(rowsCount, jsonValue.isBoolean().booleanValue());
                         }
                 }
-            case "coordinates":
-                JSONArray jsonArray = jsonColumn.get("coordinates").isArray();
-                double[] coordinates = new double[jsonArray.size()];
-                for (int i = 0 ; i < jsonArray.size(); i++) {
-                    JSONNumber number = jsonArray.get(i).isNumber();
-                    coordinates[i] = number != null ? number.doubleValue() : Double.NaN;
-                }
-                switch (type) {
-                    case GEOGRAPHIC_POINT:
-                        return new GeoPointColumnView(coordinates);
-                    case GEOGRAPHIC_AREA:
-                        return new GeoAreaColumnView(coordinates);
-                }
         }
         throw new UnsupportedOperationException("ColumnSetParser: storage is not supported, storage: " + storage);
     }

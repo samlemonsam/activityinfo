@@ -108,10 +108,18 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testAdmin() {
 
-        query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code", "boundary");
+        query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code",
+                "ST_XMIN(boundary)",
+                "ST_YMIN(boundary)",
+                "ST_XMAX(boundary)",
+                "ST_YMAX(boundary)");
         assertThat(column("name"),          hasValues("Bukavu",   "Walungu",  "Shabunda", "Kalehe",   "Irumu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
         assertThat(column("code"), hasValues("203", "201", "202", "203", "203"));
+        assertThat(column("ST_XMIN(boundary)"), hasValues(0, 0, 0, 33.5, 0));
+        assertThat(column("ST_XMAX(boundary)"), hasValues(0, 0, 0, -44.0, 0));
+        assertThat(column("ST_YMIN(boundary)"), hasValues(0, 0, 0, -22.0, 0));
+        assertThat(column("ST_YMAX(boundary)"), hasValues(0, 0, 0, 40, 0));
     }
     
     @Test

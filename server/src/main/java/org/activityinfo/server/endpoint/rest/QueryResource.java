@@ -2,6 +2,7 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.sun.jersey.api.core.HttpRequestContext;
+import org.activityinfo.model.query.ColumnModelException;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.service.store.FormCatalog;
@@ -28,7 +29,12 @@ public class QueryResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryColumns(@Context Request request) {
-        QueryModel model = parseModelFromRecord((HttpRequestContext) request);
+        QueryModel model;
+        try {
+            model = parseModelFromRecord((HttpRequestContext) request);
+        } catch (ColumnModelException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
         final ColumnSet columnSet = builder.build(model);
 

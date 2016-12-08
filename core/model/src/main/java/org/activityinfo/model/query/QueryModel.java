@@ -185,8 +185,9 @@ public class QueryModel {
             queryModel.getColumns().add(ColumnModel.fromJson(column.getAsJsonObject()));
         }
 
-        if(jsonObject.has("filter")) {
-            String filter = jsonObject.get("filter").getAsString();
+        JsonElement filterValue = jsonObject.get("filter");
+        if(filterValue != null && filterValue.isJsonPrimitive()) {
+            String filter = filterValue.getAsString();
             if (!Strings.isNullOrEmpty(filter)) {
                 queryModel.setFilter(filter);
             }

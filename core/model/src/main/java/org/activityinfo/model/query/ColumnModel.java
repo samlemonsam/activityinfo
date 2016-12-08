@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -53,7 +54,7 @@ public class ColumnModel {
         if(expression == null) {
             return null;
         } else {
-            return expression.toString();
+            return expression.asExpression();
         }
     }
 
@@ -64,7 +65,11 @@ public class ColumnModel {
 
     @JsonSetter
     public ColumnModel setExpression(String expression) {
-        this.expression = ExprParser.parse(expression);
+        try {
+            this.expression = ExprParser.parse(expression);
+        } catch (ExprSyntaxException e) {
+            throw new ColumnModelException("Invalid column expression '" + expression + "': " + e.getMessage(), e);
+        }
         return this;
     }
 

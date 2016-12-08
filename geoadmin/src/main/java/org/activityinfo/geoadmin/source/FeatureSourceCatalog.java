@@ -30,7 +30,7 @@ public class FeatureSourceCatalog implements FormCatalog {
 
     public boolean isLocalQuery(QueryModel queryModel) {
         for (RowSource rowSource : queryModel.getRowSources()) {
-            if(!isLocalResource(rowSource.getRootFormClass())) {
+            if(!isLocalResource(rowSource.getRootFormId())) {
                 return false;
             }
         }
