@@ -16,7 +16,6 @@ import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import java.util.*;
@@ -226,7 +225,7 @@ public class FormTree {
             return parent != null && (parent.isLinked() || parent.getType() instanceof ReferenceType);
         }
         public boolean isCalculated() {
-            return getType() instanceof ExprFieldType || getType() instanceof CalculatedFieldType;
+            return getType() instanceof CalculatedFieldType;
         }
 
         public Iterator<Node> selfAndAncestors() {

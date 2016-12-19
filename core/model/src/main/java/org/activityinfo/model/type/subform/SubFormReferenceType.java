@@ -25,10 +25,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 
 /**
@@ -68,11 +65,6 @@ public class SubFormReferenceType implements ParametrizedFieldType {
             return new SubFormReferenceType(formId);
         }
 
-        @Override
-        public FormClass getParameterFormClass() {
-            return new FormClass(ResourceIdPrefixType.TYPE.id("subform"));
-        }
-
 
     }
 
@@ -109,11 +101,6 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     public FieldValue parseJsonValue(JsonElement value) {
         // Subforms don't have values in their parent.
         return null;
-    }
-
-    @Override
-    public FormInstance getParameters() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -32,4 +32,7 @@ public abstract class ExprFunction implements Function<List<FieldValue>, FieldVa
      */
     public abstract FieldType resolveResultType(List<FieldType> argumentTypes);
 
+    public boolean isInfix() {
+        return false;
+    }
 }

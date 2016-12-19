@@ -73,6 +73,9 @@
       </div>
     </g:HTMLPanel>
 
-    <prop:ReferenceProperties ui:field="referenceProperties"/>
+    <!-- Editors for individual types -->
+
+    <prop:QuantityTypeEditor ui:field="quantityTypeEditor"/>
+    <prop:CalculatedTypeEditor ui:field="calculatedTypeEditor"/>
   </g:HTMLPanel>
 </ui:UiBinder>

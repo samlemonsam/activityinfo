@@ -226,22 +226,27 @@ public class DesignSteps {
             String fieldType = cells.get(1);
             String containerLabel = cells.get(2);
 
-            DropLabel dropLabel = page.fields().dropLabel(fieldType);
-            DropPanel dropPanel = page.dropPanel(containerLabel);
+            try {
 
-            dropPanel.dragAndDrop(dropLabel);
-            Sleep.sleepMillis(100);
+                DropLabel dropLabel = page.fields().dropLabel(fieldType);
+                DropPanel dropPanel = page.dropPanel(containerLabel);
 
-            if ("root".equalsIgnoreCase(containerLabel) && (
-                    fieldType.equalsIgnoreCase("Section") || fieldType.equalsIgnoreCase("Sub Form"))) {
-                DropPanel containerDropPanel = page.dropPanel(fieldType);
-                containerDropPanel.getContainer().clickWhenReady();
+                dropPanel.dragAndDrop(dropLabel);
+                Sleep.sleepMillis(100);
 
-                page.containerProperties().setLabel(label);
+                if ("root".equalsIgnoreCase(containerLabel) && (
+                        fieldType.equalsIgnoreCase("Section") || fieldType.contains("Sub-Form"))) {
+                    DropPanel containerDropPanel = page.dropPanel(fieldType);
+                    containerDropPanel.getContainer().clickWhenReady();
 
-            } else {
-                page.selectFieldByLabel(fieldType);
-                page.fieldProperties().setLabel(driver.getAliasTable().createAlias(label));
+                    page.containerProperties().setLabel(label);
+
+                } else {
+                    page.selectFieldByLabel(fieldType);
+                    page.fieldProperties().setLabel(driver.getAliasTable().createAlias(label));
+                }
+            } catch(Exception e) {
+                throw new RuntimeException("Failed to add field '" + label + "' in form designer UI", e);
             }
         }
 

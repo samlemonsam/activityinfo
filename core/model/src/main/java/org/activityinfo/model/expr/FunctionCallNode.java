@@ -73,18 +73,17 @@ public class FunctionCallNode extends ExprNode {
 
     @Override
     public String asExpression() {
-        if (ExprParser.FUNCTIONS.contains(function.getId())) {
-            String argumentString = "";
-            for (ExprNode arg : arguments) {
-                argumentString += arg;
-                if (!arg.equals(arguments.get(arguments.size() - 1))) { // add comma if not last element
-                    argumentString += ",";
-                }
-            }
-            return function.getId() + "(" + argumentString + ")";
-        } else {
-            return arguments.get(0).asExpression() + "" + function.getId() + "" + arguments.get(1).asExpression();
+        if(function.isInfix() && arguments.size() == 2) {
+                return arguments.get(0).asExpression() + "" + function.getId() + "" + arguments.get(1).asExpression();
         }
+        String argumentString = "";
+        for (ExprNode arg : arguments) {
+            argumentString += arg;
+            if (!arg.equals(arguments.get(arguments.size() - 1))) { // add comma if not last element
+                argumentString += ", ";
+            }
+        }
+        return function.getId() + "(" + argumentString + ")";
     }
     
     @Override

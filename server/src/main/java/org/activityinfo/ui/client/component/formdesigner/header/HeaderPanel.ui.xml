@@ -8,9 +8,9 @@
 
   <g:FocusPanel ui:field="focusPanel" addStyleNames="{style.widgetContainer} {style.headerContainer}">
     <g:HTMLPanel width="100%">
-      <h3><g:HTML ui:field="label"/></h3>
+      <h3 ui:field="header"></h3>
       <br/>
-      <g:HTML ui:field="description"/>
+      <g:Label ui:field="description"/>
     </g:HTMLPanel>
   </g:FocusPanel>
 </ui:UiBinder>

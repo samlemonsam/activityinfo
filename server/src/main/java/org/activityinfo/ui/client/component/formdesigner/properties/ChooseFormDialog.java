@@ -46,9 +46,6 @@ import org.activityinfo.ui.client.widget.ModalDialog;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author yuriyz on 04/06/2016.
- */
 public class ChooseFormDialog extends Composite {
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);

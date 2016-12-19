@@ -51,6 +51,11 @@ public abstract class ComparisonOperator extends ExprFunction implements ColumnF
     }
 
     @Override
+    public final boolean isInfix() {
+        return true;
+    }
+
+    @Override
     public ColumnView columnApply(List<ColumnView> arguments) {
         Preconditions.checkArgument(arguments.size() == 2);
         

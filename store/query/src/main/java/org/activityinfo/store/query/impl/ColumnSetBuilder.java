@@ -2,7 +2,6 @@ package org.activityinfo.store.query.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.form.FormClass;
@@ -56,7 +55,7 @@ public class ColumnSetBuilder {
 
 
     public void enqueue(QueryModel table, FormScanBatch batch) {
-        ResourceId classId = table.getRowSources().get(0).getRootFormClass();
+        ResourceId classId = table.getRowSources().get(0).getRootFormId();
         FormTree tree = formTreeService.queryTree(classId);
 
         FormClass formClass = tree.getRootFormClass();

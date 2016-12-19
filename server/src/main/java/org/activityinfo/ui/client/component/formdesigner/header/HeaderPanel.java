@@ -21,45 +21,110 @@ package org.activityinfo.ui.client.component.formdesigner.header;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.HeadingElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElementContainer;
+import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles;
+import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolder;
+import org.activityinfo.ui.client.component.formdesigner.event.HeaderSelectionEvent;
+import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 
 /**
  * @author yuriyz on 7/11/14.
  */
-public class HeaderPanel extends Composite {
+public class HeaderPanel implements FieldsHolder, IsWidget {
 
     private static final OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
-    interface OurUiBinder extends UiBinder<Widget, HeaderPanel> {
+    interface OurUiBinder extends UiBinder<FocusPanel, HeaderPanel> {
     }
 
-    @UiField
-    HTML label;
     @UiField
     FocusPanel focusPanel;
+
     @UiField
-    HTML description;
+    HeadingElement header;
+
+    @UiField
+    Label description;
+
+
+    private FormDesigner formDesigner;
+    private FormClass formClass;
 
     public HeaderPanel() {
-        initWidget(uiBinder.createAndBindUi(this));
+        uiBinder.createAndBindUi(this);
     }
 
-    public HTML getLabel() {
-        return label;
+    public void start(FormDesigner formDesigner) {
+        this.formDesigner = formDesigner;
+        this.formClass = formDesigner.getRootFormClass();
+
+        formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
+            @Override
+            public void handle(WidgetContainerSelectionEvent event) {
+                setSelected(false);
+            }
+        });
+        show();
     }
 
-    public HTML getDescription() {
-        return description;
-    }
-
-    public FocusPanel getFocusPanel() {
+    @Override
+    public Widget asWidget() {
         return focusPanel;
     }
-}
 
+    public FormClass getFormClass() {
+        return formClass;
+    }
+
+
+    public void show() {
+        header.setInnerText(Strings.nullToEmpty(formDesigner.getRootFormClass().getLabel()));
+        description.setText(formDesigner.getRootFormClass().getDescription());
+    }
+
+    @UiHandler("focusPanel")
+    void onClick(ClickEvent event) {
+        formDesigner.getContainerPresenter().show(this);
+        formDesigner.getFormDesignerPanel().setContainerPropertiesPanelVisible();
+
+        formDesigner.getEventBus().fireEvent(new HeaderSelectionEvent(this));
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                setSelected(true);
+            }
+        });
+    }
+
+    public void setSelected(boolean selected) {
+        if (selected) {
+            focusPanel.addStyleName(FormDesignerStyles.INSTANCE.widgetContainerSelected());
+        } else {
+            focusPanel.removeStyleName(FormDesignerStyles.INSTANCE.widgetContainerSelected());
+        }
+    }
+
+    @Override
+    public FormElementContainer getElementContainer() {
+        return formClass;
+    }
+
+    @Override
+    public void updateUi() {
+        show();
+    }
+}

@@ -1,7 +1,9 @@
 package org.activityinfo.geoadmin.merge2.view.profile;
 
 import com.google.common.base.Function;
-import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.expr.FunctionCallNode;
+import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.expr.functions.BoundingBoxFunction;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnType;
@@ -117,13 +119,13 @@ public class FormProfile {
                 // Add only geometry from the root form
                 for (FormTree.Node node : tree.getRootFields()) {
                     if(node.getType() instanceof GeoAreaType) {
-                        queryModel
-                                .selectField(node.getFieldId())
-                                .as(node.getFieldId().asString());
+                        SymbolExpr bounds = new SymbolExpr(node.getFieldId());
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMIN, bounds)).as("_xmin");
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMAX, bounds)).as("_xmax");
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.YMIN, bounds)).as("_ymin");
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.YMAX, bounds)).as("_ymax");
                     }
                 }
-                
-
                 return resourceStore.queryColumns(queryModel);
             }
         });

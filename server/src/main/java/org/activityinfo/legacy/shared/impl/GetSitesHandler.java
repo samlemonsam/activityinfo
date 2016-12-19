@@ -842,7 +842,7 @@ public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult
                             } catch (Exception e) {
                                 // we don't want to fail whole GetSites command due to invalid expression.
                                 Log.error("Failed to evaluate calculated field: " + field +
-                                        ", expression: " + ((CalculatedFieldType) field.getType()).getExpressionAsString(), e);
+                                        ", expression: " + ((CalculatedFieldType) field.getType()).getExpression(), e);
                             }
                         }
                     }

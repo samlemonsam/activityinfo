@@ -5,10 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 
 import java.util.*;
@@ -42,11 +39,6 @@ public class EnumType implements ParametrizedFieldType {
         @Override
         public EnumType createType() {
             return new EnumType();
-        }
-
-        @Override
-        public FormClass getParameterFormClass() {
-            return new FormClass(ResourceIdPrefixType.TYPE.id("enum"));
         }
 
     };
@@ -105,11 +97,6 @@ public class EnumType implements ParametrizedFieldType {
         } else {
             return null;
         }
-    }
-
-    @Override
-    public FormInstance getParameters() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

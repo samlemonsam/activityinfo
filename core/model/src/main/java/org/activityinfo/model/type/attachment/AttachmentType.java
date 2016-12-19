@@ -24,16 +24,8 @@ package org.activityinfo.model.type.attachment;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.JsonParsing;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.enumerated.EnumItem;
-import org.activityinfo.model.type.enumerated.EnumType;
 
 /**
  * @author yuriyz on 8/6/14.
@@ -63,25 +55,6 @@ public class AttachmentType implements ParametrizedFieldType {
             return new AttachmentType(cardinality, kind);
         }
 
-        @Override
-        public FormClass getParameterFormClass() {
-            EnumType cardinalityType = (EnumType) EnumType.TYPE_CLASS.createType();
-            cardinalityType.getValues().add(new EnumItem(ResourceId.valueOf("single"), I18N.CONSTANTS.single()));
-            cardinalityType.getValues().add(new EnumItem(ResourceId.valueOf("multiple"), I18N.CONSTANTS.multiple()));
-
-            EnumType kindType = (EnumType) EnumType.TYPE_CLASS.createType();
-            kindType.getValues().add(new EnumItem(ResourceId.valueOf(Kind.ATTACHMENT.name()), I18N.CONSTANTS.attachment()));
-            kindType.getValues().add(new EnumItem(ResourceId.valueOf(Kind.IMAGE.name()), I18N.CONSTANTS.image()));
-
-            FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("image"));
-            formClass.addElement(new FormField(ResourceId.valueOf("kind"))
-                            .setType(kindType)
-                            .setLabel(I18N.CONSTANTS.type())
-                            .setDescription(I18N.CONSTANTS.attachmentTypeDescription())
-                            .setVisible(false)
-            );
-            return formClass;
-        }
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();
@@ -135,11 +108,6 @@ public class AttachmentType implements ParametrizedFieldType {
 
     public void setKind(Kind kind) {
         this.kind = kind;
-    }
-
-    @Override
-    public FormInstance getParameters() {
-        return new FormInstance(null, getTypeClass().getParameterFormClass().getId());
     }
 
     @Override

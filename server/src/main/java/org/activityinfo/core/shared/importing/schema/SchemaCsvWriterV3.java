@@ -170,7 +170,7 @@ public class SchemaCsvWriterV3 {
             @Override
             public Object value(FieldContext context, FormField field, EnumItem enumItem) {
                 if(field.getType() instanceof CalculatedFieldType) {
-                    return ((CalculatedFieldType) field.getType()).getExpressionAsString();
+                    return ((CalculatedFieldType) field.getType()).getExpression();
                 }
                 return null;
             }

@@ -4,7 +4,6 @@ import com.bedatadriven.geojson.GeoJsonModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
@@ -332,9 +331,6 @@ public class ActivityInfoClient implements FormClassProvider {
                 case "array":
                     columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
                     break;
-                case "coordinates":
-                    columnMap.put(column.getKey(), parseCoordinates(columnValue.getAsJsonArray("coordinates")));
-                    break;
                 case "empty":
                     columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
                     break;
@@ -344,20 +340,6 @@ public class ActivityInfoClient implements FormClassProvider {
         }
 
         return new ColumnSet(numRows, columnMap);
-    }
-
-
-    private ColumnView parseCoordinates(JsonArray coordinateArray) {
-        double[] coordinates = new double[coordinateArray.size()];
-        for (int i = 0; i < coordinateArray.size(); i++) {
-            JsonElement coord = coordinateArray.get(i);
-            if(coord.isJsonNull()) {
-                coordinates[i] = Double.NaN;
-            } else {
-                coordinates[i] = coord.getAsDouble();
-            }
-        }
-        return new GeoAreaColumnView(coordinates);
     }
 
 

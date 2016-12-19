@@ -1,7 +1,10 @@
 package org.activityinfo.store.query.output;
 
 import com.google.gson.stream.JsonWriter;
-import org.activityinfo.model.query.*;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.ConstantColumnView;
+import org.activityinfo.model.query.EmptyColumnView;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -52,9 +55,6 @@ public class ColumnJsonWriter {
         } else if (view instanceof ConstantColumnView) {
             writeConstantView(view);
 
-        } else if (view instanceof GeoColumn) {
-            writeCoordinates((GeoColumn) view);
-            
         } else {
             writeArrayView(view);
         }
@@ -74,21 +74,6 @@ public class ColumnJsonWriter {
             case BOOLEAN:
                 writer.name("value").value(view.getBoolean(0));
         }
-    }
-    
-    private void writeCoordinates(GeoColumn view) throws IOException {
-        writer.name("storage").value("coordinates");
-        writer.name("coordinates");
-        writer.beginArray();
-        for (int i = 0; i < view.numCoordinates(); i++) {
-            double coordinate = view.getCoordinate(i);
-            if(Double.isNaN(coordinate)) {
-                writer.nullValue();
-            } else {
-                writer.value(coordinate);
-            }
-        }
-        writer.endArray();
     }
 
     private void writeArrayView(ColumnView view) throws IOException {
