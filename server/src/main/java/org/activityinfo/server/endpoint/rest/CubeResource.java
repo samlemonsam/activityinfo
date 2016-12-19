@@ -4,12 +4,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.command.PivotSites;
 import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.date.DateUnit;
+import org.activityinfo.model.date.Month;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.report.util.DateUtilCalendarImpl;
 import org.activityinfo.server.util.monitoring.Timed;
@@ -68,6 +68,9 @@ public class CubeResource {
                     break;
                 case "month":
                     pivotDimensions.add(new DateDimension(DateUnit.MONTH));
+                    break;
+                case "partner":
+                    pivotDimensions.add(new Dimension(DimensionType.Partner));
                     break;
                 default:
                     throw new WebApplicationException(Response
