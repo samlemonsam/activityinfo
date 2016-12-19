@@ -55,7 +55,7 @@ task acceptanceTest(type: JavaExec) {
     args '--ui'
     args '-T', '6'
     args '--outputDir', "$buildDir/test-results"
-    args '--retries', '3'
+    args '--retries', '1'
 
     main = 'org.activityinfo.test.TestMain'
     classpath = sourceSets.test.runtimeClasspath
