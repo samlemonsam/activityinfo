@@ -95,7 +95,7 @@ public class ExpressionBuilderTest {
 
         // containsAll/containsAny
         row.setFunction(ContainsAllFunction.INSTANCE);
-        assertCorrectRoundTripTranslation("containsAll(test_f1,test_ev1)", row);
+        assertCorrectRoundTripTranslation("containsAll(test_f1, test_ev1)", row);
     }
 
     @Test
