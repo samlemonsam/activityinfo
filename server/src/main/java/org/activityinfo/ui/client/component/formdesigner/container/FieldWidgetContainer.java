@@ -108,6 +108,12 @@ public class FieldWidgetContainer implements WidgetContainer {
         syncWithModel();
     }
 
+    public void removeFromForm() {
+        fieldPanel.getFocusPanel().removeFromParent();
+        FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
+        formClass.remove(formField);
+    }
+
     @Override
     public ResourceId getParentId() {
         return parentId;

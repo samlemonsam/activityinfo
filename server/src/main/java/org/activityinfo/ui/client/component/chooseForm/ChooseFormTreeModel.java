@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.formdesigner.properties;
+package org.activityinfo.ui.client.component.chooseForm;
 /*
  * #%L
  * ActivityInfo Server
@@ -39,10 +39,10 @@ import java.util.List;
 /**
  * @author yuriyz on 04/06/2016.
  */
-public class ChooseFormTreeModel implements TreeViewModel {
+class ChooseFormTreeModel implements TreeViewModel {
 
 
-    public static final ProvidesKey<CatalogEntry> KEY_PROVIDER = new ProvidesKey<CatalogEntry>() {
+    static final ProvidesKey<CatalogEntry> KEY_PROVIDER = new ProvidesKey<CatalogEntry>() {
         @Override
         public Object getKey(CatalogEntry node) {
             return node == null ? null : node.getId();
@@ -77,12 +77,12 @@ public class ChooseFormTreeModel implements TreeViewModel {
         }
     }
 
-    public static class DataProvider extends AsyncDataProvider<CatalogEntry> {
+    private static class DataProvider extends AsyncDataProvider<CatalogEntry> {
 
         private final ResourceLocator locator;
         private final String parentId;
 
-        public DataProvider(ResourceLocator locator, CatalogEntry parent) {
+        DataProvider(ResourceLocator locator, CatalogEntry parent) {
             this.locator = locator;
             if(parent == null) {
                 this.parentId = null;

@@ -30,13 +30,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.ui.client.component.chooseForm.ChooseFormCallback;
+import org.activityinfo.ui.client.component.chooseForm.ChooseFormDialog;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -45,7 +46,6 @@ import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetCo
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.event.PanelUpdatedEvent;
 import org.activityinfo.ui.client.component.formdesigner.palette.*;
-import org.activityinfo.ui.client.component.formdesigner.properties.ChooseFormDialog;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -237,18 +237,18 @@ public class DropPanelDropController extends FlowPanelDropController implements 
 
     private void chooseReference(final FieldWidgetContainer container, final FormField formField) {
         final ChooseFormDialog dialog = new ChooseFormDialog(this.formDesigner.getResourceLocator());
-        dialog.choose(new AsyncCallback<CatalogEntry>() {
+        dialog.choose(new ChooseFormCallback() {
             @Override
-            public void onFailure(Throwable caught) {
-
+            public void onChosen(CatalogEntry entry) {
+                ReferenceType type = (ReferenceType) formField.getType();
+                type.setRange(ResourceId.valueOf(entry.getId()));
+                formField.setLabel(entry.getLabel());
+                container.syncWithModel();
             }
 
             @Override
-            public void onSuccess(CatalogEntry result) {
-                ReferenceType type = (ReferenceType) formField.getType();
-                type.setRange(ResourceId.valueOf(result.getId()));
-                formField.setLabel(result.getLabel());
-                container.syncWithModel();
+            public void onCanceled() {
+                container.removeFromForm();
             }
         });
     }
