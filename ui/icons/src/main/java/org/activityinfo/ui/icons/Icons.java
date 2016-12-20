@@ -125,6 +125,8 @@ public class Icons  {
         return "icon icon_earth";
     }
 
+    public String exclamationCircle() { return "icon icon_exclamationCircle"; }
+
     //@Source("icons/icomoon/info.svg")
     public String overview() {
         return "icon icon_info";
@@ -157,6 +159,7 @@ public class Icons  {
     public String connectionProblem() {
         return "icon icon_connectionProblem";
     }
+
 
     /**
      * Symbolizes an unexpected exception (that is, a bug!)

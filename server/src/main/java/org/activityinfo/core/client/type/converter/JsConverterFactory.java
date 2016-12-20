@@ -14,7 +14,7 @@ public class JsConverterFactory {
         if(INSTANCE == null) {
             INSTANCE = new FieldParserFactory(
                     new JsQuantityFormatterFactory(),
-                    new JsCoordinateNumberFormatter());
+                    JsCoordinateNumberFormatter.INSTANCE);
         }
         return INSTANCE;
     }

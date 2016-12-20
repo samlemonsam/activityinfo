@@ -37,7 +37,7 @@ public class JsCoordinateNumberFormatter implements CoordinateParser.NumberForma
     private char decimalSeparator;
     private char localizedZeroDigit;
 
-    public JsCoordinateNumberFormatter() {
+    private JsCoordinateNumberFormatter() {
         dddFormat = NumberFormat.getFormat("+0.000000;-0.000000");
         shortFracFormat = NumberFormat.getFormat("0.00");
         intFormat = NumberFormat.getFormat("0");

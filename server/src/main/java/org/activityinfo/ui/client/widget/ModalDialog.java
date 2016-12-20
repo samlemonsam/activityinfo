@@ -125,9 +125,10 @@ public class ModalDialog  {
     private void showBackdrop() {
         if(backdrop == null) {
             backdrop = new SimplePanel();
-            backdrop.setStyleName("modal-backdrop fade in");
             RootPanel.get().add(backdrop);
         }
+        backdrop.setStyleName("modal-backdrop fade in");
+
         backdrop.getElement().getStyle().setDisplay(Style.Display.BLOCK);
     }
 

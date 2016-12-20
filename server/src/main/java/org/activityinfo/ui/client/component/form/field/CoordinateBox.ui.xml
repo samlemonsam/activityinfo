@@ -1,0 +1,23 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:ai="urn:import:org.activityinfo.ui.client.widget"
+>
+
+    <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+    <ui:with field="icons" type="org.activityinfo.ui.icons.Icons"/>
+
+    <ui:style>
+        .coord-help {
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </ui:style>
+
+    <g:HTMLPanel addStyleNames="field-element">
+        <label class="control-label" ui:field="controlLabel"/>
+        <ai:TextBox ui:field="textBox"/>
+        <span class="help-block" ui:field="helpBlock">
+            <span class="{icons.exclamationCircle} {style.coord-help}" ui:field="helpIcon"/>
+        </span>
+    </g:HTMLPanel>
+</ui:UiBinder>

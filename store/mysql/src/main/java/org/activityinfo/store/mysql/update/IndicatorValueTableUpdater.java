@@ -5,8 +5,6 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.HasStringValue;
@@ -106,9 +104,7 @@ public class IndicatorValueTableUpdater {
             executeQuantityUpdate(executor, update);
         } else if(update.value instanceof TextValue || update.value instanceof BarcodeValue) {
             executeTextUpdate(executor, update);
-        } else if(update.value instanceof ReferenceValue ||
-                update.value instanceof LocalDate ||
-                update.value instanceof AttachmentValue) {
+        } else  {
             executeJsonUpdate(executor, update);
         }
     }

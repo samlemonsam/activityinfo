@@ -628,8 +628,17 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No Data.")
     String noData();
 
-    @DefaultStringValue("Coordinates must specify a hemisphere (+/-/N/S/W/E)")
+    @DefaultStringValue("Coordinates must specify a hemisphere (+/-/N/S)")
     String noHemisphere();
+
+    @DefaultStringValue("Coordinates must specify a hemisphere (+/-/E/W)")
+    String noHemisphereLng();
+
+    @DefaultStringValue("Longitude must be less than 180°")
+    String longitudeOutOfBounds();
+
+    @DefaultStringValue("Latitude must be less than 90°")
+    String latitudeOutOfBounds();
 
     @DefaultStringValue("Coordinates must have at least one number")
     String noNumber();
