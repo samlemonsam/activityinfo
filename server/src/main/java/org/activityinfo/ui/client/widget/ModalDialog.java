@@ -51,6 +51,7 @@ public class ModalDialog  {
 
     private IsWidget content;
 
+
     HTMLPanel dialog;
 
     @UiField
@@ -140,6 +141,7 @@ public class ModalDialog  {
             hideHandler.onClick(null);
         }
     }
+
 
     public ClickHandler getHideHandler() {
         return hideHandler;

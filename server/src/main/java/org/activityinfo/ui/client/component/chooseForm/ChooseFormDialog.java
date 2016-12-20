@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.formdesigner.properties;
+package org.activityinfo.ui.client.component.chooseForm;
 /*
  * #%L
  * ActivityInfo Server
@@ -43,9 +43,13 @@ import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.widget.ModalDialog;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Component to allow the user to select an individual Form from the FormCatalog.
+ */
 public class ChooseFormDialog extends Composite {
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
@@ -56,7 +60,6 @@ public class ChooseFormDialog extends Composite {
     private final MultiSelectionModel<CatalogEntry> selectionModel = 
             new MultiSelectionModel<>(ChooseFormTreeModel.KEY_PROVIDER);
     private final ModalDialog dialog;
-    private HandlerRegistration okClickRegistration;
 
     @UiField(provided = true)
     CellBrowser browser;
@@ -104,17 +107,38 @@ public class ChooseFormDialog extends Composite {
                 .build();
     }
 
-    public ChooseFormDialog show() {
+    /**
+     * Shows the dialog and calls back with the user's selection.
+     */
+    public void choose(final ChooseFormCallback callback) {
+        final List<HandlerRegistration> registrations = new ArrayList<>();
+        registrations.add(dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Set<CatalogEntry> nodes = getSelectedLeafNodes();
+                if (!nodes.isEmpty()) {
+                    cleanup(registrations);
+                    dialog.hide();
+                    callback.onChosen(nodes.iterator().next());
+                }
+            }
+        }));
+        dialog.setHideHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                callback.onCanceled();
+                cleanup(registrations);
+            }
+        });
         dialog.show();
-        return this;
     }
 
-    public void setOkClickHandler(ClickHandler okClickHandler) {
-        if (okClickRegistration != null) {
-            okClickRegistration.removeHandler();
+    private void cleanup(List<HandlerRegistration> registrations) {
+        for (HandlerRegistration registration : registrations) {
+            registration.removeHandler();
         }
-        okClickRegistration = dialog.getPrimaryButton().addClickHandler(okClickHandler);
     }
+
 
     public List<ResourceId> getFormClassIds() {
         List<ResourceId> ids = Lists.newArrayList();
