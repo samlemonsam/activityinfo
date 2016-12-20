@@ -16,6 +16,7 @@ import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import java.util.*;
@@ -294,6 +295,9 @@ public class FormTree {
 
             if (node.isReference()) {
                 enumerateColumns(node.getChildren(), columns, columnMap);
+
+            } else if(node.getType() instanceof GeoPointType) {
+
             } else {
                 if (columnMap.containsKey(node.getFieldId())) {
                     columnMap.get(node.getFieldId()).addFieldPath(node.getPath());
