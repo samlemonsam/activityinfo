@@ -31,6 +31,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellBrowser;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -56,7 +57,6 @@ public class ChooseFormDialog extends Composite {
     private final MultiSelectionModel<CatalogEntry> selectionModel = 
             new MultiSelectionModel<>(ChooseFormTreeModel.KEY_PROVIDER);
     private final ModalDialog dialog;
-    private HandlerRegistration okClickRegistration;
 
     @UiField(provided = true)
     CellBrowser browser;
@@ -104,16 +104,18 @@ public class ChooseFormDialog extends Composite {
                 .build();
     }
 
-    public ChooseFormDialog show() {
+    public void choose(final AsyncCallback<CatalogEntry> callback) {
+        final HandlerRegistration registration = dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Set<CatalogEntry> nodes = getSelectedLeafNodes();
+                if (!nodes.isEmpty()) {
+                    dialog.hide();
+                    callback.onSuccess(nodes.iterator().next());
+                }
+            }
+        });
         dialog.show();
-        return this;
-    }
-
-    public void setOkClickHandler(ClickHandler okClickHandler) {
-        if (okClickRegistration != null) {
-            okClickRegistration.removeHandler();
-        }
-        okClickRegistration = dialog.getPrimaryButton().addClickHandler(okClickHandler);
     }
 
     public List<ResourceId> getFormClassIds() {
