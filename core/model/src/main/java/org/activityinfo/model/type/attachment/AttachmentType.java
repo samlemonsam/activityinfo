@@ -39,7 +39,7 @@ public class AttachmentType implements ParametrizedFieldType {
 
         @Override
         public String getId() {
-            return "ATTACHMENT";
+            return "attachment";
         }
 
         @Override

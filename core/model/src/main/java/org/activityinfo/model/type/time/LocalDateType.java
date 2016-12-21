@@ -23,7 +23,7 @@ import org.activityinfo.model.type.RecordFieldTypeClass;
  */
 public class LocalDateType implements FieldType {
 
-    public static final String TYPE_ID = "LOCAL_DATE";
+    public static final String TYPE_ID = "date";
 
     public static final FieldTypeClass TYPE_CLASS = new RecordFieldTypeClass() {
         @Override

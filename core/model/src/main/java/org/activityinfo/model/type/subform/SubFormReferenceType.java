@@ -40,7 +40,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
 
         @Override
         public String getId() {
-            return "SUBFORM";
+            return "subform";
         }
 
         @Override

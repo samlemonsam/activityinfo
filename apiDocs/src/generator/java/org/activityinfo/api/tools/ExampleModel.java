@@ -5,6 +5,14 @@ public class ExampleModel {
     private String language;
     private String source;
 
+    public ExampleModel() {
+    }
+
+    public ExampleModel(String language, String source) {
+        this.language = language;
+        this.source = source;
+    }
+
     public String getLanguage() {
         return language;
     }

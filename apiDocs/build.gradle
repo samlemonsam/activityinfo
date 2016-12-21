@@ -22,6 +22,13 @@ dependencies {
     generatorCompile 'io.swagger:swagger-parser:1.0.19'
     generatorCompile 'org.pegdown:pegdown:1.6.0'
     generatorCompile libraries.freemarker
+    generatorCompile project(':core:model')
+}
+
+task compileSass(type: org.kravemir.gradle.sass.SassCompileTask) {
+    srcDir = file("$projectDir/src/main/style")
+    outDir = file("$buildDir/html/assets")
+    exclude = "_*"
 }
 
 task copyAssets(type: Copy) {
@@ -44,4 +51,5 @@ task generateDocs(type: JavaExec) {
 }
 
 build.dependsOn copyAssets
+build.dependsOn compileSass
 build.dependsOn generateDocs

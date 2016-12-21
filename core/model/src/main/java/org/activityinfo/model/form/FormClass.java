@@ -54,12 +54,13 @@ public class FormClass implements FormElementContainer {
         return databaseId;
     }
 
-    public void setDatabaseId(ResourceId databaseId) {
+    public FormClass setDatabaseId(ResourceId databaseId) {
         this.databaseId = databaseId;
+        return this;
     }
 
-    public void setDatabaseId(int databaseId) {
-        setDatabaseId(CuidAdapter.databaseId(databaseId));
+    public FormClass setDatabaseId(int databaseId) {
+        return setDatabaseId(CuidAdapter.databaseId(databaseId));
     }
     
     public FormElementContainer getElementContainer(ResourceId elementId) {
@@ -158,8 +159,9 @@ public class FormClass implements FormElementContainer {
         return description;
     }
 
-    public void setDescription(String description) {
+    public FormClass setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     @Override

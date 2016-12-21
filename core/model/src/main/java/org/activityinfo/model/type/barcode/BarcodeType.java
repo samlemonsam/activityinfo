@@ -14,7 +14,7 @@ public class BarcodeType implements FieldType {
 
     public static final FieldTypeClass TYPE_CLASS = new RecordFieldTypeClass() {
 
-        public static final String TYPE_ID = "BARCODE";
+        public static final String TYPE_ID = "barcode";
 
         @Override
         public String getId() {

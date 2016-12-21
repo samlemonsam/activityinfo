@@ -13,7 +13,7 @@ import org.activityinfo.model.type.number.QuantityType;
  */
 public class GeoPointType implements RecordFieldType {
 
-    public static final String TYPE_ID = "GEOGRAPHIC_POINT";
+    public static final String TYPE_ID = "geopoint";
 
     public static final GeoPointType INSTANCE = new GeoPointType();
 
