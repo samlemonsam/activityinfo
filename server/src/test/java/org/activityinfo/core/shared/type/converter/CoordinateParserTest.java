@@ -138,7 +138,7 @@ public class CoordinateParserTest {
     @Test
     public void parseDMS() throws CoordinateFormatException {
         assertThat(parseLatitude("25 10 54.23\"  N"), closeTo(25.18173056, 0.000001));
-        assertThat(parseLatitude("176 50' 23\" S"), closeTo(-176.8397222, 0.000001));
+        assertThat(parseLatitude("76 50' 23\" S"), closeTo(-76.8397222, 0.000001));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class CoordinateParserTest {
         try {
 
             assertThat(parseLatitude("25 10 54,23\"  N"), closeTo(25.18173056, 0.000001));
-            assertThat(parseLatitude("176 50' 23\" S"), closeTo(-176.8397222, 0.000001));
+            assertThat(parseLatitude("76 50' 23\" S"), closeTo(-76.8397222, 0.000001));
         } finally {
             ThreadLocalLocaleProvider.popLocale();
         }
