@@ -46,14 +46,10 @@ class CoordinateBox implements IsWidget, HasValueChangeHandlers<Double> {
     TextBox textBox;
     @UiField
     SpanElement helpBlock;
-    @UiField
-    SpanElement helpIcon;
-
 
     private SimpleEventBus eventBus = new SimpleEventBus();
 
     private final CoordinateParser parser;
-    private CoordinateAxis axis;
     private Double value;
 
     private boolean valid;
@@ -66,7 +62,6 @@ class CoordinateBox implements IsWidget, HasValueChangeHandlers<Double> {
     private boolean dirtyText;
 
     public CoordinateBox(CoordinateAxis axis) {
-        this.axis = axis;
         this.panel = ourUiBinder.createAndBindUi(this);
         this.controlLabel.setInnerText(axis.getLocalizedName());
 
@@ -89,6 +84,9 @@ class CoordinateBox implements IsWidget, HasValueChangeHandlers<Double> {
                 }
             }
         });
+
+        this.valid = true;
+        updateView();
     }
 
     @Override
@@ -135,7 +133,7 @@ class CoordinateBox implements IsWidget, HasValueChangeHandlers<Double> {
         } else {
             panel.addStyleName("has-error");
             helpBlock.getStyle().setDisplay(Style.Display.BLOCK);
-            helpIcon.setTitle(validationMessage);
+            helpBlock.setInnerText(validationMessage);
         }
     }
 

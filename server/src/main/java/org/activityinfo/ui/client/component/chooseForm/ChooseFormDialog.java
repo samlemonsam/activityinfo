@@ -123,13 +123,14 @@ public class ChooseFormDialog extends Composite {
                 }
             }
         }));
-        dialog.setHideHandler(new ClickHandler() {
+        registrations.add(dialog.getCancelButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                callback.onCanceled();
                 cleanup(registrations);
+                callback.onCanceled();
             }
-        });
+        }));
+
         dialog.show();
     }
 
