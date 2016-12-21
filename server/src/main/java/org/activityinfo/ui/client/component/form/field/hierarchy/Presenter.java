@@ -156,8 +156,7 @@ class Presenter {
             @Override
             public Promise<List<Choice>> get() {
 
-                final Promise<List<Choice>> result = new Promise<>();
-                locator.queryTable(queryModel).then(new Function<ColumnSet, List<Choice>>() {
+                return locator.queryTable(queryModel).then(new Function<ColumnSet, List<Choice>>() {
                     @Nullable
                     @Override
                     public List<Choice> apply(ColumnSet input) {
@@ -182,7 +181,6 @@ class Presenter {
                         return choices;
                     }
                 });
-                return result;
             }
         };
     }
