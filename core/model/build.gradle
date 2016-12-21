@@ -21,9 +21,10 @@ jar {
     from project.sourceSets.main.output
 }
 
-
-doFirst {
-    testLogging {
-        showStandardStreams = false
+test {
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+        }
     }
 }
