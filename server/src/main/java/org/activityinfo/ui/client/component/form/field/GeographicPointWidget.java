@@ -94,7 +94,7 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     @Override
     public Promise<Void> setValue(GeoPoint value) {
         longitudeBox.setValue(value.getLongitude());
-        latitudeBox.setValue(value.getLongitude());
+        latitudeBox.setValue(value.getLatitude());
         return Promise.done();
     }
 
