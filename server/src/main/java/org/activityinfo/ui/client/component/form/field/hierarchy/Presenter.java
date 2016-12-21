@@ -15,8 +15,6 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -158,8 +156,7 @@ class Presenter {
             @Override
             public Promise<List<Choice>> get() {
 
-                final Promise<List<Choice>> result = new Promise<>();
-                locator.getTable(queryModel).transform(new Function<ColumnSet, List<Choice>>() {
+                return locator.queryTable(queryModel).then(new Function<ColumnSet, List<Choice>>() {
                     @Nullable
                     @Override
                     public List<Choice> apply(ColumnSet input) {
@@ -183,13 +180,7 @@ class Presenter {
                         }
                         return choices;
                     }
-                }).subscribe(new Observer<List<Choice>>() {
-                    @Override
-                    public void onChange(Observable<List<Choice>> observable) {
-                        result.resolve(observable.get());    
-                    }
                 });
-                return result;
             }
         };
     }

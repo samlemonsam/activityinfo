@@ -72,7 +72,7 @@ public class CoordinateParser {
 
     private final String noNumberErrorMessage = I18N.CONSTANTS.noNumber();
     private final String tooManyNumbersErrorMessage = I18N.CONSTANTS.tooManyNumbers();
-    private final String noHemisphereMessage = I18N.CONSTANTS.noHemisphere();
+    private final String noHemisphereMessage;
     private final String invalidSecondsMessage = I18N.CONSTANTS.invalidMinutes();
     private final String invalidMinutesMessage = I18N.CONSTANTS.invalidMinutes();
 
@@ -93,6 +93,14 @@ public class CoordinateParser {
         this.maxValue = axis.getMaximumValue();
         this.posHemiChars = axis.getPositiveHemisphereCharacters();
         this.negHemiChars = axis.getNegativeHemisphereCharacters();
+        switch (axis) {
+            case LATITUDE:
+                noHemisphereMessage = I18N.CONSTANTS.noHemisphere();
+                break;
+            default:
+                noHemisphereMessage = I18N.CONSTANTS.noHemisphereLng();
+                break;
+        }
     }
 
 
@@ -209,6 +217,10 @@ public class CoordinateParser {
         }
 
         double coordinate = numberFormatter.parseDouble(tokens[0].toString());
+        if(coordinate < axis.getMinimumValue() || coordinate > axis.getMaximumValue()) {
+            throw new CoordinateFormatException(axis.getDegreesOutOfBoundsMessage());
+        }
+
         notation = Notation.DDd;
 
         if (tokens[1].length() != 0) {

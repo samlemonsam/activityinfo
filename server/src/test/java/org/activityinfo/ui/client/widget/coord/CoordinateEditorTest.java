@@ -96,10 +96,8 @@ public class CoordinateEditorTest {
     public void testDMS() throws CoordinateFormatException {
         createLatitudeEditor();
 
-        Assert.assertEquals(25.18173056, editor.parse("25 10 54.23\"  N"),
-                DELTA);
-        Assert
-                .assertEquals(-176.8397222, editor.parse("176 50' 23\" S"), DELTA);
+        Assert.assertEquals(25.18173056, editor.parse("25 10 54.23\"  N"), DELTA);
+        Assert.assertEquals(-76.8397222, editor.parse("76 50' 23\" S"), DELTA);
     }
 
     @Test

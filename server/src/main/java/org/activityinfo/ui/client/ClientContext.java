@@ -24,6 +24,7 @@ package org.activityinfo.ui.client;
 
 import com.google.common.base.Strings;
 import com.google.gwt.i18n.client.Dictionary;
+import com.google.gwt.user.client.Window;
 
 public final class ClientContext {
 
@@ -57,6 +58,6 @@ public final class ClientContext {
 
 
     public static boolean isNewFieldsFlagEnabled() {
-        return getFeatureFlags().contains("newfields");
+        return getFeatureFlags().contains("newfields") || Window.Location.getHostName().contains("ai-staging");
     }
 }

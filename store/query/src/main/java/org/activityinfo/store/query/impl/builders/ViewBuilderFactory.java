@@ -47,7 +47,7 @@ public class ViewBuilderFactory {
         } else if(type instanceof AttachmentType) {
             return new StringColumnBuilder(result, new AttachmentBlobIdReader());
         } else {
-            throw new UnsupportedOperationException("Unsupported type: " + type);
+            return new UnsupportedColumnTypeBuilder(result);
         }
     }
 

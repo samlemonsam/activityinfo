@@ -31,9 +31,9 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.form.ApplicationProperties;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -150,7 +150,7 @@ public class FormFieldWidgetFactory {
     }
 
     private Promise<? extends FormFieldWidget> createReferenceWidget(FormField field, final ValueUpdater updater) {
-        if (field.isSubPropertyOf(ApplicationProperties.HIERARCHIAL)) {
+        if (isHierarchical(field)) {
             return HierarchyFieldWidget.create(resourceLocator, (ReferenceType) field.getType(), updater);
         } else {
             final ReferenceType type = (ReferenceType) field.getType();
@@ -190,6 +190,19 @@ public class FormFieldWidgetFactory {
 
             return widget;
         }
+    }
+
+    private boolean isHierarchical(FormField field) {
+        ReferenceType type = (ReferenceType) field.getType();
+        if(type.getRange().size() <= 1) {
+            return false;
+        }
+        for (ResourceId resourceId : type.getRange()) {
+            if(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, final FormField geoField) {
