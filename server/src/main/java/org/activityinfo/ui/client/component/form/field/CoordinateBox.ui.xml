@@ -8,7 +8,7 @@
 
 
 
-    <g:HTMLPanel addStyleNames="field-element">
+    <g:HTMLPanel>
         <label class="control-label" ui:field="controlLabel"/>
         <ai:TextBox ui:field="textBox"/>
         <span class="help-block" ui:field="helpBlock"/>
