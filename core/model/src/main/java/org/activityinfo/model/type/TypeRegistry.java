@@ -57,6 +57,16 @@ public class TypeRegistry {
     }
 
     public FieldTypeClass getTypeClass(String typeId) {
+
+        // Handle deprecated ids:
+        switch (typeId) {
+            case "LOCAL_DATE":
+                return LocalDateType.TYPE_CLASS;
+            case "GEOGRAPHIC_POINT":
+                return LocalDateType.TYPE_CLASS;
+        }
+
+
         FieldTypeClass typeClass = typeMap.get(typeId.toUpperCase());
         if (typeClass == null) {
             throw new RuntimeException("Unknown type: " + typeId);

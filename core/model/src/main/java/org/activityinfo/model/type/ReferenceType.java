@@ -22,7 +22,7 @@ public class ReferenceType implements ParametrizedFieldType {
 
         @Override
         public String getId() {
-            return "REFERENCE";
+            return "reference";
         }
 
         @Override

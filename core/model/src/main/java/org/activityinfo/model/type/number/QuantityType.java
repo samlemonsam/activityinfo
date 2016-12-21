@@ -20,7 +20,7 @@ public class QuantityType implements ParametrizedFieldType {
 
         @Override
         public String getId() {
-            return "QUANTITY";
+            return "quantity";
         }
 
         @Override

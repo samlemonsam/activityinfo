@@ -29,7 +29,10 @@ public class CalculatedFieldType implements ParametrizedFieldType {
 
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
-            JsonElement exprElement = parametersObject.get("expression");
+            JsonElement exprElement = parametersObject.get("formula");
+            if(exprElement == null) {
+                exprElement = parametersObject.get("expression");
+            }
             if(exprElement == null) {
                 return new CalculatedFieldType();
             } else if(exprElement.isJsonObject()) {
@@ -74,7 +77,7 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         if (expression != null) {
-            object.addProperty("expression", expression);
+            object.addProperty("formula", expression);
         }
         return object;
     }

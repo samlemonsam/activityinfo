@@ -7,6 +7,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ast.RootNode;
 
@@ -77,7 +78,7 @@ public class DocGenerator {
         });
         StringBuilder html = new StringBuilder();
         for (File file : files) {
-            PegDownProcessor processor = new PegDownProcessor();
+            PegDownProcessor processor = new PegDownProcessor(Extensions.TABLES);
             RootNode rootNode = processor.parseMarkdown(Files.asCharSource(file, Charsets.UTF_8).read().toCharArray());
             MyHtmlSerializer serializer = new MyHtmlSerializer();
             html.append(serializer.toHtml(rootNode));
