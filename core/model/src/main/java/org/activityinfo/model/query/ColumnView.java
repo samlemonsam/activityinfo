@@ -1,7 +1,5 @@
 package org.activityinfo.model.query;
 
-import org.activityinfo.model.type.geo.Extents;
-
 import java.io.Serializable;
 
 public interface ColumnView extends Serializable {
@@ -20,8 +18,6 @@ public interface ColumnView extends Serializable {
     double getDouble(int row);
 
     String getString(int row);
-
-    Extents getExtents(int row);
 
     /**
      *

@@ -2,7 +2,6 @@ package org.activityinfo.store.query.impl.views;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -49,11 +48,6 @@ public class StringArrayColumnView implements ColumnView, Serializable {
     @Override
     public String getString(int row) {
         return values[row];
-    }
-
-    @Override
-    public Extents getExtents(int row) {
-        return null;
     }
 
     @Override

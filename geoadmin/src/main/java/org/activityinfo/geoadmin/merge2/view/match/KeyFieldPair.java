@@ -45,12 +45,6 @@ public class KeyFieldPair {
             } else {
                 return scorer.score(sourceValue, targetValue);
             }
-        } else if(sourceField.isGeoArea() && targetField.isGeoArea()) {
-            Extents sourceExtents = sourceField.getView().getExtents(sourceIndex);
-            Extents targetExtents = targetField.getView().getExtents(targetIndex);
-            return jaccard(sourceExtents, targetExtents);
-
-
         } else {
             return Double.NaN;
         }

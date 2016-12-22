@@ -1,7 +1,5 @@
 package org.activityinfo.model.query;
 
-import org.activityinfo.model.type.geo.Extents;
-
 /**
  * Boolean column view backed by a int[] array
  */
@@ -51,12 +49,7 @@ public class BooleanColumnView implements ColumnView {
     return null;
   }
 
-  @Override
-  public Extents getExtents(int row) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
+    @Override
   public int getBoolean(int row) {
     return values[row];
   }
