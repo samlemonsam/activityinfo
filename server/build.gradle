@@ -18,7 +18,7 @@ description = 'ActivityInfo Server'
 
 ext {
     // The location of the configuration file to be used 
-    // for the appengine dev server
+    // for the app engine dev server
     configFile = project.file("$buildDir/config.properties")
 }
 
