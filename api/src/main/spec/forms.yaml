@@ -10,6 +10,28 @@ basePath: /resources
 produces:
   - application/json
 paths:
+  /catalog:
+    get:
+      operationId: getFormCatalog
+      summary: Get a List of Forms
+      tags:
+        - forms
+      description: This endpoint provides access to a hierarchy of Forms that are visible to the authenticated
+        user.
+      parameters:
+        - name: parent
+          in: query
+          description: Fetches children of this parent.
+          required: false
+      type: string
+      responses:
+        200:
+          description: The catalog
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FormCatalogEntry'
+
   /form/{formId}/schema:
     get:
       operationId: getFormSchema
@@ -283,29 +305,7 @@ paths:
           description: The authenticated user does not have permission to view this form
         404:
           description: No form with `formId` exists. 
-  /catalog:
-    get:
-      operationId: getFormCatalog
-      summary: Get a List of Forms
-      tags: 
-        - catalog
-      description: This endpoint provides access to a hierarchy of Forms that are visible to the authenticated
-        user. 
-      parameters:
-        - name: parent
-          in: query
-          description: Fetches children of this parent.
-          required: false
-      type: string
-      tags:
-        - catalog
-      responses:
-        200:
-          description: The catalog 
-          schema:
-            type: array
-            items: 
-              $ref: '#/definitions/FormCatalogEntry'
+
 
 definitions:
   FormSchema:
