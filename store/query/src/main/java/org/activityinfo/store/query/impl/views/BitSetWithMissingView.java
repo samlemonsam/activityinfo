@@ -2,7 +2,6 @@ package org.activityinfo.store.query.impl.views;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.geo.Extents;
 
 import java.io.Serializable;
 import java.util.BitSet;
@@ -54,11 +53,6 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
 
     @Override
     public String getString(int row) {
-        return null;
-    }
-
-    @Override
-    public Extents getExtents(int row) {
         return null;
     }
 

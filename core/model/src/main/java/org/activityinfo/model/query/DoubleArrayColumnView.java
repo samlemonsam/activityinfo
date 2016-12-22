@@ -1,7 +1,5 @@
 package org.activityinfo.model.query;
 
-import org.activityinfo.model.type.geo.Extents;
-
 import java.io.Serializable;
 
 public class DoubleArrayColumnView implements ColumnView, Serializable {
@@ -41,11 +39,6 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public String getString(int row) {
-        return null;
-    }
-
-    @Override
-    public Extents getExtents(int row) {
         return null;
     }
 

@@ -3,7 +3,6 @@ package org.activityinfo.api.client;
 import com.google.gwt.core.client.JavaScriptObject;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.geo.Extents;
 
 
 @SuppressWarnings("GwtInconsistentSerializableClass")
@@ -36,9 +35,6 @@ class ColumnArrayView implements ColumnView {
                 return getDouble(row);
             case BOOLEAN:
                 return getBoolean(row);
-            case GEOGRAPHIC_AREA:
-            case GEOGRAPHIC_POINT:
-                return getExtents(row);
         }
         throw new UnsupportedOperationException();
     }
@@ -54,15 +50,10 @@ class ColumnArrayView implements ColumnView {
     }
 
     @Override
-    public Extents getExtents(int row) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public int getBoolean(int row) {
         return getBoolean(array, row);
     }
-    
+
     private static native int getLength(JavaScriptObject array) /*-{
         return array.length();
     }-*/;

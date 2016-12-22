@@ -31,9 +31,12 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -174,7 +177,7 @@ public class FormFieldWidgetFactory {
                     if (geoPointField.isPresent()) { // if has geoPoint then show geo widget and propose map UI
                         widgetPromise = createMapWidget(type, updater, geoPointField.get());
                     } else { // no geo point, fallback to list
-                        widgetPromise = createSimpleListWidget(type, updater);
+                        widgetPromise = createSimpleListWidget(formClass, type, updater);
                     }
 
                     widgetPromise.then(new Function<FormFieldWidget, Object>() {
@@ -233,12 +236,12 @@ public class FormFieldWidgetFactory {
         return Optional.absent();
     }
 
-    private Promise<? extends FormFieldWidget> createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
+    private Promise<? extends FormFieldWidget> createSimpleListWidget(FormClass formClass, final ReferenceType type, final ValueUpdater valueUpdater) {
 
         final ResourceId formId = Iterables.getOnlyElement(type.getRange());
         QueryModel queryModel = new QueryModel(formId);
         queryModel.selectResourceId().as("id");
-        queryModel.selectExpr("label").as("label");
+        queryModel.selectExpr(findLabelExpression(formClass)).as("label");
 
         return resourceLocator
                 .queryTable(queryModel)
@@ -264,6 +267,25 @@ public class FormFieldWidgetFactory {
                         }
                     }
                 });
+    }
+
+    private ExprNode findLabelExpression(FormClass formClass) {
+        // Look for a field with the "label" tag
+        for (FormField field : formClass.getFields()) {
+            if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
+        // If no such field exists, pick the first text field
+        for (FormField field : formClass.getFields()) {
+            if(field.getType() instanceof TextType) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
+        // Otherwise fall back to the generated id
+        return new SymbolExpr(ColumnModel.ID_SYMBOL);
     }
 }
 

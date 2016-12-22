@@ -34,9 +34,44 @@ public class DatabasesFolder {
         if (parentId.equals(ROOT_ID)) {
             return queryDatabases(userId);
         } else if (ResourceId.valueOf(parentId).getDomain() == CuidAdapter.DATABASE_DOMAIN) {
-            return queryLocationTypes(ResourceId.valueOf(parentId));
+            List<CatalogEntry> children = new ArrayList<>();
+            children.addAll(queryForms(ResourceId.valueOf(parentId)));
+            children.addAll(queryLocationTypes(ResourceId.valueOf(parentId)));
+            return children;
         }
         return Collections.emptyList();
+    }
+
+
+
+    private List<CatalogEntry> queryDatabases(int userId) throws SQLException {
+        List<CatalogEntry> entries = new ArrayList<>();
+
+        try (ResultSet rs = executor.query("select d.name, d.databaseId " +
+                "FROM userdatabase d " +
+                "WHERE d.dateDeleted is NULL AND (d.ownerUserId = ? OR d.databaseId IN " +
+                " (select databaseid from userpermission where userpermission.userId = ? and allowview=1))" +
+                "ORDER BY d.name", userId, userId)) {
+            while (rs.next()) {
+                String label = rs.getString(1);
+                String formId = CuidAdapter.databaseId(rs.getInt(2)).asString();
+                entries.add(new CatalogEntry(formId, label, CatalogEntryType.FOLDER));
+            }
+        }
+        return entries;
+    }
+
+    private List<CatalogEntry> queryForms(ResourceId databaseId) throws SQLException {
+        List<CatalogEntry> entries = new ArrayList<>();
+        try(ResultSet rs = executor.query("SELECT ActivityId, name FROM activity " +
+                "WHERE dateDeleted IS NULL AND databaseId = ? ", CuidAdapter.getLegacyIdFromCuid(databaseId))) {
+            while(rs.next()) {
+                String formId = CuidAdapter.activityFormClass(rs.getInt(1)).asString();
+                String label = rs.getString(2);
+                entries.add(new CatalogEntry(formId, label, CatalogEntryType.FORM));
+            }
+        }
+        return entries;
     }
 
     private List<CatalogEntry> queryLocationTypes(ResourceId databaseId) throws SQLException {
@@ -50,24 +85,6 @@ public class DatabasesFolder {
             }
         }
 
-        return entries;
-    }
-
-    private List<CatalogEntry> queryDatabases(int userId) throws SQLException {
-        List<CatalogEntry> entries = new ArrayList<>();
-
-        try (ResultSet rs = executor.query("select d.name, d.databaseId " +
-                "from userdatabase d " +
-                "left join (select * from userpermission where userpermission.userId = ?) p " +
-                "on p.databaseId = d.databaseId " +
-                "where d.dateDeleted is NULL " +
-                "ORDER BY d.name", userId)) {
-            while (rs.next()) {
-                String label = rs.getString(1);
-                String formId = CuidAdapter.databaseId(rs.getInt(2)).asString();
-                entries.add(new CatalogEntry(formId, label, CatalogEntryType.FOLDER));
-            }
-        }
         return entries;
     }
 }

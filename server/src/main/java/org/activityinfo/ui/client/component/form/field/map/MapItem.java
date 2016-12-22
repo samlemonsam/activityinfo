@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.ui.client.component.form.field.OptionSet;
 import org.discotools.gwt.leaflet.client.types.LatLng;
 
@@ -33,13 +32,13 @@ public class MapItem {
 
     public static Set<MapItem> items(ResourceId formId, OptionSet optionSet, String geoPointColumnName) {
         Set<MapItem> items = Sets.newHashSet();
-        for (int i = 0; i < optionSet.getCount(); i++) {
+       /* for (int i = 0; i < optionSet.getCount(); i++) {
             Extents extents = optionSet.getColumnView(geoPointColumnName).getExtents(i);
             items.add(new MapItem(new RecordRef(formId, ResourceId.valueOf(optionSet.getRef(i))),
                     optionSet.getLabel(i),
                     extents.getX1(),
                     extents.getY1()));
-        }
+        }*/
         return items;
     }
 

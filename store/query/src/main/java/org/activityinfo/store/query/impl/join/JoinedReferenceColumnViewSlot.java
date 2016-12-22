@@ -4,7 +4,6 @@ import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.store.query.impl.Slot;
-import org.activityinfo.store.query.impl.views.JoinedColumnView;
 import org.activityinfo.store.query.impl.views.StringArrayColumnView;
 
 import java.util.List;
@@ -67,11 +66,10 @@ public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
                 return joinDoubleColumn(nestedColumn.get(), left);
             case BOOLEAN:
                 return joinBooleanColumn(nestedColumn.get(), left);
-            case GEOGRAPHIC_AREA:
-                break;
+            default:
+                throw new RuntimeException("columnType: " + nestedColumn.get().getType());
         }
         
-        return new JoinedColumnView(nestedColumn.get(), left);
     }
     private ColumnView joinStringColumn(ColumnView columnView, int[] joinMap) {
         int numRows = joinMap.length;
