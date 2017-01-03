@@ -57,6 +57,7 @@ public abstract class AbstractDesignForm extends FormPanel {
             @Override
             public void handleEvent(BindingEvent be) {
                 field.setVisible(field.getValue() != null);
+                field.setReadOnly(true);
             }
         });
     }

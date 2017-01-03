@@ -27,7 +27,6 @@ import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.server.endpoint.jsonrpc.Required;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -48,6 +47,7 @@ public class UpdateUserPermissions implements MutatingCommand<VoidResult> {
     private int databaseId;
     private UserPermissionDTO model;
     private String host;
+    private boolean newUser;
 
     protected UpdateUserPermissions() {
     }
@@ -94,6 +94,19 @@ public class UpdateUserPermissions implements MutatingCommand<VoidResult> {
 
     public String getHost() {
         return host;
+    }
+
+    public boolean isNewUser() {
+        return newUser;
+    }
+
+    /**
+     * Sets the "newUser" flag to true. This should be set if the user intends to be a new user.
+     * An error will be thrown if a user with the same email address already exists in the database.
+     * @param newUser
+     */
+    public void setNewUser(boolean newUser) {
+        this.newUser = newUser;
     }
 
     public void setHost(String host) {

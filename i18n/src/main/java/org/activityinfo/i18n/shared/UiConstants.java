@@ -1620,4 +1620,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Choose reference value")
     String chooseReferenceValue();
+
+    @DefaultStringValue("A user with this email address has already been added to the database.")
+    String userExistsMessage();
+
+    @DefaultStringValue("User exists")
+    String userExistsTitle();
 }
