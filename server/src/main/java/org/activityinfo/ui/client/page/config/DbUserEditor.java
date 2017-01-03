@@ -33,6 +33,7 @@ import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
@@ -48,6 +49,7 @@ import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
+import org.activityinfo.legacy.shared.command.result.UserExistsException;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
@@ -362,12 +364,18 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
             @Override
             public void onValidated() {
-                dispatcher.execute(new UpdateUserPermissions(db, form.getUser(), host),
-                        dlg,
+                UpdateUserPermissions command = new UpdateUserPermissions(db, form.getUser(), host);
+                command.setNewUser(true);
+                dispatcher.execute(command,
                         new AsyncCallback<VoidResult>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
+                                if(caught instanceof UserExistsException) {
+                                    MessageBox.alert(I18N.CONSTANTS.userExistsTitle(), I18N.CONSTANTS.userExistsMessage(), null);
+                                } else {
+                                    MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorUnexpectedOccured(), null);
+                                }
                             }
 
                             @Override
