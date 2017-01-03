@@ -5,9 +5,7 @@
  */
 apply from: "./gradle/libraries.gradle"
 apply from: "./gradle/version.gradle"
-apply from: "./gradle/coverage.gradle"
 apply from: "./gradle/jacoco.gradle"
-apply from: "./gradle/sonar.gradle"
 apply from: './gradle/database.gradle'
 apply from: "./gradle/environment.gradle"
 
