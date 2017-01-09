@@ -33,6 +33,7 @@ import org.activityinfo.store.hrd.HrdFormAccessor;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
@@ -193,8 +194,13 @@ public class FormResource {
         JsonElement jsonObject = new JsonParser().parse(body);
 
         Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer);
-        updater.create(formId, jsonObject.getAsJsonObject());
-        
+
+        try {
+            updater.create(formId, jsonObject.getAsJsonObject());
+        } catch (InvalidUpdateException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+
         return Response.ok().build();
     }
 

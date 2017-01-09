@@ -286,7 +286,7 @@ public class Updater {
         // Verify that all required fields are provided for new resources
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
-                if (formField.isRequired() && valueMap.get(formField.getId()) == null) {
+                if (formField.isRequired() && formField.isVisible() && valueMap.get(formField.getId()) == null) {
                     throw new InvalidUpdateException("Required field '%s' [%s] is missing from record with schema %s",
                             formField.getCode(), formField.getId(), formClass.getId().asString());
                 }
