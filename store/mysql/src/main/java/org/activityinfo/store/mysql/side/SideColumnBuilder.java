@@ -8,13 +8,13 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityField;
@@ -128,7 +128,11 @@ public class SideColumnBuilder {
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN attributevalue av ON (site.siteId = av.siteId)").append(newLine);
         sql.append("LEFT JOIN attribute a ON (av.attributeId = a.attributeId and av.value=1)").append(newLine);
-        sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
+        if(siteId.isPresent()) {
+            sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
+        } else {
+            sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
+        }
         sql.append("ORDER BY site.siteId");
         
         execute(executor, sql);

@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -201,6 +203,19 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2)));
         
+    }
+    
+    @Test
+    public void singleSite() {
+        FormAccessor siteStorage = catalog.getForm(CuidAdapter.activityFormClass(1)).get();
+        FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 1)).get();
+        FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
+
+        EnumValue cause = (EnumValue) site.get(CuidAdapter.attributeGroupField(1));
+        EnumValue kitContents = (EnumValue) site.get(CuidAdapter.attributeGroupField(2));
+
+        assertThat(cause, nullValue());
+        assertThat(kitContents.getResourceIds(), Matchers.contains(CuidAdapter.attributeId(3), CuidAdapter.attributeField(4)));
     }
 
     @Test
