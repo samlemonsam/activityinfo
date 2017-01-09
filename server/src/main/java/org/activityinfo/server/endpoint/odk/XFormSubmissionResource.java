@@ -160,9 +160,7 @@ public class XFormSubmissionResource {
             .entity("No partner selected").build());
         }
 
-        formInstance.set(partnerFieldId, new ReferenceValue(new RecordRef(
-                Iterables.getOnlyElement(partnerFieldType.getRange()),
-                choices.get(0).getId())));
+        formInstance.set(partnerFieldId, new ReferenceValue(choices.get(0).getRef()));
     }
 
     private FieldValue tryParse(FormInstance formInstance, FormField formField, Element element) {

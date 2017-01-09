@@ -130,7 +130,7 @@ public class OdkFormFieldBuilderFactory {
         for (ReferenceChoice choice : locator.getReferenceChoices(referenceType.getRange())) {
             Item item = new Item();
             item.setLabel(choice.getLabel());
-            item.setValue(choice.getId().asString());
+            item.setValue(choice.getRef().toQualifiedString());
             items.add(item);
         }
 
