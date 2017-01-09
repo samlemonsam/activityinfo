@@ -3,6 +3,7 @@ package org.activityinfo.store.mysql.side;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
@@ -16,6 +17,8 @@ import java.util.List;
 public class BoundLocationBuilder {
     
     private int activityId;
+    private Integer siteId;
+
     private List<CursorObserver<FieldValue>> observers = Lists.newArrayList();
 
     public BoundLocationBuilder(int activityId) {
@@ -30,6 +33,11 @@ public class BoundLocationBuilder {
         return observers.size() > 0;
     }
 
+
+    public void only(ResourceId siteId) {
+        this.siteId = CuidAdapter.getLegacyIdFromCuid(siteId);
+    }
+
     public void execute(QueryExecutor executor) throws SQLException {
         String sql = "SELECT s.siteId,  t.boundAdminLevelId, s.locationId, e.adminEntityId, l.locationTypeId " +
                 "FROM site s " +
@@ -38,8 +46,13 @@ public class BoundLocationBuilder {
                 "LEFT JOIN locationadminlink k ON (l.locationId = k.locationid) " + 
                 "LEFT JOIN adminentity e " +
                         "ON (k.adminEntityId=e.adminEntityId AND (e.adminLevelId = t.boundAdminLevelId)) " +
-                "WHERE s.activityId = " + activityId +
-                " ORDER BY s.siteId";
+                "WHERE s.activityId = " + activityId;
+
+        if(siteId != null) {
+            sql += " AND s.siteId=" + siteId;
+        }
+
+        sql +=  " ORDER BY s.siteId";
         
         System.out.println(sql);
         
@@ -82,4 +95,5 @@ public class BoundLocationBuilder {
             observer.onNext(referenceValue);
         }
     }
+
 }

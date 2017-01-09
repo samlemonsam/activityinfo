@@ -14,6 +14,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
@@ -211,6 +212,15 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(cause, nullValue());
         assertThat(kitContents.getResourceIds(), Matchers.contains(CuidAdapter.attributeId(3), CuidAdapter.attributeField(4)));
+    }
+
+    @Test
+    public void singleSiteWithBoundLocation() {
+        FormAccessor siteStorage = catalog.getForm(CuidAdapter.activityFormClass(4)).get();
+        FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 6)).get();
+        FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
+
+        FieldValue location = site.get(CuidAdapter.locationField(4));
     }
 
     

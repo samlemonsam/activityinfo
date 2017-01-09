@@ -55,6 +55,7 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         baseCursor.only(resourceId);
         indicators.only(resourceId);
         attributes.only(resourceId);
+        boundLocation.only(resourceId);
     }
 
     @Override
