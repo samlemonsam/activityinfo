@@ -13,17 +13,13 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.number.Quantity;
-import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
-import org.activityinfo.store.query.impl.Updater;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
@@ -47,8 +43,7 @@ import static org.junit.Assert.*;
 
 public class MySqlCatalogTest extends AbstractMySqlTest {
 
-    public static final int CATASTROPHE_NATURELLE_ID = 1;
-    
+
     protected int userId = 1;
  
     @BeforeClass
@@ -218,28 +213,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(kitContents.getResourceIds(), Matchers.contains(CuidAdapter.attributeId(3), CuidAdapter.attributeField(4)));
     }
 
-    @Test
-    public void testSingleSiteResource() throws IOException {
-
-        int databaseId = 1;
-        ResourceId formClass = CuidAdapter.activityFormClass(1);
-        RecordUpdate update = new RecordUpdate();
-        update.setUserId(userId);
-        update.setRecordId(cuid(SITE_DOMAIN, 1));
-        update.set(field(formClass, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
-        update.set(indicatorField(1), new Quantity(900, "units"));
-        update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
-
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
-        updater.execute(update);
-
-        query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
-
-        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
-        assertThat(column("partner"), hasValues(partnerRecordId(2), partnerRecordId(1), partnerRecordId(2)));
-        assertThat(column("BENE"), hasValues(900, 3600, 10000));
-        assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
-    }
     
     @Test
     public void siteFormClassWithNullaryLocations() {
