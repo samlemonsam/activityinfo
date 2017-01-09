@@ -93,7 +93,7 @@ public class XFormResourceTest extends CommandTestCase2 {
 
         formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService);
         formSubmissionResource = new XFormSubmissionResource(
-                getDispatcherSync(), resourceLocator, tokenService, null, null, blobstore, idService, backupService);
+                getDispatcherSync(), resourceLocator, tokenService, blobstore, idService, backupService);
     }
     
     @After

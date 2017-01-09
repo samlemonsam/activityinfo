@@ -31,7 +31,7 @@ public class XFormInstanceReader {
         }
 
         for (FormField formField : formClass.getFields()) {
-            final FieldValueParser fieldValueParser = fromFieldType(formField.getType(), false, false);
+            final FieldValueParser fieldValueParser = fromFieldType(formField.getType(), false);
             final String code = formField.getCode();
 
             for (int i = 0; i < length; i++) {

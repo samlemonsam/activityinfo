@@ -12,6 +12,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.lookup.ReferenceChoice;
@@ -50,7 +51,8 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     @Override
     public List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range) {
 
-        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(range));
+        ResourceId formId = Iterables.getOnlyElement(range);
+        QueryModel queryModel = new QueryModel(formId);
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
         
@@ -65,7 +67,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
             ResourceId choiceId = ResourceId.valueOf(id.getString(i));
             String choiceLabel = label.getString(i);
             
-            choices.add(new ReferenceChoice(choiceId, choiceLabel));            
+            choices.add(new ReferenceChoice(new RecordRef(formId, choiceId), choiceLabel));
         }
 
         return choices;

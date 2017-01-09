@@ -5,11 +5,17 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
@@ -18,6 +24,7 @@ import static org.junit.Assert.assertThat;
 
 public class MySqlUpdateTest extends AbstractMySqlTest {
 
+    public static final int CATASTROPHE_NATURELLE_ID = 1;
 
     private int userId = 1;
 
@@ -187,5 +194,29 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 //        FormField partnerField = reform.getField(CuidAdapter.partnerField(activityId));
 //
 //        assertThat(partnerField.getType(), instanceOf(ReferenceType.class));
+    }
+
+
+    @Test
+    public void testSingleSiteResource() throws IOException {
+
+        int databaseId = 1;
+        ResourceId formClass = CuidAdapter.activityFormClass(1);
+        RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
+        update.setRecordId(cuid(SITE_DOMAIN, 1));
+        update.set(field(formClass, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
+        update.set(indicatorField(1), new Quantity(900, "units"));
+        update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
+
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.execute(update);
+
+        query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
+
+        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
+        assertThat(column("partner"), hasValues(partnerRecordId(2), partnerRecordId(1), partnerRecordId(2)));
+        assertThat(column("BENE"), hasValues(900, 3600, 10000));
+        assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
     }
 }

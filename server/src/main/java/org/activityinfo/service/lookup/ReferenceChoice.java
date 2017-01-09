@@ -1,23 +1,19 @@
 package org.activityinfo.service.lookup;
 
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 
 
 public class ReferenceChoice {
-    private ResourceId id;
+    private final RecordRef ref;
     private String label;
 
-    public ReferenceChoice(ResourceId id, String label) {
-        this.id = id;
+    public ReferenceChoice(RecordRef ref, String label) {
+        this.ref = ref;
         this.label = label;
     }
 
-    public ResourceId getId() {
-        return id;
-    }
-
-    public void setId(ResourceId id) {
-        this.id = id;
+    public RecordRef getRef() {
+        return ref;
     }
 
     public String getLabel() {
