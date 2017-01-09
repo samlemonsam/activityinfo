@@ -321,7 +321,7 @@ public class Updater {
         Preconditions.checkNotNull(field);
         
         if(updatedValue == null) {
-            if(field.isRequired()) {
+            if(field.isRequired() && field.isVisible()) {
                 throw new InvalidUpdateException(
                         format("Field '%s' (id: %s, code: %s) is required. Found 'null'",
                                 field.getLabel(),
