@@ -27,4 +27,11 @@ public class FormListResource {
     public Response formList(@Context UriInfo uri) throws Exception {
         return formLister.formList(uri, Optional.<Integer>absent());
     }
+
+    @GET
+    @Path("/db/{databaseId}")
+    @Produces(MediaType.TEXT_XML)
+    public Response formList(@Context UriInfo uri, int databaseId) throws Exception {
+        return formLister.formList(uri, Optional.of(databaseId));
+    }
 }
