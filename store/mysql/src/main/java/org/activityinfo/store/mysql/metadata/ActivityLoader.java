@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -268,7 +269,7 @@ public class ActivityLoader {
                     
                     FormClass serializedFormClass = null;
                     if(!activity.classicView) {
-                        serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
+                        serializedFormClass = tryDeserialize(activity, rs.getString("formClass"), rs.getBytes("gzFormClass"));
                     }
                     if (serializedFormClass == null) {
                         classicActivityIds.add(activity.getId());
@@ -301,10 +302,14 @@ public class ActivityLoader {
                     activity.locationTypeIds.add(locationTypeId);
 
                     int adminLevelId = rs.getInt(3);
+                    ResourceId formId;
                     if(rs.wasNull()) {
-                        activity.locationRange.add(CuidAdapter.locationFormClass(locationTypeId));                        
+                        formId = CuidAdapter.locationFormClass(locationTypeId);
                     } else {
-                        activity.locationRange.add(CuidAdapter.adminLevelFormClass(adminLevelId));
+                        formId = CuidAdapter.adminLevelFormClass(adminLevelId);
+                    }
+                    if(!activity.locationRange.contains(formId)) {
+                        activity.locationRange.add(formId);
                     }
                 }
             }
@@ -331,7 +336,7 @@ public class ActivityLoader {
     }
 
 
-    private static FormClass tryDeserialize(String formClass, byte[] formClassGz) {
+    private static FormClass tryDeserialize(Activity activity, String formClass, byte[] formClassGz) {
         try {
             Reader reader;
             if (formClassGz != null) {
@@ -344,10 +349,21 @@ public class ActivityLoader {
 
             Gson gson = new Gson();
             JsonObject object = gson.fromJson(reader, JsonObject.class);
-            return FormClass.fromJson(object);
+            return patchDeserializedFormClass(activity, FormClass.fromJson(object));
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }
+    }
+
+    /**
+     * Apply any updates to the serialized FormClass that might be required to do changes in
+     * ActivityInfo.
+     */
+    private static FormClass patchDeserializedFormClass(Activity activity, FormClass formClass) {
+
+        formClass.setDatabaseId(activity.getDatabaseId());
+
+        return formClass;
     }
 
     private void addFields(Activity activity, FormClass formClass) {

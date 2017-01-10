@@ -122,7 +122,8 @@ public class SiteFormAccessor implements FormAccessor {
 
     @Override
     public FormClass getFormClass() {
-        return baseMapping.getFormClass();
+        FormClass formClass = baseMapping.getFormClass();
+        return formClass;
     }
 
     @Override

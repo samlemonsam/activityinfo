@@ -52,7 +52,6 @@ public class ReferenceType implements ParametrizedFieldType {
             type.setRange(range);
             return type;
         }
-
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass();

@@ -6,6 +6,7 @@ import org.activityinfo.server.command.DispatcherSync;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -31,7 +32,7 @@ public class FormListResource {
     @GET
     @Path("/db/{databaseId}")
     @Produces(MediaType.TEXT_XML)
-    public Response formList(@Context UriInfo uri, int databaseId) throws Exception {
+    public Response formList(@Context UriInfo uri, @PathParam("databaseId") int databaseId) throws Exception {
         return formLister.formList(uri, Optional.of(databaseId));
     }
 }

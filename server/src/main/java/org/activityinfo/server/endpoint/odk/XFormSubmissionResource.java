@@ -4,7 +4,6 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.CreateLocation;
@@ -104,9 +103,13 @@ public class XFormSubmissionResource {
 
                     ResourceId locationFieldId = field(formClass.getId(), LOCATION_FIELD);
                     int newLocationId = new KeyGenerator().generateInt();
-                    ResourceId locationFormClassId = Iterables.getOnlyElement(((ReferenceType) fieldType).getRange());
-                    int locationTypeId = getLegacyIdFromCuid(locationFormClassId);
-                    FieldValue fieldValue = new ReferenceValue(new RecordRef(locationFormClassId, locationInstanceId(newLocationId)));
+                    ReferenceType locationRefType = (ReferenceType) fieldType;
+                    if(locationRefType.getRange().isEmpty()) {
+                        throw new IllegalStateException("Location field has empty range");
+                    }
+                    ResourceId locationFormId = locationRefType.getRange().iterator().next();
+                    int locationTypeId = getLegacyIdFromCuid(locationFormId);
+                    FieldValue fieldValue = new ReferenceValue(new RecordRef(locationFormId, locationInstanceId(newLocationId)));
                     String name = OdkHelper.extractText(nameField.get());
 
                     if (Strings.isNullOrEmpty(name)) {
