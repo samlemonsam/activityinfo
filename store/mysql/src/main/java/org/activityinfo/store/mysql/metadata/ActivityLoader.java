@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -301,10 +302,14 @@ public class ActivityLoader {
                     activity.locationTypeIds.add(locationTypeId);
 
                     int adminLevelId = rs.getInt(3);
+                    ResourceId formId;
                     if(rs.wasNull()) {
-                        activity.locationRange.add(CuidAdapter.locationFormClass(locationTypeId));                        
+                        formId = CuidAdapter.locationFormClass(locationTypeId);
                     } else {
-                        activity.locationRange.add(CuidAdapter.adminLevelFormClass(adminLevelId));
+                        formId = CuidAdapter.adminLevelFormClass(adminLevelId);
+                    }
+                    if(!activity.locationRange.contains(formId)) {
+                        activity.locationRange.add(formId);
                     }
                 }
             }

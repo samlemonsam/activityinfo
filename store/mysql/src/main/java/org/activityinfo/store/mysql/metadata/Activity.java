@@ -32,7 +32,7 @@ public class Activity implements Serializable {
      * activity references *multiple* location types
      */
     Set<Integer> locationTypeIds = Sets.newHashSet();
-    Set<ResourceId> locationRange = Sets.newHashSet();
+    List<ResourceId> locationRange = new ArrayList<>();
     String category;
     String locationTypeName;
     Integer adminLevelId;
