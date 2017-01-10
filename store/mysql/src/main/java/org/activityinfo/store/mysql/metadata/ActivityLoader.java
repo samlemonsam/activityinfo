@@ -268,7 +268,7 @@ public class ActivityLoader {
                     
                     FormClass serializedFormClass = null;
                     if(!activity.classicView) {
-                        serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
+                        serializedFormClass = tryDeserialize(activity, rs.getString("formClass"), rs.getBytes("gzFormClass"));
                     }
                     if (serializedFormClass == null) {
                         classicActivityIds.add(activity.getId());
@@ -331,7 +331,7 @@ public class ActivityLoader {
     }
 
 
-    private static FormClass tryDeserialize(String formClass, byte[] formClassGz) {
+    private static FormClass tryDeserialize(Activity activity, String formClass, byte[] formClassGz) {
         try {
             Reader reader;
             if (formClassGz != null) {
@@ -344,10 +344,21 @@ public class ActivityLoader {
 
             Gson gson = new Gson();
             JsonObject object = gson.fromJson(reader, JsonObject.class);
-            return FormClass.fromJson(object);
+            return patchDeserializedFormClass(activity, FormClass.fromJson(object));
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }
+    }
+
+    /**
+     * Apply any updates to the serialized FormClass that might be required to do changes in
+     * ActivityInfo.
+     */
+    private static FormClass patchDeserializedFormClass(Activity activity, FormClass formClass) {
+
+        formClass.setDatabaseId(activity.getDatabaseId());
+
+        return formClass;
     }
 
     private void addFields(Activity activity, FormClass formClass) {
