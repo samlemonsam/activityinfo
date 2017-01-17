@@ -138,13 +138,13 @@ public class FormResource {
 
         return Response.ok()
                 .entity(record.get().toJsonElement().toString())
-                .type(MediaType.APPLICATION_JSON_TYPE)
+                .type(JSON_CONTENT_TYPE)
                 .build();
     }
 
     @GET
     @Path("record/{recordId}/history")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(JSON_CONTENT_TYPE)
     public Response getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
 
         assertVisible(formId);
@@ -154,14 +154,14 @@ public class FormResource {
 
         return Response.ok()
                 .entity(array.toString())
-                .type(MediaType.APPLICATION_JSON_TYPE)
+                .type(JSON_CONTENT_TYPE)
                 .build();
     }
 
 
     @GET
     @Path("records")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(JSON_CONTENT_TYPE)
     public Response getRecords(@QueryParam("parentId") String parentId) {
 
         assertVisible(formId);
@@ -180,7 +180,7 @@ public class FormResource {
         for (FormRecord record : records) {
             recordSet.addRecord(record);
         }        
-        return Response.ok(recordSet.toJsonString(), MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok(recordSet.toJsonString(), JSON_CONTENT_TYPE).build();
     }
     
     @POST
