@@ -23,7 +23,6 @@ package org.activityinfo.server.command.handler;
  */
 
 import com.google.cloud.trace.core.TraceContext;
-import com.google.cloud.trace.service.AppEngineTraceService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.Log;
@@ -32,6 +31,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.sync.*;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.Trace;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,8 +76,7 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
             throw new CommandException("Unknown sync region: " + cmd.getRegionPath());
         }
 
-        AppEngineTraceService traceService = new AppEngineTraceService();
-        TraceContext traceContext = traceService.getTracer().startSpan("/ai/cmd/sync/" + prefix(cmd.getRegionPath()));
+        TraceContext traceContext = Trace.startSpan("/ai/cmd/sync/" + prefix(cmd.getRegionPath()));
 
         try {
             return builder.build(user, cmd);
@@ -87,7 +86,7 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
             throw new RuntimeException(e);
 
         } finally {
-            traceService.getTracer().endSpan(traceContext);
+            Trace.endSpan(traceContext);
         }
     }
 

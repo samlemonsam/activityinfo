@@ -28,7 +28,6 @@ import com.bedatadriven.rebar.sql.client.SqlTransactionCallback;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.sql.shared.adapter.SyncTransactionAdapter;
 import com.google.cloud.trace.core.TraceContext;
-import com.google.cloud.trace.service.AppEngineTraceService;
 import com.google.common.base.Stopwatch;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Injector;
@@ -42,6 +41,7 @@ import org.activityinfo.server.command.handler.CommandHandler;
 import org.activityinfo.server.command.handler.HandlerUtil;
 import org.activityinfo.server.database.hibernate.HibernateExecutor;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.Trace;
 import org.hibernate.ejb.HibernateEntityManager;
 
 import javax.persistence.EntityManager;
@@ -253,7 +253,6 @@ public class RemoteExecutionContext implements ExecutionContext {
     private class FiringCallback<R extends CommandResult> implements AsyncCallback<R> {
         private final AsyncCallback<R> callback;
         private final String commandName;
-        private final AppEngineTraceService traceService;
         private final TraceContext traceContext;
         private final Stopwatch stopwatch = Stopwatch.createStarted();
 
@@ -261,20 +260,19 @@ public class RemoteExecutionContext implements ExecutionContext {
             super();
             this.callback = callback;
             commandName = command.getClass().getSimpleName();
-            traceService = new AppEngineTraceService();
-            traceContext = traceService.getTracer().startSpan("ai/cmd/" + command.getClass().getSimpleName());
+            traceContext = Trace.startSpan("ai/cmd/" + command.getClass().getSimpleName());
         }
 
         @Override
         public void onFailure(Throwable caught) {
-            traceService.getTracer().endSpan(traceContext);
+            Trace.endSpan(traceContext);
             LOGGER.log(Level.SEVERE, commandName + " failed with exception " + caught.getClass().getSimpleName(), caught);
             callback.onFailure(caught);
         }
 
         @Override
         public void onSuccess(final R result) {
-            traceService.getTracer().endSpan(traceContext);
+            Trace.endSpan(traceContext);
             LOGGER.info(commandName + " finished in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
             callback.onSuccess(result);
         }
