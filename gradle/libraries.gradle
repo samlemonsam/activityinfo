@@ -6,7 +6,7 @@ ext {
     rebarVersion = '2.5.31'
     gwtVersion = '2.6.1'
     jerseyVersion = '1.17'
-    gaeVersion = '1.9.24'
+    gaeVersion = '1.9.48'
     jacksonVersion = '1.9.2'
     cucumberVersion = '1.2.2'
     libraries = [
@@ -19,6 +19,8 @@ ext {
             
         appengine: [
             api:            "com.google.appengine:appengine-api-1.0-sdk:${gaeVersion}",
+            apiLabs:        "com.google.appengine:appengine-api-labs:${gaeVersion}",
+            trace:          "com.google.cloud.trace:appengine-standard-service:0.3.0",
             sdk:            "com.google.appengine:appengine-java-sdk:${gaeVersion}",
             sdkTools:       "com.google.appengine:appengine-tools-sdk:${gaeVersion}",
             gcs:            "com.google.appengine.tools:appengine-gcs-client:0.4.4",  

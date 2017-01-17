@@ -80,7 +80,8 @@ dependencies {
     compile libraries.rebar.sql
     compile libraries.rebar.sync
     
-    compile libraries.appengineMetrics
+    compile libraries.appengine.apiLabs
+    compile libraries.appengine.trace
     compile 'com.bedatadriven.appengine:appengine-hibernate:25'
 
     gwt libraries.rebar.style

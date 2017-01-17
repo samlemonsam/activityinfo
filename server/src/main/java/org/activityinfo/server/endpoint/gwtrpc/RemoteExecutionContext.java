@@ -27,6 +27,9 @@ import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.SqlTransactionCallback;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.sql.shared.adapter.SyncTransactionAdapter;
+import com.google.cloud.trace.core.TraceContext;
+import com.google.cloud.trace.service.AppEngineTraceService;
+import com.google.common.base.Stopwatch;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.command.Command;
@@ -39,10 +42,10 @@ import org.activityinfo.server.command.handler.CommandHandler;
 import org.activityinfo.server.command.handler.HandlerUtil;
 import org.activityinfo.server.database.hibernate.HibernateExecutor;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.monitoring.Profiler;
 import org.hibernate.ejb.HibernateEntityManager;
 
 import javax.persistence.EntityManager;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,11 +106,6 @@ public class RemoteExecutionContext implements ExecutionContext {
         if (CURRENT.get() != null) {
             throw new IllegalStateException("Command execution context already in progress");
         }
-//
-//        AdvisoryLock lock = null;
-//        if (Commands.hasMutatingCommand(command)) {
-//            lock = new AdvisoryLock(entityManager);
-//        }
 
         try {
             CURRENT.set(this);
@@ -170,7 +168,6 @@ public class RemoteExecutionContext implements ExecutionContext {
 
         } finally {
             CURRENT.remove();
-           // AdvisoryLock.closeQuietly(lock);
         }
     }
 
@@ -209,13 +206,13 @@ public class RemoteExecutionContext implements ExecutionContext {
         Object handler = injector.getInstance(HandlerUtil.handlerForCommand(command));
 
         if (handler instanceof CommandHandlerAsync) {
-            /**
+            /*
              * Execute Asynchronously
              */
             ((CommandHandlerAsync<C, R>) handler).execute(command, this, callback);
 
         } else if (handler instanceof CommandHandler) {
-            /**
+            /*
              * Executes Synchronously
              */
             try {
@@ -255,27 +252,30 @@ public class RemoteExecutionContext implements ExecutionContext {
 
     private class FiringCallback<R extends CommandResult> implements AsyncCallback<R> {
         private final AsyncCallback<R> callback;
-        private final Profiler profiler;
         private final String commandName;
+        private final AppEngineTraceService traceService;
+        private final TraceContext traceContext;
+        private final Stopwatch stopwatch = Stopwatch.createStarted();
 
         public FiringCallback(Command command, AsyncCallback<R> callback) {
             super();
             this.callback = callback;
             commandName = command.getClass().getSimpleName();
-            this.profiler = new Profiler("api/rpc", commandName);
+            traceService = new AppEngineTraceService();
+            traceContext = traceService.getTracer().startSpan("ai/cmd/" + command.getClass().getSimpleName());
         }
 
         @Override
         public void onFailure(Throwable caught) {
-            this.profiler.failed();        
+            traceService.getTracer().endSpan(traceContext);
             LOGGER.log(Level.SEVERE, commandName + " failed with exception " + caught.getClass().getSimpleName(), caught);
             callback.onFailure(caught);
         }
 
         @Override
         public void onSuccess(final R result) {
-            this.profiler.succeeded();
-            LOGGER.info(commandName + " finished in " + profiler.elapsedTime() + " ms");
+            traceService.getTracer().endSpan(traceContext);
+            LOGGER.info(commandName + " finished in " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
             callback.onSuccess(result);
         }
     }

@@ -32,7 +32,6 @@ import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.server.authentication.BasicAuthentication;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.monitoring.Count;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -64,7 +63,6 @@ public class KmlActivityServlet extends HttpServlet {
     }
     
     @Override
-    @Count("kml.activity")
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 
         // Get Authorization header
