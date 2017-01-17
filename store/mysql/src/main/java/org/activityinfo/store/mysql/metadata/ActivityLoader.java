@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.metadata;
 
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.cloud.sql.jdbc.internal.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -340,7 +341,7 @@ public class ActivityLoader {
         try {
             Reader reader;
             if (formClassGz != null) {
-                reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(formClassGz)));
+                reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(formClassGz)), Charsets.UTF_8);
             } else if (!Strings.isNullOrEmpty(formClass)) {
                 reader = new StringReader(formClass);
             } else {

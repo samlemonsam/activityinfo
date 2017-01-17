@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 
 public class FormResource {
-    public static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
+    public static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
 
     private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
 
@@ -84,6 +84,7 @@ public class FormResource {
      */
     @GET
     @Path("schema")
+    @Produces(JSON_CONTENT_TYPE)
     public Response getFormSchema() {
 
         assertVisible(formId);
@@ -122,7 +123,7 @@ public class FormResource {
     
     @GET
     @Path("record/{recordId}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(JSON_CONTENT_TYPE)
     public Response getRecord(@PathParam("recordId") String recordId) {
         
         FormAccessor collection = assertVisible(formId);
@@ -186,7 +187,6 @@ public class FormResource {
     @POST
     @Path("records")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response createRecord(String body) {
         
         assertVisible(formId);
