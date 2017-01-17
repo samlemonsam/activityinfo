@@ -31,7 +31,6 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.SignUpAddressExistsPageModel;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.ResetPasswordMessage;
-import org.activityinfo.server.util.monitoring.Count;
 
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
@@ -59,7 +58,6 @@ public class SignUpAddressExistsController {
 
     @POST 
     @Produces(MediaType.TEXT_HTML) 
-    @Count("sign_up.reset_password")
     @Transactional
     public Viewable resetPassword(@FormParam("email") String email) {
         try {

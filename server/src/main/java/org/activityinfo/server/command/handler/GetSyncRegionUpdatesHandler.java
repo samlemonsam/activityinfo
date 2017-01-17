@@ -22,16 +22,16 @@ package org.activityinfo.server.command.handler;
  * #L%
  */
 
+import com.google.cloud.trace.core.TraceContext;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.sync.*;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.monitoring.Profiler;
+import org.activityinfo.server.util.Trace;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,18 +76,17 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
             throw new CommandException("Unknown sync region: " + cmd.getRegionPath());
         }
 
-        Profiler profiler = new Profiler("api/rpc/sync", prefix(cmd.getRegionPath()));
+        TraceContext traceContext = Trace.startSpan("/ai/cmd/sync/" + prefix(cmd.getRegionPath()));
+
         try {
-            
-            SyncRegionUpdate update = builder.build(user, cmd);
-            
-            profiler.succeeded();
-            return update;
-            
+            return builder.build(user, cmd);
+
         } catch (Exception e) {
-            profiler.failed();
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new RuntimeException(e);
+
+        } finally {
+            Trace.endSpan(traceContext);
         }
     }
 

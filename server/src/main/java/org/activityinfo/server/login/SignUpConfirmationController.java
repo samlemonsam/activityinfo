@@ -36,7 +36,6 @@ import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.login.model.SignUpConfirmationInvalidPageModel;
 import org.activityinfo.server.login.model.SignUpConfirmationPageModel;
 import org.activityinfo.server.util.MailingListClient;
-import org.activityinfo.server.util.monitoring.Count;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -82,7 +81,6 @@ public class SignUpConfirmationController {
     }
 
     @GET
-    @Count("sign_up.confirmation.started")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getPage(@Context UriInfo uri) throws Exception {
         try {
@@ -94,7 +92,6 @@ public class SignUpConfirmationController {
     }
 
     @POST
-    @Count("sign_up.confirmation.completed")
     public Response confirm(@Context UriInfo uri,
                             @FormParam("key") String key,
                             @FormParam("password") String password,

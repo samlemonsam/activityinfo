@@ -31,7 +31,6 @@ import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.HostPageModel;
 import org.activityinfo.server.login.model.RootPageModel;
-import org.activityinfo.server.util.monitoring.Count;
 import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.persistence.EntityManager;
@@ -121,7 +120,6 @@ public class HostController {
     @GET 
     @Path("/unsupportedBrowser")
     @Produces(MediaType.TEXT_HTML)
-    @Count("login.unsupported_browser")
     public Viewable getUnsupportedBrowserMessage() {
         return new Viewable("/page/UnsupportedBrowser.ftl", new HashMap());
     }

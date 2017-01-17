@@ -49,7 +49,6 @@ import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModule;
 import org.activityinfo.server.util.jaxrs.JaxRsModule;
 import org.activityinfo.server.util.locale.LocaleModule;
-import org.activityinfo.server.util.monitoring.MonitoringModule;
 import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
 
 import javax.servlet.ServletContextEvent;
@@ -91,7 +90,6 @@ public class StartupListener extends GuiceServletContextListener {
                 new GwtRpcModule(),
                 new JsonRpcModule(),
                 new ExportModule(),
-                new MonitoringModule(),
                 new GeneratedModule(),
                 new KmlModule(),
                 new BrandingModule(),
