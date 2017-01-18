@@ -425,6 +425,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     }
 
     @Test
+    public void singlePartner() {
+
+        FormAccessor form = catalog.getForm(CuidAdapter.partnerFormId(1)).get();
+        Optional<FormRecord> partnerRecord = form.get(CuidAdapter.partnerRecordId(1));
+
+    }
+
+    @Test
     public void targets() {
         String targetValue12451 = CuidAdapter.targetIndicatorField(12451).asString();
         
