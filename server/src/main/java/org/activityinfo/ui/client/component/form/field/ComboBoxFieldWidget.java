@@ -54,7 +54,7 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
         for (int i = 0; i < range.getCount(); i++) {
             dropBox.addItem(
                     range.getLabel(i),
-                    range.getRef(i));
+                    range.getRef(i).toQualifiedString());
         }
         dropBox.addChangeHandler(new ChangeHandler() {
             @Override

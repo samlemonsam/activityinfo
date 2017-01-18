@@ -117,7 +117,7 @@ public class SuggestBoxWidget implements ReferenceFieldWidget {
 
     private String findDisplayLabel(RecordRef newValue) {
         for (int i = 0; i < range.getCount(); i++) {
-            if(range.getRecordId(i).equals(newValue.getRecordId())) {
+            if(range.getRef(i).equals(newValue)) {
                 return range.getLabel(i);
             }
         }

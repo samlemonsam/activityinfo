@@ -3,7 +3,6 @@ package org.activityinfo.ui.client.component.form.field.suggest;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.component.form.field.OptionSet;
 
 import java.util.ArrayList;
@@ -28,8 +27,7 @@ public class InstanceSuggestOracle extends SuggestOracle {
             if (scorer.score(request.getQuery(), label) > 0.5) {
                 suggestions.add(new ReferenceSuggestion(
                         options.getLabel(i),
-                        new RecordRef(formId,
-                            options.getRecordId(i))));
+                        options.getRef(i)));
             }
         }
 
@@ -40,8 +38,7 @@ public class InstanceSuggestOracle extends SuggestOracle {
                 if (request.getQuery() != null && label.toUpperCase().contains(request.getQuery().toUpperCase())) {
                     suggestions.add(new ReferenceSuggestion(
                             options.getLabel(i),
-                            new RecordRef(formId,
-                                options.getRecordId(i))));
+                            options.getRef(i)));
                 }
             }
         }

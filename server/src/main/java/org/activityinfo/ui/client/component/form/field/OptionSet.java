@@ -26,16 +26,12 @@ public class OptionSet {
         return columnSet.getNumRows();
     }
     
-    public String getRef(int i) {
-        return formId.asString() + RecordRef.SEPARATOR + id.getString(i);
+    public RecordRef getRef(int i) {
+        return new RecordRef(formId, ResourceId.valueOf(id.getString(i)));
     }
     
     public String getLabel(int i) {
         return label.getString(i);
-    }
-
-    public ResourceId getRecordId(int i) {
-        return ResourceId.valueOf(getRef(i));
     }
 
     public ColumnView getColumnView(String name) {
