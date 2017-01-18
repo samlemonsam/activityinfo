@@ -510,12 +510,10 @@ public class ActivityLoader {
 
         Map<Integer, List<EnumItem>> attributes = Maps.newHashMap();
 
-        String sql = "SELECT * " +
-                "FROM attribute A " +
-                "WHERE A.deleted=0 AND " +
-                "AttributeGroupId in" +
-                " (Select AttributeGroupId FROM attributegroupinactivity where ActivityId IN " + idList(activityIds) + ")" +
-                " ORDER BY A.SortOrder";
+        String sql = "SELECT DISTINCT A.* from attribute A " +
+                "LEFT JOIN attributegroupinactivity G on (A.attributegroupid=G.attributegroupid) " +
+                "WHERE G.activityid IN " + idList(activityIds) + " " +
+                "ORDER BY A.sortorder";
 
         try(ResultSet rs = executor.query(sql)) {
             while(rs.next()) {
