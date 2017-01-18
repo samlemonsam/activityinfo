@@ -16,6 +16,7 @@ import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.QuerySyntaxException;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -98,17 +99,37 @@ public class ColumnSetBuilder {
             ColumnView view = filter.apply(entry.getValue().get());
 
             dataMap.put(entry.getKey(), view);
+        }
 
-            if (numRows == -1) {
-                numRows = view.numRows();
-            } else {
-                if (numRows != view.numRows()) {
-                    throw new IllegalStateException("Columns are of unequal length: " + dataMap);
+        checkLengthsEqual(dataMap);
+
+        return new ColumnSet(numRows, dataMap);
+    }
+
+    private void checkLengthsEqual(Map<String, ColumnView> dataMap) {
+        // Do a final check that the columns are all of equal length
+        if(!allHaveSameLengths(dataMap)) {
+            StringBuilder message = new StringBuilder();
+            message.append("Query returned columns of different lengths:");
+            for (Map.Entry<String, ColumnView> entry : dataMap.entrySet()) {
+                message.append("\n").append(entry.getKey()).append(" = ").append(entry.getValue().numRows());
+            }
+            LOGGER.severe(message.toString());
+            throw new IllegalStateException("Query returned columns of different lengths. See logs for details.");
+        }
+    }
+
+    private boolean allHaveSameLengths(Map<String, ColumnView> dataMap) {
+        Iterator<ColumnView> iterator = dataMap.values().iterator();
+        if(iterator.hasNext()) {
+            int count = iterator.next().numRows();
+            while(iterator.hasNext()) {
+                if(count != iterator.next().numRows()) {
+                    return false;
                 }
             }
         }
-
-        return new ColumnSet(numRows, dataMap);
+        return true;
     }
 
 }

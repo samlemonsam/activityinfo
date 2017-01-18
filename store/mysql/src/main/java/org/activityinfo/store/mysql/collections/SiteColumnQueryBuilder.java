@@ -43,7 +43,7 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         this.baseCursor = new MySqlCursorBuilder(tableMapping, executor);
         this.indicators = new SideColumnBuilder(tableMapping.getFormClass());
         this.attributes = new SideColumnBuilder(tableMapping.getFormClass());
-        this.boundLocation = new BoundLocationBuilder(activity.getId());
+        this.boundLocation = new BoundLocationBuilder(activity.getId(), activity.getAdminLevelId());
         
         for(ActivityField field : activity.getFields()) {
             fieldMap.put(field.getResourceId(), field);

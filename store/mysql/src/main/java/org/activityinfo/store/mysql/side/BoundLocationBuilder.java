@@ -43,10 +43,9 @@ public class BoundLocationBuilder {
                 "FROM site s " +
                 "LEFT JOIN location l ON (s.locationId = l.locationId) " +
                 "LEFT JOIN locationtype t ON (l.locationTypeId = t.locationTypeId) " +
-                "LEFT JOIN locationadminlink k ON (l.locationId = k.locationid) " + 
-                "LEFT JOIN adminentity e " +
-                        "ON (k.adminEntityId=e.adminEntityId AND (e.adminLevelId = t.boundAdminLevelId)) " +
-                "WHERE s.activityId = " + activityId;
+                "LEFT JOIN locationadminlink k ON (l.locationId = k.locationId AND k.adminLevelId = t.adminLevelId) " +
+                "LEFT JOIN adminentity e ON (k.adminEntityId=e.adminEntityId) " +
+                "WHERE s.deleted = 0 AND s.activityId = " + activityId;
 
         if(siteId != null) {
             sql += " AND s.siteId=" + siteId;
