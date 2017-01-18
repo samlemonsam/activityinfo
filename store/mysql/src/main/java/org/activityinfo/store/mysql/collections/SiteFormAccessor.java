@@ -287,6 +287,10 @@ public class SiteFormAccessor implements FormAccessor {
 
     @Override
     public void update(RecordUpdate update) {
+
+        FormRecord formRecord = get(update.getRecordId()).get();
+        FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);
+
         BaseTableUpdater baseTable = new BaseTableUpdater(baseMapping, update.getRecordId());
         IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getRecordId());
         AttributeValueTableUpdater attributeValues = new AttributeValueTableUpdater(activity, update.getRecordId());
@@ -315,9 +319,6 @@ public class SiteFormAccessor implements FormAccessor {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        FormRecord formRecord = get(update.getRecordId()).get();
-        FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);
 
         Map<ResourceId, FieldValue> fieldValues = new HashMap<>();
         fieldValues.putAll(formInstance.getFieldValueMap());
