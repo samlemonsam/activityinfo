@@ -210,6 +210,10 @@ public class QueryModel {
         JsonObject object = new JsonObject();
         object.add("rowSources", sourcesArray);
         object.add("columns", columnsArray);
+
+        if(filter != null) {
+            object.addProperty("filter", filter.asExpression());
+        }
         return object;
     }
 }
