@@ -336,6 +336,8 @@ public class PivotAdapter {
 
         // Query the SOURCE form tree
         FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
+        Preconditions.checkNotNull(formTree, "No form tree for form " + linkedActivity.getLeafFormClassId());
+
         QueryModel queryModel = new QueryModel(linkedActivity.getLeafFormClassId());
 
         List<ActivityField> indicators = selectedIndicators(activity);
@@ -709,6 +711,9 @@ public class PivotAdapter {
     }
 
     private String siteIdField(FormTree formTree) {
+        Preconditions.checkNotNull(formTree, "formTree");
+        Preconditions.checkNotNull(formTree.getRootFormClass(), "formTree.rootFormClass");
+
         ResourceId rootFormClassId = formTree.getRootFormClass().getId();
         if(rootFormClassId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Root form class is the site, we need to compare against the ID
