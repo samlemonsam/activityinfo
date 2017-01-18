@@ -5,10 +5,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.HasStringValue;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
@@ -102,7 +100,7 @@ public class IndicatorValueTableUpdater {
             clearValue(executor, update);
         } else if(update.value instanceof Quantity) {
             executeQuantityUpdate(executor, update);
-        } else if(update.value instanceof TextValue || update.value instanceof BarcodeValue) {
+        } else if(update.value instanceof HasStringValue) {
             executeTextUpdate(executor, update);
         } else  {
             executeJsonUpdate(executor, update);
