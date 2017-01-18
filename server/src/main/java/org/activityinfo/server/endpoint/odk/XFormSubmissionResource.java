@@ -20,7 +20,6 @@ import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstanceImpl;
@@ -172,14 +171,9 @@ public class XFormSubmissionResource {
             return odkFieldValueParser.parse(element);
 
         } catch (Exception e) {
-            String text = OdkHelper.extractText(element);
-
-            if (text == null) {
-                LOGGER.log(Level.SEVERE, "Malformed Element in form instance prevents parsing", e);
-            } else if (!text.equals("")) {
-                LOGGER.log(Level.WARNING, "Can't parse form instance contents, storing as text", e);
-                formInstance.set(formField.getId(), TextValue.valueOf(text));
-            }
+            LOGGER.log(Level.WARNING, "Failed to parse value for field " + formField.getId() +
+                     " in form " + formInstance.getFormId() +
+                     " from xml: " + element, e);
         }
         return null;
     }
