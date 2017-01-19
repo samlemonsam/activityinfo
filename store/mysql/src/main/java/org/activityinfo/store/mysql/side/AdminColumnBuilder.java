@@ -3,6 +3,7 @@ package org.activityinfo.store.mysql.side;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -28,13 +29,25 @@ public class AdminColumnBuilder {
     private List<CursorObserver<FieldValue>> observers = new ArrayList<>();
 
     private final int[] adminLevels;
+    private final ResourceId[] adminLevelFormIds;
     private final int[] adminParentMap;
+
+    private ResourceId locationId;
 
     public AdminColumnBuilder(int locationTypeId, CountryStructure country) {
         this.locationTypeId = locationTypeId;
         this.country = country;
         this.adminLevels = country.getAdminLevelIdArray();
+        this.adminLevelFormIds = new ResourceId[adminLevels.length];
+        for (int i = 0; i < adminLevels.length; i++) {
+            adminLevelFormIds[i] = CuidAdapter.adminLevelFormClass(adminLevels[i]);
+        }
         this.adminParentMap = country.buildParentIndexMap(adminLevels);
+    }
+
+
+    public void only(ResourceId locationId) {
+        this.locationId = locationId;
     }
 
     public void addObserver(CursorObserver<FieldValue> observer) {
@@ -52,7 +65,11 @@ public class AdminColumnBuilder {
         sql.append("FROM location").append(NEW_LINE);
         sql.append("LEFT JOIN locationadminlink link ON (location.locationid = link.locationId)").append(NEW_LINE);
         sql.append("WHERE location.locationTypeId=").append(locationTypeId).append(NEW_LINE);
-        sql.append("ORDER BY location.locationId");
+        sql.append(" AND location.workflowStatusId='validated'").append(NEW_LINE);
+
+        if(locationId != null) {
+            sql.append(" AND location.locationId=").append(CuidAdapter.getLegacyIdFromCuid(locationId)).append(NEW_LINE);
+        }
 
         LOGGER.info("Querying admin table: " + sql.toString());
         
@@ -106,11 +123,11 @@ public class AdminColumnBuilder {
 
         // Now emit the field value
         if(nonNull) {
-            Set<ResourceId> entityIds = new HashSet<>();
+            Set<RecordRef> entityIds = new HashSet<>();
             for (int i = 0; i < adminEntity.length; i++) {
                 int entityId = adminEntity[i];
                 if(entityId != 0) {
-                    entityIds.add(CuidAdapter.entity(entityId));
+                    entityIds.add(new RecordRef(adminLevelFormIds[i], CuidAdapter.entity(entityId)));
                 }
             }
             emit(new ReferenceValue(entityIds));
@@ -130,4 +147,5 @@ public class AdminColumnBuilder {
             observer.done();
         }
     }
+
 }

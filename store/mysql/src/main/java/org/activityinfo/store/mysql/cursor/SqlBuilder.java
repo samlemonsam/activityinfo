@@ -1,6 +1,7 @@
 package org.activityinfo.store.mysql.cursor;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -28,9 +29,13 @@ public class SqlBuilder {
         newLine = "\n";
         indent = "   ";
     }
-    
+
     public void where(String whereClause) {
-        this.whereClause = whereClause;
+        if(Strings.isNullOrEmpty(this.whereClause)) {
+            this.whereClause = whereClause;
+        } else {
+            this.whereClause = "(" + this.whereClause + ") AND (" + whereClause + ")";
+        }
     }
     
     public void orderBy(String orderByClause) {

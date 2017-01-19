@@ -24,6 +24,7 @@ package org.activityinfo.ui.client.page.config.design;
 
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.TreeStore;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.callback.SuccessCallback;
 import org.activityinfo.legacy.client.state.StateManagerStub;
@@ -36,6 +37,7 @@ import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.DTOs;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.model.resource.Resource;
 import org.activityinfo.ui.client.MockEventBus;
 import org.activityinfo.ui.client.dispatch.DispatcherStub;
 import org.activityinfo.ui.client.page.NavigationCallback;
@@ -73,7 +75,10 @@ public class DesignTest {
         UiConstants constants = createNiceMock(UiConstants.class);
         replay(constants);
 
+        ResourceLocator locator = null;
+
         DesignPresenter designer = new DesignPresenter(eventBus, service,
+                locator,
                 new StateManagerStub(),
                 view, constants) {
             @Override
@@ -123,7 +128,9 @@ public class DesignTest {
         UiConstants constants = createNiceMock(UiConstants.class);
         replay(constants);
 
-        DesignPresenter designer = new DesignPresenter(eventBus, service,
+        ResourceLocator locator = null;
+
+        DesignPresenter designer = new DesignPresenter(eventBus, service, locator,
                 new StateManagerStub(),
                 view, constants) {
             @Override
@@ -192,8 +199,10 @@ public class DesignTest {
         UiConstants constants = createNiceMock(UiConstants.class);
         replay(constants);
 
+        ResourceLocator locator = null;
+
         DesignPresenter designer = new DesignPresenter(new MockEventBus(),
-                service, new StateManagerStub(),
+                service, locator, new StateManagerStub(),
                 view, constants);
         designer.go(schema.getDatabaseById(1));
 
@@ -229,8 +238,10 @@ public class DesignTest {
         UiConstants constants = createNiceMock(UiConstants.class);
         replay(constants);
 
+        ResourceLocator locator = null;
+
         DesignPresenter designer = new DesignPresenter(new MockEventBus(),
-                service, new StateManagerStub(),
+                service, locator, new StateManagerStub(),
                 view, constants);
         designer.go(schema.getDatabaseById(1));
 

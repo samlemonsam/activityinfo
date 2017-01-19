@@ -12,7 +12,6 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulSet;
 import org.activityinfo.observable.SynchronousScheduler;
@@ -53,8 +52,6 @@ public class FormMappingBuilder {
             if (targetField.getNode().isRoot())
                 if (SimpleFieldMapping.isSimple(targetField)) {
                     buildSimpleMapping(targetField);
-                } else if(targetField.getFormField().getType() instanceof GeoAreaType) {
-                    buildGeoMapping(targetField);
                 }
         }
         
@@ -114,14 +111,6 @@ public class FormMappingBuilder {
         Optional<FieldProfile> sourceField = fieldMatching.targetToSource(targetField);
         if(sourceField.isPresent()) {
             mappings.add(Observable.<FieldMapping>just(new SimpleFieldMapping(sourceField.get(), targetField)));
-        }
-    }
-
-
-    private void buildGeoMapping(FieldProfile targetField) {
-        Optional<FieldProfile> sourceField = fieldMatching.targetToSource(targetField);
-        if(sourceField.isPresent()) {
-            mappings.add(Observable.<FieldMapping>just(new GeoAreaFieldMapping(sourceField.get(), targetField)));
         }
     }
 

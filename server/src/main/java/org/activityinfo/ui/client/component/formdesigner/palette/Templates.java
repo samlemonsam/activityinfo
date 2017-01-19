@@ -12,6 +12,7 @@ import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.ui.client.ClientContext;
 
 import java.util.List;
 
@@ -21,43 +22,38 @@ public class Templates {
     public static List<Template> list() {
         List<Template> items = Lists.newArrayList();
 
-        // use only types supported by backend for the moment
-
-//        // Add all type classes to the palette except for reference + enum types:
-//        // we will handle those specially
-//        for(FieldTypeClass typeClass : TypeRegistry.get().getTypeClasses()) {
-//            if(typeClass != ReferenceType.TypeClass.INSTANCE &&
-//               typeClass != EnumType.TypeClass.INSTANCE) {
-//                items.add(new TypeClassTemplate(typeClass));
-//            }
-//        }
-//
-//        // ReferenceTypes are a bit abstract, we will provide a number of
-//        // concrete types that make will hopefully make sense to the user
+        boolean newFields = ClientContext.isNewFieldsFlagEnabled();
 
         items.add(new TypeClassTemplate(QuantityType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeQuantity()));
         items.add(new TypeClassTemplate(TextType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeText()));
         items.add(new TypeClassTemplate(NarrativeType.TYPE_CLASS,  I18N.CONSTANTS.fieldTypeNarrative()));
-        items.add(new TypeClassTemplate(LocalDateType.TYPE_CLASS, I18N.CONSTANTS.date()));
-  //      items.add(new TypeClassTemplate(LocalDateIntervalType.TYPE_CLASS));
+
+        if(newFields) {
+            items.add(new TypeClassTemplate(LocalDateType.TYPE_CLASS, I18N.CONSTANTS.date()));
+        }
 
         items.add(new CheckboxTemplate());
         items.add(new RadioButtonTemplate());
 
-        items.add(new TypeClassTemplate(GeoPointType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeGeographicPoint()));
+        if(newFields) {
+            items.add(new TypeClassTemplate(GeoPointType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeGeographicPoint()));
+        }
+
         items.add(new TypeClassTemplate(BarcodeType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeBarcode()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.IMAGE, I18N.CONSTANTS.image()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.ATTACHMENT, I18N.CONSTANTS.attachment()));
         items.add(new TypeClassTemplate(CalculatedFieldType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeCalculated()));
         items.add(new LabelTemplate());
-        items.add(new SectionTemplate());
-        items.add(new SubFormTemplate(I18N.CONSTANTS.repeatingSubform(), SubFormKind.REPEATING));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.monthlySubform(), SubFormKind.MONTHLY));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.weeklySubform(), SubFormKind.WEEKLY));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.fortnightlySubform(), SubFormKind.BIWEEKLY));
-        items.add(new SubFormTemplate(I18N.CONSTANTS.dailySubform(), SubFormKind.DAILY));
 
-        items.add(new TypeClassTemplate(ReferenceType.TYPE_CLASS, I18N.CONSTANTS.reference()));
+        if(newFields) {
+            items.add(new SubFormTemplate(I18N.CONSTANTS.repeatingSubform(), SubFormKind.REPEATING));
+            items.add(new SubFormTemplate(I18N.CONSTANTS.monthlySubform(), SubFormKind.MONTHLY));
+            items.add(new SubFormTemplate(I18N.CONSTANTS.weeklySubform(), SubFormKind.WEEKLY));
+            items.add(new SubFormTemplate(I18N.CONSTANTS.fortnightlySubform(), SubFormKind.BIWEEKLY));
+            items.add(new SubFormTemplate(I18N.CONSTANTS.dailySubform(), SubFormKind.DAILY));
+
+            items.add(new TypeClassTemplate(ReferenceType.TYPE_CLASS, I18N.CONSTANTS.reference()));
+        }
 
         return items;
     }

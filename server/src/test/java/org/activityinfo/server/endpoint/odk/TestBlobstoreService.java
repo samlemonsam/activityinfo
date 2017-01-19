@@ -5,6 +5,7 @@ import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.blob.BlobId;
 import org.activityinfo.service.blob.GcsBlobFieldStorageService;
 
@@ -13,7 +14,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class TestBlobstoreService extends GcsBlobFieldStorageService {
+public class TestBlobstoreService extends GcsBlobFieldStorageService implements BlobAuthorizer {
 
     public TestBlobstoreService(DeploymentConfiguration config, final EntityManager em) {
         super(config, new Provider<EntityManager>() {
@@ -60,7 +61,7 @@ public class TestBlobstoreService extends GcsBlobFieldStorageService {
     }
 
     @Override
-    public boolean hasAccess(ResourceId userId, BlobId blobId) {
+    public boolean isOwner(int userId, String blobId) {
         return false;
     }
 }

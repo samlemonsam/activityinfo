@@ -27,7 +27,7 @@ import org.activityinfo.core.server.type.converter.JvmConverterFactory;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.activityinfo.core.shared.importing.source.SourceRow;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.junit.Assert;
 import org.junit.Test;
 

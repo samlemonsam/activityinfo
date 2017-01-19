@@ -103,7 +103,9 @@ public class AuthenticationFilter implements Filter {
             try {
                 AuthenticatedUser currentUser = authTokenCache.get(authToken);
                 authProvider.set(currentUser);
-                
+                if(currentUser != null) {
+                    LOGGER.info("Request authenticated as " + currentUser.getEmail());
+                }
             } catch (Exception e) {
                 authProvider.clear();
             }

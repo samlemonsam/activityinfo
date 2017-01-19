@@ -10,7 +10,7 @@ dependencies {
     compile project(':io:xform')
     compile project(':io:match')
     compile project(':io:xlsform')
-    
+
     compile project(':store:mysql')
     compile project(':store:hrd')
 
@@ -80,8 +80,9 @@ dependencies {
     compile libraries.rebar.sql
     compile libraries.rebar.sync
     
-    compile libraries.appengineMetrics
-    compile 'com.bedatadriven.appengine:appengine-hibernate:25'
+    compile libraries.appengine.apiLabs
+    compile libraries.appengine.trace
+    compile 'com.bedatadriven.appengine:appengine-hibernate:30'
 
     gwt libraries.rebar.style
     

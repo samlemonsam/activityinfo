@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.metadata;
 
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.cloud.sql.jdbc.internal.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -12,6 +13,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -268,13 +270,13 @@ public class ActivityLoader {
                     
                     FormClass serializedFormClass = null;
                     if(!activity.classicView) {
-                        serializedFormClass = tryDeserialize(rs.getString("formClass"), rs.getBytes("gzFormClass"));
+                        serializedFormClass = tryDeserialize(activity, rs.getString("formClass"), rs.getBytes("gzFormClass"));
                     }
                     if (serializedFormClass == null) {
                         classicActivityIds.add(activity.getId());
                     } else {
                         addFields(activity, serializedFormClass);
-                        activity.serializedFormClass = serializedFormClass;
+                        activity.serializedFormClass.value = serializedFormClass;
                     }
 
                     activityMap.put(activity.getId(), activity);
@@ -301,10 +303,14 @@ public class ActivityLoader {
                     activity.locationTypeIds.add(locationTypeId);
 
                     int adminLevelId = rs.getInt(3);
+                    ResourceId formId;
                     if(rs.wasNull()) {
-                        activity.locationRange.add(CuidAdapter.locationFormClass(locationTypeId));                        
+                        formId = CuidAdapter.locationFormClass(locationTypeId);
                     } else {
-                        activity.locationRange.add(CuidAdapter.adminLevelFormClass(adminLevelId));
+                        formId = CuidAdapter.adminLevelFormClass(adminLevelId);
+                    }
+                    if(!activity.locationRange.contains(formId)) {
+                        activity.locationRange.add(formId);
                     }
                 }
             }
@@ -331,11 +337,11 @@ public class ActivityLoader {
     }
 
 
-    private static FormClass tryDeserialize(String formClass, byte[] formClassGz) {
+    private static FormClass tryDeserialize(Activity activity, String formClass, byte[] formClassGz) {
         try {
             Reader reader;
             if (formClassGz != null) {
-                reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(formClassGz)));
+                reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(formClassGz)), Charsets.UTF_8);
             } else if (!Strings.isNullOrEmpty(formClass)) {
                 reader = new StringReader(formClass);
             } else {
@@ -344,10 +350,21 @@ public class ActivityLoader {
 
             Gson gson = new Gson();
             JsonObject object = gson.fromJson(reader, JsonObject.class);
-            return FormClass.fromJson(object);
+            return patchDeserializedFormClass(activity, FormClass.fromJson(object));
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }
+    }
+
+    /**
+     * Apply any updates to the serialized FormClass that might be required to do changes in
+     * ActivityInfo.
+     */
+    private static FormClass patchDeserializedFormClass(Activity activity, FormClass formClass) {
+
+        formClass.setDatabaseId(activity.getDatabaseId());
+
+        return formClass;
     }
 
     private void addFields(Activity activity, FormClass formClass) {
@@ -493,12 +510,10 @@ public class ActivityLoader {
 
         Map<Integer, List<EnumItem>> attributes = Maps.newHashMap();
 
-        String sql = "SELECT * " +
-                "FROM attribute A " +
-                "WHERE A.deleted=0 AND " +
-                "AttributeGroupId in" +
-                " (Select AttributeGroupId FROM attributegroupinactivity where ActivityId IN " + idList(activityIds) + ")" +
-                " ORDER BY A.SortOrder";
+        String sql = "SELECT DISTINCT A.* from attribute A " +
+                "LEFT JOIN attributegroupinactivity G on (A.attributegroupid=G.attributegroupid) " +
+                "WHERE G.activityid IN " + idList(activityIds) + " " +
+                "ORDER BY A.sortorder";
 
         try(ResultSet rs = executor.query(sql)) {
             while(rs.next()) {

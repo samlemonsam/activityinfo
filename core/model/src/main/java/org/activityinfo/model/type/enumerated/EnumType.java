@@ -5,10 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
 
 import java.util.*;
@@ -24,19 +21,6 @@ public class EnumType implements ParametrizedFieldType {
             return "enumerated";
         }
 
-        @Override
-        public FieldType deserializeType(Record typeParameters) {
-
-            Cardinality cardinality = Cardinality.valueOf(typeParameters.getString("cardinality"));
-
-            List<EnumItem> enumItems = Lists.newArrayList();
-            List<Record> enumValueRecords = typeParameters.getRecordList("values");
-            for(Record record : enumValueRecords) {
-                enumItems.add(EnumItem.fromRecord(record));
-            }
-            return new EnumType(cardinality, enumItems);
-        }
-
 
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
@@ -44,27 +28,19 @@ public class EnumType implements ParametrizedFieldType {
                     parametersObject.get("cardinality").getAsString().toUpperCase());
 
             List<EnumItem> enumItems = Lists.newArrayList();
-            JsonArray enumItemArray = parametersObject.get("values").getAsJsonArray();
-            for(JsonElement record : enumItemArray) {
-                enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
+            JsonElement valuesArray = parametersObject.get("values");
+            if(valuesArray != null) {
+                JsonArray enumItemArray = valuesArray.getAsJsonArray();
+                for (JsonElement record : enumItemArray) {
+                    enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
+                }
             }
             return new EnumType(cardinality, enumItems);
-        
         }
 
         @Override
         public EnumType createType() {
             return new EnumType();
-        }
-
-        @Override
-        public FormClass getParameterFormClass() {
-            return new FormClass(ResourceIdPrefixType.TYPE.id("enum"));
-        }
-
-        @Override
-        public EnumValue deserialize(Record record) {
-            return EnumValue.fromRecord(record);
         }
 
     };
@@ -123,20 +99,6 @@ public class EnumType implements ParametrizedFieldType {
         } else {
             return null;
         }
-    }
-
-    @Override
-    public Record getParameters() {
-
-        List<Record> enumValueRecords = Lists.newArrayList();
-        for(EnumItem enumItem : getValues()) {
-            enumValueRecords.add(enumItem.asRecord());
-        }
-
-        return new Record()
-                .set("classId", getTypeClass().getParameterFormClass().getId())
-                .set("cardinality", cardinality.name())
-                .set("values", enumValueRecords);
     }
 
     @Override

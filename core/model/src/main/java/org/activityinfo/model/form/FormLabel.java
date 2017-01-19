@@ -2,8 +2,6 @@ package org.activityinfo.model.form;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -49,16 +47,6 @@ public class FormLabel extends FormElement {
     }
 
     @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("id", id.asString());
-        record.set("label", label);
-        record.set("type", "label");
-        record.set("visible", visible);
-        return record;
-    }
-
-    @Override
     public JsonElement toJsonObject() {
         JsonObject object = new JsonObject();
         object.addProperty("id", id.asString());
@@ -77,54 +65,4 @@ public class FormLabel extends FormElement {
         return label;
     }
 
-    public enum TextStyle {
-        PLAIN("plain", I18N.CONSTANTS.plain(), "", ""),
-        BOLD("bold", I18N.CONSTANTS.bold(), "<b>", "</b>");
-
-        private String value;
-        private String label;
-        private String htmlStartTag;
-        private String htmlEndTag;
-
-        TextStyle(String value, String label, String htmlStartTag, String htmlEndTag) {
-            this.value = value;
-            this.label = label;
-            this.htmlStartTag = htmlStartTag;
-            this.htmlEndTag = htmlEndTag;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-        public ResourceId getResourceId() {
-            return ResourceId.valueOf(value);
-        }
-
-        public static TextStyle fromValue(String textStyle) {
-            for (TextStyle style : TextStyle.values()) {
-                if (style.getValue().equalsIgnoreCase(textStyle)) {
-                    return style;
-                }
-            }
-
-            return null;
-        }
-
-        public String applyStyle(String html) {
-            return getHtmlStartTag() + html + getHtmlEndTag();
-        }
-
-        public String getHtmlStartTag() {
-            return htmlStartTag;
-        }
-
-        public String getHtmlEndTag() {
-            return htmlEndTag;
-        }
-    }
 }

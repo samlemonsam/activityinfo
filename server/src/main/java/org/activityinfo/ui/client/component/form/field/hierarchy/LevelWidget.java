@@ -130,7 +130,7 @@ public class LevelWidget implements IsWidget, LevelView {
         if(selectedIndex != -1) {
             Choice newSelection = choices.get(selectedIndex);
             if(this.selection == null ||
-                    !this.selection.getId().equals(newSelection.getId())) {
+                    !this.selection.getRef().equals(newSelection.getRef())) {
 
                 this.selection = newSelection;
                 SelectionEvent.fire(this, newSelection);
@@ -167,7 +167,7 @@ public class LevelWidget implements IsWidget, LevelView {
 
     private void applySelection() {
         for(int i=0;i!=choices.size();++i) {
-            if(choices.get(i).getId().equals(selection.getId())) {
+            if(choices.get(i).getRef().equals(selection.getRef())) {
                 listBox.setSelectedIndex(i);
                 break;
             }

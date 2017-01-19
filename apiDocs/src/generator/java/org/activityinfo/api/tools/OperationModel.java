@@ -8,6 +8,8 @@ import io.swagger.models.Operation;
 import io.swagger.models.Response;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,20 +22,27 @@ public class OperationModel {
     private final String uri;
     private final HttpMethod method;
     private final Operation operation;
-    
+
+    private DefinitionModel responseSchema = null;
+
     private String jsonOutput;
     private List<ExampleModel> examples = new ArrayList<>();
     private List<ResponseModel> responses = new ArrayList<>();
     
     private BodyParameter body = null;
     
-    public OperationModel(String uri, HttpMethod method, Operation operation) {
+    public OperationModel(Map<String, DefinitionModel> definitions, String uri, HttpMethod method, Operation operation) {
         this.uri = uri;
         this.method = method;
         this.operation = operation;
         
         this.jsonOutput = tryReadExample(".json");
         tryAddExample("shell", ".sh");
+
+        ExampleModel curlExample = CurlExamplesGenerator.getExample(operation.getOperationId());
+        if(curlExample != null) {
+            examples.add(curlExample);
+        }
 
         for (Parameter parameter : operation.getParameters()) {
             if(parameter instanceof BodyParameter) {
@@ -43,6 +52,10 @@ public class OperationModel {
         
         for (Map.Entry<String, Response> entry : operation.getResponses().entrySet()) {
             responses.add(new ResponseModel(Integer.parseInt(entry.getKey()), entry.getValue()));
+            Property schema = entry.getValue().getSchema();
+            if(schema instanceof RefProperty) {
+                responseSchema = definitions.get(((RefProperty) schema).getSimpleRef());
+            }
         }
     }
 
@@ -89,8 +102,6 @@ public class OperationModel {
     private void tryAddExample(String language, String extension) {
         String source = tryReadExample(extension);
         if(source != null) {
-            
-            
             ExampleModel model = new ExampleModel();
             model.setLanguage(language);
             model.setSource(source);
@@ -120,5 +131,9 @@ public class OperationModel {
             }
         }
         return params;
-    }   
+    }
+
+    public DefinitionModel getResponseSchema() {
+        return responseSchema;
+    }
 }

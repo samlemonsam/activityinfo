@@ -10,6 +10,16 @@ public enum CoordinateAxis {
         }
 
         @Override
+        public String getLocalizedName() {
+            return I18N.CONSTANTS.latitude();
+        }
+
+        @Override
+        public String getDegreesOutOfBoundsMessage() {
+            return I18N.CONSTANTS.latitudeOutOfBounds();
+        }
+
+        @Override
         public String getPositiveHemisphereCharacters() {
             return I18N.CONSTANTS.northHemiChars();
         }
@@ -21,9 +31,21 @@ public enum CoordinateAxis {
 
     },
     LONGITUDE {
+
+
         @Override
         public double getMaximumValue() {
             return 180;
+        }
+
+        @Override
+        public String getLocalizedName() {
+            return I18N.CONSTANTS.longitude();
+        }
+
+        @Override
+        public String getDegreesOutOfBoundsMessage() {
+            return I18N.CONSTANTS.longitudeOutOfBounds();
         }
 
         @Override
@@ -39,7 +61,11 @@ public enum CoordinateAxis {
     };
     
     public abstract double getMaximumValue();
-    
+
+    public abstract String getLocalizedName();
+
+    public abstract String getDegreesOutOfBoundsMessage();
+
     public double getMinimumValue() {
         return -getMaximumValue();
     }

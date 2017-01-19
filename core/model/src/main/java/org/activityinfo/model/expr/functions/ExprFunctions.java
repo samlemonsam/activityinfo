@@ -39,6 +39,10 @@ public final class ExprFunctions {
             register(BooleanFunctions.LESS_OR_EQUAL);
             register(MaxFunction.INSTANCE);
             register(MinFunction.INSTANCE);
+            register(BoundingBoxFunction.XMIN);
+            register(BoundingBoxFunction.YMIN);
+            register(BoundingBoxFunction.XMAX);
+            register(BoundingBoxFunction.YMAX);
         }
         
         public ExprFunction get(String name) {

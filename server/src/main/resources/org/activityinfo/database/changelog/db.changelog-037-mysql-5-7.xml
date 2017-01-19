@@ -33,4 +33,12 @@
             ALTER TABLE userdatabase MODIFY COLUMN lastSchemaUpdate datetime NOT NULL DEFAULT '1970-01-01 00:00:00'
         </sql>
     </changeSet>
+    <changeSet author="alex" id="036-02">
+        <comment>
+            Remove "zero" date defaults which is being phased out by MYSQL
+        </comment>
+        <sql>
+            ALTER TABLE userpermission MODIFY COLUMN lastSchemaUpdate datetime NOT NULL DEFAULT '1970-01-01 00:00:00'
+        </sql>
+    </changeSet>
 </databaseChangeLog>

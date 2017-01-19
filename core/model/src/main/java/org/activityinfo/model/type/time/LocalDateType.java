@@ -2,7 +2,6 @@ package org.activityinfo.model.type.time;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -24,7 +23,7 @@ import org.activityinfo.model.type.RecordFieldTypeClass;
  */
 public class LocalDateType implements FieldType {
 
-    public static final String TYPE_ID = "LOCAL_DATE";
+    public static final String TYPE_ID = "date";
 
     public static final FieldTypeClass TYPE_CLASS = new RecordFieldTypeClass() {
         @Override
@@ -37,10 +36,6 @@ public class LocalDateType implements FieldType {
             return INSTANCE;
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return org.activityinfo.model.type.time.LocalDate.fromRecord(record);
-        }
     };
 
     public static final LocalDateType INSTANCE = new LocalDateType();

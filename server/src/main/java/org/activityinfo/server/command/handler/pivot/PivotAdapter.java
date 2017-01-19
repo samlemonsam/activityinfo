@@ -41,8 +41,8 @@ import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.mysql.metadata.UserPermission;
-import org.activityinfo.store.query.impl.FormScanBatch;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.FormScanBatch;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;
@@ -51,7 +51,7 @@ import java.util.logging.Logger;
 
 import static java.util.Collections.*;
 import static org.activityinfo.model.expr.Exprs.*;
-import static org.activityinfo.model.legacy.CuidAdapter.partnerInstanceId;
+import static org.activityinfo.model.legacy.CuidAdapter.partnerRecordId;
 
 /**
  * Executes a legacy PivotSites query against the new API
@@ -293,7 +293,7 @@ public class PivotAdapter {
         } else {
             ExprNode partnerFilter = Exprs.equals(
                 new SymbolExpr("partner"),
-                new ConstantExpr(partnerInstanceId(userPermission.getPartnerId()).asString()));
+                new ConstantExpr(partnerRecordId(userPermission.getPartnerId()).asString()));
 
             return Optional.of(partnerFilter);
         }
@@ -336,6 +336,8 @@ public class PivotAdapter {
 
         // Query the SOURCE form tree
         FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
+        Preconditions.checkNotNull(formTree, "No form tree for form " + linkedActivity.getLeafFormClassId());
+
         QueryModel queryModel = new QueryModel(linkedActivity.getLeafFormClassId());
 
         List<ActivityField> indicators = selectedIndicators(activity);
@@ -709,6 +711,9 @@ public class PivotAdapter {
     }
 
     private String siteIdField(FormTree formTree) {
+        Preconditions.checkNotNull(formTree, "formTree");
+        Preconditions.checkNotNull(formTree.getRootFormClass(), "formTree.rootFormClass");
+
         ResourceId rootFormClassId = formTree.getRootFormClass().getId();
         if(rootFormClassId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Root form class is the site, we need to compare against the ID

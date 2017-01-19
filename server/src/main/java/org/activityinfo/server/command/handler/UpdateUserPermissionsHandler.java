@@ -25,6 +25,7 @@ package org.activityinfo.server.command.handler;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.legacy.shared.command.result.UserExistsException;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
@@ -86,6 +87,11 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             verifyAuthority(cmd, queryUserPermission(executingUser, database));
         }
 
+        /* Database owner cannot be added */
+        if(database.getOwner().getEmail().equalsIgnoreCase(cmd.getModel().getEmail())) {
+            throw new UserExistsException();
+        }
+
         User user = null;
         if (userDAO.doesUserExist(dto.getEmail())) {
             user = userDAO.findUserByEmail(dto.getEmail());
@@ -104,6 +110,10 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             doUpdate(perm, dto, isOwner, queryUserPermission(executingUser, database));
             permDAO.persist(perm);
         } else {
+            // If the user is intending to add a new user, verify that this user doesn't already exist
+            if(cmd.isNewUser() && perm.isAllowView()) {
+                throw new UserExistsException();
+            }
             doUpdate(perm, dto, isOwner, queryUserPermission(executingUser, database));
         }
 

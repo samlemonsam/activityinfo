@@ -1,6 +1,5 @@
 package org.activityinfo.store.query.impl;
 
-import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -11,14 +10,10 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.service.store.FormAccessor;
-import org.activityinfo.service.store.FormCatalog;
-import org.easymock.EasyMock;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +26,7 @@ public class UpdaterTest {
     @Before
     public void setUp() {
         MockFormCatalog catalog = new MockFormCatalog();
-        updater = new Updater(catalog, userId);
+        updater = new Updater(catalog, userId, new BlobAuthorizerStub());
     }
 
     @Test(expected = InvalidUpdateException.class)
@@ -100,7 +95,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.add("Q1", JsonNull.INSTANCE);
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
         assertTrue(update.getChangedFieldValues().containsKey(fieldId));
     }
@@ -116,7 +111,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", 41.3);
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, userId);
         
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -132,7 +127,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "41.3");
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -148,7 +143,7 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "4.1.3");
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
@@ -164,18 +159,10 @@ public class UpdaterTest {
         change.addProperty("@class", "XYZ123");
         change.addProperty("Q1", "Hello world");
 
-        RecordUpdate update = Updater.parseChange(formClass, change);
+        RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
     }
 
-
-    private FormCatalog emptyCatalog() {
-        FormCatalog catalog = EasyMock.createMock(FormCatalog.class);
-        expect(catalog.lookupForm(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<FormAccessor>absent());
-        expect(catalog.getForm(EasyMock.<ResourceId>anyObject())).andReturn(Optional.<FormAccessor>absent());
-        replay(catalog);
-        return catalog;
-    }
 
 }

@@ -2,7 +2,6 @@ package org.activityinfo.store.query.impl.views;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.geo.Extents;
 
 
 public class FilteredColumnView implements ColumnView {
@@ -37,11 +36,6 @@ public class FilteredColumnView implements ColumnView {
     @Override
     public String getString(int row) {
         return view.getString(filteredIndices[row]);
-    }
-
-    @Override
-    public Extents getExtents(int row) {
-        return null;
     }
 
     @Override

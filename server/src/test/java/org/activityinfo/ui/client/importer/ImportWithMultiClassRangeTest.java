@@ -7,9 +7,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import org.activityinfo.core.server.type.converter.JvmConverterFactory;
-import org.activityinfo.core.shared.form.tree.Hierarchy;
-import org.activityinfo.core.shared.form.tree.HierarchyPrettyPrinter;
 import org.activityinfo.core.shared.importing.model.ImportModel;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
 import org.activityinfo.fixtures.InjectionSupport;
@@ -18,7 +17,6 @@ import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -26,15 +24,16 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
@@ -85,9 +84,6 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
         FormTree formTree = assertResolves(formTreeBuilder.apply(NFI_DISTRIBUTION_FORM_CLASS));
         FormTreePrettyPrinter.print(formTree);
-
-        Hierarchy hierarchy = new Hierarchy(formTree.getNodeByPath(new FieldPath(CuidAdapter.locationField(33))));
-        HierarchyPrettyPrinter.prettyPrint(hierarchy);
 
         importModel = new ImportModel(formTree);
         importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
@@ -211,7 +207,13 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
 
         Promise<FormInstance> record = locator.getFormInstance(SCHOOL_FORM_CLASS, id);
         ReferenceValue value = (ReferenceValue) record.get().get(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.ADMIN_FIELD));
-        return value.getResourceIds();
+
+        Set<ResourceId> recordIds = new HashSet<>();
+        for (RecordRef recordRef : value.getReferences()) {
+            recordIds.add(recordRef.getRecordId());
+        }
+
+        return recordIds;
     }
 
     public static Set<ResourceId> set(ResourceId... resourceIds) {

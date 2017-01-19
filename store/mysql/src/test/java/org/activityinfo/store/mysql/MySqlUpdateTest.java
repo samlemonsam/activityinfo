@@ -1,11 +1,21 @@
 package org.activityinfo.store.mysql;
 
 import com.google.gson.JsonObject;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
@@ -14,6 +24,7 @@ import static org.junit.Assert.assertThat;
 
 public class MySqlUpdateTest extends AbstractMySqlTest {
 
+    public static final int CATASTROPHE_NATURELLE_ID = 1;
 
     private int userId = 1;
 
@@ -27,13 +38,13 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000013");
         changeObject.addProperty("@class", activityFormClass(1).asString());
-        changeObject.addProperty("partner", partnerInstanceId(1).asString());
+        changeObject.addProperty("partner", partnerRecordId(1).asString());
         changeObject.addProperty("date1", "2015-01-01");
         changeObject.addProperty("date2", "2015-01-01");
         changeObject.addProperty("BENE", 45000);
         changeObject.addProperty("location", locationInstanceId(3).asString());
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE");
@@ -47,9 +58,9 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSite() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
-        changeObject.addProperty("partner", partnerInstanceId(2).asString());
+        changeObject.addProperty("partner", partnerRecordId(2).asString());
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE");
@@ -65,7 +76,8 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
         changeObject.addProperty("name", "Nouveau Irumu");
         
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.setEnforcePermissions(false);
         updater.executeChange(changeObject);
         
         query(adminLevelFormClass(2), "_id", "name");
@@ -80,7 +92,8 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
         changeObject.addProperty("@deleted", true);
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.setEnforcePermissions(false);
         updater.executeChange(changeObject);
 
         query(adminLevelFormClass(2), "_id", "name");
@@ -95,7 +108,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", "s0000000001");
         changeObject.addProperty("@deleted", true);
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(changeObject);
         
         query(activityFormClass(1), "_id");
@@ -107,12 +120,12 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSiteWithMultipleProperties() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
-        changeObject.addProperty("partner", partnerInstanceId(2).asString());
+        changeObject.addProperty("partner", partnerRecordId(2).asString());
         changeObject.addProperty("BENE", 2100);
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
 
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE", "cause");
@@ -130,7 +143,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
         changeObject.addProperty(attributeGroupField(2).asString(), "Casserole");
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id",  "cause", "[contenu du kit]");
@@ -147,13 +160,63 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         JsonObject change = new JsonObject();
         change.addProperty("@id", CuidAdapter.cuid(SITE_DOMAIN, newId).asString());
         change.addProperty("@class", activityFormClass(ADVOCACY).asString());
-        change.addProperty("partner", partnerInstanceId(1).asString());
+        change.addProperty("partner", partnerRecordId(1).asString());
         change.addProperty("date1", "2015-01-01");
         change.addProperty("date2", "2015-01-31");
 
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(change);
 
         query(activityFormClass(ADVOCACY), "_id", "partner");
+    }
+
+    @Test
+    public void createForm() {
+        KeyGenerator generator = new KeyGenerator();
+        int activityId = generator.generateInt();
+
+        FormClass formClass = new FormClass(CuidAdapter.activityFormClass(activityId));
+        formClass.setDatabaseId(1);
+        formClass.setLabel("New Form");
+        formClass.addElement(new FormField(CuidAdapter.generateIndicatorId())
+                .setType(TextType.INSTANCE)
+                .setLabel("Name")
+                .setRequired(true));
+
+
+        catalog.createOrUpdateFormSchema(formClass);
+
+        System.out.println("Created activity " + activityId);
+
+//        FormClass reform = catalog.getFormClass(formClass.getId());
+//
+//        // Ensure that partner field is automatically added
+//        FormField partnerField = reform.getField(CuidAdapter.partnerField(activityId));
+//
+//        assertThat(partnerField.getType(), instanceOf(ReferenceType.class));
+    }
+
+
+    @Test
+    public void testSingleSiteResource() throws IOException {
+
+        int databaseId = 1;
+        ResourceId formClass = CuidAdapter.activityFormClass(1);
+        RecordUpdate update = new RecordUpdate();
+        update.setUserId(userId);
+        update.setRecordId(cuid(SITE_DOMAIN, 1));
+        update.set(field(formClass, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
+        update.set(indicatorField(1), new Quantity(900, "units"));
+        update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
+
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.execute(update);
+
+        query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
+
+        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
+        assertThat(column("partner"), hasValues(partnerRecordId(2), partnerRecordId(1), partnerRecordId(2)));
+        assertThat(column("BENE"), hasValues(900, 3600, 10000));
+        assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
     }
 }

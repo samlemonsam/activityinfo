@@ -42,6 +42,36 @@
         
         ${topics}
 
+        <#--<h1 id="models">Models</h1>-->
+
+        <#--<#list spec.definitions as def>-->
+
+        <#--<h2 id="${def.name}">${def.name}</h2>-->
+
+
+        <#--<h3>Properties</h3>-->
+
+        <#--<table><thead>-->
+        <#--<tr>-->
+            <#--<th>Parameter</th>-->
+            <#--<th>Type</th>-->
+            <#--<th>Description</th>-->
+        <#--</tr>-->
+        <#--</thead><tbody>-->
+            <#--<#list def.properties as prop>-->
+            <#--<tr>-->
+                <#--<td>${prop.name}</td>-->
+                <#--<td>${prop.type}</td>-->
+                <#--<td>${prop.description}</td>-->
+            <#--</tr>-->
+            <#--</#list>-->
+        <#--</tbody></table>-->
+
+
+
+        <#--</#list>-->
+
+
         <#list spec.sections as section>
             
         <h1 id="${section.tag}">${section.title}</h1>
@@ -54,13 +84,6 @@
         <pre class="highlight ${example.language}"><code>${example.source?html}</code></pre>
         </#list>
 
-        <#if op.jsonOutput??>
-        <blockquote>
-            <p>The above command returns JSON structured like this:</p>
-        </blockquote>
-<pre class="highlight json"><code>${op.jsonOutput}</code></pre>
-        </#if>
-        
         <#if op.descriptionHtml??>
         <p>${op.descriptionHtml}</p>
         </#if>
@@ -86,8 +109,27 @@
         </tr>
         </#list>
         </tbody></table>
-        
-        <h3>Responses</h3>
+
+        <#if op.responseSchema?? >
+
+        <h3>Response</h3>
+
+        <div class="model">
+            <div class="model-name">${op.responseSchema.name} {</div>
+            <div class="description">
+                <#list op.responseSchema.properties as prop>
+                <div><span class="propName">${prop.name}</span>
+                    (<span class="propType">${prop.type}</span>, <span class="propOptKey">${prop.requiredString})</span>
+                </div>
+                </#list>
+            </div>
+            }
+        </div>
+
+
+        </#if>
+
+        <h3>Response Codes</h3>
         
         <table>
             <thead>

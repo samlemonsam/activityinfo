@@ -1,6 +1,5 @@
 package org.activityinfo.store.query.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -23,6 +22,14 @@ import java.util.logging.Logger;
  * Constructs a set of ColumnViews with a single pass over a collection.
  */
 public class FormScan {
+
+    /**
+     * The current cache format version prefix.
+     *
+     * This can be changed to ensure that new versions do not use results cached by earlier versions
+     * of ActivityInfo.
+     */
+    private static final String CACHE_KEY_VERSION = "2:";
 
     private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
     private static final SymbolExpr PK_COLUMN_KEY = new SymbolExpr("@id");
@@ -286,14 +293,14 @@ public class FormScan {
 
 
     private String rowCountKey() {
-        return collectionId.asString() + "@" + cacheVersion + "#COUNT";
+        return CACHE_KEY_VERSION + collectionId.asString() + "@" + cacheVersion + "#COUNT";
     }
 
     private String fieldCacheKey(ExprNode fieldId) {
-        return collectionId.asString() + "@" + cacheVersion + "." + fieldId;
+        return CACHE_KEY_VERSION + collectionId.asString() + "@" + cacheVersion + "." + fieldId;
     }
 
     private String fkCacheKey(String fieldId) {
-        return collectionId.asString() + "@" + cacheVersion + ".fk." + fieldId;
+        return CACHE_KEY_VERSION + collectionId.asString() + "@" + cacheVersion + ".fk." + fieldId;
     }
 }

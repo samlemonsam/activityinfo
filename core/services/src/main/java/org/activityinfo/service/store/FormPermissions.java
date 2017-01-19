@@ -1,13 +1,9 @@
 package org.activityinfo.service.store;
 
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.type.expr.ExprValue;
-
 /**
  * Describes form-level permissions for a specific user
  */
-public final class FormPermissions implements IsRecord {
+public final class FormPermissions {
 
     private boolean visible;
     private String visibilityFilter;
@@ -55,21 +51,6 @@ public final class FormPermissions implements IsRecord {
         this.editFilter = editFilter;
     }
 
-    @Override
-    public Record asRecord() {
-        Record record = new Record()
-                .set("visible", visible)
-                .set("editAllowed", editAllowed);
-        
-        if(visibilityFilter != null) {
-            record.set("visibilityFilter", new ExprValue(visibilityFilter).asRecord());
-        }
-        if(editFilter != null) {
-            record.set("editFilter", new ExprValue(editFilter).asRecord());
-        }
-        return record;
-    }
-    
     public static FormPermissions none() {
         return new FormPermissions()
                 .setVisible(false)

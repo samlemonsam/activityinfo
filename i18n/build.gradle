@@ -93,8 +93,13 @@ task pushTranslations(type: JavaExec) {
     classpath = sourceSets.tool.runtimeClasspath
     workingDir = projectDir
 
+
     doFirst {
         systemProperty 'poApiKey', project.property('poApiKey')
+
+        if(project.hasProperty("dryRun")) {
+            args 'dryRun'
+        }
     }
 }
 

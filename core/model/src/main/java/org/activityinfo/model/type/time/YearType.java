@@ -21,7 +21,6 @@ package org.activityinfo.model.type.time;
  * #L%
  */
 import com.google.gson.JsonElement;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.*;
 
 /**
@@ -34,10 +33,6 @@ public class YearType implements FieldType, TemporalType {
     }
 
     public static final TypeClass TYPE_CLASS = new TypeClass() {
-        @Override
-        public YearValue deserialize(Record record) {
-            return new YearValue(record.getInt("year"));
-        }
 
         @Override
         public String getId() {

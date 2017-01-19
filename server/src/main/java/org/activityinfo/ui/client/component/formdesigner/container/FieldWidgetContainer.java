@@ -85,7 +85,6 @@ public class FieldWidgetContainer implements WidgetContainer {
                         super.onComplete();
                         FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
                         formClass.remove(formField);
-                        formDesigner.getPropertiesPresenter().reset(false);
                     }
                 });
             }
@@ -107,6 +106,12 @@ public class FieldWidgetContainer implements WidgetContainer {
 
         fieldPanel.asWidget().getElement().setAttribute(FormDesignerConstants.DATA_FIELD_ID, formField.getId().asString());
         syncWithModel();
+    }
+
+    public void removeFromForm() {
+        fieldPanel.getFocusPanel().removeFromParent();
+        FormClass formClass = (FormClass) formDesigner.getModel().getElementContainer(parentId); // get root or subform formclass
+        formClass.remove(formField);
     }
 
     @Override

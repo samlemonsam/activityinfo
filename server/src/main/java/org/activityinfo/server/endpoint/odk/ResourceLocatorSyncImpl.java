@@ -12,16 +12,17 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.server.command.handler.PermissionOracle;
-import org.activityinfo.server.endpoint.rest.UpdateValueVisibilityChecker;
+import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.lookup.ReferenceChoice;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 
 public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
@@ -31,13 +32,15 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     private Provider<FormCatalog> catalog;
     private Provider<AuthenticatedUser> authenticatedUser;
     private PermissionOracle permissionOracle;
+    private BlobAuthorizer blobAuthorizer;
 
     @Inject
     public ResourceLocatorSyncImpl(Provider<FormCatalog> catalog, Provider<AuthenticatedUser> authenticatedUser,
-                                   PermissionOracle permissionOracle) {
+                                   PermissionOracle permissionOracle, BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
         this.authenticatedUser = authenticatedUser;
         this.permissionOracle = permissionOracle;
+        this.blobAuthorizer = blobAuthorizer;
     }
 
     @Override
@@ -46,9 +49,10 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
-    public List<ReferenceChoice> getReferenceChoices(Set<ResourceId> range) {
+    public List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range) {
 
-        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(range));
+        ResourceId formId = Iterables.getOnlyElement(range);
+        QueryModel queryModel = new QueryModel(formId);
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
         
@@ -63,7 +67,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
             ResourceId choiceId = ResourceId.valueOf(id.getString(i));
             String choiceLabel = label.getString(i);
             
-            choices.add(new ReferenceChoice(choiceId, choiceLabel));            
+            choices.add(new ReferenceChoice(new RecordRef(formId, choiceId), choiceLabel));
         }
 
         return choices;
@@ -80,7 +84,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public void persist(FormInstance formInstance) {
-        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), blobAuthorizer);
         updater.execute(formInstance);
     }
 }

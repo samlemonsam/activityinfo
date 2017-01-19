@@ -1,12 +1,10 @@
 package org.activityinfo.model.type;
 
 import com.google.common.collect.Maps;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -41,7 +39,6 @@ public class TypeRegistry {
         register(QuantityType.TYPE_CLASS);
         register(NarrativeType.TYPE_CLASS);
         register(CalculatedFieldType.TYPE_CLASS);
-        register(ExprFieldType.TYPE_CLASS);
         register(LocalDateType.TYPE_CLASS);
         register(LocalDateIntervalType.TYPE_CLASS);
         register(GeoPointType.TYPE_CLASS);
@@ -60,6 +57,16 @@ public class TypeRegistry {
     }
 
     public FieldTypeClass getTypeClass(String typeId) {
+
+        // Handle deprecated ids:
+        switch (typeId) {
+            case "LOCAL_DATE":
+                return LocalDateType.TYPE_CLASS;
+            case "GEOGRAPHIC_POINT":
+                return LocalDateType.TYPE_CLASS;
+        }
+
+
         FieldTypeClass typeClass = typeMap.get(typeId.toUpperCase());
         if (typeClass == null) {
             throw new RuntimeException("Unknown type: " + typeId);
@@ -71,26 +78,5 @@ public class TypeRegistry {
         return typeMap.values();
     }
 
-    public FieldValue deserializeFieldValue(Record record) {
-        String typeClassId = record.getString(FieldValue.TYPE_CLASS_FIELD_NAME);
-        FieldTypeClass typeClass = getTypeClass(typeClassId);
-        if (typeClass instanceof RecordFieldTypeClass) {
-            return ((RecordFieldTypeClass) typeClass).deserialize(record);
-        } else {
-            throw new UnsupportedOperationException(typeClassId + " cannot be deserialized from a Record");
-        }
-    }
 
-
-    public static FieldValue readField(Record record, String name, FieldTypeClass typeClass) {
-        Record fieldValue = record.isRecord(name);
-        if (fieldValue == null) {
-            return null;
-        }
-        String typeClassId = fieldValue.isString(FieldValue.TYPE_CLASS_FIELD_NAME);
-        if (!typeClass.getId().equals(typeClassId)) {
-            return null;
-        }
-        return ((RecordFieldTypeClass) typeClass).deserialize(record);
-    }
 }

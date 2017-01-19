@@ -36,6 +36,7 @@ public class RecordFetcher {
     private class FieldCollector implements CursorObserver<FieldValue> {
         private ResourceId fieldId;
         private FormRecord.Builder builder;
+        private boolean set = false;
 
         public FieldCollector(ResourceId fieldId, FormRecord.Builder builder) {
             this.fieldId = fieldId;
@@ -44,7 +45,11 @@ public class RecordFetcher {
 
         @Override
         public void onNext(FieldValue value) {
+            if(set) {
+                throw new IllegalStateException(fieldId + ".onNext() called multiple times");
+            }
             builder.setFieldValue(fieldId, value);
+            set = true;
         }
 
         @Override

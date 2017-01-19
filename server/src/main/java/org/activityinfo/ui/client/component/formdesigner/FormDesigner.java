@@ -27,15 +27,17 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.drop.DropControllerRegistry;
-import org.activityinfo.ui.client.component.formdesigner.header.HeaderPresenter;
+import org.activityinfo.ui.client.component.formdesigner.header.HeaderPanel;
 import org.activityinfo.ui.client.component.formdesigner.properties.ContainerPropertiesPresenter;
-import org.activityinfo.ui.client.component.formdesigner.properties.PropertiesPresenter;
+import org.activityinfo.ui.client.component.formdesigner.properties.FieldEditor;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
@@ -50,9 +52,7 @@ public class FormDesigner {
     private final EventBus eventBus = new SimpleEventBus();
     private final StateProvider stateProvider;
     private final ResourceLocator resourceLocator;
-    private final PropertiesPresenter propertiesPresenter;
     private final ContainerPropertiesPresenter containerPresenter;
-    private final HeaderPresenter headerPresenter;
     private final FormDesignerPanel formDesignerPanel;
     private final FormFieldWidgetFactory formFieldWidgetFactory;
     private final FormSavedGuard savedGuard;
@@ -70,7 +70,8 @@ public class FormDesigner {
         this.formDesignerPanel.getFieldPalette().makeDraggable(dropControllerRegistry.getDragController());
 
         containerPresenter = new ContainerPropertiesPresenter(this);
-        propertiesPresenter = new PropertiesPresenter(this);
+        formDesignerPanel.getFieldEditor().start(this);
+        formDesignerPanel.getHeaderPanel().start(this);
 
         formFieldWidgetFactory = new FormFieldWidgetFactory(resourceLocator, FieldWidgetMode.DESIGN);
 
@@ -79,8 +80,6 @@ public class FormDesigner {
         formDesignerPanel.bind(eventBus);
         model.bind(eventBus);
 
-        headerPresenter = new HeaderPresenter(this);
-        headerPresenter.show();
 
         savedGuard = new FormSavedGuard(this);
 
@@ -127,12 +126,12 @@ public class FormDesigner {
         return containerPresenter;
     }
 
-    public PropertiesPresenter getPropertiesPresenter() {
-        return propertiesPresenter;
+    public FieldEditor getPropertiesPanel() {
+        return formDesignerPanel.getFieldEditor();
     }
 
-    public HeaderPresenter getHeaderPresenter() {
-        return headerPresenter;
+    public HeaderPanel getHeaderPresenter() {
+        return formDesignerPanel.getHeaderPanel();
     }
 
     public FormDesignerModel getModel() {
@@ -170,5 +169,16 @@ public class FormDesigner {
         builtIn.remove(CuidAdapter.field(formClassId, CuidAdapter.START_DATE_FIELD));
         builtIn.remove(CuidAdapter.field(formClassId, CuidAdapter.END_DATE_FIELD));
         return builtIn.contains(fieldId);
+    }
+
+
+    public static boolean isPartner(FormField field) {
+        if(field.getType() instanceof ReferenceType) {
+            ReferenceType type = (ReferenceType) field.getType();
+            if(type.getRange().size() == 1) {
+                return type.getRange().iterator().next().getDomain() == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN;
+            }
+        }
+        return false;
     }
 }

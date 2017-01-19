@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import static javax.ws.rs.core.Response.Status.*;
 
 @Path("/service/blob")
-public class GcsBlobFieldStorageService implements BlobFieldStorageService {
+public class GcsBlobFieldStorageService implements BlobFieldStorageService, BlobAuthorizer {
 
     private static final int ONE_MEGABYTE = 1 << 20;
     private static final Logger LOGGER = Logger.getLogger(GcsBlobFieldStorageService.class.getName());
@@ -59,7 +59,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
         try {
             if (Strings.isNullOrEmpty(bucketName)) {
-                LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property " + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
+                LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property "
+                        + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
                 return;
             }
             this.appIdentityService = /*DeploymentEnvironment.isAppEngineDevelopment() ?
@@ -231,17 +232,6 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
         throw new WebApplicationException(UNAUTHORIZED);
     }
 
-    public boolean hasAccess(ResourceId userId, BlobId blobId) {
-        try {
-            GcsFileMetadata metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(bucketName, blobId.asString()));
-            ResourceId resourceId = ResourceId.valueOf(metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER));
-            return hasAccess(userId, resourceId, blobId, metadata);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            return false;
-        }
-    }
-
     public boolean hasAccess(ResourceId userId, ResourceId resourceId, BlobId blobId, GcsFileMetadata metadata) {
         if (metadata == null) {
             return false;
@@ -300,5 +290,17 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService {
 
     public String getBucketName() {
         return bucketName;
+    }
+
+    @Override
+    public boolean isOwner(int userId, String blobId) {
+        GcsFileMetadata metadata = null;
+        try {
+            metadata = GcsServiceFactory.createGcsService().getMetadata(new GcsFilename(bucketName, blobId));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to check blob ownership", e);
+        }
+        String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_CREATOR);
+        return CuidAdapter.userId(userId).asString().equals(creatorIdStr);
     }
 }

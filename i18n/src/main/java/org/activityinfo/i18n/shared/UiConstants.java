@@ -141,7 +141,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Basemap")
     String basemap();
-    
+
     @DefaultStringValue("Boundaries")
     String boundaries();
 
@@ -345,9 +345,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Edit")
     String edit();
-    
-    @DefaultStringValue("Update")
-    String update();
 
     @DefaultStringValue("Email")
     String email();
@@ -367,7 +364,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Publish to website")
     String embed();
 
-    @DefaultStringValue("If you don''t wish to receive this email, uncheck the Email notification checkbox in your <a href=\"https://www.activityinfo.org/#userprofile\" style=\"text-decoration: underline;\">settings</a>.")
+    @DefaultStringValue("If you don't wish to receive this email, uncheck the Email notification checkbox in your <a href=\"https://www.activityinfo.org/#userprofile\" style=\"text-decoration: underline;\">settings</a>.")
     String digestUnsubscribeConstant();
 
     @DefaultStringValue("Your dashboard is empty! You can choose which reports appear on your dashboard by starring them in the reports page.")
@@ -411,13 +408,12 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter by date")
     String filterByDate();
-    
+
     @DefaultStringValue("Filter by end date")
     String filterByEndDate();
 
     @DefaultStringValue("Filter by start date")
     String filterByStartDate();
-
 
     @DefaultStringValue("Filter by geography")
     String filterByGeography();
@@ -632,8 +628,17 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No Data.")
     String noData();
 
-    @DefaultStringValue("Coordinates must specify a hemisphere (+/-/N/S/W/E)")
+    @DefaultStringValue("Coordinates must specify a hemisphere (+/-/N/S)")
     String noHemisphere();
+
+    @DefaultStringValue("Coordinates must specify a hemisphere (+/-/E/W)")
+    String noHemisphereLng();
+
+    @DefaultStringValue("Longitude must be less than 180°")
+    String longitudeOutOfBounds();
+
+    @DefaultStringValue("Latitude must be less than 90°")
+    String latitudeOutOfBounds();
 
     @DefaultStringValue("Coordinates must have at least one number")
     String noNumber();
@@ -1361,12 +1366,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
-    @DefaultStringValue("Please select type")
-    String pleaseSelectType();
-
-    @DefaultStringValue("Unfortunately you do not have design privileges to perform this action.")
-    String noDesignPrivileges();
-
     @DefaultStringValue("New Submission")
     String newSubmission();
 
@@ -1376,29 +1375,14 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Barcode")
     String fieldTypeBarcode();
 
-    @DefaultStringValue("Week")
-    String week();
-
     @DefaultStringValue("Calculated")
     String fieldTypeCalculated();
 
     @DefaultStringValue("Multiple selection")
     String multipleSelection();
 
-    @DefaultStringValue("Please select type")
-    String selectType();
-
     @DefaultStringValue("Please fill in all required fields")
     String pleaseFillInAllRequiredFields();
-
-    @DefaultStringValue("Sub type")
-    String subType();
-
-    @DefaultStringValue("Recommended mode for new users")
-    String recommendedMode();
-
-    @DefaultStringValue("Attributes and indicators appear separately")
-    String newFormAsClassicHelpBlock();
 
     @DefaultStringValue("There are no partners defined for this database, so it is not possible to make new submissions at this time.")
     String noPartners();
@@ -1526,30 +1510,12 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Unknown")
     String unknown();
 
-    @DefaultStringValue("Repeating")
-    String repeating();
-
     @DefaultStringValue("+ Add another")
     String addAnother();
 
     @DefaultStringValue("Tab is not selected.")
     String subFormTabNotSelected();
 
-    @DefaultStringValue("Failed to load subform instances.")
-    String failedToLoadSubformInstances();
-
-    @DefaultStringValue("Yearly")
-    String yearly();
-
-    @DefaultStringValue("Fortnightly")
-    String fortnightly();
-
-    @DefaultStringValue("Daily")
-    String daily();
-
-    @DefaultStringValue("Hourly")
-    String hourly();
-    
     @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right. <a target=\"_blank\" href=\"http://help.activityinfo.org/m/28175/l/445646-batch-import\" style=\"text-decoration: underline;\">Show me how</a>.")
     String columnMappingHelpLink();
 
@@ -1613,28 +1579,12 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Click to link")
     String clickToLink();
 
-
-
-    @DefaultStringValue("Please select type of subform again and save the subform due to serialization format change.")
-    String pleaseRecreateOutdatedSubfrom();
-
-    @DefaultStringValue("Subform type change forbidden because there are data associated with it.")
-    String subformTypeChangeDisabled();
-
-    @DefaultStringValue("Text")
-    String text();
-
-    @DefaultStringValue("Plain")
-    String plain();
-
-    @DefaultStringValue("Bold")
-    String bold();
-
     @DefaultStringValue("Reference")
     String reference();
 
     @DefaultStringValue("Choose form")
     String chooseForm();
+
     @DefaultStringValue("clear")
     String clear();
 
@@ -1643,12 +1593,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Link removed")
     String linkRemoved();
-
-    @DefaultStringValue("My databases")
-    String myDatabases();
-
-    @DefaultStringValue("Shared databases")
-    String sharedDatabases();
 
     @DefaultStringValue("You do not have permission to edit the design of this database.")
     String noDbDesignPermissions();
@@ -1676,4 +1620,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Choose reference value")
     String chooseReferenceValue();
+
+    @DefaultStringValue("A user with this email address has already been added to the database.")
+    String userExistsMessage();
+
+    @DefaultStringValue("User exists")
+    String userExistsTitle();
 }

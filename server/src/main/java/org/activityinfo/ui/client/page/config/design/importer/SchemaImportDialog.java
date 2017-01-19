@@ -19,11 +19,13 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.core.shared.importing.schema.SchemaImporter;
+import org.activityinfo.core.shared.importing.schema.SchemaImporterV2;
+import org.activityinfo.core.shared.importing.schema.SchemaImporterV3;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
-import org.activityinfo.ui.client.page.config.design.importer.SchemaImporter.ProgressListener;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.activityinfo.ui.client.style.BaseStylesheet;
 import org.activityinfo.ui.client.widget.ModalDialog;
 import org.activityinfo.ui.client.widget.ProgressBar;
@@ -82,6 +84,8 @@ public class SchemaImportDialog {
     private Promise<Void> promise;
 
     private SchemaImporter importer;
+    private SchemaImporterV2 importerV2;
+    private SchemaImporterV3 importerV3;
 
     @UiField FlowPanel container;
 
@@ -110,8 +114,9 @@ public class SchemaImportDialog {
 
     private Timer validateTimer;
 
-    public SchemaImportDialog(SchemaImporter importer) {
-        this.importer = importer;
+    public SchemaImportDialog(SchemaImporterV2 importerV2, SchemaImporterV3 importerV3) {
+        this.importerV2 = importerV2;
+        this.importerV3 = importerV3;
 
         BaseStylesheet.INSTANCE.ensureInjected();
 
@@ -228,6 +233,12 @@ public class SchemaImportDialog {
             return;
         }
 
+        if(importerV3.accept(source)) {
+            importer = importerV3;
+        } else {
+            importer = importerV2;
+        }
+
         if(!importer.parseColumns(source)) {
             onInputInvalid(I18N.MESSAGES.missingColumns(
                     Joiner.on(", ").join(importer.getMissingColumns())));
@@ -287,7 +298,7 @@ public class SchemaImportDialog {
         importer.clearWarnings();
         importer.processRows();
 
-        importer.setProgressListener(new ProgressListener() {
+        importer.setProgressListener(new SchemaImporter.ProgressListener() {
 
             @Override
             public void submittingBatch(int batchNumber, int batchCount) {

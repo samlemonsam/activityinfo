@@ -56,7 +56,7 @@ public class User implements java.io.Serializable {
     private boolean emailNotification;
     private User invitedBy;
     private Date dateCreated;
-
+    private String features;
 
     public User() {
         dateCreated = new Date();
@@ -147,6 +147,15 @@ public class User implements java.io.Serializable {
             return Locale.ENGLISH;
         }
         return Locale.forLanguageTag(this.locale);
+    }
+
+    @Column(name = "Features", nullable = true)
+    public String getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(String features) {
+        this.features = features;
     }
 
     public void setLocale(String locale) {

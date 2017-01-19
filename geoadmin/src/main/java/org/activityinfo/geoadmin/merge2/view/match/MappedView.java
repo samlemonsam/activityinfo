@@ -2,7 +2,6 @@ package org.activityinfo.geoadmin.merge2.view.match;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.geo.Extents;
 
 
 public abstract class MappedView implements ColumnView {
@@ -57,12 +56,4 @@ public abstract class MappedView implements ColumnView {
         return source.getBoolean(newRow);
     }
 
-    @Override
-    public Extents getExtents(int row) {
-        int newRow = transformRow(row);
-        if(newRow == -1) {
-            return null;
-        }
-        return source.getExtents(newRow);
-    }
 }

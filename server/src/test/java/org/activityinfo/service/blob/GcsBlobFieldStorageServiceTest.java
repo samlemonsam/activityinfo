@@ -28,9 +28,16 @@ import com.google.code.appengine.awt.image.BufferedImage;
 import com.google.code.appengine.imageio.ImageIO;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.fixtures.Modules;
+import org.activityinfo.fixtures.TestHibernateModule;
+import org.activityinfo.legacy.shared.adapter.ActivityInfoClientAsyncStub;
+import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -43,14 +50,17 @@ import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
-import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
+import org.activityinfo.server.util.TemplateModule;
+import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
@@ -66,8 +76,19 @@ import static org.junit.Assert.*;
  */
 
 @RunWith(InjectionSupport.class)
+@Modules({
+        TestHibernateModule.class,
+        TemplateModule.class,
+        GwtRpcModule.class,
+        AuthenticationModuleStub.class,
+        ConfigModuleStub.class,
+        GcsBlobFieldStorageServiceModule.class
+})
 @OnDataSet("/dbunit/schema1.db.xml")
-public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
+public class GcsBlobFieldStorageServiceTest {
+
+    @Inject
+    private Injector injector;
 
     private static final String FILE_NAME = "goabout.png";
     public static final int USER_WITHOUT_ACCESS_TO_DB_1 = 22;
@@ -76,13 +97,14 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
             new LocalBlobstoreServiceTestConfig(), new LocalDatastoreServiceTestConfig().
             setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
-    @Inject
-    GcsBlobFieldStorageService blobService;
+    private GcsBlobFieldStorageService blobService;
+    private ResourceLocatorAdaptor locator;
 
     private AuthenticatedUser user;
     private AuthenticatedUser noAccessUser;
     private BlobId blobId;
     private ResourceId resourceId = CuidAdapter.activityFormClass(1);
+    private Closeable ofy;
 
     @BeforeClass
     public static void setupI18N() {
@@ -92,10 +114,16 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
     @Before
     public final void uploadBlob() throws IOException {
 
-        AuthenticationModuleStub.setUserId(1);
-
         localServiceTestHelper.setUp();
+        ofy = ObjectifyService.begin();
+
+        blobService = injector.getInstance(GcsBlobFieldStorageService.class);
         blobService.setTestBucketName();
+
+        locator = new ResourceLocatorAdaptor(
+                new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class), blobService));
+
+        AuthenticationModuleStub.setUserId(1);
 
         user = new AuthenticatedUser("x", 1, "user1@user.com");
         noAccessUser = new AuthenticatedUser("x", 3, "stefan@user.com");
@@ -109,6 +137,7 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
 
     @After
     public void tearDown() {
+        ofy.close();
         localServiceTestHelper.tearDown();
     }
 
@@ -206,6 +235,8 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         blobService.setTestBucketName();
 
         int activityId = 1;
+        int databaseId = 1;
+        int locationType = 10;
 
         ResourceId attachmentFieldId = ResourceId.generateFieldId(AttachmentType.TYPE_CLASS);
         FormClass formClass = addAttachmentField(activityId, attachmentFieldId);
@@ -231,9 +262,9 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
         instance.set(attachmentFieldId, attachmentValue);
-        instance.set(locationField(activityId), locationInstanceId(1));
-        instance.set(partnerField(activityId), partnerInstanceId(1));
-        instance.set(projectField(activityId), projectInstanceId(1));
+        instance.set(locationField(activityId), locationRef(CuidAdapter.locationFormClass(locationType), 1));
+        instance.set(partnerField(activityId), partnerRef(databaseId, 1));
+        instance.set(projectField(activityId), projectRef(databaseId, 1));
         instance.set(field(formClass.getId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(formClass.getId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(field(formClass.getId(), COMMENT_FIELD), "My comment");
@@ -251,18 +282,16 @@ public class GcsBlobFieldStorageServiceTest extends CommandTestCase2 {
         instance.setId(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()));
         instance.setClassId(CuidAdapter.activityFormClass(anotherActivityId));
         instance.set(newAttachmentFieldId, attachmentValue);
-        instance.set(field(instance.getClassId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(field(instance.getClassId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
-        instance.set(partnerField(anotherActivityId), partnerInstanceId(1));
+        instance.set(field(instance.getFormId(), START_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(field(instance.getFormId(), END_DATE_FIELD), new LocalDate(2014, 1, 1));
+        instance.set(partnerField(anotherActivityId), partnerRef(databaseId, 1));
 
         boolean persisted = true;
         try {
             assertResolves(locator.persist(instance)); // this must fail because of blob permission check
         } catch (RuntimeException e) {
             e.printStackTrace();
-            if (e.getCause() instanceof WebApplicationException) {
-                persisted = false;
-            }
+            persisted = false;
         }
 
         assertFalse("Access to blob is stolen! Permissions check for blobs is broken.", persisted);

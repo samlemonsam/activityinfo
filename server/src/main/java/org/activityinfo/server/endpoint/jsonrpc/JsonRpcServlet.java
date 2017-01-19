@@ -12,7 +12,6 @@ import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.util.monitoring.Count;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -63,7 +62,6 @@ public class JsonRpcServlet {
     }
     
     @POST
-    @Count("api.rpc")
     public Response execute(String json) {
         
         // All RPC Commands require authentication

@@ -40,6 +40,7 @@ public class PartnerTable implements SimpleTable {
         mapping.setFromClause("partnerindatabase pd LEFT JOIN partner base ON (pd.partnerId=base.partnerId)");
         mapping.setBaseFilter("pd.databaseId=" + databaseId);
         mapping.setVersion(databaseVersionMap.getSchemaVersion(databaseId));
+        mapping.setSchemaVersion(1L); // Schema is static
         
         FormField nameField = new FormField(field(formId, NAME_FIELD))
                 .setRequired(true)

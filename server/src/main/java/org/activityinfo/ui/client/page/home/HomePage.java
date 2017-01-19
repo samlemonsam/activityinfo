@@ -42,7 +42,7 @@ public class HomePage implements Page {
         SafeHtmlBuilder html = new SafeHtmlBuilder();
         for (FormInstance instance : rootItems) {
             renderer.render(html,
-                    IconStyleProvider.getIconStyleForFormClass(instance.getClassId()),
+                    IconStyleProvider.getIconStyleForFormClass(instance.getFormId()),
                     instance.getString(FolderClass.LABEL_FIELD_ID),
                     Strings.nullToEmpty(instance.getString(FolderClass.DESCRIPTION_FIELD_ID)),
                     "#i/" + instance.getId().asString());

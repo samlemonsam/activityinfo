@@ -4,9 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.Resources;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -55,16 +53,6 @@ public class FormSection extends FormElement implements FormElementContainer {
     public FormSection insertElement(int index, FormElement element) {
         elements.add(index, element);
         return this;
-    }
-
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("id", id.asString());
-        record.set("label", label);
-        record.set("type", "section");
-        record.set("elements", Resources.asRecordList(getElements()));
-        return record;
     }
 
     @Override

@@ -98,6 +98,7 @@ public class DbUnit {
             }
 
             private PreparedStatement prepare(String sql, List<?> parameters) throws SQLException {
+                System.out.println("SQL: " + sql);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 for (int i = 0; i < parameters.size(); ++i) {
                     statement.setObject(i + 1, parameters.get(i));

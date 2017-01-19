@@ -22,6 +22,7 @@ import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.service.store.FormCatalog;
 import org.junit.After;
 import org.junit.Before;
@@ -71,8 +72,6 @@ public class XFormResourceTest extends CommandTestCase2 {
     private XFormResources formResource;
     private XFormSubmissionResource formSubmissionResource;
     private ResourceLocatorSyncImpl resourceLocator;
-    
-    
 
     @Before
     public void setUp() throws IOException {
@@ -80,7 +79,8 @@ public class XFormResourceTest extends CommandTestCase2 {
         objectifyService = ObjectifyService.begin();
 
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
-        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class), authProvider, new PermissionOracle(injector.getProvider(EntityManager.class), null));
+        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class),
+                authProvider, new PermissionOracle(injector.getProvider(EntityManager.class)), new BlobAuthorizerStub());
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);
 
@@ -93,7 +93,7 @@ public class XFormResourceTest extends CommandTestCase2 {
 
         formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService);
         formSubmissionResource = new XFormSubmissionResource(
-                getDispatcherSync(), resourceLocator, tokenService, null, null, blobstore, idService, backupService);
+                getDispatcherSync(), resourceLocator, tokenService, blobstore, idService, backupService);
     }
     
     @After

@@ -3,7 +3,8 @@ package org.activityinfo.ui.client.component.form.field.map;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.component.form.field.OptionSet;
 import org.discotools.gwt.leaflet.client.types.LatLng;
 
@@ -15,26 +16,29 @@ import java.util.Set;
  */
 public class MapItem {
 
-    private String id;
+    private RecordRef ref;
     private String label;
     private double latitude;
     private double longitude;
 
-    public MapItem(String id, String label, double latitude, double longitude) {
-        Preconditions.checkNotNull(id);
+    public MapItem(RecordRef ref, String label, double latitude, double longitude) {
+        Preconditions.checkNotNull(ref);
 
-        this.id = id;
+        this.ref = ref;
         this.label = label;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public static Set<MapItem> items(OptionSet optionSet, String geoPointColumnName) {
+    public static Set<MapItem> items(ResourceId formId, OptionSet optionSet, String geoPointColumnName) {
         Set<MapItem> items = Sets.newHashSet();
-        for (int i = 0; i < optionSet.getCount(); i++) {
+       /* for (int i = 0; i < optionSet.getCount(); i++) {
             Extents extents = optionSet.getColumnView(geoPointColumnName).getExtents(i);
-            items.add(new MapItem(optionSet.getId(i), optionSet.getLabel(i), extents.getX1(), extents.getY1()));
-        }
+            items.add(new MapItem(new RecordRef(formId, ResourceId.valueOf(optionSet.getRef(i))),
+                    optionSet.getLabel(i),
+                    extents.getX1(),
+                    extents.getY1()));
+        }*/
         return items;
     }
 
@@ -47,12 +51,8 @@ public class MapItem {
         return Optional.absent();
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public RecordRef getId() {
+        return ref;
     }
 
     public String getLabel() {
@@ -92,21 +92,32 @@ public class MapItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        MapItem item = (MapItem) o;
+        MapItem mapItem = (MapItem) o;
 
-        return !(id != null ? !id.equals(item.id) : item.id != null);
+        if (Double.compare(mapItem.latitude, latitude) != 0) return false;
+        if (Double.compare(mapItem.longitude, longitude) != 0) return false;
+        if (!ref.equals(mapItem.ref)) return false;
+        return label != null ? label.equals(mapItem.label) : mapItem.label == null;
 
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result;
+        long temp;
+        result = ref.hashCode();
+        result = 31 * result + (label != null ? label.hashCode() : 0);
+        temp = Double.doubleToLongBits(latitude);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(longitude);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 
     @Override
     public String toString() {
         return "MapItem{" +
-                "id='" + id + '\'' +
+                "ref='" + ref + '\'' +
                 ", label='" + label + '\'' +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +

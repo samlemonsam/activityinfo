@@ -8,6 +8,7 @@ import org.activityinfo.core.server.type.converter.JvmConverterFactory;
 import org.activityinfo.core.shared.importing.match.ColumnMappingGuesser;
 import org.activityinfo.core.shared.importing.model.ImportModel;
 import org.activityinfo.core.shared.importing.model.MapExistingAction;
+import org.activityinfo.core.shared.importing.source.PastedTable;
 import org.activityinfo.core.shared.importing.source.SourceColumn;
 import org.activityinfo.core.shared.importing.strategy.FieldImportStrategies;
 import org.activityinfo.core.shared.importing.validation.ValidatedRowTable;
@@ -24,7 +25,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.importDialog.Importer;
-import org.activityinfo.ui.client.component.importDialog.data.PastedTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +45,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
     private static final ResourceId TRAINING_PROGRAM_CLASS = CuidAdapter.activityFormClass(2);
 
 
-    private static final ResourceId BRAC_PARTNER_RESOURCE_ID = CuidAdapter.partnerInstanceId(1);
+    private static final ResourceId BRAC_PARTNER_RESOURCE_ID = CuidAdapter.partnerRecordId(1);
 
     public static final int MODHUPUR = 24;
 
@@ -148,7 +148,6 @@ public class ImportSimpleTest extends AbstractImporterTest {
 
         assertMapping("Partner", "Partner Name");
         assertMapping("district name", "District Name");
-        //assertMapping("upazila", "Upzilla Name");
     }
 
     private void assertMapping(String sourceColumnLabel, String targetColumnLabel) {

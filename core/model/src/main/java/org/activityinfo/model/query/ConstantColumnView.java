@@ -2,7 +2,6 @@ package org.activityinfo.model.query;
 
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NullFieldValue;
-import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -99,11 +98,6 @@ public class ConstantColumnView implements ColumnView, Serializable {
     @Override
     public String getString(int row) {
        return stringValue;
-    }
-
-    @Override
-    public Extents getExtents(int row) {
-        return null;
     }
 
     @Override

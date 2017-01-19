@@ -21,7 +21,6 @@ package org.activityinfo.ui.client.component.form.subform;
  * #L%
  */
 
-import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
@@ -37,6 +36,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import org.activityinfo.model.form.SubFormKind;
@@ -72,7 +72,7 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
         tabCount = initialTabCount(kind);
 
         setKind(kind);
-        sinkEvents(Event.CLICK);
+        sinkEvents(Event.ONCLICK);
 
         addDomHandler(this, ClickEvent.getType());
         render();

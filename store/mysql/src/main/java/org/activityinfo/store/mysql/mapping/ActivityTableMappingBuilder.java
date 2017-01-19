@@ -50,7 +50,7 @@ public class ActivityTableMappingBuilder {
         if(activity.getSerializedFormClass() != null) {
             return newForm(activity);
         }
-        
+
         ActivityTableMappingBuilder mapping = new ActivityTableMappingBuilder();
         mapping.activity = activity;
         mapping.baseTable = "site";
@@ -58,6 +58,7 @@ public class ActivityTableMappingBuilder {
         mapping.baseFilter = "base.deleted=0     AND base.activityId=" + activity.getId();
         mapping.classId = CuidAdapter.activityFormClass(activity.getId());
         mapping.formClass = new FormClass(mapping.classId);
+        mapping.formClass.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
         mapping.formClass.setLabel(activity.getName());
         mapping.formClass.setDatabaseId(activity.getDatabaseId());
         mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.SITE_DOMAIN, "siteId");
@@ -184,7 +185,7 @@ public class ActivityTableMappingBuilder {
         siteField.setRequired(true);
         
         formClass.addElement(siteField);
-        mappings.add(new FieldMapping(siteField, "siteId", new ReferenceConverter(SITE_DOMAIN)));
+        mappings.add(new FieldMapping(siteField, "siteId", new ReferenceConverter(activity.getSiteFormClassId(), SITE_DOMAIN)));
     }
     
     public void addLocationField() {
@@ -195,7 +196,8 @@ public class ActivityTableMappingBuilder {
         locationField.setRequired(true);
         
         formClass.addElement(locationField);
-        mappings.add(new FieldMapping(locationField, "locationId", new ReferenceConverter(LOCATION_DOMAIN)));
+        // TODO: how do we deal with this??
+        mappings.add(new FieldMapping(locationField, "locationId", new ReferenceConverter(activity.getLocationFormClassId(), LOCATION_DOMAIN)));
     }
 
     public void addPartnerField() {
@@ -210,21 +212,28 @@ public class ActivityTableMappingBuilder {
     }
 
     private void addPartnerField(FormField partnerField) {
-        mappings.add(new FieldMapping(partnerField, "partnerId", new ReferenceConverter(PARTNER_DOMAIN)));
+        mappings.add(new FieldMapping(partnerField, "partnerId", new ReferenceConverter(
+                CuidAdapter.partnerFormId(activity.getDatabaseId()), PARTNER_DOMAIN)));
+
     }
 
     public void addProjectField() {
+        // For new "beta" forms, we build the form class exactly once,
+        // and at this stage we hide the project field by default.
+
         FormField projectField = new FormField(field(classId, PROJECT_FIELD))
                 .setLabel("Project")
                 .setCode("project")
                 .setType(ReferenceType.single(activity.getProjectFormClassId()))
+                .setVisible(activity.isClassicView())
                 .setRequired(false);
         formClass.addElement(projectField);
         addProjectField(projectField);
     }
 
     private void addProjectField(FormField projectField) {
-        mappings.add(new FieldMapping(projectField, "projectId", new ReferenceConverter(PROJECT_DOMAIN)));
+        mappings.add(new FieldMapping(projectField, "projectId",
+                new ReferenceConverter(activity.getProjectFormClassId(), PROJECT_DOMAIN)));
     }
 
     public void addComments(){

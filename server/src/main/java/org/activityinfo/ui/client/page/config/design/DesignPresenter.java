@@ -37,6 +37,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
+import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.client.AsyncMonitor;
 import org.activityinfo.legacy.client.Dispatcher;
@@ -63,7 +64,8 @@ import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.DbPage;
 import org.activityinfo.ui.client.page.config.DbPageState;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImportDialog;
-import org.activityinfo.ui.client.page.config.design.importer.SchemaImporter;
+import org.activityinfo.core.shared.importing.schema.SchemaImporterV2;
+import org.activityinfo.core.shared.importing.schema.SchemaImporterV3;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 
@@ -103,6 +105,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
     private final EventBus eventBus;
     private final Dispatcher service;
+    private ResourceLocator locator;
     private final View view;
     private final UiConstants messages;
 
@@ -112,12 +115,14 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     @Inject
     public DesignPresenter(EventBus eventBus,
                            Dispatcher service,
+                           ResourceLocator locator,
                            StateProvider stateMgr,
                            View view,
                            UiConstants messages) {
         super(eventBus, service, stateMgr, view);
         this.eventBus = eventBus;
         this.service = service;
+        this.locator = locator;
         this.view = view;
         this.messages = messages;
     }
@@ -268,8 +273,10 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
         super.onUIAction(actionId);
 
         if (UIActions.IMPORT.equals(actionId)) {
-            SchemaImporter importer = new SchemaImporter(service, db);
-            SchemaImportDialog dialog = new SchemaImportDialog(importer);
+            SchemaImporterV2 importer = new SchemaImporterV2(service, db);
+            SchemaImportDialog dialog = new SchemaImportDialog(
+                    new SchemaImporterV2(service, db),
+                    new SchemaImporterV3(db.getId(), locator));
             dialog.show().then(new Function<Void, Object>() {
                 @Nullable
                 @Override

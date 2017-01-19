@@ -22,7 +22,6 @@ package org.activityinfo.model.type.period;
  */
 
 import com.google.gson.JsonElement;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -46,10 +45,6 @@ public class PeriodType implements FieldType {
             return INSTANCE;
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return PeriodValue.fromRecord(record);
-        }
     };
 
     public PeriodType() {

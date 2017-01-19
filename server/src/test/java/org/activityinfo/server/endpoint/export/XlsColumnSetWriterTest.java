@@ -8,6 +8,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
@@ -38,7 +39,8 @@ public class XlsColumnSetWriterTest extends CommandTestCase2 {
         QueryModel queryModel = new QueryModel(rootFormClassId);
         queryModel.selectResourceId().as("id");
         for (ColumnNode column : formTree.getColumnNodes()) {
-            if (column.getNode().getType() instanceof GeoPointType) {
+            if (column.getNode().getType() instanceof GeoPointType ||
+                column.getNode().getType() instanceof GeoAreaType) {
                 continue;
             }
             queryModel.selectField(column.getNode().getFieldId()).as(column.getNode().getFieldId().asString());

@@ -30,13 +30,10 @@ import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.HasSetFieldValue;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.ui.client.component.formdesigner.FormDesignerModel;
-import org.activityinfo.model.type.enumerated.EnumValue;
 
 import java.util.List;
 import java.util.Set;
@@ -163,20 +160,20 @@ public class RowDataBuilder {
         FieldType type = field.getType();
 
         // start from second element, first one is field id
-        Set<ResourceId> resourceIdSet = Sets.newHashSet();
+        Set<ResourceId> refs = Sets.newHashSet();
         for (int i = 1; i < functionCallNode.getArguments().size(); i++) {
             ExprNode argNode = functionCallNode.getArguments().get(i);
             if (argNode instanceof SymbolExpr) {
                 String symbol = ((SymbolExpr) argNode).getName();
-                resourceIdSet.add(ResourceId.valueOf(symbol));
+                refs.add(ResourceId.valueOf(symbol));
             } else {
                 throw new UnsupportedOperationException("Unknown argument node for function: " + functionCallNode.getFunction().getId());
             }
         }
         if (type instanceof ReferenceType) {
-            row.setValue(new ReferenceValue(resourceIdSet));
+            throw new UnsupportedOperationException("TODO");
         } else if (type instanceof EnumType) {
-            row.setValue(new EnumValue(resourceIdSet));
+            row.setValue(new EnumValue(refs));
         } else {
             throw new UnsupportedOperationException("Unknown value type for function: " + functionCallNode.getFunction().getId());
         }
@@ -219,20 +216,16 @@ public class RowDataBuilder {
         } else if (node instanceof SymbolExpr) {
             ResourceId newItem = ResourceId.valueOf(placeholder(node));
 
-            if (row.getValue() instanceof HasSetFieldValue) { // update existing value
-                HasSetFieldValue oldValue = (HasSetFieldValue) row.getValue();
+            if (row.getValue() instanceof EnumValue) { // update existing value
+                EnumValue oldValue = (EnumValue) row.getValue();
                 Set<ResourceId> newValue = Sets.newHashSet(oldValue.getResourceIds());
                 newValue.add(newItem);
                 if (row.getFormField().getType() instanceof EnumType) {
                     row.setValue(new EnumValue(newValue));
-                } else if (row.getFormField().getType() instanceof ReferenceType) {
-                    row.setValue(new ReferenceValue(newValue));
                 }
             } else { // create value
                 if (row.getFormField().getType() instanceof EnumType) {
                     row.setValue(new EnumValue(newItem));
-                } else if (row.getFormField().getType() instanceof ReferenceType) {
-                    row.setValue(new ReferenceValue(newItem));
                 } else {
                     throw new UnsupportedOperationException(row.getFormField().getType() + " is not supported.");
                 }

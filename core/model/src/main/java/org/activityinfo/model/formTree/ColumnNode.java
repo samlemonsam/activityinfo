@@ -26,10 +26,6 @@ public class ColumnNode {
         this.fieldPaths = Lists.newArrayList(node.getPath());
     }
 
-    public ColumnNode(FieldPath fieldPath, String header) {
-        this.header = header;
-        this.fieldPaths = Lists.newArrayList(fieldPath);
-    }
 
     public String getValueAsString(Object value) {
         if (value != null) {

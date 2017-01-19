@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class QueryModelTest {
 
@@ -26,6 +26,20 @@ public class QueryModelTest {
 
         QueryModel remodel = objectMapper.readValue(json, QueryModel.class);
         assertThat(remodel.getFilter(), Matchers.nullValue());
+    }
+
+    @Test
+    public void clientSideSerialization() {
+        QueryModel model = new QueryModel(ResourceId.valueOf("XYZ"));
+        model.selectResourceId().as("id");
+        model.selectResourceId();
+        model.selectExpr("foo").as("foo_column");
+
+        String json = model.toJsonString();
+
+        System.out.println(json);
+
+        QueryModel remodel = QueryModel.fromJson(json);
     }
 
 }

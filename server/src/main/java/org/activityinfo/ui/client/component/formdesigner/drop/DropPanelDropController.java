@@ -34,7 +34,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.ui.client.component.chooseForm.ChooseFormCallback;
+import org.activityinfo.ui.client.component.chooseForm.ChooseFormDialog;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -160,6 +163,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
 
     private void previewDropNewWidget(final DragContext context) throws VetoDragException {
         final Template template = ((DnDLabel) context.draggable).getTemplate();
+
         if (template instanceof FieldTemplate) {
             final FormField formField = ((FieldTemplate)template).create();
             FormClass formClass = formDesigner.getModel().getFormClassByElementId(resourceId);
@@ -170,7 +174,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                     final FieldWidgetContainer fieldWidgetContainer = new FieldWidgetContainer(formDesigner, formFieldWidget, formField, resourceId);
                     containerMap.put(formField.getId(), fieldWidgetContainer);
                     drop(fieldWidgetContainer, context, formField);
-
+                    initFieldProperties(fieldWidgetContainer, formField);
                     return null;
                 }
             });
@@ -182,6 +186,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.section(formDesigner, formSection, resourceId);
             containerMap.put(resourceId, widgetContainer); // parent drop container
             drop(widgetContainer, context, formSection);
+
         } else if (template instanceof LabelTemplate) {
             final FormLabel formLabel = ((LabelTemplate)template).create();
 
@@ -221,6 +226,31 @@ public class DropPanelDropController extends FlowPanelDropController implements 
 
         // forbid drop of source control widget
         throw new VetoDragException();
+    }
+
+
+    private void initFieldProperties(FieldWidgetContainer fieldWidgetContainer, FormField formField) {
+        if(formField.getType() instanceof ReferenceType) {
+            chooseReference(fieldWidgetContainer, formField);
+        }
+    }
+
+    private void chooseReference(final FieldWidgetContainer container, final FormField formField) {
+        final ChooseFormDialog dialog = new ChooseFormDialog(this.formDesigner.getResourceLocator());
+        dialog.choose(new ChooseFormCallback() {
+            @Override
+            public void onChosen(CatalogEntry entry) {
+                ReferenceType type = (ReferenceType) formField.getType();
+                type.setRange(ResourceId.valueOf(entry.getId()));
+                formField.setLabel(entry.getLabel());
+                container.syncWithModel();
+            }
+
+            @Override
+            public void onCanceled() {
+                container.removeFromForm();
+            }
+        });
     }
 
     private void vetoDropIfNeeded(DragContext context) throws VetoDragException {

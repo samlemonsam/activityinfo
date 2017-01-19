@@ -8,8 +8,19 @@ import java.util.List;
  */
 public class DocModel {
 
+    /**
+     * General topics written in markdown and read from src/main/content
+     */
     private String topics;
+
+    /**
+     * The OpenAPI specification model
+     */
     private SpecModel spec;
+
+    /**
+     * Programming languages for which we provide examples
+     */
     private List<String> languages;
 
     public String getTopics() {

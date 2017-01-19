@@ -30,11 +30,13 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.core.client.ResourceLocator;
-import org.activityinfo.core.shared.application.ApplicationProperties;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -45,7 +47,6 @@ import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.model.type.expr.ExprFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
@@ -101,10 +102,6 @@ public class FormFieldWidgetFactory {
         return createWidget(formClass, field, valueUpdater, null, null);
     }
 
-    public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater, @Nullable EventBus eventBus) {
-        return createWidget(formClass, field, valueUpdater, null, eventBus);
-    }
-
     public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field,
                                                            ValueUpdater valueUpdater, FormClass validationFormClass, @Nullable EventBus eventBus) {
         FieldType type = field.getType();
@@ -117,9 +114,6 @@ public class FormFieldWidgetFactory {
 
         } else if (type instanceof TextType) {
             return Promise.resolved(new TextFieldWidget(valueUpdater));
-
-        } else if (type instanceof ExprFieldType) {
-            return Promise.resolved(new ExprFieldWidget(validationFormClass, valueUpdater));
 
         } else if (type instanceof CalculatedFieldType) {
             return Promise.resolved(new CalculatedFieldWidget(valueUpdater));
@@ -159,7 +153,7 @@ public class FormFieldWidgetFactory {
     }
 
     private Promise<? extends FormFieldWidget> createReferenceWidget(FormField field, final ValueUpdater updater) {
-        if (field.isSubPropertyOf(ApplicationProperties.HIERARCHIAL)) {
+        if (isHierarchical(field)) {
             return HierarchyFieldWidget.create(resourceLocator, (ReferenceType) field.getType(), updater);
         } else {
             final ReferenceType type = (ReferenceType) field.getType();
@@ -183,7 +177,7 @@ public class FormFieldWidgetFactory {
                     if (geoPointField.isPresent()) { // if has geoPoint then show geo widget and propose map UI
                         widgetPromise = createMapWidget(type, updater, geoPointField.get());
                     } else { // no geo point, fallback to list
-                        widgetPromise = createSimpleListWidget(type, updater);
+                        widgetPromise = createSimpleListWidget(formClass, type, updater);
                     }
 
                     widgetPromise.then(new Function<FormFieldWidget, Object>() {
@@ -201,8 +195,22 @@ public class FormFieldWidgetFactory {
         }
     }
 
+    private boolean isHierarchical(FormField field) {
+        ReferenceType type = (ReferenceType) field.getType();
+        if(type.getRange().size() <= 1) {
+            return false;
+        }
+        for (ResourceId resourceId : type.getRange()) {
+            if(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, final FormField geoField) {
-        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
+        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+        QueryModel queryModel = new QueryModel(formId);
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
         queryModel.selectField(geoField.getId());
@@ -212,7 +220,7 @@ public class FormFieldWidgetFactory {
                 .then(new Function<ColumnSet, FormFieldWidget>() {
                     @Override
                     public FormFieldWidget apply(ColumnSet input) {
-                        Set<MapItem> items = MapItem.items(new OptionSet(input), geoField.getId().asString());
+                        Set<MapItem> items = MapItem.items(formId, new OptionSet(formId, input), geoField.getId().asString());
                         return new ReferenceMapWidget(items, valueUpdater);
                     }
                 });
@@ -228,11 +236,12 @@ public class FormFieldWidgetFactory {
         return Optional.absent();
     }
 
-    private Promise<? extends FormFieldWidget> createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
+    private Promise<? extends FormFieldWidget> createSimpleListWidget(FormClass formClass, final ReferenceType type, final ValueUpdater valueUpdater) {
 
-        QueryModel queryModel = new QueryModel(Iterables.getOnlyElement(type.getRange()));
+        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
+        QueryModel queryModel = new QueryModel(formId);
         queryModel.selectResourceId().as("id");
-        queryModel.selectExpr("label").as("label");
+        queryModel.selectExpr(findLabelExpression(formClass)).as("label");
 
         return resourceLocator
                 .queryTable(queryModel)
@@ -242,26 +251,41 @@ public class FormFieldWidgetFactory {
 
                         int size = input.getNumRows();
 
-                        boolean isProjectField = !type.getRange().isEmpty() &&
-                                type.getRange().iterator().next().getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
-                        if (size == 0 && isProjectField) { // for now hide only project field (AI-1200)
-                            return NullFieldWidget.INSTANCE;
-                        }
+                        OptionSet instances = new OptionSet(formId, input);
 
-                        if (size < SMALL_BALANCE_NUMBER) {
+                        if (size > 0 && size < SMALL_BALANCE_NUMBER) {
                             // Radio buttons
-                            return new CheckBoxFieldWidget(type, new OptionSet(input), valueUpdater);
+                            return new CheckBoxFieldWidget(type, instances, valueUpdater);
 
                         } else if (size < MEDIUM_BALANCE_NUMBER) {
                             // Dropdown list
-                            return new ComboBoxFieldWidget(new OptionSet(input), valueUpdater);
+                            return new ComboBoxFieldWidget(formId, instances, valueUpdater);
 
                         } else {
                             // Suggest box
-                            return new SuggestBoxWidget(new OptionSet(input), valueUpdater);
+                            return new SuggestBoxWidget(formId, instances, valueUpdater);
                         }
                     }
                 });
+    }
+
+    private ExprNode findLabelExpression(FormClass formClass) {
+        // Look for a field with the "label" tag
+        for (FormField field : formClass.getFields()) {
+            if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
+        // If no such field exists, pick the first text field
+        for (FormField field : formClass.getFields()) {
+            if(field.getType() instanceof TextType) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
+        // Otherwise fall back to the generated id
+        return new SymbolExpr(ColumnModel.ID_SYMBOL);
     }
 }
 

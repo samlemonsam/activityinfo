@@ -25,6 +25,7 @@ import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.service.store.FormPermissions;
@@ -32,6 +33,7 @@ import org.activityinfo.store.hrd.HrdFormAccessor;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
@@ -51,25 +53,28 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 
 public class FormResource {
-    public static final String JSON_CONTENT_TYPE = "application/json; charset=UTF-8";
+    public static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
 
     private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
 
     private final Provider<FormCatalog> catalog;
     private final Provider<AuthenticatedUser> userProvider;
     private final PermissionOracle permissionOracle;
+    private BlobAuthorizer blobAuthorizer;
 
     private final ResourceId formId;
     private final Gson prettyPrintingGson;
 
     public FormResource(ResourceId formId,
                         Provider<FormCatalog> catalog,
-                        Provider<AuthenticatedUser> userProvider, 
-                        PermissionOracle permissionOracle) {
+                        Provider<AuthenticatedUser> userProvider,
+                        PermissionOracle permissionOracle,
+                        BlobAuthorizer blobAuthorizer) {
         this.formId = formId;
         this.catalog = catalog;
         this.userProvider = userProvider;
         this.permissionOracle = permissionOracle;
+        this.blobAuthorizer = blobAuthorizer;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -79,6 +84,7 @@ public class FormResource {
      */
     @GET
     @Path("schema")
+    @Produces(JSON_CONTENT_TYPE)
     public Response getFormSchema() {
 
         assertVisible(formId);
@@ -117,7 +123,7 @@ public class FormResource {
     
     @GET
     @Path("record/{recordId}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(JSON_CONTENT_TYPE)
     public Response getRecord(@PathParam("recordId") String recordId) {
         
         FormAccessor collection = assertVisible(formId);
@@ -133,13 +139,13 @@ public class FormResource {
 
         return Response.ok()
                 .entity(record.get().toJsonElement().toString())
-                .type(MediaType.APPLICATION_JSON_TYPE)
+                .type(JSON_CONTENT_TYPE)
                 .build();
     }
 
     @GET
     @Path("record/{recordId}/history")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(JSON_CONTENT_TYPE)
     public Response getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
 
         assertVisible(formId);
@@ -149,14 +155,14 @@ public class FormResource {
 
         return Response.ok()
                 .entity(array.toString())
-                .type(MediaType.APPLICATION_JSON_TYPE)
+                .type(JSON_CONTENT_TYPE)
                 .build();
     }
 
 
     @GET
     @Path("records")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(JSON_CONTENT_TYPE)
     public Response getRecords(@QueryParam("parentId") String parentId) {
 
         assertVisible(formId);
@@ -175,22 +181,26 @@ public class FormResource {
         for (FormRecord record : records) {
             recordSet.addRecord(record);
         }        
-        return Response.ok(recordSet.toJsonString(), MediaType.APPLICATION_JSON_TYPE).build();
+        return Response.ok(recordSet.toJsonString(), JSON_CONTENT_TYPE).build();
     }
     
     @POST
     @Path("records")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response createRecord(String body) {
         
         assertVisible(formId);
         
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
-        updater.create(formId, jsonObject.getAsJsonObject());
-        
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer);
+
+        try {
+            updater.create(formId, jsonObject.getAsJsonObject());
+        } catch (InvalidUpdateException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+
         return Response.ok().build();
     }
 
@@ -204,7 +214,7 @@ public class FormResource {
 
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), new UpdateValueVisibilityChecker(permissionOracle));
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer);
         updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
 
         return Response.ok().build();

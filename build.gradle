@@ -3,11 +3,9 @@
  * Define common configuration properties and 
  * apply cross-project processes.
  */
-apply from: "./gradle/dependencies.gradle"
+apply from: "./gradle/libraries.gradle"
 apply from: "./gradle/version.gradle"
-apply from: "./gradle/coverage.gradle"
 apply from: "./gradle/jacoco.gradle"
-apply from: "./gradle/sonar.gradle"
 apply from: './gradle/database.gradle'
 apply from: "./gradle/environment.gradle"
 
@@ -50,7 +48,8 @@ subprojects {
 
   repositories {
     mavenLocal()
-    maven { url "http://nexus.bedatadriven.com/content/groups/public" }
+    maven { url "https://nexus.bedatadriven.com/content/groups/public" }
+    maven { url "https://plugins.gradle.org/m2/" }
   }
 
   dependencies {
@@ -85,5 +84,6 @@ buildscript {
     classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
     classpath 'com.moowork.gradle:gradle-grunt-plugin:0.12'
     classpath "com.moowork.gradle:gradle-node-plugin:0.12"
+    classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
   }
 }

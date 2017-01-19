@@ -3,7 +3,6 @@ package org.activityinfo.store.query.impl.eval;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.type.geo.Extents;
 
 public class StringComparisonView implements ColumnView {
 
@@ -58,11 +57,6 @@ public class StringComparisonView implements ColumnView {
             case NA:
                 return "NA";
         }
-        return null;
-    }
-
-    @Override
-    public Extents getExtents(int row) {
         return null;
     }
 

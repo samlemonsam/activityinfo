@@ -27,14 +27,17 @@ import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.MessageBox.MessageBoxType;
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.regexp.shared.SplitResult;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
@@ -185,7 +188,17 @@ public class ElementWidget extends Composite {
 
     private void renderStaticHtml() {
         String text = ((TextReportElement) model).getText();
-        updateHtml(text != null ? SafeHtmlUtils.htmlEscape(text) : "");
+        SplitResult lines = RegExp.compile("\r?\n").split(Strings.nullToEmpty(text));
+
+        SafeHtmlBuilder html = new SafeHtmlBuilder();
+        for (int i = 0; i < lines.length(); i++) {
+            if(i > 0) {
+                html.appendHtmlConstant("<br>");
+            }
+            html.appendEscaped(lines.get(i));
+        }
+
+        updateHtml(html.toSafeHtml().asString());
     }
 
     private void updateHtml(String html) {

@@ -24,7 +24,6 @@ package org.activityinfo.model.form;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -70,6 +69,6 @@ public class FormInstanceLabeler {
     }
 
     public static ResourceId getFormInstanceLabelCuid(FormInstance formInstance) {
-        return CuidAdapter.field(formInstance.getClassId(), CuidAdapter.NAME_FIELD);
+        return CuidAdapter.field(formInstance.getFormId(), CuidAdapter.NAME_FIELD);
     }
 }

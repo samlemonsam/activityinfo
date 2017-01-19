@@ -16,8 +16,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.BuiltinFields;
-import org.activityinfo.model.lock.LockEvaluator;
-import org.activityinfo.model.resource.Resource;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -104,17 +102,13 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         return model;
     }
 
-    public Promise<Void> show(final Resource instance) {
-        return show(FormInstance.fromResource(instance));
-    }
-
     @Override
     public Promise<Void> show(final FormInstance instance) {
         model.setWorkingRootInstance(instance);
 
         final Promise<Void> result = new Promise<>();
 
-        model.loadFormClassWithDependentSubForms(instance.getClassId()).then(new Function<Void, Void>() {
+        model.loadFormClassWithDependentSubForms(instance.getFormId()).then(new Function<Void, Void>() {
             @Override
             public Void apply(Void input) {
                 buildForm(model.getRootFormClass()).then(new Function<Void, Object>() {
@@ -242,14 +236,14 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         if (BuiltinFields.isBuiltInDate(field.getId())) {
             FormClass rootFormClass = getModel().getRootFormClass();
             DateRange dateRange = BuiltinFields.getDateRange(getModel().getWorkingRootInstance(), rootFormClass);
-
-            if (!rootFormClass.getLocks().isEmpty()) {
-                if (new LockEvaluator(rootFormClass).isLockedSilently(getModel().getWorkingRootInstance())) {
-                    getWidgetCreator().get(BuiltinFields.getStartDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
-                    getWidgetCreator().get(BuiltinFields.getEndDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
-                    return Optional.of(false);
-                }
-            }
+//
+//            if (!rootFormClass.getLocks().isEmpty()) {
+//                if (new LockEvaluator(rootFormClass).isLockedSilently(getModel().getWorkingRootInstance())) {
+//                    getWidgetCreator().get(BuiltinFields.getStartDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+//                    getWidgetCreator().get(BuiltinFields.getEndDateField(rootFormClass).getId()).setInvalid(I18N.CONSTANTS.siteIsLocked());
+//                    return Optional.of(false);
+//                }
+//            }
 
             if (!dateRange.isValidWithNull()) {
                 container.setInvalid(I18N.CONSTANTS.inconsistentDateRangeWarning());
@@ -268,7 +262,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     private boolean isEmpty(FieldValue value) {
         return value == null ||
                 (value instanceof EnumValue && ((EnumValue) value).getResourceIds().isEmpty()) ||
-                (value instanceof ReferenceValue && ((ReferenceValue) value).getResourceIds().isEmpty()) ||
+                (value instanceof ReferenceValue && ((ReferenceValue) value).getReferences().isEmpty()) ||
                 (value instanceof AttachmentValue && ((AttachmentValue) value).getValues().isEmpty());
     }
 

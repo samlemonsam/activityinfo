@@ -7,8 +7,8 @@ import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.lookup.ReferenceChoice;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @ImplementedBy(ResourceLocatorSyncImpl.class)
 public interface ResourceLocatorSync extends FormClassProvider {
@@ -17,7 +17,7 @@ public interface ResourceLocatorSync extends FormClassProvider {
 
     FormClass getFormClass(ResourceId resourceId);
 
-    List<ReferenceChoice> getReferenceChoices(Set<ResourceId> range);
+    List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range);
 
     void persist(FormClass formClass);
 }

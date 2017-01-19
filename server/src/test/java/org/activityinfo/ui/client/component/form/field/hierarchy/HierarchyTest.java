@@ -13,6 +13,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
@@ -51,7 +52,7 @@ public class HierarchyTest extends CommandTestCase2 {
 
         FormField adminField = campForm.getField(CuidAdapter.field(CAMP_CLASS, CuidAdapter.ADMIN_FIELD));
 
-        Set<ResourceId> fieldValue = Collections.singleton(entity(325703));
+        Set<RecordRef> fieldValue = Collections.singleton(new RecordRef(CAMP_DISTRICT_CLASS, entity(325703)));
 
         Hierarchy tree = assertResolves(Hierarchy.get(locator, (ReferenceType) adminField.getType()));
         prettyPrintTree(tree);
@@ -92,14 +93,14 @@ public class HierarchyTest extends CommandTestCase2 {
 
     private void prettyPrintWidgets(Hierarchy tree) {
         for(Level level : tree.getLevels()) {
-            System.out.println(widgets.get(level.getClassId()));
+            System.out.println(widgets.get(level.getFormId()));
         }
     }
 
     private void createWidgets(Hierarchy tree) {
         Map<ResourceId, MockLevelWidget> levels = new HashMap<>();
         for(Level level : tree.getLevels()) {
-            levels.put(level.getClassId(), new MockLevelWidget(level.getLabel()));
+            levels.put(level.getFormId(), new MockLevelWidget(level.getLabel()));
         }
         this.widgets = levels;
     }

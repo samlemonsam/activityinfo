@@ -24,7 +24,7 @@
               </h4>
             </div>
             <div class="panel-body">
-              <properties:PropertiesPanel ui:field="propertiesPanel" visible="false"/>
+              <properties:FieldEditor ui:field="fieldEditor" visible="false"/>
               <properties:ContainerPropertiesPanel ui:field="containerPropertiesPanel" visible="false"/>
             </div>
           </div>

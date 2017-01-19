@@ -155,6 +155,11 @@ public class UiApplicationDriver extends ApplicationDriver {
                         unsubmittedValues.remove("partner");
                     }
                     break;
+                case "Project":
+                    if (valueMap.containsKey("project")) {
+                        driver.select(aliasTable.getAlias(valueMap.get("project").getValue()));
+                        unsubmittedValues.remove("project");
+                    }
                 case "Start Date":
                     if (valueMap.containsKey("Start Date")) {
                         driver.fill(LocalDate.parse(valueMap.get("Start Date").getValue()));
@@ -307,9 +312,6 @@ public class UiApplicationDriver extends ApplicationDriver {
         dataEntryTab.selectSubmission(0);
 
         DataEntryDriver driver = dataEntryTab.updateSubmission();
-        
-        // todo conflict ?
-        //fillForm(driver, FieldValue.toMap(values));
 
         fillForm(FieldValue.toMap(values), driver);
 

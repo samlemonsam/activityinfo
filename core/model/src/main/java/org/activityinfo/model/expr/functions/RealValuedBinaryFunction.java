@@ -57,6 +57,11 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
     }
 
     @Override
+    public final boolean isInfix() {
+        return true;
+    }
+
+    @Override
     public ColumnView columnApply(List<ColumnView> arguments) {
         Preconditions.checkArgument(arguments.size() == 2);
         ColumnView x = arguments.get(0);

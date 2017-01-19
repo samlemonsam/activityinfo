@@ -31,6 +31,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -123,9 +124,15 @@ public class FormModelTest extends CommandTestCase2 {
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2016,1,1));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2016,1,1));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.PARTNER_FIELD),
-                new ReferenceValue(CuidAdapter.partnerInstanceId(1)));
+                new ReferenceValue(
+                        new RecordRef(
+                            CuidAdapter.partnerFormId(1),
+                            CuidAdapter.partnerRecordId(1))));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.LOCATION_FIELD),
-                new ReferenceValue(CuidAdapter.locationInstanceId(1)));
+                new ReferenceValue(
+                        new RecordRef(
+                                CuidAdapter.locationFormClass(1),
+                                CuidAdapter.locationInstanceId(1))));
         
         FormModel formModel = newFormModel();
         formModel.setWorkingRootInstance(rootInstance);

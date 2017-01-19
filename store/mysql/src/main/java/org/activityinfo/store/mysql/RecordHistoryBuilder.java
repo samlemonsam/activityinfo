@@ -13,16 +13,16 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.model.type.barcode.BarcodeValue;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -121,7 +121,7 @@ public class RecordHistoryBuilder {
     }
 
     private void sort(List<RecordDelta> deltas) {
-        Collections.sort(deltas, new Comparator<RecordDelta>() {
+        Collections.sort(deltas, Collections.reverseOrder(new Comparator<RecordDelta>() {
             @Override
             public int compare(RecordDelta o1, RecordDelta o2) {
                 int compare = Integer.compare((int) (o1.version.getTime() / 1000), (int) (o2.version.getTime() / 1000));
@@ -137,7 +137,7 @@ public class RecordHistoryBuilder {
                     return 0;
                 }
             }
-        });
+        }));
     }
 
     private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField) {
@@ -274,8 +274,10 @@ public class RecordHistoryBuilder {
         FormValueChangeBuilder builder = new FormValueChangeBuilder();
         builder.setFieldId(delta.field.getId().asString());
         builder.setFieldLabel(delta.field.getLabel());
-        builder.setSubFormKey(delta.subFormKey);
-        builder.setSubFormKind(delta.subFormKind != null ? delta.subFormKind.name() : null);
+        if(delta.subFormKey != null) {
+            builder.setSubFormKey(delta.subFormKey);
+            builder.setSubFormKind(delta.subFormKind != null ? delta.subFormKind.name() : null);
+        }
         builder.setOldValueLabel(renderValue(delta.field, delta.oldValue));
         builder.setNewValueLabel(renderValue(delta.field, delta.newValue));
         return builder;
@@ -285,14 +287,8 @@ public class RecordHistoryBuilder {
         if(value == null) {
             return "";
         }
-        if(field.getType() instanceof TextType) {
-            return ((TextValue) value).toString();
-        }
-        if(field.getType() instanceof NarrativeType) {
-            return ((NarrativeValue)value).toString();
-        }
-        if(field.getType() instanceof BarcodeType) {
-            return ((BarcodeValue)value).toString();
+        if(field.getType() instanceof HasStringValue) {
+            return ((HasStringValue) value).asString();
         }
         if(field.getType() instanceof EnumType) {
             return render((EnumType)field.getType(), (EnumValue)value);
@@ -321,8 +317,8 @@ public class RecordHistoryBuilder {
             if(form.isPresent()) {
                 Optional<ResourceId> labelFieldId = findLabelField(form.get().getFormClass());
 
-                for (ResourceId recordId : value.getResourceIds()) {
-                    Optional<FormRecord> record = form.get().get(recordId);
+                for (RecordRef ref : value.getReferences()) {
+                    Optional<FormRecord> record = form.get().get(ref.getRecordId());
                     if (record.isPresent()) {
                         JsonElement labelValue = null;
 
@@ -335,7 +331,7 @@ public class RecordHistoryBuilder {
                         }
 
                         if (labelValue != null && labelValue.isJsonPrimitive()) {
-                            labelMap.put(recordId, labelValue.getAsString());
+                            labelMap.put(ref.getRecordId(), labelValue.getAsString());
                         }
                     }
                 }
@@ -343,10 +339,10 @@ public class RecordHistoryBuilder {
         }
 
         List<String> list = new ArrayList<>();
-        for (ResourceId recordId : value.getResourceIds()) {
-            String label = labelMap.get(recordId);
+        for (RecordRef ref : value.getReferences()) {
+            String label = labelMap.get(ref.getRecordId());
             if(label == null) {
-                list.add(recordId.asString());
+                list.add(ref.toQualifiedString());
             } else {
                 list.add(label);
             }

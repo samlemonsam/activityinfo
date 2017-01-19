@@ -60,6 +60,7 @@ task appengineExplodeDevMode(type: Copy) {
 task appengineDevMode(type: JavaExec) {
     dependsOn appengineDownloadSdk
     dependsOn appengineExplodeDevMode
+    dependsOn compileJava
 
     main = 'com.google.gwt.dev.DevMode'
     
@@ -166,33 +167,6 @@ task appengineRunAT(type: RunTask) {
 
     dependsOn 'appengineExplodeApp', 'setupDatabaseAT', 'classes', 'compileGwt'
     ext.database = mysql.localAT
-}
-
-task appengineStartInstrumentedAT(type: RunTask) {
-    group = "Google App Engine"
-    description = "Starts a local AppEngine Dev Server instrumented for measuring test coverage"
-
-    dependsOn 'classes', 'compileGwt'
-    dependsOn 'setupDatabaseAT'
-    dependsOn 'appengineExplodeInstrumentedApp'
-
-    daemon = true
-    explodedAppDirectory = appengineExplodeInstrumentedApp.warDir
-    ext.database = mysql.localAT
-
-    doFirst {
-        def jacocoAgent = project.zipTree(configurations.jacocoAgent.singleFile)
-        def jacocoAgentJar = jacocoAgent.filter { it.name == 'jacocoagent.jar' }.singleFile.absolutePath
-
-        logger.info("Starting DevServer with jacoco agent path: ${jacocoAgentJar}.")
-
-        jvmFlags.add("-javaagent:${jacocoAgentJar}=destfile=${jacocoAcceptanceDataFile}")
-        
-        // Apparently between the Jacoco instrumentation adds significantly more pressure on
-        // the Permgen space. Set a high maximum to avoid the case that the dev server crashes
-        // during the tests
-        jvmFlags.add("-XX:MaxPermSize=2048m")
-    }
 }
 
 tasks.withType(RunTask) {

@@ -21,8 +21,8 @@ import org.activityinfo.service.lookup.ReferenceChoice;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 public class OdkFormFieldBuilderFactory {
@@ -72,7 +72,7 @@ public class OdkFormFieldBuilderFactory {
             return new QuantityFieldBuilder((QuantityType) fieldType);
         }
         if (fieldType instanceof ReferenceType) {
-            Set<ResourceId> range = ((ReferenceType) fieldType).getRange();
+            Collection<ResourceId> range = ((ReferenceType) fieldType).getRange();
             if(isSmallSet(range)) {
                 return new SelectBuilder(BindingType.STRING, referenceOptions((ReferenceType) fieldType));
             } else {
@@ -88,7 +88,7 @@ public class OdkFormFieldBuilderFactory {
         return null;
     }
 
-    private boolean isSmallSet(Set<ResourceId> range) {
+    private boolean isSmallSet(Collection<ResourceId> range) {
         // TODO: hardcoded to include partner/projects in form
         if(range.size() == 1) {
             ResourceId formClassId = Iterables.getOnlyElement(range);
@@ -130,7 +130,7 @@ public class OdkFormFieldBuilderFactory {
         for (ReferenceChoice choice : locator.getReferenceChoices(referenceType.getRange())) {
             Item item = new Item();
             item.setLabel(choice.getLabel());
-            item.setValue(choice.getId().asString());
+            item.setValue(choice.getRef().toQualifiedString());
             items.add(item);
         }
 

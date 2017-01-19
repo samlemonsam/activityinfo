@@ -11,13 +11,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.lock.ResourceLock;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +26,7 @@ import java.util.Set;
  * {@code Resources} which fulfill the contract described by a {@code FormClass}
  * are called {@code FormInstances}.
  */
-public class FormClass implements FormElementContainer, Serializable {
+public class FormClass implements FormElementContainer {
 
 
     public static final ResourceId PARENT_FIELD_ID = ResourceId.valueOf("@parent");
@@ -41,10 +39,11 @@ public class FormClass implements FormElementContainer, Serializable {
     private String label;
     private String description;
     private final List<FormElement> elements = Lists.newArrayList();
-    private final Set<ResourceLock> locks = Sets.newHashSet();
 
     private ResourceId parentFormId = null;
     private SubFormKind subFormKind = null;
+
+    private long schemaVersion;
 
     public FormClass(ResourceId id) {
         Preconditions.checkNotNull(id);
@@ -55,12 +54,13 @@ public class FormClass implements FormElementContainer, Serializable {
         return databaseId;
     }
 
-    public void setDatabaseId(ResourceId databaseId) {
+    public FormClass setDatabaseId(ResourceId databaseId) {
         this.databaseId = databaseId;
+        return this;
     }
 
-    public void setDatabaseId(int databaseId) {
-        setDatabaseId(CuidAdapter.databaseId(databaseId));
+    public FormClass setDatabaseId(int databaseId) {
+        return setDatabaseId(CuidAdapter.databaseId(databaseId));
     }
     
     public FormElementContainer getElementContainer(ResourceId elementId) {
@@ -144,12 +144,24 @@ public class FormClass implements FormElementContainer, Serializable {
         return this;
     }
 
+    /**
+     * @return the version of this form schema
+     */
+    public long getSchemaVersion() {
+        return schemaVersion;
+    }
+
+    public void setSchemaVersion(long schemaVersion) {
+        this.schemaVersion = schemaVersion;
+    }
+
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public FormClass setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     @Override
@@ -247,10 +259,6 @@ public class FormClass implements FormElementContainer, Serializable {
         return this;
     }
 
-    public Set<ResourceLock> getLocks() {
-        return locks;
-    }
-
     public Optional<ResourceId> getParentFormId() {
         return Optional.fromNullable(parentFormId);
     }
@@ -305,6 +313,7 @@ public class FormClass implements FormElementContainer, Serializable {
     public JsonObject toJsonObject() {
         JsonObject object = new JsonObject();
         object.addProperty("id", id.asString());
+        object.addProperty("schemaVersion", schemaVersion);
         
         if(databaseId != null) {
             object.addProperty("databaseId", databaseId.asString());
@@ -347,7 +356,11 @@ public class FormClass implements FormElementContainer, Serializable {
         }
         
         FormClass formClass = new FormClass(id);
-        
+
+        if(object.has("schemaVersion")) {
+            formClass.setSchemaVersion(object.get("schemaVersion").getAsLong());
+        }
+
         if(object.has("databaseId")) {
             formClass.setDatabaseId(ResourceId.valueOf(object.get("databaseId").getAsString()));
         }
@@ -408,5 +421,4 @@ public class FormClass implements FormElementContainer, Serializable {
         }
         return builtIn;
     }
-
 }

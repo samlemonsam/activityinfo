@@ -2,22 +2,16 @@ package org.activityinfo.model.type.number;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.JsonParsing;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.ResourceIdPrefixType;
 import org.activityinfo.model.type.*;
-
-import java.io.Serializable;
 
 /**
  * A value types that describes a real-valued quantity and its units.
  */
-public class QuantityType implements ParametrizedFieldType, Serializable {
+public class QuantityType implements ParametrizedFieldType {
 
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
@@ -26,7 +20,7 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
 
         @Override
         public String getId() {
-            return "QUANTITY";
+            return "quantity";
         }
 
         @Override
@@ -36,30 +30,8 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
         }
 
         @Override
-        public QuantityType deserializeType(Record typeParameters) {
-            return new QuantityType()
-                    .setUnits(typeParameters.isString("units"));
-        }
-
-        @Override
         public FieldType deserializeType(JsonObject parametersObject) {
             return new QuantityType(JsonParsing.toNullableString(parametersObject.get("units")));
-        }
-
-        @Override
-        public FormClass getParameterFormClass() {
-            FormClass formClass = new FormClass(ResourceIdPrefixType.TYPE.id("quantity"));
-            formClass.addElement(new FormField(ResourceId.valueOf("units"))
-                    .setType(FREE_TEXT.createType())
-                    .setLabel("Units")
-                    .setDescription("Describes the unit of measurement. For example: 'households', 'individuals'," +
-                                    " 'meters', etc."));
-            return formClass;
-        }
-
-        @Override
-        public FieldValue deserialize(Record record) {
-            return Quantity.fromRecord(record);
         }
 
     }
@@ -91,14 +63,11 @@ public class QuantityType implements ParametrizedFieldType, Serializable {
 
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
-        return new Quantity(value.getAsDouble(), units);
-    }
-
-    @Override
-    public Record getParameters() {
-        return new Record()
-                .set("units", units)
-                .set("classId", getTypeClass().getParameterFormClass().getId());
+        if(value instanceof JsonNull) {
+            return new Quantity(Double.NaN, units);
+        } else {
+            return new Quantity(value.getAsDouble(), units);
+        }
     }
 
     @Override

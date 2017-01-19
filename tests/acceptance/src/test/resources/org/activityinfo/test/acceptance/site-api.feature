@@ -195,8 +195,7 @@ Feature: Site API
             expression: null
             category: null
             mandatory: false
-            typeJson: null
-            
+
         attributeGroups: 
           - id: $donor
             name: donor

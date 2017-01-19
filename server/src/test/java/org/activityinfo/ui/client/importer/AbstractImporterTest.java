@@ -124,15 +124,6 @@ public class AbstractImporterTest extends CommandTestCase2 {
         }
     }
 
-    private String rowIcon(SourceRow instance) {
-//        if(!instance.isValid()) {
-//            return "x";
-//        } else {
-//            return " ";
-//        }
-        return " ";
-    }
-
     private String icon(ValidationResult status) {
         if(status.hasTypeConversionError()) {
             return "x";

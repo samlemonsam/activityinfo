@@ -14,6 +14,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.geo.Extents;
@@ -244,13 +245,20 @@ public class JsonFormAccessor implements FormAccessor {
     
     private static class ReferenceFieldBinding extends FieldBinding {
 
+        private ResourceId formId;
+
+        public ReferenceFieldBinding(ResourceId formId, String field, CursorObserver<FieldValue> observer) {
+            super(field, observer);
+            this.formId = formId;
+        }
+
         public ReferenceFieldBinding(String field, CursorObserver<FieldValue> observer) {
             super(field, observer);
         }
 
         @Override
         protected FieldValue convert(JsonElement jsonElement) {
-            return new ReferenceValue(ResourceId.valueOf(jsonElement.getAsString()));
+            return new ReferenceValue(new RecordRef(formId, ResourceId.valueOf(jsonElement.getAsString())));
         }
     }
     

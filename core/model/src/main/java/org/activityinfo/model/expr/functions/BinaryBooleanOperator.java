@@ -37,6 +37,10 @@ public abstract class BinaryBooleanOperator extends ExprFunction implements Colu
         return BooleanFieldValue.valueOf(apply(a, b));
     }
 
+    @Override
+    public final boolean isInfix() {
+        return true;
+    }
 
     @Override
     public ColumnView columnApply(List<ColumnView> arguments) {

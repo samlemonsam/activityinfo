@@ -9,7 +9,6 @@ apply plugin: 'appengine'
 apply from: './src/script/dependencies.gradle'
 apply from: './src/script/databaseSetup.gradle'
 apply from: './src/script/buildProperties.gradle'
-apply from: './src/script/instrumentedGwt.gradle'
 apply from: './src/script/devServer.gradle'
 
 
@@ -18,7 +17,7 @@ description = 'ActivityInfo Server'
 
 ext {
     // The location of the configuration file to be used 
-    // for the appengine dev server
+    // for the app engine dev server
     configFile = project.file("$buildDir/config.properties")
 }
 
@@ -36,9 +35,6 @@ gwt {
         modules 'org.activityinfo.ui.ActivityInfoRelease',
                 'org.activityinfo.ui.ActivityInfoReleaseLogging',
                 'org.activityinfo.ui.Embed'
-//        compiler {
-//            style = de.richsource.gradle.plugins.gwt.Style.DETAILED;
-//        }
     }
 }
 
@@ -69,6 +65,9 @@ war {
     from(project(':apiDocs').outputDir) {
         into 'apidocs'   
     }
+    from(project(':api').outputSpec) {
+        into 'apidocs'
+    }
     from(project(':ui:app').tasks.getByName('compileGwt')) {
         exclude("**/*.symbolMap")
     }
@@ -87,7 +86,7 @@ test {
             showStandardStreams = false
             events = ['failed']
         }
-        
+
         // still have a few tests writing to maven 'target' dir
         project.file('target').mkdirs()
     }

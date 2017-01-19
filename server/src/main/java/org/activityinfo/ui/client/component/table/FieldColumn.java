@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.user.cellview.client.Column;
 import org.activityinfo.model.formTree.ColumnNode;
-import org.activityinfo.model.formTree.FieldPath;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -21,11 +20,6 @@ public class FieldColumn extends Column<RowView, String> {
     public FieldColumn(ColumnNode column) {
         super(new TextCell());
         this.column = column;
-    }
-
-    public FieldColumn(FieldPath fieldPath, String header) {
-        super(new TextCell());
-        this.column = new ColumnNode(fieldPath, header);
     }
 
     public static List<FieldColumn> create(List<ColumnNode> columnNodes) {

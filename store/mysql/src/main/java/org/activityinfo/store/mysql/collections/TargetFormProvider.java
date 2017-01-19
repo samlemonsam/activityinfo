@@ -63,7 +63,8 @@ public class TargetFormProvider implements FormProvider {
                         "D.Name, " +
                         "I.IndicatorId, " +
                         "I.Name, " +
-                        "I.Units " +
+                        "I.Units, " +
+                        "A.schemaVersion " +
                         " FROM userdatabase D " +
                         " LEFT JOIN activity A ON (D.DatabaseId = A.DatabaseId and A.dateDeleted IS NULL) " +
                         " LEFT JOIN indicator I ON (A.ActivityId=I.ActivityId and I.dateDeleted IS NULL and I.type = 'QUANTITY') " +
@@ -73,7 +74,7 @@ public class TargetFormProvider implements FormProvider {
                     int databaseId = rs.getInt(1);
                     DatabaseTargetForm target = targetMap.get(databaseId);
                     if (target == null) {
-                        target = new DatabaseTargetForm(databaseId, rs.getString(2));
+                        target = new DatabaseTargetForm(databaseId, rs.getString(2), rs.getLong(6));
                         targetMap.put(databaseId, target);
                     }
 

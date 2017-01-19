@@ -18,6 +18,7 @@ import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.DatabaseCache;
+import org.activityinfo.store.mysql.update.ActivityUpdater;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -50,7 +51,7 @@ public class MySqlCatalog implements FormCatalog {
         providers.add(new SimpleTableFormProvider(new ProjectTable(databaseCache), FormPermissions.readonly()));
         providers.add(new TargetFormProvider());
         providers.add(new ActivityFormProvider(activityLoader));
-        providers.add(new LocationFormProvider());
+        providers.add(new LocationFormProvider(activityLoader.getPermissionCache()));
         providers.add(new HrdProvider());
 
         geodbFolder = new GeodbFolder(executor);
@@ -198,13 +199,22 @@ public class MySqlCatalog implements FormCatalog {
         if(formClass.getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Only update of activity's schemas is currently supported
             Optional<FormAccessor> collection = getForm(formClass.getId());
-            if(!collection.isPresent()) {
-                throw new UnsupportedOperationException("Activity " + formClass.getId() + " does not exist.");
+            if(collection.isPresent()) {
+                collection.get().updateFormClass(formClass);
+            } else {
+                createFormSchema(formClass);
             }
-            collection.get().updateFormClass(formClass);
         } else {
             HrdCatalog catalog = new HrdCatalog();
             catalog.create(formClass);
         }
+    }
+
+    private void createFormSchema(FormClass formClass) {
+        int activityId = CuidAdapter.getLegacyIdFromCuid(formClass.getId());
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId());
+        ActivityUpdater updater = new ActivityUpdater(activityId, databaseId, executor);
+        updater.insert(formClass);
+
     }
 }

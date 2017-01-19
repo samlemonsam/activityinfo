@@ -30,7 +30,6 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.ConfirmInvitePageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
 import org.activityinfo.server.util.MailingListClient;
-import org.activityinfo.server.util.monitoring.Count;
 
 import javax.inject.Provider;
 import javax.persistence.EntityNotFoundException;
@@ -61,7 +60,6 @@ public class ConfirmInviteController {
 
     @GET 
     @Produces(MediaType.TEXT_HTML) 
-    @Count("sign_up.confirmation_visit")
     public Viewable getPage(@Context UriInfo uri) throws Exception {
         try {
             User user = userDAO.get().findUserByChangePasswordKey(uri.getRequestUri().getQuery());
@@ -73,7 +71,6 @@ public class ConfirmInviteController {
     }
 
     @POST
-    @Count("sign_up.confirmation")
     public Response confirm(@Context UriInfo uri,
                             @FormParam("key") String key,
                             @FormParam("locale") String locale,

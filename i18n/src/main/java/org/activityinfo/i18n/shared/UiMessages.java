@@ -203,9 +203,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Oh no! Your import is missing required column(s): {0}")
     String missingColumns(String missingColumns);
 
-    @DefaultMessage("From: {0,date,dd-MM-yyyy}, To: {1,date,dd-MM-yyyy}")
-    String subformTabButtonTooltip(Date from, Date to);
-
     @DefaultMessage("{0} code does not exist.")
     String doesNotExist(String placeholder);
 
@@ -243,4 +240,16 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Unknown value: {0}. Each selection of 'Multiple selection' control must have separate column " +
             "with allowed values: TRUE, FALSE or no value (which is considered as FALSE)")
     String unknownMultiEnumValue(String value);
+
+    @DefaultMessage("Required field ''{0}'' is missing in row {1}")
+    String requiredFieldMissing(String fieldName, int rowIndex);
+
+    @DefaultMessage("You didn''t provide a column named ''{0}'', so we''ll default to ''{1}''.")
+    String missingWithDefault(String columnName, String defaultValue);
+
+    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the id of the form " +
+            "to reference, is required.")
+    String referenceFieldRequiresRange(String fieldTypeName, String columnName);
+
+
 }

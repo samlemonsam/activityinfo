@@ -4,7 +4,6 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.CreateLocation;
@@ -16,20 +15,12 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
-import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.database.hibernate.entity.Activity;
-import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.endpoint.odk.xform.LegacyXFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstanceImpl;
 import org.activityinfo.service.blob.BlobId;
@@ -37,10 +28,8 @@ import org.activityinfo.service.blob.GcsBlobFieldStorageService;
 import org.activityinfo.service.lookup.ReferenceChoice;
 import org.w3c.dom.Element;
 
-import javax.inject.Provider;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -65,8 +54,6 @@ public class XFormSubmissionResource {
     final private DispatcherSync dispatcher;
     final private ResourceLocatorSync locator;
     final private AuthenticationTokenService authenticationTokenService;
-    final private ServerSideAuthProvider authProvider;                  // Necessary for 2.8 XForms, remove afterwards
-    final private Provider<EntityManager> entityManager;                  // Necessary for 2.8 XForms, remove afterwards
     final private GcsBlobFieldStorageService blobFieldStorageService;
     final private InstanceIdService instanceIdService;
     final private SubmissionArchiver submissionArchiver;
@@ -75,16 +62,12 @@ public class XFormSubmissionResource {
     public XFormSubmissionResource(DispatcherSync dispatcher,
                                    ResourceLocatorSync locator,
                                    AuthenticationTokenService authenticationTokenService,
-                                   ServerSideAuthProvider authProvider,  // Necessary for 2.8 XForms, remove afterwards
-                                   Provider<EntityManager> entityManager,  // Necessary for 2.8 XForms, remove afterwards
                                    GcsBlobFieldStorageService blobFieldStorageService,
                                    InstanceIdService instanceIdService,
                                    SubmissionArchiver submissionArchiver) {
         this.dispatcher = dispatcher;
         this.locator = locator;
         this.authenticationTokenService = authenticationTokenService;
-        this.authProvider = authProvider;                               // Necessary for 2.8 XForms, remove afterwards
-        this.entityManager = entityManager;                             // Necessary for 2.8 XForms, remove afterwards
         this.blobFieldStorageService = blobFieldStorageService;
         this.instanceIdService = instanceIdService;
         this.submissionArchiver = submissionArchiver;
@@ -94,28 +77,11 @@ public class XFormSubmissionResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_XML)
     public Response submit(byte bytes[]) {
-        final boolean legacy;                                           // Necessary for 2.8 XForms, remove afterwards
-        AuthenticatedUser user;
-        XFormInstance instance;
-        FormClass formClass;
 
-        try {
-            instance = new XFormInstanceImpl(bytes);
-            user = authenticationTokenService.authenticate(instance.getAuthenticationToken());
-            formClass = locator.getFormClass(instance.getFormClassId());
-        } catch (IllegalStateException illegalStateException) {         // Necessary for 2.8 XForms, remove afterwards
-            if ("Cannot find element userID".equals(illegalStateException.getMessage())) {
-                LOGGER.log(Level.INFO, "User ID not found, trying to parse submission as legacy form instance");
-                instance = new LegacyXFormInstance(bytes);
-                int formClassId = getLegacyIdFromCuid(instance.getFormClassId());
-                User owner = entityManager.get().find(Activity.class, formClassId).getDatabase().getOwner();
-                authProvider.set(owner);
-                user = new AuthenticatedUser("", (int) owner.getId(), "@");
-                formClass = locator.getFormClass(instance.getFormClassId());
-            } else throw illegalStateException;                         // Legacy code ends here
-        }
+        XFormInstance instance = new XFormInstanceImpl(bytes);
+        AuthenticatedUser user = authenticationTokenService.authenticate(instance.getAuthenticationToken());
+        FormClass formClass = locator.getFormClass(instance.getFormClassId());
 
-        legacy = instance instanceof LegacyXFormInstance;               // Necessary for 2.8 XForms, remove afterwards
 
         ResourceId formId = newLegacyFormInstanceId(formClass.getId());
         FormInstance formInstance = new FormInstance(formId, formClass.getId());
@@ -126,7 +92,7 @@ public class XFormSubmissionResource {
         for (FormField formField : formClass.getFields()) {
             Optional<Element> element = instance.getFieldContent(formField.getId());
             if (element.isPresent()) {
-                formInstance.set(formField.getId(), tryParse(formInstance, formField, element.get(), legacy));
+                formInstance.set(formField.getId(), tryParse(formInstance, formField, element.get()));
             } else if (isLocation(formClass, formField)) {
                 FieldType fieldType = formField.getType();
                 Optional<Element> gpsField = instance.getFieldContent(field(formClass.getId(), GPS_FIELD));
@@ -136,9 +102,13 @@ public class XFormSubmissionResource {
 
                     ResourceId locationFieldId = field(formClass.getId(), LOCATION_FIELD);
                     int newLocationId = new KeyGenerator().generateInt();
-                    ResourceId locationFormClassId = Iterables.getOnlyElement(((ReferenceType) fieldType).getRange());
-                    int locationTypeId = getLegacyIdFromCuid(locationFormClassId);
-                    FieldValue fieldValue = new ReferenceValue(locationInstanceId(newLocationId));
+                    ReferenceType locationRefType = (ReferenceType) fieldType;
+                    if(locationRefType.getRange().isEmpty()) {
+                        throw new IllegalStateException("Location field has empty range");
+                    }
+                    ResourceId locationFormId = locationRefType.getRange().iterator().next();
+                    int locationTypeId = getLegacyIdFromCuid(locationFormId);
+                    FieldValue fieldValue = new ReferenceValue(new RecordRef(locationFormId, locationInstanceId(newLocationId)));
                     String name = OdkHelper.extractText(nameField.get());
 
                     if (Strings.isNullOrEmpty(name)) {
@@ -148,7 +118,7 @@ public class XFormSubmissionResource {
                                         build());
                     }
 
-                    Optional<GeoPoint> geoPoint = parseLocation(gpsField, legacy);
+                    Optional<GeoPoint> geoPoint = parseLocation(gpsField);
 
                     formInstance.set(locationFieldId, fieldValue);
                     createLocation(newLocationId, locationTypeId, name, geoPoint);
@@ -192,32 +162,27 @@ public class XFormSubmissionResource {
             .entity("No partner selected").build());
         }
 
-        formInstance.set(partnerFieldId, new ReferenceValue(choices.get(0).getId()));
+        formInstance.set(partnerFieldId, new ReferenceValue(choices.get(0).getRef()));
     }
 
-    private FieldValue tryParse(FormInstance formInstance, FormField formField, Element element, boolean legacy) {
+    private FieldValue tryParse(FormInstance formInstance, FormField formField, Element element) {
         try {
-            OdkFieldValueParser odkFieldValueParser = fromFieldType(formField.getType(), legacy);
+            OdkFieldValueParser odkFieldValueParser = fromFieldType(formField.getType());
             return odkFieldValueParser.parse(element);
 
         } catch (Exception e) {
-            String text = OdkHelper.extractText(element);
-
-            if (text == null) {
-                LOGGER.log(Level.SEVERE, "Malformed Element in form instance prevents parsing", e);
-            } else if (!text.equals("")) {
-                LOGGER.log(Level.WARNING, "Can't parse form instance contents, storing as text", e);
-                formInstance.set(formField.getId(), TextValue.valueOf(text));
-            }
+            LOGGER.log(Level.WARNING, "Failed to parse value for field " + formField.getId() +
+                     " in form " + formInstance.getFormId() +
+                     " from xml: " + element, e);
         }
         return null;
     }
 
-    private Optional<GeoPoint> parseLocation(Optional<Element> element, boolean legacy) {
+    private Optional<GeoPoint> parseLocation(Optional<Element> element) {
         Preconditions.checkNotNull(element);
         if (element.isPresent()) {
             try {
-                OdkFieldValueParser odkFieldValueParser = fromFieldType(GeoPointType.INSTANCE, legacy);
+                OdkFieldValueParser odkFieldValueParser = fromFieldType(GeoPointType.INSTANCE);
                 return of((GeoPoint) odkFieldValueParser.parse(element.get()));
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Can't parse form submission location data", e);

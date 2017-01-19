@@ -1,5 +1,6 @@
 package org.activityinfo.server.endpoint.odk;
 
+import com.google.common.base.Strings;
 import org.activityinfo.model.type.FieldValue;
 import org.w3c.dom.Element;
 
@@ -11,6 +12,10 @@ final public class OdkFieldValueParser {
     }
 
     public FieldValue parse(Element element) {
-        return fieldValueParser.parse(OdkHelper.extractText(element));
+        String textValue = OdkHelper.extractText(element);
+        if(Strings.isNullOrEmpty(textValue)) {
+            return null;
+        }
+        return fieldValueParser.parse(textValue);
     }
 }

@@ -1,0 +1,16 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:ai="urn:import:org.activityinfo.ui.client.widget"
+>
+
+    <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+    <ui:with field="icons" type="org.activityinfo.ui.icons.Icons"/>
+
+
+
+    <g:HTMLPanel>
+        <label class="control-label" ui:field="controlLabel"/>
+        <ai:TextBox ui:field="textBox"/>
+        <span class="help-block" ui:field="helpBlock"/>
+    </g:HTMLPanel>
+</ui:UiBinder>

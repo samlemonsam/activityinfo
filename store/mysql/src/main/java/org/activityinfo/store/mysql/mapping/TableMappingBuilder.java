@@ -85,7 +85,7 @@ public class TableMappingBuilder {
     }
 
     public void addReferenceField(FormField field, final char domain, String columnName) {
-        add(new FieldMapping(field, columnName, new ReferenceConverter(domain)));
+        add(new FieldMapping(field, columnName, new ReferenceConverter(formClass.getId(), domain)));
     }
     
     public void addGeoAreaField(FormField field) {
@@ -153,6 +153,10 @@ public class TableMappingBuilder {
     
     public void setDeleteMethod(DeleteMethod deleteMethod) {
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod);
+    }
+
+    public void setSchemaVersion(long schemaVersion) {
+        formClass.setSchemaVersion(schemaVersion);
     }
 
     public void setVersion(long version) {

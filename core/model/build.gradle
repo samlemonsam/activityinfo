@@ -20,3 +20,11 @@ jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
 }
+
+test {
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+        }
+    }
+}

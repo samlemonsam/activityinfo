@@ -5,7 +5,7 @@ import org.activityinfo.io.xform.form.BodyElement;
 
 public interface OdkFormFieldBuilder {
 
-    public BindingType getModelBindType();
+    BindingType getModelBindType();
 
-    public BodyElement createBodyElement(String ref, String label, String hint);
+    BodyElement createBodyElement(String ref, String label, String hint);
 }

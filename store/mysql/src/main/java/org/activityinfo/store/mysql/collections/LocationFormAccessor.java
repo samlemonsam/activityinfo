@@ -11,10 +11,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -26,6 +23,8 @@ import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
+import org.activityinfo.store.mysql.metadata.PermissionsCache;
+import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.SqlInsert;
 import org.activityinfo.store.mysql.update.SqlUpdate;
 
@@ -43,6 +42,9 @@ public class LocationFormAccessor implements FormAccessor {
 
     private QueryExecutor executor;
     private final int locationTypeId;
+    private Integer databaseId;
+    private boolean openWorkflow;
+    private PermissionsCache permissionsCache;
     private final TableMapping mapping;
     private final CountryStructure country;
     private long version;
@@ -51,11 +53,12 @@ public class LocationFormAccessor implements FormAccessor {
     private final ResourceId adminFieldId;
     private final ResourceId pointFieldId;
 
-    public LocationFormAccessor(QueryExecutor executor, ResourceId formClassId) throws SQLException {
+    public LocationFormAccessor(QueryExecutor executor, ResourceId formClassId, PermissionsCache permissionsCache) throws SQLException {
 
         this.executor = executor;
 
         locationTypeId = CuidAdapter.getLegacyIdFromCuid(formClassId);
+        this.permissionsCache = permissionsCache;
         int countryId;
         String name;
 
@@ -68,6 +71,12 @@ public class LocationFormAccessor implements FormAccessor {
             countryId = rs.getInt("countryId");
             Preconditions.checkState(!rs.wasNull());
 
+            openWorkflow = "open".equals(rs.getString("workflowId"));
+
+            databaseId = rs.getInt("databaseId");
+            if(rs.wasNull()) {
+                databaseId = null;
+            }
             name = rs.getString("name");
             version = rs.getLong("version");
         }
@@ -104,14 +113,8 @@ public class LocationFormAccessor implements FormAccessor {
         pointField.setRequired(false);
         pointField.setType(GeoPointType.INSTANCE);
 
-//        FormField visible = new FormField(CuidAdapter.field(formClassId, CuidAdapter));
-//        visible.setCode("visible");
-//        visible.setLabel(I18N.CONSTANTS.visible());
-//        visible.setRequired(true);
-//        visible.setType(BooleanType.INSTANCE);
-
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formClassId, TABLE_NAME);
-        mapping.setBaseFilter("base.locationTypeId=" + locationTypeId);
+        mapping.setBaseFilter("base.locationTypeId=" + locationTypeId + " AND workflowStatusId='validated'");
         mapping.setPrimaryKeyMapping(CuidAdapter.LOCATION_DOMAIN, "locationId");
         mapping.setFormLabel(name);
         mapping.setDatabaseId(GeodbFolder.GEODB_ID);
@@ -120,26 +123,28 @@ public class LocationFormAccessor implements FormAccessor {
         mapping.addUnmappedField(adminField);
         mapping.addGeoPoint(pointField);
 
-//        if(BETA.ENABLE_BOOLEAN_FIELDS) {
-//            mapping.add(new FieldMapping(visible, "workflowStatusId", new FieldValueConverter() {
-//                @Override
-//                public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
-//                    String statusId = rs.getString(index); // either "rejected" or "validatated"
-//                    return BooleanFieldValue.valueOf("validated".equals(statusId));
-//                }
-//
-//                @Override
-//                public Collection<?> toParameters(FieldValue value) {
-//                    return Collections.singletonList(value == BooleanFieldValue.TRUE ? "validated" : "rejected");
-//                }
-//            }));
-//        }
+        // TODO: The schema of a location type can actually change if we add additional
+        // admin levels to a country.
+        mapping.setSchemaVersion(1L);
+
         this.mapping = mapping.build();
 
     }
 
     @Override
     public FormPermissions getPermissions(int userId) {
+        if(openWorkflow) {
+            return FormPermissions.full();
+        }
+        if(databaseId != null) {
+            UserPermission permission = permissionsCache.getPermission(userId, databaseId);
+            if (permission.isDesign()) {
+                FormPermissions formPermissions = new FormPermissions();
+                formPermissions.setVisible(true);
+                formPermissions.setEditAllowed(true);
+                return formPermissions;
+            }
+        }
         return FormPermissions.readonly();
     }
 
@@ -330,8 +335,8 @@ public class LocationFormAccessor implements FormAccessor {
         Set<Integer> set = Sets.newHashSet();
         ReferenceValue value = (ReferenceValue) update.getChangedFieldValues().get(adminFieldId);
         if(value != null) {
-            for (ResourceId resourceId : value.getResourceIds()) {
-                set.add(CuidAdapter.getLegacyIdFromCuid(resourceId));
+            for (RecordRef ref : value.getReferences()) {
+                set.add(CuidAdapter.getLegacyIdFromCuid(ref.getRecordId()));
             }
         }
         return set;

@@ -1,0 +1,14 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+             xmlns:f="urn:import:org.activityinfo.ui.client.widget.form"
+>
+
+    <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+
+    <g:FlowPanel>
+        <f:FormGroup ui:field="expressionGroup" label="{i18n.expression}" columnLabelWidth="4">
+            <a:TextBox ui:field="expressionTextBox" width="100%"/>
+        </f:FormGroup>
+    </g:FlowPanel>
+</ui:UiBinder>

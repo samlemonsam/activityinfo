@@ -21,51 +21,46 @@ package org.activityinfo.ui.client.component.form.field;
  * #L%
  */
 
-import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.core.shared.type.converter.CoordinateAxis;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.widget.coord.CoordinateBox;
 
 /**
  * @author yuriyz on 1/31/14.
  */
 public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
 
-    interface GeographicPointWidgetUiBinder extends UiBinder<HTMLPanel, GeographicPointWidget> {
-    }
-
-    private static GeographicPointWidgetUiBinder ourUiBinder = GWT.create(GeographicPointWidgetUiBinder.class);
-
-    private final HTMLPanel panel;
+    private final FlowPanel panel;
     private final ValueUpdater<GeoPoint> valueUpdater;
 
-    @UiField
-    CoordinateBox latitudeBox;
-
-    @UiField
-    CoordinateBox longitudeBox;
+    private CoordinateBox latitudeBox;
+    private CoordinateBox longitudeBox;
 
     public GeographicPointWidget(final ValueUpdater<GeoPoint> valueUpdater) {
         this.valueUpdater = valueUpdater;
-        panel = ourUiBinder.createAndBindUi(this);
 
-        ValueChangeHandler<Double> handler = new ValueChangeHandler<Double>() {
+        latitudeBox = new CoordinateBox(CoordinateAxis.LATITUDE);
+        longitudeBox = new CoordinateBox(CoordinateAxis.LONGITUDE);
+
+        panel = new FlowPanel();
+        panel.add(latitudeBox);
+        panel.add(longitudeBox);
+
+        ValueChangeHandler<Double> changeHandler = new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> event) {
                 fireValueChanged();
             }
         };
-        latitudeBox.addValueChangeHandler(handler);
-        longitudeBox.addValueChangeHandler(handler);
+
+        latitudeBox.addValueChangeHandler(changeHandler);
+        longitudeBox.addValueChangeHandler(changeHandler);
     }
 
     @Override
@@ -76,12 +71,14 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
     protected GeoPoint getValue() {
         Double latitude = latitudeBox.getValue();
         Double longitude = longitudeBox.getValue();
-        if (latitude == null || longitude == null) {
-            return null;
-        } else {
+
+        if(latitude != null && longitude != null) {
             return new GeoPoint(latitude, longitude);
+        } else {
+            return null;
         }
     }
+
 
     @Override
     public void setReadOnly(boolean readOnly) {
@@ -96,8 +93,8 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
 
     @Override
     public Promise<Void> setValue(GeoPoint value) {
-        latitudeBox.setValue(value.getLatitude());
         longitudeBox.setValue(value.getLongitude());
+        latitudeBox.setValue(value.getLatitude());
         return Promise.done();
     }
 
@@ -114,15 +111,14 @@ public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
 
     @Override
     public boolean isValid() {
-        if (Strings.isNullOrEmpty(latitudeBox.getText()) && Strings.isNullOrEmpty(longitudeBox.getText())) {
-            return true;
+        // If either field has invalid text, it's invalid
+        if(!latitudeBox.isValid() || !longitudeBox.isValid()) {
+            return false;
         }
 
-        if ((!Strings.isNullOrEmpty(latitudeBox.getText()) && latitudeBox.getValue() != null) &&
-                (!Strings.isNullOrEmpty(longitudeBox.getText()) && longitudeBox.getValue() != null)) {
-            return true;
-        }
-        return false;
+        // Either both fields are empty, or both fields are filled.
+        return (latitudeBox.getValue() == null && longitudeBox.getValue() == null) ||
+               (latitudeBox.getValue() != null && longitudeBox.getValue() != null);
     }
 
     @Override

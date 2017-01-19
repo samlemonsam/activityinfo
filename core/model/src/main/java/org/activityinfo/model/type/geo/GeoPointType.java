@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.number.QuantityType;
@@ -14,7 +13,7 @@ import org.activityinfo.model.type.number.QuantityType;
  */
 public class GeoPointType implements RecordFieldType {
 
-    public static final String TYPE_ID = "GEOGRAPHIC_POINT";
+    public static final String TYPE_ID = "geopoint";
 
     public static final GeoPointType INSTANCE = new GeoPointType();
 
@@ -29,10 +28,6 @@ public class GeoPointType implements RecordFieldType {
             return INSTANCE;
         }
 
-        @Override
-        public FieldValue deserialize(Record record) {
-            return GeoPoint.fromRecord(record);
-        }
     };
 
     private GeoPointType() {  }

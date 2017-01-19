@@ -22,7 +22,6 @@ public class Hierarchy {
     private List<Level> roots = Lists.newArrayList();
     private List<Level> levels = Lists.newArrayList();
 
-
     public static Promise<Hierarchy> get(final ResourceLocator resourceLocator, ReferenceType type) {
         return Promise.map(type.getRange(), new Function<ResourceId, Promise<FormClass>>() {
             @Override
@@ -38,6 +37,7 @@ public class Hierarchy {
         });
     }
 
+
     public Hierarchy(List<FormClass> rangeFormClasses) {
 
         // Find all of the form class here
@@ -50,7 +50,7 @@ public class Hierarchy {
         // Assign parents...
         for(Level level : levelMap.values()) {
             if(!level.isRoot()) {
-                level.parent = levelMap.get(level.parentId);
+                level.parent = levelMap.get(level.parentFormId);
                 level.parent.children.add(level);
             }
         }

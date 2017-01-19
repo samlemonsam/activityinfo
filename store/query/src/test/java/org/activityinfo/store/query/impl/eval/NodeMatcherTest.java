@@ -202,18 +202,18 @@ public class NodeMatcherTest {
     }
     
     private FormField referenceField(String id, String label, String... formClasses) {
-        Set<ResourceId> range = new HashSet<>();
+        List<ResourceId> range = new ArrayList<>();
         for (String formClass : formClasses) {
             range.add(ResourceId.valueOf(formClass));
         }
         ReferenceType type = new ReferenceType();
         type.setCardinality(Cardinality.SINGLE);
         type.setRange(range);
-        
+
         FormField field = new FormField(ResourceId.valueOf(id));
         field.setLabel(label);
         field.setType(type);
-        
+
         return field;
     }
     

@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql.update;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.form.FormClass;
@@ -7,6 +8,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -15,18 +17,24 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 
 public class ActivityUpdater {
 
-    private Activity activity;
+    private int databaseId;
+    private int activityId;
+    private final String activityName;
     private QueryExecutor executor;
     private final long newVersion;
     private Map<ResourceId, ActivityField> fieldMap = Maps.newHashMap();
 
     public ActivityUpdater(Activity activity, QueryExecutor executor) {
-        this.activity = activity;
+        this.activityId = activity.getId();
+        this.databaseId = activity.getDatabaseId();
+        this.activityName = activity.getName();
         this.executor = executor;
         this.newVersion = activity.getVersion() + 1;
         for (ActivityField activityField : activity.getFields()) {
@@ -34,7 +42,14 @@ public class ActivityUpdater {
                 fieldMap.put(activityField.getFormField().getId(), activityField);
             }
         }
+    }
 
+    public ActivityUpdater(int newActivityid, int databaseId, QueryExecutor executor) {
+        this.activityId = newActivityid;
+        this.databaseId = databaseId;
+        this.activityName = "";
+        this.executor = executor;
+        this.newVersion = 1;
     }
 
     public void update(FormClass formClass) {
@@ -43,10 +58,67 @@ public class ActivityUpdater {
         updateFields(formClass);
     }
 
+    public void insert(FormClass formClass) {
+        Preconditions.checkArgument(CuidAdapter.getLegacyIdFromCuid(formClass.getId()) == activityId);
+
+        // find the nullary location type id
+        int locationTypeId;
+        try(ResultSet rs = executor.query("SELECT locationTypeId FROM locationtype " +
+                        "WHERE name = 'Country' AND boundAdminLevelid is NULL AND databaseID is NULL AND " +
+                            "countryId = (SELECT countryId FROM userdatabase WHERE databaseId=" + databaseId + ")")) {
+
+            if(!rs.next()) {
+                throw new IllegalStateException("Cannot find nullary location type for database " + databaseId);
+            }
+            locationTypeId = rs.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to query location type", e);
+        }
+
+
+        SqlInsert insert = SqlInsert.insertInto("activity");
+        insert.value("activityId", activityId);
+        insert.value("databaseId", databaseId);
+        insert.value("name", formClass.getLabel(), 255);
+        insert.value("formClass", validateNewFormClass(formClass).toJsonString());
+        insert.value("version", newVersion);
+        insert.value("schemaVersion", newVersion);
+        insert.value("classicView", 0);
+        insert.value("locationTypeId", locationTypeId);
+        insert.value("allowEdit", 1);
+        insert.value("reportingFrequency", 0);
+        insert.value("sortOrder", 0);
+        insert.execute(executor);
+    }
+
+    private FormClass validateNewFormClass(FormClass formClass) {
+
+        Map<ResourceId, FormField> fieldMap = new HashMap<>();
+        for (FormField field : formClass.getFields()) {
+            fieldMap.put(field.getId(), field);
+        }
+
+        ResourceId partnerFieldId = CuidAdapter.partnerField(activityId);
+        FormField partnerField = fieldMap.get(partnerFieldId);
+        if(partnerField == null) {
+            partnerField = new FormField(partnerFieldId);
+            partnerField.setLabel("Partner");
+            partnerField.setVisible(true);
+            partnerField.setRequired(true);
+            formClass.getElements().add(0, partnerField);
+        }
+
+        // Ensure partner type is correct:
+        partnerField.setType(new ReferenceType(Cardinality.SINGLE, CuidAdapter.partnerFormId(databaseId)));
+
+        return formClass;
+    }
+
     private void updateActivityRow(FormClass formClass) {
+
         SqlUpdate activityUpdate = SqlUpdate.update("activity");
-        activityUpdate.where("activityId", activity.getId());
-        activityUpdate.setIfChanged("name", activity.getName(), formClass.getLabel(), 255);
+        activityUpdate.where("activityId", activityId);
+        activityUpdate.setIfChanged("name", activityName, formClass.getLabel(), 255);
         activityUpdate.set("formClass", formClass.toJsonString());
         activityUpdate.set("version", newVersion);
         activityUpdate.set("schemaVersion", newVersion);
@@ -58,7 +130,7 @@ public class ActivityUpdater {
 
     private void updateDatabaseRow() {
         SqlUpdate databaseUpdate = SqlUpdate.update("userdatabase");
-        databaseUpdate.where("databaseId", activity.getDatabaseId());
+        databaseUpdate.where("databaseId", databaseId);
         databaseUpdate.set("version", System.currentTimeMillis());
         databaseUpdate.execute(executor);
 
@@ -89,12 +161,12 @@ public class ActivityUpdater {
             sortOrder++;
         }
 
-        for (ActivityField field : activity.getAttributeAndIndicatorFields()) {
-            if(!fieldsPresent.contains(field.getFormField().getId())) {
-                if(field.isIndicator()) {
-                    deleteIndicator(field);
-                } else if(field.isAttributeGroup()) {
-                    deleteAttributeGroup(field);
+        for (ResourceId existingFieldId : fieldMap.keySet()) {
+            if(!fieldsPresent.contains(existingFieldId)) {
+                if(existingFieldId.getDomain() == CuidAdapter.INDICATOR_DOMAIN) {
+                    deleteIndicator(CuidAdapter.getLegacyIdFromCuid(existingFieldId));
+                } else if(existingFieldId.getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN) {
+                    deleteAttributeGroup(CuidAdapter.getLegacyIdFromCuid(existingFieldId));
                 }
             }
         }
@@ -112,7 +184,7 @@ public class ActivityUpdater {
     private void insertIndicatorRow(FormField formField, int sortOrder) {
         SqlInsert insert = SqlInsert.insertInto("indicator");
         insert.value("indicatorId", CuidAdapter.getLegacyIdFromCuid(formField.getId()));
-        insert.value("activityId", activity.getId());
+        insert.value("activityId", activityId);
         insert.value("name", formField.getLabel());
         insert.value("nameInExpression", formField.getCode());
         insert.value("description", formField.getDescription());
@@ -128,15 +200,15 @@ public class ActivityUpdater {
         if(formField.getType() instanceof CalculatedFieldType) {
             CalculatedFieldType type = (CalculatedFieldType) formField.getType();
             insert.value("calculatedAutomatically", true);
-            insert.value("expression", type.getExpressionAsString());
+            insert.value("expression", type.getExpression());
         }
         insert.execute(executor);
     }
 
 
-    private void deleteIndicator(ActivityField field) {
+    private void deleteIndicator(int indicatorId) {
         SqlUpdate update = SqlUpdate.update("indicator");
-        update.where("indicatorId", field.getId());
+        update.where("indicatorId", indicatorId);
         update.set("dateDeleted", new Date());
         update.set("deleted", 1);
         update.execute(executor);
@@ -159,7 +231,7 @@ public class ActivityUpdater {
         
         insert = SqlInsert.insertInto("attributegroupinactivity");
         insert.value("attributeGroupId", groupId);
-        insert.value("activityId", activity.getId());
+        insert.value("activityId", activityId);
         insert.execute(executor);
 
         int attributeSortOrder = 1;
@@ -193,7 +265,7 @@ public class ActivityUpdater {
         if(existingField.getFormField().getType() instanceof CalculatedFieldType) {
             CalculatedFieldType existingType = (CalculatedFieldType) existingField.getFormField().getType();
             CalculatedFieldType updatedType = (CalculatedFieldType) formField.getType();
-            update.setIfChanged("expression", existingType.getExpressionAsString(), updatedType.getExpressionAsString());
+            update.setIfChanged("expression", existingType.getExpression(), updatedType.getExpression());
         }
 
         update.execute(executor);
@@ -256,9 +328,9 @@ public class ActivityUpdater {
     }
 
 
-    private void deleteAttributeGroup(ActivityField field) {
+    private void deleteAttributeGroup(int attributeGroupId) {
         SqlUpdate update = SqlUpdate.update("attributegroup");
-        update.where("attributeGroupId", field.getId());
+        update.where("attributeGroupId", attributeGroupId);
         update.set("dateDeleted", new Date());
         update.execute(executor);
     }

@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.ApplicationProperties;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -78,6 +79,7 @@ public class AdminEntityTable implements SimpleTable {
             parent.setLabel(level.getParentName());
             parent.setRequired(true);
             parent.setType(ReferenceType.single(CuidAdapter.adminLevelFormClass(level.getParentId())));
+            parent.addSuperProperty(ApplicationProperties.PARENT_PROPERTY);
         }
 
         // TODO: geometry
@@ -94,7 +96,8 @@ public class AdminEntityTable implements SimpleTable {
         mapping.setVersion(level.getVersion());
         
         if(parent != null) {
-            mapping.add(new FieldMapping(parent, "adminEntityParentId", new ReferenceConverter(ADMIN_ENTITY_DOMAIN)));
+            mapping.add(new FieldMapping(parent, "adminEntityParentId", new ReferenceConverter(
+                    CuidAdapter.adminLevelFormClass(level.getParentId()), ADMIN_ENTITY_DOMAIN)));
         }
         return mapping.build();
     }
@@ -111,5 +114,9 @@ public class AdminEntityTable implements SimpleTable {
             }
         }
         return Optional.absent();
+    }
+
+    public static void clearCache() {
+        LEVEL_CACHE.invalidateAll();
     }
 }

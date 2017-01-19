@@ -24,7 +24,9 @@ class CodeEnumFieldValueParser implements FieldValueParser {
 
     @Override
     public FieldValue parse(String text) {
-        if (text == null) throw new IllegalArgumentException("Malformed Element passed to OdkFieldValueParser.parse()");
+        if (text == null) {
+            throw new IllegalArgumentException("Malformed Element passed to OdkFieldValueParser.parse()");
+        }
 
         String selected[] = text.split(" ");
         List<ResourceId> resourceIds = Lists.newArrayListWithCapacity(selected.length);

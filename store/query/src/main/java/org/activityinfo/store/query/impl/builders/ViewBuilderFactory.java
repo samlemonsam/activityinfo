@@ -7,8 +7,6 @@ import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.geo.GeoAreaType;
-import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
@@ -48,12 +46,8 @@ public class ViewBuilderFactory {
             return new StringColumnBuilder(result, new LocalDateReader());
         } else if(type instanceof AttachmentType) {
             return new StringColumnBuilder(result, new AttachmentBlobIdReader());
-        } else if(type instanceof GeoAreaType) {
-            return new GeoAreaColumnBuilder(result);
-        } else if(type instanceof GeoPointType) {
-            return new GeoPointColumnBuilder(result);
         } else {
-            throw new UnsupportedOperationException("Unsupported type: " + type);
+            return new UnsupportedColumnTypeBuilder(result);
         }
     }
 
@@ -95,8 +89,8 @@ public class ViewBuilderFactory {
         public String readString(FieldValue value) {
             if(value instanceof ReferenceValue) {
                 ReferenceValue ref = (ReferenceValue) value;
-                if(ref.getResourceIds().size() == 1) {
-                    return ref.getResourceId().asString();
+                if(ref.getReferences().size() == 1) {
+                    return ref.getOnlyReference().getRecordId().asString();
                 }
             }
             return null;

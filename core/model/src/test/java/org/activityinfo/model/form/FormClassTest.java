@@ -56,7 +56,7 @@ public class FormClassTest {
         assertThat(calcField.getType(), instanceOf(CalculatedFieldType.class));
         
         CalculatedFieldType calcFieldType = (CalculatedFieldType) calcField.getType();
-        assertThat(calcFieldType.getExpressionAsString(), equalTo("3250+3249"));
+        assertThat(calcFieldType.getExpression(), equalTo("3250+3249"));
     }
     
 

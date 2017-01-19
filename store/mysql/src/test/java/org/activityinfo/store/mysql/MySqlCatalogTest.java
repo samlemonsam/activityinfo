@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -11,17 +13,14 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
-import org.activityinfo.store.query.impl.Updater;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
@@ -45,15 +44,14 @@ import static org.junit.Assert.*;
 
 public class MySqlCatalogTest extends AbstractMySqlTest {
 
-    public static final int CATASTROPHE_NATURELLE_ID = 1;
-    
+
     protected int userId = 1;
  
     @BeforeClass
     public static void initDatabase() throws Throwable {
         resetDatabase("catalog-test.db.xml");
     }
-    
+
     @Test
     public void testCountry() {
         query(CountryTable.FORM_CLASS_ID, "label", "code");
@@ -108,10 +106,18 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testAdmin() {
 
-        query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code", "boundary");
+        query(CuidAdapter.adminLevelFormClass(2), "name", "province.name", "code",
+                "ST_XMIN(boundary)",
+                "ST_YMIN(boundary)",
+                "ST_XMAX(boundary)",
+                "ST_YMAX(boundary)");
         assertThat(column("name"),          hasValues("Bukavu",   "Walungu",  "Shabunda", "Kalehe",   "Irumu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Sud Kivu", "Sud Kivu", "Sud Kivu", "Ituri"));
         assertThat(column("code"), hasValues("203", "201", "202", "203", "203"));
+        assertThat(column("ST_XMIN(boundary)"), hasValues(0, 0, 0, 33.5, 0));
+        assertThat(column("ST_XMAX(boundary)"), hasValues(0, 0, 0, -44.0, 0));
+        assertThat(column("ST_YMIN(boundary)"), hasValues(0, 0, 0, -22.0, 0));
+        assertThat(column("ST_YMAX(boundary)"), hasValues(0, 0, 0, 40, 0));
     }
     
     @Test
@@ -162,7 +168,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
                 "partner.label", "location.label", "location.visible", "BENE", "cause", "project", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
-        assertThat(column("partner"), hasValues(partnerInstanceId(1), partnerInstanceId(1), partnerInstanceId(2)));
+        assertThat(column("partner"), hasValues(partnerRecordId(1), partnerRecordId(1), partnerRecordId(2)));
         assertThat(column("partner.label"), hasValues("NRC", "NRC", "Solidarites"));
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
@@ -194,26 +200,29 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2)));
         
     }
+    
+    @Test
+    public void singleSite() {
+        FormAccessor siteStorage = catalog.getForm(CuidAdapter.activityFormClass(1)).get();
+        FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 1)).get();
+        FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
+
+        EnumValue cause = (EnumValue) site.get(CuidAdapter.attributeGroupField(1));
+        EnumValue kitContents = (EnumValue) site.get(CuidAdapter.attributeGroupField(2));
+
+        assertThat(cause, nullValue());
+        assertThat(kitContents.getResourceIds(), Matchers.contains(CuidAdapter.attributeId(3), CuidAdapter.attributeField(4)));
+    }
 
     @Test
-    public void testSingleSiteResource() throws IOException {
-        ResourceId formClass = CuidAdapter.activityFormClass(1);
-        RecordUpdate update = new RecordUpdate();
-        update.setRecordId(cuid(SITE_DOMAIN, 1));
-        update.set(field(formClass, PARTNER_FIELD), new ReferenceValue(CuidAdapter.partnerInstanceId(2)));
-        update.set(indicatorField(1), new Quantity(900, "units"));
-        update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
+    public void singleSiteWithBoundLocation() {
+        FormAccessor siteStorage = catalog.getForm(CuidAdapter.activityFormClass(4)).get();
+        FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 6)).get();
+        FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
 
-        Updater updater = new Updater(catalog, userId);
-        updater.execute(update);
-
-        query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
-
-        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
-        assertThat(column("partner"), hasValues(partnerInstanceId(2), partnerInstanceId(1), partnerInstanceId(2)));
-        assertThat(column("BENE"), hasValues(900, 3600, 10000));
-        assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
+        FieldValue location = site.get(CuidAdapter.locationField(4));
     }
+
     
     @Test
     public void siteFormClassWithNullaryLocations() {
@@ -416,6 +425,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     }
 
     @Test
+    public void singlePartner() {
+
+        FormAccessor form = catalog.getForm(CuidAdapter.partnerFormId(1)).get();
+        Optional<FormRecord> partnerRecord = form.get(CuidAdapter.partnerRecordId(1));
+
+    }
+
+    @Test
     public void targets() {
         String targetValue12451 = CuidAdapter.targetIndicatorField(12451).asString();
         
@@ -429,5 +446,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column(targetValue12451), hasValues(9999));
         assertThat(column("partner.name"), hasValues("NRC"));
     }
+
+
 
 }

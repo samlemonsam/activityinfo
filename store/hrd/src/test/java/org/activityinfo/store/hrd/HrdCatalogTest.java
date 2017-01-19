@@ -17,6 +17,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.service.blob.BlobAuthorizerStub;
 import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.RecordChangeType;
 import org.activityinfo.service.store.RecordVersion;
@@ -138,7 +139,7 @@ public class HrdCatalogTest {
                 .setType(TextType.INSTANCE);
 
         HrdCatalog catalog = new HrdCatalog();
-        Updater updater = new Updater(catalog, userId);
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
 
         catalog.create(formClass);
         
@@ -146,6 +147,7 @@ public class HrdCatalogTest {
 
         for (String villageName : villageNames) {
             RecordUpdate update = new RecordUpdate();
+            update.setUserId(userId);
             update.setRecordId(ResourceId.generateSubmissionId(formClass));
             update.set(nameField.getId(), TextValue.valueOf(villageName));
         
@@ -201,20 +203,24 @@ public class HrdCatalogTest {
 
 
         RecordUpdate hh1 = new RecordUpdate();
+        hh1.setUserId(userId);
         hh1.setRecordId(ResourceId.generateSubmissionId(hhForm));
         hh1.set(hhIdField.getId(), TextValue.valueOf("HH1"));
 
         RecordUpdate hh2 = new RecordUpdate();
+        hh2.setUserId(userId);
         hh2.setRecordId(ResourceId.generateSubmissionId(hhForm));
         hh2.set(hhIdField.getId(), TextValue.valueOf("HH2"));
         
         RecordUpdate father1 = new RecordUpdate();
+        father1.setUserId(userId);
         father1.setRecordId(ResourceId.generateSubmissionId(memberForm));
         father1.setParentId(hh1.getRecordId());
         father1.set(nameField.getId(), TextValue.valueOf("Homer"));
         father1.set(ageField.getId(), new Quantity(40, "years"));
         
         RecordUpdate father2 = new RecordUpdate();
+        father2.setUserId(userId);
         father2.setRecordId(ResourceId.generateSubmissionId(memberForm));
         father2.setParentId(hh2.getRecordId());
         father2.set(nameField.getId(), TextValue.valueOf("Ned"));
