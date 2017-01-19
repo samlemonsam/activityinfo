@@ -28,12 +28,14 @@ public class EnumType implements ParametrizedFieldType {
                     parametersObject.get("cardinality").getAsString().toUpperCase());
 
             List<EnumItem> enumItems = Lists.newArrayList();
-            JsonArray enumItemArray = parametersObject.get("values").getAsJsonArray();
-            for(JsonElement record : enumItemArray) {
-                enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
+            JsonElement valuesArray = parametersObject.get("values");
+            if(valuesArray != null) {
+                JsonArray enumItemArray = valuesArray.getAsJsonArray();
+                for (JsonElement record : enumItemArray) {
+                    enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
+                }
             }
             return new EnumType(cardinality, enumItems);
-        
         }
 
         @Override
