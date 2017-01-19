@@ -28,6 +28,7 @@
   <inherits name="org.activityinfo.i18n.I18n"/>
   <inherits name="org.activityinfo.Promises"/>
   <inherits name="com.google.gwt.json.JSON"/>
+  <inherits name="com.google.gson.Gson"/>
   
 
   <super-source path="jre"/>

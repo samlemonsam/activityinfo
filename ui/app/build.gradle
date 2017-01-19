@@ -3,7 +3,7 @@ apply plugin: 'gwt'
 
 gwt {
     gwtVersion = project.gwtVersion
-    modules 'com.sencha.gxt.edash.Edash'
+    modules 'org.activityinfo.ui.App'
     maxHeapSize "5g"
 }
 
@@ -22,12 +22,14 @@ dependencies {
     gwt libraries.gwt.user
     gwt libraries.gwt.guava
     gwt libraries.gwt.guice
-    gwt project(':ui:style')
-    gwt project(':ui:icons')
+    gwt libraries.gwt.gson
+    gwt project(':core:model')
     gwt project(':i18n')
+    gwt project(':apiClient:gwt')
+
     gwt group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
     gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
-    gwt group: 'com.sencha.gxt', name: 'gxt-theme-edash', version: '4.0.0'
+    gwt group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
 
 
 }
@@ -56,7 +58,7 @@ task simpleDevMode(type: JavaExec) {
 //    args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
     args '-war', "${buildDir}/exploded"
     args '-startupUrl', 'login'
-    args 'com.sencha.gxt.edash.Edash'
+    args 'org.activityinfo.ui.App'
 
 //    doFirst {
 //        // The SDK root is only available after appengineDownloadSdk runs

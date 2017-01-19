@@ -1,18 +1,22 @@
 package org.activityinfo.api.tools;
 
 import com.google.gson.JsonParser;
-import com.google.gwt.http.client.*;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.squareup.javapoet.*;
 import io.swagger.models.*;
-import io.swagger.models.Response;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.SwaggerParser;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,9 +95,8 @@ public class GwtClientGenerator {
                 .addSuperinterface(ClassName.get(CLIENT_PACKAGE, "ActivityInfoClientAsync"))
                 .addModifiers(Modifier.PUBLIC);
 
-        clientClass.addField(FieldSpec.builder(String.class, "BASE_URL")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .initializer("$S", spec.getBasePath())
+        clientClass.addField(FieldSpec.builder(String.class, "baseUrl")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .build());
 
         clientClass.addField(FieldSpec.builder(Logger.class, "LOGGER")
@@ -105,6 +108,20 @@ public class GwtClientGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer("new $T()", JsonParser.class)
                 .build());
+
+
+        clientClass.addMethod(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("baseUrl = $S", "/resources")
+                .build());
+
+        clientClass.addMethod(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(String.class, "baseUrl")
+                .addStatement("this.baseUrl = baseUrl")
+                .build());
+
+
 
 
         for (Map.Entry<String, Path> pathEntry : spec.getPaths().entrySet()) {
@@ -172,7 +189,7 @@ public class GwtClientGenerator {
             // Classes that we use
             ClassName requestBuilder = ClassName.get(RequestBuilder.class);
 
-            method.addStatement("$T urlBuilder = new $T(BASE_URL)", StringBuilder.class, StringBuilder.class);
+            method.addStatement("$T urlBuilder = new $T(baseUrl)", StringBuilder.class, StringBuilder.class);
             addPathParts(method, path);
             addQueryParameters(method, operation);
             method.addStatement("final String url = urlBuilder.toString()");

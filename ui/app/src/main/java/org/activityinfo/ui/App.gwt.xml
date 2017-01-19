@@ -22,22 +22,39 @@
 
 <module rename-to="App">
 
-  <inherits name='com.google.gwt.user.User'/>
-  <inherits name="com.google.gwt.i18n.I18N"/>
-  <inherits name="com.google.gwt.logging.Logging"/>
-  
-  <inherits name="org.activityinfo.i18n.I18n"/>
-  <inherits name="org.activityinfo.ui.Style"/>
-  <inherits name="org.activityinfo.ui.Icons"/>
+  <inherits name='com.sencha.gxt.ui.GXT'/>
+  <inherits name='com.sencha.gxt.chart.Chart' />
 
-  <set-property name="gwt.logging.popupHandler" value="DISABLED"/>
+  <inherits name='com.google.gwt.activity.Activity'/>
+  <inherits name='com.google.gwt.place.Place'/>
+  <inherits name="com.google.gwt.inject.Inject"/>
 
-  <set-property name="user.agent" value="ie8,ie9,ie10,safari,gecko1_8"/>
-  <extend-property name="locale" values="ar"/>
-  
-  <entry-point class="org.activityinfo.ui.client.App"/>
+  <inherits name="org.activityinfo.model.Model"/>
+  <inherits name="org.activityinfo.api.ApiClient"/>
 
-  <!-- Include generated sources -->
+  <set-property name="gwt.logging.logLevel" value="FINEST"/>
+  <set-property name="gwt.logging.enabled" value="TRUE"/>
+
+  <inherits name='com.sencha.gxt.theme.triton.Theme' />
+
+  <!-- Specify the paths for translatable code -->
   <source path='client'/>
-  <source path="shared"/>
+  <source path='shared'/>
+
+  <!-- GZip the output files by default -->
+  <inherits name='com.google.gwt.precompress.Precompress'/>
+
+  <set-configuration-property name="CssResource.style" value="pretty"/>
+
+  <entry-point class="org.activityinfo.ui.client.AppEntryPoint"/>
+
+  <!-- collapse properties for fewer permutations -->
+  <collapse-property name="gxt.device" values="phone, tablet" />
+
+  <collapse-property name="gxt.user.agent" values="air, safari*, chrome*, gecko*, ie11" />
+  <collapse-property name="user.agent" values="safari*, gecko*" />
+
+  <collapse-property name="gxt.user.agent" values="ie8, ie9, ie10" />
+  <collapse-property name="user.agent" values="ie*" />
+
 </module>
