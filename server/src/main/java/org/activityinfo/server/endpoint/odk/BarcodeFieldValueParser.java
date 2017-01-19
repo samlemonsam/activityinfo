@@ -11,7 +11,9 @@ import org.activityinfo.model.type.barcode.BarcodeValue;
 class BarcodeFieldValueParser implements FieldValueParser {
     @Override
     public BarcodeValue parse(String text) {
-        if (text == null) throw new IllegalArgumentException("Malformed Element passed to OdkFieldValueParser.parse()");
+        if (text == null) {
+            throw new IllegalArgumentException("Malformed Element passed to OdkFieldValueParser.parse()");
+        }
 
         return BarcodeValue.valueOf(text);
     }

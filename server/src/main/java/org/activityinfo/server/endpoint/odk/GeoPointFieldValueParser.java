@@ -8,11 +8,13 @@ class GeoPointFieldValueParser implements FieldValueParser {
     public FieldValue parse(String text) {
         double latitude, longitude;
 
-        if (text == null) throw new IllegalArgumentException("Malformed Element passed to OdkFieldValueParser.parse()");
+        if (text == null) {
+            throw new IllegalArgumentException("Malformed Element passed to OdkFieldValueParser.parse()");
+        }
 
         String coords[] = text.split("\\s+");
         if (coords.length < 2) {
-            throw new IllegalArgumentException("Insufficient doubles in Element passed to OdkFieldValueParser.parse()");
+            throw new IllegalArgumentException("Malformed lat/lng from ODK: " + text);
         }
 
         try {
