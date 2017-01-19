@@ -23,7 +23,6 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
     private AdminColumnBuilder adminColumnBuilder;
     private ResourceId formClassId;
     private TableMapping tableMapping;
-    private boolean hasWhereSet = false;
 
     public LocationQueryBuilder(QueryExecutor executor, TableMapping tableMapping, CountryStructure country) {
         this.executor = executor;
@@ -36,9 +35,7 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void only(ResourceId resourceId) {
-        hasWhereSet = true;
-        baseTableBuilder.where("base." + tableMapping.getPrimaryKey().getColumnName() + "=" + CuidAdapter.getLegacyIdFromCuid(resourceId)
-                + " AND base.workflowStatusId != 'rejected'");
+        baseTableBuilder.where("base." + tableMapping.getPrimaryKey().getColumnName() + "=" + CuidAdapter.getLegacyIdFromCuid(resourceId));
         adminColumnBuilder.only(resourceId);
     }
 
@@ -58,9 +55,6 @@ public class LocationQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void execute() {
-        if (!hasWhereSet) {
-            baseTableBuilder.where(tableMapping.getBaseFilter() + " AND base.workflowStatusId != 'rejected'");
-        }
 
         // Emit all of the base columns 
         Cursor cursor = baseTableBuilder.open();

@@ -64,12 +64,11 @@ public class AdminColumnBuilder {
         sql.append("SELECT location.locationid, link.adminEntityId, link.adminLevelId").append(NEW_LINE);
         sql.append("FROM location").append(NEW_LINE);
         sql.append("LEFT JOIN locationadminlink link ON (location.locationid = link.locationId)").append(NEW_LINE);
+        sql.append("WHERE location.locationTypeId=").append(locationTypeId).append(NEW_LINE);
+        sql.append(" AND location.workflowStatusId='validated'").append(NEW_LINE);
 
-        if(locationId == null) {
-            sql.append("WHERE location.locationTypeId=").append(locationTypeId).append(NEW_LINE);
-            sql.append("ORDER BY location.locationId");
-        } else {
-            sql.append("WHERE location.locationId=").append(CuidAdapter.getLegacyIdFromCuid(locationId)).append(NEW_LINE);
+        if(locationId != null) {
+            sql.append(" AND location.locationId=").append(CuidAdapter.getLegacyIdFromCuid(locationId)).append(NEW_LINE);
         }
 
         LOGGER.info("Querying admin table: " + sql.toString());

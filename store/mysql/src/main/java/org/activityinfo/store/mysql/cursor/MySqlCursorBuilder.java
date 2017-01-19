@@ -108,6 +108,11 @@ public class MySqlCursorBuilder implements CursorBuilder {
 
     private FieldReader<ResultSet> createFieldReader(ResourceId fieldId) {
         FieldMapping mapping = tableMapping.getMapping(fieldId);
+        if(mapping == null) {
+            throw new IllegalArgumentException(String.format("No such field %s in %s",
+                    fieldId,
+                    tableMapping.getFormClass().getId()));
+        }
 
         // Add all columns required for this field
         Iterator<String> it = mapping.getColumnNames().iterator();

@@ -113,14 +113,8 @@ public class LocationFormAccessor implements FormAccessor {
         pointField.setRequired(false);
         pointField.setType(GeoPointType.INSTANCE);
 
-//        FormField visible = new FormField(CuidAdapter.field(formClassId, CuidAdapter));
-//        visible.setCode("visible");
-//        visible.setLabel(I18N.CONSTANTS.visible());
-//        visible.setRequired(true);
-//        visible.setType(BooleanType.INSTANCE);
-
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formClassId, TABLE_NAME);
-        mapping.setBaseFilter("base.locationTypeId=" + locationTypeId);
+        mapping.setBaseFilter("base.locationTypeId=" + locationTypeId + " AND workflowStatusId='validated'");
         mapping.setPrimaryKeyMapping(CuidAdapter.LOCATION_DOMAIN, "locationId");
         mapping.setFormLabel(name);
         mapping.setDatabaseId(GeodbFolder.GEODB_ID);
@@ -133,20 +127,6 @@ public class LocationFormAccessor implements FormAccessor {
         // admin levels to a country.
         mapping.setSchemaVersion(1L);
 
-//        if(BETA.ENABLE_BOOLEAN_FIELDS) {
-//            mapping.add(new FieldMapping(visible, "workflowStatusId", new FieldValueConverter() {
-//                @Override
-//                public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
-//                    String statusId = rs.getString(index); // either "rejected" or "validatated"
-//                    return BooleanFieldValue.valueOf("validated".equals(statusId));
-//                }
-//
-//                @Override
-//                public Collection<?> toParameters(FieldValue value) {
-//                    return Collections.singletonList(value == BooleanFieldValue.TRUE ? "validated" : "rejected");
-//                }
-//            }));
-//        }
         this.mapping = mapping.build();
 
     }
