@@ -4,7 +4,7 @@ import com.google.common.base.Function;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.service.FormService;
+import org.activityinfo.ui.client.data.FormService;
 
 /**
  * Model's the user's selection of columns

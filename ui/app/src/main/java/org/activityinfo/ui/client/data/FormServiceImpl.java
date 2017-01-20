@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.service;
+package org.activityinfo.ui.client.data;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;

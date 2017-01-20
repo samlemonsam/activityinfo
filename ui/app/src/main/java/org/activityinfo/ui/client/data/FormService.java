@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.service;
+package org.activityinfo.ui.client.data;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;

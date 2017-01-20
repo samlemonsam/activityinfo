@@ -7,8 +7,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.ui.client.service.FormService;
-import org.activityinfo.ui.client.service.FormServiceImpl;
+import org.activityinfo.ui.client.data.FormService;
+import org.activityinfo.ui.client.data.FormServiceImpl;
 import org.activityinfo.ui.client.table.TableModel;
 import org.activityinfo.ui.client.table.TableView;
 

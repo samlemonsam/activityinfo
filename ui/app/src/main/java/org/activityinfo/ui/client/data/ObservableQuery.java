@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.service;
+package org.activityinfo.ui.client.data;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;

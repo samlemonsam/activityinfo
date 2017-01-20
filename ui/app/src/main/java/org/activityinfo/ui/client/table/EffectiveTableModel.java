@@ -7,7 +7,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.ui.client.service.FormService;
+import org.activityinfo.ui.client.data.FormService;
 
 import java.util.ArrayList;
 import java.util.List;
