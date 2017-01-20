@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.activityinfo.geoadmin.source.FeatureSourceAccessor.FIELD_ID_PREFIX;
+import static org.activityinfo.geoadmin.source.FeatureSourceStorage.FIELD_ID_PREFIX;
 
 
 public class FeatureQueryBuilder implements ColumnQueryBuilder {

@@ -6,8 +6,8 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
@@ -22,11 +22,11 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 /**
  * Accessor for forms backed by the AppEngine High-Replication Datastore (HRD)
  */
-public class HrdFormAccessor implements FormAccessor {
+public class HrdFormStorage implements FormStorage {
 
     private FormClass formClass;
 
-    public HrdFormAccessor(FormClass formClass) {
+    public HrdFormStorage(FormClass formClass) {
         this.formClass = formClass;
     }
 

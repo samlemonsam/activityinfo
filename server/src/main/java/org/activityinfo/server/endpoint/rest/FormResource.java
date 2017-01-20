@@ -26,10 +26,10 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.service.blob.BlobAuthorizer;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.service.store.FormPermissions;
-import org.activityinfo.store.hrd.HrdFormAccessor;
+import org.activityinfo.service.store.FormStorage;
+import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -104,7 +104,7 @@ public class FormResource {
         FormClass formClass = FormClass.fromJson(updatedSchemaJson);
         
         // Check first to see if this collection exists
-        Optional<FormAccessor> collection = catalog.get().getForm(formClass.getId());
+        Optional<FormStorage> collection = catalog.get().getForm(formClass.getId());
         if(collection.isPresent()) {
             FormClass existingFormClass = collection.get().getFormClass();
             permissionOracle.assertDesignPrivileges(existingFormClass, userProvider.get());
@@ -126,7 +126,7 @@ public class FormResource {
     @Produces(JSON_CONTENT_TYPE)
     public Response getRecord(@PathParam("recordId") String recordId) {
         
-        FormAccessor collection = assertVisible(formId);
+        FormStorage collection = assertVisible(formId);
 
 
         Optional<FormRecord> record = collection.get(ResourceId.valueOf(recordId));
@@ -167,12 +167,12 @@ public class FormResource {
 
         assertVisible(formId);
         
-        Optional<FormAccessor> collection = catalog.get().getForm(formId);
+        Optional<FormStorage> collection = catalog.get().getForm(formId);
         if(!collection.isPresent()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
+        HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
         Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
 
         FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
@@ -392,8 +392,8 @@ public class FormResource {
         return node.getField().getCode() == null ? node.getField().getLabel() : node.getField().getCode();
     }
 
-    private FormAccessor assertVisible(ResourceId collectionId) {
-        Optional<FormAccessor> collection = this.catalog.get().getForm(formId);
+    private FormStorage assertVisible(ResourceId collectionId) {
+        Optional<FormStorage> collection = this.catalog.get().getForm(formId);
         if(!collection.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.NOT_FOUND)

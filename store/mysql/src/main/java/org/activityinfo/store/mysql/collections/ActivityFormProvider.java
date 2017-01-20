@@ -3,8 +3,8 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormNotFoundException;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.ActivityTableMappingBuilder;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -39,7 +39,7 @@ public class ActivityFormProvider implements FormProvider {
     }
 
     @Override
-    public FormAccessor openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
+    public FormStorage openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
         int activityId = CuidAdapter.getLegacyIdFromCuid(formId);
         Map<Integer, Activity> map = activityLoader.load(singleton(activityId));
         
@@ -47,7 +47,7 @@ public class ActivityFormProvider implements FormProvider {
         if(activity == null) {
             throw new FormNotFoundException(formId);
         }
-        return new SiteFormAccessor(activity, buildMapping(activity, formId), executor, 
+        return new SiteFormStorage(activity, buildMapping(activity, formId), executor,
                 activityLoader.getPermissionCache());
     }
     
@@ -76,7 +76,7 @@ public class ActivityFormProvider implements FormProvider {
     }
 
     @Override
-    public Map<ResourceId, FormAccessor> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
+    public Map<ResourceId, FormStorage> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
         Set<Integer> activityIds = new HashSet<>();
         for (ResourceId collectionId : formIds) {
             if(accept(collectionId)) {
@@ -88,14 +88,14 @@ public class ActivityFormProvider implements FormProvider {
         
         } else {
             Map<Integer, Activity> activityMap = activityLoader.load(activityIds);
-            Map<ResourceId, FormAccessor> collectionMap = new HashMap<>();
+            Map<ResourceId, FormStorage> collectionMap = new HashMap<>();
 
             for (ResourceId collectionId : formIds) {
                 if (accept(collectionId)) {
                     Activity activity = activityMap.get(CuidAdapter.getLegacyIdFromCuid(collectionId));
                     if (activity != null) {
                         collectionMap.put(collectionId,
-                                new SiteFormAccessor(activity, buildMapping(activity, collectionId), executor, 
+                                new SiteFormStorage(activity, buildMapping(activity, collectionId), executor,
                                         activityLoader.getPermissionCache()));
                     }
                 }

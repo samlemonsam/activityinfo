@@ -26,8 +26,8 @@ import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormNotFoundException;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.service.store.RecordVersion;
 
 import java.sql.ResultSet;
@@ -67,7 +67,7 @@ public class RecordHistoryBuilder {
 
 
     public JsonArray build(ResourceId formId, ResourceId recordId) throws SQLException {
-        Optional<FormAccessor> form = catalog.getForm(formId);
+        Optional<FormStorage> form = catalog.getForm(formId);
         if(!form.isPresent()) {
             throw new FormNotFoundException(formId);
         }
@@ -142,7 +142,7 @@ public class RecordHistoryBuilder {
 
     private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField) {
         SubFormReferenceType subFormType = (SubFormReferenceType) subFormField.getType();
-        Optional<FormAccessor> subForm = catalog.getForm(subFormType.getClassId());
+        Optional<FormStorage> subForm = catalog.getForm(subFormType.getClassId());
         FormClass subFormClass = subForm.get().getFormClass();
 
         List<RecordVersion> versions = subForm.get().getVersionsForParent(parentRecordId);
@@ -313,7 +313,7 @@ public class RecordHistoryBuilder {
     private List<String> queryLabels(ReferenceType type, ReferenceValue value) {
         Map<ResourceId, String> labelMap = new HashMap<>();
         for (ResourceId formId : type.getRange()) {
-            Optional<FormAccessor> form = catalog.getForm(formId);
+            Optional<FormStorage> form = catalog.getForm(formId);
             if(form.isPresent()) {
                 Optional<ResourceId> labelFieldId = findLabelField(form.get().getFormClass());
 

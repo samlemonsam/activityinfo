@@ -19,11 +19,11 @@ import java.util.Map;
 
 class FormCatalogStub implements FormCatalog {
 
-    private Map<ResourceId, AccessorStub> formMap = new HashMap<>();
+    private Map<ResourceId, StorageStub> formMap = new HashMap<>();
 
 
-    public AccessorStub addForm(FormClass formClass) {
-        AccessorStub accessorStub = new AccessorStub(formClass);
+    public StorageStub addForm(FormClass formClass) {
+        StorageStub accessorStub = new StorageStub(formClass);
         formMap.put(formClass.getId(), accessorStub);
         return accessorStub;
     }
@@ -34,12 +34,12 @@ class FormCatalogStub implements FormCatalog {
     }
 
     @Override
-    public Optional<FormAccessor> getForm(ResourceId formId) {
-        return Optional.<FormAccessor>fromNullable(formMap.get(formId));
+    public Optional<FormStorage> getForm(ResourceId formId) {
+        return Optional.<FormStorage>fromNullable(formMap.get(formId));
     }
 
     @Override
-    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
+    public Optional<FormStorage> lookupForm(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -60,23 +60,23 @@ class FormCatalogStub implements FormCatalog {
 
     @Override
     public FormClass getFormClass(ResourceId resourceId) {
-        AccessorStub form = formMap.get(resourceId);
+        StorageStub form = formMap.get(resourceId);
         if(form == null) {
             throw new IllegalArgumentException();
         }
         return form.getFormClass();
     }
 
-    public class AccessorStub implements FormAccessor {
+    public class StorageStub implements FormStorage {
 
         private FormClass formClass;
         private int numRows = 10;
 
-        public AccessorStub(FormClass formClass) {
+        public StorageStub(FormClass formClass) {
             this.formClass = formClass;
         }
 
-        public AccessorStub withRowCount(int numRows) {
+        public StorageStub withRowCount(int numRows) {
             this.numRows = numRows;
             return this;
         }
@@ -135,9 +135,9 @@ class FormCatalogStub implements FormCatalog {
     private class QueryBuilderStub implements ColumnQueryBuilder {
 
         private List<CursorObserver<ResourceId>> idObservers = Lists.newArrayList();
-        private AccessorStub collection;
+        private StorageStub collection;
 
-        public QueryBuilderStub(AccessorStub collection) {
+        public QueryBuilderStub(StorageStub collection) {
             this.collection = collection;
         }
 

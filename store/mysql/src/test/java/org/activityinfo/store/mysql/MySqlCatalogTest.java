@@ -16,8 +16,8 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
@@ -203,7 +203,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     
     @Test
     public void singleSite() {
-        FormAccessor siteStorage = catalog.getForm(CuidAdapter.activityFormClass(1)).get();
+        FormStorage siteStorage = catalog.getForm(CuidAdapter.activityFormClass(1)).get();
         FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 1)).get();
         FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
 
@@ -216,7 +216,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void singleSiteWithBoundLocation() {
-        FormAccessor siteStorage = catalog.getForm(CuidAdapter.activityFormClass(4)).get();
+        FormStorage siteStorage = catalog.getForm(CuidAdapter.activityFormClass(4)).get();
         FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 6)).get();
         FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
 
@@ -419,7 +419,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void nonExistingSite() {
 
-        Optional<FormAccessor> collection = catalog.lookupForm(CuidAdapter.locationFormClass(9444441));
+        Optional<FormStorage> collection = catalog.lookupForm(CuidAdapter.locationFormClass(9444441));
     
         assertFalse(collection.isPresent());
     }
@@ -427,7 +427,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void singlePartner() {
 
-        FormAccessor form = catalog.getForm(CuidAdapter.partnerFormId(1)).get();
+        FormStorage form = catalog.getForm(CuidAdapter.partnerFormId(1)).get();
         Optional<FormRecord> partnerRecord = form.get(CuidAdapter.partnerRecordId(1));
 
     }

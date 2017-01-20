@@ -18,19 +18,19 @@ public class MockFormCatalog implements FormCatalog {
     
     private static final ResourceId COLLECTION_ID = ResourceId.valueOf("XYZ123");
     
-    private MockFormAccessor collection = new MockFormAccessor();
+    private MockFormStorage collection = new MockFormStorage();
     
     
     @Override
-    public Optional<FormAccessor> getForm(ResourceId formId) {
+    public Optional<FormStorage> getForm(ResourceId formId) {
         if (formId == null || formId.asString().equalsIgnoreCase("foobar")) {
             return Optional.absent();
         }
-        return Optional.<FormAccessor>of(collection);
+        return Optional.<FormStorage>of(collection);
     }
 
     @Override
-    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
+    public Optional<FormStorage> lookupForm(ResourceId recordId) {
         return Optional.absent();
     }
 
@@ -57,7 +57,7 @@ public class MockFormCatalog implements FormCatalog {
         return formClass;
     }
     
-    private class MockFormAccessor implements FormAccessor {
+    private class MockFormStorage implements FormStorage {
 
         @Override
         public FormPermissions getPermissions(int userId) {

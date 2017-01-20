@@ -24,9 +24,9 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.service.blob.BlobAuthorizer;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -90,7 +90,7 @@ public class Updater {
         ResourceId recordId = parseId(changeObject, "@id");
 
         // First determine whether the resource already exists. 
-        Optional<FormAccessor> accessor = catalog.lookupForm(recordId);
+        Optional<FormStorage> accessor = catalog.lookupForm(recordId);
         
         if(!accessor.isPresent()) {
             // If the record id is not present, then we need the @class attribute in order to
@@ -237,7 +237,7 @@ public class Updater {
 
 
     public void execute(RecordUpdate update) {
-        Optional<FormAccessor> collection = catalog.lookupForm(update.getRecordId());
+        Optional<FormStorage> collection = catalog.lookupForm(update.getRecordId());
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such resource: " + update.getRecordId());
         }
@@ -245,7 +245,7 @@ public class Updater {
         executeUpdate(collection.get(), update);
     }
 
-    private void executeUpdate(FormAccessor form, RecordUpdate update) {
+    private void executeUpdate(FormStorage form, RecordUpdate update) {
         
         FormClass formClass = form.getFormClass();
         Optional<FormRecord> existingResource = form.get(update.getRecordId());
@@ -294,7 +294,7 @@ public class Updater {
         }
     }
 
-    private void authorizeUpdate(FormAccessor form, Optional<FormRecord> existingResource, RecordUpdate update) {
+    private void authorizeUpdate(FormStorage form, Optional<FormRecord> existingResource, RecordUpdate update) {
 
 
         // Check form-level permissions
@@ -391,7 +391,7 @@ public class Updater {
 
     public void execute(FormInstance formInstance) {
 
-        Optional<FormAccessor> collection = catalog.getForm(formInstance.getFormId());
+        Optional<FormStorage> collection = catalog.getForm(formInstance.getFormId());
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formInstance.getFormId());
         }
@@ -419,7 +419,7 @@ public class Updater {
     }
 
     private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonObject jsonObject, boolean create) {
-        Optional<FormAccessor> collection = catalog.getForm(formId);
+        Optional<FormStorage> collection = catalog.getForm(formId);
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formId);
         }

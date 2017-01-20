@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 
@@ -27,9 +27,9 @@ public class TargetFormProvider implements FormProvider {
     }
 
     @Override
-    public FormAccessor openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
-        Map<ResourceId, FormAccessor> result = openForms(executor, Collections.singleton(formId));
-        FormAccessor collection = result.get(formId);
+    public FormStorage openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
+        Map<ResourceId, FormStorage> result = openForms(executor, Collections.singleton(formId));
+        FormStorage collection = result.get(formId);
         if(collection == null) {
             throw new IllegalArgumentException("no such target collection: " + formId);
         }
@@ -42,7 +42,7 @@ public class TargetFormProvider implements FormProvider {
     }
 
     @Override
-    public Map<ResourceId, FormAccessor> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
+    public Map<ResourceId, FormStorage> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
         
         Set<Integer> targetIds = Sets.newHashSet();
         for (ResourceId resourceId : formIds) {
@@ -51,7 +51,7 @@ public class TargetFormProvider implements FormProvider {
             }
         }
         
-        Map<ResourceId, FormAccessor> collectionMap = Maps.newHashMap();
+        Map<ResourceId, FormStorage> collectionMap = Maps.newHashMap();
 
         if(!targetIds.isEmpty()) {
             
@@ -86,7 +86,7 @@ public class TargetFormProvider implements FormProvider {
             }
 
             for (DatabaseTargetForm target : targetMap.values()) {
-                collectionMap.put(target.getFormClassId(), new TargetFormAccessor(executor, target));
+                collectionMap.put(target.getFormClassId(), new TargetFormStorage(executor, target));
             }
         }
         

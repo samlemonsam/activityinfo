@@ -11,8 +11,8 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.ConstantObservable;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.ResourceStore;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 
@@ -71,7 +71,7 @@ public class ResourceStoreStub implements ResourceStore {
     private class MergedCatalog implements FormCatalog {
 
         @Override
-        public Optional<FormAccessor> getForm(ResourceId formId) {
+        public Optional<FormStorage> getForm(ResourceId formId) {
             if (testCatalog.contains(formId)) {
                 return testCatalog.getForm(formId);
             } else {
@@ -80,7 +80,7 @@ public class ResourceStoreStub implements ResourceStore {
         }
 
         @Override
-        public Optional<FormAccessor> lookupForm(ResourceId recordId) {
+        public Optional<FormStorage> lookupForm(ResourceId recordId) {
             throw new UnsupportedOperationException();
         }
 

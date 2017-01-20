@@ -6,32 +6,34 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.service.store.RecordVersion;
+import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
-import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
+import org.activityinfo.store.mysql.update.BaseTableInserter;
+import org.activityinfo.store.mysql.update.BaseTableUpdater;
 
 import java.util.List;
 
 
-public class TargetFormAccessor implements FormAccessor {
-    
-    private final QueryExecutor executor;
-    private final DatabaseTargetForm target;
+public class SimpleTableStorage implements FormStorage {
+
     private final TableMapping mapping;
-    
-    public TargetFormAccessor(QueryExecutor executor, DatabaseTargetForm target) {
-        this.target = target;
+    private Authorizer authorizer;
+    private QueryExecutor executor;
+
+    public SimpleTableStorage(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
+        this.mapping = mapping;
+        this.authorizer = authorizer;
         this.executor = executor;
-        this.mapping = target.buildMapping();
     }
 
     @Override
     public FormPermissions getPermissions(int userId) {
-        return FormPermissions.readonly();
+        return authorizer.getPermissions(userId);
     }
 
     @Override
@@ -60,22 +62,24 @@ public class TargetFormAccessor implements FormAccessor {
     }
 
     @Override
-    public void add(RecordUpdate update) {
-        throw new UnsupportedOperationException();
+    public void update(RecordUpdate update) {
+        BaseTableUpdater updater = new BaseTableUpdater(mapping, update.getRecordId());
+        updater.update(executor, update);
     }
 
     @Override
-    public void update(RecordUpdate update) {
-        throw new UnsupportedOperationException();
+    public void add(RecordUpdate update) {
+        BaseTableInserter inserter = new BaseTableInserter(mapping, update.getRecordId());
+        inserter.insert(executor, update);
     }
 
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        return new TargetQueryBuilder(executor, target, mapping);
+        return new SimpleTableColumnQueryBuilder(new MySqlCursorBuilder(mapping, executor));
     }
 
     @Override
     public long cacheVersion() {
-        return 0;
+        return mapping.getVersion();
     }
 }

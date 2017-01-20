@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class JsonFormAccessor implements FormAccessor {
+public class JsonFormStorage implements FormStorage {
     
     private int id;
     private int parentId;
@@ -40,7 +40,7 @@ public class JsonFormAccessor implements FormAccessor {
     private final FormClass formClass;
     private final JsonArray instances;
     
-    public JsonFormAccessor(String resourceName) throws IOException {
+    public JsonFormStorage(String resourceName) throws IOException {
         formClass = loadFormClass(resourceName);
         instances = loadInstances(resourceName);
     }

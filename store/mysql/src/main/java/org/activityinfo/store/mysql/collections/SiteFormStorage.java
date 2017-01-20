@@ -33,16 +33,16 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 /**
  * Collection of Sites
  */
-public class SiteFormAccessor implements FormAccessor {
+public class SiteFormStorage implements FormStorage {
     
     private final Activity activity;
     private final TableMapping baseMapping;
     private final QueryExecutor queryExecutor;
     private final PermissionsCache permissionsCache;
 
-    public SiteFormAccessor(Activity activity, TableMapping baseMapping,
-                            QueryExecutor queryExecutor,
-                            PermissionsCache permissionsCache) {
+    public SiteFormStorage(Activity activity, TableMapping baseMapping,
+                           QueryExecutor queryExecutor,
+                           PermissionsCache permissionsCache) {
         this.activity = activity;
         this.baseMapping = baseMapping;
         this.queryExecutor = queryExecutor;
