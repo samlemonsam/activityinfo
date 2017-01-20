@@ -23,6 +23,8 @@ package org.activityinfo.server.login.model;
  * #L%
  */
 
+import com.google.appengine.labs.repackaged.com.google.common.base.Strings;
+
 public class SignUpPageModel extends PageModel {
     // used for form population after a continuable message
     private String email = "";
@@ -60,11 +62,11 @@ public class SignUpPageModel extends PageModel {
     }
 
     public SignUpPageModel set(String email, String name, String organization, String jobtitle, String locale) {
-        this.email = email;
-        this.name = name;
-        this.organization = organization;
-        this.jobtitle = jobtitle;
-        this.locale = locale;
+        this.email = Strings.nullToEmpty(email);
+        this.name = Strings.nullToEmpty(name);
+        this.organization = Strings.nullToEmpty(organization);
+        this.jobtitle = Strings.nullToEmpty(jobtitle);
+        this.locale = Strings.nullToEmpty(locale);
         return this;
     }
 
