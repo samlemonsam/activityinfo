@@ -12,13 +12,16 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulSet;
 import org.activityinfo.observable.SynchronousScheduler;
 import org.activityinfo.store.ResourceStore;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Constructs a set of {@link org.activityinfo.geoadmin.merge2.view.mapping.FieldMapping}s
@@ -61,8 +64,29 @@ public class FormMappingBuilder {
                 buildReferenceMapping(targetNode.getField());
             }
         }
-        
+
+        // Add mapping for geography, IIF source and target have exactly one GeoArea
+        Set<FormField> targetGeoFields = findGeoFields(target.getFormTree());
+        Set<FormField> sourceGeoFields = findGeoFields(source.getFormTree());
+        if(targetGeoFields.size() == 1 && sourceGeoFields.size() == 1) {
+            FormField sourceField = Iterables.getOnlyElement(sourceGeoFields);
+            FormField targetField = Iterables.getOnlyElement(targetGeoFields);
+            mappings.add(Observable.<FieldMapping>just(new GeoAreaFieldMapping(
+                    source.getField(sourceField.getId()),
+                    targetField)));
+        }
+
         return Observable.flatten(SynchronousScheduler.INSTANCE, mappings);
+    }
+
+    private Set<FormField> findGeoFields(FormTree tree) {
+        Set<FormField> set = new HashSet<>();
+        for (FormTree.Node node : tree.getRootFields()) {
+            if(node.getType() instanceof GeoAreaType) {
+                set.add(node.getField());
+            }
+        }
+        return set;
     }
 
 

@@ -7,10 +7,8 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.model.type.geo.GeoArea;
 
 /**
  * Describes the contents of a field in the source or target form.
@@ -20,11 +18,24 @@ public class FieldProfile {
     private FormTree.Node node;
     private ColumnView columnView;
 
+    private ColumnView xmin;
+    private ColumnView xmax;
+    private ColumnView ymin;
+    private ColumnView ymax;
+
     public FieldProfile(FormTree.Node node, ColumnView columnView) {
         this.node = node;
         this.columnView = columnView;
     }
-    
+
+    public FieldProfile(FormTree.Node node, ColumnView xmin, ColumnView xmax, ColumnView ymin, ColumnView ymax) {
+        this.node = node;
+        this.xmin = xmin;
+        this.xmax = xmax;
+        this.ymin = ymin;
+        this.ymax = ymax;
+    }
+
     public boolean isText() {
         if(columnView == null) {
             return false;
@@ -36,23 +47,9 @@ public class FieldProfile {
         if(columnView == null) {
             return false;
         }
-        return columnView.getType() == ColumnType.GEOGRAPHIC_AREA;
+        return node.getType() instanceof GeoArea;
     }
 
-    public Set<String> uniqueValues() {
-        if(columnView == null || columnView.getType() != ColumnType.STRING) {
-            return Collections.emptySet();
-        } 
-        
-        Set<String> set = new HashSet<>();
-        for(int i=0;i<columnView.numRows();++i) {
-            String value = columnView.getString(i);
-            if(!Strings.isNullOrEmpty(value)) {
-                set.add(value.toUpperCase());
-            }
-        }
-        return set;
-    }
 
     public ResourceId getId() {
         return node.getFieldId();
@@ -68,6 +65,13 @@ public class FieldProfile {
 
     public ColumnView getView() {
         return columnView;
+    }
+
+    public Extents getExtents(int index) {
+        return new Extents(ymin.getDouble(index),
+                           ymax.getDouble(index),
+                           xmin.getDouble(index),
+                           xmax.getDouble(index));
     }
 
     public String getCode() {

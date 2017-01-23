@@ -44,11 +44,11 @@ public class MySqlCatalog implements FormCatalog {
         activityLoader = new ActivityLoader(executor);
         DatabaseCache databaseCache = new DatabaseCache(executor);
 
-        providers.add(new SimpleTableFormProvider(new UserTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new CountryTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new AdminEntityTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new PartnerTable(databaseCache), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new ProjectTable(databaseCache), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new UserTable(), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new CountryTable(), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new AdminEntityTable(), new AdminAuthorizer()));
+        providers.add(new SimpleTableStorageProvider(new PartnerTable(databaseCache), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new ProjectTable(databaseCache), FormPermissions.readonly()));
         providers.add(new TargetFormProvider());
         providers.add(new ActivityFormProvider(activityLoader));
         providers.add(new LocationFormProvider(activityLoader.getPermissionCache()));

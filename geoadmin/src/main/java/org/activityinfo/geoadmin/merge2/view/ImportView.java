@@ -90,7 +90,7 @@ public class ImportView {
     public TransactionBuilder buildTransaction() {
         TransactionBuilder tx = new TransactionBuilder();
 
-        ResourceId targetClassId = model.getTargetFormId().get();
+        ResourceId targetFormId = model.getTargetFormId().get();
         
         KeyGenerator generator = new KeyGenerator();
 
@@ -111,7 +111,7 @@ public class ImportView {
                     update = tx.update(matchRow.getTargetId().get());
                 } else {
                     // create a new instance with properties from the source
-                    update = tx.create(targetClassId, CuidAdapter.entity(generator.generateInt()));
+                    update = tx.create(targetFormId, CuidAdapter.entity(generator.generateInt()));
                 }
                 
                 // apply properties from field mapping
@@ -120,7 +120,6 @@ public class ImportView {
                             fieldMapping.getTargetFieldId(), 
                             fieldMapping.mapFieldValue(matchRow.getSourceRow()));
                 }
-                
             }
         }
         return tx;

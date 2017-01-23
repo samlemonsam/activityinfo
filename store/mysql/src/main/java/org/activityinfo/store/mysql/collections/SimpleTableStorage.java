@@ -21,9 +21,9 @@ import java.util.List;
 
 public class SimpleTableStorage implements FormStorage {
 
-    private final TableMapping mapping;
-    private Authorizer authorizer;
-    private QueryExecutor executor;
+    protected final TableMapping mapping;
+    protected final Authorizer authorizer;
+    protected final QueryExecutor executor;
 
     public SimpleTableStorage(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
         this.mapping = mapping;

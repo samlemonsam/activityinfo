@@ -39,9 +39,19 @@ public class FormProfile {
         this.formTree = formTree;
         this.columnSet = columnSet;
         for (FormTree.Node node : formTree.getLeaves()) {
-            ColumnView view = columnSet.getColumnView(node.getFieldId().asString());
-            if(view != null && !isDuplicateColumn(view)) {
-                fields.add(new FieldProfile(node, view));
+            if(node.getType() instanceof GeoAreaType) {
+                ColumnView xmin = columnSet.getColumnView(node.getFieldId() + "_xmin");
+                ColumnView xmax = columnSet.getColumnView(node.getFieldId() + "_xmax");
+                ColumnView ymin = columnSet.getColumnView(node.getFieldId() + "_ymin");
+                ColumnView ymax = columnSet.getColumnView(node.getFieldId() + "_ymax");
+
+                fields.add(new FieldProfile(node, xmin, xmax, ymin, ymax));
+
+            } else {
+                ColumnView view = columnSet.getColumnView(node.getFieldId().asString());
+                if (view != null && !isDuplicateColumn(view)) {
+                    fields.add(new FieldProfile(node, view));
+                }
             }
         }
         
@@ -120,10 +130,10 @@ public class FormProfile {
                 for (FormTree.Node node : tree.getRootFields()) {
                     if(node.getType() instanceof GeoAreaType) {
                         SymbolExpr bounds = new SymbolExpr(node.getFieldId());
-                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMIN, bounds)).as("_xmin");
-                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMAX, bounds)).as("_xmax");
-                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.YMIN, bounds)).as("_ymin");
-                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.YMAX, bounds)).as("_ymax");
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMIN, bounds)).as(node.getFieldId() + "_xmin");
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMAX, bounds)).as(node.getFieldId() + "_xmax");
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.YMIN, bounds)).as(node.getFieldId() + "_ymin");
+                        queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.YMAX, bounds)).as(node.getFieldId() + "_ymax");
                     }
                 }
                 return resourceStore.queryColumns(queryModel);

@@ -13,14 +13,23 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class SimpleTableFormProvider implements FormProvider {
+/**
+ * Provides storage for forms that are stored in a simple table, where each field maps more or less
+ * to one table column.
+ */
+public class SimpleTableStorageProvider implements FormProvider {
     
-    private final SimpleTable table;
-    private final Authorizer authorizer;
+    protected final SimpleTable table;
+    protected final Authorizer authorizer;
 
-    public SimpleTableFormProvider(SimpleTable table, FormPermissions permissions) {
+    public SimpleTableStorageProvider(SimpleTable table, FormPermissions permissions) {
         this.table = table;
         this.authorizer = new ConstantAuthorizer(permissions);
+    }
+
+    public SimpleTableStorageProvider(SimpleTable table, Authorizer authorizer) {
+        this.table = table;
+        this.authorizer = authorizer;
     }
 
     @Override

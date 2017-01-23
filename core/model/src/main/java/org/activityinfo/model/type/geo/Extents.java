@@ -327,19 +327,19 @@ public class Extents implements Serializable, IsRecord {
         return object;
     }
 
-    public static Extents fromRecord(Record record) {
+    public static Extents fromJsonObject(JsonObject object) {
         Extents area = Extents.empty();
-        if(record.has("minLat")) {
-            area.minLat = record.getDouble("minLat");
+        if(object.has("minLat")) {
+            area.minLat = object.get("minLat").getAsDouble();
         }
-        if(record.has("maxLat")) {
-            area.maxLat = record.getDouble("maxLat");
+        if(object.has("maxLat")) {
+            area.maxLat = object.get("maxLat").getAsDouble();
         }
-        if(record.has("minLon")) {
-            area.minLon = record.getDouble("minLon");
+        if(object.has("minLon")) {
+            area.minLon = object.get("minLon").getAsDouble();
         }
-        if(record.has("maxLon")) {
-            area.maxLon = record.getDouble("maxLon");
+        if(object.has("maxLon")) {
+            area.maxLon = object.get("maxLon").getAsDouble();
         }
         return area;
     }
