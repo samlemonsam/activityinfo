@@ -16,6 +16,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -362,7 +363,19 @@ public class ActivityLoader {
      */
     private static FormClass patchDeserializedFormClass(Activity activity, FormClass formClass) {
 
+        // Ensure that all forms have the database id
         formClass.setDatabaseId(activity.getDatabaseId());
+
+        // Some partner fields have been stored to the JSON as pointing to the wrong database,
+        // either because there was a bug in the past or because the databaseId was manually updated
+        // in the activity table without a corresponding change to the formClass field.
+        FormField partnerField = formClass.getField(CuidAdapter.partnerField(activity.getId()));
+        if(partnerField == null) {
+            LOGGER.severe("Form " + activity.getId() + " is missing partner field.");
+            throw new IllegalStateException("Activity Form is missing partner field");
+        }
+        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormId(activity.getDatabaseId())));
+
 
         return formClass;
     }
