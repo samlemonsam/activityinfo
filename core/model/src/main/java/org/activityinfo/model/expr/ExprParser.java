@@ -1,6 +1,7 @@
 package org.activityinfo.model.expr;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
@@ -162,6 +163,9 @@ public class ExprParser {
     }
 
     public static ExprNode parse(String expression) {
+        if(Strings.isNullOrEmpty(expression)) {
+            throw new ExprSyntaxException("Empty expression");
+        }
         ExprParser parser = new ExprParser(new ExprLexer(expression));
         return parser.parse();
     }
