@@ -32,6 +32,7 @@ import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -209,6 +210,11 @@ public class FormModelTest extends CommandTestCase2 {
         
         masterFormClass = new FormClass(masterFormId);
         masterFormClass.setDatabaseId(CuidAdapter.databaseId(1));
+
+        FormField partnerField = new FormField(CuidAdapter.partnerField(3));
+        partnerField.setLabel("Partner");
+        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormId(1)));
+        masterFormClass.addElement(partnerField);
 
         FormField labelField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
         labelField.setLabel("label1");
