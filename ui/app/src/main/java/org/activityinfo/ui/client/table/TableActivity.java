@@ -3,21 +3,21 @@ package org.activityinfo.ui.client.table;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import org.activityinfo.ui.client.data.FormService;
+import org.activityinfo.ui.client.store.FormStore;
 
 public class TableActivity extends AbstractActivity {
 
-    private FormService formService;
+    private FormStore formStore;
     private TablePlace place;
 
-    public TableActivity(FormService formService, TablePlace place) {
-        this.formService = formService;
+    public TableActivity(FormStore formStore, TablePlace place) {
+        this.formStore = formStore;
         this.place = place;
     }
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        TableModel tableModel = new TableModel(formService, place.getFormId());
+        TableModel tableModel = new TableModel(formStore, place.getFormId());
         TableView view = new TableView(tableModel);
         panel.setWidget(view);
     }

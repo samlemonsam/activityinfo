@@ -2,7 +2,7 @@
 apply plugin: 'gwt'
 
 gwt {
-    gwtVersion = project.gwtVersion
+    gwtVersion = "2.7.0"
     modules 'org.activityinfo.ui.App'
     maxHeapSize "5g"
 }
@@ -16,10 +16,11 @@ task explodedWar(type: Copy) {
     into "$buildDir/exploded"
 }
 
+
 dependencies {
     compile libraries.guava
     compile libraries.gwt.i18nServer
-    gwt libraries.gwt.user
+    gwt "com.google.gwt:gwt-user:2.7.0"
     gwt libraries.gwt.guava
     gwt libraries.gwt.guice
     gwt libraries.gwt.gson

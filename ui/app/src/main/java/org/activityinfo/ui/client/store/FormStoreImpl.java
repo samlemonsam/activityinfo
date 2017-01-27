@@ -1,9 +1,7 @@
-package org.activityinfo.ui.client.data;
+package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -11,28 +9,29 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.ui.client.http.HttpBus;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 
-public class FormServiceImpl implements FormService {
+public class FormStoreImpl implements FormStore {
 
-    private static final Logger LOGGER = Logger.getLogger(FormServiceImpl.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FormStoreImpl.class.getName());
 
-    private ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl("http://localhost:8080/resources");
+    private HttpBus httpBus;
 
     private Map<ResourceId, ObservableForm> formMap = Maps.newHashMap();
-    private List<PendingQuery> queries = new ArrayList<>();
 
+    public FormStoreImpl(HttpBus httpBus) {
+        this.httpBus = httpBus;
+    }
 
     @Override
     public Observable<FormClass> getFormClass(ResourceId formId) {
         ObservableForm form = formMap.get(formId);
         if(form == null) {
-            form = new ObservableForm(client, formId);
+            form = new ObservableForm(httpBus, formId);
             formMap.put(formId, form);
         }
         return form;
@@ -55,6 +54,6 @@ public class FormServiceImpl implements FormService {
 
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
-        return new ObservableQuery(client, queryModel);
+        return new ObservableQuery(httpBus, queryModel);
     }
 }

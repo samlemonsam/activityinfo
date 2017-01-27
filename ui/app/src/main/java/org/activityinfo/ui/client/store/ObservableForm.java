@@ -1,11 +1,12 @@
-package org.activityinfo.ui.client.data;
+package org.activityinfo.ui.client.store;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.http.FormSchemaRequest;
+import org.activityinfo.ui.client.http.HttpBus;
+import org.activityinfo.ui.client.http.HttpSubscription;
 
 import java.util.logging.Logger;
 
@@ -17,7 +18,7 @@ class ObservableForm extends Observable<FormClass> {
 
     private static final Logger LOGGER = Logger.getLogger(ObservableForm.class.getName());
 
-    private final ActivityInfoClientAsync client;
+    private final HttpBus httpBus;
     private final ResourceId formId;
 
     /**
@@ -34,10 +35,12 @@ class ObservableForm extends Observable<FormClass> {
     /**
      * Pending/completed fetch of this form's schema.
      */
-    private Promise<FormClass> formSchema = null;
+    private FormClass formSchema = null;
 
-    public ObservableForm(ActivityInfoClientAsync client, ResourceId formId) {
-        this.client = client;
+    private HttpSubscription httpSubscription = null;
+
+    public ObservableForm(HttpBus httpBus, ResourceId formId) {
+        this.httpBus = httpBus;
         this.formId = formId;
     }
 
@@ -48,18 +51,21 @@ class ObservableForm extends Observable<FormClass> {
 
         if (formSchema == null) {
             LOGGER.info(formId + ": fetching...");
-            formSchema = client.getFormSchema(formId.asString());
-            formSchema.then(new AsyncCallback<FormClass>() {
+
+            this.httpSubscription = httpBus.submit(new FormSchemaRequest(formId), new AsyncCallback<FormClass>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO: schedule retrying.
+                    // TODO: handle deleted / no permission...
                 }
 
                 @Override
                 public void onSuccess(FormClass result) {
                     LOGGER.info(formId + ": received version " + result.getSchemaVersion());
-                    ObservableForm.this.schemaVersion = result.getSchemaVersion();
-                    ObservableForm.this.fireChange();
+                    if (result.getSchemaVersion() > schemaVersion) {
+                        formSchema = result;
+                        ObservableForm.this.schemaVersion = result.getSchemaVersion();
+                        ObservableForm.this.fireChange();
+                    }
                 }
             });
         }
@@ -69,19 +75,20 @@ class ObservableForm extends Observable<FormClass> {
     protected void onDisconnect() {
         LOGGER.info(formId + ": Disconnected.");
         connected = false;
+        if (httpSubscription != null) {
+            httpSubscription.cancel();
+            httpSubscription = null;
+        }
     }
 
     @Override
     public boolean isLoading() {
-        if (formSchema == null) {
-            return true;
-        }
-        return formSchema.getState() != Promise.State.FULFILLED;
+        return formSchema == null;
     }
 
     @Override
     public FormClass get() {
         assert !isLoading() : "loading: " + formId;
-        return formSchema.get();
+        return formSchema;
     }
 }

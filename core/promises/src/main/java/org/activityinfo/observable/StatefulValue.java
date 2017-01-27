@@ -5,7 +5,15 @@ import com.google.common.base.Preconditions;
 public class StatefulValue<T> extends Observable<T> {
     
     private T value;
-    
+
+    public StatefulValue() {
+        value = null;
+    }
+
+    public StatefulValue(T value) {
+        this.value = value;
+    }
+
     @Override
     public boolean isLoading() {
         return value == null;

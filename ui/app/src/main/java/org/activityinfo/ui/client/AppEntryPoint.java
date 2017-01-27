@@ -10,10 +10,13 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.widget.core.client.container.Viewport;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.ui.client.chrome.AppFrame;
-import org.activityinfo.ui.client.data.FormService;
-import org.activityinfo.ui.client.data.FormServiceImpl;
+import org.activityinfo.ui.client.http.HttpBus;
+import org.activityinfo.ui.client.store.FormStore;
+import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.table.TablePlace;
 
 import java.util.logging.Logger;
@@ -35,14 +38,16 @@ public class AppEntryPoint implements EntryPoint {
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
-        FormService service = new FormServiceImpl();
+        ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl("http://localhost:8080/resources");
+        HttpBus httpBus = new HttpBus(client);
+        FormStore formStore = new FormStoreImpl(httpBus);
 
         Viewport viewport = new Viewport();
-        AppFrame appFrame = new AppFrame();
+        AppFrame appFrame = new AppFrame(httpBus);
 
-        ActivityMapper activityMapper = new AppActivityMapper(service);
+        ActivityMapper activityMapper = new AppActivityMapper(formStore);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
-        activityManager.setDisplay(appFrame.getCenterPanel());
+        activityManager.setDisplay(appFrame.getDisplayWidget());
 
         AppPlaceHistoryMapper historyMapper = GWT.create(AppPlaceHistoryMapper.class);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);

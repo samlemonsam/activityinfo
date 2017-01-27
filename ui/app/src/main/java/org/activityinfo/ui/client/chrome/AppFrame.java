@@ -3,10 +3,11 @@ package org.activityinfo.ui.client.chrome;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
+import org.activityinfo.ui.client.http.HttpBus;
 
 /**
  * The outer application frame that houses the login menu, connection indicator, etc.
@@ -21,11 +22,13 @@ public class AppFrame implements IsWidget {
 
     BorderLayoutContainer container;
 
-    @UiField
-    SimplePanel centerPanel;
 
-    public AppFrame() {
+    @UiField
+    ConnectionIndicator connectionIndicator;
+
+    public AppFrame(HttpBus bus) {
         container = ourUiBinder.createAndBindUi(this);
+        connectionIndicator.setStatus(bus.getStatus());
     }
 
     @Override
@@ -33,7 +36,13 @@ public class AppFrame implements IsWidget {
         return container;
     }
 
-    public SimplePanel getCenterPanel() {
-        return centerPanel;
+    public AcceptsOneWidget getDisplayWidget() {
+        return new AcceptsOneWidget() {
+            @Override
+            public void setWidget(IsWidget w) {
+                container.setCenterWidget(w);
+                container.forceLayout();
+            }
+        };
     }
 }

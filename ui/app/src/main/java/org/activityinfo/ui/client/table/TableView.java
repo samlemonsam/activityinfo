@@ -15,7 +15,7 @@ public class TableView implements IsWidget {
 
     private TableModel model;
     private ContentPanel panel;
-    private final BorderLayoutContainer borderContainer;
+    private final BorderLayoutContainer container;
 
     private TableGrid grid;
     private DetailsPane detailsPane;
@@ -43,11 +43,12 @@ public class TableView implements IsWidget {
         };
         this.panel.setHeading(I18N.CONSTANTS.loading());
 
-        this.borderContainer = new BorderLayoutContainer();
+        this.container = new BorderLayoutContainer();
         this.detailsPane = new DetailsPane();
-        this.borderContainer.setEastWidget(detailsPane, new BorderLayoutContainer.BorderLayoutData(150));
 
-        this.panel.add(borderContainer);
+        this.container.setEastWidget(detailsPane, new BorderLayoutContainer.BorderLayoutData(150));
+
+        this.panel.add(container);
     }
 
     @Override
@@ -63,8 +64,9 @@ public class TableView implements IsWidget {
             this.panel.unmask();
             if(grid == null) {
                 grid = new TableGrid(model.getEffectiveTable().get());
-                borderContainer.setCenterWidget(grid);
-                borderContainer.forceLayout();
+                container.setCenterWidget(grid);
+                container.forceLayout();
+
             } else {
                 grid.update(model.getEffectiveTable());
             }

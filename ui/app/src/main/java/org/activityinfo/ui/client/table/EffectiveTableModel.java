@@ -7,7 +7,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.ui.client.data.FormService;
+import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class EffectiveTableModel {
     private List<EffectiveColumn> columns;
     private Observable<ColumnSet> columnSet;
 
-    public EffectiveTableModel(FormService formService, FormTree formTree) {
+    public EffectiveTableModel(FormStore formStore, FormTree formTree) {
         this.formTree = formTree;
         this.columnSet = new StatefulValue<>();
 
@@ -34,7 +34,7 @@ public class EffectiveTableModel {
             }
         }
 
-        this.columnSet = formService.query(buildQuery(columns));
+        this.columnSet = formStore.query(buildQuery(columns));
     }
 
     private QueryModel buildQuery(List<EffectiveColumn> columns) {

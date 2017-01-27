@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.data;
+package org.activityinfo.ui.client.store;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
@@ -7,7 +7,8 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 
-public interface FormService {
+public interface FormStore {
+
 
     Observable<FormClass> getFormClass(ResourceId formId);
 
