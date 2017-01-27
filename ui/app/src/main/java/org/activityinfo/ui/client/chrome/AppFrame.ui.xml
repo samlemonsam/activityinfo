@@ -1,0 +1,37 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:container='urn:import:com.sencha.gxt.widget.core.client.container'
+>
+
+    <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData"
+             field="northData">
+        <ui:attributes size="42"/>
+    </ui:with>
+
+    <ui:style gss="true">
+
+        .header {
+            background-color: #28384a;
+        }
+
+    </ui:style>
+
+
+    <container:BorderLayoutContainer>
+
+        <!-- Top Application Bar -->
+        <container:north layoutData="{northData}">
+            <container:HBoxLayoutContainer addStyleNames="{style.header}">
+
+                <g:HTML>ActivityInfo</g:HTML>
+
+            </container:HBoxLayoutContainer>
+        </container:north>
+        <container:center>
+            <g:SimplePanel ui:field="centerPanel">
+
+
+            </g:SimplePanel>
+        </container:center>
+    </container:BorderLayoutContainer>
+</ui:UiBinder>

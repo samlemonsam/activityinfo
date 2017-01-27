@@ -1,18 +1,21 @@
 package org.activityinfo.ui.client;
 
+import com.google.gwt.activity.shared.ActivityManager;
+import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.data.FormService;
 import org.activityinfo.ui.client.data.FormServiceImpl;
-import org.activityinfo.ui.client.table.TableModel;
-import org.activityinfo.ui.client.table.TableView;
+import org.activityinfo.ui.client.table.TablePlace;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -20,28 +23,35 @@ import java.util.logging.Logger;
  */
 public class AppEntryPoint implements EntryPoint {
 
+    public static final TablePlace DEFAULT_PLACE = new TablePlace(CuidAdapter.activityFormClass(33));
+
     private static final Logger logger = Logger.getLogger(AppEntryPoint.class.getName());
+
 
     @Override
     public void onModuleLoad() {
 
-        GWT.runAsync(new RunAsyncCallback() {
-            @Override
-            public void onFailure(Throwable reason) {
-                logger.log(Level.SEVERE, "Unable to start application", reason);
-                Window.alert("Some error occurred while starting application");
-            }
 
-            @Override
-            public void onSuccess() {
+        EventBus eventBus = new SimpleEventBus();
+        PlaceController placeController = new PlaceController(eventBus);
 
-                FormService service = new FormServiceImpl();
-                TableView view = new TableView(new TableModel(service, CuidAdapter.activityFormClass(33)));
+        FormService service = new FormServiceImpl();
 
-                Viewport viewport = new Viewport();
-                viewport.setWidget(view);
-                RootLayoutPanel.get().add(viewport);
-            }
-        });
+        Viewport viewport = new Viewport();
+        AppFrame appFrame = new AppFrame();
+
+        ActivityMapper activityMapper = new AppActivityMapper(service);
+        ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
+        activityManager.setDisplay(appFrame.getCenterPanel());
+
+        AppPlaceHistoryMapper historyMapper = GWT.create(AppPlaceHistoryMapper.class);
+        PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
+        historyHandler.register(placeController, eventBus, DEFAULT_PLACE);
+
+        viewport.add(appFrame);
+
+        RootLayoutPanel.get().add(viewport);
+
+        historyHandler.handleCurrentHistory();
     }
 }
