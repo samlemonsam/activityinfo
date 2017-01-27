@@ -113,6 +113,10 @@ public class HttpBus {
         return pending;
     }
 
+    public <T> Observable<T> get(HttpRequest<T> request) {
+        return new ObservableRequest<T>(this, request);
+    }
+
     /**
      * Called when a request has succeeded or cancelled and should be removed from the queue.
      */

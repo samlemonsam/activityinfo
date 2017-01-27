@@ -5,7 +5,7 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
- * Created by alex on 27-1-17.
+ * Table view place for a specific form.
  */
 public class TablePlace extends Place {
 
