@@ -4,6 +4,8 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.activityinfo.ui.client.store.FormStore;
+import org.activityinfo.ui.client.table.model.TableModel;
+import org.activityinfo.ui.client.table.view.TableView;
 
 public class TableActivity extends AbstractActivity {
 

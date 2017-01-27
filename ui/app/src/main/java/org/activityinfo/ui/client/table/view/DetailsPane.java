@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table;
+package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table;
+package org.activityinfo.ui.client.table.view;
 
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;

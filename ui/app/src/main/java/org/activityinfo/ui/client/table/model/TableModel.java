@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table;
+package org.activityinfo.ui.client.table.model;
 
 import com.google.common.base.Function;
 import org.activityinfo.model.formTree.FormTree;

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table;
+package org.activityinfo.ui.client.table.model;
 
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;

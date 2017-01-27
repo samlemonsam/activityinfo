@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table;
+package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -10,6 +10,8 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.ui.client.table.model.EffectiveColumn;
+import org.activityinfo.ui.client.table.model.EffectiveTableModel;
 
 import java.util.ArrayList;
 import java.util.List;

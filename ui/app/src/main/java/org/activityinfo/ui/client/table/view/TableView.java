@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table;
+package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -7,6 +7,8 @@ import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
+import org.activityinfo.ui.client.table.model.EffectiveTableModel;
+import org.activityinfo.ui.client.table.model.TableModel;
 
 /**
  * Displays a Form as a Table
