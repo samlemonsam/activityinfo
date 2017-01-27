@@ -1,6 +1,8 @@
 package org.activityinfo.geoadmin.merge2.view.match;
 
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
@@ -94,12 +96,19 @@ public class FieldScoreMatrix extends ScoreMatrix {
         
         double sumRowMaxes = 0;
         int countOfRows = 0;
-        
+
+        Cache<String, Double> cache = CacheBuilder.newBuilder()
+                .maximumSize(1000)
+                .build();
+
         for (int i = 0; i < x.numRows(); i++) {
             String rowName = x.getString(i);
             if(!Strings.isNullOrEmpty(rowName)) {
-                double maxScore = findScoreOfBestMatch(rowName, y);
-                
+                Double maxScore = cache.getIfPresent(rowName);
+                if (maxScore == null) {
+                    maxScore = findScoreOfBestMatch(rowName, y);
+                    cache.put(rowName, maxScore);
+                }
                 sumRowMaxes += maxScore;
                 countOfRows++;
             }
