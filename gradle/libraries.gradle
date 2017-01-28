@@ -160,8 +160,6 @@ subprojects {
         
         resolutionStrategy {
 
-            force libraries.guava
-            //  force libraries.gwt.values()
             force libraries.jts
             force libraries.gson
 

@@ -95,3 +95,13 @@ dependencies {
     compile libraries.appengine.export.emf
     compile libraries.prettytime
 }
+
+
+configurations.all {
+
+    resolutionStrategy {
+        force libraries.guava
+        force libraries.gwt.values()
+    }
+}
+

@@ -2,7 +2,7 @@
 apply plugin: 'gwt'
 
 gwt {
-    gwtVersion = "2.7.0"
+    gwtVersion = "2.8.0"
     modules 'org.activityinfo.ui.App'
     maxHeapSize "5g"
 }
@@ -18,12 +18,11 @@ task explodedWar(type: Copy) {
 
 
 dependencies {
-    compile libraries.guava
-    compile libraries.gwt.i18nServer
-    gwt "com.google.gwt:gwt-user:2.7.0"
-    gwt libraries.gwt.guava
-    gwt libraries.gwt.guice
+    compile "com.google.guava:guava:21.0"
+    gwt "com.google.gwt:gwt-user:2.8.0"
+    gwt 'com.google.guava:guava-gwt:21.0'
     gwt libraries.gwt.gson
+
     gwt project(':core:model')
     gwt project(':i18n')
     gwt project(':apiClient:gwt')
@@ -32,7 +31,12 @@ dependencies {
     gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
     gwt group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
 
+}
 
+configurations.all {
+
+    // Interferes with GWT-dev
+    exclude module: 'gwt-servlet'
 }
 
 idea {

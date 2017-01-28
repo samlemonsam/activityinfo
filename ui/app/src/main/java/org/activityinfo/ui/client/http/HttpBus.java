@@ -1,7 +1,6 @@
 package org.activityinfo.ui.client.http;
 
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -154,12 +153,13 @@ public class HttpBus {
      * @return sequence of pending requests that have failed.
      */
     private Iterable<PendingRequest<?>> failedRequests() {
-        return Iterables.filter(pendingRequests, new Predicate<PendingRequest<?>>() {
-            @Override
-            public boolean apply(PendingRequest<?> pendingRequest) {
-                return pendingRequest.isFailed();
+        List<PendingRequest<?>> failed = new ArrayList<>();
+        for (PendingRequest<?> pendingRequest : pendingRequests) {
+            if (pendingRequest.isFailed()) {
+                failed.add(pendingRequest);
             }
-        });
+        }
+        return failed;
     }
 
     /**

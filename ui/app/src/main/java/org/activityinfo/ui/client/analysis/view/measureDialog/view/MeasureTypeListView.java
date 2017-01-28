@@ -65,8 +65,8 @@ public class MeasureTypeListView implements IsWidget {
                     listStore.clear();
                 } else {
                     listStore.replaceAll(measures.get());
-                    if (!model.getSelectedMeasureType().isLoading() && model.getSelectedMeasureType().get().isPresent()) {
-                        MeasureType selectedMeasure = model.getSelectedMeasureType().get().get();
+                    if (!model.getSelectedMeasureType().isLoading()) {
+                        MeasureType selectedMeasure = model.getSelectedMeasureType().get();
                         listView.getSelectionModel().select(selectedMeasure, false);
                     }
                 }
