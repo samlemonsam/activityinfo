@@ -8,7 +8,6 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.table.model.EffectiveColumn;
 import org.activityinfo.ui.client.table.model.EffectiveTableModel;
@@ -36,12 +35,7 @@ public class TableGrid implements IsWidget {
             @Override
             protected void onAttach() {
                 super.onAttach();
-                subscription = tableModel.getColumnSet().subscribe(new Observer<ColumnSet>() {
-                    @Override
-                    public void onChange(Observable<ColumnSet> observable) {
-                        onColumnsUpdated(observable);
-                    }
-                });
+                subscription = tableModel.getColumnSet().subscribe(observable -> onColumnsUpdated(observable));
             }
 
             @Override

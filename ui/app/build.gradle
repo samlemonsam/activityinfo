@@ -1,6 +1,9 @@
 
 apply plugin: 'gwt'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 gwt {
     gwtVersion = "2.8.0"
     modules 'org.activityinfo.ui.App'

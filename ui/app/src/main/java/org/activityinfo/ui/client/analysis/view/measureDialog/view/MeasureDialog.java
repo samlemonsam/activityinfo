@@ -9,8 +9,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureSelectionModel;
 import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureType;
 import org.activityinfo.ui.client.store.FormStore;
@@ -46,17 +44,14 @@ public class MeasureDialog {
 
         this.dialog = uiBinder.createAndBindUi(this);
 
-        model.getSelectionStep().subscribe(new Observer<MeasureSelectionModel.SelectionStep>() {
-            @Override
-            public void onChange(Observable<MeasureSelectionModel.SelectionStep> step) {
-                switch (step.get()) {
-                    case FORM:
-                        container.setActiveWidget(formTree);
-                        break;
-                    case MEASURE:
-                        container.setActiveWidget(measureList);
-                        break;
-                }
+        model.getSelectionStep().subscribe(step -> {
+            switch (step.get()) {
+                case FORM:
+                    container.setActiveWidget(formTree);
+                    break;
+                case MEASURE:
+                    container.setActiveWidget(measureList);
+                    break;
             }
         });
 

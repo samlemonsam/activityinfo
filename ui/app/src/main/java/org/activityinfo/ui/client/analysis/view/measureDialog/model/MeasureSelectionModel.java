@@ -21,8 +21,6 @@ import java.util.List;
  */
 public class MeasureSelectionModel {
 
-
-
     public enum SelectionStep {
         FORM,
         MEASURE
@@ -30,9 +28,9 @@ public class MeasureSelectionModel {
 
     private final FormStore formStore;
 
-    private final StatefulValue<Optional<ResourceId>> selectedFormId = new StatefulValue<>(Optional.<ResourceId>absent());
+    private final StatefulValue<Optional<ResourceId>> selectedFormId = new StatefulValue<>(Optional.absent());
 
-    private final StatefulValue<Optional<MeasureType>> selectedMeasureType = new StatefulValue<>(Optional.<MeasureType>absent());
+    private final StatefulValue<Optional<MeasureType>> selectedMeasureType = new StatefulValue<>(Optional.absent());
 
     private final Observable<Optional<FormClass>> selectedFormSchema;
 
@@ -41,19 +39,11 @@ public class MeasureSelectionModel {
 
     public MeasureSelectionModel(final FormStore formStore) {
         this.formStore = formStore;
-        this.selectedFormSchema = selectedFormId.join(new Function<Optional<ResourceId>, Observable<Optional<FormClass>>>() {
-            @Override
-            public Observable<Optional<FormClass>> apply(Optional<ResourceId> selectedFormId) {
-                if(selectedFormId.isPresent()) {
-                    return formStore.getFormClass(selectedFormId.get()).transform(new Function<FormClass, Optional<FormClass>>() {
-                        @Override
-                        public Optional<FormClass> apply(FormClass formClass) {
-                            return Optional.of(formClass);
-                        }
-                    });
-                } else {
-                    return Observable.just(Optional.<FormClass>absent());
-                }
+        this.selectedFormSchema = selectedFormId.join(selection -> {
+            if (selection.isPresent()) {
+                return formStore.getFormClass(selection.get()).transform(formClass -> Optional.of(formClass));
+            } else {
+                return Observable.just(Optional.absent());
             }
         });
     }
@@ -89,12 +79,7 @@ public class MeasureSelectionModel {
     }
 
     public Observable<MeasureType> getSelectedMeasureType() {
-        return selectedMeasureType.transform(new Function<Optional<MeasureType>, MeasureType>() {
-            @Override
-            public MeasureType apply(Optional<MeasureType> measureType) {
-                return measureType.or(new CountMeasureType());
-            }
-        });
+        return selectedMeasureType.transform(measureType -> measureType.or(new CountMeasureType()));
     }
 
     private List<MeasureType> availableMeasures(FormClass selectedForm) {

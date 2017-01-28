@@ -7,7 +7,6 @@ import com.sencha.gxt.data.shared.event.StoreAddEvent;
 import com.sencha.gxt.data.shared.event.StoreClearEvent;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.Subscription;
 
 import java.util.AbstractList;
@@ -41,14 +40,11 @@ public class ColumnSetStore extends ListStore<Integer> {
     public ColumnSetStore(Observable<ColumnSet> columnSet) {
         super(RowIndexKeyProvider.INSTANCE);
         this.columnSet = columnSet;
-        this.subscription = this.columnSet.subscribe(new Observer<ColumnSet>() {
-            @Override
-            public void onChange(Observable<ColumnSet> observable) {
-                if(observable.isLoading()) {
-                    fireEvent(new StoreClearEvent<Integer>());
-                } else {
-                    fireEvent(new StoreAddEvent<>(0, getAll()));
-                }
+        this.subscription = this.columnSet.subscribe(observable -> {
+            if (observable.isLoading()) {
+                fireEvent(new StoreClearEvent<Integer>());
+            } else {
+                fireEvent(new StoreAddEvent<>(0, getAll()));
             }
         });
     }

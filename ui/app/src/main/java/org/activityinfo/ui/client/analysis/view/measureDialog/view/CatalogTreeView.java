@@ -3,8 +3,6 @@ package org.activityinfo.ui.client.analysis.view.measureDialog.view;
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -19,7 +17,6 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.store.FormStore;
@@ -83,12 +80,9 @@ public class CatalogTreeView implements IsWidget {
             } else {
                 entries = formStore.getCatalogChildren(ResourceId.valueOf(parent.getId()));
             }
-            Subscription subscription = entries.subscribe(new Observer<List<CatalogEntry>>() {
-                @Override
-                public void onChange(Observable<List<CatalogEntry>> observable) {
-                    if (!observable.isLoading()) {
-                        callback.onSuccess(observable.get());
-                    }
+            Subscription subscription = entries.subscribe(observable -> {
+                if (!observable.isLoading()) {
+                    callback.onSuccess(observable.get());
                 }
             });
 
@@ -130,14 +124,11 @@ public class CatalogTreeView implements IsWidget {
             }
         };
         tree.setLoader(loader);
-        tree.getSelectionModel().addSelectionHandler(new SelectionHandler<CatalogEntry>() {
-            @Override
-            public void onSelection(SelectionEvent<CatalogEntry> event) {
-                if(event.getSelectedItem().getType() == CatalogEntryType.FORM) {
-                    selectedForm.updateValue(Optional.of(ResourceId.valueOf(event.getSelectedItem().getId())));
-                } else {
-                    selectedForm.updateValue(Optional.<ResourceId>absent());
-                }
+        tree.getSelectionModel().addSelectionHandler(event -> {
+            if (event.getSelectedItem().getType() == CatalogEntryType.FORM) {
+                selectedForm.updateValue(Optional.of(ResourceId.valueOf(event.getSelectedItem().getId())));
+            } else {
+                selectedForm.updateValue(Optional.absent());
             }
         });
     }

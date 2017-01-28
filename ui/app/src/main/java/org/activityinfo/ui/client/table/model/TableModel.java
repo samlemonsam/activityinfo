@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.table.model;
 
-import com.google.common.base.Function;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
@@ -18,12 +17,7 @@ public class TableModel {
     public TableModel(final FormStore service, ResourceId formId) {
         this.formId = formId;
         this.formTree = service.getFormTree(formId);
-        this.effectiveTable = formTree.transform(new Function<FormTree, EffectiveTableModel>() {
-            @Override
-            public EffectiveTableModel apply(FormTree formTree) {
-                return new EffectiveTableModel(service, formTree);
-            }
-        });
+        this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(service, tree));
     }
 
     public Observable<EffectiveTableModel> getEffectiveTable() {

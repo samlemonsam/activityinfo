@@ -5,9 +5,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
-import org.activityinfo.ui.client.table.model.EffectiveTableModel;
 import org.activityinfo.ui.client.table.model.TableModel;
 
 /**
@@ -29,12 +26,7 @@ public class TableView implements IsWidget {
             @Override
             protected void onAttach() {
                 super.onAttach();
-                model.getEffectiveTable().subscribe(new Observer<EffectiveTableModel>() {
-                    @Override
-                    public void onChange(Observable<EffectiveTableModel> observable) {
-                        effectiveModelChanged();
-                    }
-                });
+                model.getEffectiveTable().subscribe(observable -> effectiveModelChanged());
             }
 
             @Override
