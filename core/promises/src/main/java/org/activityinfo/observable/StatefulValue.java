@@ -2,6 +2,8 @@ package org.activityinfo.observable;
 
 import com.google.common.base.Preconditions;
 
+import java.util.Objects;
+
 public class StatefulValue<T> extends Observable<T> {
     
     private T value;
@@ -26,6 +28,13 @@ public class StatefulValue<T> extends Observable<T> {
         Preconditions.checkNotNull(value, "value cannot be null");
         this.value = value;
         fireChange();
+    }
+
+    public void updateIfNotEqual(T value) {
+        if (!Objects.equals(this.value, value)) {
+            this.value = value;
+            fireChange();
+        }
     }
 
     /**

@@ -1,0 +1,27 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+             xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+             xmlns:measure="urn:import:org.activityinfo.ui.client.analysis.view.measureDialog.view"
+             xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+>
+
+    <gxt:Dialog resizable="false" pixelSize="640, 480">
+        <container:CardLayoutContainer ui:field="container">
+            <measure:CatalogTreeView ui:field="formTree"/>
+            <measure:MeasureTypeListView ui:field="measureList"/>
+        </container:CardLayoutContainer>
+        <gxt:button>
+            <button:TextButton text="Cancel" ui:field="cancelButton"/>
+        </gxt:button>
+        <gxt:button>
+            <button:TextButton text="Previous" ui:field="previousButton"/>
+        </gxt:button>
+        <gxt:button>
+            <button:TextButton text="Next" ui:field="nextButton"/>
+        </gxt:button>
+        <gxt:button>
+            <button:TextButton text="OK" ui:field="okButton"/>
+        </gxt:button>
+    </gxt:Dialog>
+</ui:UiBinder>

@@ -1,12 +1,18 @@
 package org.activityinfo.ui.client.analysis.view.measureDialog.view;
 
+import com.google.common.base.Optional;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.sencha.gxt.widget.core.client.Dialog;
-import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureSelectionModel;
+import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureType;
 import org.activityinfo.ui.client.store.FormStore;
 
 /**
@@ -14,33 +20,38 @@ import org.activityinfo.ui.client.store.FormStore;
  */
 public class MeasureDialog {
 
+    interface MyUiBinder extends UiBinder<Dialog, MeasureDialog> {
+    }
+
+    private static final MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
+
     private final MeasureSelectionModel model;
 
     private final Dialog dialog;
-    private final CatalogTreeView formTreeView;
-    private final MeasureTypeList measureList;
 
-    private CardLayoutContainer container;
+    @UiField
+    CardLayoutContainer container;
+
+    @UiField(provided = true)
+    CatalogTreeView formTree;
+
+    @UiField(provided = true)
+    MeasureTypeListView measureList;
+
 
     public MeasureDialog(FormStore formStore) {
-        this.model = new MeasureSelectionModel(formStore);
+        model = new MeasureSelectionModel(formStore);
+        measureList = new MeasureTypeListView(model);
+        formTree = new CatalogTreeView(model.getFormStore());
 
-        // First step of selection - a form tree view
-        formTreeView = new CatalogTreeView(model.getFormStore());
-
-        // Second step of selection, choose the measure based on the selected form
-        measureList = new MeasureTypeList(model.getSelectedFormSchema());
-
-        container = new CardLayoutContainer();
-        container.add(formTreeView);
-        container.add(measureList);
+        this.dialog = uiBinder.createAndBindUi(this);
 
         model.getSelectionStep().subscribe(new Observer<MeasureSelectionModel.SelectionStep>() {
             @Override
             public void onChange(Observable<MeasureSelectionModel.SelectionStep> step) {
                 switch (step.get()) {
                     case FORM:
-                        container.setActiveWidget(formTreeView);
+                        container.setActiveWidget(formTree);
                         break;
                     case MEASURE:
                         container.setActiveWidget(measureList);
@@ -49,50 +60,27 @@ public class MeasureDialog {
             }
         });
 
-        TextButton previousButton = new TextButton("Previous");
-        previousButton.addSelectHandler(new SelectEvent.SelectHandler() {
-            @Override
-            public void onSelect(SelectEvent event) {
-                model.previousStep();
-            }
-        });
-
-
-        TextButton nextButton = new TextButton("Next");
-        nextButton.addSelectHandler(new SelectEvent.SelectHandler() {
-            @Override
-            public void onSelect(SelectEvent event) {
-                model.selectForm(formTreeView.getSelectedFormId().get());
-                model.nextStep();
-            }
-        });
-
-
-        dialog = new Dialog();
-        dialog.setHeading("Add New Measure");
-        dialog.setClosable(true);
-        dialog.setPixelSize(640, 480);
-        dialog.setResizable(false);
-        dialog.addButton(nextButton);
-
-
-        dialog.add(container);
-
-
     }
 
+    @UiHandler("previousButton")
+    void onPrevious(SelectEvent event) {
+        model.previousStep();
+    }
+
+    @UiHandler("nextButton")
+    void onNext(SelectEvent event) {
+        model.selectForm(formTree.getSelectedFormId().get());
+        model.nextStep();
+    }
+
+    @UiHandler("measureList")
+    public void onMeasureSelected(SelectionEvent<MeasureType> event) {
+        model.selectMeasureType(Optional.fromNullable(event.getSelectedItem()));
+    }
 
 
     public void show() {
         dialog.show();
         dialog.center();
-        dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(new SelectEvent.SelectHandler() {
-            @Override
-            public void onSelect(SelectEvent event) {
-
-            }
-        });
     }
-
-
 }

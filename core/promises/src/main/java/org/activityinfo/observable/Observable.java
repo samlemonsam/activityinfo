@@ -25,6 +25,10 @@ public abstract class Observable<T> {
      */
     public abstract boolean isLoading();
 
+    public final boolean isLoaded() {
+        return !isLoading();
+    }
+
     /**
      * 
      * @return the current value

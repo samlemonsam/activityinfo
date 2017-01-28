@@ -1,0 +1,50 @@
+package org.activityinfo.ui.client.analysis.view.measureDialog.model;
+
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.ResourceId;
+
+public class FieldMeasureType implements MeasureType {
+
+    private ResourceId rootFormId;
+    private FormField field;
+
+    public FieldMeasureType(ResourceId rootFormId, FormField field) {
+        this.rootFormId = rootFormId;
+        this.field = field;
+    }
+
+    @Override
+    public String getId() {
+        return field.getId().asString();
+    }
+
+    @Override
+    public String getLabel() {
+        return field.getLabel();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        FieldMeasureType that = (FieldMeasureType) o;
+
+        if (!rootFormId.equals(that.rootFormId)) {
+            return false;
+        }
+        return field.getId().equals(that.field.getId());
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = rootFormId.hashCode();
+        result = 31 * result + field.getId().hashCode();
+        return result;
+    }
+}
