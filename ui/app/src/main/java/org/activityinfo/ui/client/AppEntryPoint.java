@@ -6,6 +6,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
@@ -38,7 +39,7 @@ public class AppEntryPoint implements EntryPoint {
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
-        ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl("http://localhost:8080/resources");
+        ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
         HttpBus httpBus = new HttpBus(client);
         FormStore formStore = new FormStoreImpl(httpBus);
 
@@ -58,5 +59,13 @@ public class AppEntryPoint implements EntryPoint {
         RootLayoutPanel.get().add(viewport);
 
         historyHandler.handleCurrentHistory();
+    }
+
+    private String findServerUrl() {
+        if (Window.Location.getHostName().equals("localhost")) {
+            return "http://localhost:8080/resources";
+        } else {
+            return "/resources";
+        }
     }
 }

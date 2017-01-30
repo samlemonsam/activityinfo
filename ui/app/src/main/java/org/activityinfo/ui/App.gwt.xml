@@ -20,7 +20,7 @@
   #L%
   -->
 
-<module rename-to="App">
+<module>
 
   <inherits name='com.sencha.gxt.ui.GXT'/>
   <inherits name='com.sencha.gxt.chart.Chart' />
@@ -41,7 +41,7 @@
   <source path='shared'/>
 
   <!-- GZip the output files by default -->
-  <inherits name='com.google.gwt.precompress.Precompress'/>
+  <!--<inherits name='com.google.gwt.precompress.Precompress'/>-->
 
   <set-configuration-property name="CssResource.style" value="pretty"/>
 
@@ -55,5 +55,7 @@
 
   <collapse-property name="gxt.user.agent" values="ie8, ie9, ie10" />
   <collapse-property name="user.agent" values="ie*" />
+
+  <set-property name="locale" value="en"/>
 
 </module>

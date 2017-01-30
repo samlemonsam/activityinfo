@@ -68,9 +68,9 @@ war {
     from(project(':api').outputSpec) {
         into 'apidocs'
     }
-//    from(project(':ui:app').tasks.getByName('compileGwt')) {
-//        exclude("**/*.symbolMap")
-//    }
+    from(project(':ui:app').outputDir) {
+        exclude("**/*.symbolMap")
+    }
 }
 
 
@@ -130,6 +130,7 @@ tasks.compileGwt.dependsOn ":i18n:jar"
 tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 tasks.warTemplate.enabled = false
 tasks.war.dependsOn ':apiDocs:build'
+tasks.war.dependsOn ':ui:app:compileApp'
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
