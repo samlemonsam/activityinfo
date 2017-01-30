@@ -3,6 +3,7 @@ package org.activityinfo.legacy.client;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
+import org.activityinfo.api.client.*;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
