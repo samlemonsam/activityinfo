@@ -92,6 +92,7 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
     }
 
     public void show() {
+        model.reset();
         dialog.show();
         dialog.center();
     }

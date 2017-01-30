@@ -13,6 +13,7 @@ include 'store:query'
 include 'store:mysql'
 include 'store:hrd'
 include 'store:offline'
+include 'store:testing'
 
 include 'geoadmin'
 include 'server'

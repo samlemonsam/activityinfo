@@ -30,7 +30,7 @@ public class ObservingListStore<T> extends ListStore<T> {
                 if (source.isLoading()) {
                     ObservingListStore.this.clear();
                 } else {
-                    ObservingListStore.this.replaceAll(source.asList());
+                    ObservingListStore.this.replaceAll(source.getList());
                 }
             }
 

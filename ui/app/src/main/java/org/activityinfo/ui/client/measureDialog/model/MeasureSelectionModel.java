@@ -105,6 +105,12 @@ public class MeasureSelectionModel {
         selectedMeasureType.updateIfNotEqual(measureType);
     }
 
+    public void reset() {
+        selectionStep.updateIfNotEqual(SelectionStep.FORM);
+        selectedFormId.clear();
+        selectedMeasureType.clear();
+    }
+
     /**
      * Advances to the next step if possible.
      */

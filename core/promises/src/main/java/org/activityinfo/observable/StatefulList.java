@@ -22,7 +22,7 @@ public class StatefulList<T> extends ObservableList<T> {
     }
 
     @Override
-    public List<T> asList() {
+    public List<T> getList() {
         return Collections.unmodifiableList(list);
     }
 }

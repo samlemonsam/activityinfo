@@ -31,6 +31,7 @@ public abstract class ObservableFunction<T> extends Observable<T> {
 
     @Override
     public final T get() {
+        assert value.isPresent() : "Not loaded!";
         return value.get();
     }
 

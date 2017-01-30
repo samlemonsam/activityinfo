@@ -1,15 +1,31 @@
 package org.activityinfo.observable;
 
+import com.google.common.base.Function;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * A list of items whose composition can be externally observed.
+ * <p>
+ * <p>Once subscribed, a {@link ListObserver} will be fired when items are added, removed from the list,
+ * or when the composition of the list changes completely.
+ * <p>
+ * <p>Note that changes to the items themselves are not broadcast to {@code ListObserver}s.</p>
+ *
+ * @param <T>
+ */
 public abstract class ObservableList<T> {
     private final List<ListObserver<T>> observers = new ArrayList<>();
 
     public abstract boolean isLoading();
 
     public final Subscription subscribe(final ListObserver<T> observer) {
+        if (observers.isEmpty()) {
+            onConnect();
+        }
+        observer.onChange();
 
         observers.add(observer);
 
@@ -17,9 +33,22 @@ public abstract class ObservableList<T> {
             @Override
             public void unsubscribe() {
                 observers.remove(observer);
+                if (observers.isEmpty()) {
+                    onDisconnect();
+                }
             }
         };
     }
+
+
+    protected void onConnect() {
+
+    }
+
+    protected void onDisconnect() {
+
+    }
+
 
     /**
      * Signal that the list has changed.
@@ -49,7 +78,15 @@ public abstract class ObservableList<T> {
         }
     }
 
-    public abstract List<T> asList();
+    public final <R> ObservableList<R> map(final Function<T, R> function) {
+        return new ObservableListMap<>(this, function);
+    }
+
+    /**
+     * @return the loaded list of items.
+     * @throws AssertionError if the list is still loading.
+     */
+    public abstract List<T> getList();
 
     public final Observable<List<T>> asObservable() {
         return new Observable<List<T>>() {
@@ -63,7 +100,7 @@ public abstract class ObservableList<T> {
 
             @Override
             public List<T> get() {
-                return ObservableList.this.asList();
+                return ObservableList.this.getList();
             }
 
             @Override

@@ -55,6 +55,9 @@ task simpleDevMode(type: JavaExec) {
     main = 'com.google.gwt.dev.DevMode'
 
     // Java sources first, so that changes get picked up on refresh
+    classpath project(":i18n").sourceSets.main.java.srcDirs
+    classpath project(":i18n").sourceSets.main.resources.srcDirs
+    classpath project(":core:promises").sourceSets.main.java.srcDirs
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs
 
