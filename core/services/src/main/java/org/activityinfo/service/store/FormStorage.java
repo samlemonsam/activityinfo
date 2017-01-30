@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Internal interface used to construct table queries.
  */
-public interface FormAccessor {
+public interface FormStorage {
 
     /**
      * Fetches the permissions which apply to the given user for this collection.

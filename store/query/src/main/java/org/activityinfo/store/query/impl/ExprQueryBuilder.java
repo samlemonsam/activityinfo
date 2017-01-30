@@ -22,7 +22,7 @@ import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.service.store.ColumnQueryBuilder;
 import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.service.store.CursorObservers;
-import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.builders.ViewBuilderFactory;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class ExprQueryBuilder {
     
     private FormSymbolTable symbolTable;
 
-    public ExprQueryBuilder(FormAccessor collection) {
+    public ExprQueryBuilder(FormStorage collection) {
         this.formClass = collection.getFormClass();
         this.queryBuilder = collection.newColumnQuery();
         this.symbolTable = new FormSymbolTable(formClass);

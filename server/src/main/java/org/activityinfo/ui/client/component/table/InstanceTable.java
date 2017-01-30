@@ -11,8 +11,8 @@ import com.google.gwt.view.client.RangeChangeEvent;
 import org.activityinfo.core.client.ResourceLocator;
 import org.activityinfo.legacy.client.state.StateProvider;
 import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.FunctionCallNode;
-import org.activityinfo.model.expr.functions.AndFunction;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.expr.GroupExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.component.table.action.*;
 import org.activityinfo.ui.client.component.table.filter.FilterCellAction;
@@ -133,19 +133,15 @@ public class InstanceTable implements IsWidget {
         List<ExprNode> arguments = Lists.newArrayList();
         for (FieldColumn column : columns) {
             if (column.get().getFilter() != null) {
-                arguments.add(column.get().getFilter());
+                arguments.add(new GroupExpr(column.get().getFilter()));
             }
         }
 
-        if (arguments.isEmpty()) {
+        if(arguments.isEmpty()) {
             return null;
+        } else {
+            return Exprs.allTrue(arguments);
         }
-
-        if (arguments.size() == 1) {
-            return arguments.iterator().next();
-        }
-
-        return new FunctionCallNode(AndFunction.INSTANCE, arguments);
     }
 
     public InstanceTableDataLoader getDataLoader() {

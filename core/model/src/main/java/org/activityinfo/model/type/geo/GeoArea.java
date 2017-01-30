@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.FieldValue;
 
 /* A Field Value describing a geographic area on the Earth's surface
 * in the WGS84 geographic reference system.
@@ -60,17 +59,6 @@ public class GeoArea implements GeoFieldValue, IsRecord {
         object.addProperty("blobId", blobId);
         object.add("bbox", envelope.toJsonElement());
         return object;
-    }
-    
-    
-    public static FieldValue fromRecord(Record record) {
-        Extents bbox = null;
-        Record bboxRecord = record.isRecord("bbox");
-        if(bboxRecord != null) {
-            bbox = Extents.fromRecord(bboxRecord);
-        }
-        String blobId = record.isString("blobId");
-        return new GeoArea(bbox, blobId);
     }
 
 }

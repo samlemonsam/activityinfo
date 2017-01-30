@@ -3,7 +3,7 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
 
@@ -29,8 +29,8 @@ public class LocationFormProvider implements FormProvider {
     }
 
     @Override
-    public FormAccessor openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
-        return new LocationFormAccessor(executor, formId, permissionsCache);
+    public FormStorage openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
+        return new LocationFormStorage(executor, formId, permissionsCache);
     }
 
     @Override
@@ -48,8 +48,8 @@ public class LocationFormProvider implements FormProvider {
     }
     
     @Override
-    public Map<ResourceId, FormAccessor> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
-        Map<ResourceId, FormAccessor> result = new HashMap<>();
+    public Map<ResourceId, FormStorage> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
+        Map<ResourceId, FormStorage> result = new HashMap<>();
         for (ResourceId collectionId : formIds) {
             if(accept(collectionId)) {
                 result.put(collectionId, openForm(executor, collectionId));

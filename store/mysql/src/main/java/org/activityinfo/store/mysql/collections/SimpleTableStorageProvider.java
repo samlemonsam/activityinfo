@@ -2,8 +2,8 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 
@@ -13,14 +13,23 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class SimpleTableFormProvider implements FormProvider {
+/**
+ * Provides storage for forms that are stored in a simple table, where each field maps more or less
+ * to one table column.
+ */
+public class SimpleTableStorageProvider implements FormProvider {
     
-    private final SimpleTable table;
-    private final Authorizer authorizer;
+    protected final SimpleTable table;
+    protected final Authorizer authorizer;
 
-    public SimpleTableFormProvider(SimpleTable table, FormPermissions permissions) {
+    public SimpleTableStorageProvider(SimpleTable table, FormPermissions permissions) {
         this.table = table;
         this.authorizer = new ConstantAuthorizer(permissions);
+    }
+
+    public SimpleTableStorageProvider(SimpleTable table, Authorizer authorizer) {
+        this.table = table;
+        this.authorizer = authorizer;
     }
 
     @Override
@@ -29,8 +38,8 @@ public class SimpleTableFormProvider implements FormProvider {
     }
 
     @Override
-    public FormAccessor openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
-        return new SimpleTableAccessor(table.getMapping(executor, formId), authorizer, executor);
+    public FormStorage openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
+        return new SimpleTableStorage(table.getMapping(executor, formId), authorizer, executor);
     }
 
     @Override
@@ -39,8 +48,8 @@ public class SimpleTableFormProvider implements FormProvider {
     }
 
     @Override
-    public Map<ResourceId, FormAccessor> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
-        Map<ResourceId, FormAccessor> map = new HashMap<>();
+    public Map<ResourceId, FormStorage> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
+        Map<ResourceId, FormStorage> map = new HashMap<>();
         for (ResourceId collectionId : formIds) {
             if(table.accept(collectionId)) {
                 map.put(collectionId, openForm(executor, collectionId));

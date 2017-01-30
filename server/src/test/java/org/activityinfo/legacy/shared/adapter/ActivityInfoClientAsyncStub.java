@@ -15,9 +15,9 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.service.blob.BlobAuthorizer;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.store.hrd.HrdFormAccessor;
+import org.activityinfo.service.store.FormStorage;
+import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
@@ -73,7 +73,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
             EntityTransaction tx = entityManager.get().getTransaction();
             tx.begin();
 
-            Optional<FormAccessor> collection = catalog.getForm(updatedSchema.getId());
+            Optional<FormStorage> collection = catalog.getForm(updatedSchema.getId());
             if(collection.isPresent()) {
                 collection.get().updateFormClass(updatedSchema);
             } else {
@@ -103,7 +103,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<FormRecord> getRecord(String formId, String recordId) {
         try {
             FormCatalog catalog = newCatalog();
-            Optional<FormAccessor> collection = catalog.getForm(ResourceId.valueOf(formId));
+            Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
             if(!collection.isPresent()) {
                 throw new RuntimeException("No such form " + formId);
             }
@@ -158,13 +158,13 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<FormRecordSet> getRecords(String formId, String parentId) {
         FormCatalog catalog = newCatalog();
-        Optional<FormAccessor> collection = catalog.getForm(ResourceId.valueOf(formId));
+        Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
 
         JsonArray recordArray = new JsonArray();
         
         if(collection.isPresent()) {
-            if(collection.get() instanceof HrdFormAccessor) {
-                HrdFormAccessor hrdForm = (HrdFormAccessor) collection.get();
+            if(collection.get() instanceof HrdFormStorage) {
+                HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
                 Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
                 for (FormRecord record : records) {
                     recordArray.add(record.toJsonElement());

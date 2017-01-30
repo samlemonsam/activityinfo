@@ -9,10 +9,10 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -33,7 +33,7 @@ public class MySqlCatalog implements FormCatalog {
     
     private List<FormProvider> providers = new ArrayList<>();
     private final QueryExecutor executor;
-    private LoadingCache<ResourceId, Optional<FormAccessor>> sessionCache;
+    private LoadingCache<ResourceId, Optional<FormStorage>> sessionCache;
     private final ActivityLoader activityLoader;
     
     private GeodbFolder geodbFolder;
@@ -44,11 +44,11 @@ public class MySqlCatalog implements FormCatalog {
         activityLoader = new ActivityLoader(executor);
         DatabaseCache databaseCache = new DatabaseCache(executor);
 
-        providers.add(new SimpleTableFormProvider(new UserTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new CountryTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new AdminEntityTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new PartnerTable(databaseCache), FormPermissions.readonly()));
-        providers.add(new SimpleTableFormProvider(new ProjectTable(databaseCache), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new UserTable(), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new CountryTable(), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new AdminEntityTable(), new AdminAuthorizer()));
+        providers.add(new SimpleTableStorageProvider(new PartnerTable(databaseCache), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new ProjectTable(databaseCache), FormPermissions.readonly()));
         providers.add(new TargetFormProvider());
         providers.add(new ActivityFormProvider(activityLoader));
         providers.add(new LocationFormProvider(activityLoader.getPermissionCache()));
@@ -58,21 +58,21 @@ public class MySqlCatalog implements FormCatalog {
         databasesFolder = new DatabasesFolder(executor);
         
         this.executor = executor;
-        this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<FormAccessor>>() {
+        this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<FormStorage>>() {
             @Override
-            public Optional<FormAccessor> load(ResourceId id) throws Exception {
+            public Optional<FormStorage> load(ResourceId id) throws Exception {
                 
                 for (FormProvider provider : providers) {
                     if (provider.accept(id)) {
                         try {
                             Stopwatch stopwatch = Stopwatch.createStarted();
-                            FormAccessor collection;
+                            FormStorage collection;
                             try {
                                 collection = provider.openForm(executor, id);
                             } catch (FormNotFoundException e) {
                                 return Optional.absent();
                             }
-                            Optional<FormAccessor> result = Optional.of(collection);
+                            Optional<FormStorage> result = Optional.of(collection);
                             
                             LOGGER.log(Level.INFO, "Opened collection " + id + " in " + stopwatch);
                             
@@ -92,7 +92,7 @@ public class MySqlCatalog implements FormCatalog {
     }
 
     @Override
-    public Optional<FormAccessor> getForm(ResourceId formId) {
+    public Optional<FormStorage> getForm(ResourceId formId) {
         try {
             return sessionCache.get(formId);
         } catch (ExecutionException e) {
@@ -101,7 +101,7 @@ public class MySqlCatalog implements FormCatalog {
     }
 
     @Override
-    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
+    public Optional<FormStorage> lookupForm(ResourceId recordId) {
         for (FormProvider mapping : providers) {
             try {
                 Optional<ResourceId> collectionId = mapping.lookupForm(executor, recordId);
@@ -122,7 +122,7 @@ public class MySqlCatalog implements FormCatalog {
 
         // First check sessionCache for any collections which are already loaded
         for (ResourceId collectionId : formIds) {
-            Optional<FormAccessor> collection = sessionCache.getIfPresent(collectionId);
+            Optional<FormStorage> collection = sessionCache.getIfPresent(collectionId);
             if(collection != null && collection.isPresent()) {
                 resultMap.put(collectionId, collection.get().getFormClass());
             } else {
@@ -133,8 +133,8 @@ public class MySqlCatalog implements FormCatalog {
         // Now consult each of our providers for collections
         try {
             for (FormProvider provider : providers) {
-                Map<ResourceId, FormAccessor> fetched = provider.openForms(executor, toFetch);
-                for (Map.Entry<ResourceId, FormAccessor> entry : fetched.entrySet()) {
+                Map<ResourceId, FormStorage> fetched = provider.openForms(executor, toFetch);
+                for (Map.Entry<ResourceId, FormStorage> entry : fetched.entrySet()) {
                     if(resultMap.containsKey(entry.getKey())) {
                         throw new IllegalStateException("Collection " + entry.getKey() + " returned by multiple providers");
                     }
@@ -183,7 +183,7 @@ public class MySqlCatalog implements FormCatalog {
 
     @Override
     public FormClass getFormClass(ResourceId formClassId) {
-        Optional<FormAccessor> collection = getForm(formClassId);
+        Optional<FormStorage> collection = getForm(formClassId);
         if(!collection.isPresent()) {
             throw new IllegalStateException("FormClass " + formClassId + " does not exist.");
         }
@@ -198,7 +198,7 @@ public class MySqlCatalog implements FormCatalog {
     public void createOrUpdateFormSchema(FormClass formClass) {
         if(formClass.getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Only update of activity's schemas is currently supported
-            Optional<FormAccessor> collection = getForm(formClass.getId());
+            Optional<FormStorage> collection = getForm(formClass.getId());
             if(collection.isPresent()) {
                 collection.get().updateFormClass(formClass);
             } else {

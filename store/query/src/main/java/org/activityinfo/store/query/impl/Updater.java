@@ -24,9 +24,9 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.service.blob.BlobAuthorizer;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -90,7 +90,7 @@ public class Updater {
         ResourceId recordId = parseId(changeObject, "@id");
 
         // First determine whether the resource already exists. 
-        Optional<FormAccessor> accessor = catalog.lookupForm(recordId);
+        Optional<FormStorage> accessor = catalog.lookupForm(recordId);
         
         if(!accessor.isPresent()) {
             // If the record id is not present, then we need the @class attribute in order to
@@ -165,8 +165,8 @@ public class Updater {
                             field.getCode(),
                             e.getMessage()), e);
                 }
-                validate(field, fieldValue);
-                update.set(field.getId(), fieldValue);
+
+                update.set(field.getId(), validateType(field, fieldValue));
             }
         }
         return update;
@@ -237,7 +237,7 @@ public class Updater {
 
 
     public void execute(RecordUpdate update) {
-        Optional<FormAccessor> collection = catalog.lookupForm(update.getRecordId());
+        Optional<FormStorage> collection = catalog.lookupForm(update.getRecordId());
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such resource: " + update.getRecordId());
         }
@@ -245,12 +245,17 @@ public class Updater {
         executeUpdate(collection.get(), update);
     }
 
-    private void executeUpdate(FormAccessor form, RecordUpdate update) {
+    private void executeUpdate(FormStorage form, RecordUpdate update) {
         
         FormClass formClass = form.getFormClass();
         Optional<FormRecord> existingResource = form.get(update.getRecordId());
 
-        validateUpdate(formClass, existingResource, update);
+        if(update.isDeleted() && update.getChangedFieldValues().size() > 0) {
+            throw new InvalidUpdateException("A deletion may not include field value updates.");
+        }
+        if(!update.isDeleted()) {
+            validateUpdate(formClass, existingResource, update);
+        }
         authorizeUpdate(form, existingResource, update);
 
         if(existingResource.isPresent()) {
@@ -270,23 +275,18 @@ public class Updater {
         }
 
         // Verify that provided types are correct
-        Map<ResourceId, FieldValue> valueMap = new HashMap<>();
         for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
             FormField field = fieldMap.get(change.getKey());
             if(field == null) {
                 throw new InvalidUpdateException("No such field '%s'", change.getKey());
             }
-            FieldValue updatedValue = change.getValue();
-            
-            validate(field, updatedValue);
-            
-            valueMap.put(field.getId(), updatedValue);
+            validateType(field, change.getValue());
         }
         
         // Verify that all required fields are provided for new resources
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
-                if (formField.isRequired() && formField.isVisible() && valueMap.get(formField.getId()) == null) {
+                if (formField.isRequired() && formField.isVisible() && !isProvided(formField, existingResource, update)) {
                     throw new InvalidUpdateException("Required field '%s' [%s] is missing from record with schema %s",
                             formField.getCode(), formField.getId(), formClass.getId().asString());
                 }
@@ -294,7 +294,25 @@ public class Updater {
         }
     }
 
-    private void authorizeUpdate(FormAccessor form, Optional<FormRecord> existingResource, RecordUpdate update) {
+    private static boolean isProvided(FormField formField, Optional<FormRecord> existingResource, RecordUpdate update) {
+
+        if(update.getChangedFieldValues().containsKey(formField.getId())) {
+
+            // This update includes an explict update for the given field.
+            // The updated value must not be null.
+
+            FieldValue updatedValue = update.getChangedFieldValues().get(formField.getId());
+            return updatedValue != null;
+
+        } else {
+            // This update does *not* include an updated value for this required field.
+            // This is only possible if this is indeed and update and not a new record.
+
+            return existingResource.isPresent();
+        }
+    }
+
+    private void authorizeUpdate(FormStorage form, Optional<FormRecord> existingResource, RecordUpdate update) {
 
 
         // Check form-level permissions
@@ -317,17 +335,10 @@ public class Updater {
         }
     }
 
-    private static void validate(FormField field, FieldValue updatedValue) {
+    private static FieldValue validateType(FormField field, FieldValue updatedValue) {
         Preconditions.checkNotNull(field);
         
-        if(updatedValue == null) {
-            if(field.isRequired() && field.isVisible()) {
-                throw new InvalidUpdateException(
-                        format("Field '%s' (id: %s, code: %s) is required. Found 'null'",
-                                field.getLabel(),
-                                field.getId(), field.getCode()));
-            }
-        } else {
+        if(updatedValue != null) {
             if ( field.getType() instanceof CalculatedFieldType) {
                 throw new InvalidUpdateException(
                         format("Field %s ('%s') is a calculated field and its value cannot be set. Found %s",
@@ -344,6 +355,8 @@ public class Updater {
                                 updatedValue.getTypeClass().getId()));
             }
         }
+
+        return updatedValue;
     }
 
     /**
@@ -391,7 +404,7 @@ public class Updater {
 
     public void execute(FormInstance formInstance) {
 
-        Optional<FormAccessor> collection = catalog.getForm(formInstance.getFormId());
+        Optional<FormStorage> collection = catalog.getForm(formInstance.getFormId());
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formInstance.getFormId());
         }
@@ -419,7 +432,7 @@ public class Updater {
     }
 
     private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonObject jsonObject, boolean create) {
-        Optional<FormAccessor> collection = catalog.getForm(formId);
+        Optional<FormStorage> collection = catalog.getForm(formId);
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formId);
         }

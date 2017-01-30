@@ -4,24 +4,24 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormStorage;
 
 import java.io.IOException;
 import java.util.*;
 
 public class FormCatalogStub implements FormCatalog {
     
-    private Map<ResourceId, JsonFormAccessor> map = new HashMap<>();
+    private Map<ResourceId, JsonFormStorage> map = new HashMap<>();
     
     
     @Override
-    public Optional<FormAccessor> getForm(ResourceId formId) {
-        return Optional.<FormAccessor>fromNullable(map.get(formId));
+    public Optional<FormStorage> getForm(ResourceId formId) {
+        return Optional.<FormStorage>fromNullable(map.get(formId));
     }
 
     @Override
-    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
+    public Optional<FormStorage> lookupForm(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -46,10 +46,10 @@ public class FormCatalogStub implements FormCatalog {
     }
     
     public void addJsonCollection(String resourceName) throws IOException {
-        add(new JsonFormAccessor(resourceName));
+        add(new JsonFormStorage(resourceName));
     }
     
-    public void add(JsonFormAccessor accessor) {
+    public void add(JsonFormStorage accessor) {
         map.put(accessor.getFormClass().getId(), accessor);
     }
 

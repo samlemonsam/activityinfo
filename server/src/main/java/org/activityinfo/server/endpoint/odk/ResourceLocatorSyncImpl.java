@@ -16,8 +16,8 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.lookup.ReferenceChoice;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 
@@ -75,7 +75,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public void persist(FormClass formClass) {
-        Optional<FormAccessor> form = catalog.get().getForm(formClass.getId());
+        Optional<FormStorage> form = catalog.get().getForm(formClass.getId());
         if(!form.isPresent()) {
             throw new IllegalArgumentException("no such formId:" + formClass.getId());
         }

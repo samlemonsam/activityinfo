@@ -7,8 +7,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.query.RowSource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormStorage;
 import org.geotools.data.shapefile.ShapefileDataStore;
 
 import java.io.File;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class FeatureSourceCatalog implements FormCatalog {
 
     public static final String FILE_PREFIX = "file://";
-    private Map<ResourceId, FeatureSourceAccessor> sources = new HashMap<>();
+    private Map<ResourceId, FeatureSourceStorage> sources = new HashMap<>();
     
     public boolean isLocalResource(ResourceId resourceId) {
         return resourceId.asString().startsWith(FILE_PREFIX);
@@ -40,13 +40,13 @@ public class FeatureSourceCatalog implements FormCatalog {
     public void add(ResourceId id, String path) throws IOException {
         File shapeFile = new File(path);
         ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL());
-        sources.put(id, new FeatureSourceAccessor(id, dataStore.getFeatureSource()));
+        sources.put(id, new FeatureSourceStorage(id, dataStore.getFeatureSource()));
     }
     
     @Override
-    public Optional<FormAccessor> getForm(ResourceId formId) {
+    public Optional<FormStorage> getForm(ResourceId formId) {
 
-        FeatureSourceAccessor accessor = sources.get(formId);
+        FeatureSourceStorage accessor = sources.get(formId);
         if(accessor == null) {
 
             Preconditions.checkArgument(formId.asString().startsWith(FILE_PREFIX),
@@ -55,18 +55,18 @@ public class FeatureSourceCatalog implements FormCatalog {
             try {
                 File shapeFile = new File(formId.asString().substring(FILE_PREFIX.length()));
                 ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL());
-                accessor = new FeatureSourceAccessor(formId, dataStore.getFeatureSource());
+                accessor = new FeatureSourceStorage(formId, dataStore.getFeatureSource());
                 sources.put(formId, accessor);
 
             } catch (Exception e) {
                 throw new IllegalArgumentException("Could not load " + formId, e);
             }
         }
-        return Optional.<FormAccessor>of(accessor);
+        return Optional.<FormStorage>of(accessor);
     }
 
     @Override
-    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
+    public Optional<FormStorage> lookupForm(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
 
@@ -74,7 +74,7 @@ public class FeatureSourceCatalog implements FormCatalog {
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         Map<ResourceId, FormClass> map = new HashMap<>();
         for (ResourceId collectionId : formIds) {
-            Optional<FormAccessor> collection = getForm(collectionId);
+            Optional<FormStorage> collection = getForm(collectionId);
             if(collection.isPresent()) {
                 map.put(collectionId, collection.get().getFormClass());
             }

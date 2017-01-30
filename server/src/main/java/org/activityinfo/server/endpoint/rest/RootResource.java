@@ -34,7 +34,6 @@ import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.PermissionOracle;
@@ -182,8 +181,6 @@ public class RootResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(String json) {
 
-        assertUserIsTrustedWhileInBeta();
-
         Gson gson = new Gson();
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
@@ -197,13 +194,6 @@ public class RootResource {
                     .build());
         }
         return Response.ok().build();
-    }
-    
-
-    private void assertUserIsTrustedWhileInBeta() {
-        if(!DeploymentEnvironment.isAppEngineDevelopment() && !userProvider.get().getEmail().endsWith("@bedatadriven.com")) {
-            throw new WebApplicationException(Response.status(Status.FORBIDDEN).build());
-        }
     }
 
     @Path("/users")

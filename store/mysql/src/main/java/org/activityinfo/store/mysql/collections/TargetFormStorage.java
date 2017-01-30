@@ -6,8 +6,8 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
@@ -17,13 +17,13 @@ import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 import java.util.List;
 
 
-public class TargetFormAccessor implements FormAccessor {
+public class TargetFormStorage implements FormStorage {
     
     private final QueryExecutor executor;
     private final DatabaseTargetForm target;
     private final TableMapping mapping;
     
-    public TargetFormAccessor(QueryExecutor executor, DatabaseTargetForm target) {
+    public TargetFormStorage(QueryExecutor executor, DatabaseTargetForm target) {
         this.target = target;
         this.executor = executor;
         this.mapping = target.buildMapping();

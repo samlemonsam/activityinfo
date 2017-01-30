@@ -7,7 +7,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
 import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
 import org.activityinfo.store.query.impl.builders.RowCountBuilder;
@@ -34,7 +34,7 @@ public class FormScan {
     private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
     private static final SymbolExpr PK_COLUMN_KEY = new SymbolExpr("@id");
 
-    private final FormAccessor collection;
+    private final FormStorage collection;
     private final ResourceId collectionId;
     private final long cacheVersion;
 
@@ -45,7 +45,7 @@ public class FormScan {
     private PrimaryKeySlot primaryKeySlot = null;
     private PendingSlot<Integer> rowCount = null;
 
-    public FormScan(FormAccessor collection) {
+    public FormScan(FormStorage collection) {
         this.collection = collection;
         this.collectionId = collection.getFormClass().getId();
         this.cacheVersion = collection.cacheVersion();

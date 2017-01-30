@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public class LocationFormAccessor implements FormAccessor {
+public class LocationFormStorage implements FormStorage {
 
 
     public static final String TABLE_NAME = "location";
@@ -53,7 +53,7 @@ public class LocationFormAccessor implements FormAccessor {
     private final ResourceId adminFieldId;
     private final ResourceId pointFieldId;
 
-    public LocationFormAccessor(QueryExecutor executor, ResourceId formClassId, PermissionsCache permissionsCache) throws SQLException {
+    public LocationFormStorage(QueryExecutor executor, ResourceId formClassId, PermissionsCache permissionsCache) throws SQLException {
 
         this.executor = executor;
 

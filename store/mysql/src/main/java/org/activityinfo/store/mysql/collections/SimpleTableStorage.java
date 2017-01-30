@@ -6,8 +6,8 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -19,13 +19,13 @@ import org.activityinfo.store.mysql.update.BaseTableUpdater;
 import java.util.List;
 
 
-public class SimpleTableAccessor implements FormAccessor {
+public class SimpleTableStorage implements FormStorage {
 
-    private final TableMapping mapping;
-    private Authorizer authorizer;
-    private QueryExecutor executor;
+    protected final TableMapping mapping;
+    protected final Authorizer authorizer;
+    protected final QueryExecutor executor;
 
-    public SimpleTableAccessor(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
+    public SimpleTableStorage(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
         this.mapping = mapping;
         this.authorizer = authorizer;
         this.executor = executor;

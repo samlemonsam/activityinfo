@@ -7,8 +7,8 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.service.store.RecordVersion;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -17,14 +17,14 @@ import org.opengis.feature.type.PropertyDescriptor;
 import java.util.List;
 
 
-public class FeatureSourceAccessor implements FormAccessor {
+public class FeatureSourceStorage implements FormStorage {
 
     public static final String FIELD_ID_PREFIX = "ATTRIB";
     
     private final ResourceId resourceId;
     private final SimpleFeatureSource featureSource;
 
-    public FeatureSourceAccessor(ResourceId resourceId, SimpleFeatureSource featureSource) {
+    public FeatureSourceStorage(ResourceId resourceId, SimpleFeatureSource featureSource) {
         this.resourceId = resourceId;
         this.featureSource = featureSource;
     }

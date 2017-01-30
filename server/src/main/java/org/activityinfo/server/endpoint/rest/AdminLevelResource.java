@@ -26,16 +26,16 @@ import com.bedatadriven.geojson.GeometrySerializer;
 import com.google.common.base.Charsets;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.api.view.Viewable;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.handler.PermissionOracle;
-import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.server.endpoint.rest.model.*;
+import org.activityinfo.server.database.hibernate.entity.AdminEntity;
+import org.activityinfo.server.database.hibernate.entity.AdminLevel;
+import org.activityinfo.server.database.hibernate.entity.LocationType;
+import org.activityinfo.server.endpoint.rest.model.NewAdminEntity;
+import org.activityinfo.server.endpoint.rest.model.NewAdminLevel;
 import org.activityinfo.server.util.monitoring.Timed;
 import org.activityinfo.service.blob.BlobAuthorizer;
 import org.activityinfo.service.store.FormCatalog;
@@ -53,7 +53,6 @@ import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -182,93 +181,6 @@ public class AdminLevelResource {
         return Response.ok().entity(baos.toByteArray()).type(MediaType.APPLICATION_JSON).build();
     }
 
-    @PUT
-    @Timed(name = "site.rest.admin.put")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@InjectParam AuthenticatedUser user, UpdatedAdminLevel updatedLevel) throws ParseException {
-
-        assertAuthorized(user);
-
-        EntityManager em = entityManager.get();
-        em.getTransaction().begin();
-
-        AdminLevel level = entityManager.get().merge(this.level);
-
-        level.setName(updatedLevel.getName());
-
-        for (LocationType boundLocationType : level.getBoundLocationTypes()) {
-            boundLocationType.setName(updatedLevel.getName());
-        }
-
-        if (updatedLevel.getEntities() != null) {
-            for (UpdatedAdminEntity updatedEntity : updatedLevel.getEntities()) {
-
-                // check geometry
-                if (updatedEntity.getGeometry() != null && !isValid(updatedEntity.getGeometry())) {
-                    throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                                                              .entity("Geometry must be Polygon or MultiPolygon")
-                                                              .build());
-                }
-
-                if (updatedEntity.isDeleted()) {
-                    // mark the entity as deleted. we can't remove it from
-                    // the database because we may have locations which refer to it
-                    // on distant clients
-                    em.find(AdminEntity.class, updatedEntity.getId()).setDeleted(true);
-
-                } else if (updatedEntity.isNew()) {
-                    // create new entity
-                    AdminEntity entity = new AdminEntity();
-                    entity.setLevel(level);
-                    if (updatedEntity.getParentId() != null) {
-                        entity.setParent(em.getReference(AdminEntity.class, updatedEntity.getParentId()));
-                    }
-                    entity.setName(updatedEntity.getName());
-                    entity.setCode(updatedEntity.getCode());
-                    entity.setBounds(updatedEntity.getBounds());
-                    entity.setGeometry(updatedEntity.getGeometry());
-                    em.persist(entity);
-
-                } else {
-                    // update existing entity
-                    // TODO: bound locations that share this name?
-                    AdminEntity entity = em.find(AdminEntity.class, updatedEntity.getId());
-                    entity.setName(updatedEntity.getName());
-                    entity.setCode(updatedEntity.getCode());
-                    entity.setBounds(updatedEntity.getBounds());
-                    entity.setGeometry(updatedEntity.getGeometry());
-                }
-            }
-        }
-
-        int newVersion = level.getVersion() + 1;
-        level.setVersion(newVersion);
-
-        AdminLevelVersion version = new AdminLevelVersion();
-        version.setLevel(level);
-        version.setVersion(newVersion);
-        version.setUser(em.getReference(User.class, user.getId()));
-        version.setTimeCreated(new Date().getTime());
-
-        VersionMetadata metadata = updatedLevel.getVersionMetadata();
-        if (metadata != null) {
-            version.setSourceUrl(metadata.getSourceUrl());
-            version.setSourceFilename(metadata.getSourceFilename());
-            version.setSourceHash(metadata.getSourceMD5());
-            version.setMessage(metadata.getMessage());
-            version.setSourceMetadata(metadata.getSourceMetadata());
-        }
-
-        em.persist(version);
-
-        em.getTransaction().commit();
-
-        return Response.ok().build();
-    }
-
-    private boolean isValid(Geometry geometry) {
-        return geometry instanceof Polygon || geometry instanceof MultiPolygon;
-    }
 
     @POST
     @Timed(name = "site.rest.admin.child_levels")
