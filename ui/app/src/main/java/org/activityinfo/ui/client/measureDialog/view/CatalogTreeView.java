@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.view.measureDialog.view;
+package org.activityinfo.ui.client.measureDialog.view;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.Callback;

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.view.measureDialog.model;
+package org.activityinfo.ui.client.measureDialog.model;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;

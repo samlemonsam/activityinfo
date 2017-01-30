@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.view.measureDialog.model;
+package org.activityinfo.ui.client.measureDialog.model;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;

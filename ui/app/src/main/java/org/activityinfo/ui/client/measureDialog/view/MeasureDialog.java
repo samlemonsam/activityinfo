@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.view.measureDialog.view;
+package org.activityinfo.ui.client.measureDialog.view;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.GWT;
@@ -15,8 +15,8 @@ import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
-import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureSelectionModel;
-import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureType;
+import org.activityinfo.ui.client.measureDialog.model.MeasureSelectionModel;
+import org.activityinfo.ui.client.measureDialog.model.MeasureType;
 import org.activityinfo.ui.client.store.FormStore;
 
 /**

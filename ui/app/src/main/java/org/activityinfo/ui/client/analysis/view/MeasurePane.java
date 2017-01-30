@@ -10,7 +10,7 @@ import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
-import org.activityinfo.ui.client.analysis.view.measureDialog.view.MeasureDialog;
+import org.activityinfo.ui.client.measureDialog.view.MeasureDialog;
 
 
 public class MeasurePane implements IsWidget {

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.view.measureDialog.view;
+package org.activityinfo.ui.client.measureDialog.view;
 
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -8,8 +8,8 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.widget.core.client.ListView;
-import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureSelectionModel;
-import org.activityinfo.ui.client.analysis.view.measureDialog.model.MeasureType;
+import org.activityinfo.ui.client.measureDialog.model.MeasureSelectionModel;
+import org.activityinfo.ui.client.measureDialog.model.MeasureType;
 
 /**
  * Allows the user to choose from available measure types.
