@@ -1,7 +1,0 @@
-
-
-task generateClient(type: org.activityinfo.swagger.CodegenTask) {
-    
-    inputFile = tasks(":api:compileYaml").outpu
-    
-}

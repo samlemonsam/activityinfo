@@ -18,8 +18,10 @@ include 'store:testing'
 include 'geoadmin'
 include 'server'
 include 'io:xform'
-include 'ui:icons'
-include 'ui:app'
 include 'io:match'
 include 'io:xlsform'
+
+include 'ui:icons'
+include 'ui:app'
+
 include 'tests:acceptance'
