@@ -25,22 +25,28 @@ public class ColumnSetBuilder {
 
     public static final Logger LOGGER = Logger.getLogger(ColumnSetBuilder.class.getName());
 
-    private final FormCatalog resourceStore;
-    private final FormTreeBuilder formTreeService;
+    private final FormCatalog catalog;
+    private final FormTreeBuilder formTreeBuilder;
+    private FormScanCache cache;
     private Function<ColumnView, ColumnView> filter;
     private Map<String, Slot<ColumnView>> columnViews;
     private Slot<ColumnView> columnForRowCount;
 
-    public ColumnSetBuilder(FormCatalog resourceStore) {
-        this.resourceStore = resourceStore;
-        this.formTreeService = new FormTreeBuilder(resourceStore);
+    public ColumnSetBuilder(FormCatalog catalog) {
+        this(catalog, new AppEngineFormScanCache());
+    }
+
+    public ColumnSetBuilder(FormCatalog catalog, FormScanCache cache) {
+        this.catalog = catalog;
+        this.formTreeBuilder = new FormTreeBuilder(catalog);
+        this.cache = cache;
     }
 
     public ColumnSet build(QueryModel queryModel) {
 
         // We want to make at most one pass over every collection we need to scan,
         // so first queue up all necessary work before executing
-        FormScanBatch batch = new FormScanBatch(resourceStore);
+        FormScanBatch batch = new FormScanBatch(catalog, cache);
 
         // Enqueue the columns we need
         enqueue(queryModel, batch);
@@ -58,7 +64,7 @@ public class ColumnSetBuilder {
 
     public void enqueue(QueryModel table, FormScanBatch batch) {
         ResourceId classId = table.getRowSources().get(0).getRootFormId();
-        FormTree tree = formTreeService.queryTree(classId);
+        FormTree tree = formTreeBuilder.queryTree(classId);
 
         FormClass formClass = tree.getRootFormClass();
         Preconditions.checkNotNull(formClass);

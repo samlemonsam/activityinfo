@@ -73,6 +73,7 @@ class ObservableListMap<T, R> extends ObservableList<R> {
 
     private R map(T sourceItem) {
         R resultItem = function.apply(sourceItem);
+        assert resultItem != null : "result of list map operation was null";
         results.add(resultItem);
         resultMap.put(sourceItem, resultItem);
         return resultItem;

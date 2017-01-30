@@ -6,39 +6,63 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.store.testing.TestingCatalog;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * A FormStore implementation that can be used for unit tests.
  */
 public class TestingFormStore implements FormStore {
 
-    public static final ResourceId SURVEY_FORM_ID = ResourceId.valueOf("FORM1");
 
-    private Map<ResourceId, FormClass> formClassMap = new HashMap<>();
+    private static class PendingTask<T> {
+        private Supplier<T> task;
+        private StatefulValue<T> result;
 
-    public TestingFormStore() {
-        FormClass surveyForm = new FormClass(SURVEY_FORM_ID);
-        surveyForm.setLabel("Survey");
-        surveyForm.addField(ResourceId.valueOf("FIELD1"))
-                .setLabel("What is your name?")
-                .setRequired(true)
-                .setType(TextType.INSTANCE);
+        public PendingTask(Supplier<T> task) {
+            this.task = task;
+            this.result = new StatefulValue<T>();
+        }
 
+        public Observable<T> getResult() {
+            return result;
+        }
 
-        formClassMap.put(surveyForm.getId(), surveyForm);
+        public void execute() {
+            result.updateValue(task.get());
+        }
+
     }
 
+    private TestingCatalog testingCatalog;
+
+    private boolean delayLoading = false;
+    private List<PendingTask<?>> pendingTasks = new ArrayList<>();
+
+
+    public TestingFormStore() {
+        testingCatalog = new TestingCatalog();
+    }
+
+    public void delayLoading() {
+        delayLoading = true;
+    }
+
+    public void loadAll() {
+        for (PendingTask<?> pendingTask : pendingTasks) {
+            pendingTask.execute();
+        }
+        pendingTasks.clear();
+    }
 
     @Override
     public Observable<FormClass> getFormClass(ResourceId formId) {
-        return Observable.just(formClassMap.get(formId));
-
+        return maybeExecute(() -> testingCatalog.getFormClass(formId));
     }
 
     @Override
@@ -58,6 +82,16 @@ public class TestingFormStore implements FormStore {
 
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
-        throw new UnsupportedOperationException("TODO");
+        return maybeExecute(() -> testingCatalog.query(queryModel));
+    }
+
+    private <T> Observable<T> maybeExecute(Supplier<T> task) {
+        if (delayLoading) {
+            PendingTask<T> pending = new PendingTask<T>(task);
+            pendingTasks.add(pending);
+            return pending.getResult();
+        } else {
+            return Observable.just(task.get());
+        }
     }
 }

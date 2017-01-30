@@ -3,19 +3,37 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormAccessor;
 import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.service.store.FormStorage;
+import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormScanCache;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class TestingCatalog implements FormCatalog {
+
+    private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
+
+
+    public TestingCatalog() {
+        add(new Survey());
+    }
+
+    private void add(TestForm testForm) {
+        formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
+    }
+
+
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        return null;
+    public FormClass getFormClass(ResourceId formId) {
+        if (!formMap.containsKey(formId)) {
+            throw new IllegalArgumentException("No such form " + formId);
+        }
+        return formMap.get(formId).getFormClass();
     }
 
     @Override
@@ -24,22 +42,27 @@ public class TestingCatalog implements FormCatalog {
     }
 
     @Override
-    public Optional<FormAccessor> getForm(ResourceId formId) {
-        return null;
+    public Optional<FormStorage> getForm(ResourceId formId) {
+        return Optional.<FormStorage>fromNullable(formMap.get(formId));
     }
 
     @Override
-    public Optional<FormAccessor> lookupForm(ResourceId recordId) {
-        return null;
+    public Optional<FormStorage> lookupForm(ResourceId recordId) {
+        return Optional.absent();
     }
 
     @Override
     public List<CatalogEntry> getRootEntries() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public List<CatalogEntry> getChildren(String parentId, int userId) {
-        return null;
+        return Collections.emptyList();
+    }
+
+    public ColumnSet query(QueryModel queryModel) {
+        ColumnSetBuilder builder = new ColumnSetBuilder(this, new NullFormScanCache());
+        return builder.build(queryModel);
     }
 }
