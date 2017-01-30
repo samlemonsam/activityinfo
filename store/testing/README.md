@@ -1,4 +1,4 @@
 
 # Testing 
 
-This is an implementation of Catalog for unit tests.
+This is a FormCatalog implementation for unit tests.
