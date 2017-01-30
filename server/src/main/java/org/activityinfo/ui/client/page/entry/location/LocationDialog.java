@@ -33,7 +33,6 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
-import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.model.LocationDTO;
@@ -215,6 +214,6 @@ public class LocationDialog extends Window {
      * @return true if this LocationType's workflow allows adding new locations
      */
     private boolean isAddAllowed() {
-        return !Workflow.CLOSED_WORKFLOW_ID.equals(locationType.getWorkflowId());
+        return !LocationTypeDTO.CLOSED_WORKFLOW_ID.equals(locationType.getWorkflowId());
     }
 }

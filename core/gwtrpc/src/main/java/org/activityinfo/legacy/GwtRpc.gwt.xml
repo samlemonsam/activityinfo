@@ -1,0 +1,38 @@
+<!-- #%L ActivityInfo Server %% Copyright (C) 2009 - 2013 UNICEF %% This
+  program is free software: you can redistribute it and/or modify it under
+  the terms of the GNU General Public License as published by the Free Software
+  Foundation, either version 3 of the License, or (at your option) any later
+  version. This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  more details. You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L% -->
+
+<module>
+
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name='com.extjs.gxt.ui.GXT'/>
+
+    <inherits name='org.activityinfo.core.Core'/>
+    <inherits name="com.bedatadriven.rebar.sql.Sql"/>
+    <inherits name="org.activityinfo.i18n.I18n"/>
+    <inherits name="org.activityinfo.model.Model"/>
+    <inherits name="com.google.common.cache.Cache"/>
+
+    <inherits name="org.activityinfo.api.ApiClient"/>
+
+    <source path='shared'/>
+
+    <!-- Blacklist classes that are never serialized but get pulled in by
+     interfaces on RPCable types -->
+    <extend-configuration-property name="rpc.blacklist" value="java.util.LinkedList"/>
+    <extend-configuration-property name="rpc.blacklist" value="java.util.Stack"/>
+    <extend-configuration-property name="rpc.blacklist" value="java.util.TreeMap"/>
+    <extend-configuration-property name="rpc.blacklist" value="java.util.TreeSet"/>
+    <extend-configuration-property name="rpc.blacklist" value="java.util.Vector"/>
+    <extend-configuration-property name="rpc.blacklist" value="com.google.collect.ImmutableMultimap"/>
+    <extend-configuration-property name="rpc.blacklist" value="com.google.collect.ImmutableMultiset"/>
+    <extend-configuration-property name="rpc.blacklist" value="com.google.collect.EmptyImmutableMultiset"/>
+
+</module>

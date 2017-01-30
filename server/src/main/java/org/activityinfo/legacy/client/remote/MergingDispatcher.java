@@ -28,11 +28,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.client.Dispatcher;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.Command;
+import org.activityinfo.legacy.shared.command.MutatingCommand;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
 import org.activityinfo.legacy.shared.util.BackOff;
-import org.activityinfo.legacy.shared.util.Commands;
 import org.activityinfo.legacy.shared.util.ExponentialBackOff;
 
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public class MergingDispatcher extends AbstractDispatcher {
 
         CommandRequest request = new CommandRequest(command, callback);
 
-        if (Commands.hasMutatingCommand(command)) {
+        if (hasMutatingCommand(command)) {
             // mutating requests get queued immediately, don't try to merge them
             // into any pending/executing commands, it wouldn't be correct
 
@@ -115,6 +116,20 @@ public class MergingDispatcher extends AbstractDispatcher {
                         pendingCommands.size() + " command(s) pending");
             }
         }
+    }
+
+    private static boolean hasMutatingCommand(Command command) {
+        if (command instanceof MutatingCommand) {
+            return true;
+        } else if (command instanceof BatchCommand) {
+            BatchCommand batchCommand = (BatchCommand) command;
+            for (Command innerCommand : batchCommand.getCommands()) {
+                if (hasMutatingCommand(innerCommand)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void queue(CommandRequest request) {

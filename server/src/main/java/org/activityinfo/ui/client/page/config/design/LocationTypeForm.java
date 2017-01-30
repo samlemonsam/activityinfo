@@ -9,7 +9,6 @@ import com.extjs.gxt.ui.client.widget.form.Radio;
 import com.extjs.gxt.ui.client.widget.form.RadioGroup;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import org.activityinfo.core.shared.workflow.Workflow;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
@@ -77,7 +76,7 @@ public class LocationTypeForm extends AbstractDesignForm {
 
         @Override
         public Radio convertModelValue(Object value) {
-            if(Workflow.CLOSED_WORKFLOW_ID.equals(value)) {
+            if (LocationTypeDTO.CLOSED_WORKFLOW_ID.equals(value)) {
                 return closedWorkflow;
             } else {
                 return openWorkflow;
@@ -87,9 +86,9 @@ public class LocationTypeForm extends AbstractDesignForm {
         @Override
         public String convertFieldValue(Object value) {
             if(value == closedWorkflow) {
-                return Workflow.CLOSED_WORKFLOW_ID;
+                return LocationTypeDTO.CLOSED_WORKFLOW_ID;
             } else {
-                return Workflow.OPEN_WORKFLOW_ID;
+                return LocationTypeDTO.OPEN_WORKFLOW_ID;
             }
         }
     }

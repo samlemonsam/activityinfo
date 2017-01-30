@@ -53,6 +53,7 @@
   <inherits name="org.activityinfo.model.Model"/>
   <inherits name="org.activityinfo.service.Service"/>
   <inherits name="org.activityinfo.legacy.Legacy"/>
+  <inherits name="org.activityinfo.legacy.GwtRpc"/>
   
   <inherits name="org.activityinfo.ui.Icons"/>
 

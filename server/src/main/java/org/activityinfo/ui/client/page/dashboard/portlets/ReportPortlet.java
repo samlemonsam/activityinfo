@@ -22,11 +22,7 @@ package org.activityinfo.ui.client.page.dashboard.portlets;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.event.IconButtonEvent;
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.MenuEvent;
-import com.extjs.gxt.ui.client.event.MessageBoxEvent;
-import com.extjs.gxt.ui.client.event.SelectionListener;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.MessageBox;
@@ -46,7 +42,6 @@ import org.activityinfo.legacy.shared.model.ReportMetadataDTO;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
 import org.activityinfo.legacy.shared.reports.model.PivotChartReportElement;
 import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
-import org.activityinfo.legacy.shared.reports.model.Report;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.report.view.ChartOFCView;

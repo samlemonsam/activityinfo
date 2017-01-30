@@ -48,7 +48,6 @@ dependencies {
     // MySQL Related dependencies
     compile libraries.hibernate.entitymanager
     compile libraries.hibernate.spatial
-    compile libraries.hibernate.validator
     compile libraries.liquibase
     compile libraries.jdbc.mysql
 
@@ -60,6 +59,7 @@ dependencies {
     compile libraries.google.apiClient
 
     // GWT User Interface Dependencies
+    compile project(':core:gwtrpc')
     compile libraries.gxt
     gwt libraries.gwt.dnd
     gwt libraries.gwt.guice

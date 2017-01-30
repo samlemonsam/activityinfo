@@ -4,6 +4,7 @@ include 'i18n'
 include 'core:model'
 include 'core:services'
 include 'core:promises'
+include 'core:gwtrpc'
 
 include 'api'
 include 'apiClient:gwt'
@@ -23,5 +24,6 @@ include 'io:xlsform'
 
 include 'ui:icons'
 include 'ui:app'
+include 'ui:app2'
 
 include 'tests:acceptance'

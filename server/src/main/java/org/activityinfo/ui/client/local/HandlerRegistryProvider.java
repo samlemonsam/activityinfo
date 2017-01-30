@@ -27,6 +27,7 @@ import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.impl.*;
 import org.activityinfo.ui.client.local.command.HandlerRegistry;
+import org.activityinfo.ui.client.local.command.UpdateMonthlyReportsAsync;
 
 public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
 
