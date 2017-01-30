@@ -1626,4 +1626,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("User exists")
     String userExistsTitle();
+
+    @DefaultStringValue("Count")
+    String count();
+
 }

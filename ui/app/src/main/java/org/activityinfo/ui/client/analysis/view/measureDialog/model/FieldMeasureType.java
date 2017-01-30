@@ -1,7 +1,9 @@
 package org.activityinfo.ui.client.analysis.view.measureDialog.model;
 
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.analysis.model.MeasureModel;
 
 public class FieldMeasureType implements MeasureType {
 
@@ -21,6 +23,11 @@ public class FieldMeasureType implements MeasureType {
     @Override
     public String getLabel() {
         return field.getLabel();
+    }
+
+    @Override
+    public MeasureModel buildModel(FormClass formClass) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

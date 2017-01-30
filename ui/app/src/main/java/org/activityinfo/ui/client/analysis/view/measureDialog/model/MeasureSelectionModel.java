@@ -8,6 +8,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.ArrayList;
@@ -130,6 +131,16 @@ public class MeasureSelectionModel {
                 break;
             case MEASURE:
                 selectionStep.updateValue(SelectionStep.FORM);
+        }
+    }
+
+    public Optional<MeasureModel> buildMeasure() {
+        Observable<Optional<FormClass>> selectedForm = getSelectedFormSchema();
+        Observable<MeasureType> type = getSelectedMeasureType();
+        if (type.isLoaded() && selectedForm.isLoaded() && selectedForm.get().isPresent()) {
+            return Optional.of(type.get().buildModel(selectedForm.get().get()));
+        } else {
+            return Optional.absent();
         }
     }
 
