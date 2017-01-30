@@ -251,5 +251,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
             "to reference, is required.")
     String referenceFieldRequiresRange(String fieldTypeName, String columnName);
 
+    @DefaultMessage("Count of {0}")
+    String countMeasure(String formLabel);
 
 }

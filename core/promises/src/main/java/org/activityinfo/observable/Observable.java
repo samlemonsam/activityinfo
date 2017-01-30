@@ -3,6 +3,7 @@ package org.activityinfo.observable;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import org.activityinfo.promise.BiFunction;
+import org.activityinfo.promise.Function3;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +47,8 @@ public abstract class Observable<T> {
         return new Subscription() {
             @Override
             public void unsubscribe() {
-                observers.remove(observer);   
+                boolean removed = observers.remove(observer);
+                assert removed : "Already unsubscribed!";
                 if(observers.isEmpty()) {
                     onDisconnect();
                 }
@@ -121,6 +123,26 @@ public abstract class Observable<T> {
                 T t = (T)arguments[0];
                 U u = (U)arguments[1];
                 return function.apply(t, u);
+            }
+        };
+    }
+
+    public static <A, B, C, R> Observable<R> transform(Observable<A> a, Observable<B> b, Observable<C> c,
+                                                       final Function3<A, B, C, R> function) {
+        return transform(SynchronousScheduler.INSTANCE, a, b, c, function);
+    }
+
+    public static <A, B, C, R> Observable<R> transform(Scheduler scheduler, Observable<A> a, Observable<B> b, Observable<C> c,
+                                                       final Function3<A, B, C, R> function) {
+        return new ObservableFunction<R>(scheduler, a, b, c) {
+
+            @Override
+            @SuppressWarnings("unchecked")
+            protected R compute(Object[] arguments) {
+                A a = (A) arguments[0];
+                B b = (B) arguments[1];
+                C c = (C) arguments[2];
+                return function.apply(a, b, c);
             }
         };
     }

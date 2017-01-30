@@ -8,13 +8,23 @@ import java.util.List;
  */
 public class AnalysisResult {
 
+    private DimensionSet dimensionSet;
     private List<Point> points = new ArrayList<>();
 
 
     public AnalysisResult(List<MeasureResultSet> measureSets) {
+        if (!measureSets.isEmpty()) {
+            dimensionSet = measureSets.get(0).getDimensions();
+        } else {
+            dimensionSet = new DimensionSet();
+        }
         for (MeasureResultSet measureSet : measureSets) {
             points.addAll(measureSet.getPoints());
         }
+    }
+
+    public DimensionSet getDimensionSet() {
+        return dimensionSet;
     }
 
     public List<Point> getPoints() {

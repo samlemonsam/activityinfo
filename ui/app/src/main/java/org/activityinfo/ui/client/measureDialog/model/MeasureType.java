@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.measureDialog.model;
 
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.model.CountMeasure;
 
 public interface MeasureType {
 
@@ -9,5 +9,5 @@ public interface MeasureType {
 
     String getLabel();
 
-    MeasureModel buildModel(FormClass formClass);
+    CountMeasure buildModel(FormClass formClass);
 }

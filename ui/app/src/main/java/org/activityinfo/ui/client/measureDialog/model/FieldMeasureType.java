@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.measureDialog.model;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.model.CountMeasure;
 
 public class FieldMeasureType implements MeasureType {
 
@@ -26,7 +26,7 @@ public class FieldMeasureType implements MeasureType {
     }
 
     @Override
-    public MeasureModel buildModel(FormClass formClass) {
+    public CountMeasure buildModel(FormClass formClass) {
         throw new UnsupportedOperationException();
     }
 

@@ -8,16 +8,24 @@ import java.util.List;
  */
 public class MeasureResultSet {
 
+    private DimensionSet dimensions;
     private List<Point> points = new ArrayList<>();
 
     public MeasureResultSet() {
     }
 
-    public MeasureResultSet(Point point) {
+
+    public MeasureResultSet(DimensionSet dimensions, Point point) {
+        this.dimensions = dimensions;
         points.add(point);
     }
 
     public List<Point> getPoints() {
         return points;
+    }
+
+
+    public DimensionSet getDimensions() {
+        return dimensions;
     }
 }

@@ -35,8 +35,6 @@ public class AnalysisModelTest {
         assertTrue(model.getResult().isLoading());
 
         AnalysisResult result = assertLoads(model.getResult());
-
-
     }
 
 
@@ -47,7 +45,7 @@ public class AnalysisModelTest {
         formStore.delayLoading();
 
         AnalysisModel model = new AnalysisModel(formStore);
-        model.addMeasure(new CountMeasure(Survey.FORM_ID));
+        model.addMeasure(new CountMeasure(Survey.FORM_ID, "Count of survey"));
 
         Connection<AnalysisResult> result = ObservableTesting.connect(model.getResult());
         result.assertLoading();
@@ -58,6 +56,22 @@ public class AnalysisModelTest {
 
         assertThat(points, hasSize(1));
         assertThat(points.get(0).getValue(), equalTo(0d));
+    }
+
+    @Test
+    public void dimensionSources() {
+
+        TestingFormStore formStore = new TestingFormStore();
+        AnalysisModel model = new AnalysisModel(formStore);
+        model.addMeasure(new CountMeasure(Survey.FORM_ID, "Count of survey"));
+
+        Connection<DimensionSourceSet> connection = ObservableTesting.connect(model.getDimensionSources());
+        connection.disconnect();
+
+        connection = ObservableTesting.connect(model.getDimensionSources());
+        connection.disconnect();
+
+
     }
 
     private <T> T assertLoads(Observable<T> result) {

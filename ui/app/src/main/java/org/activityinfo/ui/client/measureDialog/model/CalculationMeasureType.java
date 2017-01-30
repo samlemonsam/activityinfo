@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.measureDialog.model;
 
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.model.CountMeasure;
 
 public class CalculationMeasureType implements MeasureType {
 
@@ -17,7 +17,7 @@ public class CalculationMeasureType implements MeasureType {
     }
 
     @Override
-    public MeasureModel buildModel(FormClass formClass) {
+    public CountMeasure buildModel(FormClass formClass) {
         throw new UnsupportedOperationException();
     }
 

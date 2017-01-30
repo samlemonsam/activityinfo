@@ -6,7 +6,7 @@
              xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
 >
 
-    <gxt:Dialog resizable="false" pixelSize="640, 480">
+    <gxt:Dialog resizable="false" pixelSize="640, 480" heading="New Measure">
         <container:CardLayoutContainer ui:field="container">
             <measure:CatalogTreeView ui:field="formTree"/>
             <measure:MeasureTypeListView ui:field="measureList"/>

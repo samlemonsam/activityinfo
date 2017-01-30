@@ -16,6 +16,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Form")
     String activity();
 
+    @DefaultStringValue("Form")
+    String form();
+
     @DefaultStringValue("Add")
     String add();
 
@@ -1629,5 +1632,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Count")
     String count();
+
+    @DefaultStringValue("Measures")
+    String measures();
 
 }

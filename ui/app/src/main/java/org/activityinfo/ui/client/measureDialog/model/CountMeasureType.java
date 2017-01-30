@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.measureDialog.model;
 
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.ui.client.analysis.model.CountMeasure;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
 
 public class CountMeasureType implements MeasureType {
     @Override
@@ -16,8 +16,8 @@ public class CountMeasureType implements MeasureType {
     }
 
     @Override
-    public MeasureModel buildModel(FormClass formClass) {
-        return new CountMeasure(formClass.getId());
+    public CountMeasure buildModel(FormClass formClass) {
+        return new CountMeasure(formClass.getId(), I18N.MESSAGES.countMeasure(formClass.getLabel()));
     }
 
     @Override

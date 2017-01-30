@@ -2,6 +2,7 @@ package org.activityinfo.observable;
 
 import com.google.common.base.Function;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +81,18 @@ public abstract class ObservableList<T> {
 
     public final <R> ObservableList<R> map(final Function<T, R> function) {
         return new ObservableListMap<>(this, function);
+    }
+
+    public final <R> Observable<List<R>> flatMap(Function<T, Observable<R>> function) {
+        ObservableList<Observable<R>> listOfObservables = map(function);
+        Observable<List<Observable<R>>> observableListOfObservables = listOfObservables.asObservable();
+        return observableListOfObservables.join(new Function<List<Observable<R>>, Observable<List<R>>>() {
+            @Nullable
+            @Override
+            public Observable<List<R>> apply(@Nullable List<Observable<R>> observables) {
+                return Observable.flatten(observables);
+            }
+        });
     }
 
     /**

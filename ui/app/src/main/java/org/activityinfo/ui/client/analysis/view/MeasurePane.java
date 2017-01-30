@@ -8,6 +8,7 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.measureDialog.view.MeasureDialog;
@@ -47,7 +48,7 @@ public class MeasurePane implements IsWidget {
             }
         });
         this.contentPanel = new ContentPanel();
-        this.contentPanel.setHeading("Measures");
+        this.contentPanel.setHeading(I18N.CONSTANTS.measures());
         this.contentPanel.addTool(addButton);
         this.contentPanel.setWidget(list);
     }
