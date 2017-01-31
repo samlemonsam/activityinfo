@@ -5,13 +5,12 @@ import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.service.store.CursorObserver;
@@ -28,14 +27,13 @@ public class ViewBuilderFactory {
 
 
     public static CursorObserver<FieldValue> get(PendingSlot<ColumnView> result, FieldType type) {
-        if(type instanceof TextType) {
+        if(type instanceof TextType ||
+           type instanceof NarrativeType ||
+           type instanceof BarcodeType) {
             return new StringColumnBuilder(result, new TextFieldReader());
-        } else if(type instanceof NarrativeType) {
-            return new StringColumnBuilder(result, new NarrativeFieldReader());
+
         } else if(type instanceof QuantityType) {
             return new DoubleColumnBuilder(result, new QuantityReader());
-        } else if(type instanceof BarcodeType) {
-            return new StringColumnBuilder(result, new BarcodeReader());
         } else if(type instanceof ReferenceType) {
             return new StringColumnBuilder(result, new ReferenceIdReader());
         } else if(type instanceof EnumType) {
@@ -54,23 +52,14 @@ public class ViewBuilderFactory {
     private static class TextFieldReader implements StringReader {
         @Override
         public String readString(FieldValue value) {
-            if(value instanceof TextValue) {
-                return ((TextValue) value).asString();
+            if(value instanceof HasStringValue) {
+                return ((HasStringValue) value).asString();
             }
             return null;
         }
     }
 
 
-    private static class NarrativeFieldReader implements StringReader {
-        @Override
-        public String readString(FieldValue value) {
-            if(value instanceof NarrativeValue) {
-                return ((NarrativeValue) value).asString();
-            }
-            return null;
-        }
-    }
 
     private static class QuantityReader implements DoubleReader {
         @Override
@@ -92,16 +81,6 @@ public class ViewBuilderFactory {
                 if(ref.getReferences().size() == 1) {
                     return ref.getOnlyReference().getRecordId().asString();
                 }
-            }
-            return null;
-        }
-    }
-
-    private static class BarcodeReader implements StringReader {
-        @Override
-        public String readString(FieldValue value) {
-            if(value instanceof BarcodeValue) {
-                return ((BarcodeValue) value).asString();
             }
             return null;
         }
