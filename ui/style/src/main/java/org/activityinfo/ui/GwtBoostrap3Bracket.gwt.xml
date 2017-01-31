@@ -1,7 +1,0 @@
-<module>
-
-  <inherits name="org.gwtbootstrap3.GwtBootstrap3Base"/>
-
-  <entry-point class="org.gwtbootstrap3.client.GwtBootstrap3EntryPoint"/>
-
-</module>

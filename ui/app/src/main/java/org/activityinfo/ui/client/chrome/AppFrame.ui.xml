@@ -1,0 +1,43 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:container='urn:import:com.sencha.gxt.widget.core.client.container'
+             xmlns:chrome="urn:import:org.activityinfo.ui.client.chrome"
+>
+
+    <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData"
+             field="northData">
+        <ui:attributes size="42"/>
+    </ui:with>
+
+    <ui:style gss="true">
+
+        .header-bar {
+            background-color: #28384a;
+        }
+
+        .header-text {
+            color: white;
+            font-size: 16px;
+            padding: 6px 0 8px 6px;
+        }
+
+    </ui:style>
+
+
+    <container:BorderLayoutContainer>
+
+        <!-- Top Application Bar -->
+        <container:north layoutData="{northData}">
+            <container:HBoxLayoutContainer addStyleNames="{style.header-bar}">
+
+                <g:HTML addStyleNames="{style.header-text}">ActivityInfo</g:HTML>
+
+                <chrome:ConnectionIndicator ui:field="connectionIndicator"/>
+
+                <g:Hyperlink></g:Hyperlink>
+
+            </container:HBoxLayoutContainer>
+        </container:north>
+
+    </container:BorderLayoutContainer>
+</ui:UiBinder>

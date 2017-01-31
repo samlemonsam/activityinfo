@@ -1,0 +1,75 @@
+apply plugin: 'gwt-base'
+
+
+gwt {
+    gwtVersion = gwtVersion
+    modules 'org.activityinfo.ui.ActivityInfoRelease'
+    maxHeapSize "5g"
+}
+
+ext {
+    outputDir = "$buildDir/gwt-out"
+}
+
+dependencies {
+
+    gwt project(':i18n')
+    gwt project(':core:model')
+    gwt project(':core:gwtrpc')
+    gwt project(':core:services')
+    gwt project(':apiClient:gwt')
+    gwt project(':io:match')
+    gwt project(':ui:icons')
+
+    gwt libraries.gwt.user
+    gwt libraries.gxt
+    gwt libraries.gwt.gson
+
+    gwt libraries.gwt.dnd
+    gwt libraries.gwt.guice
+    gwt libraries.gwt.gson
+    gwt libraries.gwt.leaflet
+    gwt libraries.gwt.gears
+    gwt libraries.gwt.guava
+
+    gwt libraries.rebar.style
+    gwt libraries.rebar.appcache
+
+    gwt 'com.allen-sauer.gwt.dnd:gwt-dnd:3.3.0'
+    gwt 'com.googlecode.gwtquery:gwtquery:1.4.2'
+    gwt 'com.github.jdramaix:gwtchosen:1.2.0'
+
+    gwtSdk libraries.gwt.dev
+
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [ configurations.gwt ]
+    }
+}
+
+
+task compileApp(type: JavaExec) {
+
+    outputs.dir outputDir
+    inputs.sourceDir project.sourceSets.main.allSource.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    main = 'com.google.gwt.dev.Compiler'
+
+    args '-war', outputDir
+    args '-logLevel', 'ERROR'
+    args 'org.activityinfo.ui.ActivityInfoRelease'
+//
+//    doFirst {
+//        delete fileTree(dir: outputDir, include: '**/*.*')
+//    }
+
+}

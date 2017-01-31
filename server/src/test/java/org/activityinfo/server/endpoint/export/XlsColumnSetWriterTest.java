@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 
 /**
  * Created by yuriyz on 9/2/2016.

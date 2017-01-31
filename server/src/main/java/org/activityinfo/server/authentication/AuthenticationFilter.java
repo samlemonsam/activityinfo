@@ -133,6 +133,8 @@ public class AuthenticationFilter implements Filter {
 
         // cache cor permission for a full day
         response.addHeader("Access-Control-Max-Age", Integer.toString(24 * 60 * 60));
+        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "Content-Type");
     }
 
     @Override

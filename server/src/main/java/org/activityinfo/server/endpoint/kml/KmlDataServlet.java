@@ -24,6 +24,7 @@ package org.activityinfo.server.endpoint.kml;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.activityinfo.legacy.shared.SiteRenderer;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
@@ -34,7 +35,6 @@ import org.activityinfo.server.authentication.BasicAuthentication;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.kml.xml.XmlBuilder;
-import org.activityinfo.ui.client.page.entry.form.SiteRenderer;
 import org.xml.sax.SAXException;
 
 import javax.servlet.ServletException;

@@ -28,11 +28,11 @@ import com.bedatadriven.rebar.sql.client.query.SqliteDialect;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import org.activityinfo.i18n.shared.UiConstants;
-import org.activityinfo.legacy.client.Dispatcher;
-import org.activityinfo.legacy.client.remote.Remote;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.MockEventBus;
+import org.activityinfo.ui.client.dispatch.Dispatcher;
+import org.activityinfo.ui.client.dispatch.remote.Remote;
 import org.activityinfo.ui.client.local.command.HandlerRegistry;
 
 import java.lang.reflect.InvocationHandler;

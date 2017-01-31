@@ -8,6 +8,7 @@ dependencies {
     compile libraries.hamcrest
     compile libraries.junit
     compile libraries.guice
+    compile libraries.guava
     compile libraries.jersey.client
     compile libraries.jersey.json
     compile libraries.cucumber.java
@@ -120,5 +121,12 @@ tasks.each { task ->
                 systemProperty "phantomjsPath", project.property("phantomjsPath")
             }
         }
+    }
+}
+
+configurations.all {
+
+    resolutionStrategy {
+        force libraries.guava
     }
 }

@@ -33,13 +33,13 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.core.shared.importing.schema.SchemaCsvWriter;
+import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.activityinfo.core.client.PromiseMatchers.resolvesTo;
+import static org.activityinfo.promise.PromiseMatchers.resolvesTo;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;

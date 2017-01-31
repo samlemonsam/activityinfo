@@ -16,6 +16,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Form")
     String activity();
 
+    @DefaultStringValue("Form")
+    String form();
+
     @DefaultStringValue("Add")
     String add();
 
@@ -823,7 +826,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Share Report")
     String shareReport();
 
-    @DefaultStringValue("This report is still empty, so it can't yet be shared.")
+    @DefaultStringValue("This report is still empty, so it can't yet be model.")
     String emptyReportsCannotBeShared();
 
     @DefaultStringValue("Shared")
@@ -1626,4 +1629,11 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("User exists")
     String userExistsTitle();
+
+    @DefaultStringValue("Count")
+    String count();
+
+    @DefaultStringValue("Measures")
+    String measures();
+
 }

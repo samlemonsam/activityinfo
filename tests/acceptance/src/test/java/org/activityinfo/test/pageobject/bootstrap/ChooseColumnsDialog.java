@@ -23,11 +23,11 @@ package org.activityinfo.test.pageobject.bootstrap;
 
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.activityinfo.test.pageobject.api.FluentElements;
-import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -75,7 +75,7 @@ public class ChooseColumnsDialog {
         List<BsTable.Row> notVisible = Lists.newArrayList();
 
         for (BsTable.Row row : allColumnsGrid.rows()) {
-            if (StringUtils.contains(row.getContainer().attribute("class"), "row-present")) {
+            if (Strings.nullToEmpty(row.getContainer().attribute("class")).contains("row-present")) {
                 visible.add(row);
             } else {
                 notVisible.add(row);

@@ -32,12 +32,10 @@ import com.google.inject.Injector;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.core.shared.util.MimeTypeUtil;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.shared.adapter.ActivityInfoClientAsyncStub;
-import org.activityinfo.legacy.shared.adapter.ResourceLocatorAdaptor;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -54,6 +52,8 @@ import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
+import org.activityinfo.ui.client.component.form.field.attachment.MimeTypeUtil;
+import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -67,8 +67,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.junit.Assert.*;
 
 /**

@@ -29,7 +29,7 @@ sourceSets {
 
 dependencies {
     compile libraries.guava
-    compile libraries.gwt.i18nServer
+    compile group: 'net.lightoze.gwt-i18n-server', name: 'gwt-i18n-server', version: '0.22', classifier: 'original'
     gwt     libraries.gwt.user
     gwt     libraries.gwt.guava
     

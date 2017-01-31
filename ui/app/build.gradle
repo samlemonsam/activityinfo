@@ -1,19 +1,50 @@
+apply plugin: 'gwt-base'
 
-apply plugin: 'gwt'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 gwt {
-    gwtVersion = project.gwtVersion
-    modules 'org.activityinfo.ui.App'
+    gwtVersion = "2.8.0"
+    modules 'org.activityinfo.ui.AppProd'
+    maxHeapSize "5g"
 }
 
+ext {
+    outputDir = "$buildDir/gwt-out"
+}
+
+repositories {
+    maven { url 'https://maven.sencha.com/repo/gxt-gpl-release/' }
+}
+
+task explodedWar(type: Copy) {
+    from 'src/main/webapp'
+    into "$buildDir/exploded"
+}
+
+
 dependencies {
-    compile libraries.guava
-    compile libraries.gwt.i18nServer
-    gwt libraries.gwt.user
-    gwt libraries.gwt.guava
-    gwt project(':ui:style')
-    gwt project(':ui:icons')
+    compile "com.google.guava:guava:21.0"
+    gwt "com.google.gwt:gwt-user:2.8.0"
+    gwt 'com.google.guava:guava-gwt:21.0'
+    gwt libraries.gwt.gson
+
+    gwt project(':core:model')
     gwt project(':i18n')
+    gwt project(':apiClient:gwt')
+
+    gwt group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
+    gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
+    gwt group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
+
+    testCompile project(':store:testing')
+
+}
+
+configurations.all {
+
+    // Interferes with GWT-dev
+    exclude module: 'gwt-servlet'
 }
 
 idea {
@@ -22,3 +53,47 @@ idea {
     }
 }
 
+
+task simpleDevMode(type: JavaExec) {
+    dependsOn explodedWar
+
+    main = 'com.google.gwt.dev.DevMode'
+
+    // Java sources first, so that changes get picked up on refresh
+    classpath project(":i18n").sourceSets.main.java.srcDirs
+    classpath project(":i18n").sourceSets.main.resources.srcDirs
+    classpath project(":core:promises").sourceSets.main.java.srcDirs
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    args '-war', "${buildDir}/exploded"
+    args '-startupUrl', 'login'
+    args 'org.activityinfo.ui.AppDev'
+
+}
+
+task compileApp(type: JavaExec) {
+
+    outputs.dir outputDir
+    inputs.sourceDir project.sourceSets.main.allSource.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    main = 'com.google.gwt.dev.Compiler'
+
+    args '-logLevel', 'ERROR'
+    args '-sourceLevel', '1.8'
+    args '-war', outputDir
+    args 'org.activityinfo.ui.AppProd'
+
+}

@@ -63,9 +63,9 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
 import static org.activityinfo.model.legacy.CuidAdapter.getLegacyIdFromCuid;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.hasItem;

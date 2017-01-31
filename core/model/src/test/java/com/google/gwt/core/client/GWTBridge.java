@@ -22,7 +22,7 @@ package com.google.gwt.core.client;
  */
 
 /**
- * CalendarUtil class uses client GWT.isClient() instead of shared GWT.isClient() which
+ * CalendarUtil class uses client GWT.isClient() instead of model GWT.isClient() which
  * lead to NoClassDefFoundError during unit tests. This is dummy hack to avoid the exception.
  *
  * java.lang.NoClassDefFoundError: com/google/gwt/core/client/GWTBridge

@@ -22,7 +22,7 @@ package org.activityinfo.server.database.hibernate.entity;
  * #L%
  */
 
-import org.activityinfo.core.shared.workflow.Workflow;
+import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -52,7 +52,7 @@ public class Location implements java.io.Serializable {
     private long version;
 
     public Location() {
-        workflowStatusId = Workflow.VALIDATED;
+        workflowStatusId = LocationDTO.VALIDATED;
     }
 
     @Id @JsonProperty @Column(name = "LocationID", unique = true, nullable = false)

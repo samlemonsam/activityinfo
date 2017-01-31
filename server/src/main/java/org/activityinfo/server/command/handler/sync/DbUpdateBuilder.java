@@ -118,7 +118,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         insert(LockedPeriod.class, lockedPeriodsInDatabase(notDeleted()));
 
 
-        // Since Partners are shared, we replace the join table completely
+        // Since Partners are model, we replace the join table completely
         // for this database, but do not delete partners removed
         // from the database as they may be used by other databases
         insertPartners();

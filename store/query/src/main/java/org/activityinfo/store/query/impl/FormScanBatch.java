@@ -1,11 +1,5 @@
 package org.activityinfo.store.query.impl;
 
-import com.google.appengine.api.memcache.AsyncMemcacheService;
-import com.google.appengine.api.memcache.Expiration;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.apphosting.api.ApiProxy;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
@@ -24,11 +18,6 @@ import org.activityinfo.store.query.impl.eval.NodeMatch;
 import org.activityinfo.store.query.impl.join.*;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -40,9 +29,8 @@ import java.util.logging.Logger;
 public class FormScanBatch {
 
     private static final Logger LOGGER = Logger.getLogger(FormScanBatch.class.getName());
-    
-    private final AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
-    private final List<Future<Set<String>>> pendingCaching = new ArrayList<>();
+
+    private final FormScanCache cache;
 
     private final FormCatalog store;
 
@@ -57,6 +45,12 @@ public class FormScanBatch {
 
     public FormScanBatch(FormCatalog store) {
         this.store = store;
+        this.cache = new AppEngineFormScanCache();
+    }
+
+    public FormScanBatch(FormCatalog catalog, FormScanCache cache) {
+        this.store = catalog;
+        this.cache = cache;
     }
 
 
@@ -250,34 +244,22 @@ public class FormScanBatch {
     public void resolveFromCache() {
 
 
-        // Otherwise, try to retrieve all of the ColumnView and ForeignKeyMaps we need 
-        // from the Memcache service
-        try {
-            Set<String> toFetch = new HashSet<>();
+        Set<String> toFetch = new HashSet<>();
 
-            // Collect the keys we need from all enqueued tables
+        // Collect the keys we need from all enqueued tables
+        for (FormScan formScan : tableMap.values()) {
+            toFetch.addAll(formScan.getCacheKeys());
+        }
+
+        if (!toFetch.isEmpty()) {
+
+            Map<String, Object> cached = cache.getAll(toFetch);
+
+            // Now populate the individual collection scans with what we got back from memcache
+            // with a little luck nothing will be left to query directly from the database
             for (FormScan formScan : tableMap.values()) {
-                toFetch.addAll(formScan.getCacheKeys());
+                formScan.updateFromCache(cached);
             }
-            
-            if(!toFetch.isEmpty()) {
-                // Do a big giant memcache call and rely on appengine to parallelize as
-                // needed
-                Stopwatch stopwatch = Stopwatch.createStarted();
-                Map<String, Object> cached = memcacheService.getAll(toFetch).get();
-
-                LOGGER.info("Retrieved " + cached.size() + "/" + toFetch.size() + " requested keys from memcache in " +
-                        stopwatch);
-
-                // Now populate the individual collection scans with what we got back from memcache 
-                // with a little luck nothing will be left to query directly from the database
-                for (FormScan formScan : tableMap.values()) {
-                    formScan.updateFromCache(cached);
-                }
-            }
-            
-        } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Exception while retrieving columns from cache" , e);
         }
     }
 
@@ -286,10 +268,7 @@ public class FormScanBatch {
         try {
             Map<String, Object> toPut = scan.getValuesToCache();
             if(!toPut.isEmpty()) {
-                Future<Set<String>> result = memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600),
-                        MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
-
-                pendingCaching.add(result);
+                cache.enqueuePut(toPut);
             }
         } catch (Exception e) {
             LOGGER.severe("Failed to start memcache put for " + scan);
@@ -300,30 +279,6 @@ public class FormScanBatch {
      * Wait for caching to finish, if there is time left in this request.
      */
     public void waitForCachingToFinish() {
-
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        int columnCount = 0;
-
-        for (Future<Set<String>> future : pendingCaching) {
-            if(!future.isDone()) {
-                long remainingMillis = ApiProxy.getCurrentEnvironment().getRemainingMillis();
-                if (remainingMillis > 100) {
-                    try {
-                        Set<String> cachedKeys = future.get(remainingMillis - 50, TimeUnit.MILLISECONDS);
-                        columnCount += cachedKeys.size();
-
-                    } catch (InterruptedException | TimeoutException e) {
-                        LOGGER.warning("Ran out of time while waiting for caching of results to complete.");
-                        return;
-
-                    } catch (ExecutionException e) {
-                        LOGGER.log(Level.WARNING, "Exception caching results of query", e);
-                    }
-                }
-            }
-        }
-
-        LOGGER.info("Waited " + stopwatch + " for " + columnCount + " columns to finish caching.");
+        cache.waitUntilCached();
     }
 }

@@ -19,7 +19,7 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 

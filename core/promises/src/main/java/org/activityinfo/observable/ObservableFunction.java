@@ -18,6 +18,10 @@ public abstract class ObservableFunction<T> extends Observable<T> {
         this.arguments = arguments;
         this.subscriptions = new Subscription[arguments.length];
         computeValue();
+
+        for (int i = 0; i < arguments.length; i++) {
+            assert arguments[i] != null : "argument " + i + " is null.";
+        }
     }
 
     public ObservableFunction(Scheduler scheduler, List<Observable<?>> arguments) {
@@ -31,6 +35,7 @@ public abstract class ObservableFunction<T> extends Observable<T> {
 
     @Override
     public final T get() {
+        assert value.isPresent() : "Not loaded!";
         return value.get();
     }
 

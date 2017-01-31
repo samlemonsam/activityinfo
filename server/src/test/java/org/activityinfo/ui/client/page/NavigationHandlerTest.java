@@ -24,8 +24,8 @@ package org.activityinfo.ui.client.page;
 
 import com.google.gwt.junit.GWTMockUtilities;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.legacy.client.monitor.NullAsyncMonitor;
 import org.activityinfo.ui.client.MockEventBus;
+import org.activityinfo.ui.client.dispatch.monitor.NullAsyncMonitor;
 import org.activityinfo.ui.client.page.app.Section;
 import org.easymock.Capture;
 import org.easymock.IAnswer;

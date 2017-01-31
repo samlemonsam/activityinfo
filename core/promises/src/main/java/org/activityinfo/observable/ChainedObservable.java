@@ -54,15 +54,17 @@ public class ChainedObservable<T> extends Observable<T> {
             }
         });
     }
-    
+
     @Override
     protected void onDisconnect() {
         assert observableSubscription != null;
 
         observableSubscription.unsubscribe();
+        observableSubscription = null;
 
         if(valueSubscription != null) {
             valueSubscription.unsubscribe();
+            valueSubscription = null;
         }
     }
 }

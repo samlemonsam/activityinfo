@@ -64,8 +64,8 @@ public final class ResourceId implements Serializable {
     public static ResourceId generateSubmissionId(FormClass formClass) {
         return generateSubmissionId(formClass.getId());
     }
-    
-    private static String generateCuid() {
+
+    public static String generateCuid() {
         return Long.toString(new Date().getTime(), Character.MAX_RADIX) +
                 Long.toString(COUNTER++, Character.MAX_RADIX);
     }

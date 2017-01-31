@@ -49,8 +49,8 @@ import org.junit.runner.RunWith;
 
 import java.util.GregorianCalendar;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;

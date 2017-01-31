@@ -24,8 +24,8 @@ import org.junit.runner.RunWith;
 
 import java.util.*;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.entity;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
