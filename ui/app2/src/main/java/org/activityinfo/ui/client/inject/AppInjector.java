@@ -34,6 +34,7 @@ import org.activityinfo.ui.client.dispatch.remote.cache.AdminEntityCache;
 import org.activityinfo.ui.client.dispatch.remote.cache.SchemaCache;
 import org.activityinfo.ui.client.local.LocalController;
 import org.activityinfo.ui.client.local.LocalModule;
+import org.activityinfo.ui.client.page.FormPageLoader;
 import org.activityinfo.ui.client.page.HistoryManager;
 import org.activityinfo.ui.client.page.app.AppLoader;
 import org.activityinfo.ui.client.page.config.ConfigLoader;
@@ -47,9 +48,6 @@ import org.activityinfo.ui.client.page.report.ReportModule;
 
 /**
  * GIN injector.
- * <p/>                                     ap
- * TODO: having this number of explicit entries is probably not ideal, try to
- * make better use of injection and injecting Provider<>s
  */
 @GinModules({AppModule.class,
         ReportModule.class,
@@ -81,4 +79,6 @@ public interface AppInjector extends Ginjector {
     AppLoader createAppLoader();
     
     PrintFormPanel createPrintFormPanel();
+
+    FormPageLoader createFormLoader();
 }
