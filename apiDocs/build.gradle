@@ -50,6 +50,4 @@ task generateDocs(type: JavaExec) {
     args outputDir
 }
 
-build.dependsOn copyAssets
-build.dependsOn compileSass
-build.dependsOn generateDocs
+tasks.getByName('build').dependsOn copyAssets, compileSass, generateDocs

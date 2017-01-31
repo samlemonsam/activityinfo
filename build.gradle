@@ -9,7 +9,6 @@ apply from: "./gradle/jacoco.gradle"
 apply from: './gradle/database.gradle'
 apply from: "./gradle/environment.gradle"
 
-
 task wrapper(type: Wrapper) {
   gradleVersion = '3.3'
 }
@@ -34,10 +33,15 @@ subprojects {
 
   apply plugin: 'java'
 
-
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
 
+  /**
+   * Keep the version out of the jars to avoid re
+   */
+  jar {
+    archiveName = "activityinfo-${project.name}.jar"
+  }
 
   // This is required to stop javac from attempting to compile
   // java sources included in .jar files intended for GWT

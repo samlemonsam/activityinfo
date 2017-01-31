@@ -80,7 +80,7 @@ task simpleDevMode(type: JavaExec) {
 task compileApp(type: JavaExec) {
 
     outputs.dir outputDir
-    inputs.sourceDir project.sourceSets.main.allSource.srcDirs
+    inputs.dir sourceSets.main.allSource.srcDirs
 
     // Compiled java classes and libraries second
     classpath sourceSets.main.java.srcDirs
