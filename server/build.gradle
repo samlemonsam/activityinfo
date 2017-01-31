@@ -134,6 +134,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
 //tasks.compileGwt.onlyIf { !project.property('gwtMode').equals("skip") }
 tasks.war.dependsOn ':apiDocs:build'
 tasks.war.dependsOn ':ui:app:compileApp'
+tasks.war.dependsOn ':ui:app2:compileApp'
 
 task archive(type: org.activityinfo.gcloud.ArchiveArtifactTask) {
     group = "Delivery Pipeline"
