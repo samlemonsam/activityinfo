@@ -27,8 +27,8 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 

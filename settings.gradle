@@ -21,6 +21,7 @@ include 'server'
 include 'io:xform'
 include 'io:match'
 include 'io:xlsform'
+include 'io:schemacsv'
 
 include 'ui:icons'
 include 'ui:app'

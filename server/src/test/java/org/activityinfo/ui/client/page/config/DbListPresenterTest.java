@@ -32,8 +32,8 @@ import org.activityinfo.legacy.shared.model.CountryDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.MockEventBus;
-import org.activityinfo.legacy.client.AsyncMonitor;
-import org.activityinfo.legacy.client.Dispatcher;
+import org.activityinfo.ui.client.dispatch.AsyncMonitor;
+import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogTether;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.easymock.Capture;
@@ -52,7 +52,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;;
+import static org.junit.Assert.assertTrue;
+
+;
 
 public class DbListPresenterTest {
     private static final int OWNED_DB_ID = 1;

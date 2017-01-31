@@ -42,7 +42,7 @@ import java.io.Serializable;
  * This approach is a bit of a riff on Aspect Oriented Programming (AOP),
  * allowing us to handle all manners of cross-cutting concerns, such as
  * batching, error handling, retrying, and failure on the client side (See
- * {@link org.activityinfo.legacy.client.remote.MergingDispatcher}) and
+ * {@link org.activityinfo.ui.client.dispatch.remote.MergingDispatcher}) and
  * transactions, logging, and authentication on the server-side. (See
  * {@link org.activityinfo.server.endpoint.gwtrpc.CommandServlet}).
  *

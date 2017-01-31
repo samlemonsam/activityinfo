@@ -23,11 +23,11 @@ package org.activityinfo.ui.client.dispatch;
  */
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.legacy.client.remote.AbstractDispatcher;
 import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
+import org.activityinfo.ui.client.dispatch.remote.AbstractDispatcher;
 
 import java.util.ArrayList;
 import java.util.HashMap;

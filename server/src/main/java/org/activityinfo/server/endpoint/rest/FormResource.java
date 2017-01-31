@@ -5,7 +5,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.gson.*;
 import org.activityinfo.api.client.FormRecordSetBuilder;
-import org.activityinfo.core.shared.Pair;
+import org.activityinfo.legacy.shared.Pair;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;

@@ -52,7 +52,7 @@ public class GeneticClusterer implements Clusterer {
      * are logical candidates to cluster
      * 
      * @see
-     * org.activityinfo.legacy.shared.reports.model.clustering.Clustering#cluster(java
+     * org.activityinfo.legacy.model.reports.model.clustering.Clustering#cluster(java
      * .util.List, org.activityinfo.server.report.generator.map.RadiiCalculator)
      */
     @Override

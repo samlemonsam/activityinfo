@@ -1,8 +1,6 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.google.inject.Provider;
-import org.activityinfo.core.shared.importing.schema.SchemaCsvWriter;
-import org.activityinfo.core.shared.importing.schema.SchemaCsvWriterV3;
 import org.activityinfo.io.xform.XFormReader;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.legacy.shared.command.CreateEntity;

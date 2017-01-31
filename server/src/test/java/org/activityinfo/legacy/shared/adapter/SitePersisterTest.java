@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
-import static org.activityinfo.core.client.PromiseMatchers.assertResolves;
+import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
