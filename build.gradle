@@ -11,14 +11,14 @@ apply from: "./gradle/environment.gradle"
 
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.5'
+  gradleVersion = '3.3'
 }
 
 allprojects  {
   apply plugin: 'maven'
   apply plugin: 'idea'
   group = 'org.activityinfo'
-  
+
 }
 
 idea {
