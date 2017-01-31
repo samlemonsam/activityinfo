@@ -111,7 +111,7 @@ public class SideColumnBuilder {
             } else {
                 sql.append("WHERE rp.deleted=0 AND rp.activityId=").append(activityId).append(newLine);
             }
-            sql.append("ORDER BY rp.reportin    gPeriodId");
+            sql.append("ORDER BY rp.reportingPeriodId");
         }
         System.out.println(sql);
         
