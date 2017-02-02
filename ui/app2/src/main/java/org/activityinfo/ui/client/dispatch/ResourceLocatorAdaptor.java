@@ -2,7 +2,9 @@ package org.activityinfo.ui.client.dispatch;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonNull;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.json.client.JSONNull;
 import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
@@ -115,7 +117,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {
-                update.setFieldValue(field, entry.getValue().toJsonElement());
+                if(entry.getValue() == null) {
+                    update.setFieldValue(field, JsonNull.INSTANCE);
+                } else {
+                    update.setFieldValue(field, entry.getValue().toJsonElement());
+                }
             }
         }
         return update;
