@@ -17,7 +17,7 @@ public class ObservableStub<T> extends Observable<T> {
         this.value = initialValue;
     }
 
-    public void loading() {
+    public void setToLoading() {
         if(!loading) {
             loading = true;
             fireChange();

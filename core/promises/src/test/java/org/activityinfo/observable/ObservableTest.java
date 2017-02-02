@@ -66,7 +66,7 @@ public class ObservableTest {
         assertFalse(twice.isLoading());
         assertThat(twice.get(), equalTo(42 * 2));
         
-        number.loading();
+        number.setToLoading();
         twiceObserver.assertChangeFiredOnce();
         assertTrue(twice.isLoading());
 
