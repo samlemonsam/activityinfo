@@ -30,10 +30,13 @@ public class StatefulValue<T> extends Observable<T> {
         fireChange();
     }
 
-    public void updateIfNotEqual(T value) {
+    public boolean updateIfNotEqual(T value) {
         if (!Objects.equals(this.value, value)) {
             this.value = value;
             fireChange();
+            return true;
+        } else {
+            return false;
         }
     }
 

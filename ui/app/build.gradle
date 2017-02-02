@@ -53,6 +53,27 @@ idea {
     }
 }
 
+task codeserver(type: JavaExec) {
+
+    main = 'com.google.gwt.dev.codeserver.CodeServer'
+
+    // Java sources first, so that changes get picked up on refresh
+    classpath project(":i18n").sourceSets.main.java.srcDirs
+    classpath project(":i18n").sourceSets.main.resources.srcDirs
+    classpath project(":core:promises").sourceSets.main.java.srcDirs
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    args '-launcherDir', project(':server').buildDir.absolutePath + "/explodedDevMode"
+    args 'org.activityinfo.ui.AppDev'
+
+}
+
 
 task simpleDevMode(type: JavaExec) {
     dependsOn explodedWar

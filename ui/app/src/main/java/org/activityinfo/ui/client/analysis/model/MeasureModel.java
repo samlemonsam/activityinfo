@@ -11,11 +11,11 @@ import java.util.List;
  */
 public abstract class MeasureModel implements HasKey {
 
-    private final String key;
+    private final String id;
     private final String label;
 
     public MeasureModel(String key, String label) {
-        this.key = key;
+        this.id = key;
         this.label = label;
     }
 
@@ -25,7 +25,7 @@ public abstract class MeasureModel implements HasKey {
 
     @Override
     public String getKey() {
-        return key;
+        return id;
     }
 
     /**

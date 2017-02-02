@@ -25,6 +25,7 @@ public class FieldDimensionSource extends DimensionSourceModel {
         return field.getLabel();
     }
 
+
     public static List<DimensionSourceModel> sources(FormClass formClass) {
         List<DimensionSourceModel> sources = new ArrayList<>();
         for (FormField field : formClass.getFields()) {

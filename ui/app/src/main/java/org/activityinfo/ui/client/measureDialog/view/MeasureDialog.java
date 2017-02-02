@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.measureDialog.model.MeasureSelectionModel;
 import org.activityinfo.ui.client.measureDialog.model.MeasureType;
@@ -44,11 +45,15 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
     @UiField(provided = true)
     MeasureTypeListView measureList;
 
+    @UiField(provided = true)
+    FormulaPanel formulaPanel;
+
     private SimpleEventBus eventBus = new SimpleEventBus();
 
     public MeasureDialog(FormStore formStore) {
         model = new MeasureSelectionModel(formStore);
         measureList = new MeasureTypeListView(model);
+        formulaPanel = new FormulaPanel(Observable.flattenOptional(model.getSelectedFormSchema()));
         formTree = new CatalogTreeView(model.getFormStore());
 
         this.dialog = uiBinder.createAndBindUi(this);
@@ -60,6 +65,9 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
                     break;
                 case MEASURE:
                     container.setActiveWidget(measureList);
+                    break;
+                case MEASURE_OPTIONS:
+                    container.setActiveWidget(formulaPanel);
                     break;
             }
         });

@@ -23,6 +23,8 @@ package org.activityinfo.server.login.model;
  * #L%
  */
 
+import org.activityinfo.server.DeploymentEnvironment;
+
 public class HostPageModel extends PageModel {
     private String appUrl;
     private boolean newUI;
@@ -69,5 +71,13 @@ public class HostPageModel extends PageModel {
 
     public void setAppCacheManifest(String appCacheManifest) {
         this.appCacheManifest = appCacheManifest;
+    }
+
+    public String getDisplayVersion() {
+        return DeploymentEnvironment.getDisplayVersion();
+    }
+
+    public String getCommitId() {
+        return DeploymentEnvironment.getCommitId();
     }
 }

@@ -24,7 +24,8 @@ public class MeasureSelectionModel {
 
     public enum SelectionStep {
         FORM,
-        MEASURE
+        MEASURE,
+        MEASURE_OPTIONS
     }
 
     private final FormStore formStore;
@@ -37,6 +38,7 @@ public class MeasureSelectionModel {
 
     private StatefulValue<SelectionStep> selectionStep = new StatefulValue<>(SelectionStep.FORM);
 
+    private StatefulValue<MeasureModel> selectedMeasure = new StatefulValue<>();
 
     public MeasureSelectionModel(final FormStore formStore) {
         this.formStore = formStore;
@@ -105,6 +107,7 @@ public class MeasureSelectionModel {
         selectedMeasureType.updateIfNotEqual(measureType);
     }
 
+
     public void reset() {
         selectionStep.updateIfNotEqual(SelectionStep.FORM);
         selectedFormId.clear();
@@ -123,6 +126,7 @@ public class MeasureSelectionModel {
                 }
                 break;
             case MEASURE:
+                selectionStep.updateValue(SelectionStep.MEASURE_OPTIONS);
                 break;
         }
     }
@@ -137,6 +141,10 @@ public class MeasureSelectionModel {
                 break;
             case MEASURE:
                 selectionStep.updateValue(SelectionStep.FORM);
+                break;
+            case MEASURE_OPTIONS:
+                selectionStep.updateValue(SelectionStep.MEASURE);
+                break;
         }
     }
 

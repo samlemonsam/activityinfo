@@ -25,7 +25,16 @@ package org.activityinfo.server;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Strings;
 
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class DeploymentEnvironment {
+
+    private static final Logger LOGGER = Logger.getLogger(DeploymentEnvironment.class.getName());
+
+    private static Properties buildProperties = null;
 
     public static boolean isAppEngine() {
         return !Strings.isNullOrEmpty(SystemProperty.applicationId.get());
@@ -39,4 +48,33 @@ public class DeploymentEnvironment {
         return SystemProperty.environment.value() == SystemProperty.Environment.Value.Development;
     }
 
+    private static Properties getBuildProperties() {
+        if(buildProperties == null) {
+            try(InputStream in = DeploymentEnvironment.class.getResourceAsStream("/org/activityinfo/server/build.properties")) {
+                Properties properties = new Properties();
+                properties.load(in);
+                buildProperties = properties;
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Failed to load build properties", e);
+                buildProperties = new Properties();
+            }
+        }
+        return buildProperties;
+    }
+
+    /**
+     * @return this build's display version, for example "2.13.323", or "dev" if the build.properties
+     * resource cannot be loaded.
+     */
+    public static String getDisplayVersion() {
+        return getBuildProperties().getProperty("display.version", "dev");
+    }
+
+    /**
+     *
+     * @return this build's git commit sha1, or "dev" if the build.properties resource cannot be loaded.
+     */
+    public static String getCommitId() {
+        return getBuildProperties().getProperty("commit.id", "dev");
+    }
 }

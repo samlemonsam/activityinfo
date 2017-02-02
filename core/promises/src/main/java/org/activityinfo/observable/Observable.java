@@ -1,10 +1,12 @@
 package org.activityinfo.observable;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.promise.Function3;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -156,6 +158,11 @@ public abstract class Observable<T> {
     }
 
     @SuppressWarnings("unchecked")
+    public static <T> Observable<T> loading() {
+        return (Observable<T>) Never.INSTANCE;
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T> Observable<List<T>> flatten(Scheduler scheduler, List<Observable<T>> list) {
         return new ObservableFunction<List<T>>(scheduler, (List)list) {
             @Override
@@ -169,5 +176,17 @@ public abstract class Observable<T> {
     public static <T> Observable<List<T>> flatten(List<Observable<T>> list) {
         return flatten(SynchronousScheduler.INSTANCE, list);
     }
-    
+
+    public static <T> Observable<T> flattenOptional(Observable<Optional<T>> observable) {
+        return observable.join(new Function<Optional<T>, Observable<T>>() {
+            @Override
+            public Observable<T> apply(Optional<T> value) {
+                if(value.isPresent()) {
+                    return Observable.just(value.get());
+                } else {
+                    return Observable.loading();
+                }
+            }
+        });
+    }
 }

@@ -50,12 +50,16 @@ public class CountMeasure extends MeasureModel {
             public MeasureResultSet apply(FormClass formClass, ColumnSet columnSet, DimensionSet dimensions) {
                 Point point = new Point(dimensions);
                 point.setValue(columnSet.getNumRows());
+
+
                 for (int i = 0; i < dimensions.getCount(); i++) {
                     DimensionModel dim = dimensions.getDimension(i);
                     if (dim.getSourceModel() instanceof FormDimensionSource) {
                         point.setDimension(i, formClass.getLabel());
                     }
                 }
+
+
                 return new MeasureResultSet(dimensions, point);
             }
         });

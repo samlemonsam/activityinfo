@@ -33,18 +33,16 @@ public class PivotTableView implements IsWidget {
         this.model = model;
         this.store = new ListStore<>(point -> point.toString());
         this.grid = new Grid<>(store, buildColumnModel(new DimensionSet()));
+        this.grid.getView().setSortingEnabled(false);
         this.panel = new ContentPanel();
         this.panel.setHeading("Results");
         this.panel.add(grid);
 
-        model.getResult().subscribe(new Observer<AnalysisResult>() {
-            @Override
-            public void onChange(Observable<AnalysisResult> observable) {
-                if (observable.isLoaded()) {
-                    update(observable.get());
-                } else {
-                    store.clear();
-                }
+        model.getResult().subscribe(observable -> {
+            if (observable.isLoaded()) {
+                update(observable.get());
+            } else {
+                store.clear();
             }
         });
     }
@@ -59,12 +57,16 @@ public class PivotTableView implements IsWidget {
         for (int i = 0; i < dimensionSet.getCount(); i++) {
             ColumnConfig<Point, String> column = new ColumnConfig<>(new PointDimProvider(i));
             column.setHeader(dimensionSet.getDimension(i).getLabel());
+            column.setSortable(false);
+            column.setHideable(false);
             columns.add(column);
         }
 
         ColumnConfig<Point, Double> valueColumn = new ColumnConfig<>(new PointValueProvider());
         valueColumn.setHeader(I18N.CONSTANTS.value());
         valueColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
+        valueColumn.setSortable(false);
+        valueColumn.setHideable(false);
         columns.add(valueColumn);
 
         return new ColumnModel<>(columns);

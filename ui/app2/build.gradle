@@ -39,6 +39,8 @@ dependencies {
     gwt 'com.googlecode.gwtquery:gwtquery:1.4.2'
     gwt 'com.github.jdramaix:gwtchosen:1.2.0'
 
+    gwt 'edu.stanford.protege:codemirror-gwt:2.0.1'
+
     gwtSdk libraries.gwt.dev
 
 }
