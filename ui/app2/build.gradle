@@ -69,4 +69,5 @@ task compileApp(type: JavaExec) {
     args '-war', outputDir
     args '-logLevel', 'ERROR'
     args 'org.activityinfo.ui.ActivityInfoRelease'
+    args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
 }
