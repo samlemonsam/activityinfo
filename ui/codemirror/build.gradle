@@ -1,0 +1,57 @@
+
+
+
+ext {
+    codemirrorVersion = "5.23.0"
+}
+
+dependencies {
+    compile "net.codemirror:codemirror:${codemirrorVersion}@zip"
+    compile "com.google.gwt:gwt-user:2.8.0"
+}
+
+task unzip(type: Copy) {
+
+    def zipPath = project.configurations.compile.find {it.name.startsWith("codemirror") }
+    println zipPath
+    def zipFile = file(zipPath)
+    def outputDir = file("${buildDir}/unpacked")
+
+    from zipTree(zipFile)
+    into outputDir
+}
+
+
+task concatenateSource {
+
+    dependsOn unzip
+
+    def dist = new File("${buildDir}/unpacked/codemirror-5.23.0");
+    def codemirrorJs = new File("${dist}/lib/codemirror.js")
+    def codemirrorCss = new File("${dist}/lib/codemirror.css")
+    def spreadsheetMode = new File("${projectDir}/src/main/js/mode/activityinfo/activityinfo.js")
+
+    def outputDir = new File("${buildDir}/combined/org/activityinfo/ui/codemirror/client");
+    def outputJs = new File(outputDir, "codemirror.js")
+    def outputCss = new File(outputDir, "codemirror.css")
+
+    inputs.file codemirrorJs
+    inputs.file codemirrorCss
+    inputs.file spreadsheetMode
+    outputs.file outputJs
+    outputs.file outputCss
+
+    doFirst {
+        outputDir.mkdirs()
+        outputJs.text = codemirrorJs.text + spreadsheetMode.text
+        outputCss.text = codemirrorCss.text
+    }
+}
+
+jar {
+    dependsOn concatenateSource
+
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from "$buildDir/combined"
+}
