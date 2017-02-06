@@ -110,7 +110,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         grid.getColumnModel().getColumnById("allowEditAll").setHidden(!db.isManageUsersAllowed());
         grid.getColumnModel().getColumnById("allowManageUsers").setHidden(!db.isManageAllUsersAllowed());
         grid.getColumnModel().getColumnById("allowManageAllUsers").setHidden(!db.isManageAllUsersAllowed());
-        grid.getColumnModel().getColumnById("allowDesign").setHidden(!db.isDesignAllowed() && !db.isManageAllUsersAllowed());
+        grid.getColumnModel().getColumnById("allowDesign").setHidden(!db.isDesignAllowed());
 
         loader.load();
     }
