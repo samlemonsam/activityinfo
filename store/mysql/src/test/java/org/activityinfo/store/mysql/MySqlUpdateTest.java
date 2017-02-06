@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql;
 
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -69,7 +70,26 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         assertThat(column("partner.label"), hasValues("Solidarites", "NRC", "Solidarites"));
         assertThat(column("BENE"), hasValues(1500, 3600, 10000));
     }
-    
+
+    @Test
+    public void updateSiteSetValueToBlank() {
+        JsonObject changeObject = new JsonObject();
+        changeObject.addProperty("@id", "s0000000001");
+        changeObject.add("BENE", JsonNull.INSTANCE);
+        changeObject.add("comments", JsonNull.INSTANCE);
+
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.executeChange(changeObject);
+
+        query(activityFormClass(1), "_id", "BENE", "comments");
+
+        assertThat(column("_id"), hasValues("s0000000001", "s0000000002", "s0000000003"));
+        assertThat(column("BENE"), hasValues(null, 3600, 10000));
+        assertThat(column("comments"), hasValues((String)null, null, null));
+
+    }
+
+
     @Test
     public void updateAdminEntity() {
         JsonObject changeObject = new JsonObject();
