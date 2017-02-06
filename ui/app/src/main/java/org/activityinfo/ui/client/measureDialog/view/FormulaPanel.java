@@ -9,12 +9,12 @@ import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.button.ButtonBar;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.Container;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.ui.client.formulaDialog.FormulaElement;
+import org.activityinfo.ui.client.formulaDialog.FormulaElementCell;
 
 import java.util.ArrayList;
 import java.util.List;

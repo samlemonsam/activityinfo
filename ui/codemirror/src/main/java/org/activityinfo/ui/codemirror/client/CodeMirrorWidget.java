@@ -8,14 +8,20 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.*;
 
+import java.util.logging.Logger;
+
 
 public class CodeMirrorWidget extends Composite implements HasValue<String> {
+
+    private static final Logger LOGGER = Logger.getLogger(CodeMirrorWidget.class.getName());
 
     private static boolean resourcesInjected = false;
 
     private CodeMirrorEditor editor;
+    private Linter linter;
 
-    public CodeMirrorWidget() {
+    public CodeMirrorWidget(Linter linter) {
+        this.linter = linter;
         initWidget(new SimplePanel());
 
         if(!resourcesInjected) {
@@ -33,28 +39,29 @@ public class CodeMirrorWidget extends Composite implements HasValue<String> {
     @Override
     protected void onAttach() {
         super.onAttach();
-        this.editor = setup(this, getElement());
+        this.editor = setup(this, linter, getElement());
     }
 
-
-
-    private native CodeMirrorEditor setup(CodeMirrorWidget widget, JavaScriptObject element) /*-{
-        var instance = $wnd.CodeMirror(
+    private native CodeMirrorEditor setup(CodeMirrorWidget widget, Linter linter, JavaScriptObject element) /*-{
+        var editor = $wnd.CodeMirror(
             element,
             {
                 mode: 'activityinfo',
                 theme: 'default',
-                viewportMargin: Infinity
+                viewportMargin: Infinity,
+                lint: function(text, options) {
+                    return [];
+                },
             }
         );
-        // Listener for changes and propagate them back into the GWT compiled code
-        instance.on("change", function () {
-            $entry(widget.@org.activityinfo.ui.codemirror.client.CodeMirrorWidget::handleChange());
+        editor.on("change", function () {
+            $entry(widget.@org.activityinfo.ui.codemirror.client.CodeMirrorWidget::handleChange()());
         });
-        return instance;
+        return editor;
     }-*/;
 
     private void handleChange() {
+        LOGGER.info("CodeMirror change event fired.");
         ValueChangeEvent.fire(this, editor.getDoc().getValue());
     }
 

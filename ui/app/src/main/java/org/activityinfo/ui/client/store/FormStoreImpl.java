@@ -42,18 +42,8 @@ public class FormStoreImpl implements FormStore {
     }
 
     @Override
-    public Observable<FormTree> getFormTree(ResourceId formId) {
-        // TODO: This is an incomplete implementation
-        return getFormClass(formId).transform(new Function<FormClass, FormTree>() {
-            @Override
-            public FormTree apply(FormClass formSchema) {
-                FormTree tree = new FormTree();
-                for (FormField field : formSchema.getFields()) {
-                    tree.addRootField(formSchema, field);
-                }
-                return tree;
-            }
-        });
+    public Observable<FormTree> getFormTree(ResourceId rootFormId) {
+        return new ObservableFormTree(rootFormId, this::getFormClass);
     }
 
     @Override

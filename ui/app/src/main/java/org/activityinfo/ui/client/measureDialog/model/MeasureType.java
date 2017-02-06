@@ -1,17 +1,9 @@
 package org.activityinfo.ui.client.measureDialog.model;
 
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.ui.client.analysis.model.CountMeasure;
+public enum MeasureType {
 
-import java.util.Optional;
-
-public interface MeasureType {
-
-    String getId();
-
-    String getLabel();
-
-    CountMeasure buildModel(FormClass formClass);
-
+    COUNT,
+    PERCENT,
+    FIELDS,
+    CALCULATION
 }

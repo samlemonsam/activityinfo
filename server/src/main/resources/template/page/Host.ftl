@@ -45,7 +45,11 @@
 
     <title>${domain.title}</title>
 
-    <#if !newUI>
+    <#if newUI>
+
+    <link rel="stylesheet" type="text/css" href="App/reset.css" />
+
+    <#else>
     <style type="text/css">
         #loading-box {
             position: absolute;

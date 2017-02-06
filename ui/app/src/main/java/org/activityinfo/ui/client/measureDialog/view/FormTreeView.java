@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.measureDialog.view;
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -19,6 +20,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.ui.client.icons.IconBundle;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.ArrayList;
@@ -28,9 +30,9 @@ import java.util.logging.Logger;
 /**
  * Presents the user with a selection of Form
  */
-public class CatalogTreeView implements IsWidget {
+public class FormTreeView implements IsWidget {
 
-    private static final Logger LOGGER = Logger.getLogger(CatalogTreeView.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FormTreeView.class.getName());
 
     private final FormStore formStore;
     private final Tree<CatalogEntry, String> tree;
@@ -102,7 +104,7 @@ public class CatalogTreeView implements IsWidget {
         }
     }
 
-    public CatalogTreeView(FormStore formStore) {
+    public FormTreeView(FormStore formStore) {
         this.formStore = formStore;
 
         loader = new CatalogLoader();
@@ -124,6 +126,10 @@ public class CatalogTreeView implements IsWidget {
             }
         };
         tree.setLoader(loader);
+        tree.getStyle().setLeafIcon(IconBundle.INSTANCE.form());
+        tree.getStyle().setNodeOpenIcon(IconBundle.INSTANCE.databaseOpen());
+        tree.getStyle().setNodeCloseIcon(IconBundle.INSTANCE.databaseClosed());
+
         tree.getSelectionModel().addSelectionHandler(event -> {
             if (event.getSelectedItem().getType() == CatalogEntryType.FORM) {
                 selectedForm.updateValue(Optional.of(ResourceId.valueOf(event.getSelectedItem().getId())));
@@ -141,6 +147,10 @@ public class CatalogTreeView implements IsWidget {
 
     public Observable<Optional<ResourceId>> getSelectedFormId() {
         return selectedForm;
+    }
+
+    public void addSelectionHandler(SelectionHandler<CatalogEntry> handler) {
+        tree.getSelectionModel().addSelectionHandler(handler);
     }
 
 }

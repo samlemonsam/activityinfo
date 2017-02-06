@@ -1636,4 +1636,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Measures")
     String measures();
 
+    @DefaultStringValue("Formula")
+    String formula();
+
 }

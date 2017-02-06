@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.measureDialog.view;
+package org.activityinfo.ui.client.formulaDialog;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;

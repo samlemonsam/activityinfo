@@ -26,5 +26,6 @@ include 'io:schemacsv'
 include 'ui:icons'
 include 'ui:app'
 include 'ui:app2'
+include 'ui:codemirror'
 
 include 'tests:acceptance'

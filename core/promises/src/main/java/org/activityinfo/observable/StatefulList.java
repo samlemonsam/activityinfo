@@ -21,6 +21,18 @@ public class StatefulList<T> extends ObservableList<T> {
         fireAdded(item);
     }
 
+    public void set(T keepItem) {
+        list.clear();
+        list.add(keepItem);
+
+        fireChanged();
+    }
+
+    public void clear() {
+        list.clear();
+        fireChanged();
+    }
+
     @Override
     public List<T> getList() {
         return Collections.unmodifiableList(list);

@@ -33,9 +33,12 @@ dependencies {
     gwt project(':i18n')
     gwt project(':apiClient:gwt')
 
+    gwt project(':ui:codemirror')
+
     gwt group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
     gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
     gwt group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
+
 
     testCompile project(':store:testing')
 
