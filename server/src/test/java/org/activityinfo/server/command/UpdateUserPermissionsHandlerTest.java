@@ -24,8 +24,10 @@ package org.activityinfo.server.command;
 
 import com.google.inject.util.Providers;
 import freemarker.template.TemplateModelException;
+import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
+import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
@@ -222,6 +224,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         Assert.assertEquals("ralph@lauren.com", result.getData().get(0).getEmail());
         Assert.assertTrue("edit permissions", result.getData().get(0).getAllowEdit());
     }
+
 
     /**
      * Verifies that the owner of a database can update an existing users permission
