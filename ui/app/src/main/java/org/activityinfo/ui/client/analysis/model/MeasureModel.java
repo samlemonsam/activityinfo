@@ -4,8 +4,6 @@ import org.activityinfo.observable.HasKey;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
 
-import java.util.List;
-
 /**
  * A measure contributes quantities to an analysis.
  */
@@ -31,7 +29,7 @@ public abstract class MeasureModel implements HasKey {
     /**
      * Computes the list of available dimension sources for this measure.
      */
-    public abstract Observable<List<DimensionSourceModel>> availableDimensions(FormStore store);
+    public abstract Observable<FormForest> getFormSet(FormStore store);
 
     /**
      * Computes the values for this measure.

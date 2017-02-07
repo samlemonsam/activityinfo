@@ -14,7 +14,7 @@ public class AnalysisModel {
 
     private final FormStore formStore;
     private final StatefulList<MeasureModel> measures;
-    private final Observable<DimensionSourceSet> dimensionSources;
+    private final Observable<FormForest> formForest;
     private final StatefulValue<DimensionSet> dimensions;
     private final Observable<AnalysisResult> result;
 
@@ -24,9 +24,9 @@ public class AnalysisModel {
         dimensions = new StatefulValue<>(new DimensionSet());
 
         // The dimension sources are a function of the measures present in the analysis
-        this.dimensionSources = measures
-                .flatMap(measure -> measure.availableDimensions(formStore))
-                .transform(DimensionSourceSet::new);
+        this.formForest = measures
+                .flatMap(measure -> measure.getFormSet(formStore))
+                .transform(FormForest::merge);
 
         // The results are a function of the selected measures and dimensions
         this.result = measures
@@ -46,8 +46,8 @@ public class AnalysisModel {
         return measures;
     }
 
-    public Observable<DimensionSourceSet> getDimensionSources() {
-        return dimensionSources;
+    public Observable<FormForest> getFormForest() {
+        return formForest;
     }
 
     public Observable<DimensionSet> getDimensions() {

@@ -66,10 +66,10 @@ public class AnalysisModelTest {
         AnalysisModel model = new AnalysisModel(formStore);
         model.addMeasure(new FieldMeasure("count", "Count of survey", Survey.FORM_ID, new ConstantExpr(1)));
 
-        Connection<DimensionSourceSet> connection = ObservableTesting.connect(model.getDimensionSources());
+        Connection<DimensionSourceSet> connection = ObservableTesting.connect(model.getFormForest());
         connection.disconnect();
 
-        connection = ObservableTesting.connect(model.getDimensionSources());
+        connection = ObservableTesting.connect(model.getFormForest());
         connection.disconnect();
 
 

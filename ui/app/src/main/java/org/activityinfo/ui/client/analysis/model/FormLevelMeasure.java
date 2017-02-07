@@ -4,9 +4,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class FormLevelMeasure extends MeasureModel {
 
     private final ResourceId formId;
@@ -21,13 +18,8 @@ public abstract class FormLevelMeasure extends MeasureModel {
     }
 
     @Override
-    public final Observable<List<DimensionSourceModel>> availableDimensions(FormStore store) {
-        return store.getFormClass(formId).transform(formClass -> {
-            List<DimensionSourceModel> sources = new ArrayList<>();
-            sources.add(FormDimensionSource.INSTANCE);
-            sources.addAll(FieldDimensionSource.sources(formClass));
-            return sources;
-        });
+    public final Observable<FormForest> getFormSet(FormStore store) {
+        return store.getFormTree(formId).transform(FormForest::new);
     }
 
 }

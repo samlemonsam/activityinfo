@@ -9,11 +9,8 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.model.DimensionSet;
 import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
 
 /**
@@ -52,18 +49,15 @@ public class DimensionPane implements IsWidget {
         });
 
         contentPanel = new ContentPanel();
-        contentPanel.setHeading("Row Dimensions");
+        contentPanel.setHeading("Dimensions");
         contentPanel.addTool(addButton);
         contentPanel.setWidget(listView);
 
-        model.getDimensions().subscribe(new Observer<DimensionSet>() {
-            @Override
-            public void onChange(Observable<DimensionSet> observable) {
-                if (observable.isLoaded()) {
-                    listStore.replaceAll(observable.get().getList());
-                } else {
-                    listStore.clear();
-                }
+        model.getDimensions().subscribe(observable -> {
+            if (observable.isLoaded()) {
+                listStore.replaceAll(observable.get().getList());
+            } else {
+                listStore.clear();
             }
         });
     }

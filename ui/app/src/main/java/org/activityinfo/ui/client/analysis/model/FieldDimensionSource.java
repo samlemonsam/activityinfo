@@ -1,12 +1,12 @@
 package org.activityinfo.ui.client.analysis.model;
 
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 
@@ -20,13 +20,17 @@ import java.util.Set;
  */
 public class FieldDimensionSource extends DimensionSourceModel {
 
-    private ResourceId fieldId;
     private String label;
-
+    private ExprNode expr;
 
     public FieldDimensionSource(FormField field) {
-        this.fieldId = field.getId();
         this.label = field.getLabel();
+        this.expr = new SymbolExpr(field.getId());
+    }
+
+    public FieldDimensionSource(String label, ExprNode node) {
+        this.label = label;
+        this.expr = node;
     }
 
     @Override
@@ -51,12 +55,12 @@ public class FieldDimensionSource extends DimensionSourceModel {
 
     @Override
     public Set<ColumnModel> getRequiredColumns(String dimensionId) {
-        return Collections.singleton(new ColumnModel().setExpression(new SymbolExpr(fieldId)).setId(dimensionId));
+        return Collections.singleton(new ColumnModel().setExpression(expr).setId(dimensionId));
     }
 
     @Override
     public DimensionReader createReader(String dimensionId, FormClass formClass, ColumnSet input) {
         ColumnView columnView = input.getColumnView(dimensionId);
-        return columnView::getString;
+        return row -> columnView.getString(row);
     }
 }

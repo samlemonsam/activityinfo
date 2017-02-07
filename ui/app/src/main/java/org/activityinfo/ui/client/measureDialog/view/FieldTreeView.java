@@ -16,18 +16,18 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.measureDialog.model.FormSet;
+import org.activityinfo.ui.client.analysis.model.FormForest;
 
 public class FieldTreeView implements IsWidget {
 
 
-    private final Observable<FormSet> formSet;
+    private final Observable<FormForest> formSet;
     private final VerticalLayoutContainer container;
     private TreeStore<MeasureTreeNode> treeStore;
     private final Tree<MeasureTreeNode, String> tree;
     private final TextButton calculateButton;
 
-    public FieldTreeView(Observable<FormSet> formSet) {
+    public FieldTreeView(Observable<FormForest> formSet) {
         this.formSet = formSet;
 
         FieldFilterField filterField = new FieldFilterField();
@@ -75,7 +75,7 @@ public class FieldTreeView implements IsWidget {
         return tree.getSelectionModel();
     }
 
-    private void onFormSetChanged(Observable<FormSet> formSet) {
+    private void onFormSetChanged(Observable<FormForest> formSet) {
         treeStore.clear();
         if(formSet.isLoaded()) {
             if(!formSet.get().isEmpty()) {

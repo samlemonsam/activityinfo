@@ -3,12 +3,13 @@ package org.activityinfo.ui.client.measureDialog.model;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
-import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulList;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.BiFunction;
+import org.activityinfo.ui.client.analysis.model.FormForest;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
@@ -35,7 +36,7 @@ public class MeasureSelectionModel {
      */
     private final StatefulList<ResourceId> selectedForms = new StatefulList<>();
 
-    private final Observable<FormSet> selectedFormSet;
+    private final Observable<FormForest> selectedFormSet;
 
     private final StatefulValue<Optional<MeasureModel>> selectedMeasure = new StatefulValue<>(Optional.absent());
 
@@ -43,8 +44,8 @@ public class MeasureSelectionModel {
 
     public MeasureSelectionModel(final FormStore formStore) {
         this.formStore = formStore;
-        Observable<List<FormClass>> flatMap = selectedForms.flatMap(formStore::getFormClass);
-        this.selectedFormSet = flatMap.transform(FormSet::new);
+        Observable<List<FormTree>> flatMap = selectedForms.flatMap(formStore::getFormTree);
+        this.selectedFormSet = flatMap.transform(FormForest::new);
     }
 
 
@@ -60,14 +61,14 @@ public class MeasureSelectionModel {
         return selectionStep;
     }
 
-    public Observable<FormSet> getSelectedFormSet() {
+    public Observable<FormForest> getSelectedFormSet() {
         return selectedFormSet;
     }
 
     public Observable<Optional<MeasureModel>> getSelectedMeasure() {
-        return Observable.transform(getSelectedFormSet(), selectedMeasure, new BiFunction<FormSet, Optional<MeasureModel>, Optional<MeasureModel>>() {
+        return Observable.transform(getSelectedFormSet(), selectedMeasure, new BiFunction<FormForest, Optional<MeasureModel>, Optional<MeasureModel>>() {
             @Override
-            public Optional<MeasureModel> apply(FormSet formSet, Optional<MeasureModel> selected) {
+            public Optional<MeasureModel> apply(FormForest formForest, Optional<MeasureModel> selected) {
                 if(selected.isPresent()) {
                     // TODO: ensure the measure is still valid for the form selection
                     return selected;
