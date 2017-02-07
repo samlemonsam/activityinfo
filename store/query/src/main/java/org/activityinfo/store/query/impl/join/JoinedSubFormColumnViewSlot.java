@@ -6,8 +6,8 @@ import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.store.query.impl.Slot;
+import org.activityinfo.store.query.shared.Aggregation;
 
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -63,34 +63,9 @@ public class JoinedSubFormColumnViewSlot implements Slot<ColumnView> {
         int numMasterRows = parentLookup.getNumRows();
 
         // Sort the data values by master row index
-        HeapsortTandem.heapsortDescending(masterRowId, subColumnValues, numSubRows);
-        
-  
-        // Allocate the output for the results
-        double result[] = new double[numMasterRows];
-        Arrays.fill(result, Double.NaN);
-        
-        // Start at the first group
-        int groupStart = 0;
-
-        do {
-            int masterRow = masterRowId[groupStart];
-
-            // Find where this group ends
-            int groupEnd = groupStart + 1;
-            while (groupEnd < numSubRows && masterRow == masterRowId[groupEnd]) {
-                groupEnd++;
-            }
-
-            // Compute the statistic over this group
-            if(masterRow != -1) {
-                result[masterRow] = statistic.compute(subColumnValues, groupStart, groupEnd);
-            }
-            // Move to the next group
-            groupStart = groupEnd;
-            
-        } while(groupStart < numSubRows);
+        double[] result = Aggregation.aggregate(statistic, masterRowId, subColumnValues, numSubRows, numMasterRows);
         
         return new DoubleArrayColumnView(result);
     }
+
 }

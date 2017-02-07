@@ -9,14 +9,19 @@ import java.util.List;
 public class MeasureResultSet {
 
     private DimensionSet dimensions;
-    private List<Point> points = new ArrayList<>();
+    private List<Point> points;
 
     public MeasureResultSet() {
     }
 
+    public MeasureResultSet(DimensionSet dimensions, List<Point> points) {
+        this.dimensions = dimensions;
+        this.points = points;
+    }
 
     public MeasureResultSet(DimensionSet dimensions, Point point) {
         this.dimensions = dimensions;
+        this.points = new ArrayList<>();
         points.add(point);
     }
 

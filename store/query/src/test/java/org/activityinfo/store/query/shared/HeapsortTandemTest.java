@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.join;
+package org.activityinfo.store.query.shared;
 
 import org.junit.Test;
 

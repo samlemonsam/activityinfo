@@ -5,7 +5,10 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.observable.*;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulList;
+import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.BiFunction;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
@@ -34,11 +37,9 @@ public class MeasureSelectionModel {
 
     private final Observable<FormSet> selectedFormSet;
 
-    private final StatefulValue<MeasureType> selectedMeasureType = new StatefulValue<>(MeasureType.COUNT);
+    private final StatefulValue<Optional<MeasureModel>> selectedMeasure = new StatefulValue<>(Optional.absent());
 
     private StatefulValue<SelectionStep> selectionStep = new StatefulValue<>(SelectionStep.FORM);
-
-    private StatefulValue<MeasureModel> selectedMeasure = new StatefulValue<>();
 
     public MeasureSelectionModel(final FormStore formStore) {
         this.formStore = formStore;
@@ -63,8 +64,18 @@ public class MeasureSelectionModel {
         return selectedFormSet;
     }
 
-    public Observable<MeasureType> getSelectedMeasureType() {
-        return selectedMeasureType;
+    public Observable<Optional<MeasureModel>> getSelectedMeasure() {
+        return Observable.transform(getSelectedFormSet(), selectedMeasure, new BiFunction<FormSet, Optional<MeasureModel>, Optional<MeasureModel>>() {
+            @Override
+            public Optional<MeasureModel> apply(FormSet formSet, Optional<MeasureModel> selected) {
+                if(selected.isPresent()) {
+                    // TODO: ensure the measure is still valid for the form selection
+                    return selected;
+                } else {
+                    return Optional.absent();
+                }
+            }
+        });
     }
 
     public void selectForm(Optional<ResourceId> formId) {
@@ -82,20 +93,14 @@ public class MeasureSelectionModel {
         }
     }
 
-
-    public void selectMeasureType(MeasureType measureType) {
-        selectedMeasureType.updateIfNotEqual(measureType);
+    public void selectMeasure(MeasureModel measure) {
+        this.selectedMeasure.updateIfNotEqual(Optional.of(measure));
     }
-
 
     public void reset() {
         selectionStep.updateIfNotEqual(SelectionStep.FORM);
         selectedForms.clear();
-        selectedMeasureType.clear();
-    }
-
-    public Optional<MeasureModel> buildMeasure() {
-        return Optional.absent();
+        selectedMeasure.clear();
     }
 
 }

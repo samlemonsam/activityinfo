@@ -14,8 +14,8 @@ public abstract class MeasureModel implements HasKey {
     private final String id;
     private final String label;
 
-    public MeasureModel(String key, String label) {
-        this.id = key;
+    public MeasureModel(String id, String label) {
+        this.id = id;
         this.label = label;
     }
 
@@ -37,4 +37,5 @@ public abstract class MeasureModel implements HasKey {
      * Computes the values for this measure.
      */
     public abstract Observable<MeasureResultSet> compute(FormStore store, Observable<DimensionSet> dimensions);
+
 }

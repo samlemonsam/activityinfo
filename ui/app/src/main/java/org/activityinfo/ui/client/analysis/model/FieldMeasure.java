@@ -1,14 +1,20 @@
 package org.activityinfo.ui.client.analysis.model;
 
 import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.functions.SumFunction;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.promise.Function3;
+import org.activityinfo.promise.BiFunction;
+import org.activityinfo.store.query.shared.Aggregation;
 import org.activityinfo.ui.client.store.FormStore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A measure calculated from a field value (or a formula) and then aggregated.
@@ -27,38 +33,68 @@ public class FieldMeasure extends FormLevelMeasure {
 
     @Override
     public Observable<MeasureResultSet> compute(FormStore store, Observable<DimensionSet> dimensions) {
-        QueryModel model = new QueryModel(formId);
-        model.selectResourceId().as("id");
-        model.selectExpr(expr).as("value");
+        return compute(store, formId, expr, dimensions);
+    }
 
-        Observable<ColumnSet> columnSet = store.query(model);
+    private static class BaseData {
+        private FormClass formClass;
+        private DimensionSet dimensionSet;
+        private ColumnSet columnSet;
+
+        public BaseData(FormClass formClass, DimensionSet dimensionSet, ColumnSet columnSet) {
+            this.formClass = formClass;
+            this.dimensionSet = dimensionSet;
+            this.columnSet = columnSet;
+        }
+    }
+
+    public static Observable<MeasureResultSet> compute(FormStore store, ResourceId formId, ExprNode valueExpr, Observable<DimensionSet> dimensions) {
+
         Observable<FormClass> formClass = store.getFormClass(formId);
-
-        return Observable.transform(formClass, columnSet, dimensions, new Function3<FormClass, ColumnSet, DimensionSet, MeasureResultSet>() {
+        Observable<BaseData> baseData = Observable.join(dimensions, formClass, new BiFunction<DimensionSet, FormClass, Observable<BaseData>>() {
             @Override
-            public MeasureResultSet apply(FormClass formClass, ColumnSet columnSet, DimensionSet dimensions) {
-
-                ColumnView view = columnSet.getColumnView("value");
-                double sum = 0;
-                for (int i = 0; i < view.numRows(); i++) {
-                    double value = view.getDouble(i);
-                    if(!Double.isNaN(value)) {
-                        sum += value;
+            public Observable<BaseData> apply(DimensionSet dimensionModels, FormClass formClass) {
+                QueryModel queryModel = new QueryModel(formId);
+                queryModel.selectExpr(valueExpr).as("value");
+                for (DimensionModel dimension : dimensionModels) {
+                    for (ColumnModel columnModel : dimension.getRequiredColumns()) {
+                        queryModel.addColumn(columnModel);
                     }
                 }
-
-                Point point = new Point(dimensions);
-                point.setValue(sum);
-
-                for (int i = 0; i < dimensions.getCount(); i++) {
-                    DimensionModel dim = dimensions.getDimension(i);
-                    if (dim.getSourceModel() instanceof FormDimensionSource) {
-                        point.setDimension(i, formClass.getLabel());
-                    }
-                }
-
-                return new MeasureResultSet(dimensions, point);
+                return store.query(queryModel).transform(input -> new BaseData(formClass, dimensionModels, input));
             }
+        });
+
+        return baseData.transform(input -> {
+
+            ColumnView value = input.columnSet.getColumnView("value");
+            GroupMap groupMap = new GroupMap(input.dimensionSet, input.formClass, input.columnSet);
+
+            // Build group/value pairs
+
+            int numRows = input.columnSet.getNumRows();
+            double valueArray[] = new double[numRows];
+            int groupArray[] = new int[numRows];
+            for (int i = 0; i < numRows; i++) {
+                valueArray[i] = value.getDouble(i);
+                groupArray[i] = groupMap.groupAt(i);
+            }
+
+            // Aggregate into groups
+            int numGroups = groupMap.getGroupCount();
+            double aggregatedValues[] = Aggregation.aggregate(SumFunction.INSTANCE,
+                    groupArray,
+                    valueArray,
+                    numRows,
+                    numGroups);
+
+            // Add the points
+            List<Point> points = new ArrayList<>();
+            for (int i = 0; i < numGroups; i++) {
+                points.add(new Point(groupMap.getGroup(i), aggregatedValues[i]));
+            }
+
+            return new MeasureResultSet(input.dimensionSet, points);
         });
     }
 }

@@ -2,7 +2,6 @@ package org.activityinfo.ui.client.measureDialog.model;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.observable.Observable;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,5 +33,9 @@ public class FormSet {
 
     public boolean isEmpty() {
         return formSchemas.isEmpty();
+    }
+
+    public FormClass getFirst() {
+        return formSchemas.get(0);
     }
 }

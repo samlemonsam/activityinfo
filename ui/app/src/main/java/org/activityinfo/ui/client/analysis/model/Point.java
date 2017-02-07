@@ -8,6 +8,10 @@ public class Point {
     private double value;
     private final String[] dimensions;
 
+    public Point(String[] dimensions, double value) {
+        this.dimensions = dimensions;
+        this.value = value;
+    }
 
     public Point(DimensionSet dimensions) {
         this.dimensions = new String[dimensions.getCount()];

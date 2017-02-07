@@ -31,7 +31,6 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
     FormTreeView formTree;
     FieldTreeView fieldTree;
 
-    MeasureTypePanel measureType;
 
     FormulaPanel formulaPanel;
 
@@ -49,11 +48,9 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
         // Step 2: Select fields to add
         TabItemConfig fieldTab = new TabItemConfig("Choose Field");
         fieldTree = new FieldTreeView(model.getSelectedFormSet());
+        fieldTree.getSelectionModel().addSelectionHandler(event ->
+                model.selectMeasure(event.getSelectedItem().newMeasure()));
 
-
-        // Step 3: Choose Formula
-        TabItemConfig formulaTab = new TabItemConfig("Choose Formula Tab");
-//        formulaPanel = new FormulaPanel(Observable.flattenOptional(model.getSelectedFormSet()));
 
         // Tab Panel
         TabPanel tabPanel = new TabPanel();
@@ -74,7 +71,14 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
             tabPanel.update(fieldTree.asWidget(), fieldTab);
         });
 
+        model.getSelectedMeasure().subscribe(selection -> {
+            boolean ready = selection.isLoaded() && selection.get().isPresent();
+            dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(ready);
+        });
+
         fieldTree.getCalculateButton().addSelectHandler(this::onCalculate);
+
+        dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(this::onOK);
     }
 
     private void onCalculate(SelectEvent event) {
@@ -84,9 +88,9 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
 
 
     public void onOK(SelectEvent event) {
-        Optional<MeasureModel> measure = model.buildMeasure();
-        if (measure.isPresent()) {
-            SelectionEvent.fire(this, measure.get());
+        Observable<Optional<MeasureModel>> measure = model.getSelectedMeasure();
+        if(measure.isLoaded() && measure.get().isPresent()) {
+            SelectionEvent.fire(this, measure.get().get());
             dialog.hide();
         }
     }

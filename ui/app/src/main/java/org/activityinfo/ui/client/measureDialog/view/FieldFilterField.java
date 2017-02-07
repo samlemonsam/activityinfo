@@ -4,9 +4,9 @@ import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.form.StoreFilterField;
 
 
-public class FieldFilterField extends StoreFilterField<FieldElement> {
+public class FieldFilterField extends StoreFilterField<MeasureTreeNode> {
     @Override
-    protected boolean doSelect(Store<FieldElement> store, FieldElement parent, FieldElement item, String filter) {
-        return parent.getLabel().toLowerCase().contains(filter.toLowerCase());
+    protected boolean doSelect(Store<MeasureTreeNode> store, MeasureTreeNode parent, MeasureTreeNode item, String filter) {
+        return item.getLabel().toLowerCase().contains(filter.toLowerCase());
     }
 }

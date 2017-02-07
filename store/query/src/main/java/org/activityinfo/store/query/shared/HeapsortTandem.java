@@ -1,5 +1,5 @@
 
-package org.activityinfo.store.query.impl.join;
+package org.activityinfo.store.query.shared;
 
 /**
  * This utility heapsorts two arrays in tandem.
@@ -7,7 +7,7 @@ package org.activityinfo.store.query.impl.join;
  * @author Adriano Caloiaro
  * @date 12/6/14
  */
-final class HeapsortTandem {
+public final class HeapsortTandem {
 
 
     /**
