@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.analysis.model;
 
+import com.google.gson.JsonElement;
 import org.activityinfo.observable.HasKey;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
@@ -36,4 +37,6 @@ public abstract class MeasureModel implements HasKey {
      */
     public abstract Observable<MeasureResultSet> compute(FormStore store, Observable<DimensionSet> dimensions);
 
+
+    public abstract JsonElement toJsonObject();
 }

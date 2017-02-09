@@ -16,6 +16,8 @@ public class AnalysisView implements IsWidget {
         this.model = model;
         container = new BorderLayoutContainer();
         createPanes();
+
+        AnalysisBundle.INSTANCE.getStyles().ensureInjected();
     }
 
     private void createPanes() {

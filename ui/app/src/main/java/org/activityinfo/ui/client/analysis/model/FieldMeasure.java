@@ -1,5 +1,7 @@
 package org.activityinfo.ui.client.analysis.model;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.functions.SumFunction;
 import org.activityinfo.model.form.FormClass;
@@ -34,6 +36,15 @@ public class FieldMeasure extends FormLevelMeasure {
     @Override
     public Observable<MeasureResultSet> compute(FormStore store, Observable<DimensionSet> dimensions) {
         return compute(store, formId, expr, dimensions);
+    }
+
+    @Override
+    public JsonElement toJsonObject() {
+        JsonObject object = new JsonObject();
+        object.addProperty("type", "field");
+        object.addProperty("formId", "formId");
+        object.addProperty("expr", expr.toString());
+        return object;
     }
 
     private static class BaseData {
