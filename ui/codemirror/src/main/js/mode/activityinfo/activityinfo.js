@@ -68,7 +68,7 @@
                                 stream.next(); // consume the symbol
                             }
                         }
-                        return "variable-2";
+                        return "variable";
                 }
 
                 var peek = stream.peek();
@@ -101,7 +101,7 @@
                     return "number";
                 } else if (stream.match(/^[a-zA-Z_]\w*/)) {
                     if (stream.match(/(?=[\(.])/, false)) return "keyword";
-                    return "variable-2";
+                    return "variable";
                 } else if (["(", ")"].indexOf(peek) != -1) {
                     stream.next();
                     return "bracket";

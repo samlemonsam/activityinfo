@@ -3,26 +3,23 @@ package org.activityinfo.ui.codemirror.client;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.StyleInjector;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 
 import java.util.logging.Logger;
 
 
-public class CodeMirrorWidget extends Composite implements HasValue<String> {
+public class CodeMirrorWidget extends Composite implements RequiresResize {
 
     private static final Logger LOGGER = Logger.getLogger(CodeMirrorWidget.class.getName());
 
     private static boolean resourcesInjected = false;
 
     private CodeMirrorEditor editor;
-    private Linter linter;
 
-    public CodeMirrorWidget(Linter linter) {
-        this.linter = linter;
-        initWidget(new SimplePanel());
+    public CodeMirrorWidget() {
+        initWidget(new SimpleLayoutPanel());
 
         if(!resourcesInjected) {
 
@@ -34,57 +31,46 @@ public class CodeMirrorWidget extends Composite implements HasValue<String> {
             StyleInjector.inject(CodeMirrorBundle.INSTANCE.styles().getText());
             resourcesInjected = true;
         }
+        this.editor = setup(this, getElement());
+
     }
 
     @Override
     protected void onAttach() {
         super.onAttach();
-        this.editor = setup(this, linter, getElement());
     }
 
-    private native CodeMirrorEditor setup(CodeMirrorWidget widget, Linter linter, JavaScriptObject element) /*-{
+
+    private native CodeMirrorEditor setup(CodeMirrorWidget widget, JavaScriptObject element) /*-{
         var editor = $wnd.CodeMirror(
             element,
             {
                 mode: 'activityinfo',
                 theme: 'default',
                 viewportMargin: Infinity,
-                lint: function(text, options) {
-                    return [];
-                },
+                matchBrackets: true
             }
         );
-        editor.on("change", function () {
-            $entry(widget.@org.activityinfo.ui.codemirror.client.CodeMirrorWidget::handleChange()());
-        });
         return editor;
     }-*/;
 
-    private void handleChange() {
-        LOGGER.info("CodeMirror change event fired.");
-        ValueChangeEvent.fire(this, editor.getDoc().getValue());
+    private native void addEventHandler(CodeMirrorEditor editor, String eventName, CodeMirrorEventHandler handler) /*-{
+        editor.on(eventName, function () {
+            $entry(handler.@org.activityinfo.ui.codemirror.client.CodeMirrorEventHandler::onEvent()());
+        });
+    }-*/;
+
+    public CodeMirrorEditor getEditor() {
+        return editor;
+    }
+
+    public void addChangeHandler(CodeMirrorEventHandler handler) {
+        addEventHandler(editor, "change", handler);
     }
 
     @Override
-    public String getValue() {
-        return editor.getDoc().getValue();
-    }
-
-    @Override
-    public void setValue(String value) {
-        setValue(value, true);
-    }
-
-    @Override
-    public void setValue(String value, boolean fireEvents) {
-        editor.getDoc().setValue(value);
-        if(fireEvents) {
-            ValueChangeEvent.fire(this, value);
-        }
-    }
-
-    @Override
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> valueChangeHandler) {
-        return addHandler(valueChangeHandler, ValueChangeEvent.getType());
+    public void onResize() {
+        ((SimpleLayoutPanel)getWidget()).onResize();
+        getEditor().refresh();
     }
 }

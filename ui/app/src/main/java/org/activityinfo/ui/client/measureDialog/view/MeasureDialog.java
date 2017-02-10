@@ -31,9 +31,6 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
     FormTreeView formTree;
     FieldTreeView fieldTree;
 
-
-    FormulaPanel formulaPanel;
-
     private SimpleEventBus eventBus = new SimpleEventBus();
 
     public MeasureDialog(FormStore formStore) {

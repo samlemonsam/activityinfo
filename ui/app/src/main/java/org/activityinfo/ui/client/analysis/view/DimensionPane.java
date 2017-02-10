@@ -19,8 +19,6 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
-import org.activityinfo.ui.client.analysis.model.FieldDimensionSource;
-import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 
 /**
  *
@@ -41,7 +39,9 @@ public class DimensionPane implements IsWidget {
         addButton.addSelectHandler(this::addDimensionClicked);
 
         listStore = new ListStore<>(DimensionModel::getId);
-        listView = new ListView<>(listStore, new IdentityValueProvider<>(), new DimensionCell(this::onDimensionMenu));
+        listView = new ListView<>(listStore,
+                new IdentityValueProvider<>(),
+                new PillCell<>(DimensionModel::getLabel, this::onDimensionMenu));
 
         contentPanel = new ContentPanel();
         contentPanel.setHeading("Dimensions");
@@ -82,11 +82,11 @@ public class DimensionPane implements IsWidget {
 
 
         // Edit the formula...
-        MenuItem editFormula = new MenuItem();
-        editFormula.setText("Edit Formula...");
-        editFormula.addSelectionHandler(event -> editFormula(dim));
-        editFormula.setEnabled(dim.getSourceModel() instanceof FieldDimensionSource);
-        contextMenu.add(editFormula);
+//        MenuItem editFormula = new MenuItem();
+//        editFormula.setText("Edit Formula...");
+//        editFormula.addSelectionHandler(event -> editFormula(dim));
+//        editFormula.setEnabled(dim.getSourceModel() instanceof FieldDimensionSource);
+//        contextMenu.add(editFormula);
 
         // Allow choosing the date part to show
         MenuItem year = new CheckMenuItem("Year");
@@ -111,9 +111,5 @@ public class DimensionPane implements IsWidget {
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
     }
 
-    private void editFormula(DimensionModel dim) {
-        FieldDimensionSource dimSource = (FieldDimensionSource) dim.getSourceModel();
-        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), dimSource.get
-    }
 
 }

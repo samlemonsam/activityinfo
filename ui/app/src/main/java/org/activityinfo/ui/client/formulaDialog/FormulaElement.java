@@ -4,6 +4,8 @@ import com.google.gwt.resources.client.ImageResource;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.ui.client.icons.IconBundle;
@@ -18,15 +20,17 @@ public class FormulaElement {
     public static final ValueProvider<FormulaElement, FormulaElement> VALUE_PROVIDER = new IdentityValueProvider<>();
 
     private String key;
-
     private String code;
     private String label;
+    private ExprNode exprNode;
     private ImageResource icon;
 
-    public FormulaElement(FormField field) {
-        this.key = "field:" + field.getId().asString();
+    public FormulaElement(String key, ExprNode exprNode, FormField field) {
+        this.key = key;
+        this.exprNode = exprNode;
         this.label = field.getLabel();
         this.code = field.getCode();
+        this.icon = IconBundle.iconForField(field.getType());
     }
 
     private FormulaElement(String key, String label) {
@@ -34,11 +38,6 @@ public class FormulaElement {
         this.label = label;
     }
 
-    private FormulaElement(String key, String label, ImageResource icon) {
-        this.key = key;
-        this.label = label;
-        this.icon = icon;
-    }
 
     public String getKey() {
         return key;
@@ -61,9 +60,7 @@ public class FormulaElement {
     }
 
     public static FormulaElement fieldNode(FormTree.Node node) {
-        return new FormulaElement("field:" + node.getPath().toString(),
-                node.getField().getLabel(),
-                IconBundle.iconForField(node.getType()));
+        return new FormulaElement("field:" + node.getPath().toString(), node.getPath().toExpr(), node.getField());
     }
 
     public ImageResource getIcon() {
@@ -75,5 +72,13 @@ public class FormulaElement {
         return (code != null && code.toLowerCase().contains(filterLowered)) ||
                 label.toLowerCase().contains(filter);
 
+    }
+
+    public ExprNode getExpr() {
+        if(code != null) {
+            return new SymbolExpr(code);
+        } else {
+            return new SymbolExpr(label);
+        }
     }
 }

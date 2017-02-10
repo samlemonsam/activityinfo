@@ -92,6 +92,10 @@ public class AnalysisModel {
         dimensions.removeFirst(dim -> dim.getId().equals(id));
     }
 
+    public void removeMeasure(String id) {
+        measures.removeFirst(measure -> measure.getKey().equals(id));
+    }
+
     public void beforeChange() {
         LOGGER.log(Level.INFO, "State: " + toJsonObject().toString());
     }
@@ -125,4 +129,6 @@ public class AnalysisModel {
 
 
     }
+
+
 }

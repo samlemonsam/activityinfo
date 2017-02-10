@@ -1,0 +1,22 @@
+
+
+.formulaDragHandle {
+    background-color: lightgray;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 5px;
+    border-radius: 5px;
+    max-width: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fieldTreeCode {
+    display: inline-block;
+    background-color: lightgray;
+    font-family: monospace;
+    font-size: 0.8em;
+    border-radius: 5px;
+    padding: 5px;
+}

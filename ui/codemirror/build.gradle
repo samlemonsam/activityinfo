@@ -31,6 +31,7 @@ task concatenateSource {
     def codemirrorCss = new File("${dist}/lib/codemirror.css")
     def lintJs = new File("${dist}/addon/lint/lint.js")
     def lintCss = new File("${dist}/addon/lint/lint.css")
+    def matchBrackets = new File("${dist}/addon/edit/matchbrackets.js")
     def spreadsheetMode = new File("${projectDir}/src/main/js/mode/activityinfo/activityinfo.js")
 
     def outputDir = new File("${buildDir}/combined/org/activityinfo/ui/codemirror/client");
@@ -41,13 +42,14 @@ task concatenateSource {
     inputs.file codemirrorCss
     inputs.file lintJs
     inputs.file lintCss
+    inputs.file matchBrackets
     inputs.file spreadsheetMode
     outputs.file outputJs
     outputs.file outputCss
 
     doFirst {
         outputDir.mkdirs()
-        outputJs.text = codemirrorJs.text + spreadsheetMode.text + lintJs.text
+        outputJs.text = codemirrorJs.text + spreadsheetMode.text + lintJs.text + matchBrackets.text
         outputCss.text = codemirrorCss.text + lintCss.text
     }
 }

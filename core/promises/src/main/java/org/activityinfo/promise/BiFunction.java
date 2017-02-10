@@ -15,7 +15,7 @@ public abstract class BiFunction<T, U, R> implements Function<T, Function<U, R>>
     public abstract R apply(T t, U u);
 
     @Override
-    public Function<U, R> apply(final T t) {
+    public final Function<U, R> apply(final T t) {
         return new Function<U, R>() {
             @Override
             public R apply(U u) {

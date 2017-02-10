@@ -38,6 +38,10 @@ public class FieldMeasure extends FormLevelMeasure {
         return compute(store, formId, expr, dimensions);
     }
 
+    public ExprNode getExpr() {
+        return expr;
+    }
+
     @Override
     public JsonElement toJsonObject() {
         JsonObject object = new JsonObject();
