@@ -1,27 +1,21 @@
 package org.activityinfo.model.expr;
 
 import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.functions.*;
-import org.activityinfo.model.type.NullFieldType;
-import org.activityinfo.model.type.NullFieldValue;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
+/**
+ * Recursive descent parser for the ActivityInfo formula language.
+ *
+ */
 public class ExprParser {
-
-    private static final Set<String> INFIX_OPERATORS = Sets.newHashSet(
-            "+", "-", "*", "/", "&&", "||", "==", "!=", "<", ">", ">=", "<=");
-
-    private static final Set<String> PREFIX_OPERATORS = Sets.newHashSet("!" );
 
     public static final Set<String> FUNCTIONS = Collections.unmodifiableSet(Sets.newHashSet(
             ContainsAllFunction.INSTANCE.getId(),
@@ -42,131 +36,181 @@ public class ExprParser {
         }));
     }
 
-    public ExprNode parse() {
-        if(!lexer.hasNext()) {
-            return new ConstantExpr(NullFieldValue.INSTANCE, NullFieldType.INSTANCE);
-        }
-        ExprNode expr = parseSimple();
-
-        // Consume compound expressions
-        while(lexer.hasNext() && lexer.peek().getType() == TokenType.DOT) {
-            // Consume dot
-            lexer.next();
-            // Consume field name
-            Token fieldName = expectNext(TokenType.SYMBOL, "Field name");
-            
-            expr = new CompoundExpr(expr, new SymbolExpr(fieldName.getString()));
-        }
-
-        if (!lexer.hasNext()) {
-            return expr;
-        }
-        
+    private Token expect(TokenType tokenType) {
         Token token = lexer.peek();
-        if (isInfixOperator(token)) {
-            lexer.next();
-            ExprFunction function = ExprFunctions.get(token.getString());
-            ExprNode right = parse();
-
-            return new FunctionCallNode(function, expr, right);
-        
-        } else {
-            return expr;
+        if(token.getType() == tokenType) {
+            return token;
         }
+        throw new ExprSyntaxException("Expected " + tokenType);
     }
 
-    private boolean isInfixOperator(Token token) {
-        return token.getType() == TokenType.OPERATOR &&
-                INFIX_OPERATORS.contains(token.getString());
-    }
+    private ExprNode disjunction() {
+        ExprNode left = conjunction();
+        while(lexer.hasNext() && lexer.peek().isOrOperator()) {
+            ExprFunction op = function();
+            ExprNode right = conjunction();
 
-    public ExprNode parseSimple() {
-        Token token = lexer.next();
-        if (token.getType() == TokenType.PAREN_START) {
-            return parseGroup();
-
-        } else if (token.getType() == TokenType.SYMBOL) {
-            if(lexer.hasNext() && lexer.peek().getType() == TokenType.PAREN_START) {
-                return parseFunctionCall(token);
-            } else {
-                return new SymbolExpr(token.getString());
-            }
-
-        } else if (token.getType() == TokenType.NUMBER) {
-            return new ConstantExpr(Double.parseDouble(token.getString()));
-
-        } else if (token.getType() == TokenType.BOOLEAN_LITERAL) {
-            return new ConstantExpr(Boolean.parseBoolean(token.getString()));
-
-        } else if (prefixOperator(token)) {
-            ExprFunction function = ExprFunctions.get(token.getString());
-            ExprNode right = parse();
-            return new FunctionCallNode(function, right);
-
-        } else if (token.getType() == TokenType.STRING_LITERAL) {
-            return new ConstantExpr(token.getString());
-
-        } else if (token.getType() == TokenType.SYMBOL) {
-            return new SymbolExpr(token.getString());
-
-        } else {
-            throw new ExprSyntaxException("Unexpected token '" + token.getString() + "' at position " + token.getTokenStart() + "'");
+            left = new FunctionCallNode(op, left, right);
         }
+        return left;
     }
 
-    private ExprNode parseFunctionCall(Token token) {
-        ExprFunction function = ExprFunctions.get(token.getString());
-        List<ExprNode> arguments = Lists.newArrayList();
-        while(lexer.hasNext()) {
-            Token next = lexer.next();
+    private ExprNode conjunction() {
+        ExprNode left = equality();
+        while(lexer.hasNext() && lexer.peek().isAndOperator()) {
+            ExprFunction op = function();
+            ExprNode right = equality();
 
-            if (next.getType() == TokenType.COMMA || next.getType() == TokenType.PAREN_START) {
-                continue;
-
-            } else if (next.getType() == TokenType.PAREN_END) {
-                break;
-
-            } else if (next.getType() == TokenType.SYMBOL) {
-                arguments.add(new SymbolExpr(next.getString()));
-
-            } else {
-                throw new ExprSyntaxException("Unexpected token '" + token.getString() + "' at position " + token.getTokenStart() + "'");
-            }
+            left = new FunctionCallNode(op, left, right);
         }
-        return new FunctionCallNode(function, arguments);
+        return left;
     }
 
-    private boolean prefixOperator(Token token) {
-        return token.getType() == TokenType.OPERATOR && PREFIX_OPERATORS.contains(token.getString());
+    private ExprNode equality() {
+        ExprNode left = relational();
+        while(lexer.hasNext() && lexer.peek().isEqualityOperator()) {
+            ExprFunction op = function();
+            ExprNode right = relational();
+
+            left = new FunctionCallNode(op, left, right);
+        }
+        return left;
     }
 
-    private ExprNode parseGroup() {
-        ExprNode expr = parse();
-        expectNext(TokenType.PAREN_END, "')'");
-        return new GroupExpr(expr);
+    private ExprNode relational() {
+        ExprNode left = term();
+        while(lexer.hasNext() && lexer.peek().isRelationalOperator()) {
+            ExprFunction op = function();
+            ExprNode right = term();
+
+            left = new FunctionCallNode(op, left, right);
+        }
+        return left;
     }
 
-    /**
-     * Retrieves the next token, and throws an exception if it does not match
-     * the expected type.
-     */
-    private Token expectNext(TokenType expectedType, String description) {
+    private ExprNode term() {
+
+        // <term> ::= <factor> | <term> + <factor> | <term> - <factor>
+
+        ExprNode left = factor();
+        while (lexer.hasNext() &&  lexer.peek().isAdditiveOperator()) {
+            ExprFunction op = function();
+            ExprNode right = factor();
+
+            left = new FunctionCallNode(op, left, right);
+        }
+        return left;
+    }
+
+
+    public ExprNode factor() {
+
+        // <factor> ::= <unary> | <factor> * <unary> | <factor> / <unary>
+
+        ExprNode left = unary();
+        while(lexer.hasNext() && lexer.peek().isMultiplicativeOperator()) {
+            ExprFunction function = function();
+            ExprNode right = unary();
+
+            left = new FunctionCallNode(function, left, right);
+        }
+        return left;
+    }
+
+    private ExprNode unary() {
+        // <unary> ::=  + <unary> | - <unary> | <unary2>
+
         if(!lexer.hasNext()) {
-            throw new ExprSyntaxException("Syntax error: expected " + description + " but found end of input.");
+            throw new ExprSyntaxException("Unexpected end of formula");
+        }
+        Token token = lexer.peek();
+        if(token.getType() == TokenType.OPERATOR) {
+            if(token.getString().equals("-") ||
+               token.getString().equals("+")) {
 
+                ExprFunction op = function();
+                ExprNode operand = unary();
+                return new FunctionCallNode(op, operand);
+            }
         }
+
+        return unary2();
+    }
+
+    private ExprNode unary2() {
+        if(!lexer.hasNext()) {
+            throw new ExprSyntaxException("Unexpected end of formula");
+        }
+        Token token = lexer.peek();
+        if(token.getType() == TokenType.OPERATOR) {
+            if(token.getString().equals("!")) {
+                ExprFunction op = function();
+                ExprNode operand = primary();
+                return new FunctionCallNode(op, operand);
+            }
+        }
+        return primary();
+    }
+
+    private ExprNode primary() {
+        switch (lexer.peek().getType()) {
+            case SYMBOL:
+                return compound();
+            case NUMBER:
+                return number();
+            case BOOLEAN_LITERAL:
+                return booleanLiteral();
+            case PAREN_START:
+                lexer.next();
+                ExprNode e = term();
+                expect(TokenType.PAREN_END);
+                return new GroupExpr(e);
+            default:
+                throw new ExprSyntaxException("factor: syntax error");
+        }
+    }
+
+    private ExprNode booleanLiteral() {
         Token token = lexer.next();
-        if (token.getType() != expectedType) {
-            throw new ExprSyntaxException("Syntax error at " + token.getTokenStart() + ": expected " + description + " but found '" + token.getString() + "'");
+        assert token.getType() == TokenType.BOOLEAN_LITERAL;
+        return new ConstantExpr(token.getString().toLowerCase().equals("true"));
+    }
+
+    private ExprFunction function() {
+        Token token = lexer.next();
+        return ExprFunctions.get(token.getString());
+    }
+
+    private ExprNode compound() {
+        ExprNode symbol = symbol();
+
+        while(lexer.hasNext() && lexer.peek().isDot()) {
+            lexer.next();
+            SymbolExpr field = symbol();
+            symbol = new CompoundExpr(symbol, field);
         }
-        return token;
+        return symbol;
+    }
+
+    private SymbolExpr symbol() {
+        Token token = lexer.next();
+        assert token.getType() == TokenType.SYMBOL;
+        return new SymbolExpr(token.getString());
+    }
+
+    private ExprNode number() {
+        Token token = lexer.next();
+        return new ConstantExpr(Double.parseDouble(token.getString()));
+    }
+
+    public ExprNode parse() {
+        // Start with the operator with the highest precedence
+        return disjunction();
     }
 
     public static ExprNode parse(String expression) {
-        if(Strings.isNullOrEmpty(expression)) {
-            throw new ExprSyntaxException("Empty expression");
-        }
-        ExprParser parser = new ExprParser(new ExprLexer(expression));
+        ExprLexer lexer = new ExprLexer(expression);
+        ExprParser parser = new ExprParser(lexer);
         return parser.parse();
     }
 }

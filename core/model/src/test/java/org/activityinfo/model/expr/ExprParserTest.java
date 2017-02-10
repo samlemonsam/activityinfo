@@ -1,24 +1,73 @@
 package org.activityinfo.model.expr;
 
 
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.type.NullFieldType;
 import org.activityinfo.model.type.NullFieldValue;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.activityinfo.model.expr.Exprs.call;
+import static org.activityinfo.model.expr.Exprs.symbol;
 import static org.junit.Assert.assertEquals;
 
 public class ExprParserTest {
+
+
+    private static final ExprFunction PLUS = ExprFunctions.get("+");
+    private static final ExprFunction MINUS = ExprFunctions.get("-");
+    private static final ExprFunction MUL = ExprFunctions.get("*");
+    private static final ExprFunction DIV = ExprFunctions.get("/");
+    private static final ExprFunction LT = ExprFunctions.get("<");
+    private static final ExprFunction EQ = ExprFunctions.get("==");
+    private static final ExprFunction GE = ExprFunctions.get(">=");
+    private static final ExprFunction AND = ExprFunctions.get("&&");
+    private static final ExprFunction OR = ExprFunctions.get("||");
+
+    public static final SymbolExpr A = symbol("A");
+    public static final SymbolExpr B = symbol("B");
+    public static final SymbolExpr C = symbol("C");
+    public static final SymbolExpr D = symbol("D");
+    public static final SymbolExpr E = symbol("E");
+
+    public static final ConstantExpr TRUE = new ConstantExpr(true);
+    public static final ConstantExpr FALSE = new ConstantExpr(false);
 
 
     @Test
     public void parseSimple() {
         expect("1", new ConstantExpr(1));
         expect("(1)", new GroupExpr(new ConstantExpr(1)));
-        expect("1+2", new FunctionCallNode(PlusFunction.INSTANCE,
+        expect("1+2", new FunctionCallNode(PLUS,
                 new ConstantExpr(1),
                 new ConstantExpr(2)));
+    }
+
+    @Test
+    public void orderOfOperations() {
+        expect("A*B+C/D*E", call(PLUS,
+                                call(MUL, A, B),
+                                call(MUL,
+                                    call(DIV, C, D),
+                                        E)));
+
+        // (+ (+ (+ A B) C) (* D E))
+        expect("A+B+C+D*E",
+            call(PLUS,
+                call(PLUS,
+                    call(PLUS, A, B),
+                    C),
+                call(MUL, D, E)));
+
+        expect("A < B == C >= D",
+            call(EQ,
+                call(LT, A, B),
+                call(GE, C, D)));
+
+        expect("A && B || C && D",
+            call(OR,
+                call(AND, A, B),
+                call(AND, C, D)));
     }
 
     @Test
@@ -30,6 +79,22 @@ public class ExprParserTest {
     public void parseCompound() {
         expect("a.b", new CompoundExpr(new SymbolExpr("a"), new SymbolExpr("b")));
     }
+
+    @Test(expected = ExprSyntaxException.class)
+    public void parseMissingOperand() {
+        parse("A+");
+    }
+
+    @Test
+    public void unaryOperators() {
+        expect("+A", call(PLUS, A));
+        expect("-A", call(MINUS, A));
+        expect("-A+C*D",
+            call(PLUS,
+                call(MINUS, A),
+                call(MUL, C, D)));
+    }
+
 
     @Test
     public void parseCompoundOp() {
@@ -51,15 +116,12 @@ public class ExprParserTest {
 
     @Test
     public void parseBooleanSimple() {
-        expect("true", new ConstantExpr(true));
-        expect("false", new ConstantExpr(false));
-        expect("true&&false&&false", new FunctionCallNode(BooleanFunctions.AND,
-                new ConstantExpr(true),
-                new FunctionCallNode(BooleanFunctions.AND,
-                        new ConstantExpr(false),
-                        new ConstantExpr(false)
-                )
-        ));
+        expect("true", TRUE);
+        expect("false", FALSE);
+        expect("true&&false&&false",
+                call(AND,
+                    call(AND, TRUE, FALSE),
+                    FALSE));
     }
 
 
@@ -72,28 +134,6 @@ public class ExprParserTest {
                                         new ConstantExpr(1),
                                         new ConstantExpr(2))),
                         new ConstantExpr(3)));
-    }
-
-    @Test
-    public void parseSymbols() {
-        expect("{i1}+{i2}+1", new FunctionCallNode(ArithmeticFunctions.BINARY_PLUS,
-                new SymbolExpr("i1"),
-                new FunctionCallNode(ArithmeticFunctions.BINARY_PLUS, new SymbolExpr("i2"),
-                        new ConstantExpr(1))));
-
-        expect("({class1_i1}+{class2_i2})/{class3_i3}",
-                new FunctionCallNode(ArithmeticFunctions.DIVIDE,
-                        new GroupExpr(
-                                new FunctionCallNode(ArithmeticFunctions.BINARY_PLUS,
-                                        new SymbolExpr("class1_i1"),
-                                        new SymbolExpr("class2_i2"))
-                        ), new SymbolExpr("class3_i3")));
-
-        expect("{s000002_i0009ls}+{s000002_i0009lt}",
-                new FunctionCallNode(ArithmeticFunctions.BINARY_PLUS,
-                        new SymbolExpr("s000002_i0009ls"),
-                        new SymbolExpr("s000002_i0009lt"))
-        );
     }
 
     @Test
@@ -138,7 +178,6 @@ public class ExprParserTest {
     }
 
     @Test
-    @Ignore("todo")
     public void parseCalc() {
         expect("{Exp}*{Alloc}*{InCostUnsp}/10000",
           new FunctionCallNode(ExprFunctions.get("/"),
@@ -149,14 +188,15 @@ public class ExprParserTest {
 
     }
 
+    private void expect(String formula, ExprNode expr) {
+        assertEquals(expr, parse(formula));
+    }
 
-    private void expect(String string, ExprNode expr) {
+    private ExprNode parse(String string) {
         System.out.println("Parsing [" + string + "]");
         ExprLexer lexer = new ExprLexer(string);
         ExprParser parser = new ExprParser(lexer);
-        ExprNode actual = parser.parse();
-
-        assertEquals(expr, actual);
+        return parser.parse();
     }
 
 }

@@ -46,6 +46,44 @@ public class Token {
         return type.name() + "[" + string + "]";
     }
 
+    public boolean isRelationalOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("<") ||
+                 string.equals("<=") ||
+                 string.equals(">") ||
+                 string.equals(">="));
+    }
+
+    public boolean isAdditiveOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("+") || string.equals("-"));
+    }
+
+    public boolean isMultiplicativeOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("*") || string.equals("/"));
+    }
+
+    public boolean isEqualityOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("==") ||
+                 string.equals("!="));
+    }
+
+
+    public boolean isOrOperator() {
+        return type == TokenType.OPERATOR && string.equals("||");
+    }
+
+    public boolean isAndOperator() {
+        return type == TokenType.OPERATOR && string.equals("&&");
+    }
+
+
+    public boolean isDot() {
+        return type == TokenType.DOT && string.equals(".");
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -66,4 +104,6 @@ public class Token {
         Token other = (Token) obj;
         return other.string.equals(string);
     }
+
+
 }
