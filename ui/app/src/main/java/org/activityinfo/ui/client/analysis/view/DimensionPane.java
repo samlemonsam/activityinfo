@@ -19,6 +19,8 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
+import org.activityinfo.ui.client.analysis.model.FieldDimensionSource;
+import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 
 /**
  *
@@ -78,13 +80,15 @@ public class DimensionPane implements IsWidget {
 
         Menu contextMenu = new Menu();
 
-        MenuItem remove = new MenuItem();
-        remove.setText(I18N.CONSTANTS.remove());
-        remove.addSelectionHandler(event -> model.removeDimension(dim.getId()));
-        contextMenu.add(remove);
 
-        contextMenu.add(new SeparatorMenuItem());
+        // Edit the formula...
+        MenuItem editFormula = new MenuItem();
+        editFormula.setText("Edit Formula...");
+        editFormula.addSelectionHandler(event -> editFormula(dim));
+        editFormula.setEnabled(dim.getSourceModel() instanceof FieldDimensionSource);
+        contextMenu.add(editFormula);
 
+        // Allow choosing the date part to show
         MenuItem year = new CheckMenuItem("Year");
         MenuItem quarter = new CheckMenuItem("Quarter");
         MenuItem month = new CheckMenuItem("Month");
@@ -95,7 +99,21 @@ public class DimensionPane implements IsWidget {
         contextMenu.add(month);
         contextMenu.add(day);
 
+        contextMenu.add(new SeparatorMenuItem());
+
+
+        // Remove the dimension
+        MenuItem remove = new MenuItem();
+        remove.setText(I18N.CONSTANTS.remove());
+        remove.addSelectionHandler(event -> model.removeDimension(dim.getId()));
+        contextMenu.add(remove);
+
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
+    }
+
+    private void editFormula(DimensionModel dim) {
+        FieldDimensionSource dimSource = (FieldDimensionSource) dim.getSourceModel();
+        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), dimSource.get
     }
 
 }

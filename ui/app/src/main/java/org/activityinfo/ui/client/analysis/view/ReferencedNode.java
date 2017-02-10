@@ -32,7 +32,7 @@ public class ReferencedNode extends DimensionNode {
 
     @Override
     public DimensionSourceModel dimensionModel() {
-        return new FieldDimensionSource(field.getLabel(),
+        return new FieldDimensionSource(form.getLabel() + " " + field.getLabel(),
                 new CompoundExpr(new SymbolExpr(form.getId()), new SymbolExpr(field.getId())));
     }
 
