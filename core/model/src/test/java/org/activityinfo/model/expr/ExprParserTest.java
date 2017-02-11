@@ -13,7 +13,6 @@ import static org.junit.Assert.*;
 
 public class ExprParserTest {
 
-
     private static final ExprFunction PLUS = ExprFunctions.get("+");
     private static final ExprFunction MINUS = ExprFunctions.get("-");
     private static final ExprFunction MUL = ExprFunctions.get("*");
@@ -168,6 +167,12 @@ public class ExprParserTest {
                         new SymbolExpr("f1"),
                         new SymbolExpr("v1"))
         ));
+    }
+
+    @Test
+    public void incorrectFunction() {
+        ExprException exception = expectError("FOO(A, B)");
+
     }
     
     @Test

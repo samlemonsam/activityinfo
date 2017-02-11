@@ -215,7 +215,11 @@ public class ExprParser {
 
 
     private ExprFunction function(Token token) {
-        return ExprFunctions.get(token.getString());
+        try {
+            return ExprFunctions.get(token.getString());
+        } catch (UnsupportedOperationException e) {
+            throw new ExprSyntaxException(new SourceRange(token), "'" + token.getString() + "' is not a function.");
+        }
     }
 
 
@@ -299,7 +303,7 @@ public class ExprParser {
         ExprNode expr = expression();
         if(lexer.hasNext()) {
             Token extraToken = lexer.next();
-            throw new ExprSyntaxException(new SourceRange(extraToken), "Expected the end of the formula");
+            throw new ExprSyntaxException(new SourceRange(extraToken), "Missing an operator like + - / *, etc.");
         }
         return expr;
     }

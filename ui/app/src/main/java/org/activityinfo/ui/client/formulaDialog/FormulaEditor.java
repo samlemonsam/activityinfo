@@ -23,6 +23,7 @@ public class FormulaEditor implements IsWidget {
     private StatefulValue<String> formulaText;
 
     private Observable<ParsedFormula> result;
+    private Linter linter;
 
     public FormulaEditor(Observable<FormTree> formTree) {
         this.formTree = formTree;
@@ -53,6 +54,8 @@ public class FormulaEditor implements IsWidget {
 
     private void onAttach() {
         widget.addChangeHandler(() -> formulaText.updateValue(widget.getEditor().getDoc().getValue()));
+        linter = new Linter(result, getEditor());
+        linter.start();
     }
 
 
@@ -127,7 +130,9 @@ public class FormulaEditor implements IsWidget {
 
 
     public void setValue(String expression) {
+        formulaText.updateIfNotEqual(expression);
         getEditor().getDoc().setValue(expression);
+
     }
 
     public Observable<ParsedFormula> getValue() {

@@ -74,7 +74,6 @@ public class FormulaDialog {
         dialog.setPixelSize(640, 400);
         dialog.add(container);
         dialog.setModal(true);
-
         dialog.getButtonBar().insert(statusLabel, 0);
     }
 
@@ -91,11 +90,11 @@ public class FormulaDialog {
                     dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(false);
                 } else {
 
-                    LOGGER.info("Formula = " + formula.get().getRootNode().asExpression());
 
                     dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(formula.get().isValid());
                     if(formula.get().isValid()) {
                         statusLabel.clearStatus(I18N.CONSTANTS.formulaValid());
+                        LOGGER.info("Formula = " + formula.get().getRootNode().asExpression());
                     } else {
                         statusLabel.clearStatus(formula.get().getErrorMessage());
                     }
