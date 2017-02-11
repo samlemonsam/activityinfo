@@ -16,9 +16,9 @@ public class ExprLexerTest {
         expect("1 \n+ 2",
                 new Token(TokenType.NUMBER, 0, "1"),
                 new Token(TokenType.WHITESPACE, 1, " \n"),
-                new Token(TokenType.OPERATOR, 3, "+"),
-                new Token(TokenType.WHITESPACE, 4, " "),
-                new Token(TokenType.NUMBER, 5, "2"));
+                new Token(TokenType.OPERATOR, 0, "+"),
+                new Token(TokenType.WHITESPACE, 1, " "),
+                new Token(TokenType.NUMBER, 2, "2"));
 
 
         expect("((1+3)*(44323+455))/66   ",
@@ -79,13 +79,13 @@ public class ExprLexerTest {
                 new Token(TokenType.BOOLEAN_LITERAL, 1, "true"),
                 new Token(TokenType.OPERATOR, 5, "||"),
                 new Token(TokenType.BOOLEAN_LITERAL, 7, "false"),
-                new Token(TokenType.PAREN_END, 8, ")"),
-                new Token(TokenType.OPERATOR, 9, "&&"),
-                new Token(TokenType.PAREN_START, 11, "("),
-                new Token(TokenType.BOOLEAN_LITERAL, 12, "false"),
-                new Token(TokenType.OPERATOR, 17, "&&"),
-                new Token(TokenType.BOOLEAN_LITERAL, 22, "true"),
-                new Token(TokenType.PAREN_END, 23, ")")
+                new Token(TokenType.PAREN_END, 12, ")"),
+                new Token(TokenType.OPERATOR, 13, "&&"),
+                new Token(TokenType.PAREN_START, 15, "("),
+                new Token(TokenType.BOOLEAN_LITERAL, 16, "false"),
+                new Token(TokenType.OPERATOR, 21, "&&"),
+                new Token(TokenType.BOOLEAN_LITERAL, 23, "true"),
+                new Token(TokenType.PAREN_END, 27, ")")
         );
     }
 
@@ -99,35 +99,35 @@ public class ExprLexerTest {
     @Test
     public void unescapedSymbolTokenizing() {
         expect("i1+i2",
-                new Token(TokenType.SYMBOL, 1, "i1"),
-                new Token(TokenType.OPERATOR, 4, "+"),
-                new Token(TokenType.SYMBOL, 6, "i2")
+                new Token(TokenType.SYMBOL, 0, "i1"),
+                new Token(TokenType.OPERATOR, 2, "+"),
+                new Token(TokenType.SYMBOL, 3, "i2")
         );
         expect("class1_i1+class2_i2",
-                new Token(TokenType.SYMBOL, 1, "class1_i1"),
-                new Token(TokenType.OPERATOR, 11, "+"),
-                new Token(TokenType.SYMBOL, 13, "class2_i2")
+                new Token(TokenType.SYMBOL, 0, "class1_i1"),
+                new Token(TokenType.OPERATOR, 9, "+"),
+                new Token(TokenType.SYMBOL, 10, "class2_i2")
         );
         expect("(class1_i1+class2_i2)/class3_i3",
                 new Token(TokenType.PAREN_START, 0, "("),
-                new Token(TokenType.SYMBOL, 2, "class1_i1"),
-                new Token(TokenType.OPERATOR, 11, "+"),
-                new Token(TokenType.SYMBOL, 14, "class2_i2"),
-                new Token(TokenType.PAREN_END, 24, ")"),
-                new Token(TokenType.OPERATOR, 25, "/"),
-                new Token(TokenType.SYMBOL, 26, "class3_i3")
+                new Token(TokenType.SYMBOL, 1, "class1_i1"),
+                new Token(TokenType.OPERATOR, 10, "+"),
+                new Token(TokenType.SYMBOL, 11, "class2_i2"),
+                new Token(TokenType.PAREN_END, 20, ")"),
+                new Token(TokenType.OPERATOR, 21, "/"),
+                new Token(TokenType.SYMBOL, 22, "class3_i3")
         );
 
         expect("s000002_i0009ls+s000002_i0009lt",
-                new Token(TokenType.SYMBOL, 1, "s000002_i0009ls"),
-                new Token(TokenType.OPERATOR, 17, "+"),
-                new Token(TokenType.SYMBOL, 19, "s000002_i0009lt")
+                new Token(TokenType.SYMBOL, 0, "s000002_i0009ls"),
+                new Token(TokenType.OPERATOR, 15, "+"),
+                new Token(TokenType.SYMBOL, 16, "s000002_i0009lt")
         );
 
         expect("s000002_i0009ls>=s000002_i0009lt",
-                new Token(TokenType.SYMBOL, 1, "s000002_i0009ls"),
-                new Token(TokenType.OPERATOR, 17, ">="),
-                new Token(TokenType.SYMBOL, 20, "s000002_i0009lt")
+                new Token(TokenType.SYMBOL, 0, "s000002_i0009ls"),
+                new Token(TokenType.OPERATOR, 15, ">="),
+                new Token(TokenType.SYMBOL, 17, "s000002_i0009lt")
         );
     }
 
@@ -145,11 +145,11 @@ public class ExprLexerTest {
         expect("({class1_i1}+{class2_i2})/{class3_i3}",
                 new Token(TokenType.PAREN_START, 0, "("),
                 new Token(TokenType.SYMBOL, 1, "class1_i1"),
-                new Token(TokenType.OPERATOR, 11, "+"),
+                new Token(TokenType.OPERATOR, 12, "+"),
                 new Token(TokenType.SYMBOL, 13, "class2_i2"),
                 new Token(TokenType.PAREN_END, 24, ")"),
                 new Token(TokenType.OPERATOR, 25, "/"),
-                new Token(TokenType.SYMBOL, 25, "class3_i3"));
+                new Token(TokenType.SYMBOL, 26, "class3_i3"));
 
         expect("{s000002_i0009ls}+{s000002_i0009lt}",
                 new Token(TokenType.SYMBOL, 0, "s000002_i0009ls"),
@@ -171,11 +171,11 @@ public class ExprLexerTest {
     public void functionTokenizing() {
         expect("containsAll({f1},{v1})",
                 new Token(TokenType.SYMBOL, 0, "containsAll"),
-                new Token(TokenType.PAREN_START, 9, "("),
-                new Token(TokenType.SYMBOL, 10, "f1"),
-                new Token(TokenType.COMMA, 14, ","),
-                new Token(TokenType.SYMBOL, 15, "v1"),
-                new Token(TokenType.PAREN_END, 18, ")")
+                new Token(TokenType.PAREN_START, 11, "("),
+                new Token(TokenType.SYMBOL, 12, "f1"),
+                new Token(TokenType.COMMA, 16, ","),
+                new Token(TokenType.SYMBOL, 17, "v1"),
+                new Token(TokenType.PAREN_END, 21, ")")
         );
     }
 
@@ -196,7 +196,7 @@ public class ExprLexerTest {
             Token actual = tokenizer.next();
             System.out.println(String.format("Expected: %15s, got %s", expectedString, actual.toString()));
             if(expected != null) {
-                assertEquals("tokenStart", expected.getTokenStart(), actual.getTokenStart());
+                assertEquals("tokenStart", expected.getTokenStartColumn(), actual.getTokenStartColumn());
                 assertEquals("text", expected.getString(), actual.getString());
                 assertEquals("type", expected.getType(), actual.getType());
 
