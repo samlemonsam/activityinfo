@@ -49,6 +49,22 @@ public class ConstantExpr extends ExprNode {
         this(localDate, LocalDateType.INSTANCE);
     }
 
+    public ConstantExpr(boolean value, SourceRange source) {
+        this(value);
+        this.sourceRange = source;
+    }
+
+    public ConstantExpr(double value, SourceRange sourceRange) {
+        this(value);
+        this.sourceRange = sourceRange;
+    }
+
+
+    public ConstantExpr(String string, SourceRange sourceRange) {
+        this(string);
+        this.sourceRange = sourceRange;
+    }
+
     public static ConstantExpr valueOf(FieldValue value) {
         if(value instanceof TextValue) {
             return new ConstantExpr(((TextValue) value).asString());

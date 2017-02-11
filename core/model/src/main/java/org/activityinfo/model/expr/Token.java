@@ -41,6 +41,15 @@ public class Token {
         return pos.getColumn();
     }
 
+    public SourcePos getStart() {
+        return pos;
+    }
+
+
+    public SourcePos getEnd() {
+        return new SourcePos(pos.getLine(), pos.getColumn() + length);
+    }
+
     /**
      *
      * @return the length of the original token in the source, including any escaping.

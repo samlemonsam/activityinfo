@@ -1,13 +1,15 @@
 package org.activityinfo.model.expr;
 
 
+import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.functions.*;
 import org.junit.Test;
 
 import static org.activityinfo.model.expr.Exprs.call;
 import static org.activityinfo.model.expr.Exprs.symbol;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.*;
 
 public class ExprParserTest {
 
@@ -117,6 +119,14 @@ public class ExprParserTest {
                     FALSE));
     }
 
+    @Test
+    public void group() {
+        expect("(false||true)&&true",
+                new FunctionCallNode(AND,
+                        new GroupExpr(new FunctionCallNode(OR, FALSE, TRUE)),
+                        TRUE)
+        );
+    }
 
     @Test
     public void parseNested() {
@@ -127,6 +137,12 @@ public class ExprParserTest {
                                         new ConstantExpr(1),
                                         new ConstantExpr(2))),
                         new ConstantExpr(3)));
+    }
+
+    @Test
+    public void parseStringLiteral() {
+        expect("A=='Foo'",
+            call(EQ, symbol("A"), new ConstantExpr("Foo")));
     }
 
     @Test
@@ -171,6 +187,26 @@ public class ExprParserTest {
     }
 
     @Test
+    public void parseInvalidEquals() {
+        expectError("A+=");
+    }
+
+    @Test
+    public void invalidNumber() {
+        ExprException exception = null;
+        try {
+            ExprParser.parse("A*B+\nC + 13.342342.2343");
+        } catch (ExprException e) {
+            exception = e;
+        }
+
+        assertNotNull(exception);
+        assertThat(exception.getSourceRange(),
+                equalTo(new SourceRange(new SourcePos(1, 4),
+                                        new SourcePos(1, 18))));
+    }
+
+    @Test
     public void parseCalc() {
         expect("{Exp}*{Alloc}*{InCostUnsp}/10000",
           new FunctionCallNode(ExprFunctions.get("/"),
@@ -181,8 +217,30 @@ public class ExprParserTest {
 
     }
 
+    @Test
+    public void symbolSourceRefs() {
+        FunctionCallNode call = (FunctionCallNode) ExprParser.parse("[A] + [B]");
+        assertThat(call.getSourceRange(), equalTo(new SourceRange(new SourcePos(0, 0), new SourcePos(0, 9))));
+        assertThat(call.getArgument(1).getSourceRange(), equalTo(new SourceRange(new SourcePos(0, 6), new SourcePos(0, 9))));
+    }
+
+    @Test
+    public void symbolSourceConstants() {
+        FunctionCallNode call = (FunctionCallNode) ExprParser.parse("1+3.456");
+        assertThat(call.getSourceRange(), equalTo(new SourceRange(new SourcePos(0, 0), new SourcePos(0, 7))));
+    }
+
     private void expect(String formula, ExprNode expr) {
         assertEquals(expr, parse(formula));
+    }
+
+    private ExprException expectError(String formula) {
+        try {
+            parse(formula);
+            throw new AssertionError("Expected error");
+        } catch(ExprException e) {
+            return e;
+        }
     }
 
     private ExprNode parse(String string) {

@@ -9,6 +9,8 @@ import org.activityinfo.model.expr.functions.*;
 
 import java.util.*;
 
+import static java.util.Collections.singletonList;
+
 /**
  * Recursive descent parser for the ActivityInfo formula language.
  *
@@ -57,7 +59,7 @@ public class ExprParser {
             ExprFunction op = function();
             ExprNode right = conjunction();
 
-            left = new FunctionCallNode(op, left, right);
+            left = binaryInfixCall(op, left, right);
         }
         return left;
     }
@@ -68,7 +70,7 @@ public class ExprParser {
             ExprFunction op = function();
             ExprNode right = equality();
 
-            left = new FunctionCallNode(op, left, right);
+            left = binaryInfixCall(op, left, right);
         }
         return left;
     }
@@ -79,7 +81,7 @@ public class ExprParser {
             ExprFunction op = function();
             ExprNode right = relational();
 
-            left = new FunctionCallNode(op, left, right);
+            left = binaryInfixCall(op, left, right);
         }
         return left;
     }
@@ -90,7 +92,7 @@ public class ExprParser {
             ExprFunction op = function();
             ExprNode right = term();
 
-            left = new FunctionCallNode(op, left, right);
+            left = binaryInfixCall(op, left, right);
         }
         return left;
     }
@@ -104,7 +106,7 @@ public class ExprParser {
             ExprFunction op = function();
             ExprNode right = factor();
 
-            left = new FunctionCallNode(op, left, right);
+            left = binaryInfixCall(op, left, right);
         }
         return left;
     }
@@ -119,7 +121,7 @@ public class ExprParser {
             ExprFunction function = function();
             ExprNode right = unary();
 
-            left = new FunctionCallNode(function, left, right);
+            left = binaryInfixCall(function, left, right);
         }
         return left;
     }
@@ -135,9 +137,11 @@ public class ExprParser {
             if(token.getString().equals("-") ||
                token.getString().equals("+")) {
 
-                ExprFunction op = function();
+                Token opToken = lexer.next();
+                ExprFunction op = function(opToken);
                 ExprNode operand = unary();
-                return new FunctionCallNode(op, operand);
+                SourceRange sourceRange = new SourceRange(opToken.getStart(), operand.getSourceRange().getEnd());
+                return new FunctionCallNode(op, singletonList(operand), sourceRange);
             }
         }
 
@@ -151,9 +155,11 @@ public class ExprParser {
         Token token = lexer.peek();
         if(token.getType() == TokenType.OPERATOR) {
             if(token.getString().equals("!")) {
-                ExprFunction op = function();
+                Token opToken = lexer.next();
+                ExprFunction op = function(opToken);
                 ExprNode operand = primary();
-                return new FunctionCallNode(op, operand);
+                SourceRange sourceRange = new SourceRange(opToken.getStart(), operand.getSourceRange().getEnd());
+                return new FunctionCallNode(op, singletonList(operand), sourceRange);
             }
         }
         return primary();
@@ -167,27 +173,46 @@ public class ExprParser {
                 return number();
             case BOOLEAN_LITERAL:
                 return booleanLiteral();
+            case STRING_LITERAL:
+                return stringLiteral();
             case PAREN_START:
-                lexer.next();
-                ExprNode e = term();
-                expect(TokenType.PAREN_END);
-                return new GroupExpr(e);
+                Token openToken = lexer.next();
+                ExprNode e = expression();
+                Token closeToken = expect(TokenType.PAREN_END);
+                return new GroupExpr(e, new SourceRange(openToken, closeToken));
+
             default:
-                throw new ExprSyntaxException("factor: syntax error");
+                throw new ExprSyntaxException(new SourceRange(lexer.peek()),
+                        "Expected a symbol, a number, a string, or '('");
         }
+    }
+
+    private ExprNode stringLiteral() {
+        Token token = lexer.next();
+        assert token.getType() == TokenType.STRING_LITERAL;
+        return new ConstantExpr(token.getString(), new SourceRange(token));
     }
 
 
     private ExprNode booleanLiteral() {
         Token token = lexer.next();
         assert token.getType() == TokenType.BOOLEAN_LITERAL;
-        return new ConstantExpr(token.getString().toLowerCase().equals("true"));
+        boolean value = token.getString().toLowerCase().equals("true");
+        SourceRange source = new SourceRange(token);
+        return new ConstantExpr(value, source);
     }
 
     private ExprFunction function() {
         Token token = lexer.next();
         return function(token);
     }
+
+
+    private FunctionCallNode binaryInfixCall(ExprFunction op, ExprNode left, ExprNode right) {
+        SourceRange source = new SourceRange(left.getSourceRange(), right.getSourceRange());
+        return new FunctionCallNode(op, Arrays.asList(left, right), source);
+    }
+
 
     private ExprFunction function(Token token) {
         return ExprFunctions.get(token.getString());
@@ -223,15 +248,13 @@ public class ExprParser {
             }
             if (nextToken == TokenType.PAREN_END) {
                 // consume paren and complete argument list
-                lexer.next();
-                break;
+                Token closingParen = lexer.next();
+                return new FunctionCallNode(function, arguments, new SourceRange(functionToken, closingParen));
             }
 
             // Otherwise parse the next argument
-            arguments.add(parse());
+            arguments.add(expression());
         }
-
-        return new FunctionCallNode(function, arguments);
     }
 
     private ExprNode compound(SymbolExpr symbol) {
@@ -240,7 +263,7 @@ public class ExprParser {
         while(lexer.hasNext() && lexer.peek().isDot()) {
             lexer.next();
             SymbolExpr field = symbol();
-            result = new CompoundExpr(symbol, field);
+            result = new CompoundExpr(result, field, new SourceRange(result.getSourceRange(), field.getSourceRange()));
         }
         return result;
     }
@@ -252,17 +275,33 @@ public class ExprParser {
 
     private SymbolExpr symbol(Token token) {
         assert token.getType() == TokenType.SYMBOL;
-        return new SymbolExpr(token.getString());
+        return new SymbolExpr(token);
     }
 
     private ExprNode number() {
         Token token = lexer.next();
-        return new ConstantExpr(Double.parseDouble(token.getString()));
+        double value;
+        try {
+            value = Double.parseDouble(token.getString());
+        } catch (NumberFormatException e) {
+            throw new ExprSyntaxException(new SourceRange(token), "Invalid number '" + token.getString() + "': " +
+                    e.getMessage());
+        }
+        return new ConstantExpr(value, new SourceRange(token));
+    }
+
+    public ExprNode expression() {
+        // Start with the operator with the highest precedence
+        return disjunction();
     }
 
     public ExprNode parse() {
-        // Start with the operator with the highest precedence
-        return disjunction();
+        ExprNode expr = expression();
+        if(lexer.hasNext()) {
+            Token extraToken = lexer.next();
+            throw new ExprSyntaxException(new SourceRange(extraToken), "Expected the end of the formula");
+        }
+        return expr;
     }
 
     public static ExprNode parse(String expression) {
@@ -270,4 +309,5 @@ public class ExprParser {
         ExprParser parser = new ExprParser(lexer);
         return parser.parse();
     }
+
 }
