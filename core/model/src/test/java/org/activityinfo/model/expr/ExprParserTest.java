@@ -3,8 +3,6 @@ package org.activityinfo.model.expr;
 
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.functions.*;
-import org.activityinfo.model.type.NullFieldType;
-import org.activityinfo.model.type.NullFieldValue;
 import org.junit.Test;
 
 import static org.activityinfo.model.expr.Exprs.call;
@@ -68,11 +66,6 @@ public class ExprParserTest {
             call(OR,
                 call(AND, A, B),
                 call(AND, C, D)));
-    }
-
-    @Test
-    public void parseEmpty() {
-        expect("", new ConstantExpr(NullFieldValue.INSTANCE, NullFieldType.INSTANCE));
     }
     
     @Test

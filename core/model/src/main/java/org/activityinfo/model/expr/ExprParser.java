@@ -7,9 +7,7 @@ import com.google.common.collect.Sets;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.functions.*;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Recursive descent parser for the ActivityInfo formula language.
@@ -36,10 +34,19 @@ public class ExprParser {
         }));
     }
 
+    /**
+     * Consume and return the next token if it is of type {@code tokenType}, or
+     * throw an {@link ExprSyntaxException} if there are no remaining tokens or
+     * the next token is of the wrong type.
+     * @param tokenType
+     * @return
+     */
     private Token expect(TokenType tokenType) {
-        Token token = lexer.peek();
-        if(token.getType() == tokenType) {
-            return token;
+        if(lexer.hasNext()) {
+            Token token = lexer.next();
+            if (token.getType() == tokenType) {
+                return token;
+            }
         }
         throw new ExprSyntaxException("Expected " + tokenType);
     }
@@ -155,7 +162,7 @@ public class ExprParser {
     private ExprNode primary() {
         switch (lexer.peek().getType()) {
             case SYMBOL:
-                return compound();
+                return symbolOrCall();
             case NUMBER:
                 return number();
             case BOOLEAN_LITERAL:
@@ -170,6 +177,7 @@ public class ExprParser {
         }
     }
 
+
     private ExprNode booleanLiteral() {
         Token token = lexer.next();
         assert token.getType() == TokenType.BOOLEAN_LITERAL;
@@ -178,22 +186,71 @@ public class ExprParser {
 
     private ExprFunction function() {
         Token token = lexer.next();
+        return function(token);
+    }
+
+    private ExprFunction function(Token token) {
         return ExprFunctions.get(token.getString());
     }
 
-    private ExprNode compound() {
-        ExprNode symbol = symbol();
+
+    private ExprNode symbolOrCall() {
+        Token symbolToken = lexer.next();
+        assert symbolToken.getType() == TokenType.SYMBOL;
+
+        if(lexer.hasNext() && lexer.peek().getType() == TokenType.PAREN_START) {
+            return call(symbolToken);
+        } else {
+            return compound(symbol(symbolToken));
+        }
+    }
+
+    private ExprNode call(Token functionToken) {
+        ExprFunction function = function(functionToken);
+        expect(TokenType.PAREN_START);
+
+        List<ExprNode> arguments = new ArrayList<>();
+
+        while(true) {
+            if (!lexer.hasNext()) {
+                throw new ExprSyntaxException("Unexpected end of formula");
+            }
+            TokenType nextToken = lexer.peek().getType();
+            if (nextToken == TokenType.COMMA) {
+                // Consume comma and parse next argument
+                lexer.next();
+                continue;
+            }
+            if (nextToken == TokenType.PAREN_END) {
+                // consume paren and complete argument list
+                lexer.next();
+                break;
+            }
+
+            // Otherwise parse the next argument
+            arguments.add(parse());
+        }
+
+        return new FunctionCallNode(function, arguments);
+    }
+
+    private ExprNode compound(SymbolExpr symbol) {
+        ExprNode result = symbol;
 
         while(lexer.hasNext() && lexer.peek().isDot()) {
             lexer.next();
             SymbolExpr field = symbol();
-            symbol = new CompoundExpr(symbol, field);
+            result = new CompoundExpr(symbol, field);
         }
-        return symbol;
+        return result;
     }
 
     private SymbolExpr symbol() {
         Token token = lexer.next();
+        return symbol(token);
+    }
+
+    private SymbolExpr symbol(Token token) {
         assert token.getType() == TokenType.SYMBOL;
         return new SymbolExpr(token.getString());
     }
