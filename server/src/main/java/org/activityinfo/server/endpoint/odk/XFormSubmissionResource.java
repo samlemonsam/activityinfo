@@ -40,7 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static com.google.common.base.Optional.fromNullable;
 import static javax.ws.rs.core.Response.Status.*;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.server.endpoint.odk.OdkFieldValueParserFactory.fromFieldType;
@@ -183,7 +183,7 @@ public class XFormSubmissionResource {
         if (element.isPresent()) {
             try {
                 OdkFieldValueParser odkFieldValueParser = fromFieldType(GeoPointType.INSTANCE);
-                return of((GeoPoint) odkFieldValueParser.parse(element.get()));
+                return fromNullable((GeoPoint) odkFieldValueParser.parse(element.get()));
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Can't parse form submission location data", e);
             }
