@@ -2,12 +2,14 @@ package org.activityinfo.ui.client.component.table;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resources;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,23 +39,26 @@ public class ColumnStatePersister {
             return;
         }
 
-        stateProvider.set(INSTANCE_TABLE_COLUMNS_STATE, Resources.toJsonObject(asRecord(columnNames)).toString());
+        stateProvider.set(INSTANCE_TABLE_COLUMNS_STATE, asRecord(columnNames).toString());
     }
 
     public Set<String> getColumnNames() {
         Set<String> columns = Sets.newLinkedHashSet();
         String json = stateProvider.getString(INSTANCE_TABLE_COLUMNS_STATE);
         if (!Strings.isNullOrEmpty(json)) {
-            Record record = Resources.recordFromJson(json);
-            columns.addAll(record.getProperties().keySet());
+            JsonParser parser = new JsonParser();
+            JsonObject record = parser.parse(json).getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entry : record.entrySet()) {
+                columns.add(entry.getKey());
+            }
         }
         return columns;
     }
 
-    private Record asRecord(LinkedHashSet<String> columnNames) {
-        Record record = new Record();
+    private JsonObject asRecord(LinkedHashSet<String> columnNames) {
+        JsonObject record = new JsonObject();
         for (String columnName : columnNames) {
-            record.set(columnName, columnName);
+            record.addProperty(columnName, columnName);
         }
         return record;
     }

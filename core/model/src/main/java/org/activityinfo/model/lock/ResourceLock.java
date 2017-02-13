@@ -21,18 +21,14 @@ package org.activityinfo.model.lock;
  * #L%
  */
 
-import com.google.common.collect.Lists;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author yuriyz on 10/05/2015.
  */
-public class ResourceLock implements IsRecord, Serializable { // it's not Resource because we are going to keep lock inside payload of FormClass
+public class ResourceLock implements Serializable { // it's not Resource because we are going to keep lock inside payload of FormClass
 
     private ResourceId id;
     private ResourceId ownerId;
@@ -82,36 +78,6 @@ public class ResourceLock implements IsRecord, Serializable { // it's not Resour
 
     public void setExpression(String expression) {
         this.expression = expression;
-    }
-
-    public static ResourceLock fromRecord(Record record) {
-        ResourceLock lock = new ResourceLock();
-        lock.id = record.getResourceId("id");
-        lock.ownerId = record.getResourceId("ownerId");
-        lock.name = record.getString("name");
-        lock.expression = record.getString("expression");
-        lock.enabled = record.getBoolean("enabled");
-        return lock;
-    }
-
-    public static List<ResourceLock> fromRecords(List<Record> records) {
-        List<ResourceLock> locks = Lists.newArrayList();
-        for (Record record : records) {
-            locks.add(fromRecord(record));
-        }
-        return locks;
-    }
-
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        record.set("id", id);
-        record.set("ownerId", ownerId);
-        record.set("name", name);
-        record.set("expression", expression);
-        record.set("enabled", enabled);
-
-        return record;
     }
 
     @Override

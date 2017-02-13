@@ -24,11 +24,12 @@ package org.activityinfo.model.type.attachment;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import org.activityinfo.model.resource.Record;
-import org.activityinfo.model.resource.Resources;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,12 +44,15 @@ public class AttachmentValue implements FieldValue {
         return AttachmentType.TYPE_CLASS;
     }
 
-
     public AttachmentValue() {
     }
 
     public AttachmentValue(Attachment imageRowValue) {
         values.add(imageRowValue);
+    }
+
+    public AttachmentValue(List<Attachment> list) {
+        values.addAll(list);
     }
 
     public List<Attachment> getValues() {
@@ -57,14 +61,6 @@ public class AttachmentValue implements FieldValue {
 
     public boolean hasValues() {
         return !values.isEmpty();
-    }
-
-    public List<Record> getValuesAsRecords() {
-        final List<Record> result = Lists.newArrayList();
-        for (Attachment value : values) {
-            result.add(value.asRecord());
-        }
-        return result;
     }
 
     @Override
@@ -76,17 +72,17 @@ public class AttachmentValue implements FieldValue {
         return array;
     }
 
-    public static AttachmentValue fromRecord(Record record) {
-        AttachmentValue value = new AttachmentValue();
-        List<Record> recordList = record.getRecordList("values");
-        for (Record r : recordList) {
-            value.getValues().add(Attachment.fromRecord(r));
-        }
-        return value;
-    }
-
     public static AttachmentValue fromJson(String json) {
-        return fromRecord(Resources.recordFromJson(json));
+        JsonParser jsonParser = new JsonParser();
+        JsonObject object = jsonParser.parse(json).getAsJsonObject();
+        JsonArray array = object.getAsJsonArray("values");
+
+        List<Attachment> list = new ArrayList<>();
+        for (JsonElement value : array) {
+            list.add(Attachment.fromJson(value.getAsJsonObject()));
+        }
+
+        return new AttachmentValue(list);
     }
 
     @Override

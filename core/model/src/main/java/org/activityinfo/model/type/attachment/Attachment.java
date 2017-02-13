@@ -23,13 +23,11 @@ package org.activityinfo.model.type.attachment;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 
 /**
  * @author yuriyz on 8/12/14.
  */
-public class Attachment implements IsRecord {
+public class Attachment {
 
     private String mimeType;
     private String filename;
@@ -87,24 +85,6 @@ public class Attachment implements IsRecord {
         return blobId;
     }
 
-    @Override
-    public Record asRecord() {
-        return new Record()
-                .set("mimeType", mimeType)
-                .set("width", width)
-                .set("height", height)
-                .set("filename", filename)
-                .set("blobId", blobId);
-    }
-
-    public static Attachment fromRecord(Record record) {
-        Attachment rowValue = new Attachment(
-                record.getString("mimeType"), record.getString("filename"), record.getString("blobId"));
-        rowValue.setHeight(record.getInt("height"));
-        rowValue.setWidth(record.getInt("width"));
-        return rowValue;
-    }
-
     public JsonElement toJsonElement() {
         JsonObject object = new JsonObject();
         object.addProperty("mimeType", mimeType);
@@ -113,6 +93,17 @@ public class Attachment implements IsRecord {
         object.addProperty("filename", filename);
         object.addProperty("blobId", blobId);
         return object;
+    }
+
+
+    public static Attachment fromJson(JsonObject object) {
+        Attachment attachment = new Attachment(
+                object.get("mimeType").getAsString(),
+                object.get("filename").getAsString(),
+                object.get("blobId").getAsString());
+        attachment.setWidth(object.get("width").getAsInt());
+        attachment.setHeight(object.get("height").getAsInt());
+        return attachment;
     }
     
 
