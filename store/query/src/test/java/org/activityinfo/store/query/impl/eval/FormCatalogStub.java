@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -16,8 +17,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-mimport com.vividsolutions.jts.geom.Geometry;
 
 class FormCatalogStub implements FormCatalog {
 
