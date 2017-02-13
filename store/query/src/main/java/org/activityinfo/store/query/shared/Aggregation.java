@@ -22,6 +22,11 @@ public final class Aggregation {
     public static double[] aggregate(StatFunction statistic, int[] groupId, double[] values,
                                      int numValues, int numGroups) {
 
+
+        if(numValues == 0) {
+            return new double[] { statistic.compute(values, 0, 0) };
+        }
+
         HeapsortTandem.heapsortDescending(groupId, values, numValues);
 
         // Allocate the output for the results

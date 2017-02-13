@@ -97,10 +97,13 @@ public class GroupMap {
     }
 
     public int getGroupCount() {
-        return groups.size();
+        return Math.max(1, groups.size());
     }
 
     public String[] getGroup(int groupId) {
+        if(groups.isEmpty() && groupId == 0) {
+            return new String[dimCount];
+        }
         return groups.get(groupId);
     }
 }
