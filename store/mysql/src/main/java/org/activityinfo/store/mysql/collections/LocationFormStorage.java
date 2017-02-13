@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -350,6 +351,11 @@ public class LocationFormStorage implements FormStorage {
     @Override
     public long cacheVersion() {
         return version;
+    }
+
+    @Override
+    public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+        throw new UnsupportedOperationException();
     }
 
 }

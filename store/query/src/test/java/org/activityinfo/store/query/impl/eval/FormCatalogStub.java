@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+mimport com.vividsolutions.jts.geom.Geometry;
+
 class FormCatalogStub implements FormCatalog {
 
     private Map<ResourceId, StorageStub> formMap = new HashMap<>();
@@ -129,6 +131,11 @@ class FormCatalogStub implements FormCatalog {
         @Override
         public long cacheVersion() {
             return 0;
+        }
+
+        @Override
+        public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+            throw new UnsupportedOperationException();
         }
     }
 

@@ -14,4 +14,6 @@ public interface QueryExecutor {
     ResultSet query(String sql, List<?> parameters);
 
     int update(String sql, List<?> parameters);
+
+
 }

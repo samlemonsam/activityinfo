@@ -1,6 +1,7 @@
 package org.activityinfo.service.store;
 
 import com.google.common.base.Optional;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -68,5 +69,10 @@ public interface FormStorage {
      */
     long cacheVersion();
 
-    
+    /**
+     * Update the
+     * @param fieldId
+     * @param geometry
+     */
+    void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value);
 }

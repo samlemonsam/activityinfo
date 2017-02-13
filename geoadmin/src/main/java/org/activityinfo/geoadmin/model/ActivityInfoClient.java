@@ -14,7 +14,10 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.OutputStreamOutStream;
+import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -30,6 +33,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.ContextResolver;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -347,6 +352,44 @@ public class ActivityInfoClient implements FormClassProvider {
         String typeName = columnValue.get("type").getAsString();
         ColumnType type = ColumnType.valueOf(typeName);
         return new EmptyColumnView(type, numRows);
+    }
+
+    public void updateGeometry(ResourceId formId, ResourceId recordId, ResourceId fieldId, Geometry value) {
+        ClientResponse response = client.resource(root)
+                .path("form")
+                .path(formId.asString())
+                .path("record")
+                .path(recordId.asString())
+                .path("field")
+                .path(fieldId.asString())
+                .path("geometry")
+                .entity(toWkbBinary(value))
+                .post(ClientResponse.class);
+
+        if(response.getStatus() != 200) {
+            throw new RuntimeException("Failed with status code: " + response.getStatus() + ", message: " +
+                firstLine(response.getEntity(String.class)));
+        }
+    }
+
+    private String firstLine(String response) {
+        int endOfFirstLine = response.indexOf('\n');
+        if(endOfFirstLine == -1) {
+            return response;
+        } else {
+            return response.substring(0, endOfFirstLine);
+        }
+    }
+
+    private Object toWkbBinary(Geometry value) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        WKBWriter writer = new WKBWriter();
+        try {
+            writer.write(value, new OutputStreamOutStream(baos));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to encode geometry as WKB", e);
+        }
+        return baos.toByteArray();
     }
 
     public void executeTransaction(TransactionBuilder builder) {

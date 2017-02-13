@@ -6,6 +6,7 @@ dependencies {
     compile libraries.appengine.api
     compile libraries.guava
     compile libraries.gson
+    compile libraries.jts
 }
 
 // Copy sources needed by GWT

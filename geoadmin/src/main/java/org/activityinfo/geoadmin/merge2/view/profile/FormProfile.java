@@ -158,6 +158,17 @@ public class FormProfile {
     }
 
 
+    public FieldProfile getGeometryField() {
+        for (FieldProfile field : fields) {
+            if(field.getFormField().getType() instanceof GeoAreaType) {
+                return field;
+            }
+        }
+
+        return null;
+    }
+
+
     public FieldProfile getField(ResourceId id) {
         for (FieldProfile field : fields) {
             if(field.getId().equals(id)) {

@@ -1,6 +1,7 @@
 package org.activityinfo.geoadmin.source;
 
 import com.google.common.base.Optional;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -12,6 +13,7 @@ import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.service.store.RecordVersion;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.GeometryType;
 import org.opengis.feature.type.PropertyDescriptor;
 
 import java.util.List;
@@ -50,6 +52,10 @@ public class FeatureSourceStorage implements FormStorage {
         throw new UnsupportedOperationException();
     }
 
+    public SimpleFeatureSource getFeatureSource() {
+        return featureSource;
+    }
+
     @Override
     public FormClass getFormClass() {
         FormClass formClass = new FormClass(resourceId);
@@ -86,6 +92,17 @@ public class FeatureSourceStorage implements FormStorage {
         return field;
     }
 
+    public int getGeometryAttributeIndex() {
+        List<AttributeDescriptor> attributeDescriptors = featureSource.getSchema().getAttributeDescriptors();
+        for (int i = 0; i < attributeDescriptors.size(); i++) {
+            AttributeDescriptor descriptor = attributeDescriptors.get(i);
+            if (descriptor.getType() instanceof GeometryType) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
     @Override
     public ColumnQueryBuilder newColumnQuery() {
@@ -95,6 +112,11 @@ public class FeatureSourceStorage implements FormStorage {
     @Override
     public long cacheVersion() {
         return 0;
+    }
+
+    @Override
+    public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+        throw new UnsupportedOperationException();
     }
 
 
