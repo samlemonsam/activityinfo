@@ -13,7 +13,6 @@ dependencies {
 task unzip(type: Copy) {
 
     def zipPath = project.configurations.compile.find {it.name.startsWith("codemirror") }
-    println zipPath
     def zipFile = file(zipPath)
     def outputDir = file("${buildDir}/unpacked")
 
