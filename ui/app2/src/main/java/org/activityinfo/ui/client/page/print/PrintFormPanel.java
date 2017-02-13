@@ -23,7 +23,7 @@ import javax.inject.Provider;
 
 /**
  * Special panel that we attach to the root document on navigation to
- * #print/form/{resourceId}
+ * #print/form/{formId}/{recordId}
  * 
  * <p>This needs to be add a top level, outside of all the normal application chrome, 
  * in order to print properly</p>
@@ -32,6 +32,19 @@ public class PrintFormPanel extends FlowPanel {
 
     @Inject
     public PrintFormPanel(final ResourceLocator resourceLocator, final StateProvider stateProvider) {
+
+        // Expect #print/form/{formId}/{recordId}
+        String hash = Window.Location.getHash();
+        String[] parts = hash.split("/");
+        if(parts.length != 4) {
+            Window.alert("Invalid URL");
+            return;
+        }
+
+        final ResourceId formId = ResourceId.valueOf(parts[2]);
+        final ResourceId recordId = ResourceId.valueOf(parts[3]);
+
+
 
         BaseStylesheet.INSTANCE.ensureInjected();
         
@@ -57,28 +70,16 @@ public class PrintFormPanel extends FlowPanel {
 
             @Override
             public Promise<FormInstance> get() {
-                return resourceLocator.getFormInstance(null, parseInstanceId());
+                return resourceLocator.getFormInstance(formId, recordId);
             }
         });
         
         Document.get().getElementById("loading").getStyle().setDisplay(Style.Display.NONE);
     }
 
-    private ResourceId parseInstanceId() {
-        // Expect #print/form/{resourceId}
-        String hash = Window.Location.getHash();
-        String[] parts = hash.split("/");
-        
-        if(parts.length != 3) {
-            throw new RuntimeException("Invalid Hash: " + hash);
-        }
-        
-        return ResourceId.valueOf(parts[2]);
-    }
-    
-    public static void open(ResourceId resourceId) {
+    public static void open(ResourceId formId, ResourceId recordId) {
         String printUrl = Window.Location.createUrlBuilder()
-                .setHash("print/form/" + resourceId.asString()).buildString();
+                .setHash("print/form/" + formId.asString() + "/" + recordId.asString()).buildString();
 
         Window.open(printUrl, "_blank", "");
     }

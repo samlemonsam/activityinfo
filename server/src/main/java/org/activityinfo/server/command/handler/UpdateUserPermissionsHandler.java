@@ -58,7 +58,7 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
     private final MailSender mailSender;
 
 
-    private static final Logger logger = Logger.getLogger(UpdateUserPermissionsHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(UpdateUserPermissionsHandler.class.getName());
 
     @Inject
     public UpdateUserPermissionsHandler(UserDatabaseDAO databaseDAO,
@@ -76,6 +76,8 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
     @Override
     public CommandResult execute(UpdateUserPermissions cmd, User executingUser) throws CommandException {
 
+        LOGGER.info("UpdateUserPermissions: " + cmd);
+
         UserDatabase database = databaseDAO.findById(cmd.getDatabaseId());
         UserPermissionDTO dto = cmd.getModel();
         /*
@@ -83,8 +85,13 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
          * the queries
          */
         boolean isOwner = executingUser.getId() == database.getOwner().getId();
+        UserPermission executingUserPermission = queryUserPermission(executingUser, database);
+
+        LOGGER.info("executingUserPermission: isOwner: " + isOwner + ", executingUserPermissions: " + cmd);
+
+
         if (!isOwner) {
-            verifyAuthority(cmd, queryUserPermission(executingUser, database));
+            verifyAuthority(cmd, executingUserPermission);
         }
 
         /* Database owner cannot be added */
@@ -107,14 +114,14 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         UserPermission perm = queryUserPermission(user, database);
         if (perm == null) {
             perm = new UserPermission(database, user);
-            doUpdate(perm, dto, isOwner, queryUserPermission(executingUser, database));
+            doUpdate(perm, dto, isOwner, executingUserPermission);
             permDAO.persist(perm);
         } else {
             // If the user is intending to add a new user, verify that this user doesn't already exist
             if(cmd.isNewUser() && perm.isAllowView()) {
                 throw new UserExistsException();
             }
-            doUpdate(perm, dto, isOwner, queryUserPermission(executingUser, database));
+            doUpdate(perm, dto, isOwner, executingUserPermission);
         }
 
         return null;
@@ -141,7 +148,7 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             message.replyTo(executingUser.getEmail(), executingUser.getName());
             mailSender.send(message);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Could not send invitation mail", e);
+            LOGGER.log(Level.SEVERE, "Could not send invitation mail", e);
             throw new CommandException("Failed to send invitation email");
         }
         return user;

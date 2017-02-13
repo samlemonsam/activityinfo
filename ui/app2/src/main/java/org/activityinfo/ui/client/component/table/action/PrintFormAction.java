@@ -31,7 +31,7 @@ public class PrintFormAction implements TableHeaderAction {
     public void execute() {
         Optional<ResourceId> selection = getUniqueSelection();
         if(selection.isPresent()) {
-            PrintFormPanel.open(selection.get());
+            PrintFormPanel.open(table.getRootFormClass().getId(), selection.get());
         }
     }
 

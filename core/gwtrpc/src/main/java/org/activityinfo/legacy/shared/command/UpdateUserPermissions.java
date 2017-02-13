@@ -112,4 +112,14 @@ public class UpdateUserPermissions implements MutatingCommand<VoidResult> {
     public void setHost(String host) {
         this.host = host;
     }
+
+    @Override
+    public String toString() {
+        return "UpdateUserPermissions{" +
+                "databaseId=" + databaseId +
+                ", model=" + model +
+                ", host='" + host + '\'' +
+                ", newUser=" + newUser +
+                '}';
+    }
 }

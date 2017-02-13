@@ -183,5 +183,18 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         partner.setId(partnerId);
         setPartner(partner);
     }
+
+    public String toString() {
+        return "{email=" + getEmail() +
+                ",name=" + getName() +
+                ",partner=" + getPartner() +
+                ",view=" + getAllowView() +
+                ",viewAll=" + getAllowViewAll() +
+                ",edit=" + getAllowEdit() +
+                ",editAll=" + getAllowEditAll() +
+                ",manageUsers=" + getAllowManageUsers() +
+                ",manageAllUsers=" + getAllowManageAllUsers() +
+                "}";
+    }
     
 }

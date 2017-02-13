@@ -212,7 +212,9 @@ public class Updater {
     }
 
     private static FieldValue parseFieldValue(FormField field, JsonElement jsonValue) {
-        if(field.getType() instanceof EnumType) {
+        if(jsonValue.isJsonNull()) {
+            return null;
+        } else if(field.getType() instanceof EnumType) {
             return parseEnumValue((EnumType)field.getType(), jsonValue.getAsString());
         } else {
             return field.getType().parseJsonValue(jsonValue);
@@ -453,11 +455,19 @@ public class Updater {
         JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
         for (FormField formField : formClass.getFields()) {
             if(!(formField.getType() instanceof CalculatedFieldType)) {
-
                 if (fieldValues.has(formField.getName())) {
                     JsonElement updatedValueElement = fieldValues.get(formField.getName());
-                    FieldValue updatedValue = formField.getType().parseJsonValue(updatedValueElement);
-
+                    FieldValue updatedValue;
+                    if(updatedValueElement.isJsonNull()) {
+                        updatedValue = null;
+                    } else {
+                        try {
+                            updatedValue = formField.getType().parseJsonValue(updatedValueElement);
+                        } catch(Exception e) {
+                            throw new InvalidUpdateException("Could not parse updated value for field " +
+                                formField.getId() + ": " + e.getMessage());
+                        }
+                    }
                     update.getChangedFieldValues().put(formField.getId(), updatedValue);
 
                 } else if (create) {
