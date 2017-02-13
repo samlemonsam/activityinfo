@@ -72,4 +72,8 @@ public class Exprs {
         }
         return anyTrue(conditions);
     }
+
+    public static FunctionCallNode call(ExprFunction function, ExprNode... argumentList) {
+        return new FunctionCallNode(function, argumentList);
+    }
 }

@@ -19,10 +19,14 @@ public class FunctionCallNode extends ExprNode {
     @Nonnull
     private List<ExprNode> arguments;
 
-    public FunctionCallNode(ExprFunction function, List<ExprNode> arguments) {
+    public FunctionCallNode(ExprFunction function, List<ExprNode> arguments, SourceRange sourceRange) {
         super();
         this.function = function;
         this.arguments = arguments;
+        this.sourceRange = sourceRange;
+    }
+    public FunctionCallNode(ExprFunction function, List<ExprNode> arguments) {
+        this(function, arguments, null);
     }
 
     public FunctionCallNode(ExprFunction function, ExprNode... arguments) {

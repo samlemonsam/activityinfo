@@ -1,18 +1,18 @@
 package org.activityinfo.ui.client.measureDialog.model;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.CatalogEntry;
+import org.activityinfo.model.form.CatalogEntryType;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulList;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.BiFunction;
+import org.activityinfo.ui.client.analysis.model.FormForest;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -22,6 +22,7 @@ import java.util.List;
  */
 public class MeasureSelectionModel {
 
+
     public enum SelectionStep {
         FORM,
         MEASURE,
@@ -30,25 +31,21 @@ public class MeasureSelectionModel {
 
     private final FormStore formStore;
 
-    private final StatefulValue<Optional<ResourceId>> selectedFormId = new StatefulValue<>(Optional.absent());
+    /**
+     * Forms that have been selected
+     */
+    private final StatefulList<ResourceId> selectedForms = new StatefulList<>();
 
-    private final StatefulValue<Optional<MeasureType>> selectedMeasureType = new StatefulValue<>(Optional.absent());
+    private final Observable<FormForest> selectedFormSet;
 
-    private final Observable<Optional<FormClass>> selectedFormSchema;
+    private final StatefulValue<Optional<MeasureModel>> selectedMeasure = new StatefulValue<>(Optional.absent());
 
     private StatefulValue<SelectionStep> selectionStep = new StatefulValue<>(SelectionStep.FORM);
 
-    private StatefulValue<MeasureModel> selectedMeasure = new StatefulValue<>();
-
     public MeasureSelectionModel(final FormStore formStore) {
         this.formStore = formStore;
-        this.selectedFormSchema = selectedFormId.join(selection -> {
-            if (selection.isPresent()) {
-                return formStore.getFormClass(selection.get()).transform(formClass -> Optional.of(formClass));
-            } else {
-                return Observable.just(Optional.absent());
-            }
-        });
+        Observable<List<FormTree>> flatMap = selectedForms.flatMap(formStore::getFormTree);
+        this.selectedFormSet = flatMap.transform(FormForest::new);
     }
 
 
@@ -56,106 +53,55 @@ public class MeasureSelectionModel {
         return formStore;
     }
 
+    public StatefulList<ResourceId> getSelectedForms() {
+        return selectedForms;
+    }
+
     public Observable<SelectionStep> getSelectionStep() {
         return selectionStep;
     }
 
-    public Observable<Optional<FormClass>> getSelectedFormSchema() {
-        return selectedFormSchema;
+    public Observable<FormForest> getSelectedFormSet() {
+        return selectedFormSet;
     }
 
-
-    /**
-     * @return the list of available measures, a function of the selected form.
-     */
-    public Observable<List<MeasureType>> getAvailableMeasures() {
-        return selectedFormSchema.transform(new Function<Optional<FormClass>, List<MeasureType>>() {
+    public Observable<Optional<MeasureModel>> getSelectedMeasure() {
+        return Observable.transform(getSelectedFormSet(), selectedMeasure, new BiFunction<FormForest, Optional<MeasureModel>, Optional<MeasureModel>>() {
             @Override
-            public List<MeasureType> apply(Optional<FormClass> selectedForm) {
-                if (!selectedForm.isPresent()) {
-                    return Collections.emptyList();
+            public Optional<MeasureModel> apply(FormForest formForest, Optional<MeasureModel> selected) {
+                if(selected.isPresent()) {
+                    // TODO: ensure the measure is still valid for the form selection
+                    return selected;
                 } else {
-                    return availableMeasures(selectedForm.get());
+                    return Optional.absent();
                 }
             }
         });
     }
 
-    public Observable<MeasureType> getSelectedMeasureType() {
-        return selectedMeasureType.transform(measureType -> measureType.or(new CountMeasureType()));
-    }
-
-    private List<MeasureType> availableMeasures(FormClass selectedForm) {
-        List<MeasureType> measureTypes = new ArrayList<>();
-        measureTypes.add(new CountMeasureType());
-        measureTypes.add(new CalculationMeasureType());
-        for (FormField field : selectedForm.getFields()) {
-            if (field.getType() instanceof QuantityType) {
-                measureTypes.add(new FieldMeasureType(selectedForm.getId(), field));
-            }
-        }
-        return measureTypes;
-    }
-
-
     public void selectForm(Optional<ResourceId> formId) {
-        selectedFormId.updateIfNotEqual(formId);
+        if(formId.isPresent()) {
+            selectedForms.set(formId.get());
+        } else {
+            selectedForms.clear();
+        }
     }
 
 
-    public void selectMeasureType(Optional<MeasureType> measureType) {
-        selectedMeasureType.updateIfNotEqual(measureType);
+    public void selectForm(CatalogEntry form) {
+        if(form.getType() == CatalogEntryType.FORM) {
+            selectForm(Optional.of(ResourceId.valueOf(form.getId())));
+        }
     }
 
+    public void selectMeasure(MeasureModel measure) {
+        this.selectedMeasure.updateIfNotEqual(Optional.of(measure));
+    }
 
     public void reset() {
         selectionStep.updateIfNotEqual(SelectionStep.FORM);
-        selectedFormId.clear();
-        selectedMeasureType.clear();
-    }
-
-    /**
-     * Advances to the next step if possible.
-     */
-    public void nextStep() {
-
-        switch (selectionStep.get()) {
-            case FORM:
-                if(selectedFormId.get().isPresent()) {
-                    selectionStep.updateValue(SelectionStep.MEASURE);
-                }
-                break;
-            case MEASURE:
-                selectionStep.updateValue(SelectionStep.MEASURE_OPTIONS);
-                break;
-        }
-    }
-
-
-    /**
-     * Retreats to the previous step if possible
-     */
-    public void previousStep() {
-        switch (selectionStep.get()) {
-            case FORM:
-                break;
-            case MEASURE:
-                selectionStep.updateValue(SelectionStep.FORM);
-                break;
-            case MEASURE_OPTIONS:
-                selectionStep.updateValue(SelectionStep.MEASURE);
-                break;
-        }
-    }
-
-    public Optional<MeasureModel> buildMeasure() {
-        Observable<Optional<FormClass>> selectedForm = getSelectedFormSchema();
-        Observable<MeasureType> type = getSelectedMeasureType();
-        if (type.isLoaded() && selectedForm.isLoaded() && selectedForm.get().isPresent()) {
-            return Optional.of(type.get().buildModel(selectedForm.get().get()));
-        } else {
-            return Optional.absent();
-        }
+        selectedForms.clear();
+        selectedMeasure.clear();
     }
 
 }

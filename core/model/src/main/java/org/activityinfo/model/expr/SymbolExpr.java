@@ -44,6 +44,12 @@ public class SymbolExpr extends ExprNode {
         this(id.asString());
     }
 
+    public SymbolExpr(Token token) {
+        assert token.getType() == TokenType.SYMBOL;
+        this.name = token.getString();
+        this.sourceRange = new SourceRange(token);
+    }
+
     @Override
     public FieldValue evaluate(EvalContext context) {
         return context.resolveSymbol(name);

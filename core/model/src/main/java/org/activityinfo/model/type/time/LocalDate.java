@@ -5,8 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -16,7 +14,7 @@ import java.util.Date;
 /**
  * {@code FieldValue} of type {@code LocalDateType}
  */
-public class LocalDate implements FieldValue, IsRecord, TemporalValue {
+public class LocalDate implements FieldValue, TemporalValue {
 
     private int year;
     private int monthOfYear;
@@ -199,17 +197,6 @@ public class LocalDate implements FieldValue, IsRecord, TemporalValue {
     @Override
     public FieldTypeClass getTypeClass() {
         return LocalDateType.TYPE_CLASS;
-    }
-
-    @Override
-    public Record asRecord() {
-        return new Record()
-            .set(TYPE_CLASS_FIELD_NAME, LocalDateType.TYPE_CLASS.getId())
-            .set("value", toString());
-    }
-
-    public static LocalDate fromRecord(Record record) {
-        return LocalDate.parse(record.getString("value"));
     }
 
     public static LocalDate valueOf(com.bedatadriven.rebar.time.calendar.LocalDate rebarDate) {

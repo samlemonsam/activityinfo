@@ -2,8 +2,6 @@ package org.activityinfo.model.type.geo;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.resource.RecordFieldValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -14,7 +12,7 @@ import org.activityinfo.model.type.number.Quantity;
  * A Field Value containing a geographic point in the WGS84 geographic
  * reference system.
  */
-public class GeoPoint implements GeoFieldValue, IsRecord, RecordFieldValue {
+public class GeoPoint implements GeoFieldValue, RecordFieldValue {
 
     private double latitude;
     private double longitude;
@@ -43,18 +41,6 @@ public class GeoPoint implements GeoFieldValue, IsRecord, RecordFieldValue {
         object.addProperty("latitude", latitude);
         object.addProperty("longitude", longitude);
         return object;
-    }
-
-    @Override
-    public Record asRecord() {
-        return new Record()
-            .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
-            .set("latitude", latitude)
-            .set("longitude", longitude);
-    }
-
-    public static GeoPoint fromRecord(Record record) {
-        return new GeoPoint(record.getDouble("latitude"), record.getDouble("longitude"));
     }
 
     @Override

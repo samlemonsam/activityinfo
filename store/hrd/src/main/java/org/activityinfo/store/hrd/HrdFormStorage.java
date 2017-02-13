@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd;
 
 import com.google.common.base.Optional;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -87,6 +88,11 @@ public class HrdFormStorage implements FormStorage {
     @Override
     public long cacheVersion() {
         return 0;
+    }
+
+    @Override
+    public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+        throw new UnsupportedOperationException();
     }
 
     public Iterable<FormRecord> getSubRecords(ResourceId parentId) {

@@ -39,21 +39,20 @@ public class GeometryConverter implements Function<Object, FieldValue> {
         return CRS.findMathTransform(sourceCrs, geoCRS, lenient);
     }
 
-    @Override
-    public FieldValue apply(Object input) {
+    public Geometry toWgs84(Object input) {
         assert input instanceof Geometry;
 
-        Geometry geometryInWgs84;
         Geometry geometry = (Geometry) input;
         try {
-            geometryInWgs84 = JTS.transform(geometry, transform);
+            return JTS.transform(geometry, transform);
         } catch (TransformException e) {
             throw new RuntimeException(e);
         }
-        
-        Envelope envelope = geometryInWgs84.getEnvelopeInternal();
-        Extents extents = Extents.create(envelope.getMinX(), envelope.getMinY(), envelope.getMaxX(), envelope.getMaxY());
-        GeoArea fieldValue = new GeoArea(extents, "");
-        return fieldValue;
+    }
+
+    @Override
+    public FieldValue apply(Object input) {
+        Envelope e = toWgs84(input).getEnvelopeInternal();
+        return new GeoArea(new Extents(e.getMinY(), e.getMaxY(), e.getMinX(), e.getMaxX()));
     }
 }

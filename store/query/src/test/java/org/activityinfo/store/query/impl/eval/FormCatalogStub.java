@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
@@ -129,6 +130,11 @@ class FormCatalogStub implements FormCatalog {
         @Override
         public long cacheVersion() {
             return 0;
+        }
+
+        @Override
+        public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+            throw new UnsupportedOperationException();
         }
     }
 

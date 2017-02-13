@@ -3,6 +3,7 @@ package org.activityinfo.server.endpoint.odk.build;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -51,6 +52,9 @@ public class XPathBuilder {
         }
         try {
             return build(ExprParser.parse(expr));
+        } catch (ExprException e) {
+            LOGGER.log(Level.WARNING, "Could not parse expression '" + expr + "': " + e.getMessage());
+            return null;
         } catch (XPathBuilderException e) {
             LOGGER.log(Level.WARNING, "Exception translating expr '" + expr + "' to XPATH: " + e.getMessage());
             return null;

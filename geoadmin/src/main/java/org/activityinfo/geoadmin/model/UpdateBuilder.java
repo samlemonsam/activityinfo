@@ -1,7 +1,6 @@
 package org.activityinfo.geoadmin.model;
 
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.IsRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
@@ -39,12 +38,10 @@ public class UpdateBuilder {
     public void setProperty(ResourceId fieldId, FieldValue value) {
         if(value instanceof TextValue) {
             update.addProperty(fieldId.asString(), ((TextValue) value).asString());
+
         } else if(value instanceof ReferenceValue) {
             update.addProperty(fieldId.asString(), ((ReferenceValue) value).getOnlyReference().toQualifiedString());
 
-        } else if(value instanceof IsRecord) {
-            update.add(fieldId.asString(), value.toJsonElement());
-            
         } else {
             throw new UnsupportedOperationException("value: " + value.getTypeClass());
         }

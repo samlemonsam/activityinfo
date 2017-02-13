@@ -6,7 +6,6 @@ import com.google.common.base.Preconditions;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.promise.Function3;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -151,6 +150,10 @@ public abstract class Observable<T> {
     
     public <R> Observable<R> join(final Function<T, Observable<R>> function) {
         return new ChainedObservable<>(transform(function));
+    }
+
+    public static <X, Y, R> Observable<R> join(Observable<X> x, Observable<Y> y, BiFunction<X, Y, Observable<R>> function) {
+        return new ChainedObservable<>(transform(x, y, function));
     }
 
     public static <T> Observable<T> just(T value) {

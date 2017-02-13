@@ -23,15 +23,13 @@ package org.activityinfo.model.type.time;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
 /**
  * Represents a specific calendar year in the ISO-8601 calendar.
  */
-public class YearValue implements FieldValue, IsRecord, TemporalValue {
+public class YearValue implements FieldValue, TemporalValue {
 
     private final int year;
 
@@ -64,11 +62,6 @@ public class YearValue implements FieldValue, IsRecord, TemporalValue {
     @Override
     public JsonElement toJsonElement() {
         return new JsonPrimitive(year);
-    }
-
-    @Override
-    public Record asRecord() {
-        return new Record().set("year", year);
     }
 
     @Override

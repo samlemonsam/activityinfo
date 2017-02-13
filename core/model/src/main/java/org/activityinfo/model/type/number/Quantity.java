@@ -4,12 +4,10 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
-public class Quantity implements FieldValue, IsRecord {
+public class Quantity implements FieldValue {
 
     public static final String UNKNOWN_UNITS = "unknown";
 
@@ -77,18 +75,6 @@ public class Quantity implements FieldValue, IsRecord {
     public int hashCode() {
         long temp = Double.doubleToLongBits(value);
         return ((int) (temp ^ (temp >>> 32))) ^ (units != null ? units.hashCode() : 0);
-    }
-
-    public static FieldValue fromRecord(Record record) {
-        return new Quantity(record.getDouble("value"), record.isString("units"));
-    }
-
-    @Override
-    public Record asRecord() {
-        return new Record()
-            .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
-            .set("value", value)
-            .set("units", units);
     }
 
     public boolean hasUnits() {

@@ -29,14 +29,17 @@
   <inherits name='com.google.gwt.place.Place'/>
 
   <inherits name="org.activityinfo.model.Model"/>
+  <inherits name="org.activityinfo.store.query.Query"/>
+
   <inherits name="org.activityinfo.api.ApiClient"/>
 
   <set-property name="gwt.logging.logLevel" value="FINEST"/>
   <set-property name="gwt.logging.enabled" value="TRUE"/>
 
   <inherits name='com.sencha.gxt.theme.triton.Theme' />
+  <inherits name="org.activityinfo.ui.codemirror.CodeMirror"/>
 
-  <!-- Specify the paths for translatable code -->
+    <!-- Specify the paths for translatable code -->
   <source path='client'/>
   <source path='shared'/>
 

@@ -1636,4 +1636,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Measures")
     String measures();
 
+    @DefaultStringValue("Formula")
+    String formula();
+
+    @DefaultStringValue("The formula is valid.")
+    String formulaValid();
+
 }

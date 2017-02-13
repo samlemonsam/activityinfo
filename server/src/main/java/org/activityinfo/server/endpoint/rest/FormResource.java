@@ -4,10 +4,15 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.gson.*;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.legacy.shared.Pair;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -20,6 +25,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -48,6 +54,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -141,6 +148,71 @@ public class FormResource {
                 .entity(record.get().toJsonElement().toString())
                 .type(JSON_CONTENT_TYPE)
                 .build();
+    }
+
+    @POST
+    @Path("record/{recordId}/field/{fieldId}/geometry")
+    public Response updateGeometry(@PathParam("recordId") String recordId, @PathParam("fieldId") String fieldId,
+                                   byte[] binaryBody) {
+
+        // Parse the Geometry
+        WKBReader reader = new WKBReader(new GeometryFactory());
+        Geometry geometry;
+        try {
+            geometry = reader.read(binaryBody);
+        } catch (ParseException e) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Could not parse WKB geometry: " + e.getMessage())
+                    .build();
+        }
+
+        geometry.normalize();
+
+        if(!geometry.isValid()) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(geometry.getGeometryType() + " is not valid")
+                    .build();
+        }
+
+        // Check first to see if this form exists
+        Optional<FormStorage> storage = catalog.get().getForm(formId);
+        if(!storage.isPresent()) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("Form " + formId + " does not exist.")
+                    .build();
+        }
+
+        // Find the field and verify that it's a GeoArea type
+        FormField field;
+        try {
+            field = storage.get().getFormClass().getField(ResourceId.valueOf(fieldId));
+        } catch (IllegalArgumentException e) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("Record " + recordId + " does not exist.")
+                    .build();
+        }
+        if(!(field.getType() instanceof GeoAreaType)) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Field " + fieldId + " is not a GeoArea type")
+                    .build();
+        }
+
+        try {
+            storage.get().updateGeometry(ResourceId.valueOf(recordId), ResourceId.valueOf(fieldId), geometry);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to update geometry for record " + recordId, e);
+            return Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build();
+        }
+
+        return Response.ok().build();
     }
 
     @GET
@@ -404,7 +476,7 @@ public class FormResource {
         if(!permissions.isVisible()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.FORBIDDEN)
-                            .entity(format("You do not have permission to view the collection %s", collectionId.asString()))
+                            .entity(format("You do not have permission to view the form %s", collectionId.asString()))
                             .build());
 
         }

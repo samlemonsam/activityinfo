@@ -3,11 +3,9 @@ package org.activityinfo.model.type;
 import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.primitive.HasStringValue;
 
-public class NarrativeValue implements FieldValue, IsRecord, HasStringValue {
+public class NarrativeValue implements FieldValue, HasStringValue {
 
     private String text;
 
@@ -39,13 +37,6 @@ public class NarrativeValue implements FieldValue, IsRecord, HasStringValue {
 
 
     @Override
-    public Record asRecord() {
-        return new Record()
-                .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
-                .set("text", text);
-    }
-
-    @Override
     public String asString() {
         return text;
     }
@@ -53,10 +44,6 @@ public class NarrativeValue implements FieldValue, IsRecord, HasStringValue {
     @Override
     public String toString() {
         return text;
-    }
-
-    public static FieldValue fromRecord(Record record) {
-        return valueOf(record.getString("text"));
     }
 
     @Override

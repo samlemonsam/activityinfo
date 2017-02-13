@@ -16,7 +16,11 @@ public class ExprLexer extends UnmodifiableIterator<Token> {
 
     private String string;
     private int currentCharIndex;
+    private int currentLineIndex;
+    private int currentColumnIndex;
+
     private int currentTokenStart = 0;
+    private SourcePos currentTokenStartPos = new SourcePos(0, 0);
 
     private static final String OPERATOR_CHARS = "+-/*&|=!<>";
 
@@ -33,23 +37,42 @@ public class ExprLexer extends UnmodifiableIterator<Token> {
     }
 
     private char nextChar() {
-        return string.charAt(currentCharIndex++);
+        return consumeChar();
     }
 
     /**
      * Adds the current char to the current token
      */
-    private void consumeChar() {
+    private char consumeChar() {
+        char c = string.charAt(currentCharIndex);
         currentCharIndex++;
+        if(c == '\n') {
+            currentLineIndex ++;
+            currentColumnIndex = 0;
+        } else {
+            currentColumnIndex ++;
+        }
+        return c;
+    }
+
+    private void consumeChars(int count) {
+        while(count > 0) {
+            consumeChar();
+            count--;
+        }
     }
 
     private Token finishToken(TokenType type) {
         return finishToken(type, string.substring(currentTokenStart, currentCharIndex));
     }
 
+
     private Token finishToken(TokenType type, String text) {
-        Token token = new Token(type, currentTokenStart, text);
+        int length = currentCharIndex - currentTokenStart;
+        Token token = new Token(type, currentTokenStartPos, length, text);
         currentTokenStart = currentCharIndex;
+        currentTokenStartPos = new SourcePos(currentLineIndex, currentColumnIndex);
+
         return token;
     }
 
@@ -193,45 +216,11 @@ public class ExprLexer extends UnmodifiableIterator<Token> {
     }
 
     private Token readBooleanLiteral(char c) {
-        currentCharIndex--;
         if (c == 't' || c == 'T') {
-            String trueLiteral = Boolean.TRUE.toString();
-            String literal = string.substring(currentCharIndex, currentCharIndex + trueLiteral.length());
-            if (trueLiteral.equalsIgnoreCase(literal)) {
-                currentCharIndex += trueLiteral.length();
-                return finishToken(TokenType.BOOLEAN_LITERAL);
-            }
-        } else if (c == 'f' || c == 'F') {
-            String falseLiteral = Boolean.FALSE.toString();
-            String literal = string.substring(currentCharIndex, currentCharIndex + falseLiteral.length());
-            if (falseLiteral.equalsIgnoreCase(literal)) {
-                currentCharIndex += falseLiteral.length();
-                return finishToken(TokenType.BOOLEAN_LITERAL);
-            }
+            consumeChars(Boolean.TRUE.toString().length() - 1);
+        } else {
+            consumeChars(Boolean.FALSE.toString().length() - 1);
         }
-        throw new RuntimeException("Bug in isBooleanLiteral() ?");
+        return finishToken(TokenType.BOOLEAN_LITERAL);
     }
-
-    private Token readBooleanOperator(char c) {
-        if (c == '!') {
-            if (string.charAt(currentCharIndex) == '=') { // check whether it's NOT (!) or NOT_EQUAL operator (!=)
-                currentCharIndex++;
-            }
-            return finishToken(TokenType.OPERATOR);
-        } else if (c == '&') {
-            // if next char is also & then its && operator
-            currentCharIndex++;
-            return finishToken(TokenType.OPERATOR);
-        } else if (c == '|') {
-            currentCharIndex++;
-            // if next char is also | then its || operator
-            return finishToken(TokenType.OPERATOR);
-        } else if (c == '=') {
-            currentCharIndex++;
-            // if next char is also = then its == operator
-            return finishToken(TokenType.OPERATOR);
-        }
-        throw new RuntimeException("Invalid boolean operator.");
-    }
-
 }

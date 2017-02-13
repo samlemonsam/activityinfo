@@ -16,6 +16,12 @@ public class GroupExpr extends ExprNode {
         this.expr = expr;
     }
 
+    public GroupExpr(ExprNode expr, SourceRange sourceRange) {
+        super();
+        this.expr = expr;
+        this.sourceRange = sourceRange;
+    }
+
     @Override
     public String toString() {
         return asExpression();

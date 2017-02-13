@@ -1,6 +1,7 @@
 package org.activityinfo.model.expr.functions;
 
 import com.google.common.base.Function;
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 
@@ -34,5 +35,11 @@ public abstract class ExprFunction implements Function<List<FieldValue>, FieldVa
 
     public boolean isInfix() {
         return false;
+    }
+
+    protected void checkArity(List<?> arguments, int expectedArity) {
+        if(arguments.size() != expectedArity) {
+            throw new ExprSyntaxException("The " + getLabel() + "() function expects " + expectedArity + " argument(s).");
+        }
     }
 }

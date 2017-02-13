@@ -11,6 +11,8 @@ import org.activityinfo.model.type.FieldValue;
  */
 public abstract class ExprNode {
 
+    SourceRange sourceRange;
+
     /**
      * Evaluates the expression to a real value.
      * @param context
@@ -31,4 +33,8 @@ public abstract class ExprNode {
     }
 
     public abstract <T> T accept(ExprVisitor<T> visitor);
+
+    public SourceRange getSourceRange() {
+        return sourceRange;
+    }
 }

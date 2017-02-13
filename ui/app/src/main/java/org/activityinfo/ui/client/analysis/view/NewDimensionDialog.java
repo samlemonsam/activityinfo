@@ -6,17 +6,27 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.sencha.gxt.core.client.ValueProvider;
-import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.Dialog;
-import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.tree.Tree;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
-import org.activityinfo.ui.client.analysis.model.DimensionSourceSet;
+import org.activityinfo.ui.client.analysis.model.FormForest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Allows the user to choose a new dimension
@@ -29,29 +39,16 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSourceM
 
     private final SimpleEventBus eventBus = new SimpleEventBus();
 
-    private ListStore<DimensionSourceModel> listStore;
-    private ListView<DimensionSourceModel, String> listView;
+    private TreeStore<DimensionNode> store;
+    private Tree<DimensionNode, String> tree;
 
 
     public NewDimensionDialog(AnalysisModel model) {
         this.model = model;
 
-        listStore = new ListStore<>(item -> item.getLabel());
-        listView = new ListView<>(listStore, new ValueProvider<DimensionSourceModel, String>() {
-            @Override
-            public String getValue(DimensionSourceModel object) {
-                return object.getLabel();
-            }
-
-            @Override
-            public void setValue(DimensionSourceModel object, String value) {
-            }
-
-            @Override
-            public String getPath() {
-                return "label";
-            }
-        });
+        store = new TreeStore<>(DimensionNode::getKey);
+        tree = new Tree<>(store, DimensionNode.VALUE_PROVIDER);
+        tree.setIconProvider(DimensionNode::getIcon);
 
         this.dialog = new Dialog();
         dialog.setHeading("New Dimension");
@@ -60,7 +57,7 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSourceM
         dialog.setPredefinedButtons(Dialog.PredefinedButton.CANCEL, Dialog.PredefinedButton.OK);
         dialog.setClosable(true);
         dialog.addDialogHideHandler(this::onDialogHidden);
-        dialog.setWidget(listView);
+        dialog.setWidget(tree);
 
         dialog.getButton(Dialog.PredefinedButton.CANCEL).addSelectHandler(this::onCancelClicked);
         dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(this::onOkClicked);
@@ -68,21 +65,53 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSourceM
 
 
     public void show() {
-        subscription = model.getDimensionSources().subscribe(this::onTreeUpdated);
+        subscription = model.getFormForest().subscribe(this::onForestUpdated);
         dialog.show();
         dialog.center();
     }
 
-    private void onTreeUpdated(Observable<DimensionSourceSet> dimensionSources) {
-        if (dimensionSources.isLoading()) {
-            listStore.clear();
-        } else {
-            listStore.replaceAll(dimensionSources.get().getSources());
+    private void onForestUpdated(Observable<FormForest> forest) {
+        store.clear();
+        if (forest.isLoaded()) {
+
+            // The Form Name can be a dimension
+            store.add(new FormNode());
+
+            // Add root fields...
+            for (FormTree.Node node : forest.get().getRootNodes()) {
+                if(isEligible(node.getType())) {
+                    store.add(new RootFieldNode(node.getField()));
+                }
+            }
+
+            // Add reference forms with eligible fields
+            for (FormClass formClass : forest.get().getReferencedForms()) {
+                List<DimensionNode> children = new ArrayList<>();
+                for (FormField field : formClass.getFields()) {
+                    if(isEligible(field.getType())) {
+                        children.add(new ReferencedNode(formClass, field));
+                    }
+                }
+                if(!children.isEmpty()) {
+                    ReferenceFormNode refNode = new ReferenceFormNode(formClass, children.get(0));
+                    store.add(refNode);
+                    store.add(refNode, children);
+                }
+            }
         }
     }
 
+    private boolean isEligible(FieldType type) {
+        return type instanceof TextType ||
+                type instanceof BarcodeType ||
+                type instanceof EnumType ||
+                type instanceof LocalDateType;
+    }
+
+
+
     private void onOkClicked(SelectEvent event) {
-        DimensionSourceModel selectedItem = listView.getSelectionModel().getSelectedItem();
+        DimensionSourceModel selectedItem = tree.getSelectionModel().getSelectedItem().dimensionModel();
         if (selectedItem != null) {
             SelectionEvent.fire(this, selectedItem);
             dialog.hide();

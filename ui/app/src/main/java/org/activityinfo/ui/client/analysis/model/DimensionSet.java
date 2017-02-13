@@ -2,12 +2,13 @@ package org.activityinfo.ui.client.analysis.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Immutable set of dimensions
  */
-public class DimensionSet {
+public class DimensionSet implements Iterable<DimensionModel> {
 
     private int count;
     private DimensionModel[] dimensions;
@@ -41,5 +42,10 @@ public class DimensionSet {
         List<DimensionModel> newList = new ArrayList<>(getList());
         newList.add(newDimension);
         return new DimensionSet(newList);
+    }
+
+    @Override
+    public Iterator<DimensionModel> iterator() {
+        return Arrays.asList(dimensions).iterator();
     }
 }

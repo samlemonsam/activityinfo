@@ -24,8 +24,6 @@ package org.activityinfo.model.type.geo;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonSetter;
 
@@ -38,7 +36,7 @@ import java.io.Serializable;
  * a sphere as opposed to a coordinate on a 2D plane.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Extents implements Serializable, IsRecord {
+public class Extents implements Serializable {
 
     private static final int LAT_MAX = 90;
     private static final int LNG_MAX = 180;
@@ -291,25 +289,7 @@ public class Extents implements Serializable, IsRecord {
                ", maxLon=" + maxLon +
                '}';
     }
-    
-    @Override
-    public Record asRecord() {
-        Record record = new Record();
-        if (!Double.isNaN(minLat)) {
-            record.set("minLat", minLat);
-        }
-        if (!Double.isNaN(maxLat)) {
-            record.set("maxLat", maxLat);
-        }
-        if (!Double.isNaN(minLon)) {
-            record.set("minLon", minLon);
-        }
-        if (!Double.isNaN(maxLon)) {
-            record.set("maxLon", maxLon);
-        }
-        return record;
-    }
-    
+
     public JsonElement toJsonElement() {
         JsonObject object = new JsonObject();
         if (!Double.isNaN(minLat)) {

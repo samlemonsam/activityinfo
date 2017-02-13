@@ -1,0 +1,28 @@
+
+<arglist> ::= <expression> | <arglist> , <expression>
+
+<application> ::= SYMBOL ( <arglist>? )
+
+<compound> ::= <primary> . SYMBOL
+
+<literal> ::= NUMERIC_LITERAL | BOOLEAN_LITERAL | STRING_LITERAL
+
+<primary> ::= <literal> | ( <expression> ) | <compound> | <application>
+
+<unary2> ::= <primary> | ~ <unary> | ! <unary>
+
+<unary> ::=  + <unary> | - <unary> | <unary2>
+
+<factor> ::= <unary> | <factor> * <unary> | <factor> / <unary>
+
+<term> ::= <factor> | <term> + <factor> | <term> - <factor>
+
+<relational> ::= <term> | <relational> < <term> | <relational> > <term> | <relational> <= <term> | <relational> >= <term>
+
+<equality> ::= <relational> | <equality> == <relational> | <equality> != <relational>
+
+<conjunction> ::= <equality> | <conjunction> && <equality>
+
+<disjunction> ::= <conjunction> | <disjunction> || <conjunction>
+
+<expression> ::= <disjunction>

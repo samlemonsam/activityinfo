@@ -1,5 +1,7 @@
 package org.activityinfo.model.expr;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import javax.annotation.Nonnull;
 
 
@@ -7,17 +9,21 @@ public class Token {
 
     private TokenType type;
     private String string;
-    private int tokenStart;
+    private SourcePos pos;
+    private int length;
 
-    public Token(TokenType type, int tokenStart, @Nonnull String string) {
+    public Token(TokenType type, SourcePos pos, int length, @Nonnull String string) {
         super();
+        this.pos = pos;
+        this.length = length;
         assert string != null && string.length() > 0;
         this.type = type;
         this.string = string;
     }
 
-    public Token(TokenType type, int tokenStart, char c) {
-        this(type, tokenStart, Character.toString(c));
+    @VisibleForTesting
+    Token(TokenType type, int tokenStart, String string) {
+        this(type, new SourcePos(0, tokenStart), string.length(), string);
     }
 
     /**
@@ -31,8 +37,25 @@ public class Token {
      * @return the character index within the original expression string
      * in which this token starts
      */
-    public int getTokenStart() {
-        return tokenStart;
+    public int getTokenStartColumn() {
+        return pos.getColumn();
+    }
+
+    public SourcePos getStart() {
+        return pos;
+    }
+
+
+    public SourcePos getEnd() {
+        return new SourcePos(pos.getLine(), pos.getColumn() + length);
+    }
+
+    /**
+     *
+     * @return the length of the original token in the source, including any escaping.
+     */
+    public int getLength() {
+        return length;
     }
 
     /**
@@ -44,6 +67,44 @@ public class Token {
 
     public String toString() {
         return type.name() + "[" + string + "]";
+    }
+
+    public boolean isRelationalOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("<") ||
+                 string.equals("<=") ||
+                 string.equals(">") ||
+                 string.equals(">="));
+    }
+
+    public boolean isAdditiveOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("+") || string.equals("-"));
+    }
+
+    public boolean isMultiplicativeOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("*") || string.equals("/"));
+    }
+
+    public boolean isEqualityOperator() {
+        return type == TokenType.OPERATOR &&
+                (string.equals("==") ||
+                 string.equals("!="));
+    }
+
+
+    public boolean isOrOperator() {
+        return type == TokenType.OPERATOR && string.equals("||");
+    }
+
+    public boolean isAndOperator() {
+        return type == TokenType.OPERATOR && string.equals("&&");
+    }
+
+
+    public boolean isDot() {
+        return type == TokenType.DOT && string.equals(".");
     }
 
     @Override
@@ -66,4 +127,6 @@ public class Token {
         Token other = (Token) obj;
         return other.string.equals(string);
     }
+
+
 }

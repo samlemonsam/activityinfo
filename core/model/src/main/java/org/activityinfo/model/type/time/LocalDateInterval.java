@@ -2,8 +2,6 @@ package org.activityinfo.model.type.time;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -14,7 +12,7 @@ import javax.annotation.Nonnull;
  * a continuous interval between two {@link org.activityinfo.model.type.time.LocalDate}s,
  * starting on {@code startDate}, inclusive, and ending on {@code endDate}, inclusive.
  */
-public class LocalDateInterval implements FieldValue, IsRecord {
+public class LocalDateInterval implements FieldValue {
 
     private final LocalDate startDate;
     private final LocalDate endDate;
@@ -50,14 +48,6 @@ public class LocalDateInterval implements FieldValue, IsRecord {
         object.addProperty("start", startDate.toString());
         object.addProperty("end", endDate.toString());
         return object;
-    }
-
-    @Override
-    public Record asRecord() {
-        return new Record()
-            .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
-            .set("start", getStartDate().toString())
-            .set("end", getEndDate().toString());
     }
 
     @Override

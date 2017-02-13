@@ -16,19 +16,21 @@ public class AnalysisView implements IsWidget {
         this.model = model;
         container = new BorderLayoutContainer();
         createPanes();
+
+        AnalysisBundle.INSTANCE.getStyles().ensureInjected();
     }
 
     private void createPanes() {
 
         MeasurePane measurePane = new MeasurePane(model);
         DimensionPane rowPane = new DimensionPane(model);
-        DimensionPane columnPane = new DimensionPane(model);
+      //  DimensionPane columnPane = new DimensionPane(model);
         PivotTableView pivotTableView = new PivotTableView(model);
 
         VerticalLayoutContainer pane = new VerticalLayoutContainer();
-        pane.add(measurePane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.4));
-        pane.add(rowPane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.3));
-        pane.add(columnPane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.3));
+        pane.add(measurePane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.5));
+        pane.add(rowPane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.5));
+     //   pane.add(columnPane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.3));
 
         BorderLayoutContainer.BorderLayoutData paneLayout = new BorderLayoutContainer.BorderLayoutData();
         paneLayout.setSize(0.3); // 30% of view

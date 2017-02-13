@@ -1,8 +1,15 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.io.OutputStreamOutStream;
+import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.service.store.ColumnQueryBuilder;
@@ -16,6 +23,9 @@ import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -81,5 +91,58 @@ public class SimpleTableStorage implements FormStorage {
     @Override
     public long cacheVersion() {
         return mapping.getVersion();
+    }
+
+    @Override
+    public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry geometry)  {
+
+        // Only applies to admin table
+        if(!mapping.getBaseTable().equals("adminentity")) {
+            throw new UnsupportedOperationException();
+        }
+
+        Envelope envelope = geometry.getEnvelopeInternal();
+
+        executor.update("UPDATE adminentity SET X1 = ?, Y1 = ?, X2 = ?, Y2 = ?, geometry = GeomFromWKB(?, 4326) " +
+                "WHERE adminentityid = ?",
+                Arrays.asList(
+                    envelope.getMinX(),
+                    envelope.getMinY(),
+                    envelope.getMaxX(),
+                    envelope.getMaxY(),
+                    toBinary(geometry),
+                    CuidAdapter.getLegacyIdFromCuid(recordId)));
+
+    }
+
+    /**
+     * Convert MultiPolygons to Geometry collections as MySQL does not seem to like them.
+     */
+    private Geometry fixUpGeometry(Geometry geometry) {
+        if(geometry instanceof MultiPolygon) {
+            MultiPolygon multiPolygon = (MultiPolygon) geometry;
+            if(multiPolygon.getNumGeometries() == 1) {
+                return multiPolygon.getGeometryN(0);
+            } else {
+                Geometry[] polygons = new Geometry[multiPolygon.getNumGeometries()];
+                for (int i = 0; i < polygons.length; i++) {
+                    polygons[i] = multiPolygon.getGeometryN(i);
+                }
+                return new GeometryCollection(polygons, multiPolygon.getFactory());
+            }
+        }
+        return geometry;
+    }
+
+    private byte[] toBinary(Geometry geometry) {
+
+        WKBWriter writer = new WKBWriter();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            writer.write(fixUpGeometry(geometry), new OutputStreamOutStream(baos));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return baos.toByteArray();
     }
 }

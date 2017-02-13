@@ -1,7 +1,13 @@
 package org.activityinfo.store.mysql;
 
+import com.google.common.base.Optional;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -12,11 +18,13 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.service.blob.BlobAuthorizerStub;
+import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.Updater;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
@@ -238,5 +246,33 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         assertThat(column("partner"), hasValues(partnerRecordId(2), partnerRecordId(1), partnerRecordId(2)));
         assertThat(column("BENE"), hasValues(900, 3600, 10000));
         assertThat(column("cause"), hasValues("Catastrophe Naturelle", "Deplacement", "Catastrophe Naturelle"));
+    }
+
+    @Test
+    public void updateGeometry() throws SQLException {
+
+        userId = 3;
+
+        ResourceId formId = CuidAdapter.adminLevelFormClass(1);
+        ResourceId recordId = entity(1);
+        ResourceId fieldId = CuidAdapter.field(formId, CuidAdapter.GEOMETRY_FIELD);
+
+        Optional<FormStorage> storage = catalog.getForm(formId);
+
+        GeometryFactory factory = new GeometryFactory();
+        Polygon polygon = new Polygon(new LinearRing(new CoordinateArraySequence(
+                new Coordinate[]{
+                        new Coordinate(100, 0),
+                        new Coordinate(101, 0),
+                        new Coordinate(101, 1),
+                        new Coordinate(100, 1),
+                        new Coordinate(100, 0)
+                }), factory), new LinearRing[0], factory);
+
+
+
+        storage.get().updateGeometry(recordId, fieldId, polygon);
+
+        query(formId, "_id", "ST_XMIN(boundary)", "ST_XMAX(boundary)");
     }
 }

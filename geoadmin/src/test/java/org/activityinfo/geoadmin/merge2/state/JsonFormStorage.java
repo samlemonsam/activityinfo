@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -122,6 +123,11 @@ public class JsonFormStorage implements FormStorage {
     @Override
     public long cacheVersion() {
         return 0;
+    }
+
+    @Override
+    public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+        throw new UnsupportedOperationException();
     }
 
 
@@ -239,7 +245,7 @@ public class JsonFormStorage implements FormStorage {
                     array.get(2).getAsDouble(),
                     array.get(3).getAsDouble());
             
-            return new GeoArea(extents, "");
+            return new GeoArea(extents);
         }
     }
     

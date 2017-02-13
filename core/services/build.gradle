@@ -9,6 +9,7 @@ dependencies {
   compile libraries.jersey.core
   compile libraries.jersey.server
   compile libraries.guice
+  compile libraries.jts
 }
 
 idea {

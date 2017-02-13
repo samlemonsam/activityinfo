@@ -1,23 +1,20 @@
 package org.activityinfo.ui.client.measureDialog.view;
 
 import com.google.common.base.Optional;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.sencha.gxt.widget.core.client.Dialog;
-import com.sencha.gxt.widget.core.client.container.CardLayoutContainer;
+import com.sencha.gxt.widget.core.client.TabItemConfig;
+import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 import org.activityinfo.ui.client.measureDialog.model.MeasureSelectionModel;
-import org.activityinfo.ui.client.measureDialog.model.MeasureType;
 import org.activityinfo.ui.client.store.FormStore;
 
 /**
@@ -26,75 +23,71 @@ import org.activityinfo.ui.client.store.FormStore;
 public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
 
 
-    interface MyUiBinder extends UiBinder<Dialog, MeasureDialog> {
-    }
-
-    private static final MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
-
     private final MeasureSelectionModel model;
 
     private final Dialog dialog;
 
 
-    @UiField
-    CardLayoutContainer container;
-
-    @UiField(provided = true)
-    CatalogTreeView formTree;
-
-    @UiField(provided = true)
-    MeasureTypeListView measureList;
-
-    @UiField(provided = true)
-    FormulaPanel formulaPanel;
+    FormTreeView formTree;
+    FieldTreeView fieldTree;
 
     private SimpleEventBus eventBus = new SimpleEventBus();
 
     public MeasureDialog(FormStore formStore) {
         model = new MeasureSelectionModel(formStore);
-        measureList = new MeasureTypeListView(model);
-        formulaPanel = new FormulaPanel(Observable.flattenOptional(model.getSelectedFormSchema()));
-        formTree = new CatalogTreeView(model.getFormStore());
 
-        this.dialog = uiBinder.createAndBindUi(this);
 
-        model.getSelectionStep().subscribe(step -> {
-            switch (step.get()) {
-                case FORM:
-                    container.setActiveWidget(formTree);
-                    break;
-                case MEASURE:
-                    container.setActiveWidget(measureList);
-                    break;
-                case MEASURE_OPTIONS:
-                    container.setActiveWidget(formulaPanel);
-                    break;
-            }
+        // Step 1: Select the form to add
+        TabItemConfig formTreeTab = new TabItemConfig("Choose Form");
+        formTree = new FormTreeView(model.getFormStore());
+        formTree.addSelectionHandler(event -> model.selectForm(event.getSelectedItem()));
+
+        // Step 2: Select fields to add
+        TabItemConfig fieldTab = new TabItemConfig("Choose Field");
+        fieldTree = new FieldTreeView(model.getSelectedFormSet());
+        fieldTree.getSelectionModel().addSelectionHandler(event ->
+                model.selectMeasure(event.getSelectedItem().newMeasure()));
+
+
+        // Tab Panel
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.add(formTree,  formTreeTab);
+        tabPanel.add(fieldTree, fieldTab);
+//        tabPanel.add(formulaPanel, formulaTab);
+
+        this.dialog = new Dialog();
+        this.dialog.setHeading("Add New Measure");
+        this.dialog.setBodyBorder(false);
+        this.dialog.setPixelSize(640, 480);
+        this.dialog.setClosable(true);
+        this.dialog.setWidget(tabPanel);
+        this.dialog.setModal(true);
+
+        model.getSelectedForms().asObservable().subscribe(selection -> {
+            fieldTab.setEnabled(selection.isLoaded() && !selection.get().isEmpty());
+            tabPanel.update(fieldTree.asWidget(), fieldTab);
         });
 
+        model.getSelectedMeasure().subscribe(selection -> {
+            boolean ready = selection.isLoaded() && selection.get().isPresent();
+            dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(ready);
+        });
+
+        fieldTree.getCalculateButton().addSelectHandler(this::onCalculate);
+
+        dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(this::onOK);
     }
 
-    @UiHandler("previousButton")
-    void onPrevious(SelectEvent event) {
-        model.previousStep();
+    private void onCalculate(SelectEvent event) {
+        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), model.getSelectedForms().getList().get(0));
+        dialog.show();
     }
 
-    @UiHandler("nextButton")
-    void onNext(SelectEvent event) {
-        model.selectForm(formTree.getSelectedFormId().get());
-        model.nextStep();
-    }
 
-    @UiHandler("measureList")
-    public void onMeasureSelected(SelectionEvent<MeasureType> event) {
-        model.selectMeasureType(Optional.fromNullable(event.getSelectedItem()));
-    }
-
-    @UiHandler("okButton")
     public void onOK(SelectEvent event) {
-        Optional<MeasureModel> measure = model.buildMeasure();
-        if (measure.isPresent()) {
-            SelectionEvent.fire(this, measure.get());
+        Observable<Optional<MeasureModel>> measure = model.getSelectedMeasure();
+        if(measure.isLoaded() && measure.get().isPresent()) {
+            SelectionEvent.fire(this, measure.get().get());
             dialog.hide();
         }
     }

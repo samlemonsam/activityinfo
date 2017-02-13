@@ -23,8 +23,6 @@ package org.activityinfo.model.type.expr;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -33,7 +31,7 @@ import org.activityinfo.model.type.primitive.BooleanFieldValue;
 /**
  * @author yuriyz on 8/14/14.
  */
-public class CalculatedValue implements FieldValue, IsRecord {
+public class CalculatedValue implements FieldValue {
 
     private FieldValue value;
 
@@ -49,14 +47,6 @@ public class CalculatedValue implements FieldValue, IsRecord {
     @Override
     public JsonElement toJsonElement() {
         return JsonNull.INSTANCE;
-    }
-
-    @Override
-    public Record asRecord() {
-        if (value instanceof IsRecord) {
-            return ((IsRecord)value).asRecord();
-        }
-        return new Record();
     }
 
     public String asString() {

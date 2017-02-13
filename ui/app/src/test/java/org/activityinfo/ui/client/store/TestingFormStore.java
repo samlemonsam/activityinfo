@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.store;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -10,7 +11,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.testing.TestingCatalog;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -42,7 +43,7 @@ public class TestingFormStore implements FormStore {
     private TestingCatalog testingCatalog;
 
     private boolean delayLoading = false;
-    private List<PendingTask<?>> pendingTasks = new ArrayList<>();
+    private ArrayDeque<PendingTask<?>> pendingTasks = new ArrayDeque<>();
 
 
     public TestingFormStore() {
@@ -54,10 +55,10 @@ public class TestingFormStore implements FormStore {
     }
 
     public void loadAll() {
-        for (PendingTask<?> pendingTask : pendingTasks) {
-            pendingTask.execute();
+
+        while(!pendingTasks.isEmpty()) {
+            pendingTasks.pop().execute();
         }
-        pendingTasks.clear();
     }
 
     @Override
@@ -77,7 +78,10 @@ public class TestingFormStore implements FormStore {
 
     @Override
     public Observable<FormTree> getFormTree(ResourceId formId) {
-        throw new UnsupportedOperationException("TODO");
+        return maybeExecute(() -> {
+            FormTreeBuilder builder = new FormTreeBuilder(testingCatalog);
+            return builder.queryTree(formId);
+        });
     }
 
     @Override

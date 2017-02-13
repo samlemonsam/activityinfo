@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import com.googlecode.objectify.VoidWork;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
@@ -348,5 +349,10 @@ public class SiteFormStorage implements FormStorage {
     @Override
     public long cacheVersion() {
         return activity.getVersion();
+    }
+
+    @Override
+    public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+        throw new UnsupportedOperationException();
     }
 }

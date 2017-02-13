@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
+import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -71,5 +72,10 @@ public class TestingFormStorage implements FormStorage {
     @Override
     public long cacheVersion() {
         return 1;
+    }
+
+    @Override
+    public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
+        throw new UnsupportedOperationException();
     }
 }

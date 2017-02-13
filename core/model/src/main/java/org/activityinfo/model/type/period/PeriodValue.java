@@ -23,8 +23,6 @@ package org.activityinfo.model.type.period;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import org.activityinfo.model.resource.IsRecord;
-import org.activityinfo.model.resource.Record;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -33,7 +31,7 @@ import java.io.Serializable;
 /** 
  * @author yuriyz on 01/27/2015.
  */
-public class PeriodValue implements FieldValue, IsRecord, Serializable {
+public class PeriodValue implements FieldValue, Serializable {
 
     private int year;
     private int month;
@@ -56,10 +54,6 @@ public class PeriodValue implements FieldValue, IsRecord, Serializable {
         this.second = second;
     }
 
-    public static FieldValue fromRecord(Record record) {
-        return Iso8601.parse(record.getString("period"));
-    }
-
     @Override
     public FieldTypeClass getTypeClass() {
         return PeriodType.TYPE_CLASS;
@@ -68,13 +62,6 @@ public class PeriodValue implements FieldValue, IsRecord, Serializable {
     @Override
     public JsonElement toJsonElement() {
         return new JsonPrimitive(Iso8601.asIso8601String(this));
-    }
-
-    @Override
-    public Record asRecord() {
-        return new Record()
-                .set(TYPE_CLASS_FIELD_NAME, getTypeClass().getId())
-                .set("period", Iso8601.asIso8601String(this));
     }
 
     public int getYear() {

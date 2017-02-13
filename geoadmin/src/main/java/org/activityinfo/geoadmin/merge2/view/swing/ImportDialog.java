@@ -1,19 +1,13 @@
 package org.activityinfo.geoadmin.merge2.view.swing;
 
-import org.activityinfo.geoadmin.merge2.model.ImportModel;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
 import org.activityinfo.geoadmin.merge2.view.mapping.FormMapping;
 import org.activityinfo.geoadmin.merge2.view.mapping.ReferenceFieldMapping;
 import org.activityinfo.geoadmin.merge2.view.swing.lookup.LookupStep;
 import org.activityinfo.geoadmin.merge2.view.swing.match.MatchStep;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
-import org.activityinfo.geoadmin.model.TransactionBuilder;
-import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
-import org.activityinfo.store.ResourceStore;
-import org.activityinfo.store.ResourceStoreImpl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +24,7 @@ public class ImportDialog extends JFrame {
 
     private List stepList;
     private JPanel stepPanel;
-    
+
     private java.util.List<Step> steps;
 
     public ImportDialog(ActivityInfoClient client, ImportView viewModel) {
@@ -43,7 +37,7 @@ public class ImportDialog extends JFrame {
 
         steps = new ArrayList<>();
         stepPanel = new JPanel(new BorderLayout());
-        
+
         stepList = new List();
         stepList.addItemListener(new ItemListener() {
             @Override
@@ -53,14 +47,14 @@ public class ImportDialog extends JFrame {
                 stepPanel.validate();
             }
         });
-        
+
         viewModel.getMapping().subscribe(new Observer<FormMapping>() {
             @Override
             public void onChange(Observable<FormMapping> formMapping) {
                 updateStepList(formMapping);
             }
         });
-        
+
         JButton okButton = new JButton("Import");
         okButton.addActionListener(new AbstractAction() {
             @Override
@@ -79,45 +73,40 @@ public class ImportDialog extends JFrame {
         getContentPane().add(buttonPanel, BorderLayout.PAGE_END);
     }
 
-    
+
     private void updateStepList(Observable<FormMapping> formMapping) {
         steps.clear();
         steps.add(new MatchStep(viewModel));
-        
-        if(!formMapping.isLoading()) {
+
+        if (!formMapping.isLoading()) {
             for (ReferenceFieldMapping referenceFieldMapping : formMapping.get().getReferenceFieldMappings()) {
                 steps.add(new LookupStep(viewModel, referenceFieldMapping));
             }
         }
 
         stepList.removeAll();
-        
-        for(Step step : steps) {
+
+        for (Step step : steps) {
             stepList.add(step.getLabel());
         }
     }
-    
+
     private void runImport() {
         Observable<Integer> unresolvedCount = viewModel.getMatchTable().getUnresolvedCount();
-        if(!unresolvedCount.isLoading()) {
-            if(unresolvedCount.get() > 0) {
+        if (!unresolvedCount.isLoading()) {
+            if (unresolvedCount.get() > 0) {
                 JOptionPane.showMessageDialog(null, String.format("There are %d unresolved matches. " +
                         "Please resolve these first.", unresolvedCount.get()), "Unresolved matches", JOptionPane.PLAIN_MESSAGE);
             } else {
-                executeImport();        
+                executeImport();
             }
         }
     }
 
     private void executeImport() {
-        TransactionBuilder tx = viewModel.buildTransaction();
+        viewModel.runUpdate(client);
 
-        System.out.println(tx.build().toString());
-        
-        client.executeTransaction(tx);
-    
+
         this.setVisible(false);
     }
-
-    
 }

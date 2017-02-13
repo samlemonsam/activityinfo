@@ -27,6 +27,12 @@ public class CompoundExpr extends ExprNode {
         this.field = field;
     }
 
+    public CompoundExpr(@Nonnull ExprNode value, @Nonnull SymbolExpr field, SourceRange range) {
+        this.value = value;
+        this.field = field;
+        this.sourceRange = range;
+    }
+
     @Override
     public FieldValue evaluate(EvalContext context) {
         return null;
