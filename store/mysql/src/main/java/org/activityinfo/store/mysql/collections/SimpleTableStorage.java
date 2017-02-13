@@ -103,7 +103,7 @@ public class SimpleTableStorage implements FormStorage {
 
         Envelope envelope = geometry.getEnvelopeInternal();
 
-        executor.update("UPDATE adminentity SET X1 = ?, Y1 = ?, X2 = ?, Y2 = ?, geometry = ST_GeomFromWKB(?, 4326) " +
+        executor.update("UPDATE adminentity SET X1 = ?, Y1 = ?, X2 = ?, Y2 = ?, geometry = GeomFromWKB(?, 4326) " +
                 "WHERE adminentityid = ?",
                 Arrays.asList(
                     envelope.getMinX(),
