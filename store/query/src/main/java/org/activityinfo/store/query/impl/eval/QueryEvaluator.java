@@ -14,6 +14,8 @@ import org.activityinfo.store.query.impl.FormScanBatch;
 import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
+import org.activityinfo.store.query.shared.NodeMatch;
+import org.activityinfo.store.query.shared.NodeMatcher;
 
 import java.util.ArrayDeque;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.eval;
+package org.activityinfo.store.query.shared;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -224,7 +224,11 @@ public class NodeMatch {
         }
         return s.toString();
     }
-    
+
+    public FormTree.Node getFieldNode() {
+        return fieldNode;
+    }
+
     @Override
     public String toString() {
         if(type == Type.ID) {

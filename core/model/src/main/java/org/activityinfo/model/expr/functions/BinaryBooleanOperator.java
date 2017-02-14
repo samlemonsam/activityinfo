@@ -1,6 +1,8 @@
 package org.activityinfo.model.expr.functions;
 
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.expr.diagnostic.ArgumentException;
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldType;
@@ -62,6 +64,15 @@ public abstract class BinaryBooleanOperator extends ExprFunction implements Colu
 
     @Override
     public FieldType resolveResultType(List<FieldType> argumentTypes) {
+        if(argumentTypes.size() != 2) {
+            throw new ExprSyntaxException("Expected two arguments");
+        }
+        if(!(argumentTypes.get(0) instanceof BooleanType)) {
+            throw new ArgumentException(0, "Expected TRUE/FALSE value");
+        }
+        if(!(argumentTypes.get(1) instanceof BooleanType)) {
+            throw new ArgumentException(1, "Expected TRUE/FALSE value");
+        }
         return BooleanType.INSTANCE;
     }
 

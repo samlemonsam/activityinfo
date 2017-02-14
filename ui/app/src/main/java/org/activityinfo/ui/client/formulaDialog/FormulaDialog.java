@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.formulaDialog;
 
+import com.google.gwt.user.client.Window;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.Status;
@@ -32,6 +33,7 @@ public class FormulaDialog {
         this.formId = formId;
 
         FormulaResources.INSTANCE.styles().ensureInjected();
+
 
         // First we have a list of fields that can be referenced
         LabelToolItem fieldHeader = new LabelToolItem(I18N.CONSTANTS.fields());
@@ -71,7 +73,9 @@ public class FormulaDialog {
         dialog.setHeading("Formula");
         dialog.setClosable(true);
         dialog.setResizable(true);
-        dialog.setPixelSize(640, 400);
+        dialog.setPixelSize(
+                (int)(Window.getClientWidth() * 0.9),
+                (int)(Window.getClientHeight() * 0.9));
         dialog.add(container);
         dialog.setModal(true);
         dialog.getButtonBar().insert(statusLabel, 0);

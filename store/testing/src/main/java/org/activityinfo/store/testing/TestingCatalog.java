@@ -3,6 +3,8 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -34,6 +36,11 @@ public class TestingCatalog implements FormCatalog {
             throw new IllegalArgumentException("No such form " + formId);
         }
         return formMap.get(formId).getFormClass();
+    }
+
+    public FormTree getFormTree(ResourceId formId) {
+        FormTreeBuilder builder = new FormTreeBuilder(this);
+        return builder.queryTree(formId);
     }
 
     @Override

@@ -32,18 +32,21 @@ public class Survey implements TestForm {
     public Survey() {
         formClass = new FormClass(FORM_ID);
         formClass.addField(NAME_FIELD_ID)
+                .setCode("NAME")
                 .setLabel("Respondent Name")
                 .setType(TextType.INSTANCE)
                 .setRequired(true)
                 .setVisible(true);
 
         formClass.addField(DOB_FIELD_ID)
+                .setCode("DOB")
                 .setLabel("Respondent's Date of Birth")
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true)
                 .setVisible(true);
 
         formClass.addField(AGE_FIELD_ID)
+                .setCode("AGE")
                 .setLabel("Respondent's Age")
                 .setType(new QuantityType("years"))
                 .setRequired(true);

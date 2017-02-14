@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.eval;
+package org.activityinfo.store.query.shared;
 
 
 import com.google.common.base.Joiner;

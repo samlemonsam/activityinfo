@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.eval;
+package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;

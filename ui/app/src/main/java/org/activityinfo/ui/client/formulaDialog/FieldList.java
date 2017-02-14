@@ -5,8 +5,11 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.data.shared.TreeStore;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 
@@ -17,12 +20,18 @@ public class FieldList implements IsWidget {
 
     private static final Logger LOGGER = Logger.getLogger(FieldList.class.getName());
 
+    private VerticalLayoutContainer container;
+    private FormulaElementFilter filter;
     private TreeStore<FormulaElement> store;
     private Tree<FormulaElement, FormulaElement> tree;
     private final Subscription subscription;
 
     public FieldList(Observable<FormTree> formTree) {
         store = new TreeStore<>(FormulaElement.KEY_PROVIDER);
+
+        filter = new FormulaElementFilter();
+        filter.bind(store);
+
         tree = new Tree<FormulaElement, FormulaElement>(store, FormulaElement.VALUE_PROVIDER) {
 
             @Override
@@ -39,6 +48,10 @@ public class FieldList implements IsWidget {
         tree.setIconProvider(element -> element.getIcon());
         tree.setBorders(true);
 
+        container = new VerticalLayoutContainer();
+        container.add(filter, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
+        container.add(tree, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+
         // Start listening for changes to the form
         subscription = formTree.subscribe(this::onTreeUpdated);
 
@@ -48,7 +61,7 @@ public class FieldList implements IsWidget {
 
     @Override
     public Widget asWidget() {
-        return tree;
+        return container;
     }
 
     private void onTreeUpdated(Observable<FormTree> formTree) {
@@ -69,6 +82,12 @@ public class FieldList implements IsWidget {
         }
         for (FormTree.Node childNode : node.getChildren()) {
             addNode(field, childNode);
+        }
+        if(node.getType() instanceof EnumType) {
+            EnumType enumType = (EnumType) node.getType();
+            for (EnumItem enumItem : enumType.getValues()) {
+                store.add(field, new FormulaElement(field, enumItem));
+            }
         }
     }
 

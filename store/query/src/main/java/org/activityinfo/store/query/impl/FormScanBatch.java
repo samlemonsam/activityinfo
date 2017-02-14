@@ -12,10 +12,10 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
-import org.activityinfo.store.query.impl.eval.JoinNode;
-import org.activityinfo.store.query.impl.eval.JoinType;
-import org.activityinfo.store.query.impl.eval.NodeMatch;
 import org.activityinfo.store.query.impl.join.*;
+import org.activityinfo.store.query.shared.JoinNode;
+import org.activityinfo.store.query.shared.JoinType;
+import org.activityinfo.store.query.shared.NodeMatch;
 
 import java.util.*;
 import java.util.logging.Logger;
