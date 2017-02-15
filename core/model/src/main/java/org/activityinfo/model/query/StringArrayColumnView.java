@@ -1,7 +1,4 @@
-package org.activityinfo.store.query.impl.views;
-
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
+package org.activityinfo.model.query;
 
 import java.io.Serializable;
 import java.util.Arrays;

@@ -376,7 +376,18 @@ public class ActivityLoader {
         }
         partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormId(activity.getDatabaseId())));
 
+        // The (classic) pivot table components rely on a fixed fields with date1 and date2
+        ResourceId startDateId = CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD);
+        ResourceId endDateId = CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD);
 
+        for (FormField field : formClass.getFields()) {
+            if(field.getId().equals(startDateId) && Strings.isNullOrEmpty(field.getCode())) {
+                field.setCode("date1");
+            }
+            if(field.getId().equals(endDateId) && Strings.isNullOrEmpty(field.getCode())) {
+                field.setCode("date2");
+            }
+        }
         return formClass;
     }
 

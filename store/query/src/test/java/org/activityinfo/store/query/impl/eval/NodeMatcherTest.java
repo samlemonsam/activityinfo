@@ -21,6 +21,8 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.query.shared.NodeMatch;
+import org.activityinfo.store.query.shared.NodeMatcher;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Test;

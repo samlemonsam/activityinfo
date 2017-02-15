@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.formulaDialog;
 
+import org.activityinfo.model.expr.FormulaError;
 import org.activityinfo.model.expr.SourcePos;
 import org.activityinfo.model.expr.SourceRange;
 import org.activityinfo.observable.Observable;
@@ -39,11 +40,23 @@ public class Linter {
 
     private void applyMarks(ParsedFormula formula) {
         if(!formula.isValid()) {
-            if(formula.getErrorRange() != null) {
-                SourceRange range = formula.getErrorRange();
+            for (FormulaError error : formula.getErrors()) {
+                if(error.hasSourceRange()) {
+                    SourceRange range = error.getSourceRange();
+                    MarkOptions options = MarkOptions.create();
+                    options.setClassName("CodeMirror-lint-mark-error");
+                    options.setTitle(error.getMessage());
+
+                    TextMarker marker = editor.getDoc().markText(pos(range.getStart()), pos(range.getEnd()), options);
+                    markers.add(marker);
+                }
+            }
+        } else {
+            for (FieldReference fieldReference : formula.getReferences()) {
+                SourceRange range = fieldReference.getSourceRange();
                 MarkOptions options = MarkOptions.create();
-                options.setClassName("CodeMirror-lint-mark-error");
-                options.setTitle(formula.getErrorMessage());
+                options.setClassName(FormulaResources.INSTANCE.styles().fieldAnnotation());
+                options.setTitle(fieldReference.getDescription());
 
                 TextMarker marker = editor.getDoc().markText(pos(range.getStart()), pos(range.getEnd()), options);
                 markers.add(marker);

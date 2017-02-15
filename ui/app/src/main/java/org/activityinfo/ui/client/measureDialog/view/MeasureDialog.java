@@ -80,7 +80,7 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
 
     private void onCalculate(SelectEvent event) {
         FormulaDialog dialog = new FormulaDialog(model.getFormStore(), model.getSelectedForms().getList().get(0));
-        dialog.show();
+        dialog.show(null, expr -> {});
     }
 
 

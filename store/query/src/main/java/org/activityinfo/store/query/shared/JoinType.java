@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.eval;
+package org.activityinfo.store.query.shared;
 
 /**
  * The type of join made

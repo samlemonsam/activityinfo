@@ -3,8 +3,8 @@ package org.activityinfo.store.query.impl.join;
 import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
+import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.store.query.impl.Slot;
-import org.activityinfo.store.query.impl.views.StringArrayColumnView;
 
 import java.util.List;
 

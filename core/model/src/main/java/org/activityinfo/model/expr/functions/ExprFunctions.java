@@ -43,6 +43,7 @@ public final class ExprFunctions {
             register(BoundingBoxFunction.YMIN);
             register(BoundingBoxFunction.XMAX);
             register(BoundingBoxFunction.YMAX);
+            register(IfFunction.INSTANCE);
         }
         
         public ExprFunction get(String name) {

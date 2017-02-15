@@ -77,6 +77,25 @@ public class AnalysisModel {
         measures.add(measure);
     }
 
+
+    public void updateMeasureFormula(String measureId, String formula) {
+        beforeChange();
+        for (MeasureModel measureModel : measures.getList()) {
+            if(measureModel.getKey().equals(measureId)) {
+                measureModel.updateFormula(formula);
+            }
+        }
+    }
+
+    public void updateMeasureLabel(String key, String value) {
+        beforeChange();
+        for (MeasureModel measureModel : measures.getList()) {
+            if(measureModel.getKey().equals(key)) {
+                measureModel.updateLabel(value);
+            }
+        }
+    }
+
     public void addDimension(DimensionSourceModel dimensionSource) {
         beforeChange();
         DimensionModel newDimension = new DimensionModel(ResourceId.generateCuid(), dimensionSource);
@@ -129,6 +148,5 @@ public class AnalysisModel {
 
 
     }
-
 
 }

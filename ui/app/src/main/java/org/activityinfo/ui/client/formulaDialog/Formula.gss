@@ -20,3 +20,9 @@
     border-radius: 5px;
     padding: 5px;
 }
+
+.fieldAnnotation {
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+}
