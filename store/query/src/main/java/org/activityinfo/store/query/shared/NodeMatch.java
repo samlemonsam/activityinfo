@@ -36,6 +36,7 @@ public class NodeMatch {
     private ExprNode fieldExpr;
     private FormTree.Node fieldNode;
     private Type type;
+    private EnumItem enumItem;
 
     private NodeMatch() {}
     
@@ -61,7 +62,7 @@ public class NodeMatch {
     public static NodeMatch forEnumItem(FormTree.Node fieldNode, EnumItem item) {
         NodeMatch match = forField(fieldNode);
         match.fieldExpr = new CompoundExpr(match.fieldExpr, new SymbolExpr(item.getId()));
-        
+        match.enumItem = item;
         return match;
     }
     
@@ -227,6 +228,14 @@ public class NodeMatch {
 
     public FormTree.Node getFieldNode() {
         return fieldNode;
+    }
+
+    public boolean isEnumBoolean() {
+        return enumItem != null;
+    }
+
+    public EnumItem getEnumItem() {
+        return enumItem;
     }
 
     @Override

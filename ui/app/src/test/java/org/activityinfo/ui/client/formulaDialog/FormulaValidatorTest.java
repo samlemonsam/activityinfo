@@ -5,6 +5,7 @@ import org.activityinfo.model.expr.FormulaError;
 import org.activityinfo.model.expr.SourcePos;
 import org.activityinfo.model.expr.SourceRange;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.junit.Test;
@@ -54,6 +55,14 @@ public class FormulaValidatorTest {
         FormulaValidator validator = validate("IF('Foo', 1, 0)");
         assertThat(validator.getErrors(), hasSize(1));
         assertFalse(validator.isValid());
+    }
+
+    @Test
+    public void booleanEnumReference() {
+        FormulaValidator validator = validate("Gender.Female || Gender.Male");
+        assertThat(validator.getErrors(), hasSize(0));
+        assertTrue(validator.isValid());
+        assertThat(validator.getResultType(), equalTo(BooleanType.INSTANCE));
     }
 
     private FormulaValidator validate(String formula) {

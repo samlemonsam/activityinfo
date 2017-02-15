@@ -51,6 +51,16 @@ public class Linter {
                     markers.add(marker);
                 }
             }
+        } else {
+            for (FieldReference fieldReference : formula.getReferences()) {
+                SourceRange range = fieldReference.getSourceRange();
+                MarkOptions options = MarkOptions.create();
+                options.setClassName(FormulaResources.INSTANCE.styles().fieldAnnotation());
+                options.setTitle(fieldReference.getDescription());
+
+                TextMarker marker = editor.getDoc().markText(pos(range.getStart()), pos(range.getEnd()), options);
+                markers.add(marker);
+            }
         }
     }
 

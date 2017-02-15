@@ -1,6 +1,13 @@
 package org.activityinfo.ui.client.formulaDialog;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -16,17 +23,22 @@ import org.activityinfo.observable.Subscription;
 import java.util.logging.Logger;
 
 
-public class FieldList implements IsWidget {
+public class FieldList implements IsWidget, HasSelectionHandlers<FormulaElement> {
 
     private static final Logger LOGGER = Logger.getLogger(FieldList.class.getName());
 
-    private VerticalLayoutContainer container;
-    private FormulaElementFilter filter;
-    private TreeStore<FormulaElement> store;
-    private Tree<FormulaElement, FormulaElement> tree;
-    private final Subscription subscription;
+    private final EventBus eventBus = new SimpleEventBus();
+
+    private final VerticalLayoutContainer container;
+    private final FormulaElementFilter filter;
+    private final TreeStore<FormulaElement> store;
+    private final Tree<FormulaElement, FormulaElement> tree;
+
+    private Subscription subscription;
+    private Observable<FormTree> formTree;
 
     public FieldList(Observable<FormTree> formTree) {
+        this.formTree = formTree;
         store = new TreeStore<>(FormulaElement.KEY_PROVIDER);
 
         filter = new FormulaElementFilter();
@@ -51,9 +63,6 @@ public class FieldList implements IsWidget {
         container = new VerticalLayoutContainer();
         container.add(filter, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
         container.add(tree, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
-
-        // Start listening for changes to the form
-        subscription = formTree.subscribe(this::onTreeUpdated);
 
         // Initialize Drag and Drop
         new FieldTreeSource(tree);
@@ -91,12 +100,30 @@ public class FieldList implements IsWidget {
         }
     }
 
-    public void disconnect() {
-        subscription.unsubscribe();
+
+    public void connect() {
+        // Start listening for changes to the form
+        subscription = formTree.subscribe(this::onTreeUpdated);
     }
 
+    public void disconnect() {
+        subscription.unsubscribe();
+        subscription = null;
+    }
 
     private void onDoubleClicked(FormulaElement model) {
-        LOGGER.info("Double clicked: " + model.getCode());
+        if(tree.isLeaf(model)) {
+            SelectionEvent.fire(this, model);
+        }
+    }
+
+    @Override
+    public HandlerRegistration addSelectionHandler(SelectionHandler<FormulaElement> handler) {
+        return eventBus.addHandler(SelectionEvent.getType(), handler);
+    }
+
+    @Override
+    public void fireEvent(GwtEvent<?> event) {
+        eventBus.fireEvent(event);
     }
 }

@@ -24,6 +24,7 @@ public class ParsedFormula {
 
 
     private List<FormulaError> errors = new ArrayList<>();
+    private List<FieldReference> references = new ArrayList<>();
 
     public ParsedFormula(FormTree tree, String formula) {
         this.formula = formula;
@@ -46,11 +47,16 @@ public class ParsedFormula {
             valid = validator.isValid();
             errors.addAll(validator.getErrors());
             this.resultType = validator.getResultType();
+            this.references = validator.getReferences();
         }
     }
 
     public boolean isValid() {
         return valid;
+    }
+
+    public String getFormula() {
+        return formula;
     }
 
     public ExprNode getRootNode() {
@@ -68,5 +74,9 @@ public class ParsedFormula {
         } else {
             return I18N.CONSTANTS.calculationExpressionIsInvalid();
         }
+    }
+
+    public List<FieldReference> getReferences() {
+        return references;
     }
 }

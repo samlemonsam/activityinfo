@@ -7,7 +7,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.menu.Menu;
@@ -26,8 +28,8 @@ public class MeasurePane implements IsWidget {
     private ContentPanel contentPanel;
     private MeasureDialog dialog;
 
-    private ObservingListStore<MeasureModel> store;
-    private ListView<MeasureModel, MeasureModel> list;
+    private ObservingListStore<MeasureListItem> store;
+    private ListView<MeasureListItem, MeasureListItem> list;
     private AnalysisModel model;
 
 
@@ -37,10 +39,10 @@ public class MeasurePane implements IsWidget {
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
         addButton.addSelectHandler(this::addMeasureClicked);
 
-        store = new ObservingListStore<>(model.getMeasures(), MeasureModel::getKey);
+        store = new ObservingListStore<>(model.getMeasures().map(MeasureListItem::new), MeasureListItem::getKey);
         list = new ListView<>(store,
                 new IdentityValueProvider<>(),
-                new PillCell<>(MeasureModel::getLabel, this::showMenu));
+                new PillCell<>(MeasureListItem::getLabel, this::showMenu));
         this.contentPanel = new ContentPanel();
         this.contentPanel.setHeading(I18N.CONSTANTS.measures());
         this.contentPanel.addTool(addButton);
@@ -67,9 +69,17 @@ public class MeasurePane implements IsWidget {
     }
 
 
-    private void showMenu(Element element, MeasureModel measure) {
+    private void showMenu(Element element, MeasureListItem item) {
+
+        MeasureModel measure = item.getModel();
 
         Menu contextMenu = new Menu();
+
+        // Edit the alias
+        MenuItem editAlias = new MenuItem();
+        editAlias.setText("Edit Alias...");
+        editAlias.addSelectionHandler(event -> editAlias(measure));
+        contextMenu.add(editAlias);
 
         // Edit the formula...
         MenuItem editFormula = new MenuItem();
@@ -89,10 +99,25 @@ public class MeasurePane implements IsWidget {
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
     }
 
+    private void editAlias(MeasureModel measure) {
+        PromptMessageBox messageBox = new PromptMessageBox("Update measure's alias:", "Enter the new alias");
+        messageBox.getTextField().setText(measure.getLabel().get());
+
+        messageBox.addDialogHideHandler(event -> {
+            if(event.getHideButton() == Dialog.PredefinedButton.OK) {
+                model.updateMeasureLabel(measure.getKey(), messageBox.getValue());
+            }
+        });
+
+        messageBox.show();
+    }
 
     private void editFormula(MeasureModel measure) {
         FieldMeasure fieldMeasure = (FieldMeasure) measure;
         FormulaDialog dialog = new FormulaDialog(model.getFormStore(), ((FieldMeasure) measure).getFormId());
-        dialog.show(fieldMeasure.getExpr());
+        dialog.show(fieldMeasure.getFormula().get(), formula -> {
+            model.updateMeasureFormula(measure.getKey(), formula.getFormula());
+
+        });
     }
 }

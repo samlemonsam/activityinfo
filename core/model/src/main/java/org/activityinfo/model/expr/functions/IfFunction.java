@@ -2,15 +2,17 @@ package org.activityinfo.model.expr.functions;
 
 import org.activityinfo.model.expr.diagnostic.ArgumentException;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
 
+import java.util.Arrays;
 import java.util.List;
 
 
-public class IfFunction extends ExprFunction {
+public class IfFunction extends ExprFunction implements ColumnFunction {
 
 
     public static final IfFunction INSTANCE = new IfFunction();
@@ -68,4 +70,60 @@ public class IfFunction extends ExprFunction {
         return trueType;
     }
 
+    @Override
+    public ColumnView columnApply(List<ColumnView> arguments) {
+        checkArity(arguments, 3);
+
+        ColumnView condition = arguments.get(0);
+        ColumnView x = arguments.get(1);
+        ColumnView y = arguments.get(2);
+
+        if(x.getType() == ColumnType.NUMBER) {
+            double values[] = new double[x.numRows()];
+            Arrays.fill(values, Double.NaN);
+
+            for (int i = 0; i < values.length; i++) {
+                switch (condition.getBoolean(i)) {
+                    case ColumnView.TRUE:
+                        values[i] = x.getDouble(i);
+                        break;
+                    case ColumnView.FALSE:
+                        values[i] = y.getDouble(i);
+                        break;
+                }
+            }
+            return new DoubleArrayColumnView(values);
+
+        } else if(x.getType() == ColumnType.BOOLEAN) {
+            int values[] = new int[x.numRows()];
+            Arrays.fill(values, ColumnView.NA);
+            for (int i = 0; i < values.length; i++) {
+                switch (condition.getBoolean(i)) {
+                    case ColumnView.TRUE:
+                        values[i] = x.getBoolean(i);
+                        break;
+                    case ColumnView.FALSE:
+                        values[i] = y.getBoolean(i);
+                        break;
+                }
+            }
+            return new BooleanColumnView(values);
+
+        } else if(x.getType() == ColumnType.STRING) {
+            String[] values = new String[x.numRows()];
+            for (int i = 0; i < values.length; i++) {
+                switch (condition.getBoolean(i)) {
+                    case ColumnView.TRUE:
+                        values[i] = x.getString(i);
+                        break;
+                    case ColumnView.FALSE:
+                        values[i] = y.getString(i);
+                        break;
+                }
+            }
+            return new StringArrayColumnView(values);
+        } else {
+            throw new IllegalStateException("type: " + x.getType());
+        }
+    }
 }

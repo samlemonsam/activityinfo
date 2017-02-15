@@ -82,7 +82,7 @@ public class FunctionCallNode extends ExprNode {
         }
         String argumentString = "";
         for (ExprNode arg : arguments) {
-            argumentString += arg;
+            argumentString += arg.asExpression();
             if (!arg.equals(arguments.get(arguments.size() - 1))) { // add comma if not last element
                 argumentString += ", ";
             }

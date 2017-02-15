@@ -5,7 +5,6 @@ import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormField;
@@ -38,11 +37,12 @@ public class FormulaElement {
 
     public FormulaElement(FormulaElement field, EnumItem item) {
         this.key = field.getKey() + "#" + item.getId().asString();
-        this.exprNode = new ConstantExpr(item.getLabel());
+        this.exprNode = new CompoundExpr(field.getExpr(), new SymbolExpr(symbolFor(item)));
         this.label = item.getLabel();
         this.icon = IconBundle.INSTANCE.enumField();
         this.code = null;
     }
+
 
 
     public String getKey() {
@@ -66,11 +66,30 @@ public class FormulaElement {
     }
 
     private static ExprNode exprFor(FormTree.Node node) {
-        SymbolExpr fieldSymbol = new SymbolExpr(node.getField().hasCode() ? node.getField().getCode() : node.getFieldId().asString());
+        SymbolExpr fieldSymbol = new SymbolExpr(symbolFor(node.getField()));
         if(node.isRoot()) {
             return fieldSymbol;
         } else {
             return new CompoundExpr(exprFor(node.getParent()), fieldSymbol);
+        }
+    }
+
+    private static String symbolFor(FormField field) {
+        if(field.hasCode()) {
+            return field.getCode();
+        } else if(isSuitableSymbol(field.getLabel())) {
+            return field.getLabel();
+        } else {
+            return field.getId().asString();
+        }
+    }
+
+
+    private String symbolFor(EnumItem item) {
+        if(isSuitableSymbol(item.getLabel())) {
+            return item.getLabel();
+        } else {
+            return item.getId().asString();
         }
     }
 
@@ -86,6 +105,10 @@ public class FormulaElement {
 
     public ExprNode getExpr() {
        return exprNode;
+    }
+
+    public static boolean isSuitableSymbol(String text) {
+        return text.matches("^[A-Za-z][A-Za-z0-9_#,:\\s]{1,20}$");
     }
 
 }

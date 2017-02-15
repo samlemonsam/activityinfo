@@ -184,7 +184,16 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("[Contenu du Kit].Soap"), hasValues(true, true, false));
 
     }
-    
+
+
+    @Test
+    public void testAttributeBooleanWithIf() {
+        query(CuidAdapter.activityFormClass(1), "_id", "IF([Contenu du Kit].Casserole, 10, 0)");
+
+        assertThat(column("IF([Contenu du Kit].Casserole, 10, 0)"), hasValues(10, 0, 0));
+
+    }
+
     @Ignore
     @Test
     public void testSiteAggregated() {

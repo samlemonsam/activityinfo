@@ -2,12 +2,8 @@ package org.activityinfo.store.query.impl.builders;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import org.activityinfo.model.query.BooleanColumnView;
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.DoubleArrayColumnView;
+import org.activityinfo.model.query.*;
 import org.activityinfo.store.query.impl.Slot;
-import org.activityinfo.store.query.impl.views.StringArrayColumnView;
 
 import java.util.List;
 

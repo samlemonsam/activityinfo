@@ -16,6 +16,8 @@ public interface FormulaResources extends ClientBundle {
         String formulaDragHandle();
 
         String fieldTreeCode();
+
+        String fieldAnnotation();
     }
 
 

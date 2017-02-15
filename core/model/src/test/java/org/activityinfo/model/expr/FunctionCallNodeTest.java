@@ -1,5 +1,7 @@
 package org.activityinfo.model.expr;
 
+import org.activityinfo.model.expr.functions.EqualFunction;
+import org.activityinfo.model.expr.functions.IfFunction;
 import org.activityinfo.model.expr.functions.MaxFunction;
 import org.activityinfo.model.expr.functions.PlusFunction;
 import org.junit.Test;
@@ -25,6 +27,25 @@ public class FunctionCallNodeTest {
         assertThat(
                 new FunctionCallNode(MaxFunction.INSTANCE, new SymbolExpr("X"), new SymbolExpr("Y")).asExpression(),
                 equalTo("max(X, Y)"));
+    }
+
+    @Test
+    public void ifCall() {
+        assertThat(
+                new FunctionCallNode(IfFunction.INSTANCE, new ConstantExpr(true), new ConstantExpr(1), new ConstantExpr(0)).asExpression(),
+                equalTo("if(true, 1.0, 0.0)")
+        );
+    }
+
+
+    @Test
+    public void equalsComparison() {
+        assertThat(
+                new FunctionCallNode(IfFunction.INSTANCE,
+                    new FunctionCallNode(EqualFunction.INSTANCE, new ConstantExpr(true), new ConstantExpr(false)),
+                    new ConstantExpr(true),
+                    new ConstantExpr(false)).asExpression(),
+                    equalTo("if(true==false, true, false)"));
     }
 
 }
