@@ -1,11 +1,14 @@
 package org.activityinfo.model.expr;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.functions.*;
+import org.activityinfo.model.type.NullFieldType;
+import org.activityinfo.model.type.NullFieldValue;
 
 import java.util.*;
 
@@ -309,9 +312,11 @@ public class ExprParser {
     }
 
     public static ExprNode parse(String expression) {
+        if(Strings.isNullOrEmpty(expression)) {
+            return new ConstantExpr(NullFieldValue.INSTANCE, NullFieldType.INSTANCE);
+        }
         ExprLexer lexer = new ExprLexer(expression);
         ExprParser parser = new ExprParser(lexer);
         return parser.parse();
     }
-
 }
