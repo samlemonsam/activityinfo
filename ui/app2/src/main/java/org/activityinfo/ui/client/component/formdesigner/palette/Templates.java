@@ -43,7 +43,6 @@ public class Templates {
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.IMAGE, I18N.CONSTANTS.image()));
         items.add(new AttachmentFieldTemplate(AttachmentType.Kind.ATTACHMENT, I18N.CONSTANTS.attachment()));
         items.add(new TypeClassTemplate(CalculatedFieldType.TYPE_CLASS, I18N.CONSTANTS.fieldTypeCalculated()));
-        items.add(new LabelTemplate());
 
         if(newFields) {
             items.add(new SubFormTemplate(I18N.CONSTANTS.repeatingSubform(), SubFormKind.REPEATING));
