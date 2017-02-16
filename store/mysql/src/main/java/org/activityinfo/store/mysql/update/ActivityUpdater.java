@@ -81,7 +81,6 @@ public class ActivityUpdater {
         insert.value("databaseId", databaseId);
         insert.value("name", formClass.getLabel(), 255);
         insert.value("formClass", validateNewFormClass(formClass).toJsonString());
-        insert.value("gzFormClass", (String)null);
         insert.value("version", newVersion);
         insert.value("schemaVersion", newVersion);
         insert.value("classicView", 0);
@@ -121,6 +120,7 @@ public class ActivityUpdater {
         activityUpdate.where("activityId", activityId);
         activityUpdate.setIfChanged("name", activityName, formClass.getLabel(), 255);
         activityUpdate.set("formClass", formClass.toJsonString());
+        activityUpdate.set("gzFormClass", (String)null);
         activityUpdate.set("version", newVersion);
         activityUpdate.set("schemaVersion", newVersion);
 
