@@ -31,6 +31,11 @@ public class ErrorType implements FieldType {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      *
      * @return the singleton instance for this type

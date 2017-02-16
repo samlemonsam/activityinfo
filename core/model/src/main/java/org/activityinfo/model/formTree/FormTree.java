@@ -248,6 +248,9 @@ public class FormTree {
             };
         }
 
+        public boolean isSubForm() {
+            return getType() instanceof SubFormReferenceType;
+        }
     }
 
     public enum SearchOrder {

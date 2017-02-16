@@ -1,15 +1,13 @@
 package org.activityinfo.model.type.barcode;
 
 import com.google.gson.JsonElement;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.RecordFieldTypeClass;
+import org.activityinfo.model.type.*;
 
 /**
  * A value types that describes a real-valued barcode and its units.
  */
-public class BarcodeType implements FieldType {
+public class
+BarcodeType implements FieldType {
 
 
     public static final FieldTypeClass TYPE_CLASS = new RecordFieldTypeClass() {
@@ -41,6 +39,11 @@ public class BarcodeType implements FieldType {
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
         return BarcodeValue.valueOf(value.getAsString());
+    }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitBarcode(this);
     }
 
     @Override

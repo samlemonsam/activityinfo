@@ -102,6 +102,11 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitEnum(this);
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         
         JsonArray enumValueArray = new JsonArray();

@@ -11,6 +11,7 @@ public interface FieldType {
      */
     FieldTypeClass getTypeClass();
 
-
     FieldValue parseJsonValue(JsonElement value);
+
+    <T> T accept(FieldTypeVisitor<T> visitor);
 }

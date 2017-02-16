@@ -23,6 +23,11 @@ public final class NullFieldType implements FieldType, FieldTypeClass {
     }
 
     @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getId() {
         return "null";
     }

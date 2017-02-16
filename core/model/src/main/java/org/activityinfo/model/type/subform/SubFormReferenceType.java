@@ -104,6 +104,11 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     }
 
     @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitSubForm(this);
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         object.add("formId", classId == null ? JsonNull.INSTANCE : new JsonPrimitive(classId.asString()));

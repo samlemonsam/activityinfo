@@ -59,4 +59,9 @@ public class YearType implements FieldType, TemporalType {
         return new YearValue(value.getAsInt());
     }
 
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitYear(this);
+    }
+
 }

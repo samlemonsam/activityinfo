@@ -71,6 +71,11 @@ public class QuantityType implements ParametrizedFieldType {
     }
 
     @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitQuantity(this);
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         object.addProperty("units", Strings.nullToEmpty(units));
