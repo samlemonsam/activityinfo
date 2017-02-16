@@ -108,6 +108,9 @@ public class ActivityTableMappingBuilder {
 
             } else if (formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.PROJECT_FIELD))) {
                 mapping.addProjectField(formField);
+
+            } else if (formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.LOCATION_FIELD))) {
+                mapping.addLocationField(formField);
             
             } else if (formField.getId().equals(CuidAdapter.field(mapping.classId, CuidAdapter.COMMENT_FIELD))) {
                 mapping.addComments(formField);
@@ -197,6 +200,10 @@ public class ActivityTableMappingBuilder {
         
         formClass.addElement(locationField);
         // TODO: how do we deal with this??
+        addLocationField(locationField);
+    }
+
+    public void addLocationField(FormField locationField) {
         mappings.add(new FieldMapping(locationField, "locationId", new ReferenceConverter(activity.getLocationFormClassId(), LOCATION_DOMAIN)));
     }
 

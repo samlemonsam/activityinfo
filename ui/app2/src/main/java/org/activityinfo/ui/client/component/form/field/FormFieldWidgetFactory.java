@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.component.form.field;
  */
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -56,11 +55,9 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.attachment.AttachmentUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
-import org.activityinfo.ui.client.component.form.field.map.MapItem;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 
 import javax.annotation.Nullable;
-import java.util.Set;
 
 /**
  * @author yuriyz on 1/28/14.
@@ -165,33 +162,13 @@ public class FormFieldWidgetFactory {
             }
 
             final ResourceId formId = Iterables.getOnlyElement(type.getRange());
-
-            final Promise<FormFieldWidget> widget = new Promise<>();
-
-            resourceLocator.getFormClass(formId).then(new Function<FormClass, Void>() {
+            return resourceLocator.getFormClass(formId).join(new Function<FormClass, Promise<FormFieldWidget>>() {
                 @Override
-                public Void apply(FormClass formClass) {
-                    Optional<FormField> geoPointField = getGeoPointField(formClass);
-
-                    final Promise<? extends FormFieldWidget> widgetPromise;
-                    if (geoPointField.isPresent()) { // if has geoPoint then show geo widget and propose map UI
-                        widgetPromise = createMapWidget(type, updater, geoPointField.get());
-                    } else { // no geo point, fallback to list
-                        widgetPromise = createSimpleListWidget(formClass, type, updater);
-                    }
-
-                    widgetPromise.then(new Function<FormFieldWidget, Object>() {
-                        @Override
-                        public Object apply(FormFieldWidget input) {
-                            widget.resolve(input);
-                            return null;
-                        }
-                    });
-                    return null;
+                public Promise<FormFieldWidget> apply(FormClass formClass) {
+                    return createSimpleListWidget(formClass, type, updater);
                 }
             });
 
-            return widget;
         }
     }
 
@@ -208,35 +185,7 @@ public class FormFieldWidgetFactory {
         return false;
     }
 
-    private Promise<? extends FormFieldWidget> createMapWidget(final ReferenceType type, final ValueUpdater valueUpdater, final FormField geoField) {
-        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
-        QueryModel queryModel = new QueryModel(formId);
-        queryModel.selectResourceId().as("id");
-        queryModel.selectExpr("label").as("label");
-        queryModel.selectField(geoField.getId());
-
-        return resourceLocator
-                .queryTable(queryModel)
-                .then(new Function<ColumnSet, FormFieldWidget>() {
-                    @Override
-                    public FormFieldWidget apply(ColumnSet input) {
-                        Set<MapItem> items = MapItem.items(formId, new OptionSet(formId, input), geoField.getId().asString());
-                        return new ReferenceMapWidget(items, valueUpdater);
-                    }
-                });
-
-    }
-
-    private Optional<FormField> getGeoPointField(FormClass formClass) {
-        for (FormField field : formClass.getFields()) {
-            if (field.getType() instanceof GeoPointType) {
-                return Optional.of(field);
-            }
-        }
-        return Optional.absent();
-    }
-
-    private Promise<? extends FormFieldWidget> createSimpleListWidget(FormClass formClass, final ReferenceType type, final ValueUpdater valueUpdater) {
+    private Promise<FormFieldWidget> createSimpleListWidget(FormClass formClass, final ReferenceType type, final ValueUpdater valueUpdater) {
 
         final ResourceId formId = Iterables.getOnlyElement(type.getRange());
         QueryModel queryModel = new QueryModel(formId);
