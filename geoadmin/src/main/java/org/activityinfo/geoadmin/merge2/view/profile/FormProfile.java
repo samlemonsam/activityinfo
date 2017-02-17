@@ -16,10 +16,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.ResourceStore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Describes a Form and its fields, and the values associated with those fields.
@@ -192,4 +189,17 @@ public class FormProfile {
         return s.toString();
     }
 
+    public List<Integer> getRowIndexSequence() {
+        return new AbstractList<Integer>() {
+            @Override
+            public Integer get(int i) {
+                return i;
+            }
+
+            @Override
+            public int size() {
+                return getRowCount();
+            }
+        };
+    }
 }

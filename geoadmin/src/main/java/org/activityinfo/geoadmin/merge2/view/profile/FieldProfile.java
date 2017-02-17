@@ -8,7 +8,7 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.Extents;
-import org.activityinfo.model.type.geo.GeoArea;
+import org.activityinfo.model.type.geo.GeoAreaType;
 
 /**
  * Describes the contents of a field in the source or target form.
@@ -36,6 +36,16 @@ public class FieldProfile {
         this.ymax = ymax;
     }
 
+    public int getNumRows() {
+        if(columnView != null) {
+            return columnView.numRows();
+        } else if(xmax != null) {
+            return xmax.numRows();
+        } else {
+            return 0;
+        }
+    }
+
     public boolean isText() {
         if(columnView == null) {
             return false;
@@ -44,10 +54,10 @@ public class FieldProfile {
     }
     
     public boolean isGeoArea() {
-        if(columnView == null) {
+        if(xmin == null) {
             return false;
         }
-        return node.getType() instanceof GeoArea;
+        return node.getType() instanceof GeoAreaType;
     }
 
 
@@ -111,4 +121,11 @@ public class FieldProfile {
         return true;
     }
 
+    public String getString(int sourceRow) {
+        if(xmax != null) {
+            return "(Geometry)";
+        } else {
+            return columnView.getString(sourceRow);
+        }
+    }
 }

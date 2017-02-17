@@ -347,6 +347,7 @@ public class MatchGraph {
         }
     }
 
+
     private List<Integer> indexesOf(List<Candidate> candidates) {
         List<Integer> indexes = new ArrayList<>();
         for (Candidate candidate : candidates) {

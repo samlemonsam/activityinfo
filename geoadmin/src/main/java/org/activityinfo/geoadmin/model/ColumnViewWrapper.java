@@ -38,7 +38,12 @@ public class ColumnViewWrapper implements ColumnView {
 
     @Override
     public double getDouble(int row) {
-        throw new UnsupportedOperationException();
+        JsonElement jsonElement = array.get(row);
+        if(jsonElement.isJsonNull()) {
+            return Double.NaN;
+        } else {
+            return jsonElement.getAsDouble();
+        }
     }
 
     @Override

@@ -3,8 +3,11 @@ package org.activityinfo.geoadmin.merge2.view.swing.match.select;
 import com.google.common.base.Strings;
 import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.match.InstanceMatchGraph;
+import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPair;
 import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.match.MatchSide;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Observer;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
@@ -12,17 +15,24 @@ import java.util.List;
 class CandidateTableModel extends AbstractTableModel {
     private final KeyFieldPairSet keyFields;
     private final MatchSide side;
-    private final List<Integer> frontier;
+    private final Observable<List<Integer>> frontier;
     private final ScoreMatrix matrix;
     private int fromIndex;
 
-    public CandidateTableModel(InstanceMatchGraph graph, int fromIndex, MatchSide fromSide) {
+    public CandidateTableModel(InstanceMatchGraph graph,  int fromIndex, MatchSide fromSide, Observable<List<Integer>> candidates) {
         this.fromIndex = fromIndex;
         this.keyFields = graph.getKeyFields();
         this.side = fromSide;
-        frontier = graph.getParetoFrontier(fromIndex, fromSide);
+        this.frontier = candidates;
         matrix = graph.getMatrix();
         dumpMatchDetails(graph);
+
+        frontier.subscribe(new Observer<List<Integer>>() {
+            @Override
+            public void onChange(Observable<List<Integer>> observable) {
+                CandidateTableModel.this.fireTableDataChanged();
+            }
+        });
     }
 
     private void dumpMatchDetails(InstanceMatchGraph graph) {
@@ -31,16 +41,27 @@ class CandidateTableModel extends AbstractTableModel {
 
     public int getColumnCount() { return keyFields.size(); }
 
-    public int getRowCount() { 
-        return frontier.size();
+    public int getRowCount() {
+        if(frontier.isLoading()) {
+            return 0;
+        } else {
+            return frontier.get().size();
+        }
     }
 
     public Object getValueAt(int row, int col) {
         int index = candidateRowToInstanceIndex(row);
-        String value = keyFields.getField(col, side.opposite()).getView().getString(index);
         double score = rowScore(matrix, index, col);
-        
-        return String.format("%s [%.2f]", Strings.nullToEmpty(value), score);
+
+        KeyFieldPair pair = keyFields.get(col);
+        if(pair.isTextPair()) {
+            String value = pair.getField(side.opposite()).getString(index);
+            return String.format("%s [%.2f]", Strings.nullToEmpty(value), score);
+        } else if(pair.isGeoPair()) {
+            return String.format("Geometry [%.2f]", score);
+        } else {
+            return "";
+        }
     }
 
     private double rowScore(ScoreMatrix matrix, int row, int col) {
@@ -70,10 +91,10 @@ class CandidateTableModel extends AbstractTableModel {
      * 
      */
     public int candidateRowToInstanceIndex(int row) {
-        return frontier.get(row);
+        return frontier.get().get(row);
     }
     
     public int instanceIndexToCandidateRow(int instanceIndex) {
-        return frontier.indexOf(instanceIndex);
+        return frontier.get().indexOf(instanceIndex);
     }
 }

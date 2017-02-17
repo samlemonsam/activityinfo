@@ -83,6 +83,15 @@ public class ImportView {
         return targetProfile;
     }
 
+
+    public Observable<FormProfile> getProfile(MatchSide side) {
+        if(side == MatchSide.SOURCE) {
+            return getSourceProfile();
+        } else {
+            return getTargetProfile();
+        }
+    }
+
     public MatchTable getMatchTable() {
         return matchTable;
     }

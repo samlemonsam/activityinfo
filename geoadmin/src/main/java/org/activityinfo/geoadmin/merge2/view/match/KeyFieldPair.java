@@ -29,6 +29,14 @@ public class KeyFieldPair {
         return sourceField;
     }
 
+    public FieldProfile getField(MatchSide matchSide) {
+        if(matchSide == MatchSide.SOURCE) {
+            return getSourceField();
+        } else {
+            return getTargetField();
+        }
+    }
+
     /**
      * Score the similarity between a source and a target instance based on this
      * key field pair.
@@ -37,7 +45,7 @@ public class KeyFieldPair {
      * @return a score of similarity in the range [0, 1] where 1 is an exact match.              
      */
     public double score(int sourceIndex, int targetIndex) {
-        if(sourceField.isText() && targetField.isText()) {
+        if(isTextPair()) {
             String sourceValue = sourceField.getView().getString(sourceIndex);
             String targetValue = targetField.getView().getString(targetIndex);
             if (Strings.isNullOrEmpty(sourceValue) || Strings.isNullOrEmpty(targetValue)) {
@@ -45,12 +53,30 @@ public class KeyFieldPair {
             } else {
                 return scorer.score(sourceValue, targetValue);
             }
+        } else if(isGeoPair()) {
+            Extents sourceExtents = sourceField.getExtents(sourceIndex);
+            if(sourceExtents == null) {
+                return Double.NaN;
+            }
+            Extents targetExtents = targetField.getExtents(targetIndex);
+            if(targetExtents == null) {
+                return Double.NaN;
+            }
+            return jaccard(sourceExtents, targetExtents);
         } else {
             return Double.NaN;
         }
     }
 
-    private double jaccard(Extents a, Extents b) {
+    public boolean isGeoPair() {
+        return sourceField.isGeoArea() && targetField.isGeoArea();
+    }
+
+    public boolean isTextPair() {
+        return sourceField.isText() && targetField.isText();
+    }
+
+    public static double jaccard(Extents a, Extents b) {
         // https://en.wikipedia.org/wiki/Jaccard_index
         double areaA = a.area();
         double areaB = b.area();

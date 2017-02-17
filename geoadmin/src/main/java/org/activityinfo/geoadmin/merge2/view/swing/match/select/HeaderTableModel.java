@@ -3,7 +3,6 @@ package org.activityinfo.geoadmin.merge2.view.swing.match.select;
 import org.activityinfo.geoadmin.merge2.view.match.KeyFieldPairSet;
 import org.activityinfo.geoadmin.merge2.view.match.MatchRow;
 import org.activityinfo.geoadmin.merge2.view.match.MatchSide;
-import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -28,6 +27,6 @@ class HeaderTableModel extends AbstractTableModel {
     }
 
     public Object getValueAt(int row, int col) {
-        return keyFields.getField(col, side).getView().getString(index);
+        return keyFields.getField(col, side).getString(index);
     }
 }

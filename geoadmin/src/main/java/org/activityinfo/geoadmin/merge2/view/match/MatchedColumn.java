@@ -61,7 +61,7 @@ public class MatchedColumn extends MatchTableColumn {
         if(targetRow == -1) {
             return null;
         }
-        return targetField.getView().getString(targetRow);
+        return targetField.getString(targetRow);
     }
 
     private String getSourceValue(int rowIndex) {
@@ -69,7 +69,7 @@ public class MatchedColumn extends MatchTableColumn {
         if(sourceRow == -1) {
             return null;
         }
-        return sourceField.getView().getString(sourceRow);
+        return sourceField.getString(sourceRow);
     }
 
     public Optional<MatchLevel> getMatchConfidence(int rowIndex) {

@@ -4,12 +4,16 @@ import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.UnmodifiableIterator;
 import org.activityinfo.geoadmin.match.ScoreMatrix;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.geo.Extents;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Computes the "distance" between the <em>contents</em> of two fields
@@ -69,8 +73,22 @@ public class FieldScoreMatrix extends ScoreMatrix {
     }
 
     private double scoreGeoAreaMatch(FieldProfile x, FieldProfile y) {
-        // TODO: only really needed if we have forms with multiple geo area fields.
-        return 1.0;
+
+        double sumRowMaxes = 0;
+        int countOfRows = 0;
+
+        for (int i = 0; i < x.getNumRows(); i++) {
+            Extents rowExtents = x.getExtents(i);
+            if(rowExtents != null) {
+                sumRowMaxes += findScoreOfBestMatch(rowExtents, y);
+                countOfRows++;
+            }
+        }
+        if(countOfRows == 0) {
+            return 0;
+        } else {
+            return sumRowMaxes / (double) countOfRows;
+        }
     }
 
     private double scoreTextColumnMatch(FieldProfile sourceProfile, FieldProfile targetProfile) {
@@ -101,7 +119,7 @@ public class FieldScoreMatrix extends ScoreMatrix {
                 .maximumSize(1000)
                 .build();
 
-        for (int i = 0; i < x.numRows(); i++) {
+        for (Integer i : sampleRows(x)) {
             String rowName = x.getString(i);
             if(!Strings.isNullOrEmpty(rowName)) {
                 Double maxScore = cache.getIfPresent(rowName);
@@ -121,6 +139,53 @@ public class FieldScoreMatrix extends ScoreMatrix {
         }
     }
 
+    private Iterable<Integer> sampleRows(ColumnView x) {
+        final int rowCount = x.numRows();
+        if(rowCount < 100) {
+            return new Iterable<Integer>() {
+                @Override
+                public Iterator<Integer> iterator() {
+                    return new UnmodifiableIterator<Integer>() {
+
+                        private int i=0;
+
+                        @Override
+                        public boolean hasNext() {
+                            return i < rowCount;
+                        }
+
+                        @Override
+                        public Integer next() {
+                            return i++;
+                        }
+                    };
+                }
+            };
+        } else {
+            return new Iterable<Integer>() {
+                @Override
+                public Iterator<Integer> iterator() {
+                    return new UnmodifiableIterator<Integer>() {
+
+                        int sampled = 0;
+                        Random random = new Random();
+
+                        @Override
+                        public boolean hasNext() {
+                            return sampled < 100;
+                        }
+
+                        @Override
+                        public Integer next() {
+                            sampled++;
+                            return random.nextInt(rowCount);
+                        }
+                    };
+                }
+            };
+        }
+    }
+
     private double findScoreOfBestMatch(String rowName, ColumnView y) {
         LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
         
@@ -136,4 +201,19 @@ public class FieldScoreMatrix extends ScoreMatrix {
         }
         return maxScore;
     }
+
+    private double findScoreOfBestMatch(Extents rowExtents, FieldProfile y) {
+        double maxScore = 0;
+        for (int j = 0; j < y.getNumRows(); j++) {
+            Extents extents = y.getExtents(j);
+            if(extents != null) {
+                double score = KeyFieldPair.jaccard(rowExtents, extents);
+                if(score > maxScore) {
+                    maxScore = score;
+                }
+            }
+        }
+        return maxScore;
+    }
+
 }
