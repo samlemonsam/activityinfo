@@ -29,6 +29,7 @@ public class ConsonantSimilarity {
 
         define('M', 'N', 0.5);
         define('K', 'Q', 0.25);
+        define('C', 'S', 0.5);
     }
 
 
@@ -46,6 +47,9 @@ public class ConsonantSimilarity {
 
 
     public double distance(char x, char y) {
+        assert ('A' <= x && x <= 'Z') : "x is not a letter";
+        assert ('A' <= y && y <= 'Z') : "y is not a letter";
+
         //System.out.println(x + " <> " + y);
         return distanceMatrix[key(x,y)];
     }

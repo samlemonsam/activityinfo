@@ -71,6 +71,16 @@ public class LatinWordDistanceTest {
     }
 
     @Test
+    public void loucia() {
+        assertMatches("LOUSSA", "LOUCIA");
+    }
+
+    @Test
+    public void myrat() {
+        assertMatches("Mrayjat".toUpperCase(), "Mreijat".toUpperCase());
+    }
+
+    @Test
     public void msaitbe() {
         assertMatches("MSAITBE", "MOUSSAYTBEH");
     }
