@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 
 //@Path("/service/blob") commented path to avoid jersey conflict during binding in GcsBlobFieldStorageServiceModule
-//Error : Conflicting URI templates. The URI template /service/blob for root resource class org.activityinfo.service.blob.GcsBlobFieldStorageService and the URI template /service/blob transform to the same regular expression /service/blob(/.*)?
+//Error : Conflicting URI templates. The URI template /service/blob for root resource class org.activityinfo.server.blob.GcsBlobFieldStorageService and the URI template /service/blob transform to the same regular expression /service/blob(/.*)?
 public interface BlobFieldStorageService {
 
     /**

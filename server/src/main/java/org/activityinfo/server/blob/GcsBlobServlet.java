@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.server.blob;
 
 import com.google.api.client.util.Preconditions;
 import com.google.api.client.util.Strings;

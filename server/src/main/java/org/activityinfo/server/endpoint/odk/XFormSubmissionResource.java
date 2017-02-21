@@ -20,11 +20,10 @@ import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
+import org.activityinfo.server.blob.GcsBlobFieldStorageService;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstanceImpl;
-import org.activityinfo.service.blob.GcsBlobFieldStorageService;
-import org.activityinfo.service.lookup.ReferenceChoice;
 import org.activityinfo.store.spi.BlobId;
 import org.w3c.dom.Element;
 

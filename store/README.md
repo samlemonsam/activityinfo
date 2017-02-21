@@ -24,12 +24,10 @@ The core of the AI Data Store is:
 Actual storage is provided by several storage implementations:
 
 * [store:mysql](mysql/) - a storage implementation that maps existing 
-  MySQL tables used by ActivityInfo to forms.
-  
+  MySQL tables used by ActivityInfo to forms
 * [store:hrd](hrd/) - a new storage implementation based on the AppEngine
   High Replication Datastore (HRD) that will eventually become 
   ActivityInfo's primary storage backend.
-
 * [store:testing](testing/) - a simple in-memory storage for unit-testing.
 
 

@@ -5,7 +5,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.lookup.ReferenceChoice;
 
 import java.util.Collection;
 import java.util.List;

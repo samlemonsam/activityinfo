@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.server.blob;
 
 import org.activityinfo.server.endpoint.rest.RestApiModule;
 import org.activityinfo.store.spi.BlobAuthorizer;

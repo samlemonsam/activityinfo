@@ -30,13 +30,13 @@ import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
+import org.activityinfo.server.blob.GcsBlobFieldStorageServiceModule;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.gwtrpc.CommandServlet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.server.util.locale.LocaleModule;
-import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
 import org.junit.Before;
 
 import javax.persistence.EntityManager;

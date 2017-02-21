@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.server.blob;
 
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
@@ -22,7 +22,6 @@ import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.service.gcs.GcsAppIdentityServiceUrlSigner;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.BlobFieldStorageService;
 import org.activityinfo.store.spi.BlobId;

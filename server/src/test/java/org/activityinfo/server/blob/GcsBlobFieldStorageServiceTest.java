@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.server.blob;
 /*
  * #%L
  * ActivityInfo Server

@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.server.blob;
 
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.PublicCertificate;

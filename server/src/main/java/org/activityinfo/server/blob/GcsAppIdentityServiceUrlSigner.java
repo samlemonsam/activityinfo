@@ -1,4 +1,4 @@
-package org.activityinfo.service.gcs;
+package org.activityinfo.server.blob;
 /*
  * #%L
  * ActivityInfo Server
@@ -24,6 +24,7 @@ package org.activityinfo.service.gcs;
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
 import com.google.common.io.BaseEncoding;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Calendar;

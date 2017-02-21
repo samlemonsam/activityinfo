@@ -1,4 +1,4 @@
-package org.activityinfo.service.blob;
+package org.activityinfo.server.blob;
 
 import com.google.common.base.Charsets;
 import com.google.gson.JsonArray;

@@ -1,5 +1,5 @@
 
-# ActivityInfo User Interfaces
+# User Interface
 
 This directory contains ActivityInfo's user interfaces modules
 and supporting libraries, including:

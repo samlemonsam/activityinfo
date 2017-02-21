@@ -1,4 +1,4 @@
-package org.activityinfo.service.lookup;
+package org.activityinfo.server.endpoint.odk;
 
 import org.activityinfo.model.type.RecordRef;
 

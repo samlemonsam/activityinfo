@@ -5,7 +5,7 @@ import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
-import org.activityinfo.service.blob.GcsBlobFieldStorageService;
+import org.activityinfo.server.blob.GcsBlobFieldStorageService;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.BlobId;
 
