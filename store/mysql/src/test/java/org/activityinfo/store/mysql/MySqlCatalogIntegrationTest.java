@@ -12,9 +12,9 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
+import org.activityinfo.store.spi.FormCatalog;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

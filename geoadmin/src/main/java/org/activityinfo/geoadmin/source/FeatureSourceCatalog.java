@@ -7,8 +7,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.query.RowSource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.service.store.FormStorage;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorage;
 import org.geotools.data.shapefile.ShapefileDataStore;
 
 import java.io.File;

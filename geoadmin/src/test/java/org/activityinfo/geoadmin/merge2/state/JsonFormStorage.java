@@ -23,7 +23,7 @@ import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.*;
+import org.activityinfo.store.spi.*;
 
 import java.io.IOException;
 import java.io.Reader;

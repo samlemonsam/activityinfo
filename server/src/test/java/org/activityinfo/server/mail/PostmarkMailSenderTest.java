@@ -2,10 +2,10 @@ package org.activityinfo.server.mail;
 
 import com.google.inject.util.Providers;
 import freemarker.template.TemplateModelException;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.Domain;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.util.TemplateModule;
-import org.activityinfo.service.DeploymentConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 

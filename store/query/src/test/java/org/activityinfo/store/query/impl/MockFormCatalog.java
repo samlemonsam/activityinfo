@@ -7,7 +7,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.*;
 
 import java.util.Collection;
 import java.util.Collections;

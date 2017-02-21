@@ -13,8 +13,8 @@ import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.logging.Logger;
 

@@ -10,12 +10,12 @@ import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.service.store.Cursor;
-import org.activityinfo.service.store.CursorBuilder;
-import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.mapping.FieldMapping;
 import org.activityinfo.store.mysql.mapping.ResourceIdConverter;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.spi.Cursor;
+import org.activityinfo.store.spi.CursorBuilder;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.util.Iterator;

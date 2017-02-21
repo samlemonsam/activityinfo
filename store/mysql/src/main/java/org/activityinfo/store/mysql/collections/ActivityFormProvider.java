@@ -3,13 +3,13 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormNotFoundException;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.ActivityTableMappingBuilder;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
+import org.activityinfo.store.spi.FormNotFoundException;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -12,9 +12,9 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.QuerySyntaxException;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
+import org.activityinfo.store.spi.FormCatalog;
 
 import java.util.Collections;
 import java.util.Iterator;

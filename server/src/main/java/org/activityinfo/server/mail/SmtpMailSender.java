@@ -25,7 +25,7 @@ package org.activityinfo.server.mail;
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
 import freemarker.template.Configuration;
-import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.server.DeploymentConfiguration;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;

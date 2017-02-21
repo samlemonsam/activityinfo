@@ -3,8 +3,8 @@ package org.activityinfo.store.query.impl.builders;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.List;
 

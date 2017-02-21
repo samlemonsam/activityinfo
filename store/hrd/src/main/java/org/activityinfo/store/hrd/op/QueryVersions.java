@@ -7,10 +7,10 @@ import com.googlecode.objectify.cmd.Query;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
+import org.activityinfo.store.spi.RecordVersion;
 
 import java.util.ArrayList;
 import java.util.List;

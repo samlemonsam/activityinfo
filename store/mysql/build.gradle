@@ -3,9 +3,9 @@
 
 dependencies {
     compile project(':core:model')
-    compile project(':core:services')
     compile project(':store:query')
     compile project(':store:hrd')
+    compile project(':store:spi')
     compile project(':apiClient:gwt')
     compile project(':i18n')
     compile libraries.guava

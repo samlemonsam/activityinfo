@@ -1,8 +1,8 @@
 package org.activityinfo.store.mysql.metadata;
 
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.service.store.FormNotFoundException;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.spi.FormNotFoundException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

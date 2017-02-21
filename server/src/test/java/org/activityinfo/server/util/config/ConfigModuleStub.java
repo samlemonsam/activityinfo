@@ -2,7 +2,7 @@ package org.activityinfo.server.util.config;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.server.DeploymentConfiguration;
 
 import java.util.Properties;
 

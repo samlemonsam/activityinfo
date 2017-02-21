@@ -7,13 +7,13 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
 import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
 import org.activityinfo.store.query.impl.builders.RowCountBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyMap;
 import org.activityinfo.store.query.impl.join.PrimaryKeyMap;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
 import java.util.logging.Logger;

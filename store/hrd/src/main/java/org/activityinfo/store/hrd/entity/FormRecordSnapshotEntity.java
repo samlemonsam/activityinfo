@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.*;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.RecordChangeType;
+import org.activityinfo.store.spi.RecordChangeType;
 
 import java.util.Date;
 

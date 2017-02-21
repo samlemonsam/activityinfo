@@ -12,7 +12,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.service.store.*;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
@@ -24,6 +23,7 @@ import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.*;
+import org.activityinfo.store.spi.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,7 +53,7 @@ public class SiteFormStorage implements FormStorage {
     @Override
     public FormPermissions getPermissions(int userId) {
         if(activity.getOwnerUserId() == userId) {
-           return FormPermissions.full(); 
+           return FormPermissions.full();
         } else {
 
             UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());

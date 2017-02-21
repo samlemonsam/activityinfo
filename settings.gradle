@@ -2,7 +2,6 @@ rootProject.name = 'activityinfo'
 
 include 'i18n'
 include 'core:model'
-include 'core:services'
 include 'core:promises'
 include 'core:gwtrpc'
 
@@ -10,6 +9,7 @@ include 'api'
 include 'apiClient:gwt'
 include 'apiDocs'
 
+include 'store:spi'
 include 'store:query'
 include 'store:mysql'
 include 'store:hrd'

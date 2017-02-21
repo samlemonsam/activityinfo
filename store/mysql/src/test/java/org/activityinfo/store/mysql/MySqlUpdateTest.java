@@ -17,9 +17,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.service.blob.BlobAuthorizerStub;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.spi.BlobAuthorizerStub;
+import org.activityinfo.store.spi.FormStorage;
 import org.junit.Before;
 import org.junit.Test;
 

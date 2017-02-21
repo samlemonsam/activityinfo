@@ -8,9 +8,9 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
 import org.activityinfo.store.query.impl.views.DiscreteStringColumnView;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.List;
 import java.util.Map;

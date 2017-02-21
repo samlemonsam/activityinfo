@@ -2,9 +2,9 @@ package org.activityinfo.store.mysql.cursor;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.Cursor;
-import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.mapping.ResourceIdConverter;
+import org.activityinfo.store.spi.Cursor;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

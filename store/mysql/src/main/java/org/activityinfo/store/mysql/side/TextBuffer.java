@@ -3,7 +3,7 @@ package org.activityinfo.store.mysql.side;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

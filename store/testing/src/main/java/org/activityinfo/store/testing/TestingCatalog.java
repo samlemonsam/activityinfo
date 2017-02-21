@@ -8,10 +8,10 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
 

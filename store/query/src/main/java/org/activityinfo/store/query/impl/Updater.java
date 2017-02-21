@@ -23,10 +23,10 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.service.blob.BlobAuthorizer;
-import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.service.store.FormPermissions;
-import org.activityinfo.service.store.FormStorage;
+import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
 import java.util.logging.Logger;

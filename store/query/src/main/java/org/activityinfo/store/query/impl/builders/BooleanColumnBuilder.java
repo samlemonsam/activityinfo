@@ -3,10 +3,10 @@ package org.activityinfo.store.query.impl.builders;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
-import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.query.impl.PendingSlot;
 import org.activityinfo.store.query.impl.views.BitSetColumnView;
 import org.activityinfo.store.query.impl.views.BitSetWithMissingView;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.BitSet;
 

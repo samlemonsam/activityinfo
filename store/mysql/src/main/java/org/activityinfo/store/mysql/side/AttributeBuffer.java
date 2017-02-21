@@ -8,7 +8,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

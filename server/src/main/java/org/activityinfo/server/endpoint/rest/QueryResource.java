@@ -5,9 +5,9 @@ import com.sun.jersey.api.core.HttpRequestContext;
 import org.activityinfo.model.query.ColumnModelException;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
+import org.activityinfo.store.spi.FormCatalog;
 
 import javax.inject.Provider;
 import javax.ws.rs.*;

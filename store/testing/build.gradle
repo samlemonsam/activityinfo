@@ -1,6 +1,6 @@
 dependencies {
     compile project(':core:model')
-    compile project(':core:services')
+    compile project(':store:spi')
     compile project(':store:query')
     compile libraries.appengine.api
     compile libraries.guava

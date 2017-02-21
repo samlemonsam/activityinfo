@@ -1,7 +1,7 @@
 package org.activityinfo.store.query.impl.builders;
 
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.CursorObserver;
 
 /**
  * Counts the number of rows in a set

@@ -2,10 +2,10 @@
 
 dependencies {
     compile project(':core:model')
-    compile project(':core:services')
     compile project(':store:query')
+    compile project(':store:spi')
     compile project(':i18n')
-    compile project(':')
+
     compile 'com.googlecode.objectify:objectify:5.1.13'
     
     testCompile libraries.dbunit

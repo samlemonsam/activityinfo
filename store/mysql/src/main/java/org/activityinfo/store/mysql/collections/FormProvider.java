@@ -2,8 +2,8 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.sql.SQLException;
 import java.util.Map;

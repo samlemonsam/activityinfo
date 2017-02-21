@@ -27,11 +27,11 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.view.Viewable;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.HostPageModel;
 import org.activityinfo.server.login.model.RootPageModel;
-import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;

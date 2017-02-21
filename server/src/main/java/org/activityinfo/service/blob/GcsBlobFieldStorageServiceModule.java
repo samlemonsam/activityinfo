@@ -1,6 +1,8 @@
 package org.activityinfo.service.blob;
 
 import org.activityinfo.server.endpoint.rest.RestApiModule;
+import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.BlobFieldStorageService;
 
 public class GcsBlobFieldStorageServiceModule extends RestApiModule {
 

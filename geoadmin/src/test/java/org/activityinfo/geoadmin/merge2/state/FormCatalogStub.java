@@ -4,8 +4,8 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.service.store.FormStorage;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.io.IOException;
 import java.util.*;

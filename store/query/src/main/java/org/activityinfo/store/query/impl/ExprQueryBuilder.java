@@ -19,11 +19,11 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.service.store.CursorObservers;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.builders.ViewBuilderFactory;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.CursorObservers;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.io.IOException;
 import java.util.List;

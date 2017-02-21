@@ -15,13 +15,17 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.model.blob.UploadCredentials;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.service.DeploymentConfiguration;
 import org.activityinfo.service.gcs.GcsAppIdentityServiceUrlSigner;
+import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.BlobFieldStorageService;
+import org.activityinfo.store.spi.BlobId;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
 

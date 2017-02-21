@@ -30,9 +30,9 @@ import com.google.common.base.Strings;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.util.jaxrs.JaxRsContainer;
-import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.servlet.ServletContext;
 import java.io.File;

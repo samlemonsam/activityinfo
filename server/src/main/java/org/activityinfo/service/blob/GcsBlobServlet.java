@@ -12,6 +12,7 @@ import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.attachment.AppEngineAttachmentService;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
+import org.activityinfo.store.spi.BlobId;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;

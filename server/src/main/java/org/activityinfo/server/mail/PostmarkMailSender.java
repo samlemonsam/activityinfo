@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import freemarker.template.Configuration;
-import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.inject.Inject;

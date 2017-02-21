@@ -50,4 +50,5 @@
   <source path="legacy"/>
   <source path="util"/>
   <source path="query"/>
+  <source path="blob"/>
 </module>
