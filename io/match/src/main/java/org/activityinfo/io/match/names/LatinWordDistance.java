@@ -13,8 +13,6 @@ public class LatinWordDistance {
 
     static final double TRAILING_VOWELS_COST = 0.5;
 
-    static final double VOWEL_SUBSTITUTION_COST = 0.20;
-
     static final double DOUBLED_CONSONANT_COST = 0.5;
 
     static final double CLOSING_CONSONANT_COST = 0.75;
@@ -72,6 +70,11 @@ public class LatinWordDistance {
 
         public int length() {
             return end - start;
+        }
+
+        @Override
+        public String toString() {
+            return new String(chars, start, end);
         }
     }
 
@@ -134,10 +137,6 @@ public class LatinWordDistance {
 
             double d = Double.POSITIVE_INFINITY;
 
-//            if(x.isVowel(i) && y.isVowel(j)) {
-//                double substitutionCost = nucleusDistance(i, j);
-//            }
-
             double substitutionCost = substitutionDistance(i,j);
             if(substitutionCost < d) {
                 substitutionCost += distance(i+1, j+1);
@@ -158,22 +157,6 @@ public class LatinWordDistance {
 
             return d;
         }
-    }
-
-    /**
-     * Calculates the distance between the nuclei of two syllables
-     */
-    private double nucleusDistance(int i, int j) {
-        int xn = 1;
-        while(x.isVowel(i+xn)) {
-            xn++;
-        }
-        int yn = 1;
-        while(y.isVowel(i+yn)) {
-            yn++;
-        }
-
-        return -1;
     }
 
     /**
@@ -253,9 +236,9 @@ public class LatinWordDistance {
         while(!word.isEndOfWord(i)) {
             char c = word.at(i);
 
-            if(!isVowelChar(c)) {
+            if(!(isVowelChar(c) || c == 'Y')) {
                 if(word.isLast(i) && word.isVowel(i-1) &&
-                        (c == 'H' || c == 'Y' || c == 'T')) {
+                        (c == 'H' ||  c == 'T')) {
 
                     return CLOSING_CONSONANT_COST;
 
