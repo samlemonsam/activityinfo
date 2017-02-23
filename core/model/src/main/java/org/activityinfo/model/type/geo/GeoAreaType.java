@@ -2,10 +2,7 @@ package org.activityinfo.model.type.geo;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.RecordFieldTypeClass;
+import org.activityinfo.model.type.*;
 
 /**
  * A value type describing a geographic area on the Earth's surface
@@ -42,6 +39,11 @@ public class GeoAreaType implements FieldType {
         JsonObject object = value.getAsJsonObject();
         JsonObject bbox = object.getAsJsonObject("bbox");
         return new GeoArea(Extents.fromJsonObject(bbox));
+    }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitGeoArea(this);
     }
 
     /**

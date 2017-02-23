@@ -50,7 +50,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.store.spi.FormCatalog;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;

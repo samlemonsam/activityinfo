@@ -56,33 +56,6 @@ public class LatinPlaceNameScorer {
         // we want to know how likely it is that S refers to the
         // same entity as T.
 
-        // Names are funny things and subject to a great deal of
-        // violence by humans. There are a number of things that
-        // can happen to a written name:
-
-        // (1) The same sound may be written differently, perhaps because
-        //     of a different transliteration scheme, for example
-        //
-        //       [ou]adi => [w]adi
-        //       zou[q] bha[nn]ine => zou[k] bha[n]ine
-        //       z[ai]toun => z[ei]toun[e]
-        //
-        // (2) Sounds can drift regionally and over time, and these
-        //     differences result in new spellings
-        //
-        //
-        // (3) Names that include parts of speech can be reordered or
-        //     discarded arbitrarily
-        //
-        //     [santa, rosa, city] => [city, of, santa, rosa]
-        //     [commune, de, goumera] => [goumera]
-        //
-        // (4) Words can be split or joined
-        //
-        //     [bara, sara] => [barassara]
-        //     [nema, badenyakafo] => [nema, badenya, kafo]
-        //
-
         // So we not only have to deal with fuzzy matching, but we have to deal with it
         // on multiple levels:
 

@@ -9,7 +9,7 @@ import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
-import org.activityinfo.service.store.FormNotFoundException;
+import org.activityinfo.store.spi.FormNotFoundException;
 
 import javax.inject.Provider;
 import javax.ws.rs.*;

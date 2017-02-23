@@ -2,8 +2,8 @@ package org.activityinfo.server.endpoint.rest.usage;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.gson.stream.JsonWriter;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.service.DeploymentConfiguration;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.jdbc.AbstractReturningWork;
 

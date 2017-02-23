@@ -98,6 +98,11 @@ public class AttachmentType implements ParametrizedFieldType {
         return fieldValue;
     }
 
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitAttachment(this);
+    }
+
     public Cardinality getCardinality() {
         return cardinality;
     }

@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.inject.Provider;
 import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.service.store.FormCatalog;
+import org.activityinfo.store.spi.FormCatalog;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.QueryParam;

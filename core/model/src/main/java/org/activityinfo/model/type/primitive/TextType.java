@@ -3,6 +3,7 @@ package org.activityinfo.model.type.primitive;
 import com.google.gson.JsonElement;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldTypeVisitor;
 import org.activityinfo.model.type.FieldValue;
 
 /**
@@ -39,6 +40,11 @@ public class TextType implements FieldType {
             return null;
         }
         return TextValue.valueOf(value.getAsString());
+    }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitText(this);
     }
 
     @Override

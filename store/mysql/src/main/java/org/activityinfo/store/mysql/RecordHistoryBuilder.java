@@ -26,9 +26,9 @@ import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.service.store.FormNotFoundException;
-import org.activityinfo.service.store.FormStorage;
-import org.activityinfo.service.store.RecordVersion;
+import org.activityinfo.store.spi.FormNotFoundException;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.RecordVersion;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

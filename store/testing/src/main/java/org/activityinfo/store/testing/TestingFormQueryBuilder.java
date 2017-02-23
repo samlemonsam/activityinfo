@@ -2,8 +2,8 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.ArrayList;
 import java.util.List;

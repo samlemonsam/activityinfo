@@ -11,8 +11,8 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.spi.FormCatalog;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.ws.rs.*;

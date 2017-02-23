@@ -5,6 +5,8 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
 import org.activityinfo.ui.client.analysis.AnalysisActivity;
 import org.activityinfo.ui.client.analysis.AnalysisPlace;
+import org.activityinfo.ui.client.input.RecordActivity;
+import org.activityinfo.ui.client.input.RecordPlace;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.table.TableActivity;
 import org.activityinfo.ui.client.table.TablePlace;
@@ -27,6 +29,11 @@ public class AppActivityMapper implements ActivityMapper {
         if (place instanceof AnalysisPlace) {
             return new AnalysisActivity(formStore);
         }
+
+        if (place instanceof RecordPlace) {
+            return new RecordActivity(formStore, (RecordPlace) place);
+        }
+
         return null;
     }
 }

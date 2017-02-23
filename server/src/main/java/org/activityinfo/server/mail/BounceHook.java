@@ -2,7 +2,7 @@ package org.activityinfo.server.mail;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.server.DeploymentConfiguration;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

@@ -3,10 +3,7 @@ package org.activityinfo.model.type.expr;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.JsonParsing;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ParametrizedFieldType;
-import org.activityinfo.model.type.ParametrizedFieldTypeClass;
+import org.activityinfo.model.type.*;
 
 import javax.annotation.Nullable;
 
@@ -71,6 +68,11 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitCalculated(this);
     }
 
     @Override

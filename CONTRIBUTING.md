@@ -72,13 +72,6 @@ GWT provides a [development mode](http://www.gwtproject.org/doc/latest/DevGuideC
 that allows you to interactively make changes to the source code, and then refresh
 the browser to see the result.
 
-*Note:* we are still using the "classic" GWT Dev Mode which requires a browser plugin to function. This browser
-plugin no longer works on the most recent versions of most browsers; we recommend installing a local copy of
-[FireFox 24.2.0esr](https://ftp.mozilla.org/pub/mozilla.org/firefox/releases/24.2.0esr/) and following this 
-[tutorial](https://openbpm.wordpress.com/2014/05/31/getting-gwt-plugin-to-work-on-firefox-on-ubuntu-14-04/) to setup
-a seperate FireFox profile for testing ActivityInfo. We expect to transition to GWT 2.7 and the new "Super" Dev Mode 
-before the end of 2015.
-
 The very first time you run AI locally, you'll need to create an `activityinfo_dev` database by running:
 
     $ ./gradlew setupDevDatabase

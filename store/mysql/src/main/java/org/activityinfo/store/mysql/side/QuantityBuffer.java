@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,6 +1,7 @@
 /out
 target
 build
+classes
 .gradle
 phantomjsdriver.log
 /out

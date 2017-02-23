@@ -2,10 +2,10 @@ package org.activityinfo.server.endpoint.odk;
 
 import com.google.inject.Inject;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.service.DeploymentConfiguration;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;

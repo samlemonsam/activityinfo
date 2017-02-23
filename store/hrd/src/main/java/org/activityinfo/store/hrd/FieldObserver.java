@@ -2,7 +2,7 @@ package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.CursorObserver;
 
 public class FieldObserver {
     

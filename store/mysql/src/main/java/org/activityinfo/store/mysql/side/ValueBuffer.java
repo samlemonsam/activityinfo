@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.side;
 
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

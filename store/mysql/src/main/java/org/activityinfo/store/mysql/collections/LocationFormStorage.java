@@ -17,7 +17,6 @@ import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.service.store.*;
 import org.activityinfo.store.mysql.GeodbFolder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
@@ -28,6 +27,7 @@ import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.SqlInsert;
 import org.activityinfo.store.mysql.update.SqlUpdate;
+import org.activityinfo.store.spi.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

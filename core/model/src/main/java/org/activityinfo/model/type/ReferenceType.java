@@ -89,6 +89,11 @@ public class ReferenceType implements ParametrizedFieldType {
         }
     }
 
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitReference(this);
+    }
+
     private RecordRef parseRef(String ref) {
         int separator = ref.indexOf(':');
         if(separator == -1) {

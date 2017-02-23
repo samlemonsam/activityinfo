@@ -27,6 +27,7 @@ import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
 import org.activityinfo.server.attachment.AttachmentModule;
 import org.activityinfo.server.authentication.AuthenticationModule;
+import org.activityinfo.server.blob.GcsBlobFieldStorageServiceModule;
 import org.activityinfo.server.branding.BrandingModule;
 import org.activityinfo.server.csp.ContentSecurityModule;
 import org.activityinfo.server.database.ServerDatabaseModule;
@@ -49,7 +50,6 @@ import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModule;
 import org.activityinfo.server.util.jaxrs.JaxRsModule;
 import org.activityinfo.server.util.locale.LocaleModule;
-import org.activityinfo.service.blob.GcsBlobFieldStorageServiceModule;
 
 import javax.servlet.ServletContextEvent;
 import java.util.logging.Logger;

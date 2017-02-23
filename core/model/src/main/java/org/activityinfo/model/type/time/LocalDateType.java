@@ -2,10 +2,7 @@ package org.activityinfo.model.type.time;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.RecordFieldTypeClass;
+import org.activityinfo.model.type.*;
 
 /**
  * Value type that represents a date in the ISO-8601 calendar.
@@ -54,6 +51,12 @@ public class LocalDateType implements FieldType {
             value = ((JsonObject) value).getAsJsonPrimitive("value");
         }
         return LocalDate.parse(value.getAsString());
+    }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+
+        return visitor.visitLocalDate(this);
     }
 
     @Override

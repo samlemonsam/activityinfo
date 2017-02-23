@@ -34,8 +34,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.time.LocalDate;
-import org.activityinfo.service.store.BatchingFormTreeBuilder;
-import org.activityinfo.service.store.FormCatalog;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
@@ -43,6 +41,8 @@ import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.FormScanBatch;
+import org.activityinfo.store.spi.BatchingFormTreeBuilder;
+import org.activityinfo.store.spi.FormCatalog;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;

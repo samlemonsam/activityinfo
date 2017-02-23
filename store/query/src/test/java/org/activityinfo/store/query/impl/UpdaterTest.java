@@ -10,7 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.service.blob.BlobAuthorizerStub;
+import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -4,12 +4,12 @@ import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.RecordChangeType;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
+import org.activityinfo.store.spi.RecordChangeType;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 

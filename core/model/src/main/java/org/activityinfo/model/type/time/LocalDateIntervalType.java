@@ -3,6 +3,7 @@ package org.activityinfo.model.type.time;
 import com.google.gson.JsonElement;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldTypeVisitor;
 import org.activityinfo.model.type.FieldValue;
 
 /**
@@ -36,6 +37,11 @@ public class LocalDateIntervalType implements FieldType {
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
         throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitLocalDateInterval(this);
     }
 
     /**

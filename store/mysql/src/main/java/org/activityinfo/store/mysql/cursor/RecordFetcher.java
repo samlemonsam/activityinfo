@@ -8,9 +8,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.CursorObserver;
-import org.activityinfo.service.store.FormStorage;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.FormStorage;
 
 /**
  * Fetches a single form record using the ColumnSetBuilder

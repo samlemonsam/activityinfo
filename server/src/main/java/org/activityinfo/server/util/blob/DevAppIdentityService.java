@@ -4,7 +4,7 @@ import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.PublicCertificate;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.activityinfo.service.DeploymentConfiguration;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;

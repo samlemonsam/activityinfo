@@ -14,13 +14,13 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
-import org.activityinfo.service.blob.BlobAuthorizer;
-import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorage;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;

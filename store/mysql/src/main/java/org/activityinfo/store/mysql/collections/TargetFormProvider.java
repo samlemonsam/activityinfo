@@ -6,9 +6,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -37,6 +37,11 @@ public class NarrativeType implements FieldType {
         return NarrativeValue.valueOf(value.getAsString());
     }
 
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitNarrative(this);
+    }
+
     /**
      *
      * @return the singleton instance for this type

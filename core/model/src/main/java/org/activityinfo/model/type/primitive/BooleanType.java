@@ -24,6 +24,7 @@ package org.activityinfo.model.type.primitive;
 import com.google.gson.JsonElement;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.FieldTypeVisitor;
 import org.activityinfo.model.type.FieldValue;
 
 /**
@@ -53,6 +54,11 @@ public class BooleanType implements FieldType {
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
         return BooleanFieldValue.valueOf(value.getAsBoolean());
+    }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitBoolean(this);
     }
 
     /**

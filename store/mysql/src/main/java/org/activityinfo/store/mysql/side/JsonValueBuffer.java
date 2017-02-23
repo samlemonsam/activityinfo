@@ -2,14 +2,10 @@ package org.activityinfo.store.mysql.side;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.activityinfo.model.type.*;
-import org.activityinfo.model.type.attachment.AttachmentType;
-import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.model.type.time.LocalDate;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

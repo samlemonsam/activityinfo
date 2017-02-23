@@ -19,11 +19,11 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.time.LocalDate;
-import org.activityinfo.service.store.RecordChangeType;
-import org.activityinfo.service.store.RecordVersion;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
+import org.activityinfo.store.spi.RecordChangeType;
+import org.activityinfo.store.spi.RecordVersion;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

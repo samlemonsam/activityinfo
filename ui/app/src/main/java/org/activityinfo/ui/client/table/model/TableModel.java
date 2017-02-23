@@ -10,17 +10,31 @@ import org.activityinfo.ui.client.store.FormStore;
  */
 public class TableModel {
 
+    private final FormStore formStore;
     private ResourceId formId;
     private Observable<FormTree> formTree;
     private Observable<EffectiveTableModel> effectiveTable;
 
-    public TableModel(final FormStore service, ResourceId formId) {
+    public TableModel(final FormStore formStore, ResourceId formId) {
         this.formId = formId;
-        this.formTree = service.getFormTree(formId);
-        this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(service, tree));
+        this.formStore = formStore;
+        this.formTree = formStore.getFormTree(formId);
+        this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(formStore, tree));
     }
 
     public Observable<EffectiveTableModel> getEffectiveTable() {
         return effectiveTable;
+    }
+
+    public ResourceId getFormId() {
+        return formId;
+    }
+
+    public Observable<FormTree> getFormTree() {
+        return formTree;
+    }
+
+    public FormStore getFormStore() {
+        return formStore;
     }
 }

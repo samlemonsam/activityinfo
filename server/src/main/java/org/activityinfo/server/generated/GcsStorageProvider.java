@@ -28,8 +28,8 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.Domain;
-import org.activityinfo.service.DeploymentConfiguration;
 
 import java.io.IOException;
 import java.security.SecureRandom;

@@ -47,6 +47,11 @@ public class GeoPointType implements RecordFieldType {
         return point;
     }
 
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitGeoPoint(this);
+    }
+
     /**
      *
      * @return the singleton instance for this type

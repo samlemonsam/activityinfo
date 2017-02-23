@@ -59,4 +59,9 @@ public class MonthType implements FieldType, TemporalType {
     public FieldValue parseJsonValue(JsonElement value) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public <T> T accept(FieldTypeVisitor<T> visitor) {
+        return visitor.visitMonth(this);
+    }
 }

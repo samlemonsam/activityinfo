@@ -14,12 +14,11 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.server.command.handler.PermissionOracle;
-import org.activityinfo.service.blob.BlobAuthorizer;
-import org.activityinfo.service.lookup.ReferenceChoice;
-import org.activityinfo.service.store.FormCatalog;
-import org.activityinfo.service.store.FormStorage;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.util.Collection;
 import java.util.List;

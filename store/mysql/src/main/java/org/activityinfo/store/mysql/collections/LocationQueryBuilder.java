@@ -3,14 +3,14 @@ package org.activityinfo.store.mysql.collections;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.service.store.ColumnQueryBuilder;
-import org.activityinfo.service.store.Cursor;
-import org.activityinfo.service.store.CursorObserver;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.mysql.side.AdminColumnBuilder;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.Cursor;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.SQLException;
 

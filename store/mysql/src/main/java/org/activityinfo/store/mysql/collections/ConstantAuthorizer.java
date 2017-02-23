@@ -1,6 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.store.spi.FormPermissions;
 
 /**
  * Authorizer which grants the same permissions for all users

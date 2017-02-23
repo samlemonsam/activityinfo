@@ -1,6 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.service.store.FormPermissions;
+import org.activityinfo.store.spi.FormPermissions;
 
 /**
  * Hard-coded permissions for global ActivityInfo administrator (id=3)

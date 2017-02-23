@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.FunctionCallNode;
 import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.service.store.CursorObserver;
+import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.List;
 
