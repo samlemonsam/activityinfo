@@ -32,7 +32,7 @@ dependencies {
     gwt project(':core:model')
     gwt project(':store:query');
     gwt project(':i18n')
-    gwt project(':apiClient:gwt')
+    gwt project(':clients:gwtrest')
 
     gwt project(':ui:codemirror')
 

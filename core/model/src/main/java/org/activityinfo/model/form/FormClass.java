@@ -34,6 +34,7 @@ public class FormClass implements FormElementContainer {
 
     @Nonnull
     private ResourceId id;
+
     private ResourceId databaseId;
 
     private String label;

@@ -6,7 +6,9 @@ include 'core:promises'
 include 'core:gwtrpc'
 
 include 'api'
-include 'apiClient:gwt'
+include 'clients:gwtrpc'
+include 'clients:gwtrest'
+
 include 'apiDocs'
 
 include 'store:spi'

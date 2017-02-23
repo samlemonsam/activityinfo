@@ -3,8 +3,8 @@
 
 dependencies {
     compile project(':core:model')
-    compile project(':apiClient:gwt')
-    compile project(':core:gwtrpc')
+    compile project(':clients:gwtrpc')
+    compile project(':clients:gwtrest')
 
     compile project(':i18n')
     compile project(':io:xform')
