@@ -11,6 +11,7 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.store.spi.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -145,7 +146,6 @@ class FormCatalogStub implements FormCatalog {
         public QueryBuilderStub(StorageStub collection) {
             this.collection = collection;
         }
-
 
         @Override
         public void only(ResourceId resourceId) {
