@@ -1,8 +1,7 @@
 package org.activityinfo.geoadmin;
 
-import org.activityinfo.model.type.geo.Extents;
-
 import com.vividsolutions.jts.geom.Envelope;
+import org.activityinfo.model.type.geo.Extents;
 
 public class GeoUtils {
 
@@ -19,9 +18,4 @@ public class GeoUtils {
         return bounds;
     }
 
-    public static Extents toExtents(Envelope envelope) {
-        return new Extents(
-                envelope.getMinY(), envelope.getMaxY(),
-                envelope.getMinX(), envelope.getMaxX());
-    }
 }
