@@ -16,8 +16,8 @@ include 'store:hrd'
 include 'store:offline'
 include 'store:testing'
 
-include 'geoadmin'
 include 'server'
+
 include 'io:xform'
 include 'io:match'
 include 'io:xlsform'
@@ -27,5 +27,6 @@ include 'ui:icons'
 include 'ui:app'
 include 'ui:app2'
 include 'ui:codemirror'
+include 'ui:geoadmin'
 
 include 'tests:acceptance'
