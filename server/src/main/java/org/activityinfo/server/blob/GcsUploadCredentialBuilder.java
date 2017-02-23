@@ -4,7 +4,6 @@ import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.activityinfo.model.blob.UploadCredentials;
 import org.activityinfo.model.resource.ResourceId;
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.Duration;

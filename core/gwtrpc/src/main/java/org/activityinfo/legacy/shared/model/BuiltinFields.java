@@ -1,4 +1,4 @@
-package org.activityinfo.model.legacy;
+package org.activityinfo.legacy.shared.model;
 /*
  * #%L
  * ActivityInfo Server
@@ -26,6 +26,7 @@ import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.time.LocalDate;

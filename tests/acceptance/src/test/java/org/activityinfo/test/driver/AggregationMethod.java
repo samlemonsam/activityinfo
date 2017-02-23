@@ -1,4 +1,4 @@
-package org.activityinfo.model.calc;
+package org.activityinfo.test.driver;
 
 /*
  * #%L

@@ -40,7 +40,7 @@ import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import javax.persistence.EntityManager;
 import java.util.Date;
 
-import static org.activityinfo.model.util.StringUtil.truncate;
+import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 
 public class ActivityPolicy implements EntityPolicy<Activity> {
 

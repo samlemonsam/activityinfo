@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.activityinfo.model.util.StringUtil.truncate;
+import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 
 /**
  * Provides functionality common to CreateEntityHandler and UpdateEntityHandler

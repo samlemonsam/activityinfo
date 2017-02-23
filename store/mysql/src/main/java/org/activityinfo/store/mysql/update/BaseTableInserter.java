@@ -3,12 +3,12 @@ package org.activityinfo.store.mysql.update;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.FieldMapping;
 import org.activityinfo.store.mysql.mapping.TableMapping;
+import org.activityinfo.store.spi.RecordUpdate;
 
 import java.util.ArrayList;
 import java.util.List;

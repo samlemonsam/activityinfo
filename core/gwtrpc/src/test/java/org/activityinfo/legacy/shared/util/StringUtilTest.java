@@ -1,4 +1,4 @@
-package org.activityinfo.model.util;
+package org.activityinfo.legacy.shared.util;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,25 +21,23 @@ package org.activityinfo.model.util;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author yuriyz on 10/14/2015.
  */
-public class StringUtil {
+public class StringUtilTest {
 
-    private StringUtil() {
+    @Test
+    public void truncate() {
+        assertEquals(truncateTo(255).length(), 255);
+        assertEquals(truncateTo(300).length(), 300);
     }
 
-    public static String truncate(String s) {
-        return truncate(s, 255);
-    }
-
-    public static String truncate(String s, int maxLength) {
-        if (s == null) {
-            return null;
-        }
-        Preconditions.checkState(maxLength > 0);
-        return s.substring(0, Math.min(s.length(), maxLength));
+    public static String truncateTo(int length) {
+        return StringUtil.truncate(Strings.padEnd("", 500, 'f'), length);
     }
 }

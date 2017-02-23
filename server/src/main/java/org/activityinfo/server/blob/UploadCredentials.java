@@ -1,4 +1,4 @@
-package org.activityinfo.model.blob;
+package org.activityinfo.server.blob;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;

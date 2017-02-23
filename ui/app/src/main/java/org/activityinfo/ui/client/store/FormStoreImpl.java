@@ -1,10 +1,8 @@
 package org.activityinfo.ui.client.store;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;

@@ -1,7 +1,5 @@
-package org.activityinfo.model.resource;
+package org.activityinfo.model.type;
 
-
-import org.activityinfo.model.type.FieldValue;
 
 public interface RecordFieldValue extends FieldValue {
     

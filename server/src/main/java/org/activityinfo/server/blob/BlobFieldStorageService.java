@@ -1,8 +1,9 @@
-package org.activityinfo.store.spi;
+package org.activityinfo.server.blob;
 
 import com.sun.jersey.api.core.InjectParam;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.spi.BlobId;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;

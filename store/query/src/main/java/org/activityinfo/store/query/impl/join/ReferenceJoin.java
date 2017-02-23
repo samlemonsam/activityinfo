@@ -5,7 +5,6 @@ import org.activityinfo.store.query.impl.Slot;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.logging.Logger;
 
 /**
  * Holds the foreignKey / primaryKeyMap columns required

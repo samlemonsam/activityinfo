@@ -1,6 +1,6 @@
 package org.activityinfo.server.entity.auth;
 
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 
 
 public interface AuthorizationHandler<T> {

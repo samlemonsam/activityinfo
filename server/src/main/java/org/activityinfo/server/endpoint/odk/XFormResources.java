@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.io.xform.manifest.MediaFile;
 import org.activityinfo.io.xform.manifest.XFormManifest;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;

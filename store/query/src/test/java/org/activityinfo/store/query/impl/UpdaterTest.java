@@ -5,12 +5,12 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
+import org.activityinfo.store.spi.RecordUpdate;
 import org.junit.Before;
 import org.junit.Test;
 

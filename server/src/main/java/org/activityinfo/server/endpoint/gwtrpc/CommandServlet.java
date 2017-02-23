@@ -27,13 +27,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
+import org.activityinfo.legacy.shared.AnonymousUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandService;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
-import org.activityinfo.model.auth.AnonymousUser;
-import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
 import java.util.ArrayList;

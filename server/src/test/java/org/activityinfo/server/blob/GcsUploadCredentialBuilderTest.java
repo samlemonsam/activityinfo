@@ -4,7 +4,6 @@ import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.common.io.Resources;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import org.activityinfo.model.blob.UploadCredentials;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;

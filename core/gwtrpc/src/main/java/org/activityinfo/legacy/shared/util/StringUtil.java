@@ -1,4 +1,4 @@
-package org.activityinfo.model.resource;
+package org.activityinfo.legacy.shared.util;
 /*
  * #%L
  * ActivityInfo Server
@@ -21,26 +21,25 @@ package org.activityinfo.model.resource;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
+
 /**
- * @author yuriyz on 7/21/14.
+ * @author yuriyz on 10/14/2015.
  */
-public enum ResourceIdPrefixType {
-    TYPE("_type"),
-    SUBFORM("_subform");
+public class StringUtil {
 
-    public static final String SEPARATOR = ":";
-
-    private final String type;
-
-    ResourceIdPrefixType(String type) {
-        this.type = type;
+    private StringUtil() {
     }
 
-    public String getType() {
-        return type;
+    public static String truncate(String s) {
+        return truncate(s, 255);
     }
 
-    public ResourceId id(String suffix) {
-        return ResourceId.valueOf(type + SEPARATOR + suffix);
+    public static String truncate(String s, int maxLength) {
+        if (s == null) {
+            return null;
+        }
+        Preconditions.checkState(maxLength > 0);
+        return s.substring(0, Math.min(s.length(), maxLength));
     }
 }

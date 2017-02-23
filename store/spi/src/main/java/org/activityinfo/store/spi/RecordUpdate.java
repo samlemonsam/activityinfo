@@ -1,5 +1,6 @@
-package org.activityinfo.model.resource;
+package org.activityinfo.store.spi;
 
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
 import java.util.HashMap;

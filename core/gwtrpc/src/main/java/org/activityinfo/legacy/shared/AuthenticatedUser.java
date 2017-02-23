@@ -1,4 +1,4 @@
-package org.activityinfo.model.auth;
+package org.activityinfo.legacy.shared;
 
 /*
  * #%L

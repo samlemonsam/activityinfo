@@ -2,11 +2,11 @@ package org.activityinfo.ui.client.component.importDialog.model.strategy;
 
 import com.google.common.base.Preconditions;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.legacy.shared.model.BuiltinFields;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.legacy.BuiltinFields;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.importDialog.model.ImportModel;

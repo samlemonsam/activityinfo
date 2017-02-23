@@ -1,4 +1,5 @@
-package org.activityinfo.model.util;
+package org.activityinfo.legacy.shared;
+
 /*
  * #%L
  * ActivityInfo Server
@@ -21,23 +22,14 @@ package org.activityinfo.model.util;
  * #L%
  */
 
-import com.google.common.base.Strings;
-import org.junit.Test;
+public final class AnonymousUser {
 
-import static junit.framework.Assert.assertEquals;
+    public static final String AUTHTOKEN = "AnonymousUser";
+    public static final int USER_ID = 0;
+    public static final String USER_EMAIL = "AnonymousUser@activityinfo.org";
 
-/**
- * @author yuriyz on 10/14/2015.
- */
-public class StringUtilTest {
+    private AnonymousUser() {
 
-    @Test
-    public void truncate() {
-        assertEquals(truncateTo(255).length(), 255);
-        assertEquals(truncateTo(300).length(), 300);
     }
 
-    public static String truncateTo(int length) {
-        return StringUtil.truncate(Strings.padEnd("", 500, 'f'), length);
-    }
 }
