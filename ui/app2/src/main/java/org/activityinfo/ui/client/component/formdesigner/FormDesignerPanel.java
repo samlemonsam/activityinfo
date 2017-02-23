@@ -117,6 +117,10 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
             public void onAttachOrDetach(AttachEvent event) {
                 scrollAncestor = GwtUtil.getScrollAncestor(FormDesignerPanel.this);
                 scrollAncestor.addScrollHandler(FormDesignerPanel.this);
+
+                // Workaround for bug caused by new Scroll Anchoring feature in Chrome
+                // https://github.com/angular-ui/ui-scroll/issues/138
+                scrollAncestor.getElement().getStyle().setProperty("overflowAnchor", "none");
             }
         });
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {

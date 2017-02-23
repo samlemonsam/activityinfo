@@ -67,7 +67,13 @@ task compileApp(type: JavaExec) {
     main = 'com.google.gwt.dev.Compiler'
 
     args '-war', outputDir
-    args '-logLevel', 'ERROR'
-    args 'org.activityinfo.ui.ActivityInfoRelease'
-    args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
+
+    if ("safari".equals(project.property("gwtMode"))) {
+        args '-logLevel', 'INFO'
+        args 'org.activityinfo.ui.ActivityInfoSafariTest'
+    } else {
+        args '-logLevel', 'ERROR'
+        args 'org.activityinfo.ui.ActivityInfoRelease'
+        args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
+    }
 }
