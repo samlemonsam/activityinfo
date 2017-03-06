@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
@@ -16,11 +17,16 @@ import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservableList;
+import org.activityinfo.observable.Observer;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.FieldMeasure;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 import org.activityinfo.ui.client.measureDialog.view.MeasureDialog;
+
+import java.util.List;
 
 
 public class MeasurePane implements IsWidget {
@@ -28,7 +34,7 @@ public class MeasurePane implements IsWidget {
     private ContentPanel contentPanel;
     private MeasureDialog dialog;
 
-    private ObservingListStore<MeasureListItem> store;
+    private ListStore<MeasureListItem> store;
     private ListView<MeasureListItem, MeasureListItem> list;
     private AnalysisModel model;
 
@@ -39,7 +45,22 @@ public class MeasurePane implements IsWidget {
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
         addButton.addSelectHandler(this::addMeasureClicked);
 
-        store = new ObservingListStore<>(model.getMeasures().map(MeasureListItem::new), MeasureListItem::getKey);
+        store = new ListStore<>(MeasureListItem::getKey);
+        ObservableList<Observable<MeasureListItem>> map = model.getMeasures().map(MeasureListItem::compute);
+        Observable<List<MeasureListItem>> measures = Observable.flatten(map);
+        measures.subscribe(new Observer<List<MeasureListItem>>() {
+            @Override
+            public void onChange(Observable<List<MeasureListItem>> observable) {
+                if(observable.isLoading()) {
+                    store.clear();
+                } else {
+                    store.replaceAll(measures.get());
+                }
+            }
+        });
+
+
+        store = new ListStore<>(MeasureListItem::getKey);
         list = new ListView<>(store,
                 new IdentityValueProvider<>(),
                 new PillCell<>(MeasureListItem::getLabel, this::showMenu));
