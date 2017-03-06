@@ -18,11 +18,11 @@ for the front end applications and the generated API documentation.
 ## Gradle Tasks
 
 
-## appengineDevMode
+### appengineDevMode
 
 Run the local AppEngine server for local development
 
-## archive
+### archive
 
 Build the versioned WAR and archive on Google Cloud Storage for subsequent
 deployment and testing.

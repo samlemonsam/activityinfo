@@ -5,6 +5,9 @@ dependencies {
     compile project(':i18n')
     compile project(':core:model')
 
+    compile libraries.jersey.core
+    compile libraries.jackson.mapper
+
     compile libraries.gxt
     compile libraries.rebar.time
     compile libraries.rebar.sql
@@ -16,7 +19,6 @@ dependencies {
     compile libraries.hibernate.validator
 
     gwt libraries.gwt.user
-    gwt libraries.gwt.gson
     compile libraries.gwt.guava
 
 }
