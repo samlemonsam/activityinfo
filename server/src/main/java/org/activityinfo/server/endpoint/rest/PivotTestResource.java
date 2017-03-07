@@ -2,13 +2,13 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.model.ReportDTO;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.legacy.shared.reports.model.PivotReportElement;
 import org.activityinfo.legacy.shared.reports.model.Report;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
-import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;

@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.analysis.model;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTesting;
@@ -46,7 +47,8 @@ public class AnalysisModelTest {
         formStore.delayLoading();
 
         AnalysisModel model = new AnalysisModel(formStore);
-        model.addMeasure(new FieldMeasure("count", "Count of survey", Survey.FORM_ID, new ConstantExpr(1)));
+        model.addMeasure(new MeasureModel(ResourceId.generateCuid(), "Count",
+                new FieldMeasure(Survey.FORM_ID, new ConstantExpr(1))));
 
         Connection<AnalysisResult> result = ObservableTesting.connect(model.getResult());
         result.assertLoading();
@@ -64,7 +66,8 @@ public class AnalysisModelTest {
 
         TestingFormStore formStore = new TestingFormStore();
         AnalysisModel model = new AnalysisModel(formStore);
-        model.addMeasure(new FieldMeasure("count", "Count of survey", Survey.FORM_ID, new ConstantExpr(1)));
+        model.addMeasure(new MeasureModel(ResourceId.generateCuid(), "Count",
+                new FieldMeasure(Survey.FORM_ID, new ConstantExpr(1))));
 
         Connection<FormForest> connection = ObservableTesting.connect(model.getFormForest());
         connection.disconnect();

@@ -13,7 +13,6 @@ import cucumber.api.java.en.When;
 import cucumber.runtime.java.guice.ScenarioScoped;
 import gherkin.formatter.model.DataTableRow;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.model.type.enumerated.EnumType;

@@ -1,7 +1,7 @@
 package org.activityinfo.server.endpoint.odk;
 
 import com.google.inject.Inject;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;

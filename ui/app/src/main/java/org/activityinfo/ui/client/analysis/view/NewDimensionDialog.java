@@ -22,7 +22,7 @@ import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
-import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
+import org.activityinfo.ui.client.analysis.model.DimensionSource;
 import org.activityinfo.ui.client.analysis.model.FormForest;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Allows the user to choose a new dimension
  */
-public class NewDimensionDialog implements HasSelectionHandlers<DimensionSourceModel> {
+public class NewDimensionDialog implements HasSelectionHandlers<DimensionSource> {
 
     private AnalysisModel model;
     private Dialog dialog;
@@ -111,7 +111,7 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSourceM
 
 
     private void onOkClicked(SelectEvent event) {
-        DimensionSourceModel selectedItem = tree.getSelectionModel().getSelectedItem().dimensionModel();
+        DimensionSource selectedItem = tree.getSelectionModel().getSelectedItem().dimensionModel();
         if (selectedItem != null) {
             SelectionEvent.fire(this, selectedItem);
             dialog.hide();
@@ -129,7 +129,7 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSourceM
 
 
     @Override
-    public HandlerRegistration addSelectionHandler(SelectionHandler<DimensionSourceModel> selectionHandler) {
+    public HandlerRegistration addSelectionHandler(SelectionHandler<DimensionSource> selectionHandler) {
         return eventBus.addHandler(SelectionEvent.getType(), selectionHandler);
     }
 

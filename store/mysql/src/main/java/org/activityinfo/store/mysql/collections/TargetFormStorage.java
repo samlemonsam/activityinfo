@@ -4,16 +4,12 @@ import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.FormPermissions;
-import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.RecordVersion;
+import org.activityinfo.store.spi.*;
 
 import java.util.List;
 

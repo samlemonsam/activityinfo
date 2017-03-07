@@ -1,6 +1,5 @@
 package org.activityinfo.geoadmin.model;
 
-import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.ResourceId;

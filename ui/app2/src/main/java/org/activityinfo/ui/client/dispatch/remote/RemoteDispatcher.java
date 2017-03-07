@@ -25,11 +25,11 @@ package org.activityinfo.ui.client.dispatch.remote;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandServiceAsync;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.model.auth.AuthenticatedUser;
 
 import java.util.Collections;
 import java.util.List;

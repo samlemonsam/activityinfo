@@ -23,7 +23,7 @@ package org.activityinfo.server.authentication;
  */
 
 import com.google.inject.servlet.ServletModule;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 
 /**
  * Guice Module defining bindings for Authentication interfaces. (The default is

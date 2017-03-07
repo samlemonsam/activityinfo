@@ -3,11 +3,11 @@ package org.activityinfo.server.endpoint.odk;
 import com.google.common.base.Optional;
 import org.activityinfo.io.xform.formList.XFormList;
 import org.activityinfo.io.xform.formList.XFormListItem;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.model.auth.AuthenticatedUser;
 import org.activityinfo.server.command.DispatcherSync;
 
 import javax.inject.Provider;

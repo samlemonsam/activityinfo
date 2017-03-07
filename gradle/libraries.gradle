@@ -74,6 +74,8 @@ ext {
         ],
             
         jackson: [
+            core:           "org.codehaus.jackson:jackson-core-asl:${jacksonVersion}",
+            mapper:         "org.codehaus.jackson:jackson-mapper-asl:${jacksonVersion}",
             geojson:        'com.bedatadriven:jackson-geojson:0.7'
         ],
             

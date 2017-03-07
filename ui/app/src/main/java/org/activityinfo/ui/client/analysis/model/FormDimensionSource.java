@@ -8,7 +8,7 @@ import org.activityinfo.model.query.ColumnSet;
 /**
  * The name of a form that is the dimension
  */
-public class FormDimensionSource extends DimensionSourceModel {
+public class FormDimensionSource extends DimensionSource {
 
     public static final FormDimensionSource INSTANCE = new FormDimensionSource();
 
@@ -22,7 +22,7 @@ public class FormDimensionSource extends DimensionSourceModel {
 
 
     @Override
-    public DimensionReader createReader(String dimensionId, FormClass formClass, ColumnSet input) {
+    public DimensionReader createReader(String dimensionId, MeasureLabels measureLabels, FormClass formClass, ColumnSet input) {
         return row -> formClass.getLabel();
     }
 

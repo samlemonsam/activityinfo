@@ -7,7 +7,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;

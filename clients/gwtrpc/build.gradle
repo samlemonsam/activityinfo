@@ -1,0 +1,37 @@
+apply plugin: 'gwt-base'
+
+dependencies {
+    compile project(':core:promises')
+    compile project(':i18n')
+    compile project(':core:model')
+
+    compile libraries.jersey.core
+    compile libraries.jackson.mapper
+
+    compile libraries.gxt
+    compile libraries.rebar.time
+    compile libraries.rebar.sql
+    compile libraries.rebar.sync
+
+    compile libraries.guice
+    compile libraries.guava
+
+    compile libraries.hibernate.validator
+
+    gwt libraries.gwt.user
+    compile libraries.gwt.guava
+
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}
+
+test {
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+        }
+    }
+}

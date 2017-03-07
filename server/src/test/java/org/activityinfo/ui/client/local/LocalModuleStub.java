@@ -28,7 +28,7 @@ import com.bedatadriven.rebar.sql.client.query.SqliteDialect;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import org.activityinfo.i18n.shared.UiConstants;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.MockEventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;

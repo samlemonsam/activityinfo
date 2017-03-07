@@ -30,7 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
 
 import javax.persistence.EntityManager;

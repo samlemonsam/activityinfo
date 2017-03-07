@@ -15,8 +15,8 @@ dependencies {
 
     gwt project(':i18n')
     gwt project(':core:model')
-    gwt project(':core:gwtrpc')
-    gwt project(':apiClient:gwt')
+    gwt project(':clients:gwtrpc')
+    gwt project(':clients:gwtrest')
     gwt project(':io:match')
     gwt project(':ui:icons')
 

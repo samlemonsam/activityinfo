@@ -15,7 +15,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import cucumber.runtime.java.guice.ScenarioScoped;
-import org.activityinfo.model.calc.AggregationMethod;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;

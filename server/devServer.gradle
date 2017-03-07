@@ -69,8 +69,8 @@ task appengineDevMode(type: JavaExec) {
     classpath project(':ui:app2').sourceSets.main.resources.srcDirs
     classpath project(":i18n").sourceSets.main.java.srcDirs
     classpath project(":i18n").sourceSets.main.resources.srcDirs
-    classpath project(":apiClient:gwt").sourceSets.main.java.srcDirs
-    classpath project(":apiClient:gwt").sourceSets.generated.java.srcDirs
+    classpath project(":clients:gwtrest").sourceSets.main.java.srcDirs
+//    classpath project(":clients:gwtrest").sourceSets.generated.java.srcDirs
     classpath project(":core:model").sourceSets.main.java.srcDirs
     classpath project(":core:model").sourceSets.main.resources.srcDirs
     classpath project(":ui:app2").configurations.gwt

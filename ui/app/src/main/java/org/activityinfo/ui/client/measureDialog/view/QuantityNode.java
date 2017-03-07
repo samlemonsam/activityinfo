@@ -39,6 +39,7 @@ public class QuantityNode extends MeasureTreeNode {
 
     @Override
     public MeasureModel newMeasure() {
-        return new FieldMeasure(ResourceId.generateCuid(), field.getLabel(), formId, new SymbolExpr(field.getId()));
+        return new MeasureModel(ResourceId.generateCuid(), getLabel(),
+                new FieldMeasure(formId, new SymbolExpr(field.getId())));
     }
 }

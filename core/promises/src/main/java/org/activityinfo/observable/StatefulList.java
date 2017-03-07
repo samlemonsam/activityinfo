@@ -38,12 +38,17 @@ public class StatefulList<T> extends ObservableList<T> {
     public boolean removeFirst(Predicate<T> predicate) {
         for (int i = 0; i < list.size(); i++) {
             if(predicate.apply(list.get(i))) {
-                T removed = list.remove(i);
-                fireRemoved(removed);
+                removeAt(i);
                 return true;
             }
         }
         return false;
+    }
+
+    public T removeAt(int index) {
+        T removed = list.remove(index);
+        fireRemoved(removed);
+        return removed;
     }
 
     public void clear() {

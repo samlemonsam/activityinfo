@@ -10,7 +10,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.geo.GeoPoint;

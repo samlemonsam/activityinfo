@@ -2,10 +2,10 @@ package org.activityinfo.model.type.geo;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.RecordFieldValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NullFieldValue;
+import org.activityinfo.model.type.RecordFieldValue;
 import org.activityinfo.model.type.number.Quantity;
 
 /**

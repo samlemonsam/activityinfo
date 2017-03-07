@@ -4,12 +4,11 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
 
-public abstract class FormLevelMeasure extends MeasureModel {
+public abstract class FormLevelMeasure implements MeasureSource {
 
     private final ResourceId formId;
 
-    public FormLevelMeasure(String key, String label, ResourceId formId) {
-        super(key, label);
+    public FormLevelMeasure(ResourceId formId) {
         this.formId = formId;
     }
 

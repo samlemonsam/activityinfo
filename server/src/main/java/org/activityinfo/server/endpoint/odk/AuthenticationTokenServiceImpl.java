@@ -2,7 +2,7 @@ package org.activityinfo.server.endpoint.odk;
 
 import com.google.appengine.api.datastore.*;
 import com.google.inject.Inject;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 

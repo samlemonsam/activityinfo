@@ -50,7 +50,7 @@ class ObservableListMap<T, R> extends ObservableList<R> {
                 results.remove(resultItem);
                 ObservableListMap.this.fireRemoved(resultItem);
             }
-        });
+    });
     }
 
     @Override

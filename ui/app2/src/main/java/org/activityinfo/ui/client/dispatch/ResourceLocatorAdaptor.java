@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonNull;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.json.client.JSONNull;
 import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;

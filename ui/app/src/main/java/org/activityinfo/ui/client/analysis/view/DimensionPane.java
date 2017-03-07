@@ -18,7 +18,7 @@ import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
+import org.activityinfo.ui.client.analysis.model.DimensionSource;
 
 /**
  *
@@ -71,7 +71,7 @@ public class DimensionPane implements IsWidget {
         dialog.show();
     }
 
-    private void onNewDimensionSelected(SelectionEvent<DimensionSourceModel> event) {
+    private void onNewDimensionSelected(SelectionEvent<DimensionSource> event) {
         model.addDimension(event.getSelectedItem());
     }
 

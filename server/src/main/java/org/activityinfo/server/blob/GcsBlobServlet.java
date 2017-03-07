@@ -8,7 +8,7 @@ import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.attachment.AppEngineAttachmentService;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;

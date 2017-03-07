@@ -23,7 +23,7 @@ package org.activityinfo.server.authentication;
  */
 
 import com.google.inject.AbstractModule;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 
 public class AuthenticationModuleStub extends AbstractModule {
 

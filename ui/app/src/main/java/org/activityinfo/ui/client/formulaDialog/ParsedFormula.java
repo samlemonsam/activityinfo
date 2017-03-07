@@ -67,6 +67,10 @@ public class ParsedFormula {
         return errors;
     }
 
+    public FieldType getResultType() {
+        return resultType;
+    }
+
     public String getErrorMessage() {
         assert !valid;
         if(errors.size() == 1) {

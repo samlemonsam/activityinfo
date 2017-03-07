@@ -8,7 +8,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.spi.*;

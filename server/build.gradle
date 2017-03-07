@@ -1,7 +1,7 @@
 
 evaluationDependsOn ":ui:app"
 evaluationDependsOn ":ui:app2"
-evaluationDependsOn ":apiClient:gwt"
+evaluationDependsOn ":clients:gwtrest"
 
 apply plugin: 'war'
 apply plugin: 'appengine'

@@ -1,7 +1,7 @@
 package org.activityinfo.server.entity.change;
 
 import com.google.common.collect.Maps;
-import org.activityinfo.model.auth.AuthenticatedUser;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.User;
 
 import java.util.Map;

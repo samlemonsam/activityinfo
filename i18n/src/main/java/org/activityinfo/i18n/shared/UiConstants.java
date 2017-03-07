@@ -1519,7 +1519,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Tab is not selected.")
     String subFormTabNotSelected();
 
-    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right. <a target=\"_blank\" href=\"http://help.activityinfo.org/m/28175/l/445646-batch-import\" style=\"text-decoration: underline;\">Show me how</a>.")
+    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right.")
     String columnMappingHelpLink();
 
     @DefaultStringValue("Show me")
