@@ -2,7 +2,7 @@ package org.activityinfo.ui.client.analysis.view;
 
 import com.google.gwt.resources.client.ImageResource;
 import com.sencha.gxt.core.client.ValueProvider;
-import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
+import org.activityinfo.ui.client.analysis.model.DimensionSource;
 
 public abstract class DimensionNode {
 
@@ -28,7 +28,7 @@ public abstract class DimensionNode {
 
     public abstract String getLabel();
 
-    public abstract DimensionSourceModel dimensionModel();
+    public abstract DimensionSource dimensionModel();
 
     public abstract ImageResource getIcon();
 }

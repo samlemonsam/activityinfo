@@ -2,7 +2,7 @@ package org.activityinfo.ui.client.analysis.view;
 
 import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
+import org.activityinfo.ui.client.analysis.model.DimensionSource;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 
@@ -28,7 +28,7 @@ public class ReferenceFormNode extends DimensionNode {
     }
 
     @Override
-    public DimensionSourceModel dimensionModel() {
+    public DimensionSource dimensionModel() {
         return firstChild.dimensionModel();
     }
 

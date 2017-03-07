@@ -12,9 +12,9 @@ public class DimensionModel {
 
     private String id;
     private String label;
-    private DimensionSourceModel sourceModel;
+    private DimensionSource sourceModel;
 
-    DimensionModel(String id, DimensionSourceModel sourceModel) {
+    DimensionModel(String id, DimensionSource sourceModel) {
         this.id = id;
         this.sourceModel = sourceModel;
         this.label = sourceModel.getLabel();
@@ -25,7 +25,7 @@ public class DimensionModel {
         return label;
     }
 
-    public DimensionSourceModel getSourceModel() {
+    public DimensionSource getSourceModel() {
         return sourceModel;
     }
 
@@ -38,10 +38,9 @@ public class DimensionModel {
     }
 
 
-    public DimensionReader createReader(FormClass formClass, ColumnSet columnSet) {
-        return sourceModel.createReader(id, formClass, columnSet);
+    public DimensionReader createReader(MeasureLabels measureLabels, FormClass formClass, ColumnSet columnSet) {
+        return sourceModel.createReader(id, measureLabels, formClass, columnSet);
     }
-
 
     public JsonElement toJsonObject() {
         JsonObject object = new JsonObject();

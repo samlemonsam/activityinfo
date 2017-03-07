@@ -5,7 +5,7 @@ import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.ui.client.analysis.model.DimensionSourceModel;
+import org.activityinfo.ui.client.analysis.model.DimensionSource;
 import org.activityinfo.ui.client.analysis.model.FieldDimensionSource;
 import org.activityinfo.ui.client.icons.IconBundle;
 
@@ -31,7 +31,7 @@ public class ReferencedNode extends DimensionNode {
     }
 
     @Override
-    public DimensionSourceModel dimensionModel() {
+    public DimensionSource dimensionModel() {
         return new FieldDimensionSource(form.getLabel() + " " + field.getLabel(),
                 new CompoundExpr(new SymbolExpr(form.getId()), new SymbolExpr(field.getId())));
     }

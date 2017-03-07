@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * Field that can be used as a dimension source
  */
-public class FieldDimensionSource extends DimensionSourceModel {
+public class FieldDimensionSource extends DimensionSource {
 
     private String label;
     private ExprNode expr;
@@ -43,7 +43,7 @@ public class FieldDimensionSource extends DimensionSourceModel {
 
 
     @Override
-    public DimensionReader createReader(String dimensionId, FormClass formClass, ColumnSet input) {
+    public DimensionReader createReader(String dimensionId, MeasureLabels measureLabels, FormClass formClass, ColumnSet input) {
         ColumnView columnView = input.getColumnView(dimensionId);
         return row -> columnView.getString(row);
     }

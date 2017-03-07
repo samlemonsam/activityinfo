@@ -106,7 +106,7 @@ public class MeasurePane implements IsWidget {
         MenuItem editFormula = new MenuItem();
         editFormula.setText("Edit Formula...");
         editFormula.addSelectionHandler(event -> editFormula(measure));
-        editFormula.setEnabled(measure instanceof FieldMeasure);
+        editFormula.setEnabled(measure.getSource() instanceof FieldMeasure);
         contextMenu.add(editFormula);
 
         contextMenu.add(new SeparatorMenuItem());
@@ -134,9 +134,9 @@ public class MeasurePane implements IsWidget {
     }
 
     private void editFormula(MeasureModel measure) {
-        FieldMeasure fieldMeasure = (FieldMeasure) measure;
-        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), ((FieldMeasure) measure).getFormId());
-        dialog.show(fieldMeasure.getFormula().get(), formula -> {
+        FieldMeasure fieldSource = (FieldMeasure) measure.getSource();
+        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), fieldSource.getFormId());
+        dialog.show(fieldSource.getFormula().get(), formula -> {
             model.updateMeasureFormula(measure.getKey(), formula.getFormula());
 
         });

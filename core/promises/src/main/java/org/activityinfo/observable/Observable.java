@@ -147,13 +147,19 @@ public abstract class Observable<T> {
             }
         };
     }
-    
+
+
+
     public <R> Observable<R> join(final Function<T, Observable<R>> function) {
         return new ChainedObservable<>(transform(function));
     }
 
     public static <X, Y, R> Observable<R> join(Observable<X> x, Observable<Y> y, BiFunction<X, Y, Observable<R>> function) {
         return new ChainedObservable<>(transform(x, y, function));
+    }
+
+    public static <X, Y, Z, R> Observable<R> join(Observable<X> x, Observable<Y> y, Observable<Z> z, Function3<X, Y, Z, Observable<R>> function) {
+        return new ChainedObservable<>(transform(SynchronousScheduler.INSTANCE, x, y, z, function));
     }
 
     public static <T> Observable<T> just(T value) {

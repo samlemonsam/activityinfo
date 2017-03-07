@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Models a dimension "source".
  */
-public abstract class DimensionSourceModel {
+public abstract class DimensionSource {
 
     public abstract String getLabel();
 
@@ -20,7 +20,8 @@ public abstract class DimensionSourceModel {
         return Collections.emptySet();
     }
 
-    public abstract DimensionReader createReader(String dimensionId, FormClass formClass, ColumnSet input);
+    public abstract DimensionReader createReader(String dimensionId, MeasureLabels measureLabels,
+                                                 FormClass formClass, ColumnSet input);
 
     public abstract JsonObject toJsonObject();
 }
