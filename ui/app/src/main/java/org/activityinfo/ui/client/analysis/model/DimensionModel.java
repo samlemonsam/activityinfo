@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.Set;
 
@@ -14,7 +15,7 @@ public class DimensionModel {
     private String label;
     private DimensionSource sourceModel;
 
-    DimensionModel(String id, DimensionSource sourceModel) {
+    DimensionModel(FormStore store, String id, DimensionSource sourceModel) {
         this.id = id;
         this.sourceModel = sourceModel;
         this.label = sourceModel.getLabel();

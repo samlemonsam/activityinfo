@@ -34,7 +34,7 @@ public class AnalysisModel {
         measures = new StatefulList<>();
 
         dimensions = new StatefulList<>();
-        dimensions.add(new DimensionModel("measure", new MeasureDimensionSource()));
+        dimensions.add(new DimensionModel(formStore, "measure", new MeasureDimensionSource()));
 
         // The dimension sources are a function of the measures present in the analysis
         this.formForest = measures
@@ -100,7 +100,7 @@ public class AnalysisModel {
 
     public void addDimension(DimensionSource dimensionSource) {
         beforeChange();
-        DimensionModel newDimension = new DimensionModel(ResourceId.generateCuid(), dimensionSource);
+        DimensionModel newDimension = new DimensionModel(formStore, ResourceId.generateCuid(), dimensionSource);
         dimensions.add(newDimension);
     }
 
