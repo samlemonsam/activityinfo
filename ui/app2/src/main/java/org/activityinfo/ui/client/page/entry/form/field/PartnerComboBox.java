@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.entry.form.field;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
 import com.extjs.gxt.ui.client.widget.form.ComboBox;
@@ -43,6 +44,7 @@ public class PartnerComboBox extends ComboBox<PartnerDTO> {
 
         final ListStore<PartnerDTO> store = new ListStore<PartnerDTO>();
         store.add(partners);
+        store.sort("name", Style.SortDir.ASC);
 
         setName("partner");
         setDisplayField("name");

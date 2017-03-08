@@ -82,6 +82,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     private ActivityFormDTO currentActivity;
 
     private ActionToolBar toolBar;
+    private Month currentMonth;
 
 
     public MonthlyReportsPanel(Dispatcher service) {
@@ -215,12 +216,16 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     private void populateGrid(SiteDTO site, ActivityFormDTO activity) {
-        Month startMonth = getInitialStartMonth(site);
-        monthCombo.setMappedValue(startMonth);
+
+        if(currentMonth == null) {
+            currentMonth = getInitialStartMonth(site);
+        }
+
+        monthCombo.setMappedValue(currentMonth);
         grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(activity)));
-        grid.updateMonthColumns(startMonth);
+        grid.updateMonthColumns(currentMonth);
         grid.setReadOnly(currentActivity.isAllowedToEdit(site));
-        proxy.setStartMonth(startMonth);
+        proxy.setStartMonth(currentMonth);
         proxy.setSiteId(site.getId());
         loader.load();
     }
@@ -236,6 +241,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     private void selectStartMonth(Month startMonth) {
+        currentMonth = startMonth;
         proxy.setStartMonth(startMonth);
         grid.updateMonthColumns(startMonth);
         loader.load();
