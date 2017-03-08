@@ -32,7 +32,6 @@ import org.activityinfo.model.date.Month;
  * Each IndicatorRowDTO contains values for a single Site, and a single
  * Indicator, but values (stored as properties) for a series of ReportingPeriod
  */
-@Deprecated
 public final class IndicatorRowDTO extends BaseModelData implements DTO {
 
     private int siteId;
