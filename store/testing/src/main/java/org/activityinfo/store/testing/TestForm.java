@@ -1,15 +1,18 @@
 package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 
-/**
- * Created by alex on 30-1-17.
- */
+import java.util.List;
+
+
 public interface TestForm {
 
-    public ResourceId getFormId();
+    ResourceId getFormId();
 
-    public FormClass getFormClass();
+    FormClass getFormClass();
+
+    List<FormInstance> getRecords();
 
 }

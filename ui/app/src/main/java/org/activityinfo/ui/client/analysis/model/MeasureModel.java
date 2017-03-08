@@ -1,71 +1,42 @@
 package org.activityinfo.ui.client.analysis.model;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import org.activityinfo.observable.HasKey;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.ui.client.store.FormStore;
+import org.activityinfo.model.resource.ResourceId;
 
 /**
  * A measure contributes quantities to an analysis.
  */
-public final class MeasureModel implements HasKey {
+public final class MeasureModel {
 
     private final String id;
-    private final MeasureSource source;
-    private final StatefulValue<String> label = new StatefulValue<>();
+    private final String label;
 
-    public MeasureModel(String id, String label, MeasureSource source) {
+    private final ResourceId formId;
+    private final String formula;
+
+    public MeasureModel(String id, String label, ResourceId formId, String formula) {
         this.id = id;
-        this.source = source;
-        this.label.updateValue(label);
+        this.label = label;
+        this.formId = formId;
+        this.formula = formula;
     }
 
-    public Observable<String> getLabel() {
-        return label;
-    }
-
-    public Observable<MeasureLabels> getLabels() {
-        return label.transform(label -> new MeasureLabels(label));
-    }
-
-    @Override
-    public String getKey() {
+    public String getId() {
         return id;
     }
 
-    public MeasureSource getSource() {
-        return source;
+    public String getLabel() {
+        return label;
     }
 
     /**
-     * Computes the list of available dimension sources for this measure.
+     *
+     * @return the id of the form that is the source of this measure.
      */
-    public Observable<FormForest> getFormSet(FormStore store) {
-        return source.getFormSet(store);
+    public ResourceId getFormId() {
+        return formId;
     }
 
-    /**
-     * Computes the values for this measure.
-     */
-    public Observable<MeasureResultSet> compute(FormStore store, Observable<DimensionSet> dimensions) {
-        return source.compute(store, dimensions, getLabels());
-    }
-
-
-    public JsonElement toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id);
-        object.addProperty("label", label.get());
-        return object;
-    }
-
-    void updateFormula(String formula) {
-
-    }
-
-    public void updateLabel(String value) {
-        this.label.updateIfNotEqual(value);
+    public String getFormula() {
+        return formula;
     }
 }

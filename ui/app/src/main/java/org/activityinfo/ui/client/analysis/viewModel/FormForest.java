@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.model;
+package org.activityinfo.ui.client.analysis.viewModel;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -92,5 +92,13 @@ public class FormForest {
                 }
             }
         }
+    }
+
+    public FormTree findTree(ResourceId formId) {
+        FormTree tree = trees.get(formId);
+        if(tree == null) {
+            throw new IllegalStateException("No such tree: " + tree);
+        }
+        return tree;
     }
 }

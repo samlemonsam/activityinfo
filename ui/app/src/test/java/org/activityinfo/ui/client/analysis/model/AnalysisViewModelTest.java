@@ -2,13 +2,16 @@ package org.activityinfo.ui.client.analysis.model;
 
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTesting;
 import org.activityinfo.observable.Observer;
 import org.activityinfo.store.testing.Survey;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
+import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,10 +22,9 @@ import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 
-public class AnalysisModelTest {
+public class AnalysisViewModelTest {
 
     @Before
     public void setupI18N() {
@@ -32,11 +34,9 @@ public class AnalysisModelTest {
     @Test
     public void testEmptyModel() {
         TestingFormStore formStore = new TestingFormStore();
-        AnalysisModel model = new AnalysisModel(formStore);
+        AnalysisViewModel model = new AnalysisViewModel(formStore);
 
-        assertTrue(model.getResult().isLoading());
-
-        AnalysisResult result = assertLoads(model.getResult());
+        AnalysisResult result = assertLoads(model.getResultTable());
     }
 
 
@@ -46,11 +46,18 @@ public class AnalysisModelTest {
         TestingFormStore formStore = new TestingFormStore();
         formStore.delayLoading();
 
-        AnalysisModel model = new AnalysisModel(formStore);
-        model.addMeasure(new MeasureModel(ResourceId.generateCuid(), "Count",
-                new FieldMeasure(Survey.FORM_ID, new ConstantExpr(1))));
 
-        Connection<AnalysisResult> result = ObservableTesting.connect(model.getResult());
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(
+            new MeasureModel(ResourceId.generateCuid(),
+                "Count",
+                Survey.FORM_ID, "1"));
+
+        AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
+        viewModel.updateModel(model);
+
+
+        Connection<AnalysisResult> result = ObservableTesting.connect(viewModel.getResultTable());
         result.assertLoading();
 
         formStore.loadAll();
@@ -58,24 +65,32 @@ public class AnalysisModelTest {
         List<Point> points = result.assertLoaded().getPoints();
 
         assertThat(points, hasSize(1));
-        assertThat(points.get(0).getValue(), equalTo(0d));
+        assertThat(points.get(0).getValue(), equalTo((double)Survey.ROW_COUNT));
     }
 
     @Test
-    public void dimensionSources() {
+    public void dimensions() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(
+                new MeasureModel(ResourceId.generateCuid(),
+                        "Count",
+                        Survey.FORM_ID, "1"));
+
+        model.getDimensions().add(
+                new DimensionModel(ResourceId.generateCuid(),
+                        "Gender",
+                        new DimensionMapping(new SymbolExpr("Gender"))));
+
 
         TestingFormStore formStore = new TestingFormStore();
-        AnalysisModel model = new AnalysisModel(formStore);
-        model.addMeasure(new MeasureModel(ResourceId.generateCuid(), "Count",
-                new FieldMeasure(Survey.FORM_ID, new ConstantExpr(1))));
+        AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
+        viewModel.updateModel(model);
 
-        Connection<FormForest> connection = ObservableTesting.connect(model.getFormForest());
-        connection.disconnect();
+        AnalysisResult result = assertLoads(viewModel.getResultTable());
 
-        connection = ObservableTesting.connect(model.getFormForest());
-        connection.disconnect();
-
-
+        assertThat(result.getPoints(), hasSize(1));
+        assertThat(result.getPoints().get(0).getValue(), equalTo(0d));
     }
 
     private <T> T assertLoads(Observable<T> result) {

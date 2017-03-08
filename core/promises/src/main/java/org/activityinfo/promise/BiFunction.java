@@ -10,7 +10,7 @@ import com.google.common.base.Function;
  * @param <U> the type of the second argument to the function
  * @param <R> the type of the result of the function
  */
-public abstract class BiFunction<T, U, R> implements Function<T, Function<U, R>> {
+public abstract class BiFunction<T, U, R> implements Function<T, Function<U, R>>, Function2<T, U, R> {
 
     public abstract R apply(T t, U u);
 

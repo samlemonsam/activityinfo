@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.model;
+package org.activityinfo.ui.client.analysis.viewModel;
 
 /**
  * An individual value

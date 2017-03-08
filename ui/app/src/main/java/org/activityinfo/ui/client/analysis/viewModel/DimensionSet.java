@@ -1,4 +1,6 @@
-package org.activityinfo.ui.client.analysis.model;
+package org.activityinfo.ui.client.analysis.viewModel;
+
+import org.activityinfo.ui.client.analysis.model.DimensionModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;

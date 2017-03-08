@@ -13,7 +13,8 @@ public class MeasureListItem {
     }
 
     public static Observable<MeasureListItem> compute(MeasureModel model) {
-        return model.getLabel().transform(label -> new MeasureListItem(model, label));
+//        return model.getLabel().transform(label -> new MeasureListItem(model, label));
+        throw new UnsupportedOperationException();
     }
 
 
@@ -21,8 +22,8 @@ public class MeasureListItem {
         return label;
     }
 
-    public String getKey() {
-        return model.getKey();
+    public String getId() {
+        return model.getId();
     }
 
     public MeasureModel getModel() {

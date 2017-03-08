@@ -9,12 +9,10 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
-import org.activityinfo.ui.client.analysis.model.AnalysisResult;
-import org.activityinfo.ui.client.analysis.model.DimensionSet;
-import org.activityinfo.ui.client.analysis.model.Point;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
+import org.activityinfo.ui.client.analysis.viewModel.DimensionSet;
+import org.activityinfo.ui.client.analysis.viewModel.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +22,12 @@ public class PivotTableView implements IsWidget {
 
     private static final Logger LOGGER = Logger.getLogger(PivotTableView.class.getName());
 
-    private final AnalysisModel model;
+    private final AnalysisViewModel model;
     private ListStore<Point> store;
     private ContentPanel panel;
     private Grid<Point> grid;
 
-    public PivotTableView(AnalysisModel model) {
+    public PivotTableView(AnalysisViewModel model) {
         this.model = model;
         this.store = new ListStore<>(point -> point.toString());
         this.grid = new Grid<>(store, buildColumnModel(new DimensionSet()));
@@ -38,7 +36,7 @@ public class PivotTableView implements IsWidget {
         this.panel.setHeading("Results");
         this.panel.add(grid);
 
-        model.getResult().subscribe(observable -> {
+        model.getResultTable().subscribe(observable -> {
             if (observable.isLoaded()) {
                 update(observable.get());
             } else {

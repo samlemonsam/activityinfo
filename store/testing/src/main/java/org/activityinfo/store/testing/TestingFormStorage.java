@@ -52,7 +52,6 @@ public class TestingFormStorage implements FormStorage {
     @Override
     public void add(RecordUpdate update) {
         throw new UnsupportedOperationException();
-
     }
 
     @Override
@@ -62,7 +61,7 @@ public class TestingFormStorage implements FormStorage {
 
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        return new TestingFormQueryBuilder();
+        return new TestingFormQueryBuilder(testForm.getRecords());
     }
 
     @Override
