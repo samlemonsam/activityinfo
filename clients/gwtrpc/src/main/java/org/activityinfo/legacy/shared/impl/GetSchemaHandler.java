@@ -98,17 +98,13 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         }
 
         public Promise<Void> loadLocationTypes() {
-            SqlQuery query = SqlQuery.select()
-                .appendColumn("locationTypeId")
-                .appendColumn("lt.name", "name")
-                .appendColumn("lt.boundAdminLevelId", "boundAdminLevelId")
-                .appendColumn("lt.DateDeleted", "DateDeleted")
-                .appendColumn("lt.countryId", "countryId")
-                .appendColumn("lt.workflowId", "workflowId")
-                .appendColumn("lt.databaseId", "databaseId")
-                .appendColumn("d.name", "databaseName")
-                .from("locationtype", "lt")
-                .leftJoin("userdatabase", "d").on("lt.databaseId=d.databaseId");
+            SqlQuery query = SqlQuery.select("locationTypeId",
+                    "name",
+                    "boundAdminLevelId",
+                    "DateDeleted",
+                    "countryId",
+                    "workflowId",
+                    "databaseId").from("locationtype");
 
             return execute(query, new RowHandler() {
 
@@ -121,7 +117,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
                     if (!row.isNull("databaseId")) {
                         type.setDatabaseId(row.getInt("databaseId"));
-                        type.setDatabaseName(row.getString("databaseName"));
                     }
 
                     if (!row.isNull("boundAdminLevelId")) {
