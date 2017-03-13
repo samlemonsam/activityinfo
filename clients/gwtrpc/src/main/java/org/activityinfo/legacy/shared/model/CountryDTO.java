@@ -23,6 +23,7 @@ package org.activityinfo.legacy.shared.model;
  */
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.google.common.base.Strings;
 import org.activityinfo.model.type.geo.Extents;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
@@ -30,6 +31,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -82,6 +85,29 @@ public final class CountryDTO extends BaseModelData implements DTO {
 
     public List<LocationTypeDTO> getLocationTypes() {
         return this.locationTypes;
+    }
+
+    public List<LocationTypeDTO> getLocationTypesForDisplay() {
+        List<LocationTypeDTO> types = new ArrayList<>();
+        for (LocationTypeDTO locationTypeDTO : getLocationTypes()) {
+            if(!locationTypeDTO.isDeleted()) {
+                types.add(locationTypeDTO);
+            }
+        }
+        Collections.sort(types, new Comparator<LocationTypeDTO>() {
+            @Override
+            public int compare(LocationTypeDTO t1, LocationTypeDTO t2) {
+                String d1 = Strings.nullToEmpty(t1.getDatabaseName());
+                String d2 = Strings.nullToEmpty(t2.getDatabaseName());
+
+                int databaseCompare = d1.compareToIgnoreCase(d2);
+                if(databaseCompare != 0) {
+                    return databaseCompare;
+                }
+                return t1.getName().compareToIgnoreCase(t2.getName());
+            }
+        });
+        return types;
     }
 
     public void setLocationTypes(List<LocationTypeDTO> types) {

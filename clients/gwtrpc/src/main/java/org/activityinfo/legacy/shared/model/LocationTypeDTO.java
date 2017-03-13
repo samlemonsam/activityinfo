@@ -91,10 +91,27 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
         set("name", value);
     }
 
+
+    public void setDatabaseName(String databaseName) {
+        set("databaseName", databaseName);
+    }
+
+    public String getDatabaseName() {
+        return get("databaseName");
+    }
+
     @Override
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public String getName() {
         return get("name");
+    }
+
+    public String getDisplayName() {
+        if(getDatabaseId() == null) {
+            return getName();
+        } else {
+            return getDatabaseName() + ": " + getName();
+        }
     }
 
     /**
@@ -185,4 +202,5 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
+
 }
