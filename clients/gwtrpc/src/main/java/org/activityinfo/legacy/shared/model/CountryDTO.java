@@ -153,24 +153,6 @@ public final class CountryDTO extends BaseModelData implements DTO {
         }
     }
 
-    /**
-     * Returns the <code>LocationTypeDTO</code> with the given
-     * <code>locationTypeId</code>
-     *
-     * @param locationTypeId the id of a <code>LocationTypeDTO</code> in
-     *                       <code>locationTypes</code>
-     * @return the <code>LocationTypeDTO</code> in <code>locationTypes</code>
-     * with the id <code>locationTypeId</code>
-     */
-    public LocationTypeDTO getLocationTypeById(int locationTypeId) {
-        for (LocationTypeDTO type : getLocationTypes()) {
-            if (type.getId() == locationTypeId) {
-                return type;
-            }
-        }
-        return null;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -226,5 +208,14 @@ public final class CountryDTO extends BaseModelData implements DTO {
         }
         throw new IllegalStateException("No bound LocationType has been defined for admin level " +
                 adminLevelId + " in country " + getName());
+    }
+
+    public LocationTypeDTO getLocationTypeById(int id) {
+        for (LocationTypeDTO locationType : locationTypes) {
+            if(locationType.getId() == id) {
+                return locationType;
+            }
+        }
+        return null;
     }
 }

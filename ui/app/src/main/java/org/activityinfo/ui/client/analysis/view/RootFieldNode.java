@@ -2,8 +2,9 @@ package org.activityinfo.ui.client.analysis.view;
 
 import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.ui.client.analysis.model.DimensionSource;
-import org.activityinfo.ui.client.analysis.model.FieldDimensionSource;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.analysis.model.DimensionMapping;
+import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 public class RootFieldNode extends DimensionNode {
@@ -25,8 +26,11 @@ public class RootFieldNode extends DimensionNode {
     }
 
     @Override
-    public DimensionSource dimensionModel() {
-        return new FieldDimensionSource(field);
+    public DimensionModel dimensionModel() {
+        return new DimensionModel(
+                ResourceId.generateCuid(),
+                field.getLabel(),
+                DimensionMapping.formMapping());
     }
 
     @Override

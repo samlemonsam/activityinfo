@@ -1,7 +1,6 @@
-package org.activityinfo.ui.client.analysis.model;
+package org.activityinfo.ui.client.analysis.viewModel;
 
 
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.ColumnSet;
 
 import java.util.ArrayList;
@@ -27,11 +26,11 @@ public class GroupMap {
 
     private Function<Integer, String> keyBuilder;
 
-    public GroupMap(MeasureLabels measureLabels, DimensionSet dimensions, FormClass formClass, ColumnSet columnSet) {
+    public GroupMap(DimensionSet dimensions, ColumnSet columnSet) {
         this.dimCount = dimensions.getCount();
         this.readers = new DimensionReader[dimCount];
         for (int i = 0; i < dimCount; i++) {
-            readers[i] = dimensions.getDimension(i).createReader(measureLabels, formClass, columnSet);
+         //   readers[i] = dimensions.getDimension(i).createReader(formClass, columnSet);
         }
 
         // Try unrolling for small number of dimensions...

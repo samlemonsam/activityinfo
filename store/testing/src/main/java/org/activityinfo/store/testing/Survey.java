@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -8,6 +9,8 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
+
+import java.util.List;
 
 /**
  * An example of a Survey Form
@@ -27,7 +30,12 @@ public class Survey implements TestForm {
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
 
     public static final ResourceId FEMALE_ID = ResourceId.valueOf("G2");
+
+    public static final int ROW_COUNT = 536;
+
     private final FormClass formClass;
+
+    private List<FormInstance> records = null;
 
     public Survey() {
         formClass = new FormClass(FORM_ID);
@@ -68,5 +76,15 @@ public class Survey implements TestForm {
     @Override
     public FormClass getFormClass() {
         return formClass;
+    }
+
+
+    @Override
+    public List<FormInstance> getRecords() {
+        if(records == null) {
+            this.records = new RecordGenerator(formClass)
+                    .generate(ROW_COUNT);
+        }
+        return records;
     }
 }

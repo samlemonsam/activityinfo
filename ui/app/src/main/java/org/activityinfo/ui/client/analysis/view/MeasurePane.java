@@ -20,9 +20,8 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableList;
 import org.activityinfo.observable.Observer;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
-import org.activityinfo.ui.client.analysis.model.FieldMeasure;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 import org.activityinfo.ui.client.measureDialog.view.MeasureDialog;
 
@@ -36,16 +35,16 @@ public class MeasurePane implements IsWidget {
 
     private ListStore<MeasureListItem> store;
     private ListView<MeasureListItem, MeasureListItem> list;
-    private AnalysisModel model;
+    private AnalysisViewModel model;
 
 
-    public MeasurePane(final AnalysisModel model) {
+    public MeasurePane(final AnalysisViewModel model) {
         this.model = model;
 
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
         addButton.addSelectHandler(this::addMeasureClicked);
 
-        store = new ListStore<>(MeasureListItem::getKey);
+        store = new ListStore<>(MeasureListItem::getId);
         ObservableList<Observable<MeasureListItem>> map = model.getMeasures().map(MeasureListItem::compute);
         Observable<List<MeasureListItem>> measures = Observable.flatten(map);
         measures.subscribe(new Observer<List<MeasureListItem>>() {
@@ -60,7 +59,7 @@ public class MeasurePane implements IsWidget {
         });
 
 
-        store = new ListStore<>(MeasureListItem::getKey);
+        store = new ListStore<>(MeasureListItem::getId);
         list = new ListView<>(store,
                 new IdentityValueProvider<>(),
                 new PillCell<>(MeasureListItem::getLabel, this::showMenu));
@@ -106,7 +105,6 @@ public class MeasurePane implements IsWidget {
         MenuItem editFormula = new MenuItem();
         editFormula.setText("Edit Formula...");
         editFormula.addSelectionHandler(event -> editFormula(measure));
-        editFormula.setEnabled(measure.getSource() instanceof FieldMeasure);
         contextMenu.add(editFormula);
 
         contextMenu.add(new SeparatorMenuItem());
@@ -114,7 +112,7 @@ public class MeasurePane implements IsWidget {
         // Remove the dimension
         MenuItem remove = new MenuItem();
         remove.setText(I18N.CONSTANTS.remove());
-        remove.addSelectionHandler(event -> model.removeMeasure(measure.getKey()));
+        remove.addSelectionHandler(event -> model.removeMeasure(measure.getId()));
         contextMenu.add(remove);
 
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
@@ -122,11 +120,11 @@ public class MeasurePane implements IsWidget {
 
     private void editAlias(MeasureModel measure) {
         PromptMessageBox messageBox = new PromptMessageBox("Update measure's alias:", "Enter the new alias");
-        messageBox.getTextField().setText(measure.getLabel().get());
+        messageBox.getTextField().setText(measure.getLabel());
 
         messageBox.addDialogHideHandler(event -> {
             if(event.getHideButton() == Dialog.PredefinedButton.OK) {
-                model.updateMeasureLabel(measure.getKey(), messageBox.getValue());
+                model.updateMeasureLabel(measure.getId(), messageBox.getValue());
             }
         });
 
@@ -134,10 +132,9 @@ public class MeasurePane implements IsWidget {
     }
 
     private void editFormula(MeasureModel measure) {
-        FieldMeasure fieldSource = (FieldMeasure) measure.getSource();
-        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), fieldSource.getFormId());
-        dialog.show(fieldSource.getFormula().get(), formula -> {
-            model.updateMeasureFormula(measure.getKey(), formula.getFormula());
+        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), measure.getFormId());
+        dialog.show(measure.getFormula(), formula -> {
+            model.updateMeasureFormula(measure.getId(), formula.getFormula());
 
         });
     }

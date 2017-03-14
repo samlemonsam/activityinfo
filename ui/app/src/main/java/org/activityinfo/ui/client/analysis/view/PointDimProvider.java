@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import com.sencha.gxt.core.client.ValueProvider;
-import org.activityinfo.ui.client.analysis.model.Point;
+import org.activityinfo.ui.client.analysis.viewModel.Point;
 
 
 class PointDimProvider implements ValueProvider<Point, String> {

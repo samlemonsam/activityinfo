@@ -1,53 +1,42 @@
 package org.activityinfo.ui.client.analysis.model;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.query.ColumnModel;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.ui.client.store.FormStore;
+import com.google.common.collect.ImmutableList;
 
-import java.util.Set;
+import java.util.List;
 
+/**
+ * A Dimension has a number of discrete categories into which measures are disaggregated.
+ *
+ * <p>Importantly, a dimension must break up quantitative data from multiple data sources into common
+ * categories. </p>
+ */
 public class DimensionModel {
 
     private String id;
     private String label;
-    private DimensionSource sourceModel;
+    private List<DimensionMapping> mappings;
 
-    DimensionModel(FormStore store, String id, DimensionSource sourceModel) {
+    public DimensionModel(String id, String label, List<DimensionMapping> mappings) {
         this.id = id;
-        this.sourceModel = sourceModel;
-        this.label = sourceModel.getLabel();
-
+        this.label = label;
+        this.mappings = ImmutableList.copyOf(mappings);
     }
 
-    public String getLabel() {
-        return label;
-    }
-
-    public DimensionSource getSourceModel() {
-        return sourceModel;
-    }
-
-    public Set<ColumnModel> getRequiredColumns() {
-        return sourceModel.getRequiredColumns(this.id);
+    public DimensionModel(String id, String label, DimensionMapping... mappings) {
+        this.id = id;
+        this.label = label;
+        this.mappings = ImmutableList.copyOf(mappings);
     }
 
     public String getId() {
         return id;
     }
 
-
-    public DimensionReader createReader(MeasureLabels measureLabels, FormClass formClass, ColumnSet columnSet) {
-        return sourceModel.createReader(id, measureLabels, formClass, columnSet);
+    public String getLabel() {
+        return label;
     }
 
-    public JsonElement toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id);
-        object.addProperty("label", label);
-        object.add("source", sourceModel.toJsonObject());
-        return object;
+    public List<DimensionMapping> getMappings() {
+        return mappings;
     }
 }

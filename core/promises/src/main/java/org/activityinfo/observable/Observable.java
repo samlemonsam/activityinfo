@@ -3,7 +3,7 @@ package org.activityinfo.observable;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import org.activityinfo.promise.BiFunction;
+import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Function3;
 
 import java.util.ArrayList;
@@ -111,11 +111,11 @@ public abstract class Observable<T> {
         };
     }
 
-    public static <T, U, R> Observable<R> transform(Observable<T> t, Observable<U> u, final BiFunction<T, U, R> function) {
+    public static <T, U, R> Observable<R> transform(Observable<T> t, Observable<U> u, final Function2<T, U, R> function) {
         return transform(SynchronousScheduler.INSTANCE, t, u, function);
     }
 
-    public static <T, U, R> Observable<R> transform(Scheduler scheduler, Observable<T> t, Observable<U> u, final BiFunction<T, U, R> function) {
+    public static <T, U, R> Observable<R> transform(Scheduler scheduler, Observable<T> t, Observable<U> u, final Function2<T, U, R> function) {
         return new ObservableFunction<R>(scheduler, t, u) {
 
             @Override
@@ -154,7 +154,7 @@ public abstract class Observable<T> {
         return new ChainedObservable<>(transform(function));
     }
 
-    public static <X, Y, R> Observable<R> join(Observable<X> x, Observable<Y> y, BiFunction<X, Y, Observable<R>> function) {
+    public static <X, Y, R> Observable<R> join(Observable<X> x, Observable<Y> y, Function2<X, Y, Observable<R>> function) {
         return new ChainedObservable<>(transform(x, y, function));
     }
 

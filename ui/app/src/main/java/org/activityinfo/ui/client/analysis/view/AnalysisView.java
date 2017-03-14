@@ -4,14 +4,14 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 
 public class AnalysisView implements IsWidget {
 
     private BorderLayoutContainer container;
-    private AnalysisModel model;
+    private AnalysisViewModel model;
 
-    public AnalysisView(AnalysisModel model) {
+    public AnalysisView(AnalysisViewModel model) {
         this.model = model;
         this.model = model;
         container = new BorderLayoutContainer();

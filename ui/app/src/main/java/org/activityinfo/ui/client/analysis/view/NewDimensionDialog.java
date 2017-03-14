@@ -21,9 +21,9 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
-import org.activityinfo.ui.client.analysis.model.DimensionSource;
-import org.activityinfo.ui.client.analysis.model.FormForest;
+import org.activityinfo.ui.client.analysis.model.DimensionModel;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
+import org.activityinfo.ui.client.analysis.viewModel.FormForest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +31,9 @@ import java.util.List;
 /**
  * Allows the user to choose a new dimension
  */
-public class NewDimensionDialog implements HasSelectionHandlers<DimensionSource> {
+public class NewDimensionDialog implements HasSelectionHandlers<DimensionModel> {
 
-    private AnalysisModel model;
+    private AnalysisViewModel model;
     private Dialog dialog;
     private Subscription subscription;
 
@@ -43,7 +43,7 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSource>
     private Tree<DimensionNode, String> tree;
 
 
-    public NewDimensionDialog(AnalysisModel model) {
+    public NewDimensionDialog(AnalysisViewModel model) {
         this.model = model;
 
         store = new TreeStore<>(DimensionNode::getKey);
@@ -111,7 +111,7 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSource>
 
 
     private void onOkClicked(SelectEvent event) {
-        DimensionSource selectedItem = tree.getSelectionModel().getSelectedItem().dimensionModel();
+        DimensionModel selectedItem = tree.getSelectionModel().getSelectedItem().dimensionModel();
         if (selectedItem != null) {
             SelectionEvent.fire(this, selectedItem);
             dialog.hide();
@@ -129,7 +129,7 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionSource>
 
 
     @Override
-    public HandlerRegistration addSelectionHandler(SelectionHandler<DimensionSource> selectionHandler) {
+    public HandlerRegistration addSelectionHandler(SelectionHandler<DimensionModel> selectionHandler) {
         return eventBus.addHandler(SelectionEvent.getType(), selectionHandler);
     }
 

@@ -16,23 +16,22 @@ import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.model.DimensionSource;
+import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 
 /**
  *
  */
 public class DimensionPane implements IsWidget {
 
-    private AnalysisModel model;
+    private AnalysisViewModel model;
     private NewDimensionDialog dialog;
     private ContentPanel contentPanel;
 
     private ListStore<DimensionModel> listStore;
     private ListView<DimensionModel, DimensionModel> listView;
 
-    public DimensionPane(AnalysisModel model) {
+    public DimensionPane(AnalysisViewModel model) {
         this.model = model;
 
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
@@ -71,7 +70,7 @@ public class DimensionPane implements IsWidget {
         dialog.show();
     }
 
-    private void onNewDimensionSelected(SelectionEvent<DimensionSource> event) {
+    private void onNewDimensionSelected(SelectionEvent<DimensionModel> event) {
         model.addDimension(event.getSelectedItem());
     }
 

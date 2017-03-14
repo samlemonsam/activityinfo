@@ -72,7 +72,7 @@ public class UserForm extends FormPanel {
         partnerStore.add(database.getPartners());
         partnerStore.sort("name", SortDir.ASC);
 
-        partnerCombo = new ComboBox<PartnerDTO>();
+        partnerCombo = new ComboBox<>();
         partnerCombo.setName("partner");
         partnerCombo.setFieldLabel(constants.partner());
         partnerCombo.setDisplayField("name");
@@ -80,8 +80,13 @@ public class UserForm extends FormPanel {
         partnerCombo.setForceSelection(true);
         partnerCombo.setTriggerAction(TriggerAction.ALL);
         partnerCombo.setAllowBlank(false);
-        partnerCombo.setItemRenderer(new MultilineRenderer<PartnerDTO>(new ModelPropertyRenderer<PartnerDTO>("name")));
+        partnerCombo.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<PartnerDTO>("name")));
         this.add(partnerCombo);
+
+        if(!database.isManageAllUsersAllowed()) {
+            partnerCombo.setValue(database.getMyPartner());
+            partnerCombo.setReadOnly(true);
+        }
     }
 
     protected CheckBox createCheckBox(String property, String label) {

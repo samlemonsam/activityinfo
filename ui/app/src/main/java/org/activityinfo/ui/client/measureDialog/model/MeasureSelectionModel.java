@@ -9,8 +9,8 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulList;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.BiFunction;
-import org.activityinfo.ui.client.analysis.model.FormForest;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.viewModel.FormForest;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.List;
