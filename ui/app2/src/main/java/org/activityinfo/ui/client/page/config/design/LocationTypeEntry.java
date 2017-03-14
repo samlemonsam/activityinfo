@@ -42,8 +42,12 @@ public class LocationTypeEntry extends BaseModelData implements Comparable<Locat
 
     private void composeLabel(LocationTypeDTO locationType) {
         StringBuilder label = new StringBuilder();
-        if(!databaseName.isEmpty()) {
-            label.append(databaseName).append(": ");
+        if(!reference) {
+            if (databaseName.isEmpty()) {
+                label.append("Public: ");
+            } else {
+                label.append(databaseName).append(": ");
+            }
         }
         label.append(locationType.getName());
         label.append(" (id: ");
