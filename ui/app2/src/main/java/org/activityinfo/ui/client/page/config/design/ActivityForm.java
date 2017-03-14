@@ -29,14 +29,19 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.BindingEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.extjs.gxt.ui.client.widget.form.NumberField;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
+import org.activityinfo.legacy.shared.model.Published;
+import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
+import org.activityinfo.ui.client.widget.legacy.RemoteComboBox;
 
 /**
  * FormClass for editing ActivityDTO
@@ -76,17 +81,17 @@ class ActivityForm extends AbstractDesignForm {
         binding.addFieldBinding(new OnlyValidFieldBinding(categoryField, "category"));
         add(categoryField);
 
-        final MappingComboBox<Integer> locationTypeCombo = new MappingComboBox<Integer>();
-        for (LocationTypeDTO type : database.getCountry().getLocationTypes()) {
-            if (!type.isDeleted()) { // ai-1045 : we still fetching deleted location types but don't want to show it to user
-                locationTypeCombo.add(type.getId(), type.getName());
-            }
-        }
+
+        final ComboBox<LocationTypeEntry> locationTypeCombo = new RemoteComboBox<>();
+        locationTypeCombo.setStore(LocationTypeProxy.createStore(service, database.getCountry().getId()));
         locationTypeCombo.setAllowBlank(false);
+        locationTypeCombo.setTriggerAction(ComboBox.TriggerAction.ALL);
         locationTypeCombo.setFieldLabel(I18N.CONSTANTS.locationType());
+        locationTypeCombo.setValueField("id");
+        locationTypeCombo.setDisplayField("label");
         this.add(locationTypeCombo);
 
-        binding.addFieldBinding(new MappingComboBoxBinding(locationTypeCombo, "locationTypeId"));
+        binding.addFieldBinding(new LocationTypeFieldBinding(database.getCountry(), locationTypeCombo, "locationTypeId"));
 
         final MappingComboBox frequencyCombo = new MappingComboBox();
         frequencyCombo.setAllowBlank(false);
