@@ -1,0 +1,22 @@
+
+
+.item, .header {
+    padding: 2px;
+    border: 1px solid rgb(255, 255, 255);
+}
+
+.header {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-top: 3px;
+}
+
+.item {
+    padding-left: 8px;
+}
+
+.id {
+    color: gray;
+    font-size: 0.9em;
+    font-family: monospace;
+}

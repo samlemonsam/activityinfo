@@ -26,11 +26,11 @@ public class GroupMap {
 
     private Function<Integer, String> keyBuilder;
 
-    public GroupMap(DimensionSet dimensions, ColumnSet columnSet) {
+    public GroupMap(DimensionSet dimensions, ColumnSet columnSet, List<DimensionReaderFactory> readerFactories) {
         this.dimCount = dimensions.getCount();
         this.readers = new DimensionReader[dimCount];
         for (int i = 0; i < dimCount; i++) {
-         //   readers[i] = dimensions.getDimension(i).createReader(formClass, columnSet);
+            readers[i] = readerFactories.get(i).createReader(columnSet);
         }
 
         // Try unrolling for small number of dimensions...

@@ -736,6 +736,12 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Published")
     String published();
 
+    @DefaultStringValue("Built-in")
+    String builtInLocationTypes();
+
+    @DefaultStringValue("Public")
+    String publicLocationTypes();
+
     @DefaultStringValue("Quarter")
     String quarter();
 

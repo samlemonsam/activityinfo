@@ -81,12 +81,13 @@ class ActivityForm extends AbstractDesignForm {
         binding.addFieldBinding(new OnlyValidFieldBinding(categoryField, "category"));
         add(categoryField);
 
-
         final ComboBox<LocationTypeEntry> locationTypeCombo = new RemoteComboBox<>();
         locationTypeCombo.setStore(LocationTypeProxy.createStore(service, database.getCountry().getId()));
         locationTypeCombo.setAllowBlank(false);
         locationTypeCombo.setTriggerAction(ComboBox.TriggerAction.ALL);
         locationTypeCombo.setFieldLabel(I18N.CONSTANTS.locationType());
+        locationTypeCombo.setRenderer(new LocationTypeListRenderer());
+        locationTypeCombo.setItemSelector(LocationTypeListRenderer.getItemSelector());
         locationTypeCombo.setValueField("id");
         locationTypeCombo.setDisplayField("label");
         this.add(locationTypeCombo);
