@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.analysis.model;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -7,14 +8,12 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTesting;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -25,8 +24,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 
-@Ignore("WIP")
 public class AnalysisViewModelTest {
+
+    public static final int COLUMN_LENGTH = 20;
 
     @Before
     public void setupI18N() {
@@ -91,18 +91,44 @@ public class AnalysisViewModelTest {
 
         AnalysisResult result = assertLoads(viewModel.getResultTable());
 
+        dump(result);
+
         assertThat(result.getPoints(), hasSize(1));
         assertThat(result.getPoints().get(0).getValue(), equalTo(0d));
     }
 
+    private void dump(AnalysisResult result) {
+
+        for (DimensionModel dimensionModel : result.getDimensionSet()) {
+            System.out.print(column(dimensionModel.getLabel()));
+        }
+        System.out.println(column("Value"));
+
+        for (Point point : result.getPoints()) {
+            for (int i = 0; i < result.getDimensionSet().getCount(); i++) {
+                System.out.print(column(point.getDimension(i)));
+            }
+            System.out.println(column(Double.toString(point.getValue())));
+        }
+    }
+
+
+    private String column(String s) {
+        if(s == null) {
+            s = "";
+        }
+        if(s.length() > COLUMN_LENGTH) {
+            return s.substring(0, 20);
+        } else {
+            return Strings.padEnd(s, COLUMN_LENGTH, ' ');
+        }
+    }
+
     private <T> T assertLoads(Observable<T> result) {
         List<T> results = new ArrayList<>();
-        result.subscribe(new Observer<T>() {
-            @Override
-            public void onChange(Observable<T> observable) {
-                if (observable.isLoaded()) {
-                    results.add(observable.get());
-                }
+        result.subscribe(observable -> {
+            if (observable.isLoaded()) {
+                results.add(observable.get());
             }
         });
         if (results.isEmpty()) {

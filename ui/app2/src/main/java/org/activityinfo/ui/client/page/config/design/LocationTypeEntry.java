@@ -2,17 +2,20 @@ package org.activityinfo.ui.client.page.config.design;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 
 
 public class LocationTypeEntry extends BaseModelData implements Comparable<LocationTypeEntry> {
 
-    private boolean reference;
+    private boolean builtin;
     private String databaseName;
     private String locationTypeName;
+    private int id;
 
     private LocationTypeEntry() {
     }
+
 
     /**
      * Create an entry for a LocationType from the global admin reference database
@@ -22,10 +25,16 @@ public class LocationTypeEntry extends BaseModelData implements Comparable<Locat
         set("label", locationType.getName());
         this.locationTypeName = locationType.getName();
         this.databaseName = "";
-        this.reference = true;
-        composeLabel(locationType);
+        this.builtin = true;
     }
 
+    public int getId() {
+        return get("id");
+    }
+
+    public boolean isPublic() {
+        return !builtin && databaseName.isEmpty();
+    }
 
     /**
      * Create an entry for a locationType
@@ -34,33 +43,31 @@ public class LocationTypeEntry extends BaseModelData implements Comparable<Locat
      */
     public LocationTypeEntry(LocationTypeDTO locationTypeDTO, String databaseName) {
         set("id", locationTypeDTO.getId());
-        this.reference = false;
+        set("label", locationTypeDTO.getName());
+        this.builtin = false;
         this.databaseName = Strings.nullToEmpty(databaseName);
         this.locationTypeName = locationTypeDTO.getName();
-        composeLabel(locationTypeDTO);
     }
 
-    private void composeLabel(LocationTypeDTO locationType) {
-        StringBuilder label = new StringBuilder();
-        if(!reference) {
-            if (databaseName.isEmpty()) {
-                label.append("Public: ");
-            } else {
-                label.append(databaseName).append(": ");
-            }
+    public String getHeader() {
+        if(builtin) {
+            return I18N.CONSTANTS.builtInLocationTypes();
+        } else if(databaseName.isEmpty()) {
+            return I18N.CONSTANTS.publicLocationTypes();
+        } else {
+            return databaseName;
         }
-        label.append(locationType.getName());
-        label.append(" (id: ");
-        label.append(locationType.getId());
-        label.append(")");
-        set("label", label.toString());
+    }
+
+    public String getLocationTypeName() {
+        return locationTypeName;
     }
 
     @Override
     public int compareTo(LocationTypeEntry other) {
         // "Reference" location types from our GeoDB come first...
-        if(this.reference != other.reference) {
-            return this.reference ? -1 : +1;
+        if(this.builtin != other.builtin) {
+            return this.builtin ? -1 : +1;
         }
 
         // Then sort by database name...
@@ -77,4 +84,5 @@ public class LocationTypeEntry extends BaseModelData implements Comparable<Locat
         // Otherwise sort on the location type name.
         return this.locationTypeName.compareToIgnoreCase(other.locationTypeName);
     }
+
 }

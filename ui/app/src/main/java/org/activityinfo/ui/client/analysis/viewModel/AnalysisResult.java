@@ -7,6 +7,8 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.Aggregation;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
+import org.activityinfo.ui.client.analysis.model.DimensionMapping;
+import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
@@ -54,21 +56,28 @@ public class AnalysisResult {
     }
 
     private static Observable<MeasureResultSet> computePoints(FormStore formStore, FormForest formForest, MeasureModel measureModel, DimensionSet dimensionSet) {
-//
-//        FormTree formTree = formForest.findTree(measureModel.getFormId());
-//
-//        for (DimensionModel dimensionModel : dimensionSet) {
-//
-//        }
 
         QueryModel queryModel = new QueryModel(measureModel.getFormId());
         queryModel.selectExpr(measureModel.getFormula()).as("value");
+
+
+        List<DimensionReaderFactory> readers = new ArrayList<>();
+
+        for (int i = 0; i < dimensionSet.getCount(); i++) {
+            DimensionModel dimension = dimensionSet.getDimension(i);
+            DimensionMapping mapping = findMapping(dimension, measureModel);
+            if(mapping != null) {
+                String columnId = "d" + i;
+                queryModel.selectExpr(mapping.getFormula()).as(columnId);
+                readers.add( columnSet -> new ColumnReader(columnSet.getColumnView(columnId)) );
+            }
+        }
 
         Observable<ColumnSet> columnSet = formStore.query(queryModel);
         Observable<MeasureResultSet> resultSet = columnSet.transform(columns -> {
 
             ColumnView value = columns.getColumnView("value");
-            GroupMap groupMap = new GroupMap(dimensionSet, columns);
+            GroupMap groupMap = new GroupMap(dimensionSet, columns, readers);
 
             // Build group/value pairs
             int numRows = columns.getNumRows();
@@ -97,5 +106,14 @@ public class AnalysisResult {
         });
 
         return resultSet;
+    }
+
+    private static DimensionMapping findMapping(DimensionModel dimension, MeasureModel measureModel) {
+        for (DimensionMapping mapping : dimension.getMappings()) {
+            if(mapping.getFormId() == null) {
+                return mapping;
+            }
+        }
+        return null;
     }
 }
