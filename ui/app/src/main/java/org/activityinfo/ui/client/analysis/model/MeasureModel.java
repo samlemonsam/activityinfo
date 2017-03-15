@@ -13,6 +13,8 @@ public final class MeasureModel {
     private final ResourceId formId;
     private final String formula;
 
+    private AggregationType aggregation = AggregationType.SUM;
+
     public MeasureModel(String id, String label, ResourceId formId, String formula) {
         this.id = id;
         this.label = label;
@@ -38,5 +40,14 @@ public final class MeasureModel {
 
     public String getFormula() {
         return formula;
+    }
+
+    public AggregationType getAggregation() {
+        return aggregation;
+    }
+
+    public MeasureModel setAggregation(AggregationType aggregation) {
+        this.aggregation = aggregation;
+        return this;
     }
 }

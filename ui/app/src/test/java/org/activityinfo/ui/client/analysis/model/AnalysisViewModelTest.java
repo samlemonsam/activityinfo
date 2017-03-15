@@ -13,6 +13,7 @@ import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -20,18 +21,23 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 public class AnalysisViewModelTest {
 
-    public static final int COLUMN_LENGTH = 20;
+    private static final int COLUMN_LENGTH = 20;
+    private static final String NA = null;
+    private TestingFormStore formStore;
 
     @Before
-    public void setupI18N() {
+    public void setup() {
         LocaleProxy.initialize();
+
+        formStore = new TestingFormStore();
+
     }
 
     @Test
@@ -46,19 +52,13 @@ public class AnalysisViewModelTest {
     @Test
     public void testSimpleCount() {
 
-        TestingFormStore formStore = new TestingFormStore();
         formStore.delayLoading();
 
-
         AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(
-            new MeasureModel(ResourceId.generateCuid(),
-                "Count",
-                Survey.FORM_ID, "1"));
+        model.getMeasures().add(surveyCount());
 
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         viewModel.updateModel(model);
-
 
         Connection<AnalysisResult> result = ObservableTesting.connect(viewModel.getResultTable());
         result.assertLoading();
@@ -72,30 +72,89 @@ public class AnalysisViewModelTest {
     }
 
     @Test
-    public void dimensions() {
+    public void dimensionsWithMissing() {
 
         AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(
-                new MeasureModel(ResourceId.generateCuid(),
-                        "Count",
-                        Survey.FORM_ID, "1"));
+        model.getMeasures().add(surveyCount());
+        model.getDimensions().add(genderDimension()
+                .setMissingIncluded(true));
 
-        model.getDimensions().add(
-                new DimensionModel(ResourceId.generateCuid(),
-                        "Gender",
-                        new DimensionMapping(new SymbolExpr("Gender"))));
+        AnalysisResult result = points(model);
+
+        assertThat(result.getPoints(), containsInAnyOrder(
+                point(197, "Male"),
+                point(201, "Female"),
+                point(138, NA)));
+    }
+
+    @Test
+    public void average() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(surveyCount());
+        model.getDimensions().add(genderDimension()
+                .setMissingIncluded(true));
+
+        AnalysisResult result = points(model);
+
+        assertThat(result.getPoints(), containsInAnyOrder(
+                point(197, "Male"),
+                point(201, "Female"),
+                point(138, NA)));
+    }
 
 
-        TestingFormStore formStore = new TestingFormStore();
+
+
+    @Test
+    public void dimensionsWithoutMissing() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(averageAge());
+        model.getDimensions().add(genderDimension());
+
+        AnalysisResult result = points(model);
+
+        assertThat(result.getPoints(), containsInAnyOrder(
+                point(197, "Male"),
+                point(201, "Female")));
+    }
+
+    private DimensionModel genderDimension() {
+        return new DimensionModel(ResourceId.generateCuid(),
+                "Gender",
+                new DimensionMapping(new SymbolExpr("Gender")));
+    }
+
+    private MeasureModel surveyCount() {
+        return new MeasureModel(ResourceId.generateCuid(),
+                "Count",
+                Survey.FORM_ID, "1");
+    }
+
+    private MeasureModel averageAge() {
+        return new MeasureModel(ResourceId.generateCuid(),
+                "Age",
+                Survey.FORM_ID, Survey.AGE_FIELD_ID.asString())
+                .setAggregation(AggregationType.AVERAGE);
+    }
+
+
+    private Point point(double value, String... dimensions) {
+        return new Point(dimensions, value);
+    }
+
+    /**
+     * Computes the result of the analysis and returns the array of points.
+     */
+    private AnalysisResult points(AnalysisModel model) {
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         viewModel.updateModel(model);
 
         AnalysisResult result = assertLoads(viewModel.getResultTable());
 
         dump(result);
-
-        assertThat(result.getPoints(), hasSize(1));
-        assertThat(result.getPoints().get(0).getValue(), equalTo(0d));
+        return result;
     }
 
     private void dump(AnalysisResult result) {
