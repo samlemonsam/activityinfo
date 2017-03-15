@@ -41,8 +41,6 @@ public class GroupMap {
             this.keyBuilder = this::key1;
         } else if(dimCount == 2) {
             this.keyBuilder = this::key2;
-        } else if(dimCount == 3) {
-            this.keyBuilder = this::key3;
         } else {
             this.keyBuilder = this::key;
         }
@@ -53,13 +51,15 @@ public class GroupMap {
     }
 
     private String key2(int rowIndex) {
-        return readers[0].read(rowIndex) + "\0" + readers[1].read(rowIndex);
-    }
-
-    private String key3(int rowIndex) {
-        return readers[0].read(rowIndex) + "\0" +
-               readers[1].read(rowIndex) + "\0" +
-               readers[2];
+        String category1 = readers[0].read(rowIndex);
+        if(category1 == null) {
+            return null;
+        }
+        String category2 = readers[1].read(rowIndex);
+        if(category2 == null) {
+            return null;
+        }
+        return category1 + "\0" + category2;
     }
 
     private String key(int row) {
@@ -77,6 +77,9 @@ public class GroupMap {
      */
     public int groupAt(int rowIndex) {
         String key = keyBuilder.apply(rowIndex);
+        if(key == null) {
+            return -1;
+        }
         Integer id = map.get(key);
         if(id == null) {
             String[] group = buildGroup(rowIndex);
@@ -96,13 +99,10 @@ public class GroupMap {
     }
 
     public int getGroupCount() {
-        return Math.max(1, groups.size());
+        return groups.size();
     }
 
     public String[] getGroup(int groupId) {
-        if(groups.isEmpty() && groupId == 0) {
-            return new String[dimCount];
-        }
         return groups.get(groupId);
     }
 }

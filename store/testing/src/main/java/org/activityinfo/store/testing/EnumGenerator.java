@@ -21,7 +21,7 @@ public class EnumGenerator implements Supplier<FieldValue> {
     public EnumGenerator(FormField field) {
         this.enumType = (EnumType) field.getType();
         this.probabilityMissing = field.isRequired() ? 0.0 : 0.25;
-        this.random = new Random(2545L);
+        this.random = new Random(field.getId().hashCode());
     }
 
     @Override

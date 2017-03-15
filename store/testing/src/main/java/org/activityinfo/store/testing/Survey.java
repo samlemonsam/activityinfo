@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -27,44 +28,64 @@ public class Survey implements TestForm {
 
     public static final ResourceId GENDER_FIELD_ID = ResourceId.valueOf("F4");
 
+    public static final ResourceId MARRIED_FIELD_ID = ResourceId.valueOf("F5");
+
+
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
 
     public static final ResourceId FEMALE_ID = ResourceId.valueOf("G2");
 
+
+    public static final ResourceId MARRIED_ID = ResourceId.valueOf("M1");
+
+    public static final ResourceId SINGLE_ID = ResourceId.valueOf("M2");
+
     public static final int ROW_COUNT = 536;
 
     private final FormClass formClass;
+    private final FormField dobField;
 
     private List<FormInstance> records = null;
+    private final FormField nameField;
+    private final FormField ageField;
+    private final FormField genderField;
+    private final FormField marriedField;
 
     public Survey() {
         formClass = new FormClass(FORM_ID);
-        formClass.addField(NAME_FIELD_ID)
+        nameField = formClass.addField(NAME_FIELD_ID)
                 .setCode("NAME")
                 .setLabel("Respondent Name")
                 .setType(TextType.INSTANCE)
                 .setRequired(true)
                 .setVisible(true);
 
-        formClass.addField(DOB_FIELD_ID)
+        dobField = formClass.addField(DOB_FIELD_ID)
                 .setCode("DOB")
                 .setLabel("Respondent's Date of Birth")
                 .setType(LocalDateType.INSTANCE)
                 .setRequired(true)
                 .setVisible(true);
 
-        formClass.addField(AGE_FIELD_ID)
+        ageField = formClass.addField(AGE_FIELD_ID)
                 .setCode("AGE")
                 .setLabel("Respondent's Age")
                 .setType(new QuantityType("years"))
                 .setRequired(true);
 
 
-        formClass.addField(GENDER_FIELD_ID)
+        genderField = formClass.addField(GENDER_FIELD_ID)
                 .setLabel("Gender")
                 .setType(new EnumType(Cardinality.SINGLE,
                         new EnumItem(FEMALE_ID, "Female"),
                         new EnumItem(MALE_ID, "Male")));
+
+        marriedField = formClass.addField(MARRIED_FIELD_ID)
+                .setCode("MARRIED")
+                .setLabel("Marital Status")
+                .setType(new EnumType(Cardinality.SINGLE,
+                        new EnumItem(MARRIED_ID, "Married"),
+                        new EnumItem(SINGLE_ID, "Single")));
 
     }
 

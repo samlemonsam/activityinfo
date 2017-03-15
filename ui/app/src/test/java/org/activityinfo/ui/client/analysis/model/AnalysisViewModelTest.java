@@ -4,6 +4,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
@@ -76,10 +79,46 @@ public class AnalysisViewModelTest {
         model.getDimensions().add(genderDimension());
 
         assertThat(points(model), containsInAnyOrder(
-                point(197, "Male"),
-                point(201, "Female"),
-                point(138, NA)));
+                point(199, "Male"),
+                point(212, "Female")));
     }
+
+    @Test
+    public void twoDimensions() {
+
+        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(surveyCount());
+        model.getDimensions().add(genderDimension());
+        model.getDimensions().add(marriedDimension());
+
+        assertThat(points(model), containsInAnyOrder(
+                point(88, "Male", "Married"),
+                point(56, "Male", "Single"),
+                point(92, "Female", "Married"),
+                point(64, "Female", "Single")));
+    }
+
+    @Test
+    public void twoDimensionsWithTotals() {
+
+        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(surveyCount());
+        model.getDimensions().add(genderDimension());
+        model.getDimensions().add(marriedDimension().setTotalIncluded(true));
+
+        assertThat(points(model), containsInAnyOrder(
+                point(88, "Male",   "Married"),
+                point(56, "Male",   "Single"),
+                point(0,  "Male",   "Total"),
+                point(92, "Female", "Married"),
+                point(64, "Female", "Single"),
+                point(0,  "Female", "Total")));
+    }
+
 
     @Test
     public void median() {
@@ -90,8 +129,7 @@ public class AnalysisViewModelTest {
 
         assertThat(points(model), containsInAnyOrder(
                 point(54, "Male"),
-                point(56, "Female"),
-                point(64, NA)));
+                point(56, "Female")));
     }
 
 
@@ -112,6 +150,12 @@ public class AnalysisViewModelTest {
         return new DimensionModel(ResourceId.generateCuid(),
                 "Gender",
                 new DimensionMapping(new SymbolExpr("Gender")));
+    }
+
+    private DimensionModel marriedDimension() {
+        return new DimensionModel(ResourceId.generateCuid(),
+                "Married",
+                new DimensionMapping(new SymbolExpr("MARRIED")));
     }
 
     private MeasureModel surveyCount() {
@@ -144,6 +188,34 @@ public class AnalysisViewModelTest {
         dump(result);
 
         return result.getPoints();
+    }
+
+    private void dumpQuery(ResourceId formId, String... columns) {
+        System.err.flush();
+        QueryModel model = new QueryModel(formId);
+        for (int i = 0; i < columns.length; i++) {
+            model.selectExpr(columns[i]).as("c" + i);
+        }
+        ColumnSet columnSet = assertLoads(formStore.query(model));
+
+        for (int i = 0; i < columns.length; i++) {
+            System.out.print(columns[i]);
+        }
+        System.out.println();
+
+        for (int i = 0; i < columnSet.getNumRows(); i++) {
+            for (int j = 0; j < columns.length; j++) {
+                ColumnView columnView = columnSet.getColumnView("c" + j);
+                Object cell = columnView.get(i);
+                String cells = "";
+                if(cell != null) {
+                    cells = cell.toString();
+                }
+                System.out.print(column(cells));
+            }
+            System.out.println();
+        }
+        System.out.flush();
     }
 
     private void dump(AnalysisResult result) {

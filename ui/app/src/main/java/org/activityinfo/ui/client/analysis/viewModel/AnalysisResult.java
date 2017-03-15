@@ -15,6 +15,7 @@ import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -88,6 +89,11 @@ public class AnalysisResult {
             for (int i = 0; i < numRows; i++) {
                 valueArray[i] = value.getDouble(i);
                 groupArray[i] = groupMap.groupAt(i);
+            }
+
+            if(groupMap.getGroupCount() == 0) {
+                // All rows have at least one missing dimension
+                return new MeasureResultSet(dimensionSet, Collections.emptyList());
             }
 
             // Aggregate into groups
