@@ -13,7 +13,6 @@ import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,9 +20,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class AnalysisViewModelTest {
@@ -76,46 +73,37 @@ public class AnalysisViewModelTest {
 
         AnalysisModel model = new AnalysisModel();
         model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension()
-                .setMissingIncluded(true));
+        model.getDimensions().add(genderDimension());
 
-        AnalysisResult result = points(model);
-
-        assertThat(result.getPoints(), containsInAnyOrder(
+        assertThat(points(model), containsInAnyOrder(
                 point(197, "Male"),
                 point(201, "Female"),
                 point(138, NA)));
     }
 
     @Test
-    public void average() {
+    public void median() {
 
         AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension()
-                .setMissingIncluded(true));
+        model.getMeasures().add(medianAge());
+        model.getDimensions().add(genderDimension());
 
-        AnalysisResult result = points(model);
-
-        assertThat(result.getPoints(), containsInAnyOrder(
-                point(197, "Male"),
-                point(201, "Female"),
-                point(138, NA)));
+        assertThat(points(model), containsInAnyOrder(
+                point(54, "Male"),
+                point(56, "Female"),
+                point(64, NA)));
     }
 
 
-
-
     @Test
+    @Ignore
     public void dimensionsWithoutMissing() {
 
         AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(averageAge());
+        model.getMeasures().add(medianAge());
         model.getDimensions().add(genderDimension());
 
-        AnalysisResult result = points(model);
-
-        assertThat(result.getPoints(), containsInAnyOrder(
+        assertThat(points(model), containsInAnyOrder(
                 point(197, "Male"),
                 point(201, "Female")));
     }
@@ -132,11 +120,11 @@ public class AnalysisViewModelTest {
                 Survey.FORM_ID, "1");
     }
 
-    private MeasureModel averageAge() {
+    private MeasureModel medianAge() {
         return new MeasureModel(ResourceId.generateCuid(),
                 "Age",
                 Survey.FORM_ID, Survey.AGE_FIELD_ID.asString())
-                .setAggregation(AggregationType.AVERAGE);
+                .setAggregation("median");
     }
 
 
@@ -147,14 +135,15 @@ public class AnalysisViewModelTest {
     /**
      * Computes the result of the analysis and returns the array of points.
      */
-    private AnalysisResult points(AnalysisModel model) {
+    private List<Point> points(AnalysisModel model) {
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         viewModel.updateModel(model);
 
         AnalysisResult result = assertLoads(viewModel.getResultTable());
 
         dump(result);
-        return result;
+
+        return result.getPoints();
     }
 
     private void dump(AnalysisResult result) {

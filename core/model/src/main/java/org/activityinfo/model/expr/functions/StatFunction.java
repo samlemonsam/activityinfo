@@ -1,7 +1,10 @@
 package org.activityinfo.model.expr.functions;
 
 import com.google.common.collect.Sets;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 
@@ -11,7 +14,7 @@ import java.util.Set;
 /**
  * Base class for functions which return a statistical summary of values
  */
-public abstract class StatFunction extends ExprFunction {
+public abstract class StatFunction extends ExprFunction implements ColumnFunction {
 
 
     @Override
@@ -34,9 +37,64 @@ public abstract class StatFunction extends ExprFunction {
         }
     }
 
+
+
     /**
      * Computes the statistic over the range [{@code start}, {@code end}) 
      * of values in the given array.
+     *
+     * <p>The implementation may choose to sort the section of the array [start, end) in place. </p>
      */
     public abstract double compute(double[] values, int start, int end);
+
+
+    @Override
+    public final FieldValue apply(List<FieldValue> arguments) {
+        double argumentValues[] = new double[arguments.size()];
+        String units = Quantity.UNKNOWN_UNITS;
+
+        for (int i = 0; i < arguments.size(); i++) {
+            FieldValue argument = arguments.get(i);
+            if (argument instanceof Quantity) {
+                Quantity quantity = (Quantity) argument;
+                units = quantity.getUnits();
+                argumentValues[i] = quantity.getValue();
+            } else {
+                argumentValues[i] = Double.NaN;
+            }
+        }
+
+        double result = compute(argumentValues, 0, argumentValues.length);
+        return new Quantity(result, units);
+    }
+
+
+
+    @Override
+    public final ColumnView columnApply(List<ColumnView> arguments) {
+
+        // Apply the statistic to each row in the table,
+        // over the columns
+
+        int numRows = arguments.get(0).numRows();
+        int numCols = arguments.size();
+
+        double[] result = new double[numRows];
+
+        double[] argumentValues = new double[arguments.size()];
+
+        for(int i=0;i<numRows;++i) {
+
+            // Collect the value from each column in the row
+            for(int j=0;j<numCols;++j) {
+                argumentValues[j] = arguments.get(j).getDouble(i);
+            }
+
+            // Compute the statistic for the row
+            result[i] = compute(argumentValues, 0, numCols);
+        }
+
+        return new DoubleArrayColumnView(result);
+    }
+
 }

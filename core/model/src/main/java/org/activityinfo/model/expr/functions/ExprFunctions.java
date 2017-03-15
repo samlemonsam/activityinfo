@@ -37,8 +37,13 @@ public final class ExprFunctions {
             register(BooleanFunctions.GREATER_OR_EQUAL);
             register(BooleanFunctions.LESS);
             register(BooleanFunctions.LESS_OR_EQUAL);
+
+            register(SumFunction.INSTANCE);
+            register(AverageFunction.INSTANCE);
+            register(MedianFunction.INSTANCE);
             register(MaxFunction.INSTANCE);
             register(MinFunction.INSTANCE);
+
             register(BoundingBoxFunction.XMIN);
             register(BoundingBoxFunction.YMIN);
             register(BoundingBoxFunction.XMAX);

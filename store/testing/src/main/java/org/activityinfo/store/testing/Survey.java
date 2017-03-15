@@ -83,6 +83,7 @@ public class Survey implements TestForm {
     public List<FormInstance> getRecords() {
         if(records == null) {
             this.records = new RecordGenerator(formClass)
+                    .distribution(AGE_FIELD_ID, new IntegerGenerator(15, 99, 0.05, "years"))
                     .generate(ROW_COUNT);
         }
         return records;

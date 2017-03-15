@@ -1,32 +1,30 @@
 package org.activityinfo.model.expr.functions;
 
-/**
- * Computes the sum of its arguments.
- */
-public class SumFunction extends StatFunction {
+public class AverageFunction extends StatFunction {
 
-    public static final SumFunction INSTANCE = new SumFunction();
+    public static final AverageFunction INSTANCE = new AverageFunction();
 
     @Override
     public String getId() {
-        return "sum";
+        return "average";
     }
 
     @Override
     public String getLabel() {
-        return "sum";
+        return "average";
     }
-
 
     @Override
     public double compute(double[] values, int start, int end) {
         double sum = 0;
+        int count = 0;
         for (int i = start; i < end; i++) {
             double value = values[i];
             if(!Double.isNaN(value)) {
                 sum += value;
+                count++;
             }
         }
-        return sum;
+        return sum / (double)count;
     }
 }

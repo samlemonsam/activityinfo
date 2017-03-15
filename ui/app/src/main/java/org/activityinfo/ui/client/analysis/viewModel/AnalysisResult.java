@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
-import org.activityinfo.model.expr.functions.SumFunction;
+import org.activityinfo.model.expr.functions.ExprFunction;
+import org.activityinfo.model.expr.functions.ExprFunctions;
+import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -90,7 +92,7 @@ public class AnalysisResult {
 
             // Aggregate into groups
             int numGroups = groupMap.getGroupCount();
-            double aggregatedValues[] = Aggregation.aggregate(SumFunction.INSTANCE,
+            double aggregatedValues[] = Aggregation.aggregate(aggregationFunction(measureModel),
                     groupArray,
                     valueArray,
                     numRows,
@@ -106,6 +108,14 @@ public class AnalysisResult {
         });
 
         return resultSet;
+    }
+
+    private static StatFunction aggregationFunction(MeasureModel measure) {
+        ExprFunction function = ExprFunctions.get(measure.getAggregation());
+        if(!(function instanceof StatFunction)) {
+            throw new UnsupportedOperationException("aggregation: " + measure.getAggregation());
+        }
+        return (StatFunction) function;
     }
 
     private static DimensionMapping findMapping(DimensionModel dimension, MeasureModel measureModel) {
