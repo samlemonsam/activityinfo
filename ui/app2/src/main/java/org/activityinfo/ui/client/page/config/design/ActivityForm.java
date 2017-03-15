@@ -29,7 +29,6 @@ import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.BindingEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.widget.form.ComboBox;
 import com.extjs.gxt.ui.client.widget.form.NumberField;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
@@ -41,7 +40,6 @@ import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
-import org.activityinfo.ui.client.widget.legacy.RemoteComboBox;
 
 /**
  * FormClass for editing ActivityDTO
@@ -81,15 +79,7 @@ class ActivityForm extends AbstractDesignForm {
         binding.addFieldBinding(new OnlyValidFieldBinding(categoryField, "category"));
         add(categoryField);
 
-        final ComboBox<LocationTypeEntry> locationTypeCombo = new RemoteComboBox<>();
-        locationTypeCombo.setStore(LocationTypeProxy.createStore(service, database.getCountry().getId()));
-        locationTypeCombo.setAllowBlank(false);
-        locationTypeCombo.setTriggerAction(ComboBox.TriggerAction.ALL);
-        locationTypeCombo.setFieldLabel(I18N.CONSTANTS.locationType());
-        locationTypeCombo.setRenderer(new LocationTypeListRenderer());
-        locationTypeCombo.setItemSelector(LocationTypeListRenderer.getItemSelector());
-        locationTypeCombo.setValueField("id");
-        locationTypeCombo.setDisplayField("label");
+        final LocationTypeComboBox locationTypeCombo = new LocationTypeComboBox(service, database.getCountry());
         this.add(locationTypeCombo);
 
         binding.addFieldBinding(new LocationTypeFieldBinding(database.getCountry(), locationTypeCombo, "locationTypeId"));
@@ -114,7 +104,6 @@ class ActivityForm extends AbstractDesignForm {
 
             @Override
             public void handleEvent(BindingEvent be) {
-                //                locationTypeCombo.setEnabled(!isSaved(be.getModel()));
                 frequencyCombo.setEnabled(!isSaved(be.getModel()));
             }
         });

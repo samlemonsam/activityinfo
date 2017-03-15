@@ -1,7 +1,9 @@
 package org.activityinfo.ui.client.page.config.design;
 
-import com.extjs.gxt.ui.client.data.*;
-import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.data.BaseListLoadResult;
+import com.extjs.gxt.ui.client.data.DataProxy;
+import com.extjs.gxt.ui.client.data.DataReader;
+import com.extjs.gxt.ui.client.data.ListLoadResult;
 import com.google.common.base.Function;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.GetSchema;
@@ -12,12 +14,12 @@ import org.activityinfo.ui.client.dispatch.Dispatcher;
 
 import java.util.*;
 
-public class LocationTypeProxy implements DataProxy<ListLoadResult<LocationTypeEntry>> {
+class LocationTypeProxy implements DataProxy<ListLoadResult<LocationTypeEntry>> {
 
     private Dispatcher dispatcher;
     private int countryId;
 
-    public LocationTypeProxy(Dispatcher dispatcher, int countryId) {
+    LocationTypeProxy(Dispatcher dispatcher, int countryId) {
         this.dispatcher = dispatcher;
         this.countryId = countryId;
     }
@@ -55,8 +57,4 @@ public class LocationTypeProxy implements DataProxy<ListLoadResult<LocationTypeE
         .then(callback);
     }
 
-
-    public static ListStore<LocationTypeEntry> createStore(Dispatcher dispatcher, int countryId) {
-        return new ListStore<>(new BaseListLoader<>(new LocationTypeProxy(dispatcher, countryId)));
-    }
 }

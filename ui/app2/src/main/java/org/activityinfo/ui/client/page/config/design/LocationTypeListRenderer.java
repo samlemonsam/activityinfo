@@ -10,7 +10,7 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 
 import java.util.List;
 
-public class LocationTypeListRenderer implements SafeHtmlRenderer<List<LocationTypeEntry>> {
+class LocationTypeListRenderer implements SafeHtmlRenderer<List<LocationTypeEntry>> {
 
     interface Templates extends SafeHtmlTemplates {
 
