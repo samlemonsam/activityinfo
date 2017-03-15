@@ -26,6 +26,8 @@ public class ContentSecurityPolicy {
     private static final String HTTPS_ONLY = "https:";
     
     private static final String MAPBOX_TILES = "*.tiles.mapbox.com";
+
+    private static final String MAPBOX_API = "https://api.mapbox.com";
     
     private final String policy;
 
@@ -64,7 +66,8 @@ public class ContentSecurityPolicy {
             UNSAFE_EVAL,
                 
             // Allow google analytics scripts
-            GOOGLE_ANALYTICS, 
+            GOOGLE_ANALYTICS,
+            MAPBOX_API,
                 
             // Required for retrieving the news feed, 
             // remove after transition to new web site.
@@ -80,6 +83,7 @@ public class ContentSecurityPolicy {
             UNSAFE_INLINE,
                 
             GOOGLE_FONTS,
+            MAPBOX_API,
             
             // resources for custom domains
             CUSTOM_DOMAIN_STORAGE
