@@ -17,7 +17,6 @@ import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -174,7 +173,6 @@ public class AnalysisViewModelTest {
                 point(55.0, "Total",  "Total")));
     }
 
-
     @Test
     public void median() {
 
@@ -185,20 +183,6 @@ public class AnalysisViewModelTest {
         assertThat(points(model), containsInAnyOrder(
                 point(54, "Male"),
                 point(56, "Female")));
-    }
-
-
-    @Test
-    @Ignore
-    public void dimensionsWithoutMissing() {
-
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(medianAge());
-        model.getDimensions().add(genderDimension());
-
-        assertThat(points(model), containsInAnyOrder(
-                point(197, "Male"),
-                point(201, "Female")));
     }
 
     private DimensionModel genderDimension() {
