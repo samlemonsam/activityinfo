@@ -11,12 +11,14 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTesting;
+import org.activityinfo.store.testing.IntakeForm;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -36,7 +38,6 @@ public class AnalysisViewModelTest {
         LocaleProxy.initialize();
 
         formStore = new TestingFormStore();
-
     }
 
     @Test
@@ -94,6 +95,7 @@ public class AnalysisViewModelTest {
                 point(212, "Female"),
                 point(199+212, "Total")));
     }
+
 
     @Test
     public void twoDimensions() {
@@ -153,6 +155,29 @@ public class AnalysisViewModelTest {
                 point(300,   "Total",  "Total")));
     }
 
+    @Ignore
+    @Test
+    public void dateDimension() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(intakeCaseCount());
+        model.getDimensions().add(caseYear().setTotalIncluded(true));
+        model.getDimensions().add(caseQuarter().setTotalIncluded(true));
+
+        assertThat(points(model), containsInAnyOrder(
+                point(88,    "Male",   "Married"),
+                point(56,    "Male",   "Single"),
+                point(92,    "Female", "Married"),
+                point(64,    "Female", "Single"),
+                point(88+92, "Total",  "Married"),
+                point(56+64, "Total",  "Single"),
+                point(88+56, "Male",   "Total"),
+                point(92+64, "Female", "Total"),
+                point(300,   "Total",  "Total")));
+
+    }
+
+
     @Test
     public void twoDimensionsWithMediansAndTotals() {
 
@@ -176,13 +201,15 @@ public class AnalysisViewModelTest {
     @Test
     public void median() {
 
+        dumpQuery(Survey.FORM_ID, "Gender", "age");
+
         AnalysisModel model = new AnalysisModel();
         model.getMeasures().add(medianAge());
         model.getDimensions().add(genderDimension());
 
         assertThat(points(model), containsInAnyOrder(
-                point(54, "Male"),
-                point(56, "Female")));
+                point(56.5, "Male"),
+                point(51.0, "Female")));
     }
 
     private DimensionModel genderDimension() {
@@ -190,6 +217,7 @@ public class AnalysisViewModelTest {
                 "Gender",
                 new DimensionMapping(new SymbolExpr("Gender")));
     }
+
 
     private DimensionModel marriedDimension() {
         return new DimensionModel(ResourceId.generateCuid(),
@@ -201,6 +229,24 @@ public class AnalysisViewModelTest {
         return new MeasureModel(ResourceId.generateCuid(),
                 "Count",
                 Survey.FORM_ID, "1");
+    }
+
+
+    private MeasureModel intakeCaseCount() {
+        return new MeasureModel(ResourceId.generateCuid(),
+                "Count",
+                IntakeForm.FORM_ID, "1");
+
+    }
+    private DimensionModel caseYear() {
+        return new DimensionModel(ResourceId.generateCuid(),
+                "Quarter",
+                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID));
+    }
+    private DimensionModel caseQuarter() {
+        return new DimensionModel(ResourceId.generateCuid(),
+                "Quarter",
+                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID));
     }
 
     private MeasureModel medianAge() {
@@ -238,7 +284,7 @@ public class AnalysisViewModelTest {
         ColumnSet columnSet = assertLoads(formStore.query(model));
 
         for (int i = 0; i < columns.length; i++) {
-            System.out.print(columns[i]);
+            System.out.print(column(columns[i]));
         }
         System.out.println();
 

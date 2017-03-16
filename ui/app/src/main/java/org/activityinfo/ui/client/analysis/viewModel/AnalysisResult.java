@@ -9,7 +9,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.Aggregation;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionMapping;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
@@ -48,40 +47,41 @@ public class AnalysisResult {
         return points;
     }
 
-    public static Observable<AnalysisResult> compute(FormStore formStore, AnalysisModel model, FormForest formForest) {
+    public static Observable<AnalysisResult> compute(FormStore formStore, EffectiveModel effectiveModel) {
 
-        DimensionSet dimensionSet = new DimensionSet(model.getDimensions());
         List<Observable<MeasureResultSet>> points = new ArrayList<>();
 
-        for (MeasureModel measureModel : model.getMeasures()) {
-            points.add(computePoints(formStore, formForest, measureModel, dimensionSet));
+        for (EffectiveMeasure measure : effectiveModel.getMeasures()) {
+            points.add(computePoints(formStore, measure));
         }
 
         return Observable.flatten(points).transform(resultSets -> new AnalysisResult(resultSets));
     }
 
-    private static Observable<MeasureResultSet> computePoints(FormStore formStore, FormForest formForest, MeasureModel measureModel, DimensionSet dimensionSet) {
+    private static Observable<MeasureResultSet> computePoints(FormStore formStore, EffectiveMeasure measure) {
 
-        QueryModel queryModel = new QueryModel(measureModel.getFormId());
-        queryModel.selectExpr(measureModel.getFormula()).as("value");
+        QueryModel queryModel = new QueryModel(measure.getFormId());
+        queryModel.selectExpr(measure.getModel().getFormula()).as("value");
 
+        DimensionSet dimensionSet = measure.getDimensionSet();
 
-        List<DimensionReaderFactory> readers = new ArrayList<>();
-
+        DimensionReaderFactory[] readers = new DimensionReaderFactory[dimensionSet.getCount()];
         for (int i = 0; i < dimensionSet.getCount(); i++) {
             DimensionModel dimension = dimensionSet.getDimension(i);
-            DimensionMapping mapping = findMapping(dimension, measureModel);
+            DimensionMapping mapping = measure.getDimension(i).getMapping();
             if(mapping != null) {
                 String columnId = "d" + i;
                 queryModel.selectExpr(mapping.getFormula()).as(columnId);
-                readers.add( columnSet -> new ColumnReader(columnSet.getColumnView(columnId)) );
+                readers[i] = ( columnSet -> new ColumnReader(columnSet.getColumnView(columnId)) );
+            } else {
+                readers[i] = ( columnSet -> new ConstantReader(""));
             }
         }
 
         Observable<ColumnSet> columnSet = formStore.query(queryModel);
         Observable<MeasureResultSet> resultSet = columnSet.transform(columns -> {
 
-            List<Point> points = new ArrayList<Point>();
+            List<Point> points = new ArrayList<>();
 
             ColumnView value = columns.getColumnView("value");
             GroupMap groupMap = new GroupMap(dimensionSet, columns, readers);
@@ -100,9 +100,9 @@ public class AnalysisResult {
                 return new MeasureResultSet(dimensionSet, Collections.emptyList());
             }
 
-            StatFunction stat = aggregationFunction(measureModel);
+            StatFunction stat = aggregationFunction(measure.getModel());
 
-            // Aggregate into groups
+            // Add all un-totaled points
            aggregate(points, stat, valueArray, groupArray, groupMap.getGroups());
 
             // Add total points for those dimensions that require totals
@@ -154,12 +154,4 @@ public class AnalysisResult {
         return (StatFunction) function;
     }
 
-    private static DimensionMapping findMapping(DimensionModel dimension, MeasureModel measureModel) {
-        for (DimensionMapping mapping : dimension.getMappings()) {
-            if(mapping.getFormId() == null) {
-                return mapping;
-            }
-        }
-        return null;
-    }
 }

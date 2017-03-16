@@ -12,7 +12,8 @@ import java.util.function.Function;
 
 public class GroupMap {
 
-    private final int dimCount;
+    private int dimCount;
+    private DimensionSet dimensions;
     private final DimensionReader readers[];
 
 
@@ -26,11 +27,13 @@ public class GroupMap {
 
     private Function<Integer, String> keyBuilder;
 
-    public GroupMap(DimensionSet dimensions, ColumnSet columnSet, List<DimensionReaderFactory> readerFactories) {
-        this.dimCount = dimensions.getCount();
-        this.readers = new DimensionReader[dimCount];
-        for (int i = 0; i < dimCount; i++) {
-            readers[i] = readerFactories.get(i).createReader(columnSet);
+    public GroupMap(DimensionSet dimensions, ColumnSet columnSet, DimensionReaderFactory[] readerFactories) {
+        this.dimensions = dimensions;
+        this.readers = new DimensionReader[dimensions.getCount()];
+        for (int i = 0; i < dimensions.getCount(); i++) {
+            if(readerFactories[i] != null) {
+                readers[dimCount++] = readerFactories[i].createReader(columnSet);
+            }
         }
 
         // Try unrolling for small number of dimensions...

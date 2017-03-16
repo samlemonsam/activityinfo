@@ -27,15 +27,18 @@ public class AnalysisViewModel {
     private final FormStore formStore;
     private final StatefulValue<AnalysisModel> model;
     private final Observable<FormForest> formForest;
+    private final Observable<EffectiveModel> effectiveModel;
     private final Observable<AnalysisResult> resultTable;
 
     public AnalysisViewModel(FormStore formStore) {
         this.formStore = formStore;
         this.model = new StatefulValue<>(new AnalysisModel());
 
+
+
         // Before anything else, we need to fetch/compute the metadata required to even
         // plan the computation
-        this.formForest = model.join(m -> {
+        formForest = model.join(m -> {
             // Find unique list of forms involved in the analysis
             Set<ResourceId> forms = m.formIds();
 
@@ -46,8 +49,9 @@ public class AnalysisViewModel {
             return Observable.flatten(trees).transform(t -> new FormForest(t));
         });
 
-        // Combine the model + metadata into the result table
-        resultTable = Observable.join(model, formForest, (m, ff) -> AnalysisResult.compute(formStore, m, ff));
+        effectiveModel = Observable.transform(formForest, model, (ff, m) -> new EffectiveModel(m, ff));
+
+        resultTable = effectiveModel.join( m -> AnalysisResult.compute(formStore, m) );
 
     }
 

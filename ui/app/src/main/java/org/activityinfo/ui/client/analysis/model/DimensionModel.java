@@ -16,6 +16,7 @@ public class DimensionModel {
     private String label;
     private List<DimensionMapping> mappings;
     private boolean totalIncluded;
+    private DateLevel dateLevel;
 
     public DimensionModel(String id, String label, List<DimensionMapping> mappings) {
         this.id = id;

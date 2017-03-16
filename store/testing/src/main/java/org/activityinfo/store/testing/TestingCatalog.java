@@ -23,6 +23,7 @@ public class TestingCatalog implements FormCatalog {
 
     public TestingCatalog() {
         add(new Survey());
+        add(new IntakeForm());
     }
 
     private void add(TestForm testForm) {
