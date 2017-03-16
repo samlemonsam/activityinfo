@@ -84,6 +84,19 @@ public class AnalysisViewModelTest {
     }
 
     @Test
+    public void dimensionsWithTotal() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(surveyCount());
+        model.getDimensions().add(genderDimension().setTotalIncluded(true));
+
+        assertThat(points(model), containsInAnyOrder(
+                point(199, "Male"),
+                point(212, "Female"),
+                point(199+212, "Total")));
+    }
+
+    @Test
     public void twoDimensions() {
 
         dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
@@ -107,16 +120,58 @@ public class AnalysisViewModelTest {
 
         AnalysisModel model = new AnalysisModel();
         model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension());
+        model.getDimensions().add(genderDimension().setTotalIncluded(true));
+        model.getDimensions().add(marriedDimension());
+
+        assertThat(points(model), containsInAnyOrder(
+                point(88,    "Male",   "Married"),
+                point(56,    "Male",   "Single"),
+                point(92,    "Female", "Married"),
+                point(64,    "Female", "Single"),
+                point(88+92, "Total",  "Married"),
+                point(56+64, "Total",  "Single")));
+    }
+
+    @Test
+    public void twoDimensionsWithBothTotals() {
+
+        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(surveyCount());
+        model.getDimensions().add(genderDimension().setTotalIncluded(true));
         model.getDimensions().add(marriedDimension().setTotalIncluded(true));
 
         assertThat(points(model), containsInAnyOrder(
-                point(88, "Male",   "Married"),
-                point(56, "Male",   "Single"),
-                point(0,  "Male",   "Total"),
-                point(92, "Female", "Married"),
-                point(64, "Female", "Single"),
-                point(0,  "Female", "Total")));
+                point(88,    "Male",   "Married"),
+                point(56,    "Male",   "Single"),
+                point(92,    "Female", "Married"),
+                point(64,    "Female", "Single"),
+                point(88+92, "Total",  "Married"),
+                point(56+64, "Total",  "Single"),
+                point(88+56, "Male",   "Total"),
+                point(92+64, "Female", "Total"),
+                point(300,   "Total",  "Total")));
+    }
+
+    @Test
+    public void twoDimensionsWithMediansAndTotals() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(medianAge());
+        model.getDimensions().add(genderDimension().setTotalIncluded(true));
+        model.getDimensions().add(marriedDimension().setTotalIncluded(true));
+
+        assertThat(points(model), containsInAnyOrder(
+                point(52.5, "Male",   "Married"),
+                point(61.5, "Male",   "Single"),
+                point(56.0, "Female", "Married"),
+                point(52.0, "Female", "Single"),
+                point(63.0, "Total",  "Married"),
+                point(50.0, "Total",  "Single"),
+                point(55.0, "Male",   "Total"),
+                point(55.0, "Female", "Total"),
+                point(55.0, "Total",  "Total")));
     }
 
 

@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.expr.functions.ExprFunctions;
 import org.activityinfo.model.expr.functions.StatFunction;
@@ -15,6 +16,7 @@ import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -79,6 +81,8 @@ public class AnalysisResult {
         Observable<ColumnSet> columnSet = formStore.query(queryModel);
         Observable<MeasureResultSet> resultSet = columnSet.transform(columns -> {
 
+            List<Point> points = new ArrayList<Point>();
+
             ColumnView value = columns.getColumnView("value");
             GroupMap groupMap = new GroupMap(dimensionSet, columns, readers);
 
@@ -96,24 +100,50 @@ public class AnalysisResult {
                 return new MeasureResultSet(dimensionSet, Collections.emptyList());
             }
 
-            // Aggregate into groups
-            int numGroups = groupMap.getGroupCount();
-            double aggregatedValues[] = Aggregation.aggregate(aggregationFunction(measureModel),
-                    groupArray,
-                    valueArray,
-                    numRows,
-                    numGroups);
+            StatFunction stat = aggregationFunction(measureModel);
 
-            // Add the points
-            List<Point> points = new ArrayList<>();
-            for (int i = 0; i < numGroups; i++) {
-                points.add(new Point(groupMap.getGroup(i), aggregatedValues[i]));
+            // Aggregate into groups
+           aggregate(points, stat, valueArray, groupArray, groupMap.getGroups());
+
+            // Add total points for those dimensions that require totals
+            boolean total[] = new boolean[dimensionSet.getCount()];
+            while (nextTotalSet(dimensionSet, total)) {
+                Regrouping regrouping = groupMap.total(groupArray, total);
+                aggregate(points, stat, valueArray, regrouping.getGroupArray(), regrouping.getGroups());
             }
 
             return new MeasureResultSet(dimensionSet, points);
         });
 
         return resultSet;
+    }
+
+    @VisibleForTesting
+    static boolean nextTotalSet(DimensionSet dimensionSet, boolean[] total) {
+        // Find the right-most dimension we can "increment"
+        int i = total.length - 1;
+        while(i >= 0) {
+            if(!total[i] && dimensionSet.getDimension(i).isTotalIncluded()) {
+                total[i] = true;
+                Arrays.fill(total, i+1, total.length, false);
+                return true;
+            }
+            i--;
+        }
+        return false;
+    }
+
+    private static void aggregate(List<Point> points, StatFunction stat, double[] valueArray, int[] groupArray, List<String[]> groups) {
+
+        double aggregatedValues[] = Aggregation.aggregate(stat,
+                groupArray,
+                valueArray,
+                valueArray.length,
+                groups.size());
+
+        for (int i = 0; i < groups.size(); i++) {
+            points.add(new Point(groups.get(i), aggregatedValues[i]));
+        }
     }
 
     private static StatFunction aggregationFunction(MeasureModel measure) {
