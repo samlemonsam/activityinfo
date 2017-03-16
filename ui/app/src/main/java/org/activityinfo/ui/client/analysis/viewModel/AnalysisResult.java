@@ -9,8 +9,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.Aggregation;
-import org.activityinfo.ui.client.analysis.model.DimensionMapping;
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
@@ -63,19 +61,8 @@ public class AnalysisResult {
         QueryModel queryModel = new QueryModel(measure.getFormId());
         queryModel.selectExpr(measure.getModel().getFormula()).as("value");
 
-        DimensionSet dimensionSet = measure.getDimensionSet();
-
-        DimensionReaderFactory[] readers = new DimensionReaderFactory[dimensionSet.getCount()];
-        for (int i = 0; i < dimensionSet.getCount(); i++) {
-            DimensionModel dimension = dimensionSet.getDimension(i);
-            DimensionMapping mapping = measure.getDimension(i).getMapping();
-            if(mapping != null) {
-                String columnId = "d" + i;
-                queryModel.selectExpr(mapping.getFormula()).as(columnId);
-                readers[i] = ( columnSet -> new ColumnReader(columnSet.getColumnView(columnId)) );
-            } else {
-                readers[i] = ( columnSet -> new ConstantReader(""));
-            }
+        for (EffectiveDimension dim : measure.getDimensions()) {
+            queryModel.addColumns(dim.getRequiredColumns());
         }
 
         Observable<ColumnSet> columnSet = formStore.query(queryModel);
@@ -84,7 +71,7 @@ public class AnalysisResult {
             List<Point> points = new ArrayList<>();
 
             ColumnView value = columns.getColumnView("value");
-            GroupMap groupMap = new GroupMap(dimensionSet, columns, readers);
+            GroupMap groupMap = new GroupMap(columns, measure.getDimensions());
 
             // Build group/value pairs
             int numRows = columns.getNumRows();
@@ -97,7 +84,7 @@ public class AnalysisResult {
 
             if(groupMap.getGroupCount() == 0) {
                 // All rows have at least one missing dimension
-                return new MeasureResultSet(dimensionSet, Collections.emptyList());
+                return new MeasureResultSet(measure.getDimensionSet(), Collections.emptyList());
             }
 
             StatFunction stat = aggregationFunction(measure.getModel());
@@ -106,6 +93,7 @@ public class AnalysisResult {
            aggregate(points, stat, valueArray, groupArray, groupMap.getGroups());
 
             // Add total points for those dimensions that require totals
+            DimensionSet dimensionSet = measure.getDimensionSet();
             boolean total[] = new boolean[dimensionSet.getCount()];
             while (nextTotalSet(dimensionSet, total)) {
                 Regrouping regrouping = groupMap.total(groupArray, total);

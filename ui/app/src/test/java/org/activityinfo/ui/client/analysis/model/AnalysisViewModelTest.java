@@ -18,7 +18,6 @@ import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -155,26 +154,24 @@ public class AnalysisViewModelTest {
                 point(300,   "Total",  "Total")));
     }
 
-    @Ignore
     @Test
     public void dateDimension() {
-
         AnalysisModel model = new AnalysisModel();
         model.getMeasures().add(intakeCaseCount());
-        model.getDimensions().add(caseYear().setTotalIncluded(true));
+        model.getDimensions().add(caseYear());
         model.getDimensions().add(caseQuarter().setTotalIncluded(true));
 
         assertThat(points(model), containsInAnyOrder(
-                point(88,    "Male",   "Married"),
-                point(56,    "Male",   "Single"),
-                point(92,    "Female", "Married"),
-                point(64,    "Female", "Single"),
-                point(88+92, "Total",  "Married"),
-                point(56+64, "Total",  "Single"),
-                point(88+56, "Male",   "Total"),
-                point(92+64, "Female", "Total"),
-                point(300,   "Total",  "Total")));
-
+                point(137,   "2016",   "Q1"),
+                point(148,   "2016",   "Q2"),
+                point(142,   "2016",   "Q3"),
+                point(130,   "2016",   "Q4"),
+                point(140,   "2017",   "Q1"),
+                point(143,   "2017",   "Q2"),
+                point(150,   "2017",   "Q3"),
+                point(137,   "2017",   "Q4"),
+                point(557,   "2016",   "Total"),
+                point(570,   "2017",   "Total")));
     }
 
 
@@ -240,13 +237,15 @@ public class AnalysisViewModelTest {
     }
     private DimensionModel caseYear() {
         return new DimensionModel(ResourceId.generateCuid(),
-                "Quarter",
-                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID));
+                "Year",
+                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
+                .setDateLevel(DateLevel.YEAR);
     }
     private DimensionModel caseQuarter() {
         return new DimensionModel(ResourceId.generateCuid(),
                 "Quarter",
-                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID));
+                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
+                .setDateLevel(DateLevel.QUARTER);
     }
 
     private MeasureModel medianAge() {

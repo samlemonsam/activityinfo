@@ -1,5 +1,10 @@
 package org.activityinfo.model.expr.functions;
 
+import org.activityinfo.model.expr.functions.date.DayFunction;
+import org.activityinfo.model.expr.functions.date.MonthFunction;
+import org.activityinfo.model.expr.functions.date.QuarterFunction;
+import org.activityinfo.model.expr.functions.date.YearFunction;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +54,11 @@ public final class ExprFunctions {
             register(BoundingBoxFunction.XMAX);
             register(BoundingBoxFunction.YMAX);
             register(IfFunction.INSTANCE);
+
+            register(YearFunction.INSTANCE);
+            register(MonthFunction.INSTANCE);
+            register(QuarterFunction.INSTANCE);
+            register(DayFunction.INSTANCE);
         }
         
         public ExprFunction get(String name) {

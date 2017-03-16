@@ -26,8 +26,9 @@ public class EffectiveMeasure {
         this.dimensionSet = dimensionSet;
 
         for (int i = 0; i < dimensionSet.getCount(); i++) {
-            DimensionMapping mapping = findMapping(dimensionSet.getDimension(i));
-            dimensions.add(new EffectiveDimension(i, mapping));
+            DimensionModel dimension = dimensionSet.getDimension(i);
+            DimensionMapping mapping = findMapping(model, dimension);
+            dimensions.add(new EffectiveDimension(formTree, i, dimension, mapping));
         }
     }
 
@@ -39,7 +40,17 @@ public class EffectiveMeasure {
         return model;
     }
 
-    private static DimensionMapping findMapping(DimensionModel dimension) {
+    private static DimensionMapping findMapping(MeasureModel measure, DimensionModel dimension) {
+
+        // First try to find a mapping specifically for this form
+        for (DimensionMapping mapping : dimension.getMappings()) {
+            if(mapping.getFormId() != null &&
+               mapping.getFormId().equals(measure.getFormId())) {
+                return mapping;
+            }
+        }
+
+        // If nothing matches, try a free floating formula...
         for (DimensionMapping mapping : dimension.getMappings()) {
             if(mapping.getFormId() == null) {
                 return mapping;
@@ -50,6 +61,10 @@ public class EffectiveMeasure {
 
     public DimensionSet getDimensionSet() {
         return dimensionSet;
+    }
+
+    public List<EffectiveDimension> getDimensions() {
+        return dimensions;
     }
 
     public EffectiveDimension getDimension(int i) {

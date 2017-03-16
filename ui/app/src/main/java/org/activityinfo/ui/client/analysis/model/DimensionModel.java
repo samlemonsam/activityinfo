@@ -54,4 +54,13 @@ public class DimensionModel {
         this.totalIncluded = totalIncluded;
         return this;
     }
+
+    public DateLevel getDateLevel() {
+        return dateLevel;
+    }
+
+    public DimensionModel setDateLevel(DateLevel dateLevel) {
+        this.dateLevel = dateLevel;
+        return this;
+    }
 }

@@ -4,6 +4,11 @@ import org.activityinfo.model.type.time.LocalDate;
 
 
 public class YearFunction extends DateComponentFunction {
+
+    public static final YearFunction INSTANCE = new YearFunction();
+
+    private YearFunction() {}
+
     @Override
     public String getId() {
         return "year";
@@ -13,8 +18,6 @@ public class YearFunction extends DateComponentFunction {
     public String getLabel() {
         return "YEAR";
     }
-
-
 
     @Override
     protected String getUnits() {

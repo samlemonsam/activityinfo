@@ -31,7 +31,7 @@ public class DateGenerator implements Supplier<FieldValue> {
         if(missing < missingProbability) {
             return null;
         }
-        int year = minYear + random.nextInt(maxYear - minYear);
+        int year = minYear + random.nextInt(maxYear - minYear + 1);
         int month = 1 + random.nextInt(12);
         int day = 1 + random.nextInt(28);
 
