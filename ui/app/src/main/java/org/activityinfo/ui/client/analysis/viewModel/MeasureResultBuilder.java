@@ -112,7 +112,7 @@ public class MeasureResultBuilder {
          */
         multiDimSet = buildMultiDimSet();
 
-        if(multiDimSet == null) {
+        if(multiDimSet.isEmpty()) {
 
             /*
              * Without multi-valued dimensions, the best strategy is probably sort+aggregate
@@ -121,26 +121,20 @@ public class MeasureResultBuilder {
 
         } else {
 
-            aggregateMulti(valueArray, groupArray, groupMap, multiDimSet);
+            aggregateMulti(valueArray, groupArray, groupMap);
         }
 
     }
 
 
     private MultiDimSet buildMultiDimSet() {
-        List<MultiDimSet> dimSets = new ArrayList<>();
+        List<MultiDim> dimSets = new ArrayList<>();
         for (EffectiveDimension dimension : measure.getDimensions()) {
             if(dimension.isMultiValued()) {
                 dimSets.add(dimension.createMultiDimSet(columns));
             }
         }
-        if(dimSets.isEmpty()) {
-            return null;
-        } else if(dimSets.size() == 1) {
-            return dimSets.get(0);
-        } else {
-            throw new UnsupportedOperationException("TODO");
-        }
+        return new MultiDimSet(dimSets);
     }
 
 
@@ -184,16 +178,18 @@ public class MeasureResultBuilder {
     }
 
 
-    private void aggregateMulti(double[] valueArray, int[] groupArray, GroupMap groupMap, MultiDimSet multiDimSet) {
+    private void aggregateMulti(double[] valueArray, int[] groupArray, GroupMap groupMap) {
 
         /* For each category combination ... */
 
+        List<MultiDimCategory> categories = multiDimSet.build();
 
-        for (int j = 0; j < multiDimSet.getCategoryCount(); j++) {
+        for (MultiDimCategory category : categories) {
 
             double totals[] = new double[groupMap.getGroupCount()];
 
-            BitSet bitSet = multiDimSet.getBitSet(j);
+            BitSet bitSet = category.getBitSet();
+
             for (int i = 0; i < valueArray.length; i++) {
                  if(bitSet.get(i)) {
                      int groupIndex = groupArray[i];
@@ -202,10 +198,9 @@ public class MeasureResultBuilder {
             }
 
             for (int i = 0; i < totals.length; i++) {
-                String[] group = groupMap.getGroup(i);
-                String[] fullGroup = Arrays.copyOf(group, group.length);
-                fullGroup[multiDimSet.getDimensionIndex()] = multiDimSet.getLabel(j);
-                points.add(new Point(fullGroup, totals[i]));
+                String[] group =  category.group(groupMap.getGroup(i));
+
+                points.add(new Point(group, totals[i]));
             }
         }
     }
@@ -223,10 +218,6 @@ public class MeasureResultBuilder {
             points.add(new Point(groups.get(i), aggregatedValues[i]));
         }
     }
-
-
-
-
 
     private static StatFunction aggregationFunction(MeasureModel measure) {
         ExprFunction function = ExprFunctions.get(measure.getAggregation());

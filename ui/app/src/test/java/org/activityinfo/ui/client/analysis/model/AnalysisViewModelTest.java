@@ -18,6 +18,7 @@ import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.Point;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -193,6 +194,64 @@ public class AnalysisViewModelTest {
                 point(84,    "2017",   "Syrian")));
     }
 
+    @Test
+    public void severalMultiDimensions() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(intakeCaseCount());
+        model.getDimensions().add(caseYear());
+        model.getDimensions().add(nationality());
+        model.getDimensions().add(protectionProblem());
+
+        assertThat(points(model), containsInAnyOrder(
+                point(227,   "2016",   "Palestinian", "Documents"),
+                point(277,   "2016",   "Palestinian", "Access to Services"),
+                point(250,   "2017",   "Palestinian", "Documents"),
+                point(273,   "2017",   "Palestinian", "Access to Services"),
+                point(76,    "2016",   "Jordanian",   "Documents"),
+                point(88,    "2016",   "Jordanian",   "Access to Services"),
+                point(85,    "2017",   "Jordanian",   "Documents"),
+                point(90,    "2017",   "Jordanian",   "Access to Services"),
+                point(36,    "2016",   "Syrian",      "Documents"),
+                point(54,    "2016",   "Syrian",      "Access to Services"),
+                point(49,    "2017",   "Syrian",      "Documents"),
+                point(60,    "2017",   "Syrian",      "Access to Services")
+        ));
+    }
+
+    @Ignore("WIP")
+    @Test
+    public void severalMultiDimensionsWithTotals() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(intakeCaseCount());
+        model.getDimensions().add(caseYear().setTotalIncluded(true));
+        model.getDimensions().add(nationality());
+        model.getDimensions().add(protectionProblem());
+
+        assertThat(points(model), containsInAnyOrder(
+                point(227,   "2016",   "Palestinian", "Documents"),
+                point(277,   "2016",   "Palestinian", "Access to Services"),
+                point(250,   "2017",   "Palestinian", "Documents"),
+                point(273,   "2017",   "Palestinian", "Access to Services"),
+                point(76,    "2016",   "Jordanian",   "Documents"),
+                point(88,    "2016",   "Jordanian",   "Access to Services"),
+                point(85,    "2017",   "Jordanian",   "Documents"),
+                point(90,    "2017",   "Jordanian",   "Access to Services"),
+                point(36,    "2016",   "Syrian",      "Documents"),
+                point(54,    "2016",   "Syrian",      "Access to Services"),
+                point(49,    "2017",   "Syrian",      "Documents"),
+                point(60,    "2017",   "Syrian",      "Access to Services"),
+
+                point(477,   "Total",  "Palestinian", "Documents"),
+                point(550,   "Total",  "Palestinian", "Access to Services"),
+                point(161,   "Total",  "Jordanian",   "Documents"),
+                point(178,   "Total",  "Jordanian",   "Access to Services"),
+                point(85,    "Total",  "Syrian",      "Documents"),
+                point(114,   "Total",  "Syrian",      "Access to Services")
+        ));
+    }
+
 
     @Test
     public void twoDimensionsWithMediansAndTotals() {
@@ -274,6 +333,12 @@ public class AnalysisViewModelTest {
         return new DimensionModel(ResourceId.generateCuid(),
                 "Nationality",
                 new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.NATIONALITY_FIELD_ID));
+    }
+
+    private DimensionModel protectionProblem() {
+        return new DimensionModel(ResourceId.generateCuid(),
+                "Problem",
+                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.PROBLEM_FIELD_ID));
     }
 
     private MeasureModel medianAge() {

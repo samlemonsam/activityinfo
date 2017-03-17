@@ -150,7 +150,7 @@ public class EffectiveDimension {
         return date.substring(0, 4);
     }
 
-    public MultiDimSet createMultiDimSet(ColumnSet columnSet) {
+    public MultiDim createMultiDimSet(ColumnSet columnSet) {
         EnumType enumType = (EnumType) this.formula.getResultType();
 
         String[] labels = new String[enumType.getValues().size()];
@@ -172,6 +172,6 @@ public class EffectiveDimension {
             bitSets[j] = bitSet;
         }
 
-        return new MultiDimSet(this.index, labels, bitSets);
+        return new MultiDim(this.index, labels, bitSets);
     }
 }

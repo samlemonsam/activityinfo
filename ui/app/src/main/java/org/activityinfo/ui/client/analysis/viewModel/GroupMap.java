@@ -135,6 +135,10 @@ public class GroupMap {
      */
     public Regrouping total(int[] groupArray, boolean[] totalDimensions) {
 
+        if(!any(totalDimensions)) {
+            return new Regrouping(groupArray, groups);
+        }
+
         int map[] = new int[getGroupCount()];
 
         List<String[]> newGroups = new ArrayList<>();
@@ -169,6 +173,15 @@ public class GroupMap {
         }
 
         return new Regrouping(regroupedArray, newGroups);
+    }
+
+    private boolean any(boolean[] x) {
+        for (int i = 0; i < x.length; i++) {
+            if(x[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
