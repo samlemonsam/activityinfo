@@ -132,6 +132,8 @@ public class AnalysisViewModelTest {
                 point(56+64, "Total",  "Single")));
     }
 
+
+
     @Test
     public void twoDimensionsWithBothTotals() {
 
@@ -172,6 +174,23 @@ public class AnalysisViewModelTest {
                 point(137,   "2017",   "Q4"),
                 point(557,   "2016",   "Total"),
                 point(570,   "2017",   "Total")));
+    }
+
+    @Test
+    public void multiDimensions() {
+
+        AnalysisModel model = new AnalysisModel();
+        model.getMeasures().add(intakeCaseCount());
+        model.getDimensions().add(caseYear());
+        model.getDimensions().add(nationality());
+
+        assertThat(points(model), containsInAnyOrder(
+                point(411,   "2016",   "Palestinian"),
+                point(422,   "2017",   "Palestinian"),
+                point(138,   "2016",   "Jordanian"),
+                point(144,   "2017",   "Jordanian"),
+                point(71,    "2016",   "Syrian"),
+                point(84,    "2017",   "Syrian")));
     }
 
 
@@ -241,11 +260,20 @@ public class AnalysisViewModelTest {
                 new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
                 .setDateLevel(DateLevel.YEAR);
     }
+
+
     private DimensionModel caseQuarter() {
         return new DimensionModel(ResourceId.generateCuid(),
                 "Quarter",
                 new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
                 .setDateLevel(DateLevel.QUARTER);
+    }
+
+
+    private DimensionModel nationality() {
+        return new DimensionModel(ResourceId.generateCuid(),
+                "Nationality",
+                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.NATIONALITY_FIELD_ID));
     }
 
     private MeasureModel medianAge() {

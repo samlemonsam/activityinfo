@@ -40,11 +40,13 @@ public class GroupMap {
         this.keyDimIndexes = new int[dims.size()];
 
         for (EffectiveDimension dim : dims) {
-            DimensionReader reader = dim.createReader(columnSet);
-            if(reader != null) {
-                keyDimIndexes[keyDim] = dim.getIndex();
-                readers[keyDim] = reader;
-                keyDim++;
+            if(dim.isSingleValued()) {
+                DimensionReader reader = dim.createReader(columnSet);
+                if (reader != null) {
+                    keyDimIndexes[keyDim] = dim.getIndex();
+                    readers[keyDim] = reader;
+                    keyDim++;
+                }
             }
         }
 

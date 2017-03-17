@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-public class AnalysisResultTest {
+public class MeasureResultBuilderTest {
 
     @Test
     public void totalSets() {
@@ -16,7 +16,7 @@ public class AnalysisResultTest {
 
 
         boolean totals[] = new boolean[dimensionSet.getCount()];
-        while(AnalysisResult.nextTotalSet(dimensionSet, totals)) {
+        while(MeasureResultBuilder.nextSubset(dimensionSet, totals)) {
             System.out.println(Arrays.toString(totals));
         }
     }

@@ -29,6 +29,23 @@ public final class Aggregation {
 
         HeapsortTandem.heapsortDescending(groupId, values, numValues);
 
+        return aggregateSorted(statistic, groupId, values, numValues, numGroups);
+
+
+    }
+
+
+    /**
+     * Aggregate a value list already sorted by group.
+     *
+     * @param statistic
+     * @param groupId
+     * @param values
+     * @param numValues
+     * @param numGroups
+     * @return
+     */
+    public static double[] aggregateSorted(StatFunction statistic, int[] groupId, double[] values, int numValues, int numGroups) {
         // Allocate the output for the results
         double result[] = new double[numGroups];
         Arrays.fill(result, Double.NaN);
