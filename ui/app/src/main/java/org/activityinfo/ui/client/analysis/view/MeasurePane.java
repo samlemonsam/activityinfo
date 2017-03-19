@@ -17,18 +17,17 @@ import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.ObservableList;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 import org.activityinfo.ui.client.measureDialog.view.MeasureDialog;
 
-import java.util.List;
+import java.util.logging.Logger;
 
 
 public class MeasurePane implements IsWidget {
+
+    private static final Logger LOGGER = Logger.getLogger(MeasurePane.class.getName());
 
     private ContentPanel contentPanel;
     private MeasureDialog dialog;
@@ -44,22 +43,7 @@ public class MeasurePane implements IsWidget {
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
         addButton.addSelectHandler(this::addMeasureClicked);
 
-        store = new ListStore<>(MeasureListItem::getId);
-        ObservableList<Observable<MeasureListItem>> map = model.getMeasures().map(MeasureListItem::compute);
-        Observable<List<MeasureListItem>> measures = Observable.flatten(map);
-        measures.subscribe(new Observer<List<MeasureListItem>>() {
-            @Override
-            public void onChange(Observable<List<MeasureListItem>> observable) {
-                if(observable.isLoading()) {
-                    store.clear();
-                } else {
-                    store.replaceAll(measures.get());
-                }
-            }
-        });
-
-
-        store = new ListStore<>(MeasureListItem::getId);
+        store = new MeasureListItemStore(model);
         list = new ListView<>(store,
                 new IdentityValueProvider<>(),
                 new PillCell<>(MeasureListItem::getLabel, this::showMenu));

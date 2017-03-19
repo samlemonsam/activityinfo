@@ -18,6 +18,7 @@ import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
+import org.activityinfo.ui.client.analysis.viewModel.DimensionListItem;
 
 /**
  *
@@ -28,8 +29,8 @@ public class DimensionPane implements IsWidget {
     private NewDimensionDialog dialog;
     private ContentPanel contentPanel;
 
-    private ListStore<DimensionModel> listStore;
-    private ListView<DimensionModel, DimensionModel> listView;
+    private ListStore<DimensionListItem> listStore;
+    private ListView<DimensionListItem, DimensionListItem> listView;
 
     public DimensionPane(AnalysisViewModel model) {
         this.model = model;
@@ -37,21 +38,20 @@ public class DimensionPane implements IsWidget {
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
         addButton.addSelectHandler(this::addDimensionClicked);
 
-        listStore = new ListStore<>(DimensionModel::getId);
+        listStore = new ListStore<>(DimensionListItem::getId);
         listView = new ListView<>(listStore,
                 new IdentityValueProvider<>(),
-                new PillCell<>(DimensionModel::getLabel, this::onDimensionMenu));
+                new PillCell<>(DimensionListItem::getLabel, this::onDimensionMenu));
 
         contentPanel = new ContentPanel();
         contentPanel.setHeading("Dimensions");
         contentPanel.addTool(addButton);
         contentPanel.setWidget(listView);
 
-        model.getDimensions().asObservable().subscribe(observable -> {
+        model.getDimensionListItems().subscribe(observable -> {
+            listStore.clear();
             if (observable.isLoaded()) {
                 listStore.replaceAll(observable.get());
-            } else {
-                listStore.clear();
             }
         });
     }
@@ -75,7 +75,7 @@ public class DimensionPane implements IsWidget {
     }
 
 
-    private void onDimensionMenu(Element element, DimensionModel dim) {
+    private void onDimensionMenu(Element element, DimensionListItem dim) {
 
         Menu contextMenu = new Menu();
 
@@ -88,17 +88,19 @@ public class DimensionPane implements IsWidget {
 //        contextMenu.add(editFormula);
 
         // Allow choosing the date part to show
-        MenuItem year = new CheckMenuItem("Year");
-        MenuItem quarter = new CheckMenuItem("Quarter");
-        MenuItem month = new CheckMenuItem("Month");
-        MenuItem day = new CheckMenuItem("Day");
+        if(dim.isDate()) {
+            MenuItem year = new CheckMenuItem("Year");
+            MenuItem quarter = new CheckMenuItem("Quarter");
+            MenuItem month = new CheckMenuItem("Month");
+            MenuItem day = new CheckMenuItem("Day");
 
-        contextMenu.add(year);
-        contextMenu.add(quarter);
-        contextMenu.add(month);
-        contextMenu.add(day);
+            contextMenu.add(year);
+            contextMenu.add(quarter);
+            contextMenu.add(month);
+            contextMenu.add(day);
 
-        contextMenu.add(new SeparatorMenuItem());
+            contextMenu.add(new SeparatorMenuItem());
+        }
 
 
         // Remove the dimension

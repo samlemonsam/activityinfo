@@ -80,7 +80,7 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionModel> 
             // Add root fields...
             for (FormTree.Node node : forest.get().getRootNodes()) {
                 if(isEligible(node.getType())) {
-                    store.add(new RootFieldNode(node.getField()));
+                    store.add(new RootFieldNode(node.getDefiningFormClass().getId(), node.getField()));
                 }
             }
 

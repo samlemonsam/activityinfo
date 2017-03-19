@@ -36,5 +36,4 @@ class MultiDim {
         }
         return count;
     }
-
 }

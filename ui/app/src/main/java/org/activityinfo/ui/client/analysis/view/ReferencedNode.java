@@ -36,7 +36,6 @@ public class ReferencedNode extends DimensionNode {
         return new DimensionModel(
                 ResourceId.generateCuid(),
                 form.getLabel() + " " + field.getLabel(),
-                null,
                 new DimensionMapping(
                     new CompoundExpr(new SymbolExpr(form.getId()), new SymbolExpr(field.getId()))));
     }

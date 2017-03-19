@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.analysis.model;
+package org.activityinfo.ui.client.analysis.viewModel;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -13,9 +13,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTesting;
 import org.activityinfo.store.testing.IntakeForm;
 import org.activityinfo.store.testing.Survey;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.Point;
+import org.activityinfo.ui.client.analysis.model.*;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -300,7 +298,7 @@ public class AnalysisViewModelTest {
                 new DimensionMapping(new SymbolExpr("MARRIED")));
     }
 
-    private MeasureModel surveyCount() {
+    public static MeasureModel surveyCount() {
         return new MeasureModel(ResourceId.generateCuid(),
                 "Count",
                 Survey.FORM_ID, "1");

@@ -53,6 +53,10 @@ public class EffectiveDimension {
         }
     }
 
+    public String getId() {
+        return model.getId();
+    }
+
     public int getIndex() {
         return index;
     }
@@ -71,6 +75,13 @@ public class EffectiveDimension {
 
     public ParsedFormula getFormula() {
         return formula;
+    }
+
+    public boolean isDate() {
+        if(this.formula.isValid()) {
+            return this.formula.getResultType() instanceof LocalDateType;
+        }
+        return false;
     }
 
     public List<ColumnModel> getRequiredColumns() {
@@ -125,13 +136,15 @@ public class EffectiveDimension {
 
     private Function<String, String> createMap() {
         if(formula.getResultType() instanceof LocalDateType) {
-            switch (model.getDateLevel()) {
-                case YEAR:
-                    return EffectiveDimension::year;
-                case MONTH:
-                    return EffectiveDimension::month;
-                case QUARTER:
-                    return EffectiveDimension::quarter;
+            if(model.getDateLevel() != null) {
+                switch (model.getDateLevel()) {
+                    case YEAR:
+                        return EffectiveDimension::year;
+                    case MONTH:
+                        return EffectiveDimension::month;
+                    case QUARTER:
+                        return EffectiveDimension::quarter;
+                }
             }
         }
         return Functions.identity();
@@ -174,4 +187,6 @@ public class EffectiveDimension {
 
         return new MultiDim(this.index, labels, bitSets);
     }
+
+
 }

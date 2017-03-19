@@ -8,10 +8,10 @@ import org.activityinfo.model.resource.ResourceId;
 public final class MeasureModel {
 
     private final String id;
-    private final String label;
+    private String label;
 
-    private final ResourceId formId;
-    private final String formula;
+    private ResourceId formId;
+    private String formula;
 
     private String aggregation = "sum";
 
@@ -26,8 +26,13 @@ public final class MeasureModel {
         return id;
     }
 
+
     public String getLabel() {
         return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     /**

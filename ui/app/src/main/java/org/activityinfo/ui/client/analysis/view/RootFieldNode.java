@@ -9,9 +9,11 @@ import org.activityinfo.ui.client.icons.IconBundle;
 
 public class RootFieldNode extends DimensionNode {
 
+    private ResourceId formId;
     private FormField field;
 
-    public RootFieldNode(FormField field) {
+    public RootFieldNode(ResourceId formId, FormField field) {
+        this.formId = formId;
         this.field = field;
     }
 
@@ -30,7 +32,7 @@ public class RootFieldNode extends DimensionNode {
         return new DimensionModel(
                 ResourceId.generateCuid(),
                 field.getLabel(),
-                DimensionMapping.formMapping());
+                new DimensionMapping(formId, field.getId()));
     }
 
     @Override
