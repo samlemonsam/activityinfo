@@ -16,11 +16,15 @@ public class DimensionListItem {
     }
 
     public String getId() {
-        return model.getId();
+        return model.id();
     }
 
     public String getLabel() {
-        return model.getLabel();
+        return model.label();
+    }
+
+    public DimensionModel getModel() {
+        return model;
     }
 
     public boolean isDate() {

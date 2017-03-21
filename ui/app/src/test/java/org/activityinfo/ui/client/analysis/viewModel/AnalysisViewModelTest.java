@@ -52,8 +52,9 @@ public class AnalysisViewModelTest {
 
         formStore.delayLoading();
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(surveyCount());
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .build();
 
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         viewModel.updateModel(model);
@@ -72,9 +73,11 @@ public class AnalysisViewModelTest {
     @Test
     public void dimensionsWithMissing() {
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension());
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+            .addMeasures(surveyCount())
+            .addDimensions(genderDimension())
+            .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(199, "Male"),
@@ -84,9 +87,10 @@ public class AnalysisViewModelTest {
     @Test
     public void dimensionsWithTotal() {
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension().setTotalIncluded(true));
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension().withTotalIncluded(true))
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(199, "Male"),
@@ -96,14 +100,38 @@ public class AnalysisViewModelTest {
 
 
     @Test
+    public void dimensionListItems() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .build();
+
+        AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
+        viewModel.updateModel(model);
+
+        // Add a new dimension
+        viewModel.updateModel(model.withDimension(genderDimension()));
+        assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(1));
+
+        // Delete a non-existant dimension
+        viewModel.updateModel(model.withoutDimension("FOOOO"));
+        assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(1));
+
+        // Delete the gender dimension
+        viewModel.updateModel(model.withoutDimension(genderDimension().id()));
+        assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(0));
+    }
+
+
+    @Test
     public void twoDimensions() {
 
         dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension());
-        model.getDimensions().add(marriedDimension());
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension())
+                .addDimensions(marriedDimension())
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(88, "Male", "Married"),
@@ -117,10 +145,11 @@ public class AnalysisViewModelTest {
 
         dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension().setTotalIncluded(true));
-        model.getDimensions().add(marriedDimension());
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension().withTotalIncluded(true))
+                .addDimensions(marriedDimension())
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(88,    "Male",   "Married"),
@@ -138,10 +167,11 @@ public class AnalysisViewModelTest {
 
         dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(surveyCount());
-        model.getDimensions().add(genderDimension().setTotalIncluded(true));
-        model.getDimensions().add(marriedDimension().setTotalIncluded(true));
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension().withTotalIncluded(true))
+                .addDimensions(marriedDimension().withTotalIncluded(true))
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(88,    "Male",   "Married"),
@@ -157,10 +187,11 @@ public class AnalysisViewModelTest {
 
     @Test
     public void dateDimension() {
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(intakeCaseCount());
-        model.getDimensions().add(caseYear());
-        model.getDimensions().add(caseQuarter().setTotalIncluded(true));
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(intakeCaseCount())
+                .addDimensions(caseYear())
+                .addDimensions(caseQuarter().withTotalIncluded(true))
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(137,   "2016",   "Q1"),
@@ -178,10 +209,11 @@ public class AnalysisViewModelTest {
     @Test
     public void multiDimensions() {
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(intakeCaseCount());
-        model.getDimensions().add(caseYear());
-        model.getDimensions().add(nationality());
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(intakeCaseCount())
+                .addDimensions(caseYear())
+                .addDimensions(nationality())
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(411,   "2016",   "Palestinian"),
@@ -195,11 +227,12 @@ public class AnalysisViewModelTest {
     @Test
     public void severalMultiDimensions() {
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(intakeCaseCount());
-        model.getDimensions().add(caseYear());
-        model.getDimensions().add(nationality());
-        model.getDimensions().add(protectionProblem());
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(intakeCaseCount())
+                .addDimensions(caseYear())
+                .addDimensions(nationality())
+                .addDimensions(protectionProblem())
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(227,   "2016",   "Palestinian", "Documents"),
@@ -221,11 +254,12 @@ public class AnalysisViewModelTest {
     @Test
     public void severalMultiDimensionsWithTotals() {
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(intakeCaseCount());
-        model.getDimensions().add(caseYear().setTotalIncluded(true));
-        model.getDimensions().add(nationality());
-        model.getDimensions().add(protectionProblem());
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(intakeCaseCount())
+                .addDimensions(caseYear().withTotalIncluded(true))
+                .addDimensions(nationality())
+                .addDimensions(protectionProblem())
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(227,   "2016",   "Palestinian", "Documents"),
@@ -254,10 +288,11 @@ public class AnalysisViewModelTest {
     @Test
     public void twoDimensionsWithMediansAndTotals() {
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(medianAge());
-        model.getDimensions().add(genderDimension().setTotalIncluded(true));
-        model.getDimensions().add(marriedDimension().setTotalIncluded(true));
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(medianAge())
+                .addDimensions(genderDimension().withTotalIncluded(true))
+                .addDimensions(marriedDimension().withTotalIncluded(true))
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(52.5, "Male",   "Married"),
@@ -274,76 +309,95 @@ public class AnalysisViewModelTest {
     @Test
     public void median() {
 
-        dumpQuery(Survey.FORM_ID, "Gender", "age");
+        //dumpQuery(Survey.FORM_ID, "Gender", "age");
 
-        AnalysisModel model = new AnalysisModel();
-        model.getMeasures().add(medianAge());
-        model.getDimensions().add(genderDimension());
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(medianAge())
+                .addDimensions(genderDimension())
+                .build();
 
         assertThat(points(model), containsInAnyOrder(
                 point(56.5, "Male"),
                 point(51.0, "Female")));
     }
 
-    private DimensionModel genderDimension() {
-        return new DimensionModel(ResourceId.generateCuid(),
-                "Gender",
-                new DimensionMapping(new SymbolExpr("Gender")));
+    private ImmutableDimensionModel genderDimension() {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("Gender")
+                .addMappings(new DimensionMapping(new SymbolExpr("Gender")))
+                .build();
     }
 
 
-    private DimensionModel marriedDimension() {
-        return new DimensionModel(ResourceId.generateCuid(),
-                "Married",
-                new DimensionMapping(new SymbolExpr("MARRIED")));
+    private ImmutableDimensionModel marriedDimension() {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("Married")
+                .addMappings(new DimensionMapping(new SymbolExpr("MARRIED")))
+                .build();
     }
 
     public static MeasureModel surveyCount() {
-        return new MeasureModel(ResourceId.generateCuid(),
-                "Count",
-                Survey.FORM_ID, "1");
+        return ImmutableMeasureModel.builder()
+                .label("Count")
+                .formId(Survey.FORM_ID)
+                .formula("1")
+                .build();
     }
 
 
     private MeasureModel intakeCaseCount() {
-        return new MeasureModel(ResourceId.generateCuid(),
-                "Count",
-                IntakeForm.FORM_ID, "1");
+        return ImmutableMeasureModel.builder()
+            .label("Count")
+            .formId(IntakeForm.FORM_ID)
+            .formula("1")
+            .build();
 
     }
-    private DimensionModel caseYear() {
-        return new DimensionModel(ResourceId.generateCuid(),
-                "Year",
-                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
-                .setDateLevel(DateLevel.YEAR);
-    }
-
-
-    private DimensionModel caseQuarter() {
-        return new DimensionModel(ResourceId.generateCuid(),
-                "Quarter",
-                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
-                .setDateLevel(DateLevel.QUARTER);
+    private ImmutableDimensionModel caseYear() {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("Year")
+                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
+                .dateLevel(DateLevel.YEAR)
+                .build();
     }
 
 
-    private DimensionModel nationality() {
-        return new DimensionModel(ResourceId.generateCuid(),
-                "Nationality",
-                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.NATIONALITY_FIELD_ID));
+    private ImmutableDimensionModel caseQuarter() {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("Quarter")
+                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
+                .dateLevel(DateLevel.QUARTER)
+                .build();
     }
 
-    private DimensionModel protectionProblem() {
-        return new DimensionModel(ResourceId.generateCuid(),
-                "Problem",
-                new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.PROBLEM_FIELD_ID));
+
+    private ImmutableDimensionModel nationality() {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("Nationality")
+                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.NATIONALITY_FIELD_ID))
+                .build();
+    }
+
+    private ImmutableDimensionModel protectionProblem() {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("Problem")
+                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.PROBLEM_FIELD_ID))
+                .build();
     }
 
     private MeasureModel medianAge() {
-        return new MeasureModel(ResourceId.generateCuid(),
-                "Age",
-                Survey.FORM_ID, Survey.AGE_FIELD_ID.asString())
-                .setAggregation("median");
+        return ImmutableMeasureModel.builder()
+            .label("Age")
+            .formId(Survey.FORM_ID)
+            .formula(Survey.AGE_FIELD_ID.asString())
+            .aggregation("median")
+            .build();
     }
 
 
@@ -396,7 +450,7 @@ public class AnalysisViewModelTest {
     private void dump(AnalysisResult result) {
 
         for (DimensionModel dimensionModel : result.getDimensionSet()) {
-            System.out.print(column(dimensionModel.getLabel()));
+            System.out.print(column(dimensionModel.label()));
         }
         System.out.println(column("Value"));
 

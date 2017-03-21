@@ -15,14 +15,12 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.ui.client.analysis.model.DateLevel;
 import org.activityinfo.ui.client.analysis.model.DimensionMapping;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.formulaDialog.ParsedFormula;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Models a measure that is part of the analysis,
@@ -54,7 +52,7 @@ public class EffectiveDimension {
     }
 
     public String getId() {
-        return model.getId();
+        return model.id();
     }
 
     public int getIndex() {
@@ -136,8 +134,9 @@ public class EffectiveDimension {
 
     private Function<String, String> createMap() {
         if(formula.getResultType() instanceof LocalDateType) {
-            if(model.getDateLevel() != null) {
-                switch (model.getDateLevel()) {
+            Optional<DateLevel> dateLevel = model.dateLevel();
+            if(dateLevel.isPresent()) {
+                switch (dateLevel.get()) {
                     case YEAR:
                         return EffectiveDimension::year;
                     case MONTH:

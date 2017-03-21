@@ -24,6 +24,7 @@ import org.activityinfo.model.resource.ResourceId;
  */
 public class DimensionMapping {
 
+
     public enum Type {
         /**
          * Maps the source Form's label to the dimension category

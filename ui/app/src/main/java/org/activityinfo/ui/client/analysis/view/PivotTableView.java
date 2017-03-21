@@ -54,7 +54,7 @@ public class PivotTableView implements IsWidget {
         List<ColumnConfig<Point, ?>> columns = new ArrayList<>();
         for (int i = 0; i < dimensionSet.getCount(); i++) {
             ColumnConfig<Point, String> column = new ColumnConfig<>(new PointDimProvider(i));
-            column.setHeader(dimensionSet.getDimension(i).getLabel());
+            column.setHeader(dimensionSet.getDimension(i).label());
             column.setSortable(false);
             column.setHideable(false);
             columns.add(column);

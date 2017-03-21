@@ -1,6 +1,6 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
+import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -10,10 +10,9 @@ public class MeasureResultBuilderTest {
     @Test
     public void totalSets() {
         DimensionSet dimensionSet = new DimensionSet(Arrays.asList(
-                new DimensionModel("G", "Gender").setTotalIncluded(true),
-                new DimensionModel("A", "Age").setTotalIncluded(true),
-                new DimensionModel("L", "Location").setTotalIncluded(true)));
-
+                ImmutableDimensionModel.builder().id("G").label("Gender").totalIncluded(true).build(),
+                ImmutableDimensionModel.builder().id("A").label("Age").totalIncluded(true).build(),
+                ImmutableDimensionModel.builder().id("L").label("Location").totalIncluded(true).build()));
 
         boolean totals[] = new boolean[dimensionSet.getCount()];
         while(MeasureResultBuilder.nextSubset(dimensionSet, totals)) {

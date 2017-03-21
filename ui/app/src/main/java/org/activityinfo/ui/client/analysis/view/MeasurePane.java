@@ -17,6 +17,7 @@ import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
@@ -34,16 +35,16 @@ public class MeasurePane implements IsWidget {
 
     private ListStore<MeasureListItem> store;
     private ListView<MeasureListItem, MeasureListItem> list;
-    private AnalysisViewModel model;
+    private AnalysisViewModel viewModel;
 
 
-    public MeasurePane(final AnalysisViewModel model) {
-        this.model = model;
+    public MeasurePane(final AnalysisViewModel viewModel) {
+        this.viewModel = viewModel;
 
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
         addButton.addSelectHandler(this::addMeasureClicked);
 
-        store = new MeasureListItemStore(model);
+        store = new MeasureListItemStore(viewModel);
         list = new ListView<>(store,
                 new IdentityValueProvider<>(),
                 new PillCell<>(MeasureListItem::getLabel, this::showMenu));
@@ -57,14 +58,14 @@ public class MeasurePane implements IsWidget {
 
     private void addMeasureClicked(SelectEvent event) {
         if (dialog == null) {
-            dialog = new MeasureDialog(model.getFormStore());
+            dialog = new MeasureDialog(viewModel.getFormStore());
             dialog.addSelectionHandler(this::measureAdded);
         }
         dialog.show();
     }
 
     private void measureAdded(SelectionEvent<MeasureModel> measure) {
-        model.addMeasure(measure.getSelectedItem());
+        viewModel.addMeasure(measure.getSelectedItem());
     }
 
     @Override
@@ -96,10 +97,15 @@ public class MeasurePane implements IsWidget {
         // Remove the dimension
         MenuItem remove = new MenuItem();
         remove.setText(I18N.CONSTANTS.remove());
-        remove.addSelectionHandler(event -> model.removeMeasure(measure.getId()));
+        remove.addSelectionHandler(event -> removeMeasure(measure.getId()));
         contextMenu.add(remove);
 
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
+    }
+
+    private void removeMeasure(String id) {
+        viewModel.updateModel(
+            viewModel.getModel().withoutMeasure(id));
     }
 
     private void editAlias(MeasureModel measure) {
@@ -108,7 +114,7 @@ public class MeasurePane implements IsWidget {
 
         messageBox.addDialogHideHandler(event -> {
             if(event.getHideButton() == Dialog.PredefinedButton.OK) {
-                model.updateMeasureLabel(measure.getId(), messageBox.getValue());
+                updateMeasureLabel(measure, messageBox.getValue());
             }
         });
 
@@ -116,10 +122,31 @@ public class MeasurePane implements IsWidget {
     }
 
     private void editFormula(MeasureModel measure) {
-        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), measure.getFormId());
+        FormulaDialog dialog = new FormulaDialog(viewModel.getFormStore(), measure.getFormId());
         dialog.show(measure.getFormula(), formula -> {
-            model.updateMeasureFormula(measure.getId(), formula.getFormula());
+            updateMeasureFormula(measure, formula.getFormula());
 
         });
+    }
+
+    private void updateMeasureLabel(MeasureModel measureModel, String newLabel) {
+        ImmutableMeasureModel updatedMeasure = ImmutableMeasureModel.builder()
+                .from(measureModel)
+                .label(newLabel)
+                .build();
+
+        viewModel.updateModel(
+                viewModel.getModel().withMeasure(updatedMeasure));
+    }
+
+
+    private void updateMeasureFormula(MeasureModel measure, String formula) {
+        ImmutableMeasureModel updatedMeasure = ImmutableMeasureModel.builder()
+                .from(measure)
+                .formula(formula)
+                .build();
+
+        viewModel.updateModel(
+                viewModel.getModel().withMeasure(updatedMeasure));
     }
 }

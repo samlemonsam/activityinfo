@@ -8,6 +8,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.analysis.model.DimensionMapping;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
+import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 
@@ -33,11 +34,12 @@ public class ReferencedNode extends DimensionNode {
 
     @Override
     public DimensionModel dimensionModel() {
-        return new DimensionModel(
-                ResourceId.generateCuid(),
-                form.getLabel() + " " + field.getLabel(),
-                new DimensionMapping(
-                    new CompoundExpr(new SymbolExpr(form.getId()), new SymbolExpr(field.getId()))));
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label(form.getLabel() + " " + field.getLabel())
+                .addMappings(new DimensionMapping(
+                    new CompoundExpr(new SymbolExpr(form.getId()), new SymbolExpr(field.getId()))))
+                .build();
     }
 
     @Override

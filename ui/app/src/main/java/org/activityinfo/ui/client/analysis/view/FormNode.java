@@ -5,6 +5,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.analysis.model.DimensionMapping;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
+import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 
@@ -21,7 +22,11 @@ public class FormNode extends DimensionNode {
 
     @Override
     public DimensionModel dimensionModel() {
-        return new DimensionModel(ResourceId.generateCuid(), I18N.CONSTANTS.form(), DimensionMapping.formMapping());
+        return ImmutableDimensionModel.builder()
+            .id(ResourceId.generateCuid())
+            .label(I18N.CONSTANTS.form())
+            .addMappings(DimensionMapping.formMapping())
+            .build();
     }
 
     @Override

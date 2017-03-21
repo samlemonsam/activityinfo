@@ -167,7 +167,7 @@ public class MeasureResultBuilder {
         // Find the right-most dimension we can "increment"
         int i = excludedDimensions.length - 1;
         while(i >= 0) {
-            if(!excludedDimensions[i] && dimensionSet.getDimension(i).isTotalIncluded()) {
+            if(!excludedDimensions[i] && dimensionSet.getDimension(i).totalIncluded()) {
                 excludedDimensions[i] = true;
                 Arrays.fill(excludedDimensions, i+1, excludedDimensions.length, false);
                 return true;

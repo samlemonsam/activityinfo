@@ -43,7 +43,7 @@ public class EffectiveMeasure {
     private static DimensionMapping findMapping(MeasureModel measure, DimensionModel dimension) {
 
         // First try to find a mapping specifically for this form
-        for (DimensionMapping mapping : dimension.getMappings()) {
+        for (DimensionMapping mapping : dimension.mappings()) {
             if(mapping.getFormId() != null &&
                mapping.getFormId().equals(measure.getFormId())) {
                 return mapping;
@@ -51,7 +51,7 @@ public class EffectiveMeasure {
         }
 
         // If nothing matches, try a free floating formula...
-        for (DimensionMapping mapping : dimension.getMappings()) {
+        for (DimensionMapping mapping : dimension.mappings()) {
             if(mapping.getFormId() == null) {
                 return mapping;
             }

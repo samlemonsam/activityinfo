@@ -1,8 +1,7 @@
 package org.activityinfo.ui.client.analysis.model;
 
-import com.google.common.collect.ImmutableList;
-
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A Dimension has a number of discrete categories into which measures are disaggregated.
@@ -10,57 +9,17 @@ import java.util.List;
  * <p>Importantly, a dimension must break up quantitative data from multiple data sources into common
  * categories. </p>
  */
-public class DimensionModel {
+@org.immutables.value.Value.Immutable
+public abstract class DimensionModel {
 
-    private String id;
-    private String label;
-    private List<DimensionMapping> mappings;
-    private boolean totalIncluded;
-    private DateLevel dateLevel;
+    public abstract String id();
+    public abstract String label();
+    public abstract List<DimensionMapping> mappings();
 
-    public DimensionModel(String id, String label, List<DimensionMapping> mappings) {
-        this.id = id;
-        this.label = label;
-        this.mappings = ImmutableList.copyOf(mappings);
+    @org.immutables.value.Value.Default
+    public boolean totalIncluded() {
+        return false;
     }
+    public abstract Optional<DateLevel> dateLevel();
 
-    public DimensionModel(String id, String label, DimensionMapping... mappings) {
-        this.id = id;
-        this.label = label;
-        this.mappings = ImmutableList.copyOf(mappings);
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public List<DimensionMapping> getMappings() {
-        return mappings;
-    }
-
-
-    /**
-     * @return true if a total column is included.
-     */
-    public boolean isTotalIncluded() {
-        return totalIncluded;
-    }
-
-    public DimensionModel setTotalIncluded(boolean totalIncluded) {
-        this.totalIncluded = totalIncluded;
-        return this;
-    }
-
-    public DateLevel getDateLevel() {
-        return dateLevel;
-    }
-
-    public DimensionModel setDateLevel(DateLevel dateLevel) {
-        this.dateLevel = dateLevel;
-        return this;
-    }
 }
