@@ -119,19 +119,19 @@ public class AnalysisViewModelTest {
                 point(199+212, "Total")));
     }
 
-    @Test
-    public void dimensionsWithTotalPercentages() {
-
-        AnalysisModel model = ImmutableAnalysisModel.builder()
-                .addMeasures(surveyCount().withStatistics(Statistic.PERCENTAGE))
-                .addDimensions(genderDimension().withTotals(true))
-                .build();
-
-        assertThat(points(model), containsInAnyOrder(
-                point(199, "Male"),
-                point(212, "Female"),
-                point(199+212, "Total")));
-    }
+//    @Test
+//    public void dimensionsWithTotalPercentages() {
+//
+//        AnalysisModel model = ImmutableAnalysisModel.builder()
+//                .addMeasures(surveyCount().withStatistics(Statistic.PERCENTAGE))
+//                .addDimensions(genderDimension().withTotals(true))
+//                .build();
+//
+//        assertThat(points(model), containsInAnyOrder(
+//                point(199, "Male"),
+//                point(212, "Female"),
+//                point(199+212, "Total")));
+//    }
 
     @Test
     public void dimensionListItems() {
@@ -189,10 +189,10 @@ public class AnalysisViewModelTest {
 
         assertThat(points(model), containsInAnyOrder(
                 point(88,    "Male",   "Married"),
-                point(56,    "Male",   "Single"),
                 point(92,    "Female", "Married"),
-                point(64,    "Female", "Single"),
                 point(88+92, "Total",  "Married"),
+                point(56,    "Male",   "Single"),
+                point(64,    "Female", "Single"),
                 point(56+64, "Total",  "Single")));
     }
 

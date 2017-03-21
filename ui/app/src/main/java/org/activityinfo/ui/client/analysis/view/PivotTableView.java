@@ -62,7 +62,6 @@ public class PivotTableView implements IsWidget {
 
         ColumnConfig<Point, String> statColumn = new ColumnConfig<>(new PointStatProvider());
         statColumn.setHeader(I18N.CONSTANTS.statistic());
-        statColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
         statColumn.setSortable(false);
         statColumn.setHideable(false);
         columns.add(statColumn);

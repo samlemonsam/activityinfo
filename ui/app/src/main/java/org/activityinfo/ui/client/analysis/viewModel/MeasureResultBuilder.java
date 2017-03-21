@@ -226,7 +226,6 @@ public class MeasureResultBuilder {
         switch (statistic) {
             case COUNT:
                 return CountFunction.INSTANCE;
-            case PERCENTAGE:
             case SUM:
                 return SumFunction.INSTANCE;
             case AVERAGE:
