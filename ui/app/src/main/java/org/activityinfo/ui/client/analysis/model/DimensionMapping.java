@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.analysis.model;
 
 import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -22,6 +23,7 @@ import org.activityinfo.model.resource.ResourceId;
  *
  */
 public class DimensionMapping {
+
 
     public enum Type {
         /**
@@ -53,6 +55,12 @@ public class DimensionMapping {
     public DimensionMapping(ResourceId formId, String formula) {
         this.formId = formId;
         this.formula = formula;
+        this.type = Type.VALUE;
+    }
+
+    public DimensionMapping(ResourceId formId, ResourceId fieldId) {
+        this.formId = formId;
+        this.formula = new SymbolExpr(fieldId).asExpression();
         this.type = Type.VALUE;
     }
 

@@ -4,6 +4,7 @@ import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
@@ -19,7 +20,6 @@ public class QuantityNode extends MeasureTreeNode {
         this.formId = formId;
         this.field = field;
     }
-
 
     @Override
     public String getId() {
@@ -38,7 +38,10 @@ public class QuantityNode extends MeasureTreeNode {
 
     @Override
     public MeasureModel newMeasure() {
-        return new MeasureModel(ResourceId.generateCuid(), getLabel(),
-                formId, new SymbolExpr(field.getId()).asExpression());
+        return ImmutableMeasureModel.builder()
+                .label(getLabel())
+                .formId(formId)
+                .formula(new SymbolExpr(field.getId()).asExpression())
+                .build();
     }
 }

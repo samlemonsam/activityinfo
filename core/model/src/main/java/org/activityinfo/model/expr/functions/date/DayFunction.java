@@ -4,6 +4,11 @@ import org.activityinfo.model.type.time.LocalDate;
 
 
 public class DayFunction extends DateComponentFunction {
+
+    public static final DayFunction INSTANCE = new DayFunction();
+
+    private DayFunction() {}
+
     @Override
     public String getId() {
         return "day";

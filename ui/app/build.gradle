@@ -1,3 +1,10 @@
+
+
+plugins {
+    id "net.ltgt.apt" version "0.9"
+}
+
+
 apply plugin: 'gwt-base'
 
 sourceCompatibility = 1.8
@@ -25,6 +32,14 @@ task explodedWar(type: Copy) {
 
 dependencies {
     compile "com.google.guava:guava:21.0"
+
+    apt "org.immutables:value:2.4.4"
+
+    compileOnly "org.immutables:value:2.4.4:annotations"
+
+    gwt  "org.immutables:value:2.4.4:annotations"
+
+
     gwt "com.google.gwt:gwt-user:2.8.0"
     gwt 'com.google.guava:guava-gwt:21.0'
     gwt libraries.gwt.gson
@@ -68,6 +83,10 @@ task codeserver(type: JavaExec) {
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs
 
+    // Generated sources from Annotation processors
+    classpath sourceSets.main.output.generatedSourcesDir
+
+
     // Compiled java classes and libraries second
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.gwt
@@ -79,28 +98,6 @@ task codeserver(type: JavaExec) {
 }
 
 
-task simpleDevMode(type: JavaExec) {
-    dependsOn explodedWar
-
-    main = 'com.google.gwt.dev.DevMode'
-
-    // Java sources first, so that changes get picked up on refresh
-    classpath project(":i18n").sourceSets.main.java.srcDirs
-    classpath project(":i18n").sourceSets.main.resources.srcDirs
-    classpath project(":core:promises").sourceSets.main.java.srcDirs
-    classpath sourceSets.main.java.srcDirs
-    classpath sourceSets.main.resources.srcDirs
-
-    // Compiled java classes and libraries second
-    classpath sourceSets.main.runtimeClasspath
-    classpath configurations.gwt
-    classpath configurations.gwtSdk
-
-    args '-war', "${buildDir}/exploded"
-    args '-startupUrl', 'login'
-    args 'org.activityinfo.ui.AppDev'
-
-}
 
 task compileApp(type: JavaExec) {
 
@@ -111,6 +108,7 @@ task compileApp(type: JavaExec) {
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs
     classpath sourceSets.main.runtimeClasspath
+    classpath sourceSets.main.output.generatedSourcesDir
     classpath configurations.gwt
     classpath configurations.gwtSdk
 

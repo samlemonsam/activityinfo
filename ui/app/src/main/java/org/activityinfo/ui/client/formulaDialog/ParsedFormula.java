@@ -22,7 +22,6 @@ public class ParsedFormula {
     private ExprNode rootNode;
     private FieldType resultType;
 
-
     private List<FormulaError> errors = new ArrayList<>();
     private List<FieldReference> references = new ArrayList<>();
 

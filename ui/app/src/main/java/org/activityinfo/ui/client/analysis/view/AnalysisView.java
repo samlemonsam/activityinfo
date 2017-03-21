@@ -30,7 +30,7 @@ public class AnalysisView implements IsWidget {
         VerticalLayoutContainer pane = new VerticalLayoutContainer();
         pane.add(measurePane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.5));
         pane.add(rowPane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.5));
-     //   pane.add(columnPane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.3));
+//        pane.add(columnPane, new VerticalLayoutContainer.VerticalLayoutData(1, 0.3));
 
         BorderLayoutContainer.BorderLayoutData paneLayout = new BorderLayoutContainer.BorderLayoutData();
         paneLayout.setSize(0.3); // 30% of view

@@ -11,10 +11,18 @@ public class DateGenerator implements Supplier<FieldValue> {
 
     private double missingProbability;
     private final Random random;
+    private int minYear;
+    private int maxYear;
+
+    public DateGenerator(FormField field, int minYear, int maxYear) {
+        this.missingProbability = field.isRequired() ? 0.0 : 0.25;
+        this.minYear = minYear;
+        this.maxYear = maxYear;
+        this.random = new Random(67680L);
+    }
 
     public DateGenerator(FormField field) {
-        this.missingProbability = field.isRequired() ? 0.0 : 0.25;
-        this.random = new Random(67680L);
+        this(field, 1995, 1995+50);
     }
 
     @Override
@@ -23,7 +31,7 @@ public class DateGenerator implements Supplier<FieldValue> {
         if(missing < missingProbability) {
             return null;
         }
-        int year = 1995 + random.nextInt(50);
+        int year = minYear + random.nextInt(maxYear - minYear + 1);
         int month = 1 + random.nextInt(12);
         int day = 1 + random.nextInt(28);
 

@@ -1,15 +1,8 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
-import org.activityinfo.model.expr.functions.SumFunction;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.store.query.shared.Aggregation;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
-import org.activityinfo.ui.client.analysis.model.DimensionMapping;
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.ArrayList;
@@ -43,77 +36,35 @@ public class AnalysisResult {
         return points;
     }
 
-    public static Observable<AnalysisResult> compute(FormStore formStore, AnalysisModel model, FormForest formForest) {
+    public static Observable<AnalysisResult> compute(FormStore formStore, EffectiveModel effectiveModel) {
 
-        DimensionSet dimensionSet = new DimensionSet(model.getDimensions());
         List<Observable<MeasureResultSet>> points = new ArrayList<>();
 
-        for (MeasureModel measureModel : model.getMeasures()) {
-            points.add(computePoints(formStore, formForest, measureModel, dimensionSet));
+        for (EffectiveMeasure measure : effectiveModel.getMeasures()) {
+            points.add(computePoints(formStore, measure));
         }
 
         return Observable.flatten(points).transform(resultSets -> new AnalysisResult(resultSets));
     }
 
-    private static Observable<MeasureResultSet> computePoints(FormStore formStore, FormForest formForest, MeasureModel measureModel, DimensionSet dimensionSet) {
+    private static Observable<MeasureResultSet> computePoints(FormStore formStore, EffectiveMeasure measure) {
 
-        QueryModel queryModel = new QueryModel(measureModel.getFormId());
-        queryModel.selectExpr(measureModel.getFormula()).as("value");
+        QueryModel queryModel = new QueryModel(measure.getFormId());
+        queryModel.selectExpr(measure.getModel().getFormula()).as("value");
 
-
-        List<DimensionReaderFactory> readers = new ArrayList<>();
-
-        for (int i = 0; i < dimensionSet.getCount(); i++) {
-            DimensionModel dimension = dimensionSet.getDimension(i);
-            DimensionMapping mapping = findMapping(dimension, measureModel);
-            if(mapping != null) {
-                String columnId = "d" + i;
-                queryModel.selectExpr(mapping.getFormula()).as(columnId);
-                readers.add( columnSet -> new ColumnReader(columnSet.getColumnView(columnId)) );
-            }
+        for (EffectiveDimension dim : measure.getDimensions()) {
+            queryModel.addColumns(dim.getRequiredColumns());
         }
 
         Observable<ColumnSet> columnSet = formStore.query(queryModel);
         Observable<MeasureResultSet> resultSet = columnSet.transform(columns -> {
-
-            ColumnView value = columns.getColumnView("value");
-            GroupMap groupMap = new GroupMap(dimensionSet, columns, readers);
-
-            // Build group/value pairs
-            int numRows = columns.getNumRows();
-            double valueArray[] = new double[numRows];
-            int groupArray[] = new int[numRows];
-            for (int i = 0; i < numRows; i++) {
-                valueArray[i] = value.getDouble(i);
-                groupArray[i] = groupMap.groupAt(i);
-            }
-
-            // Aggregate into groups
-            int numGroups = groupMap.getGroupCount();
-            double aggregatedValues[] = Aggregation.aggregate(SumFunction.INSTANCE,
-                    groupArray,
-                    valueArray,
-                    numRows,
-                    numGroups);
-
-            // Add the points
-            List<Point> points = new ArrayList<>();
-            for (int i = 0; i < numGroups; i++) {
-                points.add(new Point(groupMap.getGroup(i), aggregatedValues[i]));
-            }
-
-            return new MeasureResultSet(dimensionSet, points);
+            MeasureResultBuilder builder = new MeasureResultBuilder(measure, columns);
+            builder.execute();
+            return builder.getResult();
         });
 
         return resultSet;
     }
 
-    private static DimensionMapping findMapping(DimensionModel dimension, MeasureModel measureModel) {
-        for (DimensionMapping mapping : dimension.getMappings()) {
-            if(mapping.getFormId() == null) {
-                return mapping;
-            }
-        }
-        return null;
-    }
+
 }

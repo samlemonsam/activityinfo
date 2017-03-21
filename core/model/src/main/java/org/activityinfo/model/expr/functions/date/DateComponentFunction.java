@@ -1,7 +1,10 @@
 package org.activityinfo.model.expr.functions.date;
 
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
+import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.expr.functions.ExprFunction;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -10,7 +13,7 @@ import org.activityinfo.model.type.time.LocalDate;
 
 import java.util.List;
 
-public abstract class DateComponentFunction extends ExprFunction {
+public abstract class DateComponentFunction extends ExprFunction implements ColumnFunction {
 
 
     @Override
@@ -34,4 +37,27 @@ public abstract class DateComponentFunction extends ExprFunction {
     protected abstract String getUnits();
 
     protected abstract int apply(LocalDate date);
+
+    protected int apply(String string) {
+        return apply(LocalDate.parse(string));
+    }
+
+    @Override
+    public ColumnView columnApply(List<ColumnView> arguments) {
+        checkArity(arguments, 1);
+
+        ColumnView view = arguments.get(0);
+        double result[] = new double[view.numRows()];
+
+        for (int i = 0; i < view.numRows(); i++) {
+            String date = view.getString(i);
+            if(date == null) {
+                result[i] = Double.NaN;
+            } else {
+                result[i] = apply(date);
+            }
+        }
+        return new DoubleArrayColumnView(result);
+    }
 }
+

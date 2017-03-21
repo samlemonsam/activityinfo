@@ -8,12 +8,12 @@ import org.activityinfo.observable.ObservableList;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.ui.client.analysis.model.AnalysisModel;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
+import org.activityinfo.ui.client.analysis.model.ImmutableAnalysisModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -25,17 +25,22 @@ public class AnalysisViewModel {
     private static final Logger LOGGER = Logger.getLogger(AnalysisViewModel.class.getName());
 
     private final FormStore formStore;
-    private final StatefulValue<AnalysisModel> model;
+    private final StatefulValue<ImmutableAnalysisModel> model;
     private final Observable<FormForest> formForest;
+    private final Observable<EffectiveModel> effectiveModel;
     private final Observable<AnalysisResult> resultTable;
+    private final Observable<List<DimensionListItem>> dimensionListItems;
+            ;
 
     public AnalysisViewModel(FormStore formStore) {
         this.formStore = formStore;
-        this.model = new StatefulValue<>(new AnalysisModel());
+        this.model = new StatefulValue<>(ImmutableAnalysisModel.builder().build());
+
+
 
         // Before anything else, we need to fetch/compute the metadata required to even
         // plan the computation
-        this.formForest = model.join(m -> {
+        formForest = model.join(m -> {
             // Find unique list of forms involved in the analysis
             Set<ResourceId> forms = m.formIds();
 
@@ -46,13 +51,22 @@ public class AnalysisViewModel {
             return Observable.flatten(trees).transform(t -> new FormForest(t));
         });
 
-        // Combine the model + metadata into the result table
-        resultTable = Observable.join(model, formForest, (m, ff) -> AnalysisResult.compute(formStore, m, ff));
+        effectiveModel = Observable.transform(formForest, model, (ff, m) -> new EffectiveModel(m, ff));
+        dimensionListItems = effectiveModel.transform(DimensionListItem::compute);
 
+        resultTable = effectiveModel.join( m -> AnalysisResult.compute(formStore, m) );
+    }
+
+    public AnalysisModel getModel() {
+        return model.get();
+    }
+
+    public Observable<EffectiveModel> getEffectiveModel() {
+        return effectiveModel;
     }
 
     public void updateModel(AnalysisModel model) {
-        this.model.updateValue(model);
+        this.model.updateValue(ImmutableAnalysisModel.copyOf(model));
     }
 
     public ObservableList<DimensionModel> getDimensions() {
@@ -63,48 +77,27 @@ public class AnalysisViewModel {
         return formStore;
     }
 
-    /**
-     * @return the list of measures present in this analysis.
-     */
-    public ObservableList<MeasureModel> getMeasures() {
-        throw new UnsupportedOperationException();
+    public Observable<List<DimensionListItem>> getDimensionListItems() {
+        return dimensionListItems;
     }
 
     public Observable<FormForest> getFormForest() {
-        throw new UnsupportedOperationException();
+        return formForest;
     }
 
 
     public void addMeasure(MeasureModel measure) {
-        beforeChange();
-        throw new UnsupportedOperationException();
+        ImmutableAnalysisModel newModel = ImmutableAnalysisModel.builder()
+                .from(this.model.get())
+                .addMeasures(measure)
+                .build();
+
+        this.model.updateValue(newModel);
     }
 
-
-    public void updateMeasureFormula(String measureId, String formula) {
-        beforeChange();
-        throw new UnsupportedOperationException();
-    }
-
-    public void updateMeasureLabel(String key, String value) {
-        beforeChange();
-        throw new UnsupportedOperationException();
-    }
 
     public Observable<AnalysisResult> getResultTable() {
         return resultTable;
-    }
-
-    public void removeDimension(String id) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void removeMeasure(String id) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void beforeChange() {
-        LOGGER.log(Level.INFO, "State: " + toJsonObject().toString());
     }
 
     public JsonObject toJsonObject() {
@@ -113,11 +106,6 @@ public class AnalysisViewModel {
 
     public void loadFromJson(JsonObject object) {
 
-
-
     }
 
-    public void addDimension(DimensionModel selectedItem) {
-        throw new UnsupportedOperationException();
-    }
 }

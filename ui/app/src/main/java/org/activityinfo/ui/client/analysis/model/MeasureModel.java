@@ -5,38 +5,29 @@ import org.activityinfo.model.resource.ResourceId;
 /**
  * A measure contributes quantities to an analysis.
  */
-public final class MeasureModel {
+@org.immutables.value.Value.Immutable
+public abstract class MeasureModel {
 
-    private final String id;
-    private final String label;
-
-    private final ResourceId formId;
-    private final String formula;
-
-    public MeasureModel(String id, String label, ResourceId formId, String formula) {
-        this.id = id;
-        this.label = label;
-        this.formId = formId;
-        this.formula = formula;
-    }
-
+    @org.immutables.value.Value.Default
     public String getId() {
-        return id;
+        return ResourceId.generateCuid();
     }
 
-    public String getLabel() {
-        return label;
-    }
+    public abstract String getLabel();
 
     /**
      *
      * @return the id of the form that is the source of this measure.
      */
-    public ResourceId getFormId() {
-        return formId;
-    }
+    public abstract ResourceId getFormId();
+    public abstract String getFormula();
 
-    public String getFormula() {
-        return formula;
+    /**
+     *
+     * @return the aggregation function used to combine values.
+     */
+    @org.immutables.value.Value.Default
+    public Aggregation getAggregation() {
+        return Aggregation.SUM;
     }
 }

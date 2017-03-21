@@ -1648,4 +1648,16 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("The formula is valid.")
     String formulaValid();
 
+    @DefaultStringValue("Percentage")
+    String percentage();
+
+
+    @DefaultStringValue("Median")
+    String median();
+
+    @DefaultStringValue("Min")
+    String minimum();
+
+    @DefaultStringValue("Maximum")
+    String maximum();
 }

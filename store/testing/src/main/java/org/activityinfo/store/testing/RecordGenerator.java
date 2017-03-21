@@ -58,6 +58,11 @@ public class RecordGenerator {
         }
     }
 
+    public RecordGenerator distribution(ResourceId fieldId, Supplier<FieldValue> distribution) {
+        generators.put(fieldId, distribution);
+        return this;
+    }
+
     public List<FormInstance> generate(int rowCount) {
         List<FormInstance> records = new ArrayList<>();
         for (int i = 0; i < rowCount; i++) {

@@ -1,9 +1,5 @@
 package org.activityinfo.model.expr.functions;
 
-import org.activityinfo.model.type.FieldValue;
-
-import java.util.List;
-
 /**
  * Computes the sum of its arguments.
  */
@@ -21,10 +17,6 @@ public class SumFunction extends StatFunction {
         return "sum";
     }
 
-    @Override
-    public FieldValue apply(List<FieldValue> arguments) {
-        throw new UnsupportedOperationException("TODO");
-    }
 
     @Override
     public double compute(double[] values, int start, int end) {

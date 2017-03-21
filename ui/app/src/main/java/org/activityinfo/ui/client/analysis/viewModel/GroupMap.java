@@ -12,8 +12,16 @@ import java.util.function.Function;
 
 public class GroupMap {
 
-    private final int dimCount;
+    /**
+     * Number of actually used dimensions. May be fewer than the total number of dimensions
+     * in the analysis
+     */
+    private int keyDim;
+
+    private final List<EffectiveDimension> dimensions;
+
     private final DimensionReader readers[];
+    private final int keyDimIndexes[];
 
 
     /**
@@ -26,23 +34,30 @@ public class GroupMap {
 
     private Function<Integer, String> keyBuilder;
 
-    public GroupMap(DimensionSet dimensions, ColumnSet columnSet, List<DimensionReaderFactory> readerFactories) {
-        this.dimCount = dimensions.getCount();
-        this.readers = new DimensionReader[dimCount];
-        for (int i = 0; i < dimCount; i++) {
-            readers[i] = readerFactories.get(i).createReader(columnSet);
+    public GroupMap(ColumnSet columnSet, List<EffectiveDimension> dims) {
+        this.dimensions = dims;
+        this.readers = new DimensionReader[dims.size()];
+        this.keyDimIndexes = new int[dims.size()];
+
+        for (EffectiveDimension dim : dims) {
+            if(dim.isSingleValued()) {
+                DimensionReader reader = dim.createReader(columnSet);
+                if (reader != null) {
+                    keyDimIndexes[keyDim] = dim.getIndex();
+                    readers[keyDim] = reader;
+                    keyDim++;
+                }
+            }
         }
 
         // Try unrolling for small number of dimensions...
         // TODO: actually measure this performance
-        if(dimCount == 0) {
+        if(keyDim == 0) {
             this.keyBuilder = (row -> "");
-        } else if(dimCount == 1) {
+        } else if(keyDim == 1) {
             this.keyBuilder = this::key1;
-        } else if(dimCount == 2) {
+        } else if(keyDim == 2) {
             this.keyBuilder = this::key2;
-        } else if(dimCount == 3) {
-            this.keyBuilder = this::key3;
         } else {
             this.keyBuilder = this::key;
         }
@@ -53,13 +68,15 @@ public class GroupMap {
     }
 
     private String key2(int rowIndex) {
-        return readers[0].read(rowIndex) + "\0" + readers[1].read(rowIndex);
-    }
-
-    private String key3(int rowIndex) {
-        return readers[0].read(rowIndex) + "\0" +
-               readers[1].read(rowIndex) + "\0" +
-               readers[2];
+        String category1 = readers[0].read(rowIndex);
+        if(category1 == null) {
+            return null;
+        }
+        String category2 = readers[1].read(rowIndex);
+        if(category2 == null) {
+            return null;
+        }
+        return category1 + "\0" + category2;
     }
 
     private String key(int row) {
@@ -77,6 +94,9 @@ public class GroupMap {
      */
     public int groupAt(int rowIndex) {
         String key = keyBuilder.apply(rowIndex);
+        if(key == null) {
+            return -1;
+        }
         Integer id = map.get(key);
         if(id == null) {
             String[] group = buildGroup(rowIndex);
@@ -88,21 +108,114 @@ public class GroupMap {
     }
 
     private String[] buildGroup(int rowIndex) {
-        String[] dims = new String[dimCount];
-        for (int i = 0; i < dimCount; i++) {
-            dims[i]  = readers[i].read(rowIndex);
+        String[] dims = new String[dimensions.size()];
+        for (int i = 0; i < keyDim; i++) {
+            int dimIndex = keyDimIndexes[i];
+            String dimCategory = readers[i].read(rowIndex);
+            dims[dimIndex] = dimCategory;
         }
         return dims;
     }
 
     public int getGroupCount() {
-        return Math.max(1, groups.size());
+        return groups.size();
     }
 
     public String[] getGroup(int groupId) {
-        if(groups.isEmpty() && groupId == 0) {
-            return new String[dimCount];
-        }
         return groups.get(groupId);
+    }
+
+    public List<String[]> getGroups() {
+        return groups;
+    }
+
+
+    /**
+     * Merges an existing group array to produce a group array for totals of a single dimension
+     */
+    public Regrouping total(int[] groupArray, boolean[] totalDimensions) {
+
+        if(!any(totalDimensions)) {
+            return new Regrouping(groupArray, groups);
+        }
+
+        int map[] = new int[getGroupCount()];
+
+        List<String[]> newGroups = new ArrayList<>();
+        Map<String, Integer> newGroupMap = new HashMap<>();
+
+        // Merge the existing groups into superset by omitting the
+        // total dimension
+        for (int i = 0; i < groups.size(); i++) {
+            String[] group = groups.get(i);
+            String regroupedKey = rekey(group, totalDimensions);
+
+            Integer regroupedIndex = newGroupMap.get(regroupedKey);
+            if(regroupedIndex == null) {
+                String regroup[] = regroup(group, totalDimensions);
+
+                regroupedIndex = newGroups.size();
+                newGroups.add(regroup);
+                newGroupMap.put(regroupedKey, regroupedIndex);
+            }
+            map[i] = regroupedIndex;
+        }
+
+        // Now map the group array to the new indexes
+        int[] regroupedArray = new int[groupArray.length];
+        for (int i = 0; i < groupArray.length; i++) {
+            int oldGroup = groupArray[i];
+            if(oldGroup == -1) {
+                regroupedArray[i] = -1;
+            } else {
+                regroupedArray[i] = map[oldGroup];
+            }
+        }
+
+        return new Regrouping(regroupedArray, newGroups);
+    }
+
+    private boolean any(boolean[] x) {
+        for (int i = 0; i < x.length; i++) {
+            if(x[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Creates a new 'totals' key by omitting totalled dimensions
+     *
+     * @param group an array of dimension categories
+     * @param totalDimensions an array indicating which dimensions should be totaled and so omitted from the key.
+     */
+
+    private String rekey(String[] group, boolean[] totalDimensions) {
+        assert group.length == dimensions.size();
+        assert group.length == totalDimensions.length;
+
+        StringBuilder key = new StringBuilder();
+        for (int i = 0; i < group.length; i++) {
+            if(!totalDimensions[i]) {
+                key.append('\0');
+                key.append(group[i]);
+            }
+        }
+        return key.toString();
+    }
+
+    private String[] regroup(String[] group, boolean[] totalDimensions) {
+        assert group.length == dimensions.size();
+
+        String[] regrouped = new String[group.length];
+        for (int i = 0; i < group.length; i++) {
+            if(totalDimensions[i]) {
+                regrouped[i] = "Total";
+            } else {
+                regrouped[i] = group[i];
+            }
+        }
+        return regrouped;
     }
 }
