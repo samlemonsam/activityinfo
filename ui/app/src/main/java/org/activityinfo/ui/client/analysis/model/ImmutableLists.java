@@ -32,9 +32,9 @@ public final class ImmutableLists {
     public static <T> List<T> remove(List<T> list, String id, Function<T, String> keyProvider) {
 
         List<T> newList = new ArrayList<>(list.size());
-        for (T item : newList) {
+        for (T item : list) {
             String itemId = keyProvider.apply(item);
-            if(!itemId.equals(itemId)) {
+            if(!itemId.equals(id)) {
                 newList.add(item);
             }
         }

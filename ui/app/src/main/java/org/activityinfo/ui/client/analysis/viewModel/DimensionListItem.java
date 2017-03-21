@@ -16,11 +16,11 @@ public class DimensionListItem {
     }
 
     public String getId() {
-        return model.id();
+        return model.getId();
     }
 
     public String getLabel() {
-        return model.label();
+        return model.getLabel();
     }
 
     public DimensionModel getModel() {

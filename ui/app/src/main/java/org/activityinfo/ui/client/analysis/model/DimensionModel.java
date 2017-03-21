@@ -12,14 +12,14 @@ import java.util.Optional;
 @org.immutables.value.Value.Immutable
 public abstract class DimensionModel {
 
-    public abstract String id();
-    public abstract String label();
-    public abstract List<DimensionMapping> mappings();
+    public abstract String getId();
+    public abstract String getLabel();
+    public abstract List<DimensionMapping> getMappings();
 
     @org.immutables.value.Value.Default
-    public boolean totalIncluded() {
+    public boolean getTotals() {
         return false;
     }
-    public abstract Optional<DateLevel> dateLevel();
+    public abstract Optional<DateLevel> getDateLevel();
 
 }

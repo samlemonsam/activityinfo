@@ -13,10 +13,12 @@ import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.analysis.model.Aggregation;
 import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
@@ -81,10 +83,10 @@ public class MeasurePane implements IsWidget {
         Menu contextMenu = new Menu();
 
         // Edit the alias
-        MenuItem editAlias = new MenuItem();
-        editAlias.setText("Edit Alias...");
-        editAlias.addSelectionHandler(event -> editAlias(measure));
-        contextMenu.add(editAlias);
+        MenuItem editLabel = new MenuItem();
+        editLabel.setText("Edit Label...");
+        editLabel.addSelectionHandler(event -> editLabel(measure));
+        contextMenu.add(editLabel);
 
         // Edit the formula...
         MenuItem editFormula = new MenuItem();
@@ -93,6 +95,16 @@ public class MeasurePane implements IsWidget {
         contextMenu.add(editFormula);
 
         contextMenu.add(new SeparatorMenuItem());
+
+        // Choose the aggregation
+        for (Aggregation aggregation : Aggregation.values()) {
+            CheckMenuItem aggregationItem = new CheckMenuItem(aggregation.getLabel());
+            aggregationItem.setChecked(measure.getAggregation() == aggregation);
+            aggregationItem.addCheckChangeHandler(event -> updateAggregation(measure, aggregation));
+            contextMenu.add(aggregationItem);
+        }
+        contextMenu.add(new SeparatorMenuItem());
+
 
         // Remove the dimension
         MenuItem remove = new MenuItem();
@@ -103,12 +115,13 @@ public class MeasurePane implements IsWidget {
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
     }
 
+
     private void removeMeasure(String id) {
         viewModel.updateModel(
             viewModel.getModel().withoutMeasure(id));
     }
 
-    private void editAlias(MeasureModel measure) {
+    private void editLabel(MeasureModel measure) {
         PromptMessageBox messageBox = new PromptMessageBox("Update measure's alias:", "Enter the new alias");
         messageBox.getTextField().setText(measure.getLabel());
 
@@ -144,6 +157,17 @@ public class MeasurePane implements IsWidget {
         ImmutableMeasureModel updatedMeasure = ImmutableMeasureModel.builder()
                 .from(measure)
                 .formula(formula)
+                .build();
+
+        viewModel.updateModel(
+                viewModel.getModel().withMeasure(updatedMeasure));
+    }
+
+
+    private void updateAggregation(MeasureModel measureModel, Aggregation aggregation) {
+        ImmutableMeasureModel updatedMeasure = ImmutableMeasureModel.builder()
+                .from(measureModel)
+                .aggregation(aggregation)
                 .build();
 
         viewModel.updateModel(

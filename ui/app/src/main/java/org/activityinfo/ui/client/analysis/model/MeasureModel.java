@@ -27,7 +27,7 @@ public abstract class MeasureModel {
      * @return the aggregation function used to combine values.
      */
     @org.immutables.value.Value.Default
-    public String getAggregation() {
-        return "sum";
+    public Aggregation getAggregation() {
+        return Aggregation.SUM;
     }
 }

@@ -2,9 +2,7 @@ package org.activityinfo.ui.client.analysis.viewModel;
 
 
 import com.google.common.annotations.VisibleForTesting;
-import org.activityinfo.model.expr.functions.ExprFunction;
-import org.activityinfo.model.expr.functions.ExprFunctions;
-import org.activityinfo.model.expr.functions.StatFunction;
+import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.shared.Aggregation;
@@ -167,7 +165,7 @@ public class MeasureResultBuilder {
         // Find the right-most dimension we can "increment"
         int i = excludedDimensions.length - 1;
         while(i >= 0) {
-            if(!excludedDimensions[i] && dimensionSet.getDimension(i).totalIncluded()) {
+            if(!excludedDimensions[i] && dimensionSet.getDimension(i).getTotals()) {
                 excludedDimensions[i] = true;
                 Arrays.fill(excludedDimensions, i+1, excludedDimensions.length, false);
                 return true;
@@ -220,11 +218,22 @@ public class MeasureResultBuilder {
     }
 
     private static StatFunction aggregationFunction(MeasureModel measure) {
-        ExprFunction function = ExprFunctions.get(measure.getAggregation());
-        if(!(function instanceof StatFunction)) {
-            throw new UnsupportedOperationException("aggregation: " + measure.getAggregation());
+        switch (measure.getAggregation()) {
+            case SUM:
+                return SumFunction.INSTANCE;
+            case AVERAGE:
+                return AverageFunction.INSTANCE;
+            case MEDIAN:
+                return MedianFunction.INSTANCE;
+            case MIN:
+                return MinFunction.INSTANCE;
+            case MAX:
+                return MaxFunction.INSTANCE;
+            case COUNT:
+                return CountFunction.INSTANCE;
+            default:
+                throw new IllegalArgumentException("aggregation: " + measure.getAggregation());
         }
-        return (StatFunction) function;
     }
 
 

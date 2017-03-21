@@ -89,7 +89,7 @@ public class AnalysisViewModelTest {
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
-                .addDimensions(genderDimension().withTotalIncluded(true))
+                .addDimensions(genderDimension().withTotals(true))
                 .build();
 
         assertThat(points(model), containsInAnyOrder(
@@ -101,23 +101,25 @@ public class AnalysisViewModelTest {
 
     @Test
     public void dimensionListItems() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
-                .addMeasures(surveyCount())
-                .build();
 
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
-        viewModel.updateModel(model);
+        viewModel.updateModel(
+                ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .build());
+
+        ImmutableDimensionModel genderDimension = genderDimension();
 
         // Add a new dimension
-        viewModel.updateModel(model.withDimension(genderDimension()));
+        viewModel.updateModel(viewModel.getModel().withDimension(genderDimension));
         assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(1));
 
         // Delete a non-existant dimension
-        viewModel.updateModel(model.withoutDimension("FOOOO"));
+        viewModel.updateModel(viewModel.getModel().withoutDimension("FOOOO"));
         assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(1));
 
         // Delete the gender dimension
-        viewModel.updateModel(model.withoutDimension(genderDimension().id()));
+        viewModel.updateModel(viewModel.getModel().withoutDimension(genderDimension.getId()));
         assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(0));
     }
 
@@ -147,7 +149,7 @@ public class AnalysisViewModelTest {
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
-                .addDimensions(genderDimension().withTotalIncluded(true))
+                .addDimensions(genderDimension().withTotals(true))
                 .addDimensions(marriedDimension())
                 .build();
 
@@ -169,8 +171,8 @@ public class AnalysisViewModelTest {
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
-                .addDimensions(genderDimension().withTotalIncluded(true))
-                .addDimensions(marriedDimension().withTotalIncluded(true))
+                .addDimensions(genderDimension().withTotals(true))
+                .addDimensions(marriedDimension().withTotals(true))
                 .build();
 
         assertThat(points(model), containsInAnyOrder(
@@ -190,7 +192,7 @@ public class AnalysisViewModelTest {
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(intakeCaseCount())
                 .addDimensions(caseYear())
-                .addDimensions(caseQuarter().withTotalIncluded(true))
+                .addDimensions(caseQuarter().withTotals(true))
                 .build();
 
         assertThat(points(model), containsInAnyOrder(
@@ -256,7 +258,7 @@ public class AnalysisViewModelTest {
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(intakeCaseCount())
-                .addDimensions(caseYear().withTotalIncluded(true))
+                .addDimensions(caseYear().withTotals(true))
                 .addDimensions(nationality())
                 .addDimensions(protectionProblem())
                 .build();
@@ -290,8 +292,8 @@ public class AnalysisViewModelTest {
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(medianAge())
-                .addDimensions(genderDimension().withTotalIncluded(true))
-                .addDimensions(marriedDimension().withTotalIncluded(true))
+                .addDimensions(genderDimension().withTotals(true))
+                .addDimensions(marriedDimension().withTotals(true))
                 .build();
 
         assertThat(points(model), containsInAnyOrder(
@@ -396,7 +398,7 @@ public class AnalysisViewModelTest {
             .label("Age")
             .formId(Survey.FORM_ID)
             .formula(Survey.AGE_FIELD_ID.asString())
-            .aggregation("median")
+            .aggregation(Aggregation.MEDIAN)
             .build();
     }
 
@@ -450,7 +452,7 @@ public class AnalysisViewModelTest {
     private void dump(AnalysisResult result) {
 
         for (DimensionModel dimensionModel : result.getDimensionSet()) {
-            System.out.print(column(dimensionModel.label()));
+            System.out.print(column(dimensionModel.getLabel()));
         }
         System.out.println(column("Value"));
 

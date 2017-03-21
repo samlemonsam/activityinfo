@@ -37,7 +37,7 @@ public abstract class AnalysisModel {
     public AnalysisModel withDimension(DimensionModel dimensionModel) {
         return ImmutableAnalysisModel.builder()
                 .from(this)
-                .dimensions(ImmutableLists.update(getDimensions(), dimensionModel, m -> m.id()))
+                .dimensions(ImmutableLists.update(getDimensions(), dimensionModel, m -> m.getId()))
                 .build();
     }
 
@@ -51,7 +51,7 @@ public abstract class AnalysisModel {
     public AnalysisModel withoutDimension(String dimensionId) {
         return ImmutableAnalysisModel.builder()
                 .from(this)
-                .dimensions(ImmutableLists.remove(getDimensions(), dimensionId, d -> d.id()))
+                .dimensions(ImmutableLists.remove(getDimensions(), dimensionId, d -> d.getId()))
                 .build();
     }
 }

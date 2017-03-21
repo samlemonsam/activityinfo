@@ -8,7 +8,9 @@ import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
@@ -100,9 +102,17 @@ public class DimensionPane implements IsWidget {
 //        editFormula.setEnabled(dim.getSourceModel() instanceof FieldDimensionSource);
 //        contextMenu.add(editFormula);
 
+        MenuItem editLabel = new MenuItem();
+        editLabel.setText("Edit Label...");
+        editLabel.addSelectionHandler(event -> editLabel(dim.getModel()));
+
+        contextMenu.add(editLabel);
+
+        contextMenu.add(new SeparatorMenuItem());
+
         // Allow choosing the date part to show
         if(dim.isDate()) {
-            DateLevel currentLevel = dim.getModel().dateLevel().orElse(null);
+            DateLevel currentLevel = dim.getModel().getDateLevel().orElse(null);
             for (DateLevel dateLevel : DateLevel.values()) {
                 CheckMenuItem item = new CheckMenuItem(dateLevel.getLabel());
                 item.setChecked(currentLevel == dateLevel);
@@ -116,7 +126,7 @@ public class DimensionPane implements IsWidget {
 
         // Choose to include totals or not.
         CheckMenuItem totalsItem = new CheckMenuItem("Include Totals");
-        totalsItem.setChecked(dim.getModel().totalIncluded());
+        totalsItem.setChecked(dim.getModel().getTotals());
         totalsItem.addCheckChangeHandler(event -> updateTotals(dim, event.getChecked()));
         contextMenu.add(totalsItem);
         contextMenu.add(new SeparatorMenuItem());
@@ -130,12 +140,34 @@ public class DimensionPane implements IsWidget {
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
     }
 
+
+    private void editLabel(DimensionModel dim) {
+        PromptMessageBox messageBox = new PromptMessageBox("Update dimension's label:", "Enter the new label");
+        messageBox.getTextField().setText(dim.getLabel());
+
+        messageBox.addDialogHideHandler(event -> {
+            if(event.getHideButton() == Dialog.PredefinedButton.OK) {
+                updateLabel(dim, messageBox.getValue());
+            }
+        });
+
+        messageBox.show();
+    }
+
+    private void updateLabel(DimensionModel dimension, String label) {
+        viewModel.updateModel(viewModel.getModel().withDimension(
+            ImmutableDimensionModel.builder()
+                    .from(dimension)
+                    .label(label)
+                    .build()));
+    }
+
     private void updateTotals(DimensionListItem dim, Tree.CheckState checkState) {
         viewModel.updateModel(
                 viewModel.getModel().withDimension(
                         ImmutableDimensionModel.builder()
                                 .from(dim.getModel())
-                                .totalIncluded(checkState == Tree.CheckState.CHECKED)
+                                .totals(checkState == Tree.CheckState.CHECKED)
                                 .build()));
     }
 

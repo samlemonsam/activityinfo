@@ -10,9 +10,9 @@ public class MeasureResultBuilderTest {
     @Test
     public void totalSets() {
         DimensionSet dimensionSet = new DimensionSet(Arrays.asList(
-                ImmutableDimensionModel.builder().id("G").label("Gender").totalIncluded(true).build(),
-                ImmutableDimensionModel.builder().id("A").label("Age").totalIncluded(true).build(),
-                ImmutableDimensionModel.builder().id("L").label("Location").totalIncluded(true).build()));
+                ImmutableDimensionModel.builder().id("G").label("Gender").totals(true).build(),
+                ImmutableDimensionModel.builder().id("A").label("Age").totals(true).build(),
+                ImmutableDimensionModel.builder().id("L").label("Location").totals(true).build()));
 
         boolean totals[] = new boolean[dimensionSet.getCount()];
         while(MeasureResultBuilder.nextSubset(dimensionSet, totals)) {

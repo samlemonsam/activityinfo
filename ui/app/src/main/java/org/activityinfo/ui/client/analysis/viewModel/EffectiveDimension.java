@@ -52,7 +52,7 @@ public class EffectiveDimension {
     }
 
     public String getId() {
-        return model.id();
+        return model.getId();
     }
 
     public int getIndex() {
@@ -134,7 +134,7 @@ public class EffectiveDimension {
 
     private Function<String, String> createMap() {
         if(formula.getResultType() instanceof LocalDateType) {
-            Optional<DateLevel> dateLevel = model.dateLevel();
+            Optional<DateLevel> dateLevel = model.getDateLevel();
             if(dateLevel.isPresent()) {
                 switch (dateLevel.get()) {
                     case YEAR:
