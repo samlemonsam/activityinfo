@@ -6,7 +6,7 @@ import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.shared.Aggregation;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.model.Statistic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,6 @@ public class MeasureResultBuilder {
      */
     private final int numDims;
 
-    private final StatFunction stat;
 
     /**
      * List of all points in the multi-dimensional space resulting from this measure.
@@ -45,7 +44,6 @@ public class MeasureResultBuilder {
     public MeasureResultBuilder(EffectiveMeasure measure, ColumnSet columns) {
         this.measure = measure;
         this.columns = columns;
-        this.stat = aggregationFunction(measure.getModel());
         this.numRows = columns.getNumRows();
         this.numDims = measure.getDimensionSet().getCount();
 
@@ -138,22 +136,27 @@ public class MeasureResultBuilder {
 
     private void sortAndAggregate(double[] valueArray, int[] groupArray, GroupMap groupMap) {
 
-        /*
-         * We always do an initial aggregation that includes all the dimensions
-         */
-        aggregate(valueArray, groupArray, groupMap.getGroups());
+        for (Statistic statistic : measure.getModel().getStatistics()) {
 
-        /*
-         * In addition to the values for the full dimension set, totals may be requested for one or
-         * more dimensions. This essentially means re-computing totals for different subsets of the dimensions.
-         *
-         * The subset array indicates which dimensions should excluded in this round and thus totaled.
-         */
-        boolean subset[] = new boolean[numDims];
-        while (nextSubset(measure.getDimensionSet(), subset)) {
-            Regrouping regrouping = groupMap.total(groupArray, subset);
-            aggregate(valueArray, regrouping.getGroupArray(), regrouping.getGroups());
+
+            /*
+             * We always do an initial aggregation that includes all the dimensions
+             */
+            aggregate(statistic, valueArray, groupArray, groupMap.getGroups());
+
+            /*
+             * In addition to the values for the full dimension set, totals may be requested for one or
+             * more dimensions. This essentially means re-computing totals for different subsets of the dimensions.
+             *
+             * The subset array indicates which dimensions should excluded in this round and thus totaled.
+             */
+            boolean subset[] = new boolean[numDims];
+            while (nextSubset(measure.getDimensionSet(), subset)) {
+                Regrouping regrouping = groupMap.total(groupArray, subset);
+                aggregate(statistic, valueArray, regrouping.getGroupArray(), regrouping.getGroups());
+            }
         }
+
     }
 
 
@@ -198,12 +201,14 @@ public class MeasureResultBuilder {
             for (int i = 0; i < totals.length; i++) {
                 String[] group =  category.group(groupMap.getGroup(i));
 
-                points.add(new Point(group, totals[i]));
+                points.add(new Point(totals[i], group));
             }
         }
     }
 
-    private void aggregate(double[] valueArray, int[] groupId, List<String[]> groups) {
+    private void aggregate(Statistic statistic, double[] valueArray, int[] groupId, List<String[]> groups) {
+
+        StatFunction stat = aggregationFunction(statistic);
 
         double aggregatedValues[] = Aggregation.aggregate(
                 stat,
@@ -213,12 +218,15 @@ public class MeasureResultBuilder {
                 groups.size());
 
         for (int i = 0; i < groups.size(); i++) {
-            points.add(new Point(groups.get(i), aggregatedValues[i]));
+            points.add(new Point(aggregatedValues[i], statistic, groups.get(i)));
         }
     }
 
-    private static StatFunction aggregationFunction(MeasureModel measure) {
-        switch (measure.getAggregation()) {
+    private static StatFunction aggregationFunction(Statistic statistic) {
+        switch (statistic) {
+            case COUNT:
+                return CountFunction.INSTANCE;
+            case PERCENTAGE:
             case SUM:
                 return SumFunction.INSTANCE;
             case AVERAGE:
@@ -229,10 +237,9 @@ public class MeasureResultBuilder {
                 return MinFunction.INSTANCE;
             case MAX:
                 return MaxFunction.INSTANCE;
-            case COUNT:
-                return CountFunction.INSTANCE;
+
             default:
-                throw new IllegalArgumentException("aggregation: " + measure.getAggregation());
+                throw new IllegalArgumentException("aggregation: " + statistic);
         }
     }
 

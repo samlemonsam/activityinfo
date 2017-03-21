@@ -1,7 +1,8 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
-import com.google.common.base.Joiner;
+import org.activityinfo.ui.client.analysis.model.Statistic;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 /**
@@ -9,31 +10,33 @@ import java.util.Arrays;
  */
 public class Point {
 
-    private double value;
+    private final double value;
 
+    @Nonnull
+    private final Statistic statistic;
+
+    @Nonnull
     private final String[] dimensions;
 
-    public Point(String[] dimensions, double value) {
+    public Point(double value, String[] dimensions) {
+        this.value = value;
+        this.statistic = Statistic.SUM;
         this.dimensions = dimensions;
-        this.value = value;
     }
 
-    public Point(DimensionSet dimensions) {
-        this.dimensions = new String[dimensions.getCount()];
+    public Point(double value, Statistic statistic, String[] dimensions) {
+        this.value = value;
+        this.statistic = statistic;
+        this.dimensions = dimensions;
     }
 
-    public void setValue(double value) {
-        this.value = value;
+    public Statistic getStatistic() {
+        return statistic;
     }
 
     public double getValue() {
         return value;
     }
-
-    public void setDimension(int index, String label) {
-        dimensions[index] = label;
-    }
-
 
     public String getDimension(int dimensionIndex) {
         return dimensions[dimensionIndex];
@@ -43,6 +46,8 @@ public class Point {
     public String toString() {
         StringBuilder s = new StringBuilder("Point{");
         s.append(value);
+        s.append(',');
+        s.append(statistic.name());
         for (int i = 0; i < dimensions.length; i++) {
             s.append(",");
             if(dimensions[i] == null) {
@@ -63,6 +68,7 @@ public class Point {
         Point point = (Point) o;
 
         if (Double.compare(point.value, value) != 0) return false;
+        if (statistic != point.statistic) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(dimensions, point.dimensions);
 
@@ -74,6 +80,7 @@ public class Point {
         long temp;
         temp = Double.doubleToLongBits(value);
         result = (int) (temp ^ (temp >>> 32));
+        result = 31 * result + statistic.hashCode();
         result = 31 * result + Arrays.hashCode(dimensions);
         return result;
     }

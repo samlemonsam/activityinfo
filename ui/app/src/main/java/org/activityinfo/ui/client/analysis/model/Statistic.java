@@ -5,9 +5,8 @@ import org.activityinfo.i18n.shared.I18N;
 /**
  * The way in which a measure is aggregate
  */
-public enum Aggregation {
+public enum Statistic {
     COUNT(I18N.CONSTANTS.count()),
-//    PERCENTAGE(I18N.CONSTANTS.percentage()),
     SUM(I18N.CONSTANTS.sum()),
     AVERAGE(I18N.CONSTANTS.average()),
     MEDIAN(I18N.CONSTANTS.median()),
@@ -16,7 +15,7 @@ public enum Aggregation {
 
     private final String label;
 
-    Aggregation(String label) {
+    Statistic(String label) {
         this.label = label;
     }
 
