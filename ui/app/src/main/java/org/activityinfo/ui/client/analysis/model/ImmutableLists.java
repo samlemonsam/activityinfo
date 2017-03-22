@@ -13,7 +13,7 @@ public final class ImmutableLists {
 
         List<T> newList = new ArrayList<>(list.size());
         boolean updated = false;
-        for (T item : newList) {
+        for (T item : list) {
             String itemId = keyProvider.apply(item);
             if(itemId.equals(updatedId)) {
                 newList.add(updatedItem);

@@ -28,7 +28,7 @@ public class MinFunction extends StatFunction {
             if(Double.isNaN(min)) {
                 min = value;
             } else if(!Double.isNaN(value)) {
-                if(min < value) {
+                if(value < min) {
                     min = value;
                 }
             }

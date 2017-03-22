@@ -76,8 +76,10 @@ public class EffectiveDimension {
     }
 
     public boolean isDate() {
-        if(this.formula.isValid()) {
-            return this.formula.getResultType() instanceof LocalDateType;
+        if(this.mapping != null) {
+            if (this.formula.isValid()) {
+                return this.formula.getResultType() instanceof LocalDateType;
+            }
         }
         return false;
     }

@@ -1658,6 +1658,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Min")
     String minimum();
 
-    @DefaultStringValue("Maximum")
+    @DefaultStringValue("Max")
     String maximum();
+
+    @DefaultStringValue("Statistic")
+    String statistic();
 }

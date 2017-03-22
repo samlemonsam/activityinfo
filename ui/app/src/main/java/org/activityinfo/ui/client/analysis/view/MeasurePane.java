@@ -17,14 +17,17 @@ import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
+import com.sencha.gxt.widget.core.client.tree.Tree;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.analysis.model.Aggregation;
 import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.model.Statistic;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 import org.activityinfo.ui.client.measureDialog.view.MeasureDialog;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 
@@ -57,7 +60,6 @@ public class MeasurePane implements IsWidget {
     }
 
 
-
     private void addMeasureClicked(SelectEvent event) {
         if (dialog == null) {
             dialog = new MeasureDialog(viewModel.getFormStore());
@@ -74,7 +76,6 @@ public class MeasurePane implements IsWidget {
     public Widget asWidget() {
         return contentPanel;
     }
-
 
     private void showMenu(Element element, MeasureListItem item) {
 
@@ -97,10 +98,10 @@ public class MeasurePane implements IsWidget {
         contextMenu.add(new SeparatorMenuItem());
 
         // Choose the aggregation
-        for (Aggregation aggregation : Aggregation.values()) {
-            CheckMenuItem aggregationItem = new CheckMenuItem(aggregation.getLabel());
-            aggregationItem.setChecked(measure.getAggregation() == aggregation);
-            aggregationItem.addCheckChangeHandler(event -> updateAggregation(measure, aggregation));
+        for (Statistic statistic : Statistic.values()) {
+            CheckMenuItem aggregationItem = new CheckMenuItem(statistic.getLabel());
+            aggregationItem.setChecked(measure.getStatistics().contains(statistic));
+            aggregationItem.addCheckChangeHandler(event -> updateStatistic(measure, statistic, event.getChecked()));
             contextMenu.add(aggregationItem);
         }
         contextMenu.add(new SeparatorMenuItem());
@@ -138,7 +139,6 @@ public class MeasurePane implements IsWidget {
         FormulaDialog dialog = new FormulaDialog(viewModel.getFormStore(), measure.getFormId());
         dialog.show(measure.getFormula(), formula -> {
             updateMeasureFormula(measure, formula.getFormula());
-
         });
     }
 
@@ -164,10 +164,18 @@ public class MeasurePane implements IsWidget {
     }
 
 
-    private void updateAggregation(MeasureModel measureModel, Aggregation aggregation) {
+    private void updateStatistic(MeasureModel measureModel, Statistic statistic, Tree.CheckState checked) {
+
+        Set<Statistic> newSelection = new HashSet<>(measureModel.getStatistics());
+        if(checked == Tree.CheckState.CHECKED) {
+            newSelection.add(statistic);
+        } else {
+            newSelection.remove(statistic);
+        }
+
         ImmutableMeasureModel updatedMeasure = ImmutableMeasureModel.builder()
                 .from(measureModel)
-                .aggregation(aggregation)
+                .statistics(newSelection)
                 .build();
 
         viewModel.updateModel(

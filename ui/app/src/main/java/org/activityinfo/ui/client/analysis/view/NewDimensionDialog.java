@@ -108,8 +108,6 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionModel> 
                 type instanceof LocalDateType;
     }
 
-
-
     private void onOkClicked(SelectEvent event) {
         DimensionModel selectedItem = tree.getSelectionModel().getSelectedItem().dimensionModel();
         if (selectedItem != null) {
