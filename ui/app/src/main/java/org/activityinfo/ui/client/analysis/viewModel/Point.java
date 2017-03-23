@@ -38,7 +38,7 @@ public class Point {
         return value;
     }
 
-    public String getDimension(int dimensionIndex) {
+    public String getCategory(int dimensionIndex) {
         return dimensions[dimensionIndex];
     }
 

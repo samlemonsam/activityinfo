@@ -19,12 +19,15 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.analysis.model.Axis;
 import org.activityinfo.ui.client.analysis.model.DateLevel;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.DimensionListItem;
+import org.activityinfo.ui.client.analysis.viewModel.EffectiveDimension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -35,25 +38,27 @@ public class DimensionPane implements IsWidget {
     private static final Logger LOGGER = Logger.getLogger(DimensionPane.class.getName());
 
     private AnalysisViewModel viewModel;
+    private Axis axis;
     private NewDimensionDialog dialog;
     private ContentPanel contentPanel;
 
-    private ListStore<DimensionListItem> listStore;
-    private ListView<DimensionListItem, DimensionListItem> listView;
+    private ListStore<EffectiveDimension> listStore;
+    private ListView<EffectiveDimension, EffectiveDimension> listView;
 
-    public DimensionPane(AnalysisViewModel viewModel) {
+    public DimensionPane(AnalysisViewModel viewModel, Axis axis) {
         this.viewModel = viewModel;
+        this.axis = axis;
 
         ToolButton addButton = new ToolButton(ToolButton.PLUS);
         addButton.addSelectHandler(this::addDimensionClicked);
 
-        listStore = new ListStore<>(DimensionListItem::getId);
+        listStore = new ListStore<>(EffectiveDimension::getId);
         listView = new ListView<>(listStore,
                 new IdentityValueProvider<>(),
-                new PillCell<>(DimensionListItem::getLabel, this::onDimensionMenu));
+                new PillCell<>(EffectiveDimension::getLabel, this::onDimensionMenu));
 
         contentPanel = new ContentPanel();
-        contentPanel.setHeading("Dimensions");
+        contentPanel.setHeading(axis.name());
         contentPanel.addTool(addButton);
         contentPanel.setWidget(listView);
 
@@ -62,7 +67,13 @@ public class DimensionPane implements IsWidget {
             if (observable.isLoaded()) {
                 LOGGER.info("Num dimension items = " + observable.get().size());
 
-                listStore.replaceAll(observable.get());
+                List<EffectiveDimension> dims = new ArrayList<>();
+                for (EffectiveDimension dim : observable.get()) {
+                    if(dim.getAxis() == this.axis) {
+                        dims.add(dim);
+                    }
+                }
+                listStore.replaceAll(dims);
             }
         });
     }
@@ -83,14 +94,18 @@ public class DimensionPane implements IsWidget {
 
     private void onNewDimensionSelected(SelectionEvent<DimensionModel> event) {
         viewModel.updateModel(
-                viewModel.getModel().withDimension(event.getSelectedItem()));
+                viewModel.getModel().withDimension(
+                        ImmutableDimensionModel.builder()
+                        .from(event.getSelectedItem())
+                        .axis(this.axis)
+                        .build()));
 
         LOGGER.info("Num dimensions = " + viewModel.getModel().getDimensions());
 
     }
 
 
-    private void onDimensionMenu(Element element, DimensionListItem dim) {
+    private void onDimensionMenu(Element element, EffectiveDimension dim) {
 
         Menu contextMenu = new Menu();
 
@@ -162,7 +177,7 @@ public class DimensionPane implements IsWidget {
                     .build()));
     }
 
-    private void updateTotals(DimensionListItem dim, Tree.CheckState checkState) {
+    private void updateTotals(EffectiveDimension dim, Tree.CheckState checkState) {
         viewModel.updateModel(
                 viewModel.getModel().withDimension(
                         ImmutableDimensionModel.builder()
@@ -171,7 +186,7 @@ public class DimensionPane implements IsWidget {
                                 .build()));
     }
 
-    private void updateDateLevel(DimensionListItem dim, DateLevel level) {
+    private void updateDateLevel(EffectiveDimension dim, DateLevel level) {
         viewModel.updateModel(
                 viewModel.getModel().withDimension(
                         ImmutableDimensionModel.builder()

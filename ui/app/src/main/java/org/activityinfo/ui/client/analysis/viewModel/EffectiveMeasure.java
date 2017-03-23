@@ -18,7 +18,7 @@ public class EffectiveMeasure {
     private FormTree formTree;
     private DimensionSet dimensionSet;
 
-    private List<EffectiveDimension> dimensions = new ArrayList<>();
+    private List<EffectiveMapping> dimensions = new ArrayList<>();
 
     public EffectiveMeasure(MeasureModel model, FormTree formTree, DimensionSet dimensionSet) {
         this.model = model;
@@ -28,7 +28,7 @@ public class EffectiveMeasure {
         for (int i = 0; i < dimensionSet.getCount(); i++) {
             DimensionModel dimension = dimensionSet.getDimension(i);
             DimensionMapping mapping = findMapping(model, dimension);
-            dimensions.add(new EffectiveDimension(formTree, i, dimension, mapping));
+            dimensions.add(new EffectiveMapping(formTree, i, dimension, mapping));
         }
     }
 
@@ -63,11 +63,11 @@ public class EffectiveMeasure {
         return dimensionSet;
     }
 
-    public List<EffectiveDimension> getDimensions() {
+    public List<EffectiveMapping> getDimensions() {
         return dimensions;
     }
 
-    public EffectiveDimension getDimension(int i) {
+    public EffectiveMapping getDimension(int i) {
         return dimensions.get(i);
     }
 

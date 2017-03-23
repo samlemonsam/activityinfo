@@ -29,8 +29,8 @@ public class AnalysisViewModel {
     private final Observable<FormForest> formForest;
     private final Observable<EffectiveModel> effectiveModel;
     private final Observable<AnalysisResult> resultTable;
-    private final Observable<List<DimensionListItem>> dimensionListItems;
-            ;
+    private final Observable<List<EffectiveDimension>> dimensions;
+    private final Observable<PivotTable> pivotTable;
 
     public AnalysisViewModel(FormStore formStore) {
         this.formStore = formStore;
@@ -52,9 +52,10 @@ public class AnalysisViewModel {
         });
 
         effectiveModel = Observable.transform(formForest, model, (ff, m) -> new EffectiveModel(m, ff));
-        dimensionListItems = effectiveModel.transform(DimensionListItem::compute);
 
         resultTable = effectiveModel.join( m -> AnalysisResult.compute(formStore, m) );
+        dimensions = effectiveModel.transform(em -> em.getDimensions());
+        pivotTable = resultTable.transform(t -> new PivotTable(t));
     }
 
     public AnalysisModel getModel() {
@@ -77,8 +78,8 @@ public class AnalysisViewModel {
         return formStore;
     }
 
-    public Observable<List<DimensionListItem>> getDimensionListItems() {
-        return dimensionListItems;
+    public Observable<List<EffectiveDimension>> getDimensionListItems() {
+        return dimensions;
     }
 
     public Observable<FormForest> getFormForest() {

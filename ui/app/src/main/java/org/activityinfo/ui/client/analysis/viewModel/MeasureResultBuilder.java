@@ -125,7 +125,7 @@ public class MeasureResultBuilder {
 
     private MultiDimSet buildMultiDimSet() {
         List<MultiDim> dimSets = new ArrayList<>();
-        for (EffectiveDimension dimension : measure.getDimensions()) {
+        for (EffectiveMapping dimension : measure.getDimensions()) {
             if(dimension.isMultiValued()) {
                 dimSets.add(dimension.createMultiDimSet(columns));
             }

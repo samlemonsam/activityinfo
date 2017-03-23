@@ -196,7 +196,56 @@ public class AnalysisViewModelTest {
                 point(56+64, "Total",  "Single")));
     }
 
+    @Test
+    public void twoDimensionsPivotedInRows() {
 
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension())
+                .addDimensions(marriedDimension())
+                .build();
+
+        assertThat(pivot(model), equalTo(
+                table("Gender   Female   Married   Married   92   ",
+                      "                            Single    64   ",
+                      "         Male     Married   Married   88   ",
+                      "                            Single    56   ")));
+
+    }
+
+    @Test
+    public void twoDimensionsPivoted() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension())
+                .addDimensions(marriedDimension().withAxis(Axis.COLUMN))
+                .build();
+
+        assertThat(pivot(model), equalTo(
+                table("                  Married            ",
+                      "                  Married   Single   ",
+                      "Gender   Female   92        64       ",
+                      "         Male     88        56       ")));
+
+    }
+
+    private String pivot(AnalysisModel model) {
+        AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
+        viewModel.updateModel(model);
+        AnalysisResult analysisResult = assertLoads(viewModel.getResultTable());
+        PivotTable table = new PivotTable(analysisResult);
+
+        return PivotTableRenderer.render(table);
+    }
+
+    private String table(String... rows) {
+        StringBuilder s = new StringBuilder();
+        for (String row : rows) {
+            s.append(row).append('\n');
+        }
+        return s.toString();
+    }
 
     @Test
     public void twoDimensionsWithBothTotals() {
@@ -460,7 +509,7 @@ public class AnalysisViewModelTest {
                 }
 
                 for (int i = 0; i < dimensions.length; i++) {
-                    if (!dimensions[i].equals(point.getDimension(i))) {
+                    if (!dimensions[i].equals(point.getCategory(i))) {
                         return false;
                     }
                 }
@@ -521,7 +570,7 @@ public class AnalysisViewModelTest {
 
         for (Point point : result.getPoints()) {
             for (int i = 0; i < result.getDimensionSet().getCount(); i++) {
-                System.out.print(column(point.getDimension(i)));
+                System.out.print(column(point.getCategory(i)));
             }
             System.out.print(column(point.getStatistic().name()));
             System.out.println(column(Double.toString(point.getValue())));
