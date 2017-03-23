@@ -176,6 +176,11 @@ public class DimensionPane implements IsWidget {
         totalsItem.setChecked(dim.getModel().getTotals());
         totalsItem.addCheckChangeHandler(event -> updateTotals(dim, event.getChecked()));
         contextMenu.add(totalsItem);
+
+        MenuItem totalsLabel = new MenuItem("Total Label...");
+        totalsLabel.addSelectionHandler(event -> editTotalLabel(dim));
+        contextMenu.add(totalsLabel);
+
         contextMenu.add(new SeparatorMenuItem());
 
 
@@ -217,6 +222,27 @@ public class DimensionPane implements IsWidget {
                     .from(dimension)
                     .label(label)
                     .build()));
+    }
+
+
+    private void editTotalLabel(EffectiveDimension dim) {
+        PromptMessageBox messageBox = new PromptMessageBox("Update total label:", "Enter the new label");
+        messageBox.getTextField().setText(dim.getTotalLabel());
+
+        messageBox.addDialogHideHandler(event -> {
+            if(event.getHideButton() == Dialog.PredefinedButton.OK) {
+                updateTotalLabel(dim, messageBox.getValue());
+            }
+        });
+        messageBox.show();
+    }
+
+    private void updateTotalLabel(EffectiveDimension dim, String value) {
+        viewModel.updateModel(viewModel.getModel().withDimension(
+                ImmutableDimensionModel.builder()
+                        .from(dim.getModel())
+                        .totalLabel(value)
+                        .build()));
     }
 
     private void updateTotals(EffectiveDimension dim, Tree.CheckState checkState) {
