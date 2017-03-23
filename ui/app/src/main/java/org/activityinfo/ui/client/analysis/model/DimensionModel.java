@@ -17,6 +17,11 @@ public abstract class DimensionModel {
     public abstract List<DimensionMapping> getMappings();
 
     @org.immutables.value.Value.Default
+    public Axis getAxis() {
+        return Axis.ROW;
+    }
+
+    @org.immutables.value.Value.Default
     public boolean getTotals() {
         return false;
     }

@@ -18,7 +18,7 @@ public class GroupMap {
      */
     private int keyDim;
 
-    private final List<EffectiveDimension> dimensions;
+    private final List<EffectiveMapping> dimensions;
 
     private final DimensionReader readers[];
     private final int keyDimIndexes[];
@@ -34,12 +34,12 @@ public class GroupMap {
 
     private Function<Integer, String> keyBuilder;
 
-    public GroupMap(ColumnSet columnSet, List<EffectiveDimension> dims) {
+    public GroupMap(ColumnSet columnSet, List<EffectiveMapping> dims) {
         this.dimensions = dims;
         this.readers = new DimensionReader[dims.size()];
         this.keyDimIndexes = new int[dims.size()];
 
-        for (EffectiveDimension dim : dims) {
+        for (EffectiveMapping dim : dims) {
             if(dim.isSingleValued()) {
                 DimensionReader reader = dim.createReader(columnSet);
                 if (reader != null) {
@@ -80,9 +80,16 @@ public class GroupMap {
     }
 
     private String key(int row) {
-        StringBuilder key = new StringBuilder(readers[0].read(row));
-        for (int i = 1; i < readers.length; i++) {
-            key.append('\0').append(readers[i].read(row));
+        StringBuilder key = new StringBuilder();
+        for (int i = 0; i < this.keyDim; i++) {
+            String category = readers[i].read(row);
+            if(category == null) {
+                return null;
+            }
+            if(i > 0) {
+                key.append('\0');
+            }
+            key.append(category);
         }
         return key.toString();
     }

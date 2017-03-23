@@ -15,9 +15,10 @@ public class AnalysisResult {
 
     private DimensionSet dimensionSet;
     private List<Point> points = new ArrayList<>();
+    private EffectiveModel effectiveModel;
 
-
-    public AnalysisResult(List<MeasureResultSet> measureSets) {
+    public AnalysisResult(EffectiveModel effectiveModel, List<MeasureResultSet> measureSets) {
+        this.effectiveModel = effectiveModel;
         if (!measureSets.isEmpty()) {
             dimensionSet = measureSets.get(0).getDimensions();
         } else {
@@ -26,6 +27,10 @@ public class AnalysisResult {
         for (MeasureResultSet measureSet : measureSets) {
             points.addAll(measureSet.getPoints());
         }
+    }
+
+    public EffectiveModel getEffectiveModel() {
+        return effectiveModel;
     }
 
     public DimensionSet getDimensionSet() {
@@ -44,7 +49,7 @@ public class AnalysisResult {
             points.add(computePoints(formStore, measure));
         }
 
-        return Observable.flatten(points).transform(resultSets -> new AnalysisResult(resultSets));
+        return Observable.flatten(points).transform(resultSets -> new AnalysisResult(effectiveModel, resultSets));
     }
 
     private static Observable<MeasureResultSet> computePoints(FormStore formStore, EffectiveMeasure measure) {
@@ -52,7 +57,7 @@ public class AnalysisResult {
         QueryModel queryModel = new QueryModel(measure.getFormId());
         queryModel.selectExpr(measure.getModel().getFormula()).as("value");
 
-        for (EffectiveDimension dim : measure.getDimensions()) {
+        for (EffectiveMapping dim : measure.getDimensions()) {
             queryModel.addColumns(dim.getRequiredColumns());
         }
 

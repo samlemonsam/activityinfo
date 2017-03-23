@@ -15,7 +15,7 @@ class PointDimProvider implements ValueProvider<Point, String> {
 
     @Override
     public String getValue(Point object) {
-        return object.getDimension(dimensionIndex);
+        return object.getCategory(dimensionIndex);
     }
 
     @Override

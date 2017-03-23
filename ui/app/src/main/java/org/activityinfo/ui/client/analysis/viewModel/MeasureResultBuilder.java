@@ -125,7 +125,7 @@ public class MeasureResultBuilder {
 
     private MultiDimSet buildMultiDimSet() {
         List<MultiDim> dimSets = new ArrayList<>();
-        for (EffectiveDimension dimension : measure.getDimensions()) {
+        for (EffectiveMapping dimension : measure.getDimensions()) {
             if(dimension.isMultiValued()) {
                 dimSets.add(dimension.createMultiDimSet(columns));
             }
@@ -194,7 +194,10 @@ public class MeasureResultBuilder {
             for (int i = 0; i < valueArray.length; i++) {
                  if(bitSet.get(i)) {
                      int groupIndex = groupArray[i];
-                     totals[groupIndex] += valueArray[i];
+                     double value = valueArray[i];
+                     if(!Double.isNaN(value)) {
+                         totals[groupIndex] += value;
+                     }
                  }
             }
 
