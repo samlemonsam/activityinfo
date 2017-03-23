@@ -7,6 +7,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.dnd.core.client.DND;
+import com.sencha.gxt.dnd.core.client.DndDropEvent;
+import com.sencha.gxt.dnd.core.client.ListViewDragSource;
+import com.sencha.gxt.dnd.core.client.ListViewDropTarget;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
@@ -62,6 +66,20 @@ public class DimensionPane implements IsWidget {
         contentPanel.addTool(addButton);
         contentPanel.setWidget(listView);
 
+        ListViewDragSource<EffectiveDimension> dragSource = new ListViewDragSource<>(listView);
+        dragSource.setGroup("dims");
+
+        ListViewDropTarget<EffectiveDimension> dropTarget = new ListViewDropTarget<EffectiveDimension>(listView) {
+            @Override
+            protected void onDragDrop(DndDropEvent event) {
+                onDimensionsDropped(insertIndex, (List<EffectiveDimension>)event.getData());
+            }
+        };
+        dropTarget.setGroup("dims");
+        dropTarget.setFeedback(DND.Feedback.BOTH);
+        dropTarget.setAllowSelfAsSource(true);
+
+
         viewModel.getDimensionListItems().subscribe(observable -> {
             listStore.clear();
             if (observable.isLoaded()) {
@@ -79,6 +97,7 @@ public class DimensionPane implements IsWidget {
     }
 
 
+
     @Override
     public Widget asWidget() {
         return contentPanel;
@@ -91,6 +110,27 @@ public class DimensionPane implements IsWidget {
         }
         dialog.show();
     }
+
+    private void onDimensionsDropped(int insertIndex, List<EffectiveDimension> dropped) {
+
+        List<DimensionModel> dims = new ArrayList<>();
+        for (EffectiveDimension effectiveDimension : dropped) {
+            dims.add(ImmutableDimensionModel.builder()
+                .from(effectiveDimension.getModel())
+                .axis(this.axis)
+                .build());
+        }
+
+        String afterDimId = null;
+        EffectiveDimension afterItem = listStore.get(insertIndex);
+        if(afterItem != null) {
+            afterDimId = afterItem.getId();
+        }
+
+        viewModel.updateModel(
+                viewModel.getModel().reorderDimensions(afterDimId, dims));
+    }
+
 
     private void onNewDimensionSelected(SelectionEvent<DimensionModel> event) {
         viewModel.updateModel(
@@ -109,13 +149,6 @@ public class DimensionPane implements IsWidget {
 
         Menu contextMenu = new Menu();
 
-
-        // Edit the formula...
-//        MenuItem editFormula = new MenuItem();
-//        editFormula.setText("Edit Formula...");
-//        editFormula.addSelectionHandler(event -> editFormula(dim));
-//        editFormula.setEnabled(dim.getSourceModel() instanceof FieldDimensionSource);
-//        contextMenu.add(editFormula);
 
         MenuItem editLabel = new MenuItem();
         editLabel.setText("Edit Label...");
@@ -136,7 +169,6 @@ public class DimensionPane implements IsWidget {
             }
 
             contextMenu.add(new SeparatorMenuItem());
-
         }
 
         // Choose to include totals or not.
@@ -146,10 +178,20 @@ public class DimensionPane implements IsWidget {
         contextMenu.add(totalsItem);
         contextMenu.add(new SeparatorMenuItem());
 
+
         // Remove the dimension
         MenuItem remove = new MenuItem();
         remove.setText(I18N.CONSTANTS.remove());
         remove.addSelectionHandler(event -> removeDimension(dim.getId()));
+
+        // Special handling for "Statistics' dimension
+        if(dim.getId().equals(DimensionModel.STATISTIC_ID)) {
+            totalsItem.setEnabled(false);
+            if(viewModel.getModel().isMeasureDefinedWithMultipleStatistics()) {
+                remove.setEnabled(false);
+            }
+        }
+
         contextMenu.add(remove);
 
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));

@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.analysis.viewModel;
  * #L%
  */
 
+import com.google.common.base.Function;
 import org.activityinfo.ui.client.analysis.model.Axis;
 
 import java.util.*;
@@ -65,9 +66,10 @@ public class PivotTable {
         return columnDimensions;
     }
 
-    private Node find(Node parent, Iterator<EffectiveDimension> dimensionIterator, Point result) {
+    private Node find(Node parent, Iterator<EffectiveDimension> dimensionIterator, Point point) {
 
         EffectiveDimension childDimension = dimensionIterator.next();
+        Function<Point, String> categoryProvider = childDimension.getCategoryProvider();
 
         if(parent.dimension == null) {
             parent.dimension = childDimension;
@@ -75,7 +77,7 @@ public class PivotTable {
 
         Comparator<String> categoryComparator = childDimension.getCategoryComparator();
 
-        String category = result.getCategory(childDimension.getIndex());
+        String category = categoryProvider.apply(point);
         PivotTable.Node child = parent.getChild(category);
         if (child == null) {
             child = parent.addChild(
@@ -83,7 +85,7 @@ public class PivotTable {
                     categoryComparator);
         }
         if (dimensionIterator.hasNext()) {
-            return find(child, dimensionIterator, result);
+            return find(child, dimensionIterator, point);
         } else {
             return child;
         }

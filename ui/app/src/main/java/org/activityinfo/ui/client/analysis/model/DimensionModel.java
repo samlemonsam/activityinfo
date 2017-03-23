@@ -12,6 +12,8 @@ import java.util.Optional;
 @org.immutables.value.Value.Immutable
 public abstract class DimensionModel {
 
+    public static final String STATISTIC_ID = "statistic";
+
     public abstract String getId();
     public abstract String getLabel();
     public abstract List<DimensionMapping> getMappings();

@@ -21,11 +21,14 @@ public class DimensionSet implements Iterable<DimensionModel> {
     }
 
     public DimensionSet(List<DimensionModel> dimensions) {
-        this.count = dimensions.size();
-        this.dimensions = new DimensionModel[count];
-        for (int i = 0; i < count; i++) {
-            this.dimensions[i] = dimensions.get(i);
+        List<DimensionModel> activeDimensions = new ArrayList<>();
+        for (DimensionModel dimension : dimensions) {
+            if(!dimension.getMappings().isEmpty()) {
+                activeDimensions.add(dimension);
+            }
         }
+        this.count = activeDimensions.size();
+        this.dimensions = activeDimensions.toArray(new DimensionModel[count]);
     }
 
     public int getCount() {
@@ -34,6 +37,15 @@ public class DimensionSet implements Iterable<DimensionModel> {
 
     public DimensionModel getDimension(int i) {
         return dimensions[i];
+    }
+
+    public int getIndex(DimensionModel dimensionModel) {
+        for (int i = 0; i < dimensions.length; i++) {
+            if(dimensions[i].getId().equals(dimensionModel.getId())) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Dimension " + dimensionModel.getId() + " is not a member of this set");
     }
 
     public List<DimensionModel> getList() {
@@ -50,4 +62,5 @@ public class DimensionSet implements Iterable<DimensionModel> {
     public Iterator<DimensionModel> iterator() {
         return Arrays.asList(dimensions).iterator();
     }
+
 }

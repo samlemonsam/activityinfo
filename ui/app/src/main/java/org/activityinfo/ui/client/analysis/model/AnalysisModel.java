@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.analysis.model;
 
 import com.google.common.collect.ImmutableSet;
 import org.activityinfo.model.resource.ResourceId;
+import org.immutables.value.Value;
 
 import java.util.List;
 import java.util.Set;
@@ -53,5 +54,26 @@ public abstract class AnalysisModel {
                 .from(this)
                 .dimensions(ImmutableLists.remove(getDimensions(), dimensionId, d -> d.getId()))
                 .build();
+    }
+
+    public AnalysisModel reorderDimensions(String afterId, List<DimensionModel> dims) {
+        return ImmutableAnalysisModel.builder()
+                .from(this)
+                .dimensions(ImmutableLists.reorder(getDimensions(), afterId, dims, d -> d.getId()))
+                .build();
+    }
+
+    /**
+     *
+     * @return true if any of the measures defined have multiple statistics.
+     */
+    @Value.Derived
+    public boolean isMeasureDefinedWithMultipleStatistics() {
+        for (MeasureModel measure : getMeasures()) {
+            if(measure.getStatistics().size() > 1) {
+                return true;
+            }
+        }
+        return false;
     }
 }

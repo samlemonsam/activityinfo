@@ -86,6 +86,7 @@ public class AnalysisViewModelTest {
                 point(212, "Female")));
     }
 
+
     @Test
     public void dimensionsWithSeveralStatistics() {
 
@@ -104,6 +105,35 @@ public class AnalysisViewModelTest {
                 point(51.0, Statistic.MEDIAN, "Female")));
     }
 
+    @Test
+    public void pivotDimensionsWithSeveralStatistics() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX))
+                .addDimensions(genderDimension())
+                .build();
+
+        assertThat(pivot(model), equalTo(table(
+                "Gender   Female   Statistic   Min   15   ",
+                "                              Max   98   ",
+                "         Male     Statistic   Min   15   ",
+                "                              Max   98   "
+        )));
+    }
+
+    @Test
+    public void pivotDimensionsWithSeveralStatisticsExplicitStatDim() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX))
+                .addDimensions(genderDimension())
+                .addDimensions(statDimension().withAxis(Axis.COLUMN))
+                .build();
+
+        assertThat(pivot(model), equalTo(table(
+                "                  Statistic         ",
+                "                  Min         Max   ",
+                "Gender   Female   15          98    ",
+                "         Male     15          98    ")));
+    }
 
     @Test
     public void dimensionsWithTotal() {
@@ -236,7 +266,11 @@ public class AnalysisViewModelTest {
         AnalysisResult analysisResult = assertLoads(viewModel.getResultTable());
         PivotTable table = new PivotTable(analysisResult);
 
-        return PivotTableRenderer.render(table);
+        String text = PivotTableRenderer.render(table);
+
+        System.out.println(text);
+
+        return text;
     }
 
     private String table(String... rows) {
@@ -406,11 +440,31 @@ public class AnalysisViewModelTest {
                 point(51.0, Statistic.MEDIAN, "Female")));
     }
 
+    @Test
+    public void medianWithMissing() {
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(numChildren().withStatistics(Statistic.MEDIAN))
+                .addDimensions(genderDimension())
+                .build();
+
+        assertThat(points(model), containsInAnyOrder(
+                point(3.0, Statistic.MEDIAN, "Male"),
+                point(4.0, Statistic.MEDIAN, "Female")));
+    }
+
     private ImmutableDimensionModel genderDimension() {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Gender")
                 .addMappings(new DimensionMapping(new SymbolExpr("Gender")))
+                .build();
+    }
+
+    private ImmutableDimensionModel statDimension() {
+        return ImmutableDimensionModel.builder()
+                .id(DimensionModel.STATISTIC_ID)
+                .label("Statistic")
                 .build();
     }
 
@@ -483,6 +537,14 @@ public class AnalysisViewModelTest {
             .formula(Survey.AGE_FIELD_ID.asString())
             .addStatistics(Statistic.MEDIAN)
             .build();
+    }
+
+    private ImmutableMeasureModel numChildren() {
+        return ImmutableMeasureModel.builder()
+                .label("# Children")
+                .formId(Survey.FORM_ID)
+                .formula(Survey.CHILDREN_FIELD_ID.asString())
+                .build();
     }
 
     private TypeSafeMatcher<Point> point(double value, String... dimensions) {

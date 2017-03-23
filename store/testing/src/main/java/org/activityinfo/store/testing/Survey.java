@@ -30,6 +30,7 @@ public class Survey implements TestForm {
 
     public static final ResourceId MARRIED_FIELD_ID = ResourceId.valueOf("F5");
 
+    public static final ResourceId CHILDREN_FIELD_ID = ResourceId.valueOf("F6");
 
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
 
@@ -48,6 +49,7 @@ public class Survey implements TestForm {
     private List<FormInstance> records = null;
     private final FormField nameField;
     private final FormField ageField;
+    private final FormField numChildrenField;
     private final FormField genderField;
     private final FormField marriedField;
 
@@ -73,6 +75,12 @@ public class Survey implements TestForm {
                 .setType(new QuantityType("years"))
                 .setRequired(true);
 
+
+        numChildrenField = formClass.addField(CHILDREN_FIELD_ID)
+                .setCode("CHILDREN")
+                .setLabel("Number of children")
+                .setType(new QuantityType("children"))
+                .setRequired(false);
 
         genderField = formClass.addField(GENDER_FIELD_ID)
                 .setLabel("Gender")
@@ -105,6 +113,7 @@ public class Survey implements TestForm {
         if(records == null) {
             this.records = new RecordGenerator(formClass)
                     .distribution(AGE_FIELD_ID, new IntegerGenerator(15, 99, 0.05, "years"))
+                    .distribution(CHILDREN_FIELD_ID, new IntegerGenerator(0, 8, 0.20, "children"))
                     .generate(ROW_COUNT);
         }
         return records;

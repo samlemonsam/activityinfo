@@ -2,6 +2,9 @@ package org.activityinfo.ui.client.analysis.model;
 
 import org.activityinfo.i18n.shared.I18N;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The way in which a measure is aggregate
  */
@@ -21,5 +24,13 @@ public enum Statistic {
 
     public String getLabel() {
         return label;
+    }
+
+    public static List<String> labels() {
+        List<String> labels = new ArrayList<>();
+        for (Statistic statistic : values()) {
+            labels.add(statistic.getLabel());
+        }
+        return labels;
     }
 }
