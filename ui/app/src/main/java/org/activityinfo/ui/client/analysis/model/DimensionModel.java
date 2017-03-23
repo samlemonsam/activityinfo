@@ -29,4 +29,6 @@ public abstract class DimensionModel {
     }
     public abstract Optional<DateLevel> getDateLevel();
 
+    public abstract Optional<String> getTotalLabel();
+
 }

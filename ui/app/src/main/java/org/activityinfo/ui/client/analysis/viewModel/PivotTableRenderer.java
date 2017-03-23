@@ -68,11 +68,12 @@ public class PivotTableRenderer {
     }
 
 
+
     private int addColumnHeaders(PivotTable.Node parent, int row, int col) {
         if(!parent.isLeaf()) {
             addCell(row, col, parent.getDimension().getLabel());
             for (PivotTable.Node child : parent.getChildren()) {
-                addCell(row+1, col, child.getCategory());
+                addCell(row+1, col, child.getCategoryLabel());
                 if(child.isLeaf()) {
                     col++;
                 } else {
@@ -91,7 +92,7 @@ public class PivotTableRenderer {
     private int addRowHeaders(PivotTable.Node parent, int row, int col) {
         addCell(row, col, parent.getDimension().getLabel());
         for (PivotTable.Node child : parent.getChildren()) {
-            addCell(row, col+1, child.getCategory());
+            addCell(row, col+1, child.getCategoryLabel());
             if(child.isLeaf()) {
                 row++;
             } else {

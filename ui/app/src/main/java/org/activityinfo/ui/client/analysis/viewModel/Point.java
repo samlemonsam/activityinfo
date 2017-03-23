@@ -10,6 +10,8 @@ import java.util.Arrays;
  */
 public class Point {
 
+    public static final String TOTAL = "\0\0TOTAL";
+
     private final double value;
 
     @Nonnull

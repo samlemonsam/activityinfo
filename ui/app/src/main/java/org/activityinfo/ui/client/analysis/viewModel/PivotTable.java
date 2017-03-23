@@ -175,7 +175,7 @@ public class PivotTable {
 
         private void insertChildSorted(Node child, Comparator<String> comparator) {
             for (int i = 0; i != children.size(); ++i) {
-                if (comparator.compare(child.getCategory(), children.get(i).getCategory()) < 0) {
+                if (comparator.compare(child.category, children.get(i).category) < 0) {
                     children.add(i, child);
                     return;
                 }
@@ -258,6 +258,14 @@ public class PivotTable {
             return category;
         }
 
+        public String getCategoryLabel() {
+            if(Point.TOTAL.equals(category)) {
+                return parent.getDimension().getTotalLabel();
+            } else {
+                return category;
+            }
+        }
+
         public Map<Node, Cell> getCells() {
             return cells;
         }
@@ -278,12 +286,12 @@ public class PivotTable {
             StringBuilder sb = new StringBuilder();
             Node node = this;
             do {
-                if (node.getCategory() != null) {
+                if (node.getCategoryLabel() != null) {
                     if (sb.length() != 0) {
                         sb.append(" ");
                     }
 
-                    sb.append(node.getCategory());
+                    sb.append(node.getCategoryLabel());
                 }
                 node = node.getParent();
 

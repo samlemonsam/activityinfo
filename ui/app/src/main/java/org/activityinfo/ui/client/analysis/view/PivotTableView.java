@@ -68,10 +68,10 @@ public class PivotTableView implements IsWidget {
         List<PivotTable.Node> leafColumns = pivotTable.getRootColumn().getLeaves();
         for (PivotTable.Node leafColumn : leafColumns) {
             ColumnConfig<PivotRow, Double> column = new ColumnConfig<>(new PivotValueProvider(leafColumn));
-            if(leafColumn.getCategory() == null) {
+            if(leafColumn.getCategoryLabel() == null) {
                 column.setHeader(I18N.CONSTANTS.value());
             } else {
-                column.setHeader(leafColumn.getCategory());
+                column.setHeader(leafColumn.getCategoryLabel());
             }
             column.setSortable(false);
             column.setHideable(false);
@@ -101,7 +101,7 @@ public class PivotTableView implements IsWidget {
                 col++;
             } else {
                 cm.addHeaderGroup(row + 1, col,
-                        new HeaderGroupConfig(child.getCategory(), 1, child.getLeaves().size()));
+                        new HeaderGroupConfig(child.getCategoryLabel(), 1, child.getLeaves().size()));
                 col = addHeaderGroups(cm, child, row + 2, col);
             }
         }
@@ -124,7 +124,7 @@ public class PivotTableView implements IsWidget {
             list.add(new PivotRow(Arrays.copyOf(rowHeaders, rowHeaders.length), parent));
         } else {
             for (PivotTable.Node child : parent.getChildren()) {
-                rowHeaders[rowHeaderIndex] = child.getCategory();
+                rowHeaders[rowHeaderIndex] = child.getCategoryLabel();
                 addRows(list, child, rowHeaders, rowHeaderIndex+1);
                 if(rowHeaderIndex > 0) {
                     rowHeaders[rowHeaderIndex - 1] = null;

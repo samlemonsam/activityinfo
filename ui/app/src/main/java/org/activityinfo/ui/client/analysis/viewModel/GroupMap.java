@@ -218,7 +218,7 @@ public class GroupMap {
         String[] regrouped = new String[group.length];
         for (int i = 0; i < group.length; i++) {
             if(totalDimensions[i]) {
-                regrouped[i] = "Total";
+                regrouped[i] = Point.TOTAL;
             } else {
                 regrouped[i] = group[i];
             }
