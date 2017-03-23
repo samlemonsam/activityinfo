@@ -101,6 +101,10 @@ public class AnalysisViewModel {
         return resultTable;
     }
 
+    public Observable<PivotTable> getPivotTable() {
+        return pivotTable;
+    }
+
     public JsonObject toJsonObject() {
         throw new UnsupportedOperationException();
     }

@@ -55,7 +55,7 @@ class ColumnArrayView implements ColumnView {
     }
 
     private static native int getLength(JavaScriptObject array) /*-{
-        return array.length();
+        return array.length;
     }-*/;
     
     private static native String getString(JavaScriptObject array, int index) /*-{

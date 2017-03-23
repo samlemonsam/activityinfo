@@ -29,17 +29,20 @@ import java.util.Map.Entry;
 
 public class PivotTable {
 
-    private Node rootRow;
-    private Node rootColumn;
+    private Node rootRow = new Node();
+    private Node rootColumn = new Node();
 
     private List<EffectiveDimension> rowDimensions;
     private List<EffectiveDimension> columnDimensions;
 
+    public PivotTable() {
+        this.rowDimensions = Collections.emptyList();
+        this.columnDimensions = Collections.emptyList();
+    }
+
     public PivotTable(AnalysisResult results) {
         this.rowDimensions = results.getEffectiveModel().getDimensions(Axis.ROW);
         this.columnDimensions = results.getEffectiveModel().getDimensions(Axis.COLUMN);
-        rootRow = new Node();
-        rootColumn = new Node();
 
         for (Point point : results.getPoints()) {
 
@@ -323,6 +326,21 @@ public class PivotTable {
 
         public boolean isLeaf() {
             return children.isEmpty();
+        }
+
+        public int getDepth() {
+            return calculateDepth(0);
+        }
+
+        protected int calculateDepth(int depth) {
+            int maxChildDepth = depth;
+            for (Node child : getChildren()) {
+                int childDepth = child.calculateDepth(depth + 1);
+                if (maxChildDepth < childDepth) {
+                    maxChildDepth = childDepth;
+                }
+            }
+            return maxChildDepth;
         }
     }
 
