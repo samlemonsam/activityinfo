@@ -68,11 +68,12 @@ public class PivotTableRenderer {
     }
 
 
+
     private int addColumnHeaders(PivotTable.Node parent, int row, int col) {
         if(!parent.isLeaf()) {
             addCell(row, col, parent.getDimension().getLabel());
             for (PivotTable.Node child : parent.getChildren()) {
-                addCell(row+1, col, child.getCategory());
+                addCell(row+1, col, child.getCategoryLabel());
                 if(child.isLeaf()) {
                     col++;
                 } else {
@@ -91,7 +92,7 @@ public class PivotTableRenderer {
     private int addRowHeaders(PivotTable.Node parent, int row, int col) {
         addCell(row, col, parent.getDimension().getLabel());
         for (PivotTable.Node child : parent.getChildren()) {
-            addCell(row, col+1, child.getCategory());
+            addCell(row, col+1, child.getCategoryLabel());
             if(child.isLeaf()) {
                 row++;
             } else {
@@ -104,11 +105,10 @@ public class PivotTableRenderer {
 
     private int addValues(PivotTable.Node parentRow, int row, int col) {
         if(parentRow.isLeaf()) {
-            for (Map.Entry<PivotTable.Node, PivotTable.Cell> entry : parentRow.getCells().entrySet()) {
+            for (Map.Entry<PivotTable.Node, Point> entry : parentRow.getPoints().entrySet()) {
                 int leafIndex = leafColumns.indexOf(entry.getKey());
-                String text = Integer.toString(entry.getValue().getValue().intValue());
 
-                addCell(row, col + leafIndex, text);
+                addCell(row, col + leafIndex, entry.getValue().getFormattedValue());
             }
             row++;
         } else {

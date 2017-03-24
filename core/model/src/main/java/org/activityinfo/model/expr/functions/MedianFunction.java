@@ -1,5 +1,7 @@
 package org.activityinfo.model.expr.functions;
 
+import com.google.gwt.core.client.GWT;
+
 import java.util.Arrays;
 
 /**
@@ -22,7 +24,28 @@ public class MedianFunction extends StatFunction {
     @Override
     public double compute(double[] values, int start, int end) {
 
-        Arrays.sort(values, start, end);
+
+
+        if(GWT.isScript()) {
+            // Work-around for bug in GWT's Arrays.sort() implementation:
+            // NaNs are not handled consistently with the JDK and not sorted
+            // to the end of the array. 
+            double[] copy = new double[end-start];
+            int j = 0;
+            for (int i = start; i < end; i++) {
+                double value = values[i];
+                if(!Double.isNaN(value)) {
+                    copy[j++] = value;
+                }
+            }
+            Arrays.sort(copy, 0, j);
+            values = copy;
+            start = 0;
+            end = j;
+        } else {
+            Arrays.sort(values, start, end);
+        }
+
 
         // Exclude missing (NaN) values, which are sorted to the end
         // of the array section.

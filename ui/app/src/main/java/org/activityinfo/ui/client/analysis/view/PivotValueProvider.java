@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.analysis.view;
 import com.sencha.gxt.core.client.ValueProvider;
 import org.activityinfo.ui.client.analysis.viewModel.PivotTable;
 
-public class PivotValueProvider implements ValueProvider<PivotRow, Double> {
+public class PivotValueProvider implements ValueProvider<PivotRow, String> {
 
     private PivotTable.Node column;
 
@@ -12,12 +12,12 @@ public class PivotValueProvider implements ValueProvider<PivotRow, Double> {
     }
 
     @Override
-    public Double getValue(PivotRow object) {
-        return object.getValue(column);
+    public String getValue(PivotRow object) {
+        return object.getFormattedValue(column);
     }
 
     @Override
-    public void setValue(PivotRow object, Double value) {
+    public void setValue(PivotRow object, String value) {
     }
 
     @Override

@@ -65,7 +65,7 @@ public class EffectiveMapping {
     }
 
     public boolean isSingleValued() {
-        return formula.isValid() && !multiValued;
+        return formula != null && formula.isValid() && !multiValued;
     }
 
     public DimensionMapping getMapping() {

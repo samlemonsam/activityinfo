@@ -1,10 +1,8 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
 
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
-import org.activityinfo.ui.client.analysis.model.Axis;
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.analysis.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,22 +17,51 @@ public class EffectiveModel {
 
     public EffectiveModel(AnalysisModel model, FormForest formForest) {
         this.model = model;
-        this.dimensionSet = new DimensionSet(model.getDimensions());
+
+        List<DimensionModel> dimensions = new ArrayList<>(model.getDimensions());
+
+        // Include a Statistics dimension if required but not added by
+        // the user to the model.
+        if(model.isMeasureDefinedWithMultipleStatistics() &&
+                !isDefined(dimensions, DimensionModel.STATISTIC_ID)) {
+
+            dimensions.add(
+                    ImmutableDimensionModel.builder()
+                            .id(DimensionModel.STATISTIC_ID)
+                            .label(I18N.CONSTANTS.statistic())
+                            .build());
+        }
+
+        // Create a DimensionSet, which maps each dimension
+        // to an integer index.
+        this.dimensionSet = new DimensionSet(dimensions);
+
         for (MeasureModel measureModel : model.getMeasures()) {
             this.measures.add(new EffectiveMeasure(measureModel,
                     formForest.findTree(measureModel.getFormId()),
                     dimensionSet));
         }
 
-        for (int i = 0; i < dimensionSet.getCount(); i++) {
-            DimensionModel dimensionModel = dimensionSet.getDimension(i);
+        for (DimensionModel dimensionModel : dimensions) {
+
+            int index = dimensionSet.getIndex(dimensionModel);
             List<EffectiveMapping> effectiveMappings = new ArrayList<>();
             for (EffectiveMeasure effectiveMeasure : measures) {
-                effectiveMappings.add(effectiveMeasure.getDimension(i));
+                effectiveMappings.add(effectiveMeasure.getDimension(index));
             }
-            dimensions.add(new EffectiveDimension(i, dimensionModel, effectiveMappings));
+            this.dimensions.add(new EffectiveDimension(index, dimensionModel, effectiveMappings));
         }
     }
+
+    private boolean isDefined(List<DimensionModel> dimensions, String dimensionId) {
+        for (DimensionModel dimension : dimensions) {
+            if(dimension.getId().equals(dimensionId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public List<EffectiveDimension> getDimensions() {
         return dimensions;

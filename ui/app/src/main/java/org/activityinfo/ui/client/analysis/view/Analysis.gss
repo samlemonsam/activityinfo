@@ -3,3 +3,7 @@
 .handle {
     float: right;
 }
+
+.totalCell {
+    font-weight: bold;
+}

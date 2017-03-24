@@ -34,6 +34,8 @@ public class GroupMap {
 
     private Function<Integer, String> keyBuilder;
 
+    private int statisticDimensionIndex = -1;
+
     public GroupMap(ColumnSet columnSet, List<EffectiveMapping> dims) {
         this.dimensions = dims;
         this.readers = new DimensionReader[dims.size()];
@@ -142,9 +144,7 @@ public class GroupMap {
      */
     public Regrouping total(int[] groupArray, boolean[] totalDimensions) {
 
-        if(!any(totalDimensions)) {
-            return new Regrouping(groupArray, groups);
-        }
+        assert any(totalDimensions);
 
         int map[] = new int[getGroupCount()];
 
@@ -168,18 +168,7 @@ public class GroupMap {
             map[i] = regroupedIndex;
         }
 
-        // Now map the group array to the new indexes
-        int[] regroupedArray = new int[groupArray.length];
-        for (int i = 0; i < groupArray.length; i++) {
-            int oldGroup = groupArray[i];
-            if(oldGroup == -1) {
-                regroupedArray[i] = -1;
-            } else {
-                regroupedArray[i] = map[oldGroup];
-            }
-        }
-
-        return new Regrouping(regroupedArray, newGroups);
+        return new Regrouping(groupArray, groups, totalDimensions, map, newGroups);
     }
 
     private boolean any(boolean[] x) {
@@ -218,7 +207,7 @@ public class GroupMap {
         String[] regrouped = new String[group.length];
         for (int i = 0; i < group.length; i++) {
             if(totalDimensions[i]) {
-                regrouped[i] = "Total";
+                regrouped[i] = Point.TOTAL;
             } else {
                 regrouped[i] = group[i];
             }

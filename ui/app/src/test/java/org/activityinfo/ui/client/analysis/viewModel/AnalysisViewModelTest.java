@@ -22,12 +22,17 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static org.activityinfo.ui.client.analysis.viewModel.Point.TOTAL;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class AnalysisViewModelTest {
+
+    private static boolean DUMP_RAW_DATA = false;
 
     private static final int COLUMN_LENGTH = 20;
     private static final String NA = null;
@@ -86,6 +91,7 @@ public class AnalysisViewModelTest {
                 point(212, "Female")));
     }
 
+
     @Test
     public void dimensionsWithSeveralStatistics() {
 
@@ -104,6 +110,49 @@ public class AnalysisViewModelTest {
                 point(51.0, Statistic.MEDIAN, "Female")));
     }
 
+    @Test
+    public void pivotDimensionsWithSeveralStatistics() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX))
+                .addDimensions(genderDimension())
+                .build();
+
+        assertThat(pivot(model), equalTo(table(
+                "Gender   Female   Statistic   Min   15   ",
+                "                              Max   98   ",
+                "         Male     Statistic   Min   15   ",
+                "                              Max   98   "
+        )));
+    }
+
+    @Test
+    public void pivotDimensionsWithSeveralStatisticsExplicitStatDim() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX))
+                .addDimensions(genderDimension())
+                .addDimensions(statDimension().withAxis(Axis.COLUMN))
+                .build();
+
+        assertThat(pivot(model), equalTo(table(
+                "                  Statistic         ",
+                "                  Min         Max   ",
+                "Gender   Female   15          98    ",
+                "         Male     15          98    ")));
+    }
+
+    @Test
+    public void pivotWithCustomTotalLabel() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(medianAge().withStatistics(Statistic.MIN))
+                .addDimensions(genderDimension().withTotals(true).withTotalLabel("ALL"))
+                .build();
+
+        assertThat(pivot(model), equalTo(table(
+                "Gender   Female   15   ",
+                "         Male     15   ",
+                "         ALL      15   ")));
+    }
+
 
     @Test
     public void dimensionsWithTotal() {
@@ -116,22 +165,40 @@ public class AnalysisViewModelTest {
         assertThat(points(model), containsInAnyOrder(
                 point(199, "Male"),
                 point(212, "Female"),
-                point(199+212, "Total")));
+                point(199+212, TOTAL)));
     }
 
-//    @Test
-//    public void dimensionsWithTotalPercentages() {
-//
-//        AnalysisModel model = ImmutableAnalysisModel.builder()
-//                .addMeasures(surveyCount().withStatistics(Statistic.PERCENTAGE))
-//                .addDimensions(genderDimension().withTotals(true))
-//                .build();
-//
-//        assertThat(points(model), containsInAnyOrder(
-//                point(199, "Male"),
-//                point(212, "Female"),
-//                point(199+212, "Total")));
-//    }
+    @Test
+    public void dimensionWithPercentages() {
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension().withPercentage(true))
+                .build();
+
+        assertThat(pivot(model), equalTo(
+                table("Gender   Female   Statistic   Sum   212   ",
+                      "                              %     52%   ",
+                      "         Male     Statistic   Sum   199   ",
+                      "                              %     48%   ")));
+    }
+
+    @Test
+    public void dimensionWithPercentagesWithTotals() {
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension().withPercentage(true).withTotals(true))
+                .addDimensions(statDimension().withAxis(Axis.COLUMN))
+                .build();
+
+        assertThat(pivot(model), equalTo(
+                table("                  Statistic          ",
+                      "                  Sum         %      ",
+                      "Gender   Female   212         52%    ",
+                      "         Male     199         48%    ",
+                      "         Total    411         100%   ")));
+    }
 
     @Test
     public void dimensionListItems() {
@@ -177,6 +244,30 @@ public class AnalysisViewModelTest {
     }
 
     @Test
+    public void twoDimensionsWithPercentages() {
+
+        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension()
+                        .withPercentage(true)
+                        .withAxis(Axis.ROW)
+                        .withTotals(true))
+                .addDimensions(marriedDimension()
+                        .withAxis(Axis.COLUMN)
+                        .withLabel("Civil Status")
+                        .withTotals(true)
+                        .withPercentage(true))
+                .addDimensions(statDimension().withAxis(Axis.COLUMN))
+                .build();
+
+        pivot(model);
+
+    }
+
+
+    @Test
     public void twoDimensionsWithTotals() {
 
         dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
@@ -190,10 +281,10 @@ public class AnalysisViewModelTest {
         assertThat(points(model), containsInAnyOrder(
                 point(88,    "Male",   "Married"),
                 point(92,    "Female", "Married"),
-                point(88+92, "Total",  "Married"),
+                point(88+92, TOTAL,    "Married"),
                 point(56,    "Male",   "Single"),
                 point(64,    "Female", "Single"),
-                point(56+64, "Total",  "Single")));
+                point(56+64, TOTAL,    "Single")));
     }
 
     @Test
@@ -236,7 +327,11 @@ public class AnalysisViewModelTest {
         AnalysisResult analysisResult = assertLoads(viewModel.getResultTable());
         PivotTable table = new PivotTable(analysisResult);
 
-        return PivotTableRenderer.render(table);
+        String text = PivotTableRenderer.render(table);
+
+        System.out.println(text);
+
+        return text;
     }
 
     private String table(String... rows) {
@@ -263,11 +358,11 @@ public class AnalysisViewModelTest {
                 point(56,    "Male",   "Single"),
                 point(92,    "Female", "Married"),
                 point(64,    "Female", "Single"),
-                point(88+92, "Total",  "Married"),
-                point(56+64, "Total",  "Single"),
-                point(88+56, "Male",   "Total"),
-                point(92+64, "Female", "Total"),
-                point(300,   "Total",  "Total")));
+                point(88+92, TOTAL,  "Married"),
+                point(56+64, TOTAL,  "Single"),
+                point(88+56, "Male",   TOTAL),
+                point(92+64, "Female", TOTAL),
+                point(300,   TOTAL,  TOTAL)));
     }
 
     @Test
@@ -287,8 +382,8 @@ public class AnalysisViewModelTest {
                 point(143,   "2017",   "Q2"),
                 point(150,   "2017",   "Q3"),
                 point(137,   "2017",   "Q4"),
-                point(557,   "2016",   "Total"),
-                point(570,   "2017",   "Total")));
+                point(557,   "2016",   TOTAL),
+                point(570,   "2017",   TOTAL)));
     }
 
     @Test
@@ -360,13 +455,33 @@ public class AnalysisViewModelTest {
                 point(49,    "2017",   "Syrian",      "Documents"),
                 point(60,    "2017",   "Syrian",      "Access to Services"),
 
-                point(477,   "Total",  "Palestinian", "Documents"),
-                point(550,   "Total",  "Palestinian", "Access to Services"),
-                point(161,   "Total",  "Jordanian",   "Documents"),
-                point(178,   "Total",  "Jordanian",   "Access to Services"),
-                point(85,    "Total",  "Syrian",      "Documents"),
-                point(114,   "Total",  "Syrian",      "Access to Services")
+                point(477,   TOTAL,  "Palestinian", "Documents"),
+                point(550,   TOTAL,  "Palestinian", "Access to Services"),
+                point(161,   TOTAL,  "Jordanian",   "Documents"),
+                point(178,   TOTAL,  "Jordanian",   "Access to Services"),
+                point(85,    TOTAL,  "Syrian",      "Documents"),
+                point(114,   TOTAL,  "Syrian",      "Access to Services")
         ));
+    }
+
+    @Test
+    public void sort() {
+        double[] array = new double[] {
+                41.5, Double.NaN, Double.NaN, 3, 932535, 1, Double.NaN,
+                -356, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN,
+                -Double.MAX_VALUE, Double.MAX_VALUE};
+        Arrays.sort(array);
+
+        System.out.println(Arrays.toString(array));
+
+        assertTrue(Arrays.equals(new double[] {
+                 Double.NEGATIVE_INFINITY,
+                -Double.MAX_VALUE,
+                -356,
+                1.0, 3.0, 41.5, 932535,
+                Double.MAX_VALUE,
+                Double.POSITIVE_INFINITY,
+                Double.NaN, Double.NaN, Double.NaN, Double.NaN }, array));
     }
 
 
@@ -384,11 +499,11 @@ public class AnalysisViewModelTest {
                 point(61.5, Statistic.MEDIAN, "Male",   "Single"),
                 point(56.0, Statistic.MEDIAN, "Female", "Married"),
                 point(52.0, Statistic.MEDIAN, "Female", "Single"),
-                point(63.0, Statistic.MEDIAN, "Total",  "Married"),
-                point(50.0, Statistic.MEDIAN, "Total",  "Single"),
-                point(55.0, Statistic.MEDIAN, "Male",   "Total"),
-                point(55.0, Statistic.MEDIAN, "Female", "Total"),
-                point(55.0, Statistic.MEDIAN, "Total",  "Total")));
+                point(63.0, Statistic.MEDIAN, TOTAL,  "Married"),
+                point(50.0, Statistic.MEDIAN, TOTAL,  "Single"),
+                point(55.0, Statistic.MEDIAN, "Male",   TOTAL),
+                point(55.0, Statistic.MEDIAN, "Female", TOTAL),
+                point(55.0, Statistic.MEDIAN, TOTAL,  TOTAL)));
     }
 
     @Test
@@ -406,11 +521,31 @@ public class AnalysisViewModelTest {
                 point(51.0, Statistic.MEDIAN, "Female")));
     }
 
+    @Test
+    public void medianWithMissing() {
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(numChildren().withStatistics(Statistic.MEDIAN))
+                .addDimensions(genderDimension())
+                .build();
+
+        assertThat(points(model), containsInAnyOrder(
+                point(3.0, Statistic.MEDIAN, "Male"),
+                point(4.0, Statistic.MEDIAN, "Female")));
+    }
+
     private ImmutableDimensionModel genderDimension() {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Gender")
                 .addMappings(new DimensionMapping(new SymbolExpr("Gender")))
+                .build();
+    }
+
+    private ImmutableDimensionModel statDimension() {
+        return ImmutableDimensionModel.builder()
+                .id(DimensionModel.STATISTIC_ID)
+                .label("Statistic")
                 .build();
     }
 
@@ -430,7 +565,6 @@ public class AnalysisViewModelTest {
                 .formula("1")
                 .build();
     }
-
 
     private MeasureModel intakeCaseCount() {
         return ImmutableMeasureModel.builder()
@@ -485,6 +619,14 @@ public class AnalysisViewModelTest {
             .build();
     }
 
+    private ImmutableMeasureModel numChildren() {
+        return ImmutableMeasureModel.builder()
+                .label("# Children")
+                .formId(Survey.FORM_ID)
+                .formula(Survey.CHILDREN_FIELD_ID.asString())
+                .build();
+    }
+
     private TypeSafeMatcher<Point> point(double value, String... dimensions) {
         return point(value, Statistic.SUM, dimensions);
     }
@@ -494,7 +636,7 @@ public class AnalysisViewModelTest {
 
             @Override
             public void describeTo(Description description) {
-                description.appendValue(new Point(value, statistic, dimensions));
+                description.appendValue(new Point(value, Integer.toString((int) value), dimensions));
             }
 
             @Override
@@ -502,9 +644,6 @@ public class AnalysisViewModelTest {
 
                 double absDiff = Math.abs(point.getValue() - value);
                 if(absDiff >= 1.0) {
-                    return false;
-                }
-                if(point.getStatistic() != statistic) {
                     return false;
                 }
 
@@ -533,31 +672,33 @@ public class AnalysisViewModelTest {
     }
 
     private void dumpQuery(ResourceId formId, String... columns) {
-        System.err.flush();
-        QueryModel model = new QueryModel(formId);
-        for (int i = 0; i < columns.length; i++) {
-            model.selectExpr(columns[i]).as("c" + i);
-        }
-        ColumnSet columnSet = assertLoads(formStore.query(model));
+        if(DUMP_RAW_DATA) {
+            System.err.flush();
+            QueryModel model = new QueryModel(formId);
+            for (int i = 0; i < columns.length; i++) {
+                model.selectExpr(columns[i]).as("c" + i);
+            }
+            ColumnSet columnSet = assertLoads(formStore.query(model));
 
-        for (int i = 0; i < columns.length; i++) {
-            System.out.print(column(columns[i]));
-        }
-        System.out.println();
-
-        for (int i = 0; i < columnSet.getNumRows(); i++) {
-            for (int j = 0; j < columns.length; j++) {
-                ColumnView columnView = columnSet.getColumnView("c" + j);
-                Object cell = columnView.get(i);
-                String cells = "";
-                if(cell != null) {
-                    cells = cell.toString();
-                }
-                System.out.print(column(cells));
+            for (int i = 0; i < columns.length; i++) {
+                System.out.print(column(columns[i]));
             }
             System.out.println();
+
+            for (int i = 0; i < columnSet.getNumRows(); i++) {
+                for (int j = 0; j < columns.length; j++) {
+                    ColumnView columnView = columnSet.getColumnView("c" + j);
+                    Object cell = columnView.get(i);
+                    String cells = "";
+                    if (cell != null) {
+                        cells = cell.toString();
+                    }
+                    System.out.print(column(cells));
+                }
+                System.out.println();
+            }
+            System.out.flush();
         }
-        System.out.flush();
     }
 
     private void dump(AnalysisResult result) {
@@ -565,14 +706,12 @@ public class AnalysisViewModelTest {
         for (DimensionModel dimensionModel : result.getDimensionSet()) {
             System.out.print(column(dimensionModel.getLabel()));
         }
-        System.out.print(column("Statistic"));
         System.out.println(column("Value"));
 
         for (Point point : result.getPoints()) {
             for (int i = 0; i < result.getDimensionSet().getCount(); i++) {
                 System.out.print(column(point.getCategory(i)));
             }
-            System.out.print(column(point.getStatistic().name()));
             System.out.println(column(Double.toString(point.getValue())));
         }
     }

@@ -1663,4 +1663,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Statistic")
     String statistic();
+
+    @DefaultStringValue("Total")
+    String tableTotal();
 }

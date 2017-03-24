@@ -80,6 +80,7 @@ task codeserver(type: JavaExec) {
     classpath project(":i18n").sourceSets.main.java.srcDirs
     classpath project(":i18n").sourceSets.main.resources.srcDirs
     classpath project(":core:promises").sourceSets.main.java.srcDirs
+    classpath project(":core:model").sourceSets.main.java.srcDirs
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs
 

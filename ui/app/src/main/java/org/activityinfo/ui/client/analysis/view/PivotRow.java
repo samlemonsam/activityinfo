@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import org.activityinfo.ui.client.analysis.viewModel.PivotTable;
+import org.activityinfo.ui.client.analysis.viewModel.Point;
 
 public class PivotRow {
     private final String[] rowHeaders;
@@ -16,11 +17,11 @@ public class PivotRow {
         return rowHeaders[rowDimensionIndex];
     }
 
-    public Double getValue(PivotTable.Node leafColumn) {
-        PivotTable.Cell cell = node.getCell(leafColumn);
+    public String getFormattedValue(PivotTable.Node leafColumn) {
+        Point cell = node.getPoint(leafColumn);
         if(cell == null) {
             return null;
         }
-        return cell.getValue();
+        return cell.getFormattedValue();
     }
 }
