@@ -9,13 +9,18 @@ import org.activityinfo.store.query.shared.Aggregation;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.Statistic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 
 
 public class MeasureResultBuilder {
 
 
     private final EffectiveMeasure measure;
+
+    private final DimensionSet dimensionSet;
 
     private ColumnSet columns;
 
@@ -52,6 +57,7 @@ public class MeasureResultBuilder {
      */
     public MeasureResultBuilder(EffectiveMeasure measure, ColumnSet columns) {
         this.measure = measure;
+        this.dimensionSet = measure.getDimensionSet();
         this.columns = columns;
         this.numRows = columns.getNumRows();
         this.numDims = measure.getDimensionSet().getCount();
@@ -61,18 +67,11 @@ public class MeasureResultBuilder {
     }
 
     private boolean[] whichDimensionsRequireTotals() {
-        DimensionSet dimensionSet = measure.getDimensionSet();
         boolean[] totals = new boolean[dimensionSet.getCount()];
         for (int i = 0; i < dimensionSet.getCount(); i++) {
             DimensionModel dim = dimensionSet.getDimension(i);
-            if(dim.getTotals()) {
+            if(dim.getTotals() || dim.getPercentage()) {
                 totals[i] = true;
-            } else if(dim.getPercentage()) {
-                Set<Statistic> stats = measure.getModel().getStatistics();
-                if(stats.contains(Statistic.SUM) ||
-                   stats.contains(Statistic.COUNT)) {
-                    totals[i] = true;
-                }
             }
         }
         return totals;
@@ -215,6 +214,7 @@ public class MeasureResultBuilder {
         }
 
         // Now add percentages if they are requested
+        String percentageLabel = composePercentageLabel(regrouping);
         if(includePercentages) {
             for (int oldGroup = 0; oldGroup < groupSums.length; oldGroup++) {
                 int newGroup = map[oldGroup];
@@ -222,15 +222,40 @@ public class MeasureResultBuilder {
 
                 points.add(new Point(conditionalProbability,
                         formatPercentage(conditionalProbability),
-                        withStatistic(regrouping.getOldGroup(oldGroup), "%")));
+                        withStatistic(regrouping.getOldGroup(oldGroup), percentageLabel)));
             }
         }
 
         if(includeTotals && includePercentages) {
             for (String[] newGroup : regrouping.getNewGroups()) {
-                points.add(new Point(1.0, formatPercentage(1.0), withStatistic(newGroup, "%")));
+                points.add(new Point(1.0, formatPercentage(1.0), withStatistic(newGroup, percentageLabel)));
             }
         }
+    }
+
+    private String composePercentageLabel(Regrouping regrouping) {
+        StringBuilder s = new StringBuilder("%");
+
+        if(!isGrandTotal(regrouping)) {
+            for (int i = 0; i < dimensionSet.getCount(); i++) {
+                if(regrouping.isDimensionTotaled(i)) {
+                    s.append(" ");
+                    s.append(dimensionSet.getDimension(i).getLabel());
+                }
+            }
+        }
+        return s.toString();
+    }
+
+    public boolean isGrandTotal(Regrouping regrouping) {
+        for (EffectiveMapping dim : measure.getDimensions()) {
+            if(!dim.getId().equals(DimensionModel.STATISTIC_ID)) {
+                if(!regrouping.isDimensionTotaled(dim.getIndex())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private String formatPercentage(double probability) {

@@ -125,4 +125,6 @@ public class Regrouping {
     public boolean isDimensionTotaled(int index) {
         return subset[index];
     }
+
+
 }

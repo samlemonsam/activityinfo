@@ -189,15 +189,15 @@ public class AnalysisViewModelTest {
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension().withPercentage(true).withTotals(true))
+                .addDimensions(statDimension().withAxis(Axis.COLUMN))
                 .build();
 
         assertThat(pivot(model), equalTo(
-                table("Gender   Female   Statistic   Sum   212    ",
-                      "                              %     52%    ",
-                      "         Male     Statistic   Sum   199    ",
-                      "                              %     48%    ",
-                      "         Total    Statistic   Sum   411    ",
-                      "                              %     100%   ")));
+                table("                  Statistic          ",
+                      "                  Sum         %      ",
+                      "Gender   Female   212         52%    ",
+                      "         Male     199         48%    ",
+                      "         Total    411         100%   ")));
     }
 
     @Test
@@ -242,6 +242,30 @@ public class AnalysisViewModelTest {
                 point(92, "Female", "Married"),
                 point(64, "Female", "Single")));
     }
+
+    @Test
+    public void twoDimensionsWithPercentages() {
+
+        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension()
+                        .withPercentage(true)
+                        .withAxis(Axis.ROW)
+                        .withTotals(true))
+                .addDimensions(marriedDimension()
+                        .withAxis(Axis.COLUMN)
+                        .withLabel("Civil Status")
+                        .withTotals(true)
+                        .withPercentage(true))
+                .addDimensions(statDimension().withAxis(Axis.COLUMN))
+                .build();
+
+        pivot(model);
+
+    }
+
 
     @Test
     public void twoDimensionsWithTotals() {
