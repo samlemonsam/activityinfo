@@ -105,11 +105,10 @@ public class PivotTableRenderer {
 
     private int addValues(PivotTable.Node parentRow, int row, int col) {
         if(parentRow.isLeaf()) {
-            for (Map.Entry<PivotTable.Node, PivotTable.Cell> entry : parentRow.getCells().entrySet()) {
+            for (Map.Entry<PivotTable.Node, Point> entry : parentRow.getPoints().entrySet()) {
                 int leafIndex = leafColumns.indexOf(entry.getKey());
-                String text = Integer.toString(entry.getValue().getValue().intValue());
 
-                addCell(row, col + leafIndex, text);
+                addCell(row, col + leafIndex, entry.getValue().getFormattedValue());
             }
             row++;
         } else {

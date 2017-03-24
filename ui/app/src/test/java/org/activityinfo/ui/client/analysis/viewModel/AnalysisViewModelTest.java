@@ -168,19 +168,37 @@ public class AnalysisViewModelTest {
                 point(199+212, TOTAL)));
     }
 
-//    @Test
-//    public void dimensionsWithTotalPercentages() {
-//
-//        AnalysisModel model = ImmutableAnalysisModel.builder()
-//                .addMeasures(surveyCount().withStatistics(Statistic.PERCENTAGE))
-//                .addDimensions(genderDimension().withTotals(true))
-//                .build();
-//
-//        assertThat(points(model), containsInAnyOrder(
-//                point(199, "Male"),
-//                point(212, "Female"),
-//                point(199+212, TOTAL)));
-//    }
+    @Test
+    public void dimensionWithPercentages() {
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension().withPercentage(true))
+                .build();
+
+        assertThat(pivot(model), equalTo(
+                table("Gender   Female   Statistic   Sum   212   ",
+                      "                              %     52%   ",
+                      "         Male     Statistic   Sum   199   ",
+                      "                              %     48%   ")));
+    }
+
+    @Test
+    public void dimensionWithPercentagesWithTotals() {
+
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+                .addMeasures(surveyCount())
+                .addDimensions(genderDimension().withPercentage(true).withTotals(true))
+                .build();
+
+        assertThat(pivot(model), equalTo(
+                table("Gender   Female   Statistic   Sum   212    ",
+                      "                              %     52%    ",
+                      "         Male     Statistic   Sum   199    ",
+                      "                              %     48%    ",
+                      "         Total    Statistic   Sum   411    ",
+                      "                              %     100%   ")));
+    }
 
     @Test
     public void dimensionListItems() {
@@ -594,7 +612,7 @@ public class AnalysisViewModelTest {
 
             @Override
             public void describeTo(Description description) {
-                description.appendValue(new Point(value, statistic, dimensions));
+                description.appendValue(new Point(value, Integer.toString((int) value), dimensions));
             }
 
             @Override
@@ -602,9 +620,6 @@ public class AnalysisViewModelTest {
 
                 double absDiff = Math.abs(point.getValue() - value);
                 if(absDiff >= 1.0) {
-                    return false;
-                }
-                if(point.getStatistic() != statistic) {
                     return false;
                 }
 
@@ -667,14 +682,12 @@ public class AnalysisViewModelTest {
         for (DimensionModel dimensionModel : result.getDimensionSet()) {
             System.out.print(column(dimensionModel.getLabel()));
         }
-        System.out.print(column("Statistic"));
         System.out.println(column("Value"));
 
         for (Point point : result.getPoints()) {
             for (int i = 0; i < result.getDimensionSet().getCount(); i++) {
                 System.out.print(column(point.getCategory(i)));
             }
-            System.out.print(column(point.getStatistic().name()));
             System.out.println(column(Double.toString(point.getValue())));
         }
     }

@@ -5,9 +5,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class EffectiveModel {
 
@@ -19,42 +17,50 @@ public class EffectiveModel {
 
     public EffectiveModel(AnalysisModel model, FormForest formForest) {
         this.model = model;
-        this.dimensionSet = new DimensionSet(model.getDimensions());
+
+        List<DimensionModel> dimensions = new ArrayList<>(model.getDimensions());
+
+        // Include a Statistics dimension if required but not added by
+        // the user to the model.
+        if(model.isMeasureDefinedWithMultipleStatistics() &&
+                !isDefined(dimensions, DimensionModel.STATISTIC_ID)) {
+
+            dimensions.add(
+                    ImmutableDimensionModel.builder()
+                            .id(DimensionModel.STATISTIC_ID)
+                            .label(I18N.CONSTANTS.statistic())
+                            .build());
+        }
+
+        // Create a DimensionSet, which maps each dimension
+        // to an integer index.
+        this.dimensionSet = new DimensionSet(dimensions);
+
         for (MeasureModel measureModel : model.getMeasures()) {
             this.measures.add(new EffectiveMeasure(measureModel,
                     formForest.findTree(measureModel.getFormId()),
                     dimensionSet));
         }
 
-        Set<String> definedDimensionIds = new HashSet<>();
+        for (DimensionModel dimensionModel : dimensions) {
 
-        for (DimensionModel dimensionModel : model.getDimensions()) {
-            definedDimensionIds.add(dimensionModel.getId());
-
-            if(dimensionModel.getId().equals(DimensionModel.STATISTIC_ID)) {
-                dimensions.add(new EffectiveDimension(dimensionModel));
-
-            } else {
-                int index = dimensionSet.getIndex(dimensionModel);
-                List<EffectiveMapping> effectiveMappings = new ArrayList<>();
-                for (EffectiveMeasure effectiveMeasure : measures) {
-                    effectiveMappings.add(effectiveMeasure.getDimension(index));
-                }
-                dimensions.add(new EffectiveDimension(index, dimensionModel, effectiveMappings));
+            int index = dimensionSet.getIndex(dimensionModel);
+            List<EffectiveMapping> effectiveMappings = new ArrayList<>();
+            for (EffectiveMeasure effectiveMeasure : measures) {
+                effectiveMappings.add(effectiveMeasure.getDimension(index));
             }
-        }
-
-        if(model.isMeasureDefinedWithMultipleStatistics() &&
-                !definedDimensionIds.contains(DimensionModel.STATISTIC_ID)) {
-
-            dimensions.add(new EffectiveDimension(
-                    ImmutableDimensionModel.builder()
-                    .id(DimensionModel.STATISTIC_ID)
-                    .label(I18N.CONSTANTS.statistic())
-                    .build()));
+            this.dimensions.add(new EffectiveDimension(index, dimensionModel, effectiveMappings));
         }
     }
 
+    private boolean isDefined(List<DimensionModel> dimensions, String dimensionId) {
+        for (DimensionModel dimension : dimensions) {
+            if(dimension.getId().equals(dimensionId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     public List<EffectiveDimension> getDimensions() {

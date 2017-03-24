@@ -15,6 +15,8 @@ public interface AnalysisBundle extends ClientBundle {
 
         String handle();
 
+        String totalCell();
+
     }
 
 }

@@ -74,6 +74,11 @@ public abstract class AnalysisModel {
                 return true;
             }
         }
+        for (DimensionModel dimensionModel : getDimensions()) {
+            if(dimensionModel.getPercentage()) {
+                return true;
+            }
+        }
         return false;
     }
 }

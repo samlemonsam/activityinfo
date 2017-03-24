@@ -177,6 +177,12 @@ public class DimensionPane implements IsWidget {
         totalsItem.addCheckChangeHandler(event -> updateTotals(dim, event.getChecked()));
         contextMenu.add(totalsItem);
 
+        CheckMenuItem percentagesItem = new CheckMenuItem("Include Percentages");
+        percentagesItem.setChecked(dim.getModel().getPercentage());
+        percentagesItem.addCheckChangeHandler(event -> updatePercentages(dim, event.getChecked()));
+        contextMenu.add(percentagesItem);
+
+
         MenuItem totalsLabel = new MenuItem("Total Label...");
         totalsLabel.addSelectionHandler(event -> editTotalLabel(dim));
         contextMenu.add(totalsLabel);
@@ -201,6 +207,8 @@ public class DimensionPane implements IsWidget {
 
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
     }
+
+
 
 
     private void editLabel(DimensionModel dim) {
@@ -251,6 +259,15 @@ public class DimensionPane implements IsWidget {
                         ImmutableDimensionModel.builder()
                                 .from(dim.getModel())
                                 .totals(checkState == Tree.CheckState.CHECKED)
+                                .build()));
+    }
+
+    private void updatePercentages(EffectiveDimension dim, Tree.CheckState checkState) {
+        viewModel.updateModel(
+                viewModel.getModel().withDimension(
+                        ImmutableDimensionModel.builder()
+                                .from(dim.getModel())
+                                .percentage(checkState == Tree.CheckState.CHECKED)
                                 .build()));
     }
 

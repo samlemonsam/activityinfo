@@ -67,7 +67,7 @@ public class PivotTableView implements IsWidget {
 
         List<PivotTable.Node> leafColumns = pivotTable.getRootColumn().getLeaves();
         for (PivotTable.Node leafColumn : leafColumns) {
-            ColumnConfig<PivotRow, Double> column = new ColumnConfig<>(new PivotValueProvider(leafColumn));
+            ColumnConfig<PivotRow, String> column = new ColumnConfig<>(new PivotValueProvider(leafColumn));
             if(leafColumn.getCategoryLabel() == null) {
                 column.setHeader(I18N.CONSTANTS.value());
             } else {

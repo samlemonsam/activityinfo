@@ -6,12 +6,10 @@ import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.shared.Aggregation;
+import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.Statistic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 
 public class MeasureResultBuilder {
@@ -33,8 +31,19 @@ public class MeasureResultBuilder {
      * List of all points in the multi-dimensional space resulting from this measure.
      */
     private final List<Point> points = new ArrayList<>();
+
     private MultiDimSet multiDimSet;
 
+
+    /**
+     * The index of the "statistic" dimension, or -1 if not requested.
+     */
+    private int statisticDimensionIndex;
+
+    /**
+     * Dimensions which require totals
+     */
+    private final boolean[] totalsRequired;
 
     /**
      *
@@ -46,7 +55,27 @@ public class MeasureResultBuilder {
         this.columns = columns;
         this.numRows = columns.getNumRows();
         this.numDims = measure.getDimensionSet().getCount();
+        this.statisticDimensionIndex = measure.getDimensionSet().getIndexByDimensionId(DimensionModel.STATISTIC_ID);
+        this.totalsRequired = whichDimensionsRequireTotals();
 
+    }
+
+    private boolean[] whichDimensionsRequireTotals() {
+        DimensionSet dimensionSet = measure.getDimensionSet();
+        boolean[] totals = new boolean[dimensionSet.getCount()];
+        for (int i = 0; i < dimensionSet.getCount(); i++) {
+            DimensionModel dim = dimensionSet.getDimension(i);
+            if(dim.getTotals()) {
+                totals[i] = true;
+            } else if(dim.getPercentage()) {
+                Set<Statistic> stats = measure.getModel().getStatistics();
+                if(stats.contains(Statistic.SUM) ||
+                   stats.contains(Statistic.COUNT)) {
+                    totals[i] = true;
+                }
+            }
+        }
+        return totals;
     }
 
     public void execute() {
@@ -119,7 +148,6 @@ public class MeasureResultBuilder {
 
             aggregateMulti(valueArray, groupArray, groupMap);
         }
-
     }
 
 
@@ -138,11 +166,10 @@ public class MeasureResultBuilder {
 
         for (Statistic statistic : measure.getModel().getStatistics()) {
 
-
             /*
              * We always do an initial aggregation that includes all the dimensions
              */
-            aggregate(statistic, valueArray, groupArray, groupMap.getGroups());
+            double[] groupedValues = aggregate(statistic, valueArray, groupArray, groupMap.getGroups());
 
             /*
              * In addition to the values for the full dimension set, totals may be requested for one or
@@ -151,12 +178,113 @@ public class MeasureResultBuilder {
              * The subset array indicates which dimensions should excluded in this round and thus totaled.
              */
             boolean subset[] = new boolean[numDims];
-            while (nextSubset(measure.getDimensionSet(), subset)) {
+            while (nextSubset(subset, totalsRequired)) {
                 Regrouping regrouping = groupMap.total(groupArray, subset);
-                aggregate(statistic, valueArray, regrouping.getGroupArray(), regrouping.getGroups());
+
+                if(statistic == Statistic.SUM) {
+                    totalSums(regrouping, groupedValues);
+                } else {
+                    aggregate(statistic, valueArray, regrouping.getNewGroupArray(), regrouping.getNewGroups());
+                }
+            }
+        }
+    }
+
+    private void totalSums(Regrouping regrouping, double[] groupSums) {
+        boolean includeTotals = includeTotals(regrouping);
+        boolean includePercentages = includePercentages(regrouping);
+
+        double[] totals = new double[regrouping.getNewGroupCount()];
+        int[] map = regrouping.getMap();
+
+        // First, merge the individual group sums into
+        // totals by the selected dimensions
+        for (int oldGroup = 0; oldGroup < groupSums.length; oldGroup++) {
+            int newGroup = map[oldGroup];
+            totals[newGroup] += groupSums[oldGroup];
+        }
+
+        // Add a point for each of the collapsed groups
+        if(includeTotals) {
+            List<String[]> newGroups = regrouping.getNewGroups();
+            for (int i = 0; i < totals.length; i++) {
+                points.add(new Point(totals[i],
+                        format(totals[i]),
+                        withStatistic(newGroups.get(i), Statistic.SUM)));
             }
         }
 
+        // Now add percentages if they are requested
+        if(includePercentages) {
+            for (int oldGroup = 0; oldGroup < groupSums.length; oldGroup++) {
+                int newGroup = map[oldGroup];
+                double conditionalProbability = groupSums[oldGroup] / totals[newGroup];
+
+                points.add(new Point(conditionalProbability,
+                        formatPercentage(conditionalProbability),
+                        withStatistic(regrouping.getOldGroup(oldGroup), "%")));
+            }
+        }
+
+        if(includeTotals && includePercentages) {
+            for (String[] newGroup : regrouping.getNewGroups()) {
+                points.add(new Point(1.0, formatPercentage(1.0), withStatistic(newGroup, "%")));
+            }
+        }
+    }
+
+    private String formatPercentage(double probability) {
+        return Integer.toString((int)Math.round(probability * 100d)) + "%";
+    }
+
+    private boolean includePercentages(Regrouping regrouping) {
+        DimensionSet dimensionSet = measure.getDimensionSet();
+        for (int i = 0; i < dimensionSet.getCount(); i++) {
+            if (regrouping.isDimensionTotaled(i)) {
+                if(!dimensionSet.getDimension(i).getPercentage()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean includeTotals(Regrouping regrouping) {
+        DimensionSet dimensionSet = measure.getDimensionSet();
+        for (int i = 0; i < dimensionSet.getCount(); i++) {
+            if (regrouping.isDimensionTotaled(i)) {
+                if(!dimensionSet.getDimension(i).getTotals()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private String[] withStatistic(String[] group, Statistic statistic) {
+        return withStatistic(group, statistic.getLabel());
+    }
+
+    private String[] withStatistic(String[] group, String statistic) {
+        if(statisticDimensionIndex == -1) {
+            return group;
+        } else {
+            String[] groupWithStat = Arrays.copyOf(group, group.length);
+            groupWithStat[statisticDimensionIndex] = statistic;
+            return groupWithStat;
+        }
+    }
+
+    private boolean isCommutative(Statistic statistic) {
+        switch (statistic) {
+            case COUNT:
+            case SUM:
+            case MIN:
+            case MAX:
+                return true;
+            default:
+                return false;
+        }
     }
 
 
@@ -164,20 +292,19 @@ public class MeasureResultBuilder {
      * Finds the next combination of dimensions to include in the aggregation.
      */
     @VisibleForTesting
-    static boolean nextSubset(DimensionSet dimensionSet, boolean[] excludedDimensions) {
+    static boolean nextSubset(boolean[] subset, boolean[] totalsRequired) {
         // Find the right-most dimension we can "increment"
-        int i = excludedDimensions.length - 1;
+        int i = subset.length - 1;
         while(i >= 0) {
-            if(!excludedDimensions[i] && dimensionSet.getDimension(i).getTotals()) {
-                excludedDimensions[i] = true;
-                Arrays.fill(excludedDimensions, i+1, excludedDimensions.length, false);
+            if(!subset[i] && totalsRequired[i]) {
+                subset[i] = true;
+                Arrays.fill(subset, i+1, subset.length, false);
                 return true;
             }
             i--;
         }
         return false;
     }
-
 
     private void aggregateMulti(double[] valueArray, int[] groupArray, GroupMap groupMap) {
 
@@ -204,12 +331,12 @@ public class MeasureResultBuilder {
             for (int i = 0; i < totals.length; i++) {
                 String[] group =  category.group(groupMap.getGroup(i));
 
-                points.add(new Point(totals[i], group));
+                points.add(new Point(totals[i], format(totals[i]), withStatistic(group, Statistic.SUM)));
             }
         }
     }
 
-    private void aggregate(Statistic statistic, double[] valueArray, int[] groupId, List<String[]> groups) {
+    private double[] aggregate(Statistic statistic, double[] valueArray, int[] groupId, List<String[]> groups) {
 
         StatFunction stat = aggregationFunction(statistic);
 
@@ -221,8 +348,14 @@ public class MeasureResultBuilder {
                 groups.size());
 
         for (int i = 0; i < groups.size(); i++) {
-            points.add(new Point(aggregatedValues[i], statistic, groups.get(i)));
+            points.add(new Point(aggregatedValues[i], format(aggregatedValues[i]), withStatistic(groups.get(i), statistic)));
         }
+
+        return aggregatedValues;
+    }
+
+    private String format(double value) {
+        return Integer.toString((int)Math.round(value));
     }
 
     private static StatFunction aggregationFunction(Statistic statistic) {

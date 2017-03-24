@@ -1,7 +1,6 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Ordering;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.Axis;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
@@ -23,12 +22,6 @@ public class EffectiveDimension {
         this.model = model;
         this.effectiveMappings = effectiveMappings;
         this.totalLabel = model.getTotalLabel().orElse(I18N.CONSTANTS.tableTotal());
-    }
-
-    public EffectiveDimension(DimensionModel model) {
-        this.model = model;
-        this.effectiveMappings = Collections.emptyList();
-        this.index = -1;
     }
 
     public String getId() {
@@ -67,34 +60,35 @@ public class EffectiveDimension {
     }
 
     public Function<Point, String> getCategoryProvider() {
-        switch (model.getId()) {
-            case DimensionModel.STATISTIC_ID:
-                return (p -> p.getStatistic().getLabel());
-
-            default:
-                return (p -> p.getCategory(index));
-        }
+        return (p -> p.getCategory(index));
     }
 
     public Comparator<String> getCategoryComparator() {
         switch (model.getId()) {
             case DimensionModel.STATISTIC_ID:
-                return new TotalsLast(Ordering.explicit(Statistic.labels()));
+                return new CategoryComparator(Statistic.labels());
             default:
-                return new TotalsLast(Ordering.natural());
+                return new CategoryComparator();
         }
     }
 
-    private static class TotalsLast implements Comparator<String> {
+    private static class CategoryComparator implements Comparator<String> {
 
-        private final Comparator<String> comparator;
+        private final List<String> explicitOrder;
 
-        public TotalsLast(Comparator<String> comparator) {
-            this.comparator = comparator;
+        public CategoryComparator(List<String> explicitOrder) {
+            this.explicitOrder = explicitOrder;
+        }
+
+        public CategoryComparator() {
+            this.explicitOrder = Collections.emptyList();
         }
 
         @Override
         public int compare(String a, String b) {
+
+            // FIRST: Total categories always are sorted to the end
+
             boolean ta = Point.TOTAL.equals(a);
             boolean tb = Point.TOTAL.equals(b);
             if(ta && tb) {
@@ -104,7 +98,29 @@ public class EffectiveDimension {
             } else if(tb) {
                 return -1;
             }
-            return comparator.compare(a, b);
+
+            // THEN: take into account any explicit ordering provided.
+            // Explicitly ordered values always proceed unordered values.
+            if(!explicitOrder.isEmpty()) {
+                int ia = explicitOrder.indexOf(a);
+                int ib = explicitOrder.indexOf(b);
+
+                if (ia != -1 && ib != -1) {
+                    // both values are explicitly ordered
+                    return Integer.compare(ia, ib);
+                }
+                if (ib != -1) {
+                    // a is not explicitly ordered, so follows b
+                    return +1;
+                }
+                if (ia != -1) {
+                    // b is not explicity ordered, so follows a
+                    return +1;
+                }
+            }
+
+            // Finally, if neither values are explicitly ordered, use natural (alphabetic) order
+            return a.compareTo(b);
         }
     }
 

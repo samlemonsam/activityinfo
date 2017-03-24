@@ -1,7 +1,5 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
-import org.activityinfo.ui.client.analysis.model.Statistic;
-
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 
@@ -14,30 +12,33 @@ public class Point {
 
     private final double value;
 
-    @Nonnull
-    private final Statistic statistic;
+    private final String formattedValue;
 
     @Nonnull
     private final String[] dimensions;
 
-    public Point(double value, String[] dimensions) {
+    public Point(double value, String formattedValue, String[] dimensions) {
+        assert !anyNull(dimensions) : "Dimension categories cannot be null";
         this.value = value;
-        this.statistic = Statistic.SUM;
+        this.formattedValue = formattedValue;
         this.dimensions = dimensions;
     }
 
-    public Point(double value, Statistic statistic, String[] dimensions) {
-        this.value = value;
-        this.statistic = statistic;
-        this.dimensions = dimensions;
-    }
-
-    public Statistic getStatistic() {
-        return statistic;
+    private boolean anyNull(String[] dimensions) {
+        for (String dimension : dimensions) {
+            if(dimension == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public double getValue() {
         return value;
+    }
+
+    public String getFormattedValue() {
+        return formattedValue;
     }
 
     public String getCategory(int dimensionIndex) {
@@ -48,8 +49,6 @@ public class Point {
     public String toString() {
         StringBuilder s = new StringBuilder("Point{");
         s.append(value);
-        s.append(',');
-        s.append(statistic.name());
         for (int i = 0; i < dimensions.length; i++) {
             s.append(",");
             if(dimensions[i] == null) {
@@ -70,8 +69,6 @@ public class Point {
         Point point = (Point) o;
 
         if (Double.compare(point.value, value) != 0) return false;
-        if (statistic != point.statistic) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(dimensions, point.dimensions);
 
     }
@@ -82,7 +79,6 @@ public class Point {
         long temp;
         temp = Double.doubleToLongBits(value);
         result = (int) (temp ^ (temp >>> 32));
-        result = 31 * result + statistic.hashCode();
         result = 31 * result + Arrays.hashCode(dimensions);
         return result;
     }

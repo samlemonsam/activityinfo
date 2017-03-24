@@ -23,9 +23,7 @@ public class DimensionSet implements Iterable<DimensionModel> {
     public DimensionSet(List<DimensionModel> dimensions) {
         List<DimensionModel> activeDimensions = new ArrayList<>();
         for (DimensionModel dimension : dimensions) {
-            if(!dimension.getMappings().isEmpty()) {
-                activeDimensions.add(dimension);
-            }
+            activeDimensions.add(dimension);
         }
         this.count = activeDimensions.size();
         this.dimensions = activeDimensions.toArray(new DimensionModel[count]);
@@ -63,4 +61,17 @@ public class DimensionSet implements Iterable<DimensionModel> {
         return Arrays.asList(dimensions).iterator();
     }
 
+    /**
+     *
+     * @return the index of the Dimension with the given {@code dimensionId},
+     * or -1 if no such dimension is included.
+     */
+    public int getIndexByDimensionId(String dimensionId) {
+        for (int i = 0; i < dimensions.length; i++) {
+            if (dimensions[i].getId().equals(dimensionId)) {
+                 return i;
+            }
+        }
+        return -1;
+    }
 }

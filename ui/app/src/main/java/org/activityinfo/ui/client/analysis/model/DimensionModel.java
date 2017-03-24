@@ -31,4 +31,9 @@ public abstract class DimensionModel {
 
     public abstract Optional<String> getTotalLabel();
 
+    @org.immutables.value.Value.Default
+    public boolean getPercentage() {
+        return false;
+    }
+
 }

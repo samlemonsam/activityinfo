@@ -46,7 +46,6 @@ public class PivotTable {
         this.columnDimensions = results.getEffectiveModel().getDimensions(Axis.COLUMN);
 
         for (Point point : results.getPoints()) {
-
             PivotTable.Node column = columnDimensions.isEmpty() ? rootColumn : find(rootColumn,
                     columnDimensions.iterator(),
                     point);
@@ -54,7 +53,7 @@ public class PivotTable {
                     rowDimensions.iterator(),
                     point);
 
-            row.setValue(column, point.getValue());
+            row.setValue(column, point);
         }
     }
 
@@ -110,23 +109,7 @@ public class PivotTable {
     public Node getRootSeries() {
         return getRootColumn();
     }
-
-    public static class Cell {
-        private Double value;
-
-        public Cell(Double value) {
-            this.value = value;
-        }
-
-        public Double getValue() {
-            return value;
-        }
-
-        public void setValue(Double value) {
-            this.value = value;
-        }
-    }
-
+    
     public static List<String> flattenLabels(List<Node> list) {
         List<String> labels = new ArrayList<>();
         for (Node node : list) {
@@ -142,7 +125,7 @@ public class PivotTable {
         private String category;
 
         private Map<String, Node> childMap = new HashMap<>();
-        private Map<Node, Cell> cells = new HashMap<>();
+        private Map<Node, Point> cells = new HashMap<>();
 
         private List<Node> children = new ArrayList<>();
 
@@ -242,11 +225,11 @@ public class PivotTable {
             return children.get(children.size() - 1);
         }
 
-        private void setValue(Node column, Double value) {
-            cells.put(column, new Cell(value));
+        private void setValue(Node column, Point value) {
+            cells.put(column, value);
         }
 
-        public Cell getCell(Node column) {
+        public Point getPoint(Node column) {
             return cells.get(column);
         }
 
@@ -266,7 +249,7 @@ public class PivotTable {
             }
         }
 
-        public Map<Node, Cell> getCells() {
+        public Map<Node, Point> getPoints() {
             return cells;
         }
 
@@ -306,7 +289,7 @@ public class PivotTable {
             }
             sb.append(dimension).append(":").append(category);
 
-            for (Entry<Node, Cell> column : cells.entrySet()) {
+            for (Entry<Node, Point> column : cells.entrySet()) {
                 sb.append(" | ");
                 sb.append(column.getKey().category).append("=").append(column.getValue().getValue());
             }
@@ -316,24 +299,6 @@ public class PivotTable {
             }
 
         }
-
-        public double getMaxValue() {
-            return findMaxValue(0.0);
-        }
-
-        private double findMaxValue(double max) {
-            for (Cell cell : cells.values()) {
-                if (cell.getValue() != null && cell.getValue() > max) {
-                    max = cell.getValue();
-                }
-            }
-            for (Node child : children) {
-                max = child.findMaxValue(max);
-            }
-
-            return max;
-        }
-
         public boolean isLeaf() {
             return children.isEmpty();
         }
