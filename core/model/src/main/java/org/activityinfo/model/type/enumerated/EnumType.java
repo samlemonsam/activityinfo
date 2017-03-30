@@ -84,7 +84,7 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
+    public EnumValue parseJsonValue(JsonElement value) {
         if(value instanceof JsonPrimitive) {
             ResourceId id = ResourceId.valueOf(value.getAsString());
             return new EnumValue(id);

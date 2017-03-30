@@ -10,10 +10,13 @@ import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
+import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.table.viewModel.EffectiveTableModel;
+import org.activityinfo.ui.client.table.viewModel.TableViewModel;
 
 
 public class TableGrid implements IsWidget {
@@ -25,7 +28,7 @@ public class TableGrid implements IsWidget {
     private final ColumnSetProxy proxy;
     private final PagingLoader<PagingLoadConfig, PagingLoadResult<Integer>> loader;
 
-    public TableGrid(final EffectiveTableModel tableModel) {
+    public TableGrid(TableViewModel viewModel, final EffectiveTableModel tableModel) {
 
         // GXT Grid's are built around row-major data storage, while AI uses
         // Column-major order here. So we construct fake loaders/stores that represent
@@ -45,6 +48,19 @@ public class TableGrid implements IsWidget {
         gridView.setColumnLines(true);
         gridView.setTrackMouseOver(false);
 
+        CellSelectionModel<Integer> sm = new CellSelectionModel<>();
+        sm.addCellSelectionChangedHandler(new CellSelectionChangedEvent.CellSelectionChangedHandler<Integer>() {
+            @Override
+            public void onCellSelectionChanged(CellSelectionChangedEvent<Integer> event) {
+                if(proxy.isLoaded()) {
+                    if(!event.getSelection().isEmpty()) {
+                        int rowIndex = event.getSelection().get(0).getModel();
+                        viewModel.select(new RecordRef(tableModel.getFormId(), proxy.getRecordId(rowIndex)));
+                    }
+                }
+            }
+        });
+
         grid = new Grid<Integer>(store, columns.buildColumnModel()) {
             @Override
             protected void onAttach() {
@@ -62,7 +78,7 @@ public class TableGrid implements IsWidget {
         grid.setLoader(loader);
         grid.setLoadMask(true);
         grid.setView(gridView);
-        grid.setSelectionModel(new CellSelectionModel<>());
+        grid.setSelectionModel(sm);
 
         // Setup grid filters
         GridFilters<Integer> filters = new GridFilters<>();

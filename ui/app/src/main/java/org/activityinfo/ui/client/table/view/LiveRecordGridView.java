@@ -8,6 +8,7 @@ import com.sencha.gxt.widget.core.client.grid.LiveGridView;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import org.activityinfo.i18n.shared.I18N;
 
 public class LiveRecordGridView extends LiveGridView<Integer> {
 
@@ -45,9 +46,9 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
         }
 
         MenuItem columns = new MenuItem();
-        columns.setText(DefaultMessages.getMessages().gridView_columnsText());
+        columns.setText(I18N.CONSTANTS.chooseColumns());
         columns.setIcon(header.getAppearance().columnsIcon());
-        columns.setData("gxt-columns", "true");
+
 
         menu.add(columns);
         return menu;

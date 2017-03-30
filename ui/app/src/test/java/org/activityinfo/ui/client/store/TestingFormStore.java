@@ -2,11 +2,13 @@ package org.activityinfo.ui.client.store;
 
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.testing.TestingCatalog;
@@ -87,6 +89,11 @@ public class TestingFormStore implements FormStore {
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
         return maybeExecute(() -> testingCatalog.query(queryModel));
+    }
+
+    @Override
+    public Observable<FormRecord> getRecord(RecordRef recordRef) {
+        return maybeExecute(() -> testingCatalog.getForm(recordRef.getFormId()).get().get(recordRef.getRecordId()).get());
     }
 
     private <T> Observable<T> maybeExecute(Supplier<T> task) {

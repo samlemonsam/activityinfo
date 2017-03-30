@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
@@ -18,7 +19,7 @@ import org.activityinfo.ui.client.table.viewModel.TableViewModel;
  */
 public class TableView implements IsWidget {
 
-    private TableViewModel model;
+    private TableViewModel viewModel;
     private ContentPanel panel;
     private final BorderLayoutContainer container;
 
@@ -27,15 +28,13 @@ public class TableView implements IsWidget {
 
     private VerticalLayoutContainer center;
 
-    private DetailsPane detailsPane;
-
     private Subscription subscription;
 
-    public TableView(final TableViewModel model) {
-        this.model = model;
+    public TableView(final TableViewModel viewModel) {
 
+        TableBundle.INSTANCE.style().ensureInjected();
 
-        this.detailsPane = new DetailsPane();
+        this.viewModel = viewModel;
 
         TextButton newButton = new TextButton("New Record");
         newButton.addSelectHandler(this::onNewRecordClicked);
@@ -48,7 +47,11 @@ public class TableView implements IsWidget {
         center.add(toolBar, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
 
         this.container = new BorderLayoutContainer();
-        this.container.setEastWidget(detailsPane, new BorderLayoutContainer.BorderLayoutData(150));
+        BorderLayoutContainer.BorderLayoutData east = new BorderLayoutContainer.BorderLayoutData(150);
+        east.setSplit(true);
+        int margins = 8;
+        east.setMargins(new Margins(0, 0, 0, margins));
+        this.container.setEastWidget(new SidePanel(viewModel), east);
         this.container.setCenterWidget(center);
 
         this.panel = new ContentPanel() {
@@ -56,7 +59,7 @@ public class TableView implements IsWidget {
             @Override
             protected void onAttach() {
                 super.onAttach();
-                subscription = model.getEffectiveTable().subscribe(observable -> effectiveModelChanged());
+                subscription = viewModel.getEffectiveTable().subscribe(observable -> effectiveModelChanged());
             }
 
             @Override
@@ -70,7 +73,7 @@ public class TableView implements IsWidget {
     }
 
     private void onNewRecordClicked(SelectEvent event) {
-        FormDialog dialog = new FormDialog(model.getFormStore(), model.getFormId());
+        FormDialog dialog = new FormDialog(viewModel.getFormStore(), viewModel.getFormId());
         dialog.show();
     }
 
@@ -80,18 +83,18 @@ public class TableView implements IsWidget {
     }
 
     private void effectiveModelChanged() {
-        if(model.getEffectiveTable().isLoading()) {
+        if(viewModel.getEffectiveTable().isLoading()) {
             this.panel.mask();
         } else {
-            this.panel.setHeading(model.getEffectiveTable().get().getFormLabel());
+            this.panel.setHeading(viewModel.getEffectiveTable().get().getFormLabel());
             this.panel.unmask();
             if(grid == null) {
-                grid = new TableGrid(model.getEffectiveTable().get());
+                grid = new TableGrid(viewModel, viewModel.getEffectiveTable().get());
                 center.add(grid, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
                 center.forceLayout();
 
             } else {
-                grid.update(model.getEffectiveTable());
+                grid.update(viewModel.getEffectiveTable());
             }
         }
     }

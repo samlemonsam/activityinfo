@@ -1,0 +1,17 @@
+
+.detailPane {
+    overflow-y: scroll;
+    padding: 10px;
+    font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+    font-size: 13px;
+}
+
+.detailPane h3 {
+    margin-top: 1em;
+    margin-bottom: 0.3em;
+    color: gray;
+}
+
+.detailPane p {
+
+}

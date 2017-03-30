@@ -8,11 +8,14 @@ import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.table.viewModel.EffectiveTableModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer>> {
+
 
     private class PendingRequest {
         PagingLoadConfig config;
@@ -122,12 +125,24 @@ class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer
         return provider;
     }
 
+    public boolean isLoaded() {
+        return columnSet != null;
+    }
+
     public ValueProvider<Integer, String> stringValueProvider(String columnId) {
         return addProvider(new StringValueProvider(columnId));
     }
 
     public ValueProvider<Integer, Double> doubleValueProvider(String columnId) {
         return addProvider(new DoubleValueProvider(columnId));
+    }
+
+    public ResourceId getRecordId(int rowIndex) {
+        if(columnSet == null) {
+            throw new IllegalStateException("ColumnSet not loaded");
+        }
+        ColumnView idView = columnSet.getColumnView(EffectiveTableModel.ID_COLUMN_ID);
+        return ResourceId.valueOf(idView.getString(rowIndex));
     }
 
 }

@@ -7,6 +7,9 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.ui.client.table.viewModel.EffectiveColumn;
@@ -27,7 +30,9 @@ public class ColumnModelBuilder {
     public void addAll(List<EffectiveColumn> columns) {
 
         for (EffectiveColumn tableColumn : columns) {
-            if(tableColumn.getType() instanceof TextType) {
+            if(tableColumn.getType() instanceof TextType ||
+               tableColumn.getType() instanceof BarcodeType ||
+               tableColumn.getType() instanceof NarrativeType) {
                 addTextColumn(tableColumn);
 
             } else if(tableColumn.getType() instanceof QuantityType) {
@@ -54,6 +59,9 @@ public class ColumnModelBuilder {
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
+
+        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
+        filters.add(filter);
 
     }
 

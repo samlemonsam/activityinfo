@@ -3,6 +3,8 @@ package org.activityinfo.ui.client.table.model;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
+import java.util.Optional;
+
 /**
  * The user's table model
  */
@@ -10,5 +12,7 @@ import org.immutables.value.Value;
 public abstract class TableModel  {
 
     abstract ResourceId getFormId();
+
+    abstract Optional<ResourceId> getSubFormId();
 
 }

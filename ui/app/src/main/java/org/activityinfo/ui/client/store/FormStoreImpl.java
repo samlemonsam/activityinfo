@@ -3,14 +3,17 @@ package org.activityinfo.ui.client.store;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.http.CatalogRequest;
 import org.activityinfo.ui.client.http.HttpBus;
 import org.activityinfo.ui.client.http.QueryRequest;
+import org.activityinfo.ui.client.http.RecordRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,7 @@ public class FormStoreImpl implements FormStore {
     }
 
 
+
     @Override
     public Observable<List<CatalogEntry>> getCatalogRoots() {
         return httpBus.get(new CatalogRequest());
@@ -58,6 +62,11 @@ public class FormStoreImpl implements FormStore {
     @Override
     public Observable<List<CatalogEntry>> getCatalogChildren(ResourceId parentId) {
         return httpBus.get(new CatalogRequest(parentId));
+    }
+
+    @Override
+    public Observable<FormRecord> getRecord(RecordRef recordRef) {
+        return httpBus.get(new RecordRequest(recordRef));
     }
 
 }
