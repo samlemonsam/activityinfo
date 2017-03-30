@@ -6,7 +6,6 @@ import com.bedatadriven.rebar.sql.client.SqlResultSetRow;
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
@@ -14,7 +13,10 @@ import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.promise.Promise;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GetActivityFormsHandler implements CommandHandlerAsync<GetActivityForms, ActivityFormResults> {
@@ -36,31 +38,39 @@ public class GetActivityFormsHandler implements CommandHandlerAsync<GetActivityF
 
                     @Override
                     public void onSuccess(SchemaDTO schema) {
-                        Promise.map(applyPermission(schema, results), new Function<SqlResultSetRow, Promise<ActivityFormDTO>>() {
-                            @Override
-                            public Promise<ActivityFormDTO> apply(SqlResultSetRow input) {
-                                return fetchForm(context, input.getInt("activityId"));
+                        LOGGER.log(Level.INFO, "Forms matching filter: " + results.getRows().size());
+
+                        final List<Promise<ActivityFormDTO>> pending = new ArrayList<>();
+
+                        for (SqlResultSetRow row : results.getRows()) {
+                            int activityId = row.getInt("activityId");
+                            boolean visible = (schema.getActivityById(activityId) != null);
+                            if(visible) {
+                                pending.add(fetchForm(context, activityId));
                             }
-                        }).then(new Function<List<ActivityFormDTO>, ActivityFormResults>() {
+                        }
+
+                        LOGGER.log(Level.INFO, "Forms pending: " + pending.size());
+
+                        Promise.waitAll(pending).then(new Function<Void, ActivityFormResults>() {
+                            @Nullable
                             @Override
-                            public ActivityFormResults apply(List<ActivityFormDTO> input) {
-                                return new ActivityFormResults(input);
+                            public ActivityFormResults apply(@Nullable Void aVoid) {
+                                LOGGER.log(Level.INFO, "Form loading completed.");
+
+                                List<ActivityFormDTO> forms = new ArrayList<>();
+                                for (Promise<ActivityFormDTO> pendingForm : pending) {
+                                    forms.add(pendingForm.get());
+                                }
+
+                                return new ActivityFormResults(forms);
                             }
-                        }).then(callback);
+                        });
                     }
                 });
             }
-        });
-    }
 
-    private List<SqlResultSetRow> applyPermission(SchemaDTO schema, SqlResultSet results) {
-        List<SqlResultSetRow> allowedActivities = Lists.newArrayList();
-        for (SqlResultSetRow row : results.getRows()) {
-            if (schema.getActivityById(row.getInt("activityId")) != null) {
-                allowedActivities.add(row);
-            }
-        }
-        return allowedActivities;
+        });
     }
 
     private SqlQuery composeQuery(Filter filter) {
