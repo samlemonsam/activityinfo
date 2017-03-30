@@ -47,15 +47,10 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
 
     private static final Logger LOGGER = Logger.getLogger(GetActivityFormHandler.class.getName());
 
-    private ActivityFormCache cache;
 
     public GetActivityFormHandler() {
-        this.cache = new ActivityFormCache();
     }
 
-    public GetActivityFormHandler(ActivityFormCache cache) {
-        this.cache = cache;
-    }
 
     @Override
     public void execute(GetActivityForm command, final ExecutionContext context, AsyncCallback<ActivityFormDTO> callback) {
@@ -126,14 +121,9 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
     }
 
     private Promise<ActivityFormDTO> fetchForm(ExecutionContext context, final int activityId) {
-        ActivityFormDTO form = cache.getCopyIfPresent(activityId);
-        if(form != null) {
-            return Promise.resolved(form);
-        }
         return new FormBuilder(activityId).build(context).then(new Function<ActivityFormDTO, ActivityFormDTO>() {
             @Override
             public ActivityFormDTO apply(ActivityFormDTO input) {
-                cache.put(input);
                 return input;
             }
         });

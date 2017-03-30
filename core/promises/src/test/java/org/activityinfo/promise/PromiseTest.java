@@ -53,4 +53,10 @@ public class PromiseTest {
 
         assertThat(promise.then(takeSquareRoot), PromiseMatchers.resolvesTo(equalTo(8.0)));
     }
+
+    @Test
+    public void map() {
+
+
+    }
 }
