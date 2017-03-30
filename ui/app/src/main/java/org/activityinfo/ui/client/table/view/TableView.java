@@ -11,14 +11,14 @@ import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.input.view.FormDialog;
-import org.activityinfo.ui.client.table.model.TableModel;
+import org.activityinfo.ui.client.table.viewModel.TableViewModel;
 
 /**
  * Displays a Form as a Table
  */
 public class TableView implements IsWidget {
 
-    private TableModel model;
+    private TableViewModel model;
     private ContentPanel panel;
     private final BorderLayoutContainer container;
 
@@ -31,7 +31,7 @@ public class TableView implements IsWidget {
 
     private Subscription subscription;
 
-    public TableView(final TableModel model) {
+    public TableView(final TableViewModel model) {
         this.model = model;
 
 

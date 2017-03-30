@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table.model;
+package org.activityinfo.ui.client.table.viewModel;
 
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
@@ -17,6 +17,7 @@ public class EffectiveColumn {
         this.label = node.getField().getLabel();
         this.id = "col" + (nextId++);
         this.columnModel = new ColumnModel().setExpression(node.getPath()).as(id);
+        this.type = node.getType();
     }
 
     public FieldType getType() {

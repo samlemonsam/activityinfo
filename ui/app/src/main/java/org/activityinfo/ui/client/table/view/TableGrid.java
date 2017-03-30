@@ -1,58 +1,56 @@
 package org.activityinfo.ui.client.table.view;
 
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.widget.core.client.grid.*;
-import org.activityinfo.i18n.shared.I18N;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
+import com.sencha.gxt.data.shared.loader.PagingLoadResult;
+import com.sencha.gxt.data.shared.loader.PagingLoader;
+import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
+import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.grid.filters.Filter;
+import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
-import org.activityinfo.ui.client.table.model.EffectiveColumn;
-import org.activityinfo.ui.client.table.model.EffectiveTableModel;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.activityinfo.ui.client.table.viewModel.EffectiveTableModel;
 
 
 public class TableGrid implements IsWidget {
 
-    private final ColumnSetStore store;
+    private final ListStore<Integer> store;
     private final Grid<Integer> grid;
 
     private Subscription subscription;
+    private final ColumnSetProxy proxy;
+    private final PagingLoader<PagingLoadConfig, PagingLoadResult<Integer>> loader;
 
     public TableGrid(final EffectiveTableModel tableModel) {
-        store = new ColumnSetStore(tableModel.getColumnSet());
-        List<ColumnConfig<Integer, ?>> columns = new ArrayList<>();
-        for (EffectiveColumn tableColumn : tableModel.getColumns()) {
-            columns.add(buildColumnConfig(tableColumn));
-        }
-        ColumnModel<Integer> cm = new ColumnModel<>(columns);
 
-        GridView<Integer> gridView = new GridView<Integer>() {
+        // GXT Grid's are built around row-major data storage, while AI uses
+        // Column-major order here. So we construct fake loaders/stores that represent
+        // each row as row index.
 
-            private int currentScrollLeft;
+        proxy = new ColumnSetProxy();
+        loader = new PagingLoader<>(proxy);
+        loader.setRemoteSort(true);
 
-            @Override
-            protected void syncScroll() {
-                int scrollLeft = scroller.getScrollLeft();
-                if(currentScrollLeft != scrollLeft) {
-                    syncHeaderScroll();
-                    currentScrollLeft = scrollLeft;
-                }
-            }
-        };
+        store = new ListStore<>(i -> i.toString());
+
+        // Build a grid column model based on the user's selection of columns
+        ColumnModelBuilder columns = new ColumnModelBuilder(proxy);
+        columns.addAll(tableModel.getColumns());
+
+        LiveRecordGridView gridView = new LiveRecordGridView();
         gridView.setColumnLines(true);
         gridView.setTrackMouseOver(false);
 
-
-        grid = new Grid<Integer>(store, cm) {
+        grid = new Grid<Integer>(store, columns.buildColumnModel()) {
             @Override
             protected void onAttach() {
                 super.onAttach();
                 subscription = tableModel.getColumnSet().subscribe(observable -> onColumnsUpdated(observable));
+                loader.load(0, gridView.getCacheSize());
             }
 
             @Override
@@ -61,22 +59,19 @@ public class TableGrid implements IsWidget {
                 subscription.unsubscribe();
             }
         };
+        grid.setLoader(loader);
         grid.setLoadMask(true);
         grid.setView(gridView);
         grid.setSelectionModel(new CellSelectionModel<>());
-    }
 
-
-    private ColumnConfig<Integer, ?> buildColumnConfig(EffectiveColumn tableColumn) {
-        ColumnConfig<Integer, String> columnConfig = new ColumnConfig<>(store.stringValueProvider(tableColumn.getId()));
-        columnConfig.setHeader(tableColumn.getLabel());
-
-        if(tableColumn.getType() instanceof QuantityType) {
-            columnConfig.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        // Setup grid filters
+        GridFilters<Integer> filters = new GridFilters<>();
+        filters.initPlugin(grid);
+        for (Filter<Integer, ?> filter : columns.getFilters()) {
+            filters.addFilter(filter);
         }
-
-        return columnConfig;
     }
+
 
     @Override
     public Widget asWidget() {
@@ -85,10 +80,10 @@ public class TableGrid implements IsWidget {
 
 
     private void onColumnsUpdated(Observable<ColumnSet> columnSet) {
-        if(columnSet.isLoading()) {
-            grid.mask(I18N.CONSTANTS.loading());
-        } else {
-            grid.unmask();
+        if(columnSet.isLoaded()) {
+            if(!proxy.push(columnSet.get())) {
+                loader.load();
+            }
         }
     }
 

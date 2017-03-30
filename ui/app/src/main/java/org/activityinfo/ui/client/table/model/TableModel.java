@@ -1,40 +1,14 @@
 package org.activityinfo.ui.client.table.model;
 
-import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.store.FormStore;
+import org.immutables.value.Value;
 
 /**
- * Model's the user's selection of columns
+ * The user's table model
  */
-public class TableModel {
+@Value.Immutable
+public abstract class TableModel  {
 
-    private final FormStore formStore;
-    private ResourceId formId;
-    private Observable<FormTree> formTree;
-    private Observable<EffectiveTableModel> effectiveTable;
+    abstract ResourceId getFormId();
 
-    public TableModel(final FormStore formStore, ResourceId formId) {
-        this.formId = formId;
-        this.formStore = formStore;
-        this.formTree = formStore.getFormTree(formId);
-        this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(formStore, tree));
-    }
-
-    public Observable<EffectiveTableModel> getEffectiveTable() {
-        return effectiveTable;
-    }
-
-    public ResourceId getFormId() {
-        return formId;
-    }
-
-    public Observable<FormTree> getFormTree() {
-        return formTree;
-    }
-
-    public FormStore getFormStore() {
-        return formStore;
-    }
 }

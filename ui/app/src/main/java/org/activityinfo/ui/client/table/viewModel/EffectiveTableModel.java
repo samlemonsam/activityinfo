@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table.model;
+package org.activityinfo.ui.client.table.viewModel;
 
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
@@ -24,8 +24,8 @@ public class EffectiveTableModel {
     public EffectiveTableModel(FormStore formStore, FormTree formTree) {
         this.formTree = formTree;
         this.columnSet = new StatefulValue<>();
-
         this.columns = new ArrayList<>();
+
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.getType() instanceof TextType) {
                 columns.add(new EffectiveColumn(node));
