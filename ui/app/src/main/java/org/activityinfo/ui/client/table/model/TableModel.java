@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.table.model;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,8 +12,10 @@ import java.util.Optional;
 @Value.Immutable
 public abstract class TableModel  {
 
-    abstract ResourceId getFormId();
+    public abstract ResourceId getFormId();
 
-    abstract Optional<ResourceId> getSubFormId();
+    public abstract List<TableColumn> getColumns();
+
+    public abstract Optional<ResourceId> getSubFormId();
 
 }

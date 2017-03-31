@@ -56,6 +56,7 @@ public class AdminEntityTable implements SimpleTable {
         FormField label = new FormField(CuidAdapter.field(formId, CuidAdapter.NAME_FIELD));
         label.setLabel(I18N.CONSTANTS.name());
         label.setCode("name");
+        label.setKey(true);
         label.setRequired(true);
         label.addSuperProperty(ResourceId.valueOf("label"));
         label.setType(TextType.INSTANCE);
@@ -78,6 +79,7 @@ public class AdminEntityTable implements SimpleTable {
             parent.setCode("parent");
             parent.setLabel(level.getParentName());
             parent.setRequired(true);
+            parent.setKey(true);
             parent.setType(ReferenceType.single(CuidAdapter.adminLevelFormClass(level.getParentId())));
             parent.addSuperProperty(ApplicationProperties.PARENT_PROPERTY);
         }

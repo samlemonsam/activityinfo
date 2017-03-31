@@ -24,9 +24,9 @@ import java.util.*;
 /**
  * Contains a tree of fields based on references to other {@code FormClasses}
  */
-public class FormTree {
+public class FormTree implements FormClassProvider {
 
-    
+
     public class Node {
 
         private Node parent;
@@ -439,6 +439,11 @@ public class FormTree {
 
     public static Predicate<Node> pathNotIn(final Collection<FieldPath> paths) {
         return Predicates.not(pathIn(paths));
+    }
+
+    public FormTree subTree(ResourceId formId) {
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(this);
+        return treeBuilder.queryTree(formId);
     }
 
     @Override

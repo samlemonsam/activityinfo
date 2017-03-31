@@ -7,6 +7,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 
@@ -157,6 +158,9 @@ class ObservableFormTree extends Observable<FormTree> {
                     for (ResourceId childId : type.getRange()) {
                         crawl(childId, reachable, missing, loading);
                     }
+                } else if(field.getType() instanceof SubFormReferenceType) {
+                    SubFormReferenceType type = (SubFormReferenceType) field.getType();
+                    crawl(type.getClassId(), reachable, missing, loading);
                 }
             }
         }

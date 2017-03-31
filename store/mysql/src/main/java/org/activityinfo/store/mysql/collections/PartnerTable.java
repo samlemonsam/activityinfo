@@ -46,6 +46,7 @@ public class PartnerTable implements SimpleTable {
                 .setRequired(true)
                 .setLabel("Name")
                 .setCode("label")
+                .setKey(true)
           //      .setSuperProperty(ApplicationProperties.LABEL_PROPERTY)
                 .setType(TextType.INSTANCE);
         

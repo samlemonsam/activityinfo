@@ -4,6 +4,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.activityinfo.ui.client.store.FormStore;
+import org.activityinfo.ui.client.table.model.ImmutableTableModel;
 import org.activityinfo.ui.client.table.view.TableView;
 import org.activityinfo.ui.client.table.viewModel.TableViewModel;
 
@@ -19,7 +20,12 @@ public class TableActivity extends AbstractActivity {
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        TableViewModel tableViewModel = new TableViewModel(formStore, place.getFormId());
+        ImmutableTableModel tableModel = ImmutableTableModel
+                .builder()
+                .formId(place.getFormId())
+                .build();
+
+        TableViewModel tableViewModel = new TableViewModel(formStore, tableModel);
         TableView view = new TableView(tableViewModel);
         panel.setWidget(view);
     }

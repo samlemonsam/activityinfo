@@ -47,6 +47,7 @@ public class ProjectTable implements SimpleTable {
                 .setRequired(true)
                 .setLabel("Name")
                 .setCode("label")
+                .setKey(true)
                 .setType(TextType.INSTANCE);
 
         mapping.addTextField(nameField, "name");

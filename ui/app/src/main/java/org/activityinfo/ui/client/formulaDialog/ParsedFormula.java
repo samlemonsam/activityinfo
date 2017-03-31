@@ -8,6 +8,7 @@ import org.activityinfo.model.expr.FormulaError;
 import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.store.query.shared.NodeMatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,12 @@ public class ParsedFormula {
     private boolean valid;
     private ExprNode rootNode;
     private FieldType resultType;
+
+    /**
+     * True if this refers to a single field
+     */
+    private boolean simpleReference = true;
+
 
     private List<FormulaError> errors = new ArrayList<>();
     private List<FieldReference> references = new ArrayList<>();
@@ -47,6 +54,7 @@ public class ParsedFormula {
             errors.addAll(validator.getErrors());
             this.resultType = validator.getResultType();
             this.references = validator.getReferences();
+            this.simpleReference = validator.isSimpleReference();
         }
     }
 
@@ -81,5 +89,23 @@ public class ParsedFormula {
 
     public List<FieldReference> getReferences() {
         return references;
+    }
+
+    public String getLabel() {
+        // If this formula is just a field reference
+        if(simpleReference && references.size() == 1) {
+            NodeMatch ref = references.get(0).getMatch();
+            if(ref.isEnumBoolean()) {
+                return ref.getEnumItem().getLabel();
+            } else if(ref.getType() == NodeMatch.Type.FIELD) {
+                FormTree.Node field = ref.getFieldNode();
+                if (field.isRoot()) {
+                    return field.getField().getLabel();
+                } else {
+                    return field.getDefiningFormClass().getLabel() + " " + field.getField().getLabel();
+                }
+            }
+        }
+        return formula;
     }
 }

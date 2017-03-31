@@ -80,6 +80,7 @@ public class CuidAdapter {
     public static final int LOCATION_NAME_FIELD = 15;
     public static final int GPS_FIELD = 16;
     public static final int SITE_FIELD = 17;
+    public static final int MONTHLY_SUBFORM_FIELD = 18;
 
     public static final int BLOCK_SIZE = 10;
     public static final String CLASS_FIELD = "_class";
@@ -87,6 +88,8 @@ public class CuidAdapter {
     public static final int[] BUILTIN_FIELDS = new int[] {
             START_DATE_FIELD, END_DATE_FIELD, PARTNER_FIELD, PROJECT_FIELD,
             LOCATION_FIELD, COMMENT_FIELD };
+
+
     /**
      * Avoid instance creation.
      */

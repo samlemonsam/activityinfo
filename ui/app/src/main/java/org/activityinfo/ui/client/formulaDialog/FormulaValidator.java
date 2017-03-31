@@ -26,6 +26,7 @@ public class FormulaValidator {
     private List<FieldReference> references = new ArrayList<>();
 
     private boolean valid;
+    private boolean simpleReference = true;
 
     private FieldType resultType;
 
@@ -46,6 +47,10 @@ public class FormulaValidator {
 
     public boolean isValid() {
         return valid;
+    }
+
+    public boolean isSimpleReference() {
+        return simpleReference;
     }
 
     public FieldType getResultType() {
@@ -94,7 +99,7 @@ public class FormulaValidator {
 
         NodeMatch match = Iterables.getOnlyElement(matches);
 
-        references.add(new FieldReference(exprNode.getSourceRange(), describe(match)));
+        references.add(new FieldReference(exprNode.getSourceRange(), match));
 
         if(match.isEnumBoolean()) {
             return BooleanType.INSTANCE;
@@ -103,16 +108,12 @@ public class FormulaValidator {
         }
     }
 
-    private String describe(NodeMatch match) {
-        if(match.isEnumBoolean()) {
-            return match.getFieldNode().getField().getLabel() + " is " + match.getEnumItem().getLabel();
-        } else {
-            return match.getFieldNode().getField().getLabel();
-        }
-    }
-
 
     private FieldType validateFunctionCall(FunctionCallNode call) {
+
+        // If function calls are involved, this is no longer
+        // a simple field reference
+        this.simpleReference = false;
 
         List<ExprNode> arguments = call.getArguments();
         List<FieldType> argumentTypes = new ArrayList<>();
@@ -145,4 +146,6 @@ public class FormulaValidator {
     public List<FormulaError> getErrors() {
         return errors;
     }
+
+
 }

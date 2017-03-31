@@ -4,11 +4,19 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.ui.client.store.FormStore;
+import org.activityinfo.ui.client.table.model.ImmutableTableColumn;
+import org.activityinfo.ui.client.table.model.TableModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,33 +29,73 @@ public class EffectiveTableModel {
     public static final String ID_COLUMN_ID = "$$id";
 
     private FormTree formTree;
-    private List<EffectiveColumn> columns;
+    private List<EffectiveTableColumn> columns;
     private Observable<ColumnSet> columnSet;
 
-    public EffectiveTableModel(FormStore formStore, FormTree formTree) {
+    public EffectiveTableModel(FormStore formStore, FormTree formTree, TableModel tableModel) {
         this.formTree = formTree;
         this.columnSet = new StatefulValue<>();
         this.columns = new ArrayList<>();
 
-        for (FormTree.Node node : formTree.getRootFields()) {
-            if(node.getType() instanceof TextType) {
-                columns.add(new EffectiveColumn(node));
-            } else if(node.getType() instanceof QuantityType) {
-                columns.add(new EffectiveColumn(node));
+
+        if(this.columns.isEmpty()) {
+            // Populate with a default set of columns
+            for (FormTree.Node node : formTree.getRootFields()) {
+                if (isSimple(node.getType())) {
+                    columns.add(new EffectiveTableColumn(formTree, columnModel(node)));
+
+                } else if (node.getType() instanceof ReferenceType) {
+                    addKeyColumns(columns,  node);
+                }
             }
         }
 
         this.columnSet = formStore.query(buildQuery(columns));
     }
 
+    private boolean isSimple(FieldType type) {
+        return type instanceof TextType ||
+               type instanceof QuantityType ||
+               type instanceof BarcodeType ||
+               (type instanceof EnumType && ((EnumType) type).getCardinality() == Cardinality.SINGLE) ||
+               type instanceof LocalDateType;
+    }
+
+    private ImmutableTableColumn columnModel(FormTree.Node node) {
+        return ImmutableTableColumn.builder()
+                .formula(node.getPath().toExpr().asExpression())
+                .build();
+    }
+
+    private void addKeyColumns(List<EffectiveTableColumn> columns, FormTree.Node node) {
+
+        boolean hasKeys = false;
+
+        // First add reference key fields
+        for (FormTree.Node childNode : node.getChildren()) {
+            if(childNode.getField().isKey() && childNode.isReference()) {
+                addKeyColumns(columns, childNode);
+                hasKeys = true;
+            }
+        }
+
+        // Now any non-reference key fields
+        for (FormTree.Node childNode : node.getChildren()) {
+            if(childNode.getField().isKey() && !childNode.isReference()) {
+                columns.add(new EffectiveTableColumn(formTree, columnModel(childNode)));
+                hasKeys = true;
+            }
+        }
+    }
+
     public ResourceId getFormId() {
         return formTree.getRootFormClass().getId();
     }
 
-    private QueryModel buildQuery(List<EffectiveColumn> columns) {
+    private QueryModel buildQuery(List<EffectiveTableColumn> columns) {
         QueryModel queryModel = new QueryModel(formTree.getRootFormClass().getId());
         queryModel.selectResourceId().as(ID_COLUMN_ID);
-        for (EffectiveColumn column : columns) {
+        for (EffectiveTableColumn column : columns) {
             queryModel.addColumn(column.getQueryModel());
         }
         return queryModel;
@@ -57,7 +105,7 @@ public class EffectiveTableModel {
         return formTree;
     }
 
-    public List<EffectiveColumn> getColumns() {
+    public List<EffectiveTableColumn> getColumns() {
         return columns;
     }
 

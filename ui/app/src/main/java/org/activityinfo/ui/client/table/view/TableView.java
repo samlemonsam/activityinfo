@@ -10,6 +10,7 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.input.view.FormDialog;
 import org.activityinfo.ui.client.table.viewModel.TableViewModel;
@@ -29,6 +30,7 @@ public class TableView implements IsWidget {
     private VerticalLayoutContainer center;
 
     private Subscription subscription;
+    public static final int MARGINS = 8;
 
     public TableView(final TableViewModel viewModel) {
 
@@ -47,11 +49,20 @@ public class TableView implements IsWidget {
         center.add(toolBar, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
 
         this.container = new BorderLayoutContainer();
-        BorderLayoutContainer.BorderLayoutData east = new BorderLayoutContainer.BorderLayoutData(150);
-        east.setSplit(true);
-        int margins = 8;
-        east.setMargins(new Margins(0, 0, 0, margins));
-        this.container.setEastWidget(new SidePanel(viewModel), east);
+
+
+        SidePanel sidePanel = new SidePanel(viewModel);
+        BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
+        sidePaneLayout.setSplit(true);
+        sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
+
+        SubFormPane subFormPane = new SubFormPane(viewModel);
+        BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
+        subFormPaneLayout.setSplit(true);
+        subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
+
+        this.container.setEastWidget(sidePanel, sidePaneLayout);
+        this.container.setSouthWidget(subFormPane, subFormPaneLayout);
         this.container.setCenterWidget(center);
 
         this.panel = new ContentPanel() {
@@ -89,7 +100,13 @@ public class TableView implements IsWidget {
             this.panel.setHeading(viewModel.getEffectiveTable().get().getFormLabel());
             this.panel.unmask();
             if(grid == null) {
-                grid = new TableGrid(viewModel, viewModel.getEffectiveTable().get());
+                grid = new TableGrid(viewModel.getEffectiveTable().get());
+                grid.addSelectionChangedHandler(event -> {
+                    if(!event.getSelection().isEmpty()) {
+                        RecordRef ref = event.getSelection().get(0);
+                        viewModel.select(ref);
+                    }
+                });
                 center.add(grid, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
                 center.forceLayout();
 
