@@ -31,14 +31,13 @@ import java.util.List;
 public class InstanceScoreSource {
 
     private List<ColumnAccessor> sources;
+    private boolean[] roots;
     private List<ResourceId> referenceInstanceIds;
     private List<String[]> referenceValues;
 
-    public InstanceScoreSource() {
-    }
-
-    public InstanceScoreSource(List<ColumnAccessor> sources, List<ResourceId> referenceInstanceIds, List<String[]> referenceValues) {
+    public InstanceScoreSource(List<ColumnAccessor> sources, boolean[] roots, List<ResourceId> referenceInstanceIds, List<String[]> referenceValues) {
         this.sources = sources;
+        this.roots = roots;
         this.referenceInstanceIds = referenceInstanceIds;
         this.referenceValues = referenceValues;
     }
@@ -66,4 +65,9 @@ public class InstanceScoreSource {
     public void setReferenceValues(List<String[]> referenceValues) {
         this.referenceValues = referenceValues;
     }
+
+    public boolean isRoot(int i) {
+        return roots[i];
+    }
+
 }

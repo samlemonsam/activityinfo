@@ -116,7 +116,6 @@ public class InstanceTable implements IsWidget {
         for (FieldColumn column : columns) {
             final FilterCellAction filterAction = new FilterCellAction(this, column);
             table.addColumn(column, new FilterHeader(column, filterAction));
-            dataLoader.getFields().addAll(column.get().getFieldPaths());
         }
 
         reload();

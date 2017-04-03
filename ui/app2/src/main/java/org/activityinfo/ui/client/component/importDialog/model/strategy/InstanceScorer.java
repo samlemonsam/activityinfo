@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.component.importDialog.model.strategy;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import org.activityinfo.io.match.names.LatinPlaceNameScorer;
 import org.activityinfo.ui.client.component.importDialog.model.source.SourceRow;
 
@@ -70,11 +71,15 @@ public class InstanceScorer {
     }
 
     public Score score(SourceRow row) {
+
+        String[] imported = toArray(row);
+        if(!hasRoot(imported)) {
+            return new Score(-1, null, -1, imported);
+        }
+
         double bestScore = 0;
         double bestScores[] = new double[source.getSources().size()];
         int bestMatchIndex = -1;
-
-        String[] imported = toArray(row);
 
         if (imported != null) {
             for (int i = 0; i != source.getReferenceInstanceIds().size(); ++i) {
@@ -89,11 +94,18 @@ public class InstanceScorer {
                 }
             }
         }
-//        if (bestMatchIndex != -1) {
-//            System.out.println("Score: " + Arrays.toString(bestScores) + "  " +
-//                    Arrays.toString(source.getReferenceValues().get(bestMatchIndex)));
-//        }
         return new Score(bestScore, bestScores, bestMatchIndex, imported);
+    }
+
+    private boolean hasRoot(String[] imported) {
+        for (int i = 0; i < imported.length;i++) {
+            if(source.isRoot(i)) {
+                if(!Strings.isNullOrEmpty(imported[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private double sum(double[] score) {

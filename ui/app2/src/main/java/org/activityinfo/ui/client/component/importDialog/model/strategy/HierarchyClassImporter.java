@@ -27,19 +27,19 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.hierarchy.Hierarchy;
+import org.activityinfo.ui.client.component.form.field.hierarchy.Level;
 import org.activityinfo.ui.client.component.importDialog.model.source.SourceRow;
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidationResult;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author yuriyz on 5/19/14.
@@ -51,6 +51,8 @@ public class HierarchyClassImporter implements FieldImporter {
     private final List<ColumnAccessor> sourceColumns;
     private final List<FieldImporterColumn> fieldImporterColumns;
     private final Map<ResourceId, InstanceScoreSource> scoreSources = Maps.newHashMap();
+    private final Hierarchy hierarchy;
+    private final ArrayList<Level> levels;
 
     public HierarchyClassImporter(FormTree.Node rootField,
                                   List<ColumnAccessor> sourceColumns,
@@ -60,6 +62,9 @@ public class HierarchyClassImporter implements FieldImporter {
         this.sourceColumns = sourceColumns;
         this.referenceFields = referenceFields;
         this.fieldImporterColumns = fieldImporterColumns;
+        this.hierarchy = Hierarchy.get(rootField);
+        this.levels = Lists.newArrayList(hierarchy.getLevels());
+        Collections.reverse(this.levels);
     }
 
     @Override
@@ -67,21 +72,48 @@ public class HierarchyClassImporter implements FieldImporter {
         final List<Promise<Void>> promises = Lists.newArrayList();
 
         for (final ResourceId formId : rootField.getRange()) {
-            QueryModel queryModel = new QueryModel(formId);
-            queryModel.selectResourceId().as("_id");
-            for (FieldPath referenceFieldPath : referenceFields.keySet()) {
-                queryModel.selectField(referenceFieldPath).as(referenceFieldPath.toString());
-            }
-            promises.add(locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
-                @Override
-                public Void apply(ColumnSet columnSet) {
-                    scoreSources.put(formId, new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet));
-                    return null;
+            if(isMatchableAtLevel(formId, referenceFields.keySet())) {
+
+                QueryModel queryModel = new QueryModel(formId);
+                queryModel.selectResourceId().as("_id");
+
+                for (FieldPath referenceFieldPath : referenceFields.keySet()) {
+                    queryModel.selectField(referenceFieldPath).as(referenceFieldPath.toString());
                 }
-            }));
+                promises.add(locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
+                    @Override
+                    public Void apply(ColumnSet columnSet) {
+                        scoreSources.put(formId, new InstanceScoreSourceBuilder(formId, referenceFields, sourceColumns).build(columnSet));
+                        return null;
+                    }
+                }));
+            }
         }
-        
+
         return Promise.waitAll(promises);
+    }
+
+    /**
+     * To be "matchable" at a given level, we must have at least one field on the form itself.
+     *
+     *
+     * <p>For example, suppose you have a field that can reference EITHER a Province or a Territory, and Territory
+     * is a child level of Province. If you have a Territory Name or Code, then you could plausibly match against
+     * the territories. However, if you only have a Province name, we have to limit our matches to province.</p>
+     */
+    private boolean isMatchableAtLevel(ResourceId formId, Set<FieldPath> referenceFields) {
+
+        // TODO: these reference fields should really be qualified with the
+        // the formId. This will only work with admin levels
+        String prefix = formId.asString();
+
+        for (FieldPath referenceField : referenceFields) {
+            if(referenceField.isRoot() && referenceField.toString().startsWith(prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private FieldImporterColumn getImportedColumn(ColumnAccessor columnAccessor) {
@@ -95,38 +127,30 @@ public class HierarchyClassImporter implements FieldImporter {
 
     @Override
     public void validateInstance(SourceRow row, List<ValidationResult> results) {
-        for (int i = 0; i < sourceColumns.size(); i++) {
-            ColumnAccessor columnAccessor = sourceColumns.get(i);
-            if (!columnAccessor.isMissing(row)) {
-                FieldImporterColumn importedColumn = getImportedColumn(columnAccessor);
-                ResourceId targetSiteId = ResourceId.valueOf(importedColumn.getTarget().getSite().asString());
-                if (targetSiteId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
-                    final int levelId = CuidAdapter.getBlock(targetSiteId, 0);
-                    // todo : recreation of admin level cuid seems to be error prone, check later !
-                    ResourceId range = CuidAdapter.adminLevelFormClass(levelId);
-                    InstanceScoreSource scoreSource = scoreSources.get(range);
-                    InstanceScorer instanceScorer = new InstanceScorer(scoreSource);
-                    final InstanceScorer.Score score = instanceScorer.score(row);
-                    final int bestMatchIndex = score.getBestMatchIndex();
 
-                    if (score.getImported()[i] == null) {
-                        results.add(ValidationResult.MISSING);
-                    } else if (bestMatchIndex == -1) {
-                        results.add(ValidationResult.error("No match"));
-                    } else {
+        // Start from the leaf level and work our way up to the parent levels
+        for (Level level : levels) {
+            InstanceScoreSource scoreSource = scoreSources.get(level.getFormId());
+            if(scoreSource != null) {
+
+                InstanceScorer instanceScorer = new InstanceScorer(scoreSource);
+                final InstanceScorer.Score score = instanceScorer.score(row);
+                final int bestMatchIndex = score.getBestMatchIndex();
+
+                if(bestMatchIndex != -1) {
+                    for (int i = 0; i < sourceColumns.size(); i++) {
                         String matched = scoreSource.getReferenceValues().get(bestMatchIndex)[i];
                         final ValidationResult converted = ValidationResult.converted(matched, score.getBestScores()[i]);
-                        converted.setRef(new RecordRef(range, scoreSource.getReferenceInstanceIds().get(bestMatchIndex)));
+                        converted.setRef(new RecordRef(level.getFormId(), scoreSource.getReferenceInstanceIds().get(bestMatchIndex)));
                         results.add(converted);
                     }
-                } else {
-                    throw new UnsupportedOperationException("Not supported");
+                    return;
                 }
-            } else {
-                results.add(ValidationResult.MISSING);
             }
         }
-
+        for (int i = 0; i < sourceColumns.size(); i++) {
+            results.add(ValidationResult.error("No match"));
+        }
     }
 
     @Override
