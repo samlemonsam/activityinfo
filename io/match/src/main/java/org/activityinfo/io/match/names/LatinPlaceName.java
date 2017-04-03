@@ -14,8 +14,6 @@ class LatinPlaceName {
     private final int DIGIT_CLASS = 1;
     private final int OTHER = -1;
 
-    public static final String APOSTROPHE = "'";
-
 
     /**
      * Normalized characters, without any separating spaces
@@ -56,7 +54,7 @@ class LatinPlaceName {
                 String ch = characterNormalizer.normalizeCharacter(input.substring(i, i + 1));
 
                 // For words like N'Goutjina we just drop the apostrophe
-                if (ch.equals(APOSTROPHE) && currentClass == LETTER_CLASS) {
+                if (isApostrophe(ch) && currentClass == LETTER_CLASS) {
                     continue;
                 }
 
@@ -81,6 +79,10 @@ class LatinPlaceName {
 
         // add a final offset for convenience
         partOffsets[numParts] = numChars;
+    }
+
+    private boolean isApostrophe(String ch) {
+        return ch.equals("'") || ch.equals("´") || ch.equals("`");
     }
 
     public int partCount() {
