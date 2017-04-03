@@ -150,9 +150,7 @@ public class HierarchyClassImporter implements FieldImporter {
                 }
             }
         }
-        if (missing) {
-            results.add(ValidationResult.MISSING);
-        } else {
+        for (int i = 0; i < sourceColumns.size(); i++) {
             results.add(ValidationResult.error("No match"));
         }
     }
