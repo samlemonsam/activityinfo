@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public class ColumnStatePersister {
 
-    private static final String INSTANCE_TABLE_COLUMNS_STATE = "instanceTableColumnState";
+    private static final String INSTANCE_TABLE_COLUMNS_STATE = "instanceTableColumnStatev2";
 
     private StateProvider stateProvider;
 
