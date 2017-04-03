@@ -35,12 +35,23 @@ import java.util.Map;
  */
 public class InstanceScoreSourceBuilder {
 
+    private ResourceId formId;
     private final Map<FieldPath, Integer> referenceFields;
     private final List<ColumnAccessor> sourceColumns;
+    private final boolean[] roots;
 
-    public InstanceScoreSourceBuilder(Map<FieldPath, Integer> referenceFields, List<ColumnAccessor> sourceColumns) {
+    public InstanceScoreSourceBuilder(ResourceId formId, Map<FieldPath, Integer> referenceFields, List<ColumnAccessor> sourceColumns) {
+        this.formId = formId;
         this.referenceFields = referenceFields;
         this.sourceColumns = sourceColumns;
+
+        this.roots = new boolean[sourceColumns.size()];
+        for (Map.Entry<FieldPath, Integer> entry : referenceFields.entrySet()) {
+            if(entry.getKey().isRoot() && entry.getKey().toString().startsWith(formId.asString())) {
+                roots[entry.getValue()] = true;
+            }
+        }
+
     }
 
     public InstanceScoreSource build(ColumnSet columnSet) {
@@ -53,6 +64,6 @@ public class InstanceScoreSourceBuilder {
             recordIdList.add(ResourceId.valueOf(id.getString(i)));
             referenceValueList.add(SingleClassImporter.toArray(columnSet, i, referenceFields, sourceColumns.size()));
         }
-        return new InstanceScoreSource(sourceColumns, recordIdList, referenceValueList);
+        return new InstanceScoreSource(sourceColumns, roots, recordIdList, referenceValueList);
     }
 }

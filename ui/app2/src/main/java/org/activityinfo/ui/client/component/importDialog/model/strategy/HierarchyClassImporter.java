@@ -83,7 +83,7 @@ public class HierarchyClassImporter implements FieldImporter {
                 promises.add(locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
                     @Override
                     public Void apply(ColumnSet columnSet) {
-                        scoreSources.put(formId, new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet));
+                        scoreSources.put(formId, new InstanceScoreSourceBuilder(formId, referenceFields, sourceColumns).build(columnSet));
                         return null;
                     }
                 }));
@@ -129,12 +129,10 @@ public class HierarchyClassImporter implements FieldImporter {
     public void validateInstance(SourceRow row, List<ValidationResult> results) {
 
         // Start from the leaf level and work our way up to the parent levels
-        boolean missing = true;
         for (Level level : levels) {
             InstanceScoreSource scoreSource = scoreSources.get(level.getFormId());
             if(scoreSource != null) {
 
-                missing = false;
                 InstanceScorer instanceScorer = new InstanceScorer(scoreSource);
                 final InstanceScorer.Score score = instanceScorer.score(row);
                 final int bestMatchIndex = score.getBestMatchIndex();
