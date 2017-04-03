@@ -40,10 +40,10 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.command.DimensionType;
-import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.legacy.shared.command.GetActivityForms;
-import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
+import org.activityinfo.legacy.shared.command.BatchCommand;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
+import org.activityinfo.legacy.shared.command.result.BatchResult;
+import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.ListResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.number.QuantityType;
@@ -77,7 +77,12 @@ public class IndicatorGridPanel extends ContentPanel {
                 return;
             }
 
-            dispatcher.execute(new GetActivityForms().setFilter(activityIdsFilter())).then(new AsyncCallback<ActivityFormResults>() {
+            BatchCommand batchCommand = new BatchCommand();
+            for (ActivityDTO activityDTO : selectedDb.getActivities()) {
+                batchCommand.add(new GetActivityForm(activityDTO.getId()));
+            }
+
+            dispatcher.execute(batchCommand).then(new AsyncCallback<BatchResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     showEmptyText(ExceptionOracle.getExplanation(caught));
@@ -85,16 +90,18 @@ public class IndicatorGridPanel extends ContentPanel {
                 }
 
                 @Override
-                public void onSuccess(ActivityFormResults result) {
+                public void onSuccess(BatchResult result) {
                     setEmptyText();
-                    callback.onSuccess(constructResult(result.getData()));
+                    callback.onSuccess(constructResult(result));
                 }
             });
         }
 
-        private List<ModelData> constructResult(List<ActivityFormDTO> data) {
+        private List<ModelData> constructResult(BatchResult batchResult) {
+
             List<ModelData> result = Lists.newArrayList();
-            for (ActivityFormDTO activity : data) {
+            for (CommandResult commandResult : batchResult.getResults()) {
+                ActivityFormDTO activity = (ActivityFormDTO) commandResult;
                 result.add(activity);
                 for (IndicatorGroup group : activity.groupIndicators()) {
                     if (group.getName() == null) {
@@ -114,17 +121,6 @@ public class IndicatorGridPanel extends ContentPanel {
                 }
             }
             return result;
-        }
-
-        private Filter activityIdsFilter() {
-            List<Integer> activityIds = Lists.newArrayList();
-            for(ActivityDTO activity : selectedDb.getActivities()) {
-                activityIds.add(activity.getId());
-            }
-
-            Filter filter = new Filter();
-            filter.addRestriction(DimensionType.Activity, activityIds);
-            return filter;
         }
 
     }
