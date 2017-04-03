@@ -13,6 +13,8 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
@@ -23,15 +25,17 @@ import org.activityinfo.ui.client.component.importDialog.model.match.JvmConverte
 import org.activityinfo.ui.client.component.importDialog.model.source.PastedTable;
 import org.activityinfo.ui.client.component.importDialog.model.source.SourceColumn;
 import org.activityinfo.ui.client.component.importDialog.model.strategy.FieldImportStrategies;
+import org.activityinfo.ui.client.component.importDialog.model.strategy.ImportTarget;
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidatedRowTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.google.common.io.Resources.getResource;
 import static org.activityinfo.promise.PromiseMatchers.assertResolves;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 //@SuppressWarnings("GwtClientClassFromNonInheritedModule")
@@ -40,6 +44,8 @@ import static org.junit.Assert.*;
 public class ImportSimpleTest extends AbstractImporterTest {
 
     private static final ResourceId HOUSEHOLD_SURVEY_FORM_CLASS = CuidAdapter.activityFormClass(1);
+    public static final ResourceId VILLAGE_FORM_ID = CuidAdapter.locationFormClass(2);
+    public static final ResourceId PROVINCE_FORM_ID = CuidAdapter.adminLevelFormClass(3);
 
     private static final ResourceId TRAINING_PROGRAM_CLASS = CuidAdapter.activityFormClass(2);
 
@@ -87,6 +93,10 @@ public class ImportSimpleTest extends AbstractImporterTest {
 
         assertResolves(importer.persist(importModel));
 
+        // VERIFY total count
+        SiteResult allResults = execute(new GetSites(Filter.filter().onActivity(1)));
+        assertThat(allResults.getData().size(), equalTo(63));
+
         // AND... verify
         Filter filter = new Filter();
         filter.addRestriction(DimensionType.AdminLevel, MODHUPUR);
@@ -97,6 +107,56 @@ public class ImportSimpleTest extends AbstractImporterTest {
         SiteDTO site = sites.getData().get(0);
         assertThat(site.getDate1(), equalTo(new LocalDate(2012,12,19)));
         assertThat(site.getDate2(), equalTo(new LocalDate(2012,12,19)));
+        assertThat(site.getAdminEntity(3), not(nullValue()));
+    }
+
+    @Test
+    public void locationWithMissingAdminLevel() throws IOException {
+
+        FormTree formTree = assertResolves(formTreeBuilder.apply(VILLAGE_FORM_ID));
+        FormTreePrettyPrinter.print(formTree);
+
+
+        importModel = new ImportModel(formTree);
+
+
+        // Step 1: User pastes in data to import
+        PastedTable source = new PastedTable(
+                Resources.toString(getResource(getClass(), "qis-villages.csv"), Charsets.UTF_8));
+        source.parseAllRows();
+
+        assertThat(source.getRows().size(), equalTo(1));
+
+        importModel.setSource(source);
+        importer = new Importer(locator, formTree, FieldImportStrategies.get(JvmConverterFactory.get()));
+
+        dumpList("COLUMNS", source.getColumns());
+
+        // Step 2: User maps imported columns to FormFields
+        List<ImportTarget> targets = importer.getImportTargets();
+        dumpList("FIELDS", targets);
+        importModel.setColumnAction(columnIndex("Name"), target("Name"));
+        importModel.setColumnAction(columnIndex("District"), target("District Name"));
+
+
+        // Step 3: Validate for user
+        ValidatedRowTable validatedResult = assertResolves(importer.validateRows(importModel));
+        showValidationGrid(validatedResult);
+
+        assertResolves(importer.persist(importModel));
+
+        // AND... verify
+        QueryModel queryModel = new QueryModel(VILLAGE_FORM_ID);
+        queryModel.selectExpr("Name").as("name");
+        queryModel.selectField(CuidAdapter.field(VILLAGE_FORM_ID, CuidAdapter.ADMIN_FIELD)).as("admin");
+
+        ColumnSet columnSet = assertResolves(locator.queryTable(queryModel));
+        assertThat(columnSet.getNumRows(), equalTo(1));
+        assertThat(columnSet.getColumnView("name").getString(0), equalTo("Village 1"));
+        assertThat(columnSet.getColumnView("admin").getString(1),
+                equalTo(CuidAdapter.cuid(CuidAdapter.ADMIN_ENTITY_DOMAIN, 2).asString()));
+
+
     }
 
     @Test

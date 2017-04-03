@@ -125,4 +125,8 @@ public class FieldPath  {
     public Iterator<ResourceId> iterator() {
         return path.iterator();
     }
+
+    public boolean isRoot() {
+        return !isNested();
+    }
 }

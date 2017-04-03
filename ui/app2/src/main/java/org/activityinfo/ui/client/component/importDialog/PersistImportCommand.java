@@ -41,7 +41,6 @@ import java.util.List;
  */
 public class PersistImportCommand implements ImportCommand<Void> {
 
-//    private static final Logger LOGGER = Logger.getLogger(PersistImportCommand.class.getName());
 
     private ImportCommandExecutor commandExecutor;
     private PromisesExecutionMonitor monitor;
@@ -71,7 +70,8 @@ public class PersistImportCommand implements ImportCommand<Void> {
             }
         }
 
-        return commandExecutor.getResourceLocator().persist(toPersist, monitor);
+        SerialQueue queue = new SerialQueue(commandExecutor.getResourceLocator(), toPersist, monitor);
+        return queue.execute();
     }
 
     @Override
