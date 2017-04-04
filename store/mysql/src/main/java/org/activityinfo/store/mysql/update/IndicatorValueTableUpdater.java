@@ -86,6 +86,8 @@ public class IndicatorValueTableUpdater {
         // But we are not ready to remove the date1/date2 fields from the reportingperiod table
         if(date1 == null) {
             date1 = new Date(0);
+        }
+        if(date2 == null) {
             date2 = new Date(0);
         }
         
