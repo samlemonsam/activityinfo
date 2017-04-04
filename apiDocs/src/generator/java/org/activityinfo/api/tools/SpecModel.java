@@ -41,7 +41,7 @@ public class SpecModel {
     }
 
     public String getBaseUri() {
-        return "https://www.activityinfo.org";
+        return "https://www.activityinfo.org/resources";
     }
     
     public List<ApiSectionModel> getSections() {
