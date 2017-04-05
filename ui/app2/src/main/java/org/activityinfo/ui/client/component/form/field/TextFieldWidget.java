@@ -19,7 +19,7 @@ import org.activityinfo.ui.client.widget.TextBox;
 public class TextFieldWidget implements FormFieldWidget<TextValue> {
 
 
-    private final InputMask inputMask;
+    private InputMask inputMask;
     private final TextBox box;
     private final FieldUpdater valueUpdater;
 
@@ -78,6 +78,8 @@ public class TextFieldWidget implements FormFieldWidget<TextValue> {
 
     @Override
     public void setType(FieldType type) {
+        this.inputMask = new InputMask(((TextType) type).getInputMask());
+        this.box.setPlaceholder(inputMask.placeHolderText());
     }
 
     @Override
