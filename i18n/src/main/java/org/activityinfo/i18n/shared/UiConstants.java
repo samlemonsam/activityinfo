@@ -1669,4 +1669,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Input Mask")
     String inputMask();
+
+    @DefaultStringValue("Learn more about input masks")
+    String learnMoreAboutInputMasks();
 }

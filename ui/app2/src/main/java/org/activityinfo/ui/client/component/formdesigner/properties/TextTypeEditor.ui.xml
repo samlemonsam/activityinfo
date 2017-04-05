@@ -10,6 +10,9 @@
     <g:FlowPanel>
         <f:FormGroup label="{i18n.inputMask}" columnLabelWidth="4">
             <a:TextBox ui:field="inputMask" width="100%"/>
+            <g:HTMLPanel addStyleNames="help-block">
+                <a href="http://help.activityinfo.org/m/28175/l/718178" target="_blank"><ui:text from="{i18n.learnMoreAboutInputMasks}"/></a>
+            </g:HTMLPanel>
         </f:FormGroup>
     </g:FlowPanel>
 </ui:UiBinder>
