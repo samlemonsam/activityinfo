@@ -492,7 +492,7 @@ public class ActivityLoader {
                     break;
                 
                 case "FREE_TEXT":
-                    formField.setType(TextType.INSTANCE);
+                    formField.setType(TextType.SIMPLE);
                     break;
                 case "NARRATIVE":
                     formField.setType(NarrativeType.INSTANCE);

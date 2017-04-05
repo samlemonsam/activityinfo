@@ -199,7 +199,7 @@ public class ActivityTest extends CommandTestCase2 {
 
         FormField newTextField = new FormField(ResourceId.generateFieldId(TextType.TYPE_CLASS));
         newTextField.setLabel("What is your name?");
-        newTextField.setType(TextType.INSTANCE);
+        newTextField.setType(TextType.SIMPLE);
         formClass.addElement(newTextField);
 
         assertResolves(locator.persist(formClass));
@@ -240,7 +240,7 @@ public class ActivityTest extends CommandTestCase2 {
 
         FormField newTextField = new FormField(ResourceId.generateFieldId(TextType.TYPE_CLASS));
         newTextField.setLabel("What is your name?");
-        newTextField.setType(TextType.INSTANCE);
+        newTextField.setType(TextType.SIMPLE);
         formClass.addElement(newTextField);
 
         assertResolves(locator.persist(formClass));

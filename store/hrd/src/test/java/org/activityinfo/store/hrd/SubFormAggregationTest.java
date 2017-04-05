@@ -75,7 +75,7 @@ public class SubFormAggregationTest {
         siteForm.setLabel("Household interview");
         FormField villageField = siteForm.addField()
                 .setLabel("Village Name")
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
         siteForm.addField()
                 .setLabel("Maximum Beneficiaries")
                 .setCode("BENE")

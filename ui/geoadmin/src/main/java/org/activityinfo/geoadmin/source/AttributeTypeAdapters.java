@@ -30,7 +30,7 @@ public enum AttributeTypeAdapters implements AttributeTypeAdapter {
     TEXT {
         @Override
         public FieldType createType() {
-            return TextType.INSTANCE;
+            return TextType.SIMPLE;
         }
     },
     

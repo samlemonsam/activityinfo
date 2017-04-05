@@ -27,7 +27,7 @@ public class FormClassTest {
         formClass.setLabel("Form");
 
         FormField field = new FormField(ResourceId.generateId());
-        field.setType(TextType.INSTANCE);
+        field.setType(TextType.SIMPLE);
         formClass.addElement(field);
 
         JsonObject jsonObject = formClass.toJsonObject();

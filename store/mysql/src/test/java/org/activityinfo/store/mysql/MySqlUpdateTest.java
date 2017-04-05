@@ -207,7 +207,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         formClass.setDatabaseId(1);
         formClass.setLabel("New Form");
         formClass.addElement(new FormField(CuidAdapter.generateIndicatorId())
-                .setType(TextType.INSTANCE)
+                .setType(TextType.SIMPLE)
                 .setLabel("Name")
                 .setRequired(true));
 

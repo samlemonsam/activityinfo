@@ -95,7 +95,8 @@ public class FieldEditor implements IsWidget {
     QuantityTypeEditor quantityTypeEditor;
     @UiField
     CalculatedTypeEditor calculatedTypeEditor;
-
+    @UiField
+    TextTypeEditor textTypeEditor;
 
     private FormDesigner formDesigner;
 
@@ -158,6 +159,7 @@ public class FieldEditor implements IsWidget {
 
         quantityTypeEditor.show(fieldWidgetContainer);
         calculatedTypeEditor.show(formField);
+        textTypeEditor.show(fieldWidgetContainer);
     }
 
     /**

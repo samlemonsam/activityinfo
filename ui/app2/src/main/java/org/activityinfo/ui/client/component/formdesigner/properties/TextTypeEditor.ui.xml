@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:a="urn:import:org.activityinfo.ui.client.widget"
+             xmlns:f="urn:import:org.activityinfo.ui.client.widget.form"
+>
+
+    <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+    <ui:with field="style" type="org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles"/>
+
+    <g:FlowPanel>
+        <f:FormGroup label="{i18n.inputMask}" columnLabelWidth="4">
+            <a:TextBox ui:field="inputMask" width="100%"/>
+        </f:FormGroup>
+    </g:FlowPanel>
+</ui:UiBinder>

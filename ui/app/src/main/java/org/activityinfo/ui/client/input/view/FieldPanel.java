@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.DateCell;
 import com.sencha.gxt.core.client.dom.XDOM;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -86,6 +87,8 @@ public class FieldPanel extends Widget {
             DateCell dateCell = new DateCell();
             dateCell.setHideTrigger(false);
             return dateCell;
+        } else if(node.getType() instanceof EnumType) {
+
         }
         return null;
     }

@@ -34,7 +34,7 @@ public class ConstantExpr extends ExprNode {
     }
 
     public ConstantExpr(String value) {
-        this(TextValue.valueOf(value), TextType.INSTANCE);
+        this(TextValue.valueOf(value), TextType.SIMPLE);
     }
 
     public ConstantExpr(Quantity value) {
@@ -42,7 +42,7 @@ public class ConstantExpr extends ExprNode {
     }
 
     public ConstantExpr(TextValue value) {
-        this(value, TextType.INSTANCE);
+        this(value, TextType.SIMPLE);
     }
 
     public ConstantExpr(LocalDate localDate) {

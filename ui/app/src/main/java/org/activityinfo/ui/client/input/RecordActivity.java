@@ -7,9 +7,6 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.activityinfo.ui.client.input.view.InputPanel;
 import org.activityinfo.ui.client.store.FormStore;
 
-/**
- * Created by alex on 16-2-17.
- */
 public class RecordActivity extends AbstractActivity {
 
     private FormStore formStore;

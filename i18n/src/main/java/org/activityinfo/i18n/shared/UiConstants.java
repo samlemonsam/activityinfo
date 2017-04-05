@@ -1666,4 +1666,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Total")
     String tableTotal();
+
+    @DefaultStringValue("Input Mask")
+    String inputMask();
 }

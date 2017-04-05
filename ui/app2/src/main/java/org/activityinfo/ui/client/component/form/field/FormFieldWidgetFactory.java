@@ -110,7 +110,7 @@ public class FormFieldWidgetFactory {
             return Promise.resolved(new NarrativeFieldWidget(valueUpdater));
 
         } else if (type instanceof TextType) {
-            return Promise.resolved(new TextFieldWidget(valueUpdater));
+            return Promise.resolved(new TextFieldWidget((TextType) type, valueUpdater, eventBus, field.getId()));
 
         } else if (type instanceof CalculatedFieldType) {
             return Promise.resolved(new CalculatedFieldWidget(valueUpdater));

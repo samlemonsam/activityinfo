@@ -226,7 +226,7 @@ public class XFormBuilder {
 
     private OdkField locationName(FormField original) {
         FormField formField = new FormField(locationNameFieldId);
-        formField.setType(TextType.INSTANCE);
+        formField.setType(TextType.SIMPLE);
         formField.setLabel(original.getLabel());
         formField.setRequired(original.isRequired());
         return new OdkField(formField, factory.get(formField.getType()));

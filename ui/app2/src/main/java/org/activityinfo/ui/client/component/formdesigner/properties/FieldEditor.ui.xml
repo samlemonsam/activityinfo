@@ -74,7 +74,7 @@
     </g:HTMLPanel>
 
     <!-- Editors for individual types -->
-
+    <prop:TextTypeEditor ui:field="textTypeEditor"/>
     <prop:QuantityTypeEditor ui:field="quantityTypeEditor"/>
     <prop:CalculatedTypeEditor ui:field="calculatedTypeEditor"/>
   </g:HTMLPanel>

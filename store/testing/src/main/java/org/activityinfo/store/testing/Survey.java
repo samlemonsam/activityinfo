@@ -58,7 +58,7 @@ public class Survey implements TestForm {
         nameField = formClass.addField(NAME_FIELD_ID)
                 .setCode("NAME")
                 .setLabel("Respondent Name")
-                .setType(TextType.INSTANCE)
+                .setType(TextType.SIMPLE)
                 .setRequired(true)
                 .setVisible(true);
 

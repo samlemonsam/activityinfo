@@ -47,7 +47,7 @@ public class ProjectTable implements SimpleTable {
                 .setRequired(true)
                 .setLabel("Name")
                 .setCode("label")
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
 
         mapping.addTextField(nameField, "name");
 
@@ -55,7 +55,7 @@ public class ProjectTable implements SimpleTable {
         FormField fullNameField = new FormField(field(formId, FULL_NAME_FIELD))
                 .setLabel("Description")
                 .setRequired(false)
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
 
         mapping.addTextField(fullNameField, "description");
 

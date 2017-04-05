@@ -168,7 +168,7 @@ public class NodeMatcherTest {
     private FormField field(String id, String label) {
         FormField field = new FormField(ResourceId.valueOf(id));
         field.setLabel(label);
-        field.setType(TextType.INSTANCE);
+        field.setType(TextType.SIMPLE);
         
         return field;
     }
