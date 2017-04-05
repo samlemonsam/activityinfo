@@ -25,7 +25,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.legacy.shared.Log;
@@ -56,8 +55,6 @@ import org.activityinfo.ui.client.component.form.field.attachment.AttachmentUplo
 import org.activityinfo.ui.client.component.form.field.attachment.ImageUploadFieldWidget;
 import org.activityinfo.ui.client.component.form.field.hierarchy.HierarchyFieldWidget;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
-
-import javax.annotation.Nullable;
 
 /**
  * @author yuriyz on 1/28/14.
@@ -95,28 +92,25 @@ public class FormFieldWidgetFactory {
         this.fieldWidgetMode = fieldWidgetMode;
     }
 
-    public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field, ValueUpdater valueUpdater) {
-        return createWidget(formClass, field, valueUpdater, null, null);
-    }
 
     public Promise<? extends FormFieldWidget> createWidget(FormClass formClass, FormField field,
-                                                           ValueUpdater valueUpdater, FormClass validationFormClass, @Nullable EventBus eventBus) {
+                                                           FieldUpdater valueUpdater) {
         FieldType type = field.getType();
 
         if (type instanceof QuantityType) {
-            return Promise.resolved(new QuantityFieldWidget((QuantityType) type, valueUpdater, eventBus, field.getId()));
+            return Promise.resolved(new QuantityFieldWidget((QuantityType) type, valueUpdater));
 
         } else if (type instanceof NarrativeType) {
             return Promise.resolved(new NarrativeFieldWidget(valueUpdater));
 
         } else if (type instanceof TextType) {
-            return Promise.resolved(new TextFieldWidget((TextType) type, valueUpdater, eventBus, field.getId()));
+            return Promise.resolved(new TextFieldWidget((TextType) type, valueUpdater));
 
         } else if (type instanceof CalculatedFieldType) {
             return Promise.resolved(new CalculatedFieldWidget(valueUpdater));
 
         } else if (type instanceof LocalDateType) {
-            return Promise.resolved(new DateFieldWidget(valueUpdater, eventBus, field.getId()));
+            return Promise.resolved(new DateFieldWidget(valueUpdater));
 
         } else if (type instanceof LocalDateIntervalType) {
             return Promise.resolved(new DateIntervalFieldWidget(valueUpdater));

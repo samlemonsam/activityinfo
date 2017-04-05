@@ -21,10 +21,13 @@ public class InputMaskTest {
 
         assertThat("1-00000000", matches(mask));
         assertThat("1-23487538", matches(mask));
+        assertThat("1-a0000000", not(matches(mask)));
+
         assertThat("1-234875383", not(matches(mask)));
         assertThat("0-234875383", not(matches(mask)));
         assertThat("-234875383", not(matches(mask)));
     }
+
 
     public Matcher<String> matches(final InputMask mask) {
         this.mask = mask;

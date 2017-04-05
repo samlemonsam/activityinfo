@@ -22,25 +22,20 @@ package org.activityinfo.ui.client.component.form.field;
  */
 
 import com.google.common.base.Strings;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.component.importDialog.model.type.formatter.DateFormatterFactory;
 import org.activityinfo.ui.client.widget.DateBox;
 
-import javax.annotation.Nullable;
 import java.util.Date;
 
 /**
@@ -68,23 +63,17 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
 
     public static final String FORMAT = DateFormatterFactory.FORMAT;
 
-    @Nullable
-    private final EventBus eventBus;
-    private final ResourceId fieldId;
     private final DateBox dateBox;
-    private final ValueUpdater<LocalDate> valueUpdater;
+    private final FieldUpdater valueUpdater;
 
-    public DateFieldWidget(final ValueUpdater<LocalDate> valueUpdater,
-                           @Nullable EventBus eventBus, ResourceId fieldId) {
+    public DateFieldWidget(final FieldUpdater valueUpdater) {
         this.valueUpdater = valueUpdater;
-        this.eventBus = eventBus;
-        this.fieldId = fieldId;
         this.dateBox = new DateBox(new DatePicker(), null,
                 new DateBox.DefaultFormat(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)));
         this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                fireValueChanged();
+                validate();
             }
         });
         this.dateBox.getTextBox().addKeyUpHandler(new KeyUpHandler() {
@@ -137,16 +126,17 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
     }
 
     private void validate() {
-        if (eventBus == null) {
-            return;
-        }
-
         String valueAsString = dateBox.getTextBox().getValue();
-        if (!Strings.isNullOrEmpty(valueAsString) &&
-                this.dateBox.getFormat().parse(dateBox, valueAsString, false) == null) {
-            eventBus.fireEvent(new FieldMessageEvent(fieldId, I18N.MESSAGES.dateFieldInvalidValue(FORMAT)));
+
+        if (!Strings.isNullOrEmpty(valueAsString)) {
+            valueUpdater.update(null);
         } else {
-            eventBus.fireEvent(new FieldMessageEvent(fieldId, "").setClearMessage(true));
+            Date dateValue = this.dateBox.getFormat().parse(dateBox, valueAsString, false);
+            if(dateValue == null) {
+                valueUpdater.onInvalid(I18N.MESSAGES.dateFieldInvalidValue(FORMAT));
+            } else {
+                valueUpdater.update(new LocalDate(dateValue));
+            }
         }
     }
 }

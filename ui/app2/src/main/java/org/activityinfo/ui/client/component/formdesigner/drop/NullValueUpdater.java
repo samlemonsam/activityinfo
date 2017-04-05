@@ -1,12 +1,19 @@
 package org.activityinfo.ui.client.component.formdesigner.drop;
 
-import com.google.gwt.cell.client.ValueUpdater;
+import org.activityinfo.ui.client.component.form.field.FieldUpdater;
 
-public enum NullValueUpdater implements ValueUpdater {
-    INSTANCE;
+public enum NullValueUpdater implements FieldUpdater {
+    INSTANCE {
+
+    };
 
     @Override
     public void update(Object value) {
+        // No action
+    }
+
+    @Override
+    public void onInvalid(String errorMessage) {
         // No action
     }
 }
