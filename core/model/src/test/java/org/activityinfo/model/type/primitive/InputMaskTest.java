@@ -28,6 +28,21 @@ public class InputMaskTest {
         assertThat("-234875383", not(matches(mask)));
     }
 
+    @Test
+    public void nullInputMask() {
+        InputMask mask = new InputMask(null);
+
+        assertThat("", matches(mask));
+        assertThat("foobar", matches(mask));
+    }
+
+    @Test
+    public void emptyInputMask() {
+        InputMask mask = new InputMask("");
+
+        assertThat("", matches(mask));
+        assertThat("foobar", matches(mask));
+    }
 
     public Matcher<String> matches(final InputMask mask) {
         this.mask = mask;

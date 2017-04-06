@@ -128,7 +128,7 @@ public class DateFieldWidget implements FormFieldWidget<LocalDate> {
     private void validate() {
         String valueAsString = dateBox.getTextBox().getValue();
 
-        if (!Strings.isNullOrEmpty(valueAsString)) {
+        if (Strings.isNullOrEmpty(valueAsString)) {
             valueUpdater.update(null);
         } else {
             Date dateValue = this.dateBox.getFormat().parse(dateBox, valueAsString, false);
