@@ -161,7 +161,7 @@ public class InputMask {
 
     public InputMask(String mask) {
         this.mask = Strings.nullToEmpty(mask);
-        this.empty = mask.isEmpty();
+        this.empty = this.mask.isEmpty();
         if(!this.empty) {
             int i = 0;
             while (i < mask.length()) {
