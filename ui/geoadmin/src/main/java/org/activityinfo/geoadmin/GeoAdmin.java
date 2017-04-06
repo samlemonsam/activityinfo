@@ -5,7 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.model.Country;
 
 import javax.swing.*;
@@ -43,7 +43,7 @@ public class GeoAdmin extends JFrame {
     private static final String OPEN_TABS = "open_tabs";
     private static final String ACTIVE_TAB = "active_tab";
 
-    private ActivityInfoClient client;
+    private GeoAdminClient client;
     private JTabbedPane tabPane;
 
     private List<Country> countries;
@@ -53,7 +53,7 @@ public class GeoAdmin extends JFrame {
 
     private Preferences prefs = Preferences.userNodeForPackage(GeoAdmin.class);
 
-    public GeoAdmin(ActivityInfoClient client) {
+    public GeoAdmin(GeoAdminClient client) {
         this.client = client;
 
         setTitle("ActivityInfo Geo Administrator");
@@ -210,7 +210,7 @@ public class GeoAdmin extends JFrame {
     }
 
     private static void onAuthenticated(String username, String password, String endpoint) {
-        final ActivityInfoClient client = new ActivityInfoClient(endpoint, username, password);
+        final GeoAdminClient client = new GeoAdminClient(endpoint, username, password);
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override

@@ -14,6 +14,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.BlobAuthorizer;
@@ -83,7 +84,8 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public void persist(FormInstance formInstance) {
-        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), blobAuthorizer);
+        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), blobAuthorizer,
+                new HrdSerialNumberProvider());
         updater.execute(formInstance);
     }
 }

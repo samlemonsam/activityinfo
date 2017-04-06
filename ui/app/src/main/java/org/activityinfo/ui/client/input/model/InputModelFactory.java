@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.input.model;
 
 import org.activityinfo.model.type.FieldTypeVisitor;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -104,4 +105,11 @@ public enum InputModelFactory implements FieldTypeVisitor<InputModel> {
     public InputModel visitText(TextType textType) {
         return new SimpleInputModel();
     }
+
+    @Override
+    public InputModel visitFileNumber(SerialNumberType serialNumberType) {
+        throw new UnsupportedOperationException();
+    }
+
+
 }

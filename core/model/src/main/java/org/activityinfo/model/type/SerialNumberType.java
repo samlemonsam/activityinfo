@@ -7,23 +7,23 @@ import com.google.gson.JsonObject;
  * Field to which a sequential number is assigned when the record is first saved.
  *
  */
-public class FileNumberType implements FieldType {
+public class SerialNumberType implements FieldType {
 
 
     public static final FieldTypeClass TYPE_CLASS = new ParametrizedFieldTypeClass() {
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
-            return new FileNumberType();
+            return new SerialNumberType();
         }
 
         @Override
         public String getId() {
-            return "file_number";
+            return "serial";
         }
 
         @Override
         public FieldType createType() {
-            return new FileNumberType();
+            return new SerialNumberType();
         }
     };
 
@@ -34,7 +34,7 @@ public class FileNumberType implements FieldType {
 
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
-        return new FileNumber(value.getAsString());
+        return new SerialNumber(value.getAsNumber().intValue());
     }
 
     @Override

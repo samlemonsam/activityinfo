@@ -91,7 +91,8 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
           result.resolve(FormRecord.fromJson(response.getText()));
           return;
         }
-        LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getStatusText());
+        LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " +
+                response.getText());
         result.reject(new ApiException(response.getStatusCode()));
       }
 
@@ -134,7 +135,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
           result.resolve(null);
           return;
         }
-        LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getStatusText());
+        LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getText());
         result.reject(new ApiException(response.getStatusCode()));
       }
 
@@ -259,7 +260,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
           result.resolve(null);
           return;
         }
-        LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getStatusText());
+        LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getText());
         result.reject(new ApiException(response.getStatusCode()));
       }
 

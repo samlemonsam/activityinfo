@@ -11,6 +11,8 @@ dependencies {
     compile project(':core:promises')
     compile project(':io:match')
     compile project(':store:query')
+    compile project(':clients:javarest')
+
     
     compile group: 'com.sun.jersey', name: 'jersey-client', version:'1.17'
     compile group: 'com.sun.jersey', name: 'jersey-json', version:'1.17'

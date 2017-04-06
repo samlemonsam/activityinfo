@@ -9,7 +9,7 @@ import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.geoadmin.merge2.view.swing.SwingSchedulers;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.model.TransactionBuilder;
 import org.activityinfo.geoadmin.model.UpdateBuilder;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
@@ -110,7 +110,7 @@ public class ImportView {
      * build a transaction to effect the import.
      * @param client
      */
-    public void runUpdate(ActivityInfoClient client) {
+    public void runUpdate(GeoAdminClient client) {
         TransactionBuilder tx = new TransactionBuilder();
 
         ResourceId targetFormId = model.getTargetFormId().get();
@@ -162,7 +162,7 @@ public class ImportView {
 
     }
 
-    private void updateGeometry(ActivityInfoClient client, Map<ResourceId, ResourceId> idMap) throws IOException {
+    private void updateGeometry(GeoAdminClient client, Map<ResourceId, ResourceId> idMap) throws IOException {
         FeatureSourceCatalog catalog = new FeatureSourceCatalog();
         FeatureSourceStorage formStorage = (FeatureSourceStorage) catalog.getForm(getModel().getSourceFormId().get()).get();
 

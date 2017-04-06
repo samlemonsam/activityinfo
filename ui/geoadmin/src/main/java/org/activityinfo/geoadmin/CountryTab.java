@@ -34,10 +34,10 @@ public class CountryTab extends JPanel {
     private Preferences prefs = Preferences.userNodeForPackage(GeoAdmin.class);
 
     private Country country;
-    private ActivityInfoClient client;
+    private GeoAdminClient client;
     private JTree tree;
 
-    public CountryTab(ActivityInfoClient client, Country country) {
+    public CountryTab(GeoAdminClient client, Country country) {
         super(false); // isDoubleBuffered
         this.client = client;
         this.country = country;

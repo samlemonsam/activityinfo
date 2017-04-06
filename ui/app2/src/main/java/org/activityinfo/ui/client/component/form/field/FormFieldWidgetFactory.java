@@ -40,6 +40,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -99,6 +100,9 @@ public class FormFieldWidgetFactory {
 
         if (type instanceof QuantityType) {
             return Promise.resolved(new QuantityFieldWidget((QuantityType) type, valueUpdater));
+
+        } else if (type instanceof SerialNumberType) {
+            return Promise.resolved(new SerialNumberFieldWidget());
 
         } else if (type instanceof NarrativeType) {
             return Promise.resolved(new NarrativeFieldWidget(valueUpdater));

@@ -45,9 +45,9 @@ import java.util.logging.Logger;
 /**
  * ActivityInfo REST Client
  */
-public class ActivityInfoClient implements FormClassProvider {
+public class GeoAdminClient implements FormClassProvider {
 
-    public static final Logger LOGGER = Logger.getLogger(ActivityInfoClient.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(GeoAdminClient.class.getName());
 
     private Client client;
     private URI root;
@@ -57,7 +57,7 @@ public class ActivityInfoClient implements FormClassProvider {
     @Override
     public FormClass getFormClass(ResourceId resourceId) {
         Preconditions.checkArgument(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN);
-        return ActivityInfoClient.this.getFormClass(CuidAdapter.getLegacyIdFromCuid(resourceId));
+        return GeoAdminClient.this.getFormClass(CuidAdapter.getLegacyIdFromCuid(resourceId));
     }
 
     public static class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
@@ -83,7 +83,7 @@ public class ActivityInfoClient implements FormClassProvider {
      * @param password
      *            User's plaintext password
      */
-    public ActivityInfoClient(String endpoint, String username, String password) {
+    public GeoAdminClient(String endpoint, String username, String password) {
         ClientConfig clientConfig = new DefaultClientConfig();
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
         clientConfig.getClasses().add(ObjectMapperProvider.class);

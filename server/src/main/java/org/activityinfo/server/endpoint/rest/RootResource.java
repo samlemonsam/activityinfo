@@ -42,6 +42,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
+import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
@@ -185,7 +186,8 @@ public class RootResource {
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
         Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(),
-                blobAuthorizer);
+                blobAuthorizer,
+                new HrdSerialNumberProvider());
         try {
             updater.execute(jsonElement.getAsJsonObject());
         } catch (InvalidUpdateException e) {

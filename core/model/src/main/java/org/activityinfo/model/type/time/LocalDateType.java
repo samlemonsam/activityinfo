@@ -61,7 +61,7 @@ public class LocalDateType implements FieldType {
 
     @Override
     public boolean isUpdatable() {
-        return false;
+        return true;
     }
 
     @Override

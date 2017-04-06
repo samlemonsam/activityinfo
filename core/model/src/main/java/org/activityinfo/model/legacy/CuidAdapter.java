@@ -2,8 +2,11 @@ package org.activityinfo.model.legacy;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 
 /**
@@ -342,5 +345,20 @@ public class CuidAdapter {
         return new ReferenceValue(new RecordRef(
                 CuidAdapter.projectFormClass(databaseId),
                 CuidAdapter.projectInstanceId(projectId)));
+    }
+
+    public static ResourceId generateActivityId() {
+        return CuidAdapter.activityFormClass(new KeyGenerator().generateInt());
+    }
+
+
+    public static FormField partnerField(FormClass formClass) {
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId());
+        ResourceId partnerId = field(formClass.getId(), PARTNER_FIELD);
+        FormField formField = new FormField(partnerId);
+        formField.setLabel("Partner");
+        formField.setType(ReferenceType.single(partnerFormId(databaseId)));
+        formField.setRequired(true);
+        return formField;
     }
 }

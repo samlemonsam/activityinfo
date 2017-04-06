@@ -15,6 +15,8 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumber;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -42,13 +44,17 @@ public class Updater {
     private final FormCatalog catalog;
     private int userId;
     private BlobAuthorizer blobAuthorizer;
+    private SerialNumberProvider serialNumberProvider;
 
     private boolean enforcePermissions = true;
 
-    public Updater(FormCatalog catalog, int userId, BlobAuthorizer blobAuthorizer) {
+    public Updater(FormCatalog catalog, int userId,
+                   BlobAuthorizer blobAuthorizer,
+                   SerialNumberProvider serialNumberProvider) {
         this.catalog = catalog;
         this.userId = userId;
         this.blobAuthorizer = blobAuthorizer;
+        this.serialNumberProvider = serialNumberProvider;
     }
 
     public void setEnforcePermissions(boolean enforcePermissions) {
@@ -259,8 +265,26 @@ public class Updater {
         if(existingResource.isPresent()) {
             form.update(update);
         } else {
+
+            generateSerialNumbers(formClass, update);
+
             form.add(update);
         }
+    }
+
+    private void generateSerialNumbers(FormClass formClass, RecordUpdate update) {
+        List<FormField> serialNumbers = new ArrayList<>();
+        for (FormField formField : formClass.getFields()) {
+            if(formField.getType() instanceof SerialNumberType) {
+                generateSerialNumber(formClass, formField, update);
+            }
+        }
+    }
+
+    private void generateSerialNumber(FormClass formClass, FormField formField, RecordUpdate update) {
+        int serialNumber = serialNumberProvider.next(formClass.getId(), formField.getId());
+
+        update.set(formField.getId(), new SerialNumber(serialNumber));
     }
 
 
@@ -284,7 +308,9 @@ public class Updater {
         // Verify that all required fields are provided for new resources
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
-                if (formField.isRequired() && formField.isVisible() && !isProvided(formField, existingResource, update)) {
+                if (formField.isRequired() &&
+                    formField.isVisible() &&
+                    formField.getType().isUpdatable() && !isProvided(formField, existingResource, update)) {
                     throw new InvalidUpdateException("Required field '%s' [%s] is missing from record with schema %s",
                             formField.getCode(), formField.getId(), formClass.getId().asString());
                 }

@@ -5,7 +5,7 @@ import org.activityinfo.geoadmin.merge2.view.mapping.FormMapping;
 import org.activityinfo.geoadmin.merge2.view.mapping.ReferenceFieldMapping;
 import org.activityinfo.geoadmin.merge2.view.swing.lookup.LookupStep;
 import org.activityinfo.geoadmin.merge2.view.swing.match.MatchStep;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
 
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class ImportDialog extends JFrame {
 
-    private ActivityInfoClient client;
+    private GeoAdminClient client;
     private final ImportView viewModel;
 
     private List stepList;
@@ -27,7 +27,7 @@ public class ImportDialog extends JFrame {
 
     private java.util.List<Step> steps;
 
-    public ImportDialog(ActivityInfoClient client, ImportView viewModel) {
+    public ImportDialog(GeoAdminClient client, ImportView viewModel) {
         super("Merge");
         this.client = client;
         this.viewModel = viewModel;
