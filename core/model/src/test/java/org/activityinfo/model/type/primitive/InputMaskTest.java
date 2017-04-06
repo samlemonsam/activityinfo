@@ -5,6 +5,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
@@ -34,6 +35,15 @@ public class InputMaskTest {
 
         assertThat("", matches(mask));
         assertThat("foobar", matches(mask));
+    }
+
+    @Test
+    public void malformedEscapeTest() {
+        InputMask mask = new InputMask("000\\");
+
+        assertThat(mask.placeHolderText(), equalTo("000\\"));
+        assertThat("000", not(matches(mask)));
+        assertThat("123\\", matches(mask));
     }
 
     @Test
