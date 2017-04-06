@@ -82,6 +82,52 @@ public class InputMask {
         }
     }
 
+    public class RequiredLetter extends Atom {
+
+        public static final char CHAR = 'L';
+
+        @Override
+        public boolean validate(Input input, StringBuilder output) {
+            if(!input.hasNext()) {
+                return false;
+            }
+            char next = input.next();
+            if(!Character.isLetter(next)) {
+                return false;
+            }
+            output.append(next);
+            return true;
+        }
+
+        @Override
+        public void appendPlaceHolder(StringBuilder sb) {
+            sb.append(CHAR);
+        }
+    }
+
+    public class RequiredLetterOrDigit extends Atom {
+
+        public static final char CHAR = 'A';
+
+        @Override
+        public boolean validate(Input input, StringBuilder output) {
+            if(!input.hasNext()) {
+                return false;
+            }
+            char next = input.next();
+            if(!(Character.isLetter(next) || Character.isDigit(next)) ) {
+                return false;
+            }
+            output.append(next);
+            return true;
+        }
+
+        @Override
+        public void appendPlaceHolder(StringBuilder sb) {
+            sb.append(CHAR);
+        }
+    }
+
     public class Literal extends Atom {
 
         private char expectedChar;
@@ -123,6 +169,14 @@ public class InputMask {
                 switch (c) {
                     case RequiredDigit.CHAR:
                         atoms.add(new RequiredDigit());
+                        break;
+
+                    case RequiredLetter.CHAR:
+                        atoms.add(new RequiredLetter());
+                        break;
+
+                    case RequiredLetterOrDigit.CHAR:
+                        atoms.add(new RequiredLetterOrDigit());
                         break;
 
                     case ESCAPE:
