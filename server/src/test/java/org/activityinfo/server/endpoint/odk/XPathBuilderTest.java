@@ -163,7 +163,7 @@ public class XPathBuilderTest extends CommandTestCase2 {
 
         FormField textField = new FormField(TEXT_FIELD_ID);
         textField.setLabel("Text");
-        textField.setType(TextType.INSTANCE);
+        textField.setType(TextType.SIMPLE);
 
         FormField quantityField = new FormField(QUANTITY_FIELD_ID);
         quantityField.setLabel("Quantity");

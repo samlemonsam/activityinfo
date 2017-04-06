@@ -70,7 +70,7 @@ public class HrdCatalogTest {
         formClass.addField(villageField)
                 .setLabel("Village name")
                 .setCode("VILLAGE")
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
         formClass.addField(countField)
                 .setLabel("Number of Beneficiaries")
                 .setCode("BENE")
@@ -132,7 +132,7 @@ public class HrdCatalogTest {
         FormField nameField = formClass.addField(ResourceId.generateId())
                 .setLabel("Village name")
                 .setCode("VILLAGE")
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
 
         HrdCatalog catalog = new HrdCatalog();
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
@@ -178,7 +178,7 @@ public class HrdCatalogTest {
         hhForm.setLabel("Household interview");
         FormField hhIdField = hhForm.addField()
                 .setLabel("Household ID")
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
         hhForm.addField()
                 .setLabel("Household Memmbers")
                 .setType(new SubFormReferenceType(memberForm.getId()));
@@ -187,7 +187,7 @@ public class HrdCatalogTest {
         memberForm.setLabel("Household Members");
         FormField nameField = memberForm.addField()
                 .setLabel("Name")
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
         FormField ageField = memberForm.addField()
                 .setLabel("Age")
                 .setType(new QuantityType("years"));

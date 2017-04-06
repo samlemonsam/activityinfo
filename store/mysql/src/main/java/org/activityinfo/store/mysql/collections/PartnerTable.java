@@ -47,7 +47,7 @@ public class PartnerTable implements SimpleTable {
                 .setLabel("Name")
                 .setCode("label")
           //      .setSuperProperty(ApplicationProperties.LABEL_PROPERTY)
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
         
         mapping.addTextField(nameField, "name");
         
@@ -56,7 +56,7 @@ public class PartnerTable implements SimpleTable {
                 .setLabel("Full Name")
             //    .setSuperProperty(ApplicationProperties.DESCRIPTION_PROPERTY)
                 .setRequired(false)
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
         
         mapping.addTextField(fullNameField, "FullName");
 

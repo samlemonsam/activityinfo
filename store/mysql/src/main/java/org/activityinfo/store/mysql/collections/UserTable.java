@@ -28,7 +28,7 @@ public class UserTable implements SimpleTable {
 
         FormField nameField = new FormField(NAME_FIELD_ID);
         nameField.setLabel("Name");
-        nameField.setType(TextType.INSTANCE);
+        nameField.setType(TextType.SIMPLE);
         nameField.setRequired(true);
 
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(FORM_CLASS_ID, TABLE_NAME);

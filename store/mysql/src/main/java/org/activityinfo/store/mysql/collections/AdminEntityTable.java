@@ -58,13 +58,13 @@ public class AdminEntityTable implements SimpleTable {
         label.setCode("name");
         label.setRequired(true);
         label.addSuperProperty(ResourceId.valueOf("label"));
-        label.setType(TextType.INSTANCE);
+        label.setType(TextType.SIMPLE);
 
         FormField code = new FormField(CuidAdapter.field(formId, CuidAdapter.CODE_FIELD));
         code.setCode("code");
         code.setLabel(I18N.CONSTANTS.codeFieldLabel());
         code.setRequired(false);
-        code.setType(TextType.INSTANCE);            
+        code.setType(TextType.SIMPLE);
         
         FormField bounds = new FormField(CuidAdapter.field(formId, CuidAdapter.GEOMETRY_FIELD));
         bounds.setCode("boundary");

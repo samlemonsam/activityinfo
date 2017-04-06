@@ -89,14 +89,14 @@ public class LocationFormStorage implements FormStorage {
         labelField.setLabel(I18N.CONSTANTS.name());
         labelField.addSuperProperty(ResourceId.valueOf("label"));
         labelField.setRequired(true);
-        labelField.setType(TextType.INSTANCE);
+        labelField.setType(TextType.SIMPLE);
 
         axeFieldId = CuidAdapter.field(formClassId, CuidAdapter.AXE_FIELD);
         FormField axeField = new FormField(axeFieldId);
         axeField.setCode("axe");
         axeField.setLabel(I18N.CONSTANTS.alternateName());
         axeField.setRequired(false);
-        axeField.setType(TextType.INSTANCE);
+        axeField.setType(TextType.SIMPLE);
 
         adminFieldId = CuidAdapter.field(formClassId, CuidAdapter.ADMIN_FIELD);
         FormField adminField = new FormField(adminFieldId);

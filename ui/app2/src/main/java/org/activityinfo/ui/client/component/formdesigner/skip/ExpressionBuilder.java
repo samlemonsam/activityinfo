@@ -119,7 +119,7 @@ public class ExpressionBuilder {
         } else if (value instanceof Quantity) {
             return new ConstantExpr((Quantity)value);
         } else if (value instanceof TextValue) {
-            return new ConstantExpr(value, TextType.INSTANCE);
+            return new ConstantExpr(value, TextType.SIMPLE);
         } else {
             throw new IllegalArgumentException("value: "+ value);
         }
