@@ -183,7 +183,8 @@ public class InputMask {
                         if (i < mask.length()) {
                             atoms.add(new Literal(mask.charAt(i++)));
                         } else {
-                            throw new InvalidInputMaskException(mask, i - 1);
+                            // be lenient in what we accept
+                            atoms.add(new Literal('\\'));
                         }
                         break;
 
