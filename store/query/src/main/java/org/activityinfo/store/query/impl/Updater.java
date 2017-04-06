@@ -337,11 +337,12 @@ public class Updater {
         Preconditions.checkNotNull(field);
         
         if(updatedValue != null) {
-            if ( field.getType() instanceof CalculatedFieldType) {
+            if ( !field.getType().isUpdatable()) {
                 throw new InvalidUpdateException(
-                        format("Field %s ('%s') is a calculated field and its value cannot be set. Found %s",
+                        format("Field %s ('%s') is a field of type '%s' and its value cannot be set. Found %s",
                                 field.getId(),
                                 field.getLabel(),
+                                field.getType().getTypeClass().getId(),
                                 updatedValue));
             }
             if (!field.getType().getTypeClass().equals(updatedValue.getTypeClass())) {

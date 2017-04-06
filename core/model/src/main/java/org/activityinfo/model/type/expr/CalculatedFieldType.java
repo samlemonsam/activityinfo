@@ -76,6 +76,11 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return false;
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         if (expression != null) {

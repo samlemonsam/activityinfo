@@ -14,4 +14,9 @@ public interface FieldType {
     FieldValue parseJsonValue(JsonElement value);
 
     <T> T accept(FieldTypeVisitor<T> visitor);
+
+    /**
+     * @return true if fields of this type can be set by the user.
+     */
+    boolean isUpdatable();
 }

@@ -74,6 +74,11 @@ public class TextType implements ParametrizedFieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "TextType";
     }

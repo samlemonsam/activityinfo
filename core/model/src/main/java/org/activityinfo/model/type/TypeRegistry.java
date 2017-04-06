@@ -47,6 +47,7 @@ public class TypeRegistry {
         register(BarcodeType.TYPE_CLASS);
         register(AttachmentType.TYPE_CLASS);
         register(SubFormReferenceType.TYPE_CLASS);
+        register(FileNumberType.TYPE_CLASS);
     }
 
     private void register(FieldTypeClass typeClass) {

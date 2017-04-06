@@ -52,6 +52,11 @@ public class GeoPointType implements RecordFieldType {
         return visitor.visitGeoPoint(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     /**
      *
      * @return the singleton instance for this type

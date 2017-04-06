@@ -28,6 +28,11 @@ public final class NullFieldType implements FieldType, FieldTypeClass {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
+    @Override
     public String getId() {
         return "null";
     }

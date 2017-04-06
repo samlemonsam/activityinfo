@@ -76,6 +76,11 @@ public class QuantityType implements ParametrizedFieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         object.addProperty("units", Strings.nullToEmpty(units));

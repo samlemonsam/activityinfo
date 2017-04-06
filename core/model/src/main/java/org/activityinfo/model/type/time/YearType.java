@@ -64,4 +64,9 @@ public class YearType implements FieldType, TemporalType {
         return visitor.visitYear(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
 }

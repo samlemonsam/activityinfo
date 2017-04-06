@@ -42,6 +42,11 @@ public class NarrativeType implements FieldType {
         return visitor.visitNarrative(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     /**
      *
      * @return the singleton instance for this type

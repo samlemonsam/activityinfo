@@ -94,6 +94,11 @@ public class ReferenceType implements ParametrizedFieldType {
         return visitor.visitReference(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     private RecordRef parseRef(String ref) {
         int separator = ref.indexOf(':');
         if(separator == -1) {

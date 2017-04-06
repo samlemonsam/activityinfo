@@ -107,6 +107,11 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         
         JsonArray enumValueArray = new JsonArray();

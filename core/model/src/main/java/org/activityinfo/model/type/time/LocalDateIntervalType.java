@@ -44,6 +44,11 @@ public class LocalDateIntervalType implements FieldType {
         return visitor.visitLocalDateInterval(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     /**
      *
      * @return the singleton instance for this type
