@@ -42,7 +42,7 @@
         <h1 class="logo"><img src="https://site-dot-ai-dev.appspot.com/about/assets/images/logo-activityinfo.png" alt=""><a href="./">ActivityInfo</a></h1>
 
         <ul>
-            <li><a href="./features.html">Features</a></li>
+            <li><a href="/about/feature/api.html">Features</a></li>
             <li><a href="./pricing.html">Pricing</a></li>
             <li><a href="./signup.html">Signup</a></li>
             <li class="cta"><a href="/login">Login</a></li>
@@ -66,7 +66,7 @@
                 <h2>Product</h2>
 
                 <ul>
-                    <li><a href="/about/features.html">Features</a></li>
+                    <li><a href="/about/feature/api.html">Features</a></li>
                     <li><a href="/about/benefits.html">Benefits</a></li>
                     <li><a href="/about/pricing.html">Plans</a></li>
                     <li><a href="/about/status.html">Status</a></li>
