@@ -122,7 +122,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer);
+            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer, new SerialNumberProviderStub());
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -145,7 +145,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer);
+            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer,  new SerialNumberProviderStub());
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
             return Promise.resolved(null);

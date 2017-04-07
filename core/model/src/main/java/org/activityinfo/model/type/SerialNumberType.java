@@ -79,6 +79,10 @@ public class SerialNumberType implements ParametrizedFieldType {
         return prefixFormula;
     }
 
+    public SerialNumberType withPrefixFormula(String formula) {
+        return new SerialNumberType(formula, this.digits);
+    }
+
 
     public boolean hasPrefix() {
         return !Strings.isNullOrEmpty(prefixFormula);

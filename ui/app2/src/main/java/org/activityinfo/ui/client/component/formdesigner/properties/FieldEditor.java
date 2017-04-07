@@ -97,6 +97,9 @@ public class FieldEditor implements IsWidget {
     CalculatedTypeEditor calculatedTypeEditor;
     @UiField
     TextTypeEditor textTypeEditor;
+    @UiField
+    SerialNumberTypeEditor serialNumberTypeEditor;
+
 
     private FormDesigner formDesigner;
 
@@ -160,6 +163,7 @@ public class FieldEditor implements IsWidget {
         quantityTypeEditor.show(fieldWidgetContainer);
         calculatedTypeEditor.show(formField);
         textTypeEditor.show(fieldWidgetContainer);
+        serialNumberTypeEditor.show(fieldWidgetContainer);
     }
 
     /**

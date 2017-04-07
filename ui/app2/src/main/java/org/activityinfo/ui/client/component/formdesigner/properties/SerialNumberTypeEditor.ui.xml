@@ -8,10 +8,10 @@
     <ui:with field="style" type="org.activityinfo.ui.client.component.formdesigner.FormDesignerStyles"/>
 
     <g:FlowPanel>
-        <f:FormGroup label="{i18n.inputMask}" columnLabelWidth="4">
-            <a:TextBox ui:field="inputMask" width="100%"/>
+        <f:FormGroup ui:field="prefixGroup" label="{i18n.prefixFormula}" columnLabelWidth="4">
+            <a:TextBox ui:field="prefixFormulaBox" width="100%"/>
             <g:FlowPanel addStyleNames="help-block">
-                <a:HelpLink helpId="718178" label="{i18n.learnMoreAboutInputMasks}"/>
+                <a:HelpLink helpId="719141" label="{i18n.learnMoreAboutSerialNumbers}"/>
             </g:FlowPanel>
         </f:FormGroup>
     </g:FlowPanel>

@@ -1673,10 +1673,21 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Learn more about input masks")
     String learnMoreAboutInputMasks();
 
+    @DefaultStringValue("Learn more about serial numbers")
+    String learnMoreAboutSerialNumbers();
+
+
+
     @DefaultStringValue("(Pending)")
     String pending();
 
     @DefaultStringValue("Serial Number")
     String serialNumber();
+
+    @DefaultStringValue("Prefix Formula")
+    String prefixFormula();
+
+
+
 }
 
