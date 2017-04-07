@@ -44,6 +44,8 @@ public class ViewBuilderFactory {
             return new StringColumnBuilder(result, new LocalDateReader());
         } else if(type instanceof AttachmentType) {
             return new StringColumnBuilder(result, new AttachmentBlobIdReader());
+        } else if(type instanceof SerialNumberType) {
+            return new StringColumnBuilder(result, new SerialNumberReader((SerialNumberType) type));
         } else {
             return new UnsupportedColumnTypeBuilder(result);
         }

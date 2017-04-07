@@ -1,5 +1,6 @@
 package org.activityinfo.client;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.jersey.api.client.Client;
@@ -11,11 +12,14 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Standard Java REST Client for ActivityInfo
@@ -107,4 +111,64 @@ public class ActivityInfoClient {
         FormInstance instance = FormInstance.toFormInstance(formClass, record);
         return instance;
     }
+
+    public ColumnSet queryTable(QueryModel queryModel) {
+
+        String json = client.resource(root)
+                .path("resources")
+                .path("query")
+                .path("columns")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .post(String.class, queryModel.toJsonString());
+
+        JsonObject object = (JsonObject) parser.parse(json);
+        int numRows = object.getAsJsonPrimitive("rows").getAsInt();
+
+        Map<String, ColumnView> columnMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> column : object.getAsJsonObject("columns").entrySet()) {
+            JsonObject columnValue = column.getValue().getAsJsonObject();
+            String storage = columnValue.getAsJsonPrimitive("storage").getAsString();
+            switch (storage) {
+                case "array":
+                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
+                    break;
+                case "empty":
+                    columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
+                    break;
+                case "constant":
+                    columnMap.put(column.getKey(), parseConstantColumn(numRows, columnValue));
+                    break;
+
+                default:
+                    throw new UnsupportedOperationException(storage);
+            }
+        }
+
+        return new ColumnSet(numRows, columnMap);
+    }
+
+    private ColumnView parseConstantColumn(int numRows, JsonObject columnValue) {
+        if(columnValue.get("value").isJsonNull()) {
+            return parseEmpty(numRows, columnValue);
+        }
+        String typeName = columnValue.get("type").getAsString();
+        switch(typeName) {
+            case "STRING":
+                return new ConstantColumnView(numRows, columnValue.get("value").getAsString());
+            case "NUMBER":
+                return new ConstantColumnView(numRows, columnValue.get("value").getAsDouble());
+            case "BOOLEAN":
+                return new ConstantColumnView(numRows, columnValue.get("value").getAsBoolean());
+            default:
+                throw new UnsupportedOperationException("type: " + typeName);
+        }
+    }
+
+
+    private ColumnView parseEmpty(int numRows, JsonObject columnValue) {
+        String typeName = columnValue.get("type").getAsString();
+        ColumnType type = ColumnType.valueOf(typeName);
+        return new EmptyColumnView(type, numRows);
+    }
+
 }

@@ -2,6 +2,7 @@ package org.activityinfo.model.type;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 /**
@@ -9,10 +10,17 @@ import com.google.gson.JsonPrimitive;
  */
 public class SerialNumber implements FieldValue {
 
+    private final String prefix;
     private int number;
 
     public SerialNumber(int serialNumber) {
         number = serialNumber;
+        prefix = null;
+    }
+
+    public SerialNumber(String prefix, int number) {
+        this.prefix = prefix;
+        this.number = number;
     }
 
     @Override
@@ -22,7 +30,18 @@ public class SerialNumber implements FieldValue {
 
     @Override
     public JsonElement toJsonElement() {
-        return new JsonPrimitive(number);
+        if(prefix == null) {
+            return new JsonPrimitive(number);
+        } else {
+            JsonObject object = new JsonObject();
+            object.addProperty("prefix", prefix);
+            object.addProperty("number", number);
+            return object;
+        }
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     public int getNumber() {
@@ -36,22 +55,27 @@ public class SerialNumber implements FieldValue {
 
         SerialNumber that = (SerialNumber) o;
 
-        return number == that.number;
-    }
+        if (number != that.number) return false;
+        return prefix != null ? prefix.equals(that.prefix) : that.prefix == null;
 
-    public String format() {
-        return Strings.padStart(Integer.toString(number), 5, '0');
     }
 
     @Override
     public int hashCode() {
-        return number;
+        int result = prefix != null ? prefix.hashCode() : 0;
+        result = 31 * result + number;
+        return result;
     }
 
     @Override
     public String toString() {
         return "SerialNumber{" +
-                "number=" + number +
+                "prefix='" + prefix + '\'' +
+                ", number=" + number +
                 '}';
+    }
+
+    public boolean hasPrefix() {
+        return !Strings.isNullOrEmpty(prefix);
     }
 }

@@ -4,7 +4,6 @@ import com.bedatadriven.geojson.GeoJsonModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -18,6 +17,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
+import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -25,7 +25,8 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.*;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -37,9 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -51,6 +50,8 @@ public class GeoAdminClient implements FormClassProvider {
 
     private Client client;
     private URI root;
+
+    private ActivityInfoClient remote;
     
     private FeatureSourceCatalog localCatalog = new FeatureSourceCatalog();
 
@@ -87,14 +88,12 @@ public class GeoAdminClient implements FormClassProvider {
         ClientConfig clientConfig = new DefaultClientConfig();
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
         clientConfig.getClasses().add(ObjectMapperProvider.class);
-//        clientConfig.getProperties().put(com.sun.jersey.client.urlconnection.HTTPSProperties.PROPERTY_HTTPS_PROPERTIES,
-//                new HTTPSProperties(new ActivityInfoHostnameVerifier(), getSSLContext()));
-
-
         client = Client.create(clientConfig);
         client.addFilter(new HTTPBasicAuthFilter(username, password));
 
         root = UriBuilder.fromUri(endpoint).build();
+
+        remote = new ActivityInfoClient(endpoint, username, password);
     }
 
 
@@ -314,44 +313,8 @@ public class GeoAdminClient implements FormClassProvider {
 
         } else {
 
-            return queryColumnsRemotely(queryModel);
+            return remote.queryTable(queryModel);
         }
-    }
-
-    private ColumnSet queryColumnsRemotely(QueryModel queryModel) {
-        String json = client.resource(root)
-                .path("query")
-                .path("columns")
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .post(String.class, queryModel);
-
-        JsonObject object = new Gson().fromJson(json, JsonObject.class);
-        int numRows = object.getAsJsonPrimitive("rows").getAsInt();
-
-        Map<String, ColumnView> columnMap = new HashMap<>();
-        for (Map.Entry<String, JsonElement> column : object.getAsJsonObject("columns").entrySet()) {
-            JsonObject columnValue = column.getValue().getAsJsonObject();
-            String storage = columnValue.getAsJsonPrimitive("storage").getAsString();
-            switch (storage) {
-                case "array":
-                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
-                    break;
-                case "empty":
-                    columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
-                    break;
-                default:
-                    throw new UnsupportedOperationException(storage);
-            }
-        }
-
-        return new ColumnSet(numRows, columnMap);
-    }
-
-
-    private ColumnView parseEmpty(int numRows, JsonObject columnValue) {
-        String typeName = columnValue.get("type").getAsString();
-        ColumnType type = ColumnType.valueOf(typeName);
-        return new EmptyColumnView(type, numRows);
     }
 
     public void updateGeometry(ResourceId formId, ResourceId recordId, ResourceId fieldId, Geometry value) {

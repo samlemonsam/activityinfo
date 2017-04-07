@@ -9,10 +9,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
@@ -24,9 +23,11 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.spi.*;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -273,7 +274,6 @@ public class Updater {
     }
 
     private void generateSerialNumbers(FormClass formClass, RecordUpdate update) {
-        List<FormField> serialNumbers = new ArrayList<>();
         for (FormField formField : formClass.getFields()) {
             if(formField.getType() instanceof SerialNumberType) {
                 generateSerialNumber(formClass, formField, update);
@@ -281,10 +281,46 @@ public class Updater {
         }
     }
 
-    private void generateSerialNumber(FormClass formClass, FormField formField, RecordUpdate update) {
-        int serialNumber = serialNumberProvider.next(formClass.getId(), formField.getId());
+    @VisibleForTesting
+    void generateSerialNumber(FormClass formClass, FormField formField, RecordUpdate update) {
 
-        update.set(formField.getId(), new SerialNumber(serialNumber));
+        SerialNumberType type = (SerialNumberType) formField.getType();
+        String prefix = computeSerialNumberPrefix(formClass, type, update);
+
+        int serialNumber = serialNumberProvider.next(formClass.getId(), formField.getId(), prefix);
+
+        update.set(formField.getId(), new SerialNumber(prefix, serialNumber));
+    }
+
+    private String computeSerialNumberPrefix(FormClass formClass, SerialNumberType type, RecordUpdate update) {
+
+        if(!type.hasPrefix()) {
+            return null;
+        }
+
+        try {
+            FormInstance record = new FormInstance(update.getRecordId(), formClass.getId());
+            for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
+                record.set(entry.getKey(), entry.getValue());
+            }
+
+            FormEvalContext evalContext = new FormEvalContext(formClass);
+            evalContext.setInstance(record);
+
+            ExprNode formula = ExprParser.parse(type.getPrefixFormula());
+            FieldValue prefixValue = formula.evaluate(evalContext);
+
+            if(prefixValue instanceof TextValue) {
+                return ((TextValue) prefixValue).asString();
+            } else {
+                throw new IllegalStateException("Prefix " + type.getPrefixFormula() + " resolves to type " +
+                        prefixValue.getTypeClass().getId());
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to compute prefix for serial number", e);
+            return null;
+        }
     }
 
 

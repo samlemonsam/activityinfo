@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.*;
+import com.google.common.base.Strings;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.SerialNumberProvider;
 
@@ -17,10 +18,19 @@ public class HrdSerialNumberProvider implements SerialNumberProvider {
     }
 
     @Override
-    public int next(ResourceId formId, ResourceId fieldId) {
+    public int next(ResourceId formId, ResourceId fieldId, String prefix) {
 
-        Key key = KeyFactory.createKey(KIND,
-                formId.asString() + "$$$" + fieldId.asString());
+        StringBuilder keyString = new StringBuilder();
+        keyString.append(formId.asString());
+        keyString.append('\0');
+        keyString.append(fieldId.asString());
+
+        if(!Strings.isNullOrEmpty(prefix)) {
+            keyString.append('\0');
+            keyString.append(prefix);
+        }
+
+        Key key = KeyFactory.createKey(KIND, keyString.toString());
 
         Transaction tx = datastore.beginTransaction();
 

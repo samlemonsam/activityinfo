@@ -102,7 +102,7 @@ public class FormFieldWidgetFactory {
             return Promise.resolved(new QuantityFieldWidget((QuantityType) type, valueUpdater));
 
         } else if (type instanceof SerialNumberType) {
-            return Promise.resolved(new SerialNumberFieldWidget());
+            return Promise.resolved(new SerialNumberFieldWidget((SerialNumberType) type));
 
         } else if (type instanceof NarrativeType) {
             return Promise.resolved(new NarrativeFieldWidget(valueUpdater));

@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.SerialNumber;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.widget.TextBox;
 
@@ -13,8 +14,10 @@ import org.activityinfo.ui.client.widget.TextBox;
 public class SerialNumberFieldWidget implements FormFieldWidget<SerialNumber> {
 
     private final TextBox box;
+    private SerialNumberType type;
 
-    public SerialNumberFieldWidget() {
+    public SerialNumberFieldWidget(SerialNumberType type) {
+        this.type = type;
         box = new TextBox();
         box.setReadOnly(true);
         box.setPlaceholder(I18N.CONSTANTS.pending());
@@ -32,7 +35,7 @@ public class SerialNumberFieldWidget implements FormFieldWidget<SerialNumber> {
 
     @Override
     public Promise<Void> setValue(SerialNumber value) {
-        box.setValue(value.format());
+        box.setValue(type.format(value));
         return Promise.resolved(null);
     }
 

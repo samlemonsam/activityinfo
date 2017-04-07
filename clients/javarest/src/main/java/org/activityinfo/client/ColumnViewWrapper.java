@@ -1,4 +1,4 @@
-package org.activityinfo.geoadmin.model;
+package org.activityinfo.client;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
