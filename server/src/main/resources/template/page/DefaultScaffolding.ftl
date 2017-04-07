@@ -44,7 +44,7 @@
         <ul>
             <li><a href="/about/feature/api.html">Features</a></li>
             <li><a href="./pricing.html">Pricing</a></li>
-            <li><a href="./signup.html">Signup</a></li>
+            <li><a href="/">Signup</a></li>
             <li class="cta"><a href="/login">Login</a></li>
         </ul>
 
@@ -81,7 +81,7 @@
                     <li><a href="./documentation.html">Documentation</a></li>
                     <li><a href="./api-guide.html">API Guide</a></li>
                     <li><a href="./contributors-guide.html">Contributor’s Guide</a></li>
-                    <li><a href="./faq.html">FAQ</a></li>
+                    <li><a href="./about/faq.html">FAQ</a></li>
                     <li><a href="./blog.html">Blog</a></li>
                 </ul>
             </li>
