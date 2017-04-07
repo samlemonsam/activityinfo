@@ -43,10 +43,10 @@
     <service>warmup</service>
   </inbound-services>
 
-  <instance-class>F4</instance-class>
+  <instance-class>F1</instance-class>
   <automatic-scaling>
     <min-idle-instances>3</min-idle-instances>
-    <max-idle-instances>4</max-idle-instances>
+    <max-idle-instances>1</max-idle-instances>
     <max-pending-latency>500ms</max-pending-latency>
     <max-concurrent-requests>11</max-concurrent-requests>
   </automatic-scaling>
