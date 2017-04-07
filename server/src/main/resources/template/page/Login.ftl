@@ -23,84 +23,33 @@
 <@scaffolding title="${label.login}">
 
     <@content>
-    <div id="main" class="row clearfix" role="main">
+    <div class="row row--padded">
+        <h1>Login</h1>
 
-        <div class="span8">
-            <h4 style="margin-top:50px">${label.whatIsActivityInfo}</h4>
+        <div class="grid grid--spaced">
+            <form action="/login" method="POST">
+                <label>
+                    ${label.emailAddress}
+                    <input name="email" type="email" required>
+                </label>
 
-            <p class="lead">${label.activityInfoIntro}</p>
+                <label>
+                    ${label.password}
+                    <input type="password" name="password" required>
+                </label>
 
-            <p>
-                <a href="/" class="btn">${label.learnMore}&nbsp;&raquo;</a>
-                <#if domain.signUpAllowed><a href="/signUp" class="btn">Sign Up&nbsp;&raquo;</a></#if>
-            </p>
-        </div>
-
-        <div class="span4">
-            <form class="form-signin" id="loginForm" action="/login" method="POST">
-                <h3 class="form-signin-heading">${label.login}</h3>
-                <input type="text" name="email" id="emailInput" class="input-block-level"
-                       placeholder="${label.emailAddress}">
-                <input type="password" name="password" id="passwordInput" class="input-block-level"
-                       placeholder="${label.password}">
-
-                <div class="alert alert-error <#if !loginError>hide</#if>" id="loginAlert">
+                <#if loginError>
+                <div>
                 ${label.incorrectLogin}
                 </div>
+                </#if>
 
-                <button class="btn btn-info btn-primary btn-large" type="submit"
-                        id="loginButton">${label.login}</button>
-                <img src="img/ajax-loader-spinner.gif" width="16" height="16" class="hide" id="loginSpinner">
+                <button type="submit">${label.login}</button>
 
                 <div class="login-problem"><a href="loginProblem">${label.forgottenYourPassword}</a></div>
-
             </form>
         </div>
-
-
     </div>
     </@content>
     <@footer/>
-    <@scripts>
-    <script type="text/javascript">
-
-
-        var enableForm = function (enabled) {
-            $('#loginButton').prop('disabled', !enabled);
-            $('#loginSpinner').toggleClass('hide', enabled);
-        }
-
-        $('#loginForm').submit(function () {
-
-            $('#loginAlert').addClass('hide');
-
-            enableForm(false);
-            $.ajax({
-                url: '/login/ajax',
-                type: 'POST',
-                data: {
-                    email: $('#emailInput').val(),
-                    password: $('#passwordInput').val(),
-                    ajax: 'true'
-                },
-                success: function () {
-                    if (window.location.pathname != '/') {
-                        window.location = '/' + window.location.search + window.location.hash;
-                    } else {
-                        window.location.reload(true);
-                    }
-                },
-                error: function (xhr) {
-                    $('#loginAlert').toggleClass('hide', false);
-                },
-                complete: function () {
-                    enableForm(true);
-                }
-            });
-            return false;
-        });
-
-        $('#emailInput').focus();
-    </script>
-    </@scripts>
 </@scaffolding>

@@ -23,35 +23,35 @@
 <@scaffolding title="${label.resetYourPassword}">
 
     <@content>
-    <div class="row">
-        <div class="span12">
+    <div class="row row--padded">
 
-            <h3>${label.resetYourPassword}</h3>
+        <h1>${label.resetYourPassword}</h1>
 
-            <p>${label.resetDetailMessage}</p>
+        <p>${label.resetDetailMessage}</p>
 
-            <form class="form-inline" action="loginProblem" method="POST">
-                <input type="text" name="email" class="input-xlarge" placeholder="${label.emailAddress}">
-                <button type="submit" class="btn btn-primary">${label.reset}</button>
-            </form>
+        <form action="loginProblem" method="POST">
+            <label>
+            ${label.emailAddress}
+                <input name="email" type="email" required>
+            </label>
+            <button type="submit">${label.reset}</button>
+        </form>
 
-            <#if loginError == true>
-                <div class="alert alert-error">
-                    <a class="close" data-dismiss="alert" href="#">&times;</a>
-                ${label.loginError}
-                </div>
-            </#if>
-            <#if emailSent == true>
-                <div class="alert alert-success">
-                ${label.emailSent}
-                </div>
-            </#if>
-            <#if emailError == true>
-                <div class="alert alert-error">
-                ${label.emailErrorAlert}
-                </div>
-            </#if>
-        </div>
+        <#if loginError == true>
+            <div class="alert alert-error">
+            ${label.loginError}
+            </div>
+        </#if>
+        <#if emailSent == true>
+            <div class="alert alert-success">
+            ${label.emailSent}
+            </div>
+        </#if>
+        <#if emailError == true>
+            <div class="alert alert-error">
+            ${label.emailErrorAlert}
+            </div>
+        </#if>
     </div>
     </@content>
     <@footer/>

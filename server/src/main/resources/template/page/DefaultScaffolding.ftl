@@ -1,34 +1,15 @@
-<#--
- #%L
- ActivityInfo Server
- %%
- Copyright (C) 2009 - 2013 UNICEF
- %%
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as
- published by the Free Software Foundation, either version 3 of the 
- License, or (at your option) any later version.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public 
- License along with this program.  If not, see
- <http://www.gnu.org/licenses/gpl-3.0.html>.
- #L%
--->
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>${title}</title>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- CSS Files -->
-    <link href="/css/style.css" rel="stylesheet" media="screen">
+    <title>ActivityInfo</title>
+
+    <link rel="stylesheet" href="https://site-dot-ai-dev.appspot.com/about/assets/css/style.css">
+    <link rel="stylesheet" href="https://fonts.typotheque.com/WF-028542-009575.css" type="text/css" />
 
     <script type="text/javascript">
         var _gaq = _gaq || [];
@@ -47,91 +28,87 @@
     </script>
 </head>
 <body>
-<div id="wrap">
+<nav class="skiplinks">
+    <a href="/login" class="visuallyhidden">Skip to login</a>
+    <a href="#main" class="visuallyhidden">Skip to content</a>
+    <a href="#news" class="visuallyhidden">Skip to news</a>
+    <a href="#howto" class="visuallyhidden">Skip to learning center</a>
+    <a href="#footer" class="visuallyhidden">Skip to footer</a>
+</nav>
 
-    <header role="banner">
+<header role="banner">
 
-        <div id="inner-header" class="clearfix">
+    <nav role="navigation" id="navigation">
+        <h1 class="logo"><img src="https://site-dot-ai-dev.appspot.com/about/assets/images/logo-activityinfo.png" alt=""><a href="./">ActivityInfo</a></h1>
 
-            <div class="navbar navbar-static-top">
-                <div class="navbar-inner">
-                    <div class="container nav-container">
-                        <nav role="navigation">
-                            <a class="brand" href="http://about.activityinfo.org" style=""><img
-                                    src="/img/logo-shadow.png"><span>${label.activityInfo}</span></a>
-                            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                            </a>
+        <ul>
+            <li><a href="./features.html">Features</a></li>
+            <li><a href="./pricing.html">Pricing</a></li>
+            <li><a href="./signup.html">Signup</a></li>
+            <li class="cta"><a href="/login">Login</a></li>
+        </ul>
 
-                            <div class="pull-right">
-                                <ul class="upper nav">
-                                    <li class="normal-header">
-                                        <a href="/login" class="btn">${label.login}</a>
-                                    </li>
-                                    <li>
-                                        <a href="/signUp" class="btn">${label.signUpButton}</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="nav-collapse pull-right normal-header">
-                                <ul id="menu-activity-info" class="nav">
-                                    <li><a href="//about.activityinfo.org/">Home</a></li>
-                                    <li><a href="//about.activityinfo.org/feature/flexible/">Features</a></li>
-                                    <li><a href="//about.activityinfo.org/case-studies/">Who uses AI?</a></li>
-                                    <li><a href="//about.activityinfo.org/learn/">Learning Center</a></li>
-                                </ul>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            <!-- /.navbar -->
+    </nav>
+</header>
 
-        </div>
-        <!-- end #inner-header -->
-
+<main role="main" id="main">
+    <div class="row row--small">
     ${body}
+    </div>
+</main>
 
-        <div id="push"></div>
-</div>
+<footer class="bg-dark" id="footer">
 
-<div id="footer">
-    <footer role="contentinfo" class="container">
-        <div id="inner-footer" class="row">
-            <div class="span3">
-                <div id="text-4" class="widget widget_text">
-                    <h4>Developed by</h4>
+    <nav class="row">
+        <ul>
+            <li>
 
-                    <div class="textwidget">
-                        <p><a href="http://www.unicef.org" target="_blank">
-                            <img src="/img/unicef-logo.png"></a></p>
+                <h2>Product</h2>
 
-                        <p><a href="http://www.bedatadriven.com" target="_blank">
-                            <img src="/img/bdd.png"></a></p>
-                    </div>
-                </div>
-            </div>
-            <div class="span3">
-                <div id="text-5" class="widget widget_text">
-                    <h4>Partners</h4>
+                <ul>
+                    <li><a href="/about/features.html">Features</a></li>
+                    <li><a href="/about/benefits.html">Benefits</a></li>
+                    <li><a href="/about/pricing.html">Plans</a></li>
+                    <li><a href="/about/status.html">Status</a></li>
+                    <li><a href="/about/releases.html">Releases</a></li>
+                </ul>
+            </li>
+            <li>
 
-                    <div class="textwidget">
-                        <p><a href="http://www.unocha.org" target="_blank">
-                            <img src="/img/OCHA-Logo.png"></a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="span3">
-                &nbsp;
-            </div>
-            <div class="span3">
-            </div>
-        </div>
-</div>
-</footer> <!-- end footer -->
-</div>
+                <h2>Resources</h2>
+
+                <ul>
+                    <li><a href="./documentation.html">Documentation</a></li>
+                    <li><a href="./api-guide.html">API Guide</a></li>
+                    <li><a href="./contributors-guide.html">Contributor’s Guide</a></li>
+                    <li><a href="./faq.html">FAQ</a></li>
+                    <li><a href="./blog.html">Blog</a></li>
+                </ul>
+            </li>
+
+            <li>
+
+                <h2>ActivityInfo</h2>
+
+                <ul>
+                    <li><a href="./about-activityinfo.html">About Us</a></li>
+                    <li><a href="/about/privacy.html">Privacy Policy</a></li>
+                    <li><a href="/about/terms.html">Terms of Use</a></li>
+                    <li><a href="/contact/index.html">Contact</a></li>
+                    <li>
+                        <a href="https://twitter.com/activityinfo">Twitter</a>
+                        <a href="https://www.linkedin.com/groups/5098257">LinkedIn</a>
+                        <a href="https://github.com/bedatadriven/activityinfo">Github</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <img src="https://site-dot-ai-dev.appspot.com/about/assets/images/bdd-logo.svg" alt="BeDataDriven logo">
+                <p>Copyright 2017 BeDataDriven</p>
+            </li>
+        </ul>
+    </nav>
+</footer>
 </body>
 </html>

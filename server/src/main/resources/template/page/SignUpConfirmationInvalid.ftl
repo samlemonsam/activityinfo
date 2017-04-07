@@ -23,11 +23,11 @@
 <@scaffolding title="${label.signUpConfirmationInvalidTitle}">
 
     <@content>
-    <div class="row">
-        <div class="span12">
-            <h3>${label.signUpConfirmationInvalidTitle}</h3>
+    <div class="row row--padded">
 
-        ${label.signUpConfirmationInvalidDetail}
+    <h3>${label.signUpConfirmationInvalidTitle}</h3>
+
+    <p>${label.signUpConfirmationInvalidDetail}</p>
 
             <p><a href="login" class="btn btn-primary">${label.loginNow}</a></p>
         </div>
