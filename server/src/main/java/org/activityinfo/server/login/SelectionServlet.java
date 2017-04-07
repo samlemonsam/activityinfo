@@ -96,7 +96,7 @@ public class SelectionServlet extends DefaultSelectionServlet {
     @Override
     protected void handleSelectionException(Path path, Exception e, HttpServletResponse resp) throws IOException {
         if (e instanceof UnknownUserAgentException) {
-            resp.getWriter().print("window.location = '/unsupportedBrowser'; ");
+            resp.getWriter().print("window.location = '/app/unsupportedBrowser'; ");
         } else {
             resp.sendError(CACHE_OBSOLETE, e.getMessage());
         }
@@ -105,7 +105,7 @@ public class SelectionServlet extends DefaultSelectionServlet {
     @Override
     protected void handleNoAvailablePermutation(Path path, HttpServletResponse resp) throws IOException {
         if (path.fileType.equals("js")) {
-            resp.getWriter().println("window.location = '/unsupportedBrowser';");
+            resp.getWriter().println("window.location = '/app/unsupportedBrowser';");
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unsupported browser");
         }

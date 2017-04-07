@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dispatch-entries>
 
+  <!-- Serve landing page from site module -->
+  <dispatch>
+    <url>*/</url>
+    <module>site</module>
+  </dispatch>
+
   <!-- Send old Wordpress URLs to site module for redirect -->
   <dispatch>
     <url>about.activityinfo.org/</url>

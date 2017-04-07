@@ -101,7 +101,7 @@ public class LoginController {
             return Response.ok(model.asViewable()).type(MediaType.TEXT_HTML).build();
         }
 
-        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/").build())
+        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
                        .cookie(authTokenProvider.get().createNewAuthCookies(user))
                        .build();
     }

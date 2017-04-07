@@ -8,3 +8,6 @@ __ENTRIES__
 
 NETWORK:
 *
+
+FALLBACK:
+/ /app/offline

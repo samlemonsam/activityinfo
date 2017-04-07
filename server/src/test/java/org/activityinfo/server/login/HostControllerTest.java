@@ -63,7 +63,7 @@ public class HostControllerTest extends ControllerTestCase {
         expect(entityManager.find(User.class, 3)).andReturn(new User()).anyTimes();
         replay(entityManager);
 
-        resource = new HostController(deploymentConfig, authProvider, Providers.of(entityManager));
+        resource = new HostController(authProvider, Providers.of(entityManager));
     }
 
     @Test

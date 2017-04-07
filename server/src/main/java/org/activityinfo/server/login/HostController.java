@@ -22,16 +22,13 @@ package org.activityinfo.server.login;
  * #L%
  */
 
-import com.bedatadriven.rebar.appcache.server.UserAgentProvider;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.view.Viewable;
-import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.HostPageModel;
-import org.activityinfo.server.login.model.RootPageModel;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -44,20 +41,20 @@ import java.util.HashMap;
 
 @Path(HostController.ENDPOINT)
 public class HostController {
-    public static final String ENDPOINT = "/";
+    public static final String ENDPOINT = "/app";
 
     private final ServerSideAuthProvider authProvider;
     private Provider<EntityManager> entityManager;
 
     @Inject
-    public HostController(DeploymentConfiguration deployConfig, ServerSideAuthProvider authProvider,
+    public HostController(ServerSideAuthProvider authProvider,
                           Provider<EntityManager> entityManager) {
         this.authProvider = authProvider;
         this.entityManager = entityManager;
     }
 
-    @GET 
-    @Produces(MediaType.TEXT_HTML) 
+    @GET
+    @Produces(MediaType.TEXT_HTML)
     public Response getHostPage(@Context UriInfo uri,
                                 @Context HttpServletRequest req,
                                 @QueryParam("redirect") boolean redirect,
@@ -68,10 +65,7 @@ public class HostController {
 
         if (!authProvider.isAuthenticated()) {
             // Otherwise, go to the default ActivityInfo root page
-            return Response.ok(new RootPageModel().asViewable())
-                           .type(MediaType.TEXT_HTML)
-                           .cacheControl(CacheControl.valueOf("no-cache"))
-                           .build();
+            return Response.temporaryRedirect(uri.getAbsolutePathBuilder().path("login").build()).build();
         }
 
         if (redirect) {
@@ -128,15 +122,10 @@ public class HostController {
         return new Viewable("/page/UnsupportedBrowser.ftl", new HashMap());
     }
 
-    private boolean checkAppCacheEnabled(HttpServletRequest req) {
-        // for browsers that only support database synchronisation via gears at
-        // this point,
-        // we would rather use gears managed resources stores than HTML5
-        // appcache
-        // so that we only have to display one permission
-        // (this really only applies to FF <= 3.6 right now)
-        UserAgentProvider userAgentProvider = new UserAgentProvider();
-        return !userAgentProvider.canSupportGears(req);
+    @GET
+    @Path("/offline")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getOfflinePage() {
+        return new Viewable("/page/Offline.ftl", new HashMap<>());
     }
-
 }
