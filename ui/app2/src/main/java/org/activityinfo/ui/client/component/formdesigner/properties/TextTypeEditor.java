@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.component.formdesigner.properties;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -49,7 +49,7 @@ public class TextTypeEditor implements IsWidget {
     }
 
     @UiHandler("inputMask")
-    public void onInputMaskChanged(KeyPressEvent event) {
+    public void onInputMaskChanged(KeyUpEvent event) {
         currentField.getFormField().setType(TextType.SIMPLE.withInputMask(inputMask.getText()));
         currentField.syncWithModel();
     }
