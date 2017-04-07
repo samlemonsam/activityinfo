@@ -27,7 +27,6 @@
 
         <p>${label.signUpEmailSent}</p>
     </div>
-
     </@content>
     <@footer/>
 </@scaffolding>

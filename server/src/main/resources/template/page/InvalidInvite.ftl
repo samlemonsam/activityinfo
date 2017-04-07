@@ -24,7 +24,7 @@
 
     <@content>
     <div class="row row--padded">
-        <h1 class="page-title">${label.invalidInvitation}</h1>
+        <h1>${label.invalidInvitation}</h1>
 
         <p>${label.invalidInvitationDetail}</p>
 

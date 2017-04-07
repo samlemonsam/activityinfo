@@ -29,9 +29,9 @@
 
     <p>${label.signUpConfirmationInvalidDetail}</p>
 
-            <p><a href="login" class="btn btn-primary">${label.loginNow}</a></p>
-        </div>
-    </div>
+    <form action="/login" method="GET">
+        <button type="submit">${label.loginNow}</button>
+    </form>
     </@content>
 
     <@footer/>
