@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response;
 import java.util.Properties;
 
 import static org.easymock.EasyMock.*;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
@@ -77,12 +78,10 @@ public class HostControllerTest extends ControllerTestCase {
         replay(req);
 
         Response response = resource.getHostPage(
-                RestMockUtils.mockUriInfo("http://www.activityinfo.org"), req,
+                RestMockUtils.mockUriInfo("http://www.activityinfo.org/app"), req,
                 false, "oldui", null, null, null);
 
-        assertThat(response.getEntity(), instanceOf(Viewable.class));
-        assertThat(((Viewable) response.getEntity()).getModel(),
-                instanceOf(RootPageModel.class));
+        assertThat(response.getStatus(), equalTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode()));
     }
 
     @Test
