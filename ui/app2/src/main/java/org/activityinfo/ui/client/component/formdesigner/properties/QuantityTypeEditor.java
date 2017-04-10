@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.component.formdesigner.properties;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -47,7 +47,7 @@ public class QuantityTypeEditor extends TypeEditor<QuantityType> {
     }
 
     @UiHandler("units")
-    public void onUnitsChange(KeyPressEvent event) {
+    public void onUnitsChange(KeyUpEvent event) {
         updateType(currentType().withUnits(units.getValue()));
     }
 }
