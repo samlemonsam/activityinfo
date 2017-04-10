@@ -29,9 +29,8 @@
 
     <p>${label.signUpConfirmationInvalidDetail}</p>
 
-    <form action="/login" method="GET">
-        <button type="submit">${label.loginNow}</button>
-    </form>
+    <a href="/app" class="cta-link">${label.loginNow}</a>
+
     </@content>
 
     <@footer/>

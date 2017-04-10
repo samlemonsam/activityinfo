@@ -9,10 +9,7 @@
         <p>You currently have no connection to the internet. However, ActivityInfo has been
         cached offline!</p>
 
-
-        <form action="/app" method="GET">
-            <button type="submit">Open Application</button>
-        </form>
+        <a href="/app" class="cta-link">Open Application</a>
     </div>
     </@content>
     <@footer/>

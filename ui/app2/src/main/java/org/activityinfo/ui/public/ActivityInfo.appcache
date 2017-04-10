@@ -4,6 +4,9 @@ CACHE MANIFEST
 # Version: __VERSION__
 
 CACHE:
+/about/assets/style.css
+/about/assets/images/logo-activityinfo.png
+/about/assets/images/bdd-logo.svg
 __ENTRIES__
 
 NETWORK:
