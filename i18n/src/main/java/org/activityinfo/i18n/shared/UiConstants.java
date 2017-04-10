@@ -1688,6 +1688,13 @@ public interface UiConstants extends Constants {
     String prefixFormula();
 
 
+    @DefaultStringValue("Show as dropdown")
+    String dropdownPresentation();
 
+    @DefaultStringValue("Show as checkboxes")
+    String checkboxPresentation();
+
+    @DefaultStringValue("Presentation")
+    String presentation();
 }
 

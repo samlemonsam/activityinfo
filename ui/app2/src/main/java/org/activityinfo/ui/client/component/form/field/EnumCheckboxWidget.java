@@ -56,7 +56,7 @@ import java.util.Set;
 /**
  * @author yuriyz on 09/28/2015.
  */
-public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
+public class EnumCheckboxWidget implements FormFieldWidget<EnumValue> {
 
     public interface Templates extends SafeHtmlTemplates {
 
@@ -91,7 +91,7 @@ public class EnumListFieldWidget implements FormFieldWidget<EnumValue> {
     private final ValueUpdater<EnumValue> valueUpdater;
     private final Button clearButton = createClearButton();
 
-    public EnumListFieldWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater, FieldWidgetMode fieldWidgetMode) {
+    public EnumCheckboxWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater, FieldWidgetMode fieldWidgetMode) {
         this.enumType = enumType;
         this.groupName = "group" + (nextId++);
         this.fieldWidgetMode = fieldWidgetMode;

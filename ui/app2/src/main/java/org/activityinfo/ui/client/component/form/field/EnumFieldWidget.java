@@ -16,16 +16,19 @@ public class EnumFieldWidget implements FormFieldWidget<EnumValue> {
     }
 
     private FormFieldWidget<EnumValue> createWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater, FieldWidgetMode fieldWidgetMode) {
-        int size = enumType.getValues().size();
-
-        if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
-            if (size > FormFieldWidgetFactory.SMALL_BALANCE_NUMBER && size <= FormFieldWidgetFactory.MEDIUM_BALANCE_NUMBER) {
-                return new EnumComboboxWidget(enumType, valueUpdater);
-            } else if (size > FormFieldWidgetFactory.MEDIUM_BALANCE_NUMBER) {
-                return new EnumComboboxWidget(enumType, valueUpdater);
-            }
+        EnumType.Presentation presentation = EnumType.Presentation.CHECKBOX;
+        if(fieldWidgetMode == FieldWidgetMode.NORMAL) {
+            // Only apply presentation choices in data entry mode
+            presentation = enumType.getEffectivePresentation();
+        } else {
+            presentation = EnumType.Presentation.CHECKBOX;
         }
-        return new EnumListFieldWidget(enumType, valueUpdater, fieldWidgetMode);
+
+        if(presentation == EnumType.Presentation.CHECKBOX) {
+            return new EnumCheckboxWidget(enumType, valueUpdater, fieldWidgetMode);
+        } else {
+            return new EnumDropDownWidget(enumType, valueUpdater);
+        }
     }
 
     @Override

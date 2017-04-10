@@ -12,6 +12,12 @@ import java.util.*;
 
 public class EnumType implements ParametrizedFieldType {
 
+    /**
+     * The maximum number of items to show as checkboxes, when presentation is "Automatic". Above
+     * this count, dropdown will be used.
+     */
+    public static final int MAX_CHECKBOX_ITEMS = 10;
+
     public interface EnumTypeClass extends ParametrizedFieldTypeClass, RecordFieldTypeClass { }
 
     public enum Presentation {
@@ -90,6 +96,18 @@ public class EnumType implements ParametrizedFieldType {
 
     public Presentation getPresentation() {
         return presentation;
+    }
+
+    public Presentation getEffectivePresentation() {
+        if(presentation == Presentation.AUTOMATIC) {
+            if(values.size() > MAX_CHECKBOX_ITEMS) {
+                return Presentation.DROPDOWN;
+            } else {
+                return Presentation.CHECKBOX;
+            }
+        } else {
+            return presentation;
+        }
     }
 
     public List<EnumItem> getValues() {
