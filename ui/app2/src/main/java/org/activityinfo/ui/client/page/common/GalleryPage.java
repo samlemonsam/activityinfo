@@ -68,7 +68,7 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
     @Inject
     public GalleryPage(final EventBus eventBus) {
 
-        this.setStyleName("gallery");
+        this.setStyleName(ApplicationBundle.INSTANCE.styles().gallery());
         this.setScrollMode(Style.Scroll.AUTOY);
         this.setStyleAttribute("background", "white");
 
@@ -106,7 +106,7 @@ public class GalleryPage extends LayoutContainer implements GalleryView {
         view.setBorders(false);
         view.setStore(store);
         view.setItemSelector("dd");
-        view.setOverStyle("over");
+        view.setOverStyle(ApplicationBundle.INSTANCE.styles().over());
 
         view.addListener(Events.Select, new Listener<ListViewEvent<GalleryModel>>() {
 
