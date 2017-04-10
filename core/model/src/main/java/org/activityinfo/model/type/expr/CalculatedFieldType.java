@@ -60,6 +60,10 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         this.expression = expression;
     }
 
+    public CalculatedFieldType withFormula(String formula) {
+        return new CalculatedFieldType(formula);
+    }
+
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
@@ -93,4 +97,5 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     public boolean isValid() {
         return true;
     }
+
 }

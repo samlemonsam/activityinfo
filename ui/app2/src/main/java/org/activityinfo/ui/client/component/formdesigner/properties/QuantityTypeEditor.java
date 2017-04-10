@@ -6,18 +6,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.widget.TextBox;
 
 /**
  * Allows the user to edit the properties of a quantity type
  */
-public class QuantityTypeEditor implements IsWidget {
-
-
+public class QuantityTypeEditor extends TypeEditor<QuantityType> {
 
     interface QuantityTypePanelUiBinder extends UiBinder<FlowPanel, QuantityTypeEditor> {
     }
@@ -30,8 +27,6 @@ public class QuantityTypeEditor implements IsWidget {
     @UiField
     TextBox units;
 
-    private FieldWidgetContainer currentField;
-
     public QuantityTypeEditor() {
         this.panel = ourUiBinder.createAndBindUi(this);
     }
@@ -41,21 +36,18 @@ public class QuantityTypeEditor implements IsWidget {
         return panel;
     }
 
-    public void show(FieldWidgetContainer container) {
-        if(container.getFormField().getType() instanceof QuantityType) {
-            this.currentField = container;
-            QuantityType type = (QuantityType) container.getFormField().getType();
-            units.setText(type.getUnits());
-            panel.setVisible(true);
+    @Override
+    protected boolean accept(FieldType type) {
+        return type instanceof QuantityType;
+    }
 
-        } else {
-            panel.setVisible(false);
-        }
+    @Override
+    protected void show(QuantityType type) {
+        units.setText(type.getUnits());
     }
 
     @UiHandler("units")
     public void onUnitsChange(KeyPressEvent event) {
-        ((QuantityType) currentField.getFormField().getType()).setUnits(units.getValue());
-        currentField.syncWithModel();
+        updateType(currentType().withUnits(units.getValue()));
     }
 }

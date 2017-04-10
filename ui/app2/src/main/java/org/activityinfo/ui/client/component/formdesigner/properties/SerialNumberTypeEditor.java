@@ -6,12 +6,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.SerialNumberType;
-import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.widget.TextBox;
 import org.activityinfo.ui.client.widget.form.FormGroup;
 import org.activityinfo.ui.client.widget.form.ValidationStateType;
@@ -19,26 +18,20 @@ import org.activityinfo.ui.client.widget.form.ValidationStateType;
 /**
  * Allows the user to edit a serial number field
  */
-public class SerialNumberTypeEditor implements IsWidget {
-
-
+public class SerialNumberTypeEditor extends TypeEditor<SerialNumberType> {
 
     interface SerialNumberTypeEditorUiBinder extends UiBinder<FlowPanel, SerialNumberTypeEditor> {
     }
 
     private static SerialNumberTypeEditorUiBinder ourUiBinder = GWT.create(SerialNumberTypeEditorUiBinder.class);
 
-
     private final FlowPanel panel;
-
 
     @UiField
     TextBox prefixFormulaBox;
 
     @UiField
     FormGroup prefixGroup;
-
-    private FieldWidgetContainer currentField;
 
     public SerialNumberTypeEditor() {
         this.panel = ourUiBinder.createAndBindUi(this);
@@ -49,18 +42,15 @@ public class SerialNumberTypeEditor implements IsWidget {
         return panel;
     }
 
-    public void show(FieldWidgetContainer container) {
-        if(container.getFormField().getType() instanceof SerialNumberType) {
-            this.currentField = container;
+    @Override
+    protected boolean accept(FieldType type) {
+        return type instanceof SerialNumberType;
+    }
 
-            SerialNumberType type = (SerialNumberType) currentField.getFormField().getType();
-            prefixFormulaBox.setText(type.getPrefixFormula());
-            panel.setVisible(true);
-            validateFormula(type.getPrefixFormula());
-
-        } else {
-            panel.setVisible(false);
-        }
+    @Override
+    protected void show(SerialNumberType type) {
+        prefixFormulaBox.setText(type.getPrefixFormula());
+        validateFormula(type.getPrefixFormula());
     }
 
     @UiHandler("prefixFormulaBox")
@@ -68,13 +58,11 @@ public class SerialNumberTypeEditor implements IsWidget {
 
         String updatedFormula = prefixFormulaBox.getValue();
 
-        SerialNumberType type = (SerialNumberType) currentField.getFormField().getType();
-        SerialNumberType updatedType = type.withPrefixFormula(updatedFormula);
+        SerialNumberType updatedType = currentType().withPrefixFormula(updatedFormula);
 
-        currentField.getFormField().setType(updatedType);
+        updateType(updatedType);
 
         validateFormula(updatedFormula);
-
     }
 
     private void validateFormula(String updatedFormula) {
@@ -88,7 +76,6 @@ public class SerialNumberTypeEditor implements IsWidget {
     }
 
     private boolean isValid(String updatedFormula) {
-
         try {
             ExprParser.parse(updatedFormula);
             return true;
