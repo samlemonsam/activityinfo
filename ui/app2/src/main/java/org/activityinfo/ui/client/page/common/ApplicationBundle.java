@@ -39,7 +39,7 @@ public interface ApplicationBundle extends ClientBundle {
 
         String details();
 
-        String indicatorValue();
+        String indicatorQuantity();
 
         @ClassName("loading-placeholder")
         String loadingPlaceholder();

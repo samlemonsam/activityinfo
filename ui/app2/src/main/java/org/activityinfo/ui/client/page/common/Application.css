@@ -94,8 +94,11 @@
     padding-top: 10px;
 }
 
-.details .indicatorValue {
+.details .indicatorQuantity {
     text-align: right;
+}
+
+.details .indicatorText {
 }
 
 .details .indicatorGroupChild {
