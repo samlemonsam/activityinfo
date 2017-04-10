@@ -135,7 +135,8 @@ public class HrdCatalogTest {
                 .setType(TextType.SIMPLE);
 
         HrdCatalog catalog = new HrdCatalog();
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
+                new HrdSerialNumberProvider());
 
         catalog.create(formClass);
         
