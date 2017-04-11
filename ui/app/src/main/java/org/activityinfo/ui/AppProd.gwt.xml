@@ -27,4 +27,9 @@
     <!-- Minimize CSS names -->
     <set-configuration-property name="CssResource.style" value="obf"/>
 
+    <set-property name="locale" value="en"/>
+    <set-property name="gxt.device" value="desktop"/>
+
+    <collapse-all-properties />
+
 </module>
