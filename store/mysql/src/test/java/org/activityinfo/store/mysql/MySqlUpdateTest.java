@@ -138,10 +138,31 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(changeObject);
+
+        newRequest();
         
         query(activityFormClass(1), "_id");
 
         assertThat(column("_id"), hasValues("s0000000002", "s0000000003"));
+    }
+
+    @Test
+    public void deleteSiteWithMonthlyReports() {
+
+        query(CuidAdapter.reportingPeriodFormClass(3), "_id", "site", CuidAdapter.indicatorField(5).asString());
+
+        assertThat(column("site"), hasValues("s0000000009", "s0000000009", "s0000000009"));
+
+        JsonObject changeObject = new JsonObject();
+        changeObject.addProperty("@id", "s0000000009");
+        changeObject.addProperty("@deleted", true);
+
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        updater.executeChange(changeObject);
+
+        query(CuidAdapter.reportingPeriodFormClass(3), "_id", "site", CuidAdapter.indicatorField(5).asString());
+        assertThat(column("site"), hasValues(new String[0]));
+
     }
 
     @Test
@@ -275,4 +296,6 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         query(formId, "_id", "ST_XMIN(boundary)", "ST_XMAX(boundary)");
     }
+
+
 }

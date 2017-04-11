@@ -69,6 +69,11 @@ public abstract class AbstractMySqlTest {
         CountryStructure.clearCache();
     }
 
+    protected final void newRequest() {
+        catalog = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
+        executor = new ColumnSetBuilder(catalog);
+    }
+
 
     protected final void query(ResourceId formClassId, String... fields) {
         QueryModel queryModel = new QueryModel(formClassId);
