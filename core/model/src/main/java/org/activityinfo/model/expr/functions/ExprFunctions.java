@@ -59,6 +59,9 @@ public final class ExprFunctions {
             register(MonthFunction.INSTANCE);
             register(QuarterFunction.INSTANCE);
             register(DayFunction.INSTANCE);
+            register(YearFracFunction.INSTANCE);
+
+
         }
         
         public ExprFunction get(String name) {
