@@ -39,11 +39,11 @@ public class YearFracFunctionTest {
 
     @Test
     public void evaluation() {
-        LocalDate x = new LocalDate(1, 1, 2016);
-        LocalDate y = new LocalDate(1, 1, 2017);
+        LocalDate x = new LocalDate(2016, 1, 1);
+        LocalDate y = new LocalDate(2017, 1, 1);
         Quantity z = (Quantity) YearFracFunction.INSTANCE.apply(Arrays.<FieldValue>asList(x, y));
 
-        assertThat(z, equalTo(new Quantity(1.0)));
+        assertThat(z, equalTo(new Quantity(1.0, "years")));
     }
 
     private void check(String startDateString, String endDateString, double expectedFrac) {
