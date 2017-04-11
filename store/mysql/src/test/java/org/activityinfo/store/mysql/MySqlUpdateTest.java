@@ -157,7 +157,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", "s0000000009");
         changeObject.addProperty("@deleted", true);
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
         updater.executeChange(changeObject);
 
         query(CuidAdapter.reportingPeriodFormClass(3), "_id", "site", CuidAdapter.indicatorField(5).asString());
