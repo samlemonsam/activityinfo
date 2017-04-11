@@ -10,6 +10,13 @@ dependencies {
     compile "com.google.gwt:gwt-user:2.8.0"
 }
 
+configurations {
+    closureCompiler
+}
+dependencies {
+    closureCompiler 'com.google.javascript:closure-compiler:v20150609'
+}
+
 task unzip(type: Copy) {
 
     def zipPath = project.configurations.compile.find {it.name.startsWith("codemirror") }
@@ -21,40 +28,57 @@ task unzip(type: Copy) {
 }
 
 
-task concatenateSource {
+task concatenateCss {
 
     dependsOn unzip
 
     def dist = new File("${buildDir}/unpacked/codemirror-5.23.0");
-    def codemirrorJs = new File("${dist}/lib/codemirror.js")
     def codemirrorCss = new File("${dist}/lib/codemirror.css")
-    def lintJs = new File("${dist}/addon/lint/lint.js")
     def lintCss = new File("${dist}/addon/lint/lint.css")
-    def matchBrackets = new File("${dist}/addon/edit/matchbrackets.js")
-    def spreadsheetMode = new File("${projectDir}/src/main/js/mode/activityinfo/activityinfo.js")
 
     def outputDir = new File("${buildDir}/combined/org/activityinfo/ui/codemirror/client");
-    def outputJs = new File(outputDir, "codemirror.js")
     def outputCss = new File(outputDir, "codemirror.css")
 
-    inputs.file codemirrorJs
     inputs.file codemirrorCss
-    inputs.file lintJs
     inputs.file lintCss
-    inputs.file matchBrackets
-    inputs.file spreadsheetMode
-    outputs.file outputJs
     outputs.file outputCss
 
     doFirst {
         outputDir.mkdirs()
-        outputJs.text = codemirrorJs.text + spreadsheetMode.text + lintJs.text + matchBrackets.text
         outputCss.text = codemirrorCss.text + lintCss.text
     }
 }
 
+
+task minifyJs(type: JavaExec){
+
+    dependsOn unzip
+
+    classpath configurations.closureCompiler
+    main = 'com.google.javascript.jscomp.CommandLineRunner'
+
+    def dist = new File("${buildDir}/unpacked/codemirror-5.23.0");
+    def outputDir = new File("${buildDir}/combined/org/activityinfo/ui/codemirror/client");
+
+    def closureArgs = []
+    //append all your command line options here
+    closureArgs << "--compilation_level=SIMPLE_OPTIMIZATIONS"
+    closureArgs << "--js_output_file=${outputDir}/codemirror.js"
+    closureArgs << "${dist}/lib/codemirror.js"
+    closureArgs << "${dist}/addon/lint/lint.js"
+    closureArgs << "${dist}/addon/edit/matchbrackets.js"
+    closureArgs << "${projectDir}/src/main/js/mode/activityinfo/activityinfo.js"
+
+    args closureArgs
+
+    doFirst {
+        outputDir.mkdirs();
+    }
+}
+
 jar {
-    dependsOn concatenateSource
+    dependsOn concatenateCss
+    dependsOn minifyJs
 
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
