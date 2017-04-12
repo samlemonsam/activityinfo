@@ -56,11 +56,15 @@ public class IndicatorValueTableUpdater {
     }
 
     public void setDate1(FieldValue value) {
-        this.date1 = ((LocalDate)value).atMidnightInMyTimezone();
+        if(value != null) {
+            this.date1 = ((LocalDate) value).atMidnightInMyTimezone();
+        }
     }
 
     public void setDate2(FieldValue value) {
-        this.date2 = ((LocalDate)value).atMidnightInMyTimezone();
+        if(value != null) {
+            this.date2 = ((LocalDate) value).atMidnightInMyTimezone();
+        }
     }
     
     public void execute(QueryExecutor executor) throws SQLException {
