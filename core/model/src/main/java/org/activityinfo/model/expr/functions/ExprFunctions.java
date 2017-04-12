@@ -60,6 +60,7 @@ public final class ExprFunctions {
             register(QuarterFunction.INSTANCE);
             register(DayFunction.INSTANCE);
             register(YearFracFunction.INSTANCE);
+            register(TodayFunction.INSTANCE);
 
 
         }
