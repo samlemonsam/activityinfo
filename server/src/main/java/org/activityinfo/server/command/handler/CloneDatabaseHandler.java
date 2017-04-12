@@ -40,14 +40,24 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.ParametrizedFieldType;
+import org.activityinfo.model.type.FieldTypeVisitor;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.model.type.time.MonthType;
+import org.activityinfo.model.type.time.YearType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.FormCatalog;
@@ -111,10 +121,8 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             copyUserPermissions();
         }
 
-        List<Promise<Void>> promises = new ArrayList<>();
-
         // 3. copy forms and form data
-        copyFormData();
+        copyForms();
         
         return new CreateResult(targetDb.getId());
     }
@@ -153,7 +161,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         em.persist(targetDb);
     }
 
-    private void copyFormData() {
+    private void copyForms() {
 
         // first copy all activities without payload (indicators, attributes)
         for (Activity activity : sourceDb.getActivities()) {
@@ -202,7 +210,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
                 FormField sourceField = (FormField) element;
                 FormField targetField = new FormField(targetFieldId(sourceField, sourceFormId, targetFormId));
 
-                targetField.setType(targetFieldType(sourceField));
+                targetField.setType(copyType(sourceField));
                 targetField.setCode(sourceField.getCode());
                 targetField.setRelevanceConditionExpression(sourceField.getRelevanceConditionExpression());
                 targetField.setLabel(sourceField.getLabel());
@@ -240,72 +248,168 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         return expression;
     }
 
-    private FieldType targetFieldType(FormField sourceField) {
-        FieldType fieldType = sourceField.getType();
+    /**
+     * Copies a field type.
+     *
+     * Most field types can be copied as-is, but some field types, for example,
+     * reference fields, require special handling.
+     */
+    private FieldType copyType(FormField sourceField) {
+        return sourceField.getType().accept(new FieldTypeVisitor<FieldType>() {
+            @Override
+            public FieldType visitAttachment(AttachmentType attachmentType) {
+                return attachmentType;
+            }
 
-        if (!(fieldType instanceof ParametrizedFieldType)) {
-            return fieldType;
+            @Override
+            public FieldType visitCalculated(CalculatedFieldType calculatedFieldType) {
+                return calculatedFieldType;
+            }
+
+            @Override
+            public FieldType visitReference(ReferenceType referenceType) {
+                return copyReferenceType(referenceType);
+            }
+
+            @Override
+            public FieldType visitNarrative(NarrativeType narrativeType) {
+                return narrativeType;
+            }
+
+            @Override
+            public FieldType visitBoolean(BooleanType booleanType) {
+                return booleanType;
+            }
+
+            @Override
+            public FieldType visitQuantity(QuantityType type) {
+                return type;
+            }
+
+            @Override
+            public FieldType visitGeoPoint(GeoPointType geoPointType) {
+                return geoPointType;
+            }
+
+            @Override
+            public FieldType visitGeoArea(GeoAreaType geoAreaType) {
+                return geoAreaType;
+            }
+
+            @Override
+            public FieldType visitEnum(EnumType enumType) {
+                return cloneEnumType(enumType);
+            }
+
+            @Override
+            public FieldType visitBarcode(BarcodeType barcodeType) {
+                return barcodeType;
+            }
+
+            @Override
+            public FieldType visitSubForm(SubFormReferenceType subFormReferenceType) {
+                return subFormReferenceType;
+            }
+
+            @Override
+            public FieldType visitLocalDate(LocalDateType localDateType) {
+                return localDateType;
+            }
+
+            @Override
+            public FieldType visitMonth(MonthType monthType) {
+                return monthType;
+            }
+
+            @Override
+            public FieldType visitYear(YearType yearType) {
+                return yearType;
+            }
+
+            @Override
+            public FieldType visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
+                return localDateIntervalType;
+            }
+
+            @Override
+            public FieldType visitText(TextType textType) {
+                return textType;
+            }
+        });
+    }
+
+    /**
+     * Copies a reference type, updating any references to forms within the source
+     * database to the newly cloned forms in the target database.
+     */
+    private FieldType copyReferenceType(ReferenceType sourceType) {
+
+        Collection<ResourceId> targetRange = new HashSet<>();
+        for (ResourceId sourceFormId : sourceType.getRange()) {
+            targetRange.add(copyReference(sourceFormId));
         }
 
-        if (fieldType instanceof QuantityType ||
-                fieldType instanceof CalculatedFieldType ||
-                fieldType instanceof LocalDateType ||
-                fieldType instanceof AttachmentType) {
-            return fieldType;
-        }
+        return new ReferenceType()
+                .setCardinality(sourceType.getCardinality())
+                .setRange(targetRange);
+    }
 
-        if (fieldType instanceof EnumType) {
-            if (sourceField.getId().getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN) {
-                EnumType sourceEnumType = (EnumType) fieldType;
-                List<EnumItem> targetValues = Lists.newArrayList();
+    /**
+     * Copies a reference, changing references to forms within the source database
+     * to the cloned forms in the target database.
+     */
+    private ResourceId copyReference(ResourceId sourceFormId) {
+        switch (sourceFormId.getDomain()) {
 
-                for (EnumItem sourceValue : sourceEnumType.getValues()) {
+            // Reference the NEW database's partner form
+            case CuidAdapter.PARTNER_FORM_CLASS_DOMAIN:
+                ResourceId partnerId = CuidAdapter.partnerFormId(targetDb.getId());
+                typeIdMapping.put(sourceFormId, partnerId);
+                return partnerId;
 
-                    ResourceId targetValueId = CuidAdapter.cuid(sourceValue.getId().getDomain(), generator.generateInt());
-                    targetValues.add(new EnumItem(targetValueId, sourceValue.getLabel()));
-                    typeIdMapping.put(sourceValue.getId(), targetValueId);
+            // Reference the NEW database's project form
+            case CuidAdapter.PROJECT_CLASS_DOMAIN:
+                ResourceId projectId = CuidAdapter.projectFormClass(targetDb.getId());
+                typeIdMapping.put(sourceFormId, projectId);
+                return projectId;
+
+            // If this references a form in the source database, change
+            // the reference to point to the clone of that form
+            case CuidAdapter.ACTIVITY_DOMAIN:
+                int sourceActivityId = CuidAdapter.getLegacyIdFromCuid(sourceFormId);
+                Activity targetActivity = this.activityMapping.get(sourceActivityId);
+                if(targetActivity != null) {
+                    return CuidAdapter.activityFormClass(targetActivity.getId());
+                } else {
+                    // if this is an activity in another database, then keep the
+                    // reference as-is
+                    return sourceFormId;
                 }
-                return new EnumType(sourceEnumType.getCardinality(), targetValues);
-            }
+
+            // If this form doesn't live in the source database, for example, it
+            // could be an administrative level form, then don't change the reference at all.
+            default:
+                return sourceFormId;
         }
+    }
 
-        if (fieldType instanceof ReferenceType) {
-            ReferenceType sourceType = (ReferenceType) fieldType;
+    /**
+     * Copies an {@link EnumType}, generating a new unique identifier each
+     * enumerated item, since the MySQL backend requires them to be globally unique.
+     */
+    private FieldType cloneEnumType(EnumType sourceEnumType) {
 
-            Collection<ResourceId> sourceRange = sourceType.getRange();
-            Collection<ResourceId> targetRange = new HashSet<>();
-
-            ResourceId next = sourceRange.iterator().next();
-            switch (next.getDomain()) {
-                case CuidAdapter.PARTNER_FORM_CLASS_DOMAIN:
-                    if (command.isCopyPartners()) {
-
-                        // as defined in ActivityFormClassBuilder.build() in reference range we stick to db id
-                        ResourceId partnerId = CuidAdapter.partnerFormId(targetDb.getId());
-                        targetRange.add(partnerId);
-                        typeIdMapping.put(next, partnerId);
-                    }
-                    break;
-                case CuidAdapter.PROJECT_CLASS_DOMAIN:
-                    ResourceId projectId = CuidAdapter.projectFormClass(targetDb.getId());
-                    targetRange.add(projectId);
-                    typeIdMapping.put(next, projectId);
-                    break;
-            }
-
-
-            // fallback to source targetRange
-            if (targetRange.isEmpty()) {
-                targetRange = sourceRange;
-            }
-
-            return new ReferenceType()
-                    .setCardinality(sourceType.getCardinality())
-                    .setRange(targetRange);
+        List<EnumItem> targetValues = Lists.newArrayList();
+        for (EnumItem sourceValue : sourceEnumType.getValues()) {
+            ResourceId targetValueId = newEnumId(sourceValue);
+            targetValues.add(new EnumItem(targetValueId, sourceValue.getLabel()));
+            typeIdMapping.put(sourceValue.getId(), targetValueId);
         }
+        return new EnumType(sourceEnumType.getCardinality(), targetValues);
+    }
 
-        throw new RuntimeException("Unable to generate field id for fieldType : " + fieldType);
-
+    private ResourceId newEnumId(EnumItem sourceValue) {
+        return CuidAdapter.cuid(sourceValue.getId().getDomain(), generator.generateInt());
     }
 
     private ResourceId targetFieldId(FormField sourceField, ResourceId sourceClassId, ResourceId targetClassId) {
