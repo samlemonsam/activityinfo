@@ -38,8 +38,6 @@ dependencies {
     gwt 'com.googlecode.gwtquery:gwtquery:1.4.2'
     gwt 'com.github.jdramaix:gwtchosen:1.2.0'
 
-    gwt 'edu.stanford.protege:codemirror-gwt:2.0.1'
-
     gwtSdk libraries.gwt.dev
 
 }
@@ -65,13 +63,28 @@ task compileApp(type: JavaExec) {
 
     main = 'com.google.gwt.dev.Compiler'
 
+    args '-logLevel', 'INFO'
+
+    // Disable class metadata -- Class.getName() will not
+    // be available to compiled code, but we save ~150k
+    args '-XnoclassMetadata'
+
     args '-war', outputDir
 
-    if ("safari".equals(project.property("gwtMode"))) {
-        args '-logLevel', 'INFO'
+    args '-extra', "${buildDir}/gwt-extra"
+
+    args '-saveSource'
+    args '-gen', "${buildDir}/gwt-gen"
+
+    if("true".equals(project.property("gwtSoyc"))) {
+        args '-compileReport'
+    }
+    if ("dev".equals(project.property("gwtMode"))) {
+        args 'org.activityinfo.ui.ActivityDev'
+    } else if ("safari".equals(project.property("gwtMode"))) {
         args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
-        args '-logLevel', 'ERROR'
+        args '-logLevel', 'INFO'
         args 'org.activityinfo.ui.ActivityInfoRelease'
         args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }
