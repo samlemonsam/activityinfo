@@ -32,6 +32,6 @@
 
     <add-linker name="std"/>
 
-    <collapse-all-permutations/>
+    <collapse-all-properties/>
 
 </module>
