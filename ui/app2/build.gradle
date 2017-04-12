@@ -80,7 +80,7 @@ task compileApp(type: JavaExec) {
         args '-compileReport'
     }
     if ("dev".equals(project.property("gwtMode"))) {
-        args 'org.activityinfo.ui.ActivityDev'
+        args 'org.activityinfo.ui.ActivityInfoDev'
     } else if ("safari".equals(project.property("gwtMode"))) {
         args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
