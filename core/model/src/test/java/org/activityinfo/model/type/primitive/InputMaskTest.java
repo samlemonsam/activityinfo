@@ -47,7 +47,7 @@ public class InputMaskTest {
 
         InputMask phoneMask = new InputMask("(000) 000-0000");
 
-        assertThat("(570) 724-30d53", matchesUsingRegex(phoneMask));
+        assertThat("(570) 724-3053", matchesUsingRegex(phoneMask));
     }
 
     @Test
