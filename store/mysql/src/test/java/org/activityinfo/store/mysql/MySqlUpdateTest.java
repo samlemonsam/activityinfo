@@ -163,7 +163,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         newRequest();
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
         updater.executeChange(changeObject);
 
         newRequest();
