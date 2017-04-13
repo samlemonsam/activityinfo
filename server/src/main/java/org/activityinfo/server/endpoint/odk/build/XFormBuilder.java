@@ -75,7 +75,7 @@ public class XFormBuilder {
         for (FormField field : formClass.getFields()) {
             if(field.isVisible() && isValid(field)) {
                 OdkFormFieldBuilder builder = factory.get(field.getType());
-                if (builder != null) {
+                if (builder != OdkFormFieldBuilder.NONE) {
                     fields.add(new OdkField(field, builder));
                 }
             }

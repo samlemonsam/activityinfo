@@ -95,7 +95,7 @@ public class TextType implements ParametrizedFieldType {
 
     @Override
     public boolean isValid() {
-        return false;
+        return true;
     }
 
     public String getInputMask() {
