@@ -140,6 +140,7 @@ public class XFormBuilder {
                 Bind bind = new Bind();
                 bind.setNodeSet(field.getAbsoluteFieldName());
                 bind.setType(field.getBuilder().getModelBindType());
+                bind.setConstraint(field.getBuilder().getConstraint().orNull());
 
                 //TODO Fix this
                 //bind.calculate = formField.getExpression();

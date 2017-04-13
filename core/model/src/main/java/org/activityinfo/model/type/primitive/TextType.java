@@ -101,4 +101,8 @@ public class TextType implements ParametrizedFieldType {
     public String getInputMask() {
         return inputMask;
     }
+
+    public boolean hasInputMask() {
+        return inputMask != null;
+    }
 }

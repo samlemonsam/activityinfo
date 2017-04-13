@@ -36,6 +36,7 @@ public class InputMask {
     public static final char ESCAPE = '\\';
 
 
+
     public static final class Input {
         private CharSequence sequence;
         private int offset = 0;
@@ -57,6 +58,8 @@ public class InputMask {
         public abstract boolean validate(Input input, StringBuilder output);
 
         public abstract void appendPlaceHolder(StringBuilder sb);
+
+        public abstract void appendRegex(StringBuilder regex);
     }
 
     public class RequiredDigit extends Atom {
@@ -79,6 +82,11 @@ public class InputMask {
         @Override
         public void appendPlaceHolder(StringBuilder sb) {
             sb.append(CHAR);
+        }
+
+        @Override
+        public void appendRegex(StringBuilder regex) {
+            regex.append("[0-9]");
         }
     }
 
@@ -103,6 +111,11 @@ public class InputMask {
         public void appendPlaceHolder(StringBuilder sb) {
             sb.append(CHAR);
         }
+
+        @Override
+        public void appendRegex(StringBuilder regex) {
+            regex.append("[A-Za-z]");
+        }
     }
 
     public class RequiredLetterOrDigit extends Atom {
@@ -125,6 +138,11 @@ public class InputMask {
         @Override
         public void appendPlaceHolder(StringBuilder sb) {
             sb.append(CHAR);
+        }
+
+        @Override
+        public void appendRegex(StringBuilder regex) {
+            regex.append("[A-Za-z0-9]");
         }
     }
 
@@ -152,6 +170,29 @@ public class InputMask {
         @Override
         public void appendPlaceHolder(StringBuilder sb) {
             sb.append(expectedChar);
+        }
+
+        @Override
+        public void appendRegex(StringBuilder regex) {
+            if(isRegexCharacter()) {
+                regex.append('\\');
+            }
+            regex.append(expectedChar);
+        }
+
+        private boolean isRegexCharacter() {
+            switch (expectedChar) {
+                case '.':
+                case '+':
+                case '[':
+                case ']':
+                case '(':
+                case ')':
+                case '\\':
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 
@@ -231,6 +272,19 @@ public class InputMask {
             atom.appendPlaceHolder(sb);
         }
         return sb.toString();
+    }
+
+
+    /**
+     *
+     * @return an XForm (ODK) compatible regular expression to validate this input mask.
+     */
+    public String toXFormRegex() {
+        StringBuilder regex = new StringBuilder();
+        for (Atom atom : atoms) {
+            atom.appendRegex(regex);
+        }
+        return regex.toString();
     }
 
 

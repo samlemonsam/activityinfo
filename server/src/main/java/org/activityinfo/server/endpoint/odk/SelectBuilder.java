@@ -1,7 +1,8 @@
 package org.activityinfo.server.endpoint.odk;
 
-import org.activityinfo.model.type.Cardinality;
+import com.google.common.base.Optional;
 import org.activityinfo.io.xform.form.*;
+import org.activityinfo.model.type.Cardinality;
 
 import java.util.List;
 
@@ -19,6 +20,11 @@ class SelectBuilder implements OdkFormFieldBuilder {
     @Override
     public BindingType getModelBindType() {
         return modelBindType;
+    }
+
+    @Override
+    public Optional<String> getConstraint() {
+        return Optional.absent();
     }
 
     @Override

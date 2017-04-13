@@ -1,7 +1,10 @@
 package org.activityinfo.server.endpoint.odk;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.google.inject.Inject;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.Item;
@@ -17,6 +20,7 @@ import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateIntervalType;
@@ -31,6 +35,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class OdkFormFieldBuilderFactory {
+
+    public static final Escaper REGEX_ESCAPER = Escapers.builder().addEscape('\'', "\\'").build();
 
     private static final Logger LOGGER = Logger.getLogger(OdkFormFieldBuilderFactory.class.getName());
 
@@ -137,12 +143,23 @@ public class OdkFormFieldBuilderFactory {
 
             @Override
             public OdkFormFieldBuilder visitText(TextType textType) {
-                return null;
+                return new SimpleInputBuilder(BindingType.STRING, textConstraint(textType));
+            }
+
+            private Optional<String> textConstraint(TextType textType) {
+                if(textType.hasInputMask()) {
+                    InputMask inputMask = new InputMask(textType.getInputMask());
+                    return Optional.of(String.format("regex(., '%s')",
+                            REGEX_ESCAPER.escape(inputMask.toXFormRegex())));
+
+                } else {
+                    return Optional.absent();
+                }
             }
 
             @Override
             public OdkFormFieldBuilder visitSerialNumber(SerialNumberType serialNumberType) {
-                return new SimpleInputBuilder(BindingType.STRING);
+                return OdkFormFieldBuilder.NONE;
             }
         });
     }
