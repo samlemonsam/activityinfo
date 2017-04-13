@@ -1,6 +1,8 @@
 package org.activityinfo.model.expr.functions;
 
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.ConstantColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.time.LocalDate;
@@ -12,7 +14,7 @@ import java.util.List;
 /**
  * Returns today's current date as {@link org.activityinfo.model.type.time.LocalDate} value
  */
-public class TodayFunction extends ExprFunction {
+public class TodayFunction extends ExprFunction implements ColumnFunction {
 
     public static final TodayFunction INSTANCE = new TodayFunction();
 
@@ -41,4 +43,8 @@ public class TodayFunction extends ExprFunction {
         return LocalDateType.INSTANCE;
     }
 
+    @Override
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
+        return new ConstantColumnView(numRows, new LocalDate(new Date()).toString());
+    }
 }

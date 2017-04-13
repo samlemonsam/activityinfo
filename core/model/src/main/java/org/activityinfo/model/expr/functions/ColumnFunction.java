@@ -12,5 +12,5 @@ public interface ColumnFunction {
   /**
    * Apply this function to all rows in the provided arguments, 
    */
-  ColumnView columnApply(List<ColumnView> arguments);
+  ColumnView columnApply(int numRows, List<ColumnView> arguments);
 }

@@ -43,7 +43,7 @@ public abstract class DateComponentFunction extends ExprFunction implements Colu
     }
 
     @Override
-    public ColumnView columnApply(List<ColumnView> arguments) {
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
         checkArity(arguments, 1);
 
         ColumnView view = arguments.get(0);

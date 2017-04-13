@@ -20,6 +20,8 @@ public class IntakeForm implements TestForm {
 
     public static final ResourceId NATIONALITY_FIELD_ID = ResourceId.valueOf("F3");
     public static final ResourceId PROBLEM_FIELD_ID = ResourceId.valueOf("F4");
+    public static final ResourceId DOB_FIELD_ID = ResourceId.valueOf("F5");
+
 
     public static final ResourceId JORDANIAN_ID = ResourceId.valueOf("N1");
     public static final ResourceId PALESTINIAN_ID = ResourceId.valueOf("N2");
@@ -35,6 +37,7 @@ public class IntakeForm implements TestForm {
     private final FormField openDateField;
     private final FormField nationalityField;
     private final FormField problemField;
+    private final FormField dobField;
 
     private List<FormInstance> records;
 
@@ -72,6 +75,12 @@ public class IntakeForm implements TestForm {
                         new EnumItem(SERVICES_ID, "Access to Services")));
 
 
+        dobField = formClass.addField(DOB_FIELD_ID)
+                .setCode("DOB")
+                .setLabel("Date of Birth")
+                .setType(LocalDateType.INSTANCE);
+
+
     }
 
     @Override
@@ -89,6 +98,7 @@ public class IntakeForm implements TestForm {
         if(records == null) {
             this.records = new RecordGenerator(formClass)
                     .distribution(OPEN_DATE_FIELD_ID, new DateGenerator(openDateField, 2016, 2017))
+                    .distribution(DOB_FIELD_ID, new DateGenerator(dobField, 1950, 1991))
                     .distribution(NATIONALITY_FIELD_ID, new MultiEnumGenerator(nationalityField, 0.85, 0.30, 0.15))
                     .distribution(PROBLEM_FIELD_ID, new MultiEnumGenerator(problemField, 0.65, 0.75))
                     .generate(ROW_COUNT);

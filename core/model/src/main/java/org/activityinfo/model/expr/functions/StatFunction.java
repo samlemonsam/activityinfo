@@ -71,12 +71,11 @@ public abstract class StatFunction extends ExprFunction implements ColumnFunctio
 
 
     @Override
-    public final ColumnView columnApply(List<ColumnView> arguments) {
+    public final ColumnView columnApply(int numRows, List<ColumnView> arguments) {
 
         // Apply the statistic to each row in the table,
         // over the columns
 
-        int numRows = arguments.get(0).numRows();
         int numCols = arguments.size();
 
         double[] result = new double[numRows];

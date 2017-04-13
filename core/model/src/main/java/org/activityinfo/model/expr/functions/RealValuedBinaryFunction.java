@@ -62,7 +62,7 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
     }
 
     @Override
-    public ColumnView columnApply(List<ColumnView> arguments) {
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
         Preconditions.checkArgument(arguments.size() == 2);
         ColumnView x = arguments.get(0);
         ColumnView y = arguments.get(1);

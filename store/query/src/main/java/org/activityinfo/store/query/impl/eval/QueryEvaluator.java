@@ -17,10 +17,7 @@ import org.activityinfo.store.query.impl.views.ColumnFilter;
 import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.query.shared.NodeMatcher;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,27 +115,50 @@ public class QueryEvaluator {
         @Override
         public Slot<ColumnView> visitFunctionCall(final FunctionCallNode call) {
             if(call.getFunction() instanceof ColumnFunction) {
-                final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
-                for(ExprNode argument : call.getArguments()) {
-                    argumentSlots.add(argument.accept(this));
+                if(call.getArguments().isEmpty()) {
+                    return createNullaryFunctionCall(call);
+                } else {
+                    return createFunctionCall(call);
                 }
-                return new Slot<ColumnView>() {
-                    @Override
-                    public ColumnView get() {
-                        List<ColumnView> arguments = Lists.newArrayList();
-                        for (Slot<ColumnView> argument : argumentSlots) {
-                            ColumnView view = argument.get();
-                            if(view == null) {
-                                throw new IllegalStateException();
-                            }
-                            arguments.add(view);
-                        }
-                        return ((ColumnFunction) call.getFunction()).columnApply(arguments);
-                    }
-                };
             } else {
                 return batch.addExpression(rootFormClass, call);
             }
+        }
+
+        private Slot<ColumnView> createNullaryFunctionCall(final FunctionCallNode call) {
+            assert call.getArguments().isEmpty();
+
+            final Slot<Integer> rowCount = batch.addRowCount(rootFormClass);
+
+            return new Slot<ColumnView>() {
+                @Override
+                public ColumnView get() {
+                    return ((ColumnFunction) call.getFunction()).columnApply(rowCount.get(),
+                            Collections.<ColumnView>emptyList());
+                }
+            };
+
+        }
+
+        private Slot<ColumnView> createFunctionCall(final FunctionCallNode call) {
+            final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
+            for(ExprNode argument : call.getArguments()) {
+                argumentSlots.add(argument.accept(this));
+            }
+            return new Slot<ColumnView>() {
+                @Override
+                public ColumnView get() {
+                    List<ColumnView> arguments = Lists.newArrayList();
+                    for (Slot<ColumnView> argument : argumentSlots) {
+                        ColumnView view = argument.get();
+                        if(view == null) {
+                            throw new IllegalStateException();
+                        }
+                        arguments.add(view);
+                    }
+                    return ((ColumnFunction) call.getFunction()).columnApply(arguments.get(0).numRows(), arguments);
+                }
+            };
         }
 
         private Slot<ColumnView> addColumn(Collection<NodeMatch> nodes) {

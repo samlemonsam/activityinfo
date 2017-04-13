@@ -2,6 +2,8 @@ package org.activityinfo.model.expr.functions;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -16,7 +18,7 @@ import java.util.List;
  *
  * @see <a href="https://en.wikipedia.org/wiki/Day_count_convention#30.2F360_US">US 30/360 method</a>
  */
-public class YearFracFunction extends ExprFunction {
+public class YearFracFunction extends ExprFunction implements ColumnFunction {
 
     public static final YearFracFunction INSTANCE = new YearFracFunction();
 
@@ -40,6 +42,10 @@ public class YearFracFunction extends ExprFunction {
         }
         LocalDate startDate = (LocalDate) arguments.get(0);
         LocalDate endDate = (LocalDate) arguments.get(1);
+
+        if(startDate == null || endDate == null) {
+            return null;
+        }
 
         return new Quantity(compute(startDate, endDate), "years");
     }
@@ -79,5 +85,28 @@ public class YearFracFunction extends ExprFunction {
 
     private static boolean lastDayOfFebruary(int month, int day) {
         return month == 2 && (day == 28 || day == 29);
+    }
+
+    @Override
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
+        if(arguments.size() != 2) {
+            throw new ExprSyntaxException("YEARFRAC() requires two arguments");
+        }
+        ColumnView startView = arguments.get(0);
+        ColumnView endView = arguments.get(1);
+
+        double[] result = new double[numRows];
+
+        for (int i = 0; i < numRows; i++) {
+            String start = startView.getString(i);
+            String end = endView.getString(i);
+            if(start == null || end == null) {
+                result[i] = Double.NaN;
+            } else {
+                result[i] = compute(LocalDate.parse(start), LocalDate.parse(end));
+            }
+        }
+
+        return new DoubleArrayColumnView(result);
     }
 }
