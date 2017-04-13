@@ -11,7 +11,6 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.ExprLexer;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.ui.client.widget.TextBox;
@@ -38,14 +37,6 @@ public class CalculatedTypeEditor extends TypeEditor<CalculatedFieldType> {
     @Override
     public Widget asWidget() {
         return widget;
-    }
-
-    public void show(FormField field) {
-        if(field.getType() instanceof CalculatedFieldType) {
-            widget.setVisible(true);
-        } else {
-            widget.setVisible(false);
-        }
     }
 
     @Override

@@ -163,7 +163,7 @@ public class FieldEditor implements IsWidget {
         validateLabel();
 
         quantityTypeEditor.show(fieldWidgetContainer);
-        calculatedTypeEditor.show(formField);
+        calculatedTypeEditor.show(fieldWidgetContainer);
         textTypeEditor.show(fieldWidgetContainer);
         serialNumberTypeEditor.show(fieldWidgetContainer);
         enumTypeEditor.show(fieldWidgetContainer);
