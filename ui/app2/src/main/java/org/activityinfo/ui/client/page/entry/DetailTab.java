@@ -34,6 +34,7 @@ import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.type.IndicatorNumberFormat;
+import org.activityinfo.ui.client.page.common.ApplicationBundle;
 
 public class DetailTab extends TabItem {
 
@@ -47,7 +48,7 @@ public class DetailTab extends TabItem {
         this.setScrollMode(Scroll.AUTO);
 
         content = new Html();
-        content.setStyleName("details");
+        content.setStyleName(ApplicationBundle.INSTANCE.styles().details());
         add(content);
 
     }

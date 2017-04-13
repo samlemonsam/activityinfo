@@ -1,3 +1,5 @@
+@external .*;
+
 /*
  * #%L
  * ActivityInfo Server
@@ -6,15 +8,15 @@
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the 
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public 
+ *
+ * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
@@ -22,10 +24,9 @@
 
 .loading-placeholder,
 .gallery,
-.details,
-.intro-para
+.details
 {
-    font-family: Arial, Sans-serif;
+    font-family: Arial, sans-serif;
 }
 
 .loading-placeholder {
@@ -42,11 +43,6 @@
 .appTitle {
     font-weight: bold;
     font-size: 10pt;
-}
-
-.filter-trigger {
-    cursor: pointer;
-    background-image: url(Applicaton/image/filter.png);
 }
 
 .mapped {
@@ -98,8 +94,11 @@
     padding-top: 10px;
 }
 
-.details .indicatorValue {
+.details .indicatorQuantity {
     text-align: right;
+}
+
+.details .indicatorText {
 }
 
 .details .indicatorGroupChild {
@@ -121,13 +120,6 @@
     padding-left: 15px;
     margin-bottom: 20px;
 
-}
-
-.intro-para {
-    padding-left: 15px;
-    font-size: 14px;
-    color: #777777;
-    margin-bottom: 15px;
 }
 
 .gallery dd {
@@ -154,7 +146,7 @@
 .gallery dd h4 {
     color: #555555;
     margin: 5px 0;
-    font-family: tahoma, arial, san-serif;
+    font-family: tahoma, arial, sans-serif;
     font-size: 11px;
     font-weight: bold;
 }
@@ -175,17 +167,8 @@
     margin: 10px;
 }
 
-.InfoPageHeader {
-    color: navy;
-    margin-right: 0.25em;
-    font-size: 1em;
-    font-weight: bold;
-}
 
-.headerImage {
-    margin-right: 0.25em;
-}
-
+/* Used in PivotGridView */
 .cell-hover {
     background-color: #C9E3FF;
 }

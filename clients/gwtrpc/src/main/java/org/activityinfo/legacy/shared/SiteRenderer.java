@@ -152,14 +152,14 @@ public class SiteRenderer {
 
                 if(indicator.getType() == FieldTypeClass.QUANTITY) {
                     groupHtml
-                         .append("<td class='indicatorValue'>")
+                         .append("<td class='indicatorQuantity'>")
                          .append(formatValue(indicator, value))
                          .append("</td><td class='indicatorUnits'>")
                          .append(SafeHtmlUtils.htmlEscape(Strings.nullToEmpty(indicator.getUnits())))
                          .append("</td>");
                 } else {
                     groupHtml
-                         .append("<td colspan='2' class='indicatorValue'>")
+                         .append("<td colspan='2' class='indicatorText'>")
                          .append(formatValue(indicator, value))
                          .append("</td>");
                 }

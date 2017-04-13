@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.page.common.ApplicationBundle;
 
 import java.util.Objects;
 
@@ -77,14 +78,14 @@ public class PivotGridView extends GridView {
 
     private void onCellOver(Element cell) {
         if ("value".equals(cell.getAttribute("data-pivot"))) {
-            fly(cell).addStyleName("cell-hover");
+            fly(cell).addStyleName(ApplicationBundle.INSTANCE.styles().cellHover());
             overCell = cell;
             toolTip.showAt((Window.getClientWidth() - TOOLTIP_WIDTH) / 2, 0);
         }
     }
 
     private void onCellOut(Element cell) {
-        fly(cell).removeStyleName("cell-hover");
+        fly(cell).removeStyleName(ApplicationBundle.INSTANCE.styles().cellHover());
         overCell = null;
         toolTip.hide();
     }
