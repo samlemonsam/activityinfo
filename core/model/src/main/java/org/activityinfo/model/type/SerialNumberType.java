@@ -98,7 +98,7 @@ public class SerialNumberType implements ParametrizedFieldType {
 
     @Override
     public <T> T accept(FieldTypeVisitor<T> visitor) {
-        return visitor.visitFileNumber(this);
+        return visitor.visitSerialNumber(this);
     }
 
     @Override

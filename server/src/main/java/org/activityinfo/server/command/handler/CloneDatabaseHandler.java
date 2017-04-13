@@ -39,10 +39,7 @@ import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldTypeVisitor;
-import org.activityinfo.model.type.NarrativeType;
-import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -335,6 +332,11 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             @Override
             public FieldType visitText(TextType textType) {
                 return textType;
+            }
+
+            @Override
+            public FieldType visitSerialNumber(SerialNumberType serialNumberType) {
+                return serialNumberType;
             }
         });
     }

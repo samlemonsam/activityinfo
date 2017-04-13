@@ -113,7 +113,7 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
     }
 
     @Override
-    public CursorObserver<FieldValue> visitFileNumber(SerialNumberType serialNumberType) {
+    public CursorObserver<FieldValue> visitSerialNumber(SerialNumberType serialNumberType) {
         return new StringColumnBuilder(result, new SerialNumberReader(serialNumberType));
     }
 

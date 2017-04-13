@@ -48,6 +48,6 @@ public interface FieldTypeVisitor<T> {
 
     T visitText(TextType textType);
 
-    T visitFileNumber(SerialNumberType serialNumberType);
+    T visitSerialNumber(SerialNumberType serialNumberType);
 
 }
