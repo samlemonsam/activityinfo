@@ -46,6 +46,11 @@ public class GeoAreaType implements FieldType {
         return visitor.visitGeoArea(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     /**
      * 
      * @return the singleton instance for this type

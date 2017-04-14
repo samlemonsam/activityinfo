@@ -46,7 +46,10 @@ public class ActivityLoader {
     private final QueryExecutor executor;
     private final ParentKeyCache parentKeys;
     private final PermissionsCache permissionCache;
-    
+
+    /**
+     * Cache for activity metadata for the duration of a request.
+     */
     private Map<Integer, Activity> activityMap = new HashMap<>();
 
     public ActivityLoader(QueryExecutor executor) {
@@ -492,7 +495,7 @@ public class ActivityLoader {
                     break;
                 
                 case "FREE_TEXT":
-                    formField.setType(TextType.INSTANCE);
+                    formField.setType(TextType.SIMPLE);
                     break;
                 case "NARRATIVE":
                     formField.setType(NarrativeType.INSTANCE);

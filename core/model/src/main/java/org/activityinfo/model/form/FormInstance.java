@@ -23,6 +23,8 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -265,5 +267,20 @@ public class FormInstance {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
+    }
+
+    public JsonObject toJsonObject() {
+
+        JsonObject fields = new JsonObject();
+        for (Map.Entry<ResourceId, FieldValue> entry : fieldMap.entrySet()) {
+            fields.add(entry.getKey().asString(), entry.getValue().toJsonElement());
+        }
+
+        JsonObject object = new JsonObject();
+        object.addProperty("formId", getFormId().asString());
+        object.addProperty("recordId", getId().asString());
+        object.add("fieldValues", fields);
+
+        return object;
     }
 }

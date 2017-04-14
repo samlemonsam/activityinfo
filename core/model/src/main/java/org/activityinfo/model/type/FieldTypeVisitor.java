@@ -47,4 +47,7 @@ public interface FieldTypeVisitor<T> {
     T visitLocalDateInterval(LocalDateIntervalType localDateIntervalType);
 
     T visitText(TextType textType);
+
+    T visitSerialNumber(SerialNumberType serialNumberType);
+
 }

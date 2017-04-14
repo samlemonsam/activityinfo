@@ -1,0 +1,9 @@
+
+dependencies {
+    compile project(':clients:javarest')
+}
+
+
+// we're not using the standard test plug
+// as we have our own test harness
+test.enabled = false

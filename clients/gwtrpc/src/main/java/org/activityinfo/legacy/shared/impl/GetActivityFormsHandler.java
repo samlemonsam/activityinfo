@@ -26,6 +26,7 @@ public class GetActivityFormsHandler implements CommandHandlerAsync<GetActivityF
     @Override
     public void execute(GetActivityForms command, final ExecutionContext context, final AsyncCallback<ActivityFormResults> callback) {
 
+
         composeQuery(command.getFilter())
         .execute(context.getTransaction(), new SqlResultCallback() {
             @Override

@@ -302,9 +302,7 @@ public class FormTree implements FormClassProvider {
             } else if(node.getType() instanceof GeoPointType) {
 
             } else {
-                if (columnMap.containsKey(node.getFieldId())) {
-                    columnMap.get(node.getFieldId()).addFieldPath(node.getPath());
-                } else {
+                if (!columnMap.containsKey(node.getFieldId())) {
                     ColumnNode col = new ColumnNode(node);
                     columnMap.put(node.getFieldId(), col);
                     columns.add(col);

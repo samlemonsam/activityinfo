@@ -56,6 +56,13 @@ public class QuantityType implements ParametrizedFieldType {
         return this;
     }
 
+    /**
+     * @return new QuantitType with the given {@code updatedUnits}
+     */
+    public QuantityType withUnits(String updatedUnits) {
+        return new QuantityType(updatedUnits);
+    }
+
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
@@ -73,6 +80,11 @@ public class QuantityType implements ParametrizedFieldType {
     @Override
     public <T> T accept(FieldTypeVisitor<T> visitor) {
         return visitor.visitQuantity(this);
+    }
+
+    @Override
+    public boolean isUpdatable() {
+        return true;
     }
 
     @Override

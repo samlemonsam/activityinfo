@@ -17,4 +17,5 @@ public interface FieldContainer extends IsWidget {
 
     void setInvalid(String message);
 
+    boolean isInputValid();
 }

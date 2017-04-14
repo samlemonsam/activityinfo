@@ -21,7 +21,6 @@ package org.activityinfo.ui.client.component.form.field;
  * #L%
  */
 
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -37,12 +36,12 @@ import org.activityinfo.ui.client.component.importDialog.model.type.converter.Co
 public class GeographicPointWidget implements FormFieldWidget<GeoPoint> {
 
     private final FlowPanel panel;
-    private final ValueUpdater<GeoPoint> valueUpdater;
+    private final FieldUpdater valueUpdater;
 
     private CoordinateBox latitudeBox;
     private CoordinateBox longitudeBox;
 
-    public GeographicPointWidget(final ValueUpdater<GeoPoint> valueUpdater) {
+    public GeographicPointWidget(final FieldUpdater valueUpdater) {
         this.valueUpdater = valueUpdater;
 
         latitudeBox = new CoordinateBox(CoordinateAxis.LATITUDE);

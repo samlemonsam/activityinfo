@@ -40,12 +40,12 @@ import java.util.Set;
 /**
  * @author yuriyz on 09/28/2015.
  */
-public class EnumComboboxWidget implements FormFieldWidget<EnumValue> {
+public class EnumDropDownWidget implements FormFieldWidget<EnumValue> {
 
     private final ListBox dropBox;
     private final ValueUpdater<EnumValue> valueUpdater;
 
-    public EnumComboboxWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater) {
+    public EnumDropDownWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater) {
         this.valueUpdater = valueUpdater;
         dropBox = new ListBox(enumType.getCardinality() == Cardinality.MULTIPLE);
         dropBox.addStyleName("form-control");

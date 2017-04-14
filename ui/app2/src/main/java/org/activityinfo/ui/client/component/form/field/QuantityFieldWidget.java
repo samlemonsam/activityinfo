@@ -1,57 +1,46 @@
 package org.activityinfo.ui.client.component.form.field;
 
 import com.google.common.base.Strings;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
 import org.activityinfo.ui.client.widget.DoubleBox;
 
-import javax.annotation.Nullable;
 import java.text.ParseException;
 
 public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
 
-    @Nullable
-    private final EventBus eventBus;
-    private final ResourceId fieldId;
     private final FlowPanel panel;
     private final DoubleBox box;
     private final InlineLabel unitsLabel;
-    private final ValueUpdater<Quantity> valueUpdater;
+    private final FieldUpdater valueUpdater;
     private final QuantityType type;
 
-    public QuantityFieldWidget(final QuantityType type, final ValueUpdater<Quantity> valueUpdater,
-                               @Nullable EventBus eventBus, ResourceId fieldId) {
+    public QuantityFieldWidget(final QuantityType type, final FieldUpdater valueUpdater) {
         this.type = type;
-        this.eventBus = eventBus;
-        this.fieldId = fieldId;
         this.valueUpdater = valueUpdater;
 
         box = new DoubleBox();
         box.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> event) {
-                fireValueChanged();
+                onValueChanged();
             }
         });
         box.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                validate(true);
+                onValueChanged();
             }
         });
 
@@ -64,10 +53,6 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
         panel.add(unitsLabel);
     }
 
-    @Override
-    public void fireValueChanged() {
-        valueUpdater.update(box.getValue() != null ? new Quantity(box.getValue(), type.getUnits()) : null);
-    }
 
     @Override
     public void setReadOnly(boolean readOnly) {
@@ -91,6 +76,11 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
     }
 
     @Override
+    public void fireValueChanged() {
+        onValueChanged();
+    }
+
+    @Override
     public void setType(FieldType type) {
         unitsLabel.setText(((QuantityType) type).getUnits());
     }
@@ -105,28 +95,20 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
                 (!Strings.isNullOrEmpty(box.getText()) && box.getValue() != null);
     }
 
-    private void validate(boolean onKeyUp) {
-        if (eventBus == null) {
-            return;
-        }
-
-        if (isValid()) {
-            eventBus.fireEvent(new FieldMessageEvent(fieldId, "").setClearMessage(true));
-        }
+    public void onValueChanged() {
 
         try {
-            // The value sanitization algorithm is as follows: If the value of the element is not a valid floating-point number,
-            // then set it to the empty string instead.
-            // http://stackoverflow.com/questions/18852244/how-to-get-the-raw-value-an-input-type-number-field
-            // SOLUTION : if we know that user typed something and value is null then browser sanitized it for us -> input invalid
-            if (onKeyUp && box.getValue() == null) {
-                eventBus.fireEvent(new FieldMessageEvent(fieldId, invalidErrorMessage()));
+            Double value = box.getValueOrThrow();
+            if(value == null) {
+                valueUpdater.update(null);
+            } else {
+                valueUpdater.update(new Quantity(value, type.getUnits()));
             }
-            box.getValueOrThrow();
         } catch (ParseException e) {
-            eventBus.fireEvent(new FieldMessageEvent(fieldId, invalidErrorMessage()));
+            valueUpdater.onInvalid(invalidErrorMessage());
         }
     }
+
 
     private String invalidErrorMessage() {
         NumberFormat decimalFormat = NumberFormat.getDecimalFormat();

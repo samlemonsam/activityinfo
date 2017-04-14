@@ -15,7 +15,7 @@ import javax.swing.JToolBar;
 
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 
 /**
  * Modal window that simply lists the admin entities currently on the server.
@@ -24,7 +24,7 @@ public class AdminListWindow extends JDialog {
 
     private AdminTableModel tableModel;
 
-    public AdminListWindow(JFrame parent, ActivityInfoClient client, AdminLevel level) {
+    public AdminListWindow(JFrame parent, GeoAdminClient client, AdminLevel level) {
         super(parent, level.getName(), Dialog.ModalityType.APPLICATION_MODAL);
         setSize(650, 350);
         setLocationRelativeTo(parent);

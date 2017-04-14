@@ -103,13 +103,17 @@ public class InstanceScoreTest extends AbstractImporterTest {
 
         // Province level
         ColumnSet columnSet = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.PROVINCE_LEVEL));
-        InstanceScoreSource scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet);
+        InstanceScoreSource scoreSource = new InstanceScoreSourceBuilder(
+                CuidAdapter.adminLevelFormClass(ImportWithMultiClassRangeTest.PROVINCE_LEVEL),
+                referenceFields, sourceColumns).build(columnSet);
         InstanceScorer.Score score = score(source.getRows().get(0), scoreSource);
         assertScore(score, "Katanga");
 
         // District level
         columnSet = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.DISTRICT_LEVEL));
-        scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet);
+        scoreSource = new InstanceScoreSourceBuilder(
+                CuidAdapter.adminLevelFormClass(ImportWithMultiClassRangeTest.DISTRICT_LEVEL),
+                referenceFields, sourceColumns).build(columnSet);
         score = score(source.getRows().get(1), scoreSource);
         assertScore(score, "Katanga");
         assertScore(score, "Tanganika");
@@ -117,7 +121,9 @@ public class InstanceScoreTest extends AbstractImporterTest {
 
         // Territoire level
         columnSet = assertResolves(query(referenceFields, ImportWithMultiClassRangeTest.TERRITOIRE_LEVEL));
-        scoreSource = new InstanceScoreSourceBuilder(referenceFields, sourceColumns).build(columnSet);
+        scoreSource = new InstanceScoreSourceBuilder(
+                CuidAdapter.adminLevelFormClass(ImportWithMultiClassRangeTest.TERRITOIRE_LEVEL),
+                referenceFields, sourceColumns).build(columnSet);
         score = score(source.getRows().get(2), scoreSource);
         assertScore(score, "Katanga");
         assertScore(score, "Tanganika");

@@ -61,6 +61,11 @@ public class BooleanType implements FieldType {
         return visitor.visitBoolean(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     /**
      *
      * @return the singleton instance for this type

@@ -6,12 +6,11 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 
 
-public class LocationTypeEntry extends BaseModelData implements Comparable<LocationTypeEntry> {
+class LocationTypeEntry extends BaseModelData implements Comparable<LocationTypeEntry> {
 
     private boolean builtin;
     private String databaseName;
     private String locationTypeName;
-    private int id;
 
     private LocationTypeEntry() {
     }

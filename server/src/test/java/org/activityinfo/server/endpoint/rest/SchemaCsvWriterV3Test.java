@@ -65,7 +65,7 @@ public class SchemaCsvWriterV3Test {
                 .setLabel("What is your name?")
                 .setDescription("The head of household's name")
                 .setRequired(true)
-                .setType(TextType.INSTANCE));
+                .setType(TextType.SIMPLE));
 
         surveyForm.addElement(new FormField(ResourceId.valueOf("F2"))
                 .setCode("AGE")
@@ -99,7 +99,7 @@ public class SchemaCsvWriterV3Test {
 
         subFormClass.addElement(new FormField(ResourceId.valueOf("F21"))
                 .setLabel("Name")
-                .setType(TextType.INSTANCE)
+                .setType(TextType.SIMPLE)
                 .setRequired(true));
 
         subFormClass.addElement(new FormField(ResourceId.valueOf("F22"))

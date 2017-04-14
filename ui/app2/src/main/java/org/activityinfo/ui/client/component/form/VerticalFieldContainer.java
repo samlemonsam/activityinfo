@@ -22,6 +22,7 @@ public class VerticalFieldContainer implements FieldContainer {
     private final FormGroup formGroup;
     private final FormField field;
     private final FormFieldWidget fieldWidget;
+    private boolean valid = true;
 
     public VerticalFieldContainer(FormField formField, FormFieldWidget fieldWidget) {
         this.field = formField;
@@ -45,12 +46,19 @@ public class VerticalFieldContainer implements FieldContainer {
 
     @Override
     public void setValid() {
+        valid = true;
         formGroup.showValidationMessage(false);
     }
 
     @Override
     public void setInvalid(String message) {
+        valid = false;
         formGroup.showValidationMessage(message);
+    }
+
+    @Override
+    public boolean isInputValid() {
+        return valid;
     }
 
     @Override

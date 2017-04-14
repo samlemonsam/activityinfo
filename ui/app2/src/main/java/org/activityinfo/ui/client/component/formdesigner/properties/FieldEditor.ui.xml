@@ -74,8 +74,11 @@
     </g:HTMLPanel>
 
     <!-- Editors for individual types -->
-
+    <prop:TextTypeEditor ui:field="textTypeEditor"/>
     <prop:QuantityTypeEditor ui:field="quantityTypeEditor"/>
     <prop:CalculatedTypeEditor ui:field="calculatedTypeEditor"/>
+    <prop:SerialNumberTypeEditor ui:field="serialNumberTypeEditor"/>
+    <prop:EnumTypeEditor ui:field="enumTypeEditor"/>
+
   </g:HTMLPanel>
 </ui:UiBinder>

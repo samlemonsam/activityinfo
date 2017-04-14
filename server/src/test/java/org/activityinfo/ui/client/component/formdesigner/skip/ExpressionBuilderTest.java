@@ -144,7 +144,7 @@ public class ExpressionBuilderTest {
 
         FormField textField = new FormField(TEXT_FIELD_ID);
         textField.setLabel("Text");
-        textField.setType(TextType.INSTANCE);
+        textField.setType(TextType.SIMPLE);
 
         final FormClass formClass = new FormClass(CuidAdapter.activityFormClass(1));
         formClass.addElement(genderField);

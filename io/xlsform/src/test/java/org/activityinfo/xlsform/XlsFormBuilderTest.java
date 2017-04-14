@@ -29,7 +29,7 @@ public class XlsFormBuilderTest {
                 .setLabel("What is your name?")
                 .setRequired(true)
                 .setCode("RespName")
-                .setType(TextType.INSTANCE);
+                .setType(TextType.SIMPLE);
         
         formClass.addField(ResourceId.valueOf("X2"))
                 .setLabel("How old are you?")
@@ -69,7 +69,7 @@ public class XlsFormBuilderTest {
         subFormClass.setLabel("Sub Form");
         subFormClass.addField(ResourceId.valueOf("Y1"))
             .setLabel("What is his name?")
-            .setType(TextType.INSTANCE)
+            .setType(TextType.SIMPLE)
             .setCode("Name");
 
 

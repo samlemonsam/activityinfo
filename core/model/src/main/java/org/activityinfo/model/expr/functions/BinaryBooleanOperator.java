@@ -45,7 +45,7 @@ public abstract class BinaryBooleanOperator extends ExprFunction implements Colu
     }
 
     @Override
-    public ColumnView columnApply(List<ColumnView> arguments) {
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
         Preconditions.checkArgument(arguments.size() == 2);
 
         ColumnView a = arguments.get(0);

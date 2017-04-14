@@ -23,7 +23,6 @@ package org.activityinfo.ui.client.component.formdesigner.skip;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -44,6 +43,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.ui.client.component.form.field.FieldUpdater;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
@@ -106,7 +106,12 @@ public class RelevanceRowPresenter {
     private void initValueWidget() {
         view.getValueContainer().clear();
 
-        ValueUpdater<FieldValue> valueUpdater = new ValueUpdater<FieldValue>() {
+        FieldUpdater valueUpdater = new FieldUpdater<FieldValue>() {
+            @Override
+            public void onInvalid(String errorMessage) {
+                update(null);
+            }
+
             @Override
             public void update(FieldValue value) {
                 RelevanceRowPresenter.this.value = value;

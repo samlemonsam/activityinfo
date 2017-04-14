@@ -39,12 +39,18 @@ public class CellTableAffixer {
     private final ScrollPanel scrollAncestor;
     private final CellTableHeaderWidthApplier widthApplier;
 
+    private int tableTop;
+    private int headerHeight;
+
     private boolean affixed = false;
 
     public CellTableAffixer(final CellTable table) {
         this.table = table;
         this.scrollAncestor = table.getScrollAncestor();
         this.widthApplier = new CellTableHeaderWidthApplier(table);
+
+        this.tableTop = table.getAbsoluteTop();
+        this.headerHeight = table.getTableHeadElement().getOffsetHeight();
 
         table.getEventBus().addHandler(CellTable.ScrollEvent.TYPE, new CellTable.ScrollHandler() {
             @Override
@@ -61,10 +67,17 @@ public class CellTableAffixer {
     }
 
     private void handleScroll(CellTable.ScrollEvent event) {
+
+        int threshold;
+        if(affixed) {
+            threshold = tableTop - headerHeight;
+        } else {
+            threshold = tableTop;
+        }
+
         final int verticalScroll = event.getVerticalScrollPosition();
 
-        final int tableTop = table.getAbsoluteTop();
-        boolean shouldAffix = verticalScroll > tableTop;
+        boolean shouldAffix = verticalScroll > threshold;
 
         if (affixed == shouldAffix) {
             return;

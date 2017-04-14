@@ -24,7 +24,6 @@ package org.activityinfo.model.type.attachment;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -74,8 +73,14 @@ public class AttachmentValue implements FieldValue {
 
     public static AttachmentValue fromJson(String json) {
         JsonParser jsonParser = new JsonParser();
-        JsonObject object = jsonParser.parse(json).getAsJsonObject();
-        JsonArray array = object.getAsJsonArray("values");
+        JsonArray array;
+
+        JsonElement root = jsonParser.parse(json);
+        if(root.isJsonObject()) {
+            array = root.getAsJsonObject().getAsJsonArray("values");
+        } else {
+            array = root.getAsJsonArray();
+        }
 
         List<Attachment> list = new ArrayList<>();
         for (JsonElement value : array) {

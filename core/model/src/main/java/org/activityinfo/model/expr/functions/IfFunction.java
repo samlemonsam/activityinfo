@@ -71,7 +71,7 @@ public class IfFunction extends ExprFunction implements ColumnFunction {
     }
 
     @Override
-    public ColumnView columnApply(List<ColumnView> arguments) {
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
         checkArity(arguments, 3);
 
         ColumnView condition = arguments.get(0);

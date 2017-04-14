@@ -41,7 +41,7 @@ class Forms implements FormClassProvider {
 
     private FormField textField(String label) {
         return new FormField(ResourceId.valueOf(label))
-                .setType(TextType.INSTANCE)
+                .setType(TextType.SIMPLE)
                 .setLabel(label);
     }
 

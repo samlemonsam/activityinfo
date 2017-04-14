@@ -1,7 +1,10 @@
 package org.activityinfo.server.endpoint.odk;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.google.inject.Inject;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.Item;
@@ -12,11 +15,18 @@ import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.model.type.time.MonthType;
+import org.activityinfo.model.type.time.YearType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +35,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class OdkFormFieldBuilderFactory {
+
+    public static final Escaper REGEX_ESCAPER = Escapers.builder().addEscape('\'', "\\'").build();
 
     private static final Logger LOGGER = Logger.getLogger(OdkFormFieldBuilderFactory.class.getName());
 
@@ -38,53 +50,118 @@ public class OdkFormFieldBuilderFactory {
     public OdkFormFieldBuilder get(FieldType fieldType) {
         if (fieldType instanceof ParametrizedFieldType) {
             ParametrizedFieldType parametrizedFieldType = (ParametrizedFieldType) fieldType;
-            if (!parametrizedFieldType.isValid()) return null;
-        }
-
-        if (fieldType instanceof BarcodeType) {
-            return new SimpleInputBuilder(BindingType.BARCODE);
-        }
-        if (fieldType instanceof BooleanType) {
-            return new SelectBuilder(BindingType.BOOLEAN, booleanOptions());
-        }
-        if (fieldType instanceof EnumType) {
-            SelectOptions options = enumOptions((EnumType) fieldType);
-            if(options.isEmpty()) {
-                return null;
-            } else {
-                return new SelectBuilder(BindingType.STRING, options);
+            if (!parametrizedFieldType.isValid()) {
+                return OdkFormFieldBuilder.NONE;
             }
         }
-        if (fieldType instanceof GeoPointType) {
-            return new SimpleInputBuilder(BindingType.GEOPOINT);
-        }
-        if (fieldType instanceof AttachmentType) {
-            return new UploadBuilder("image/*");
-        }
-        if (fieldType instanceof LocalDateType) {
-            return new SimpleInputBuilder(BindingType.DATE);
-        }
-        if (fieldType instanceof NarrativeType) {
-            return new SimpleInputBuilder(BindingType.STRING);
-        }
-        if (fieldType instanceof QuantityType) {
-            return new QuantityFieldBuilder((QuantityType) fieldType);
-        }
-        if (fieldType instanceof ReferenceType) {
-            Collection<ResourceId> range = ((ReferenceType) fieldType).getRange();
-            if(isSmallSet(range)) {
-                return new SelectBuilder(BindingType.STRING, referenceOptions((ReferenceType) fieldType));
-            } else {
-                return new ReferenceBuilder(range);
-            }
-        }
-        if (fieldType instanceof TextType) {
-            return new SimpleInputBuilder(BindingType.STRING);
-        }
 
-        // If this happens, it means this class needs to be expanded to support the new FieldType class.
-        LOGGER.warning("Unknown FieldType: " + fieldType.getClass().getName());
-        return null;
+        return fieldType.accept(new FieldTypeVisitor<OdkFormFieldBuilder>() {
+
+            @Override
+            public OdkFormFieldBuilder visitAttachment(AttachmentType attachmentType) {
+                return new UploadBuilder("image/*");
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitCalculated(CalculatedFieldType calculatedFieldType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitReference(ReferenceType referenceType) {
+                if(isSmallSet(referenceType.getRange())) {
+                    return new SelectBuilder(BindingType.STRING, referenceOptions(referenceType));
+                } else {
+                    return new ReferenceBuilder(referenceType.getRange());
+                }
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitNarrative(NarrativeType narrativeType) {
+                return new SimpleInputBuilder(BindingType.STRING);
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitBoolean(BooleanType booleanType) {
+                return new SelectBuilder(BindingType.BOOLEAN, booleanOptions());
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitQuantity(QuantityType type) {
+                return new QuantityFieldBuilder(type);
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitGeoPoint(GeoPointType geoPointType) {
+                return new SimpleInputBuilder(BindingType.GEOPOINT);
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitGeoArea(GeoAreaType geoAreaType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitEnum(EnumType enumType) {
+                SelectOptions options = enumOptions(enumType);
+                if(options.isEmpty()) {
+                    return OdkFormFieldBuilder.NONE;
+                } else {
+                    return new SelectBuilder(BindingType.STRING, options);
+                }
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitBarcode(BarcodeType barcodeType) {
+                return new SimpleInputBuilder(BindingType.BARCODE);
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitSubForm(SubFormReferenceType subFormReferenceType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitLocalDate(LocalDateType localDateType) {
+                return new SimpleInputBuilder(BindingType.DATE);
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitMonth(MonthType monthType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitYear(YearType yearType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitText(TextType textType) {
+                return new SimpleInputBuilder(BindingType.STRING, textConstraint(textType));
+            }
+
+            private Optional<String> textConstraint(TextType textType) {
+                if(textType.hasInputMask()) {
+                    InputMask inputMask = new InputMask(textType.getInputMask());
+                    return Optional.of(String.format("regex(., '%s')",
+                            REGEX_ESCAPER.escape(inputMask.toXFormRegex())));
+
+                } else {
+                    return Optional.absent();
+                }
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitSerialNumber(SerialNumberType serialNumberType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+        });
     }
 
     private boolean isSmallSet(Collection<ResourceId> range) {

@@ -36,12 +36,12 @@ public class CountryTable implements SimpleTable {
         FormField nameField = new FormField(NAME_FIELD_ID);
         nameField.setCode("label");
         nameField.setLabel(I18N.CONSTANTS.name());
-        nameField.setType(TextType.INSTANCE);
+        nameField.setType(TextType.SIMPLE);
 
         FormField isoField = new FormField(CODE_FIELD_ID);
         isoField.setCode("code");
         isoField.setLabel(I18N.CONSTANTS.codeFieldLabel());
-        isoField.setType(TextType.INSTANCE);
+        isoField.setType(TextType.SIMPLE);
     
         FormField boundaryField = new FormField(BOUNDARY_FIELD_ID);
         boundaryField.setCode("boundary");

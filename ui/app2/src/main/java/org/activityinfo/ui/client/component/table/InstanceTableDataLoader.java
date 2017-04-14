@@ -21,12 +21,10 @@ package org.activityinfo.ui.client.component.table;
  * #L%
  */
 
-import com.google.common.collect.Sets;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ListDataProvider;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.observable.Observable;
@@ -35,7 +33,6 @@ import org.activityinfo.observable.Observer;
 import org.activityinfo.ui.client.widget.CellTable;
 import org.activityinfo.ui.client.widget.loading.LoadingState;
 
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,8 +48,6 @@ public class InstanceTableDataLoader {
 
     private final ListDataProvider<RowView> tableDataProvider = new ListDataProvider<>();
     private final InstanceTable table;
-    private final Set<FieldPath> fields = Sets.newHashSet();
-
     private int lastVerticalScrollPosition;
     private int totalCount = -1;
     private ColumnSet prefetchedResult;
@@ -149,7 +144,7 @@ public class InstanceTableDataLoader {
         }
 
         LOGGER.log(Level.FINE, "Loading instances... offset = " +
-                offset + ", count = " + countToLoad + ", totalCount = " + totalCount + ", fields = " + fields);
+                offset + ", count = " + countToLoad + ", totalCount = " + totalCount);
 
         table.getLoadingIndicator().onLoadingStateChanged(LoadingState.LOADING, I18N.CONSTANTS.loading());
 
@@ -157,7 +152,7 @@ public class InstanceTableDataLoader {
         queryModel.setFilter(table.getFilter());
 
         for (FieldColumn column : table.getColumns()) {
-            queryModel.selectField(column.get().getNode().getFieldId()).as(column.get().getNode().getFieldId().asString());
+            queryModel.selectExpr(column.get().getExpr()).as(column.get().getNode().getFieldId().asString());
         }
 
         Observable<ColumnSet> observable = table.getResourceLocator().getTable(queryModel);
@@ -186,7 +181,6 @@ public class InstanceTableDataLoader {
             ((ObservablePromise)observable).getPromise().then(new AsyncCallback() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    LOGGER.log(Level.SEVERE, "Failed to load instances. fields = " + fields, caught);
                     table.getLoadingIndicator().onLoadingStateChanged(LoadingState.FAILED, caught);
                 }
 
@@ -234,12 +228,7 @@ public class InstanceTableDataLoader {
         load(0, PAGE_SIZE, false);
     }
 
-    public Set<FieldPath> getFields() {
-        return fields;
-    }
-
     public void reset() {
-        fields.clear();
         prefetchedResult = null;
     }
 }

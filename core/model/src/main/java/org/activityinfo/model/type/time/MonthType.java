@@ -64,4 +64,9 @@ public class MonthType implements FieldType, TemporalType {
     public <T> T accept(FieldTypeVisitor<T> visitor) {
         return visitor.visitMonth(this);
     }
+
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
 }

@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -17,10 +17,10 @@ import java.util.concurrent.Executors;
 
 public class ResourceStoreImpl implements ResourceStore {
     
-    private final ActivityInfoClient client;
+    private final GeoAdminClient client;
     private final ListeningExecutorService executorService;
 
-    public ResourceStoreImpl(ActivityInfoClient client) {
+    public ResourceStoreImpl(GeoAdminClient client) {
         this.client = client;
         executorService = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
     }

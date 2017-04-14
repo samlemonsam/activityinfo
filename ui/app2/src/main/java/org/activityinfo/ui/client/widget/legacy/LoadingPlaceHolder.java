@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
+import org.activityinfo.ui.client.page.common.ApplicationBundle;
 
 /**
  * An AsyncMonitor implementation that shows the "Loading Component" message
@@ -40,7 +41,7 @@ public class LoadingPlaceHolder extends LayoutContainer implements AsyncMonitor 
         super();
         setLayout(new CenterLayout());
         html = new Html();
-        html.addStyleName("loading-placeholder");
+        html.addStyleName(ApplicationBundle.INSTANCE.styles().loadingPlaceholder());
         html.setText(I18N.CONSTANTS.loadingComponent());
         add(html);
     }

@@ -1,0 +1,25 @@
+
+dependencies {
+    compile project(':core:promises')
+    compile project(':core:model')
+
+    compile libraries.jersey.core
+    compile libraries.jersey.client
+    compile libraries.jackson.mapper
+
+    testCompile libraries.junit
+
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}
+
+test {
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+        }
+    }
+}

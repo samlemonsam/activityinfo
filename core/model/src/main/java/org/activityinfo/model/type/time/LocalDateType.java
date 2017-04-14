@@ -63,6 +63,11 @@ public class LocalDateType implements FieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "LocalDateType";
     }

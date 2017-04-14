@@ -120,7 +120,7 @@ public class XFormReader {
     private FieldType createType(BodyElement element, Bind binding) {
         switch (binding.getType()) {
             case STRING:
-                return TextType.INSTANCE;
+                return TextType.SIMPLE;
             case DATE:
             case DATETIME:
                 return LocalDateType.INSTANCE;

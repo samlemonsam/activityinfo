@@ -51,6 +51,8 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
         dropBox = new ListBox(false);
         dropBox.addStyleName("form-control");
 
+        dropBox.addItem("", (String)null);
+
         for (int i = 0; i < range.getCount(); i++) {
             dropBox.addItem(
                     range.getLabel(i),
@@ -87,6 +89,9 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
     private ReferenceValue updatedValue() {
         Set<RecordRef> refs = Sets.newHashSet();
         int selectedIndex = dropBox.getSelectedIndex();
+        if(selectedIndex == 0) {
+            return null;
+        }
         if(selectedIndex != -1) {
             refs.add(RecordRef.fromQualifiedString(dropBox.getValue(selectedIndex)));
         }
@@ -98,13 +103,18 @@ public class ComboBoxFieldWidget implements ReferenceFieldWidget {
 
         Set<String> selectedRecords = new HashSet<>();
         for (RecordRef recordRef : value.getReferences()) {
-            selectedRecords.add(recordRef.getRecordId().asString());
+            selectedRecords.add(recordRef.toQualifiedString());
         }
 
-        for(int i=0;i!=dropBox.getItemCount();++i) {
-            if(selectedRecords.contains(dropBox.getValue(i))) {
-                dropBox.setSelectedIndex(i);
-                break;
+        if(selectedRecords.isEmpty()) {
+            dropBox.setSelectedIndex(0);
+
+        } else {
+            for (int i = 0; i != dropBox.getItemCount(); ++i) {
+                if (selectedRecords.contains(dropBox.getValue(i))) {
+                    dropBox.setSelectedIndex(i);
+                    break;
+                }
             }
         }
         return Promise.done();

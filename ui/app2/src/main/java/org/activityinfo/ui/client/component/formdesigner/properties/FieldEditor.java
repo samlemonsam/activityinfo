@@ -95,6 +95,12 @@ public class FieldEditor implements IsWidget {
     QuantityTypeEditor quantityTypeEditor;
     @UiField
     CalculatedTypeEditor calculatedTypeEditor;
+    @UiField
+    TextTypeEditor textTypeEditor;
+    @UiField
+    SerialNumberTypeEditor serialNumberTypeEditor;
+    @UiField
+    EnumTypeEditor enumTypeEditor;
 
 
     private FormDesigner formDesigner;
@@ -157,7 +163,10 @@ public class FieldEditor implements IsWidget {
         validateLabel();
 
         quantityTypeEditor.show(fieldWidgetContainer);
-        calculatedTypeEditor.show(formField);
+        calculatedTypeEditor.show(fieldWidgetContainer);
+        textTypeEditor.show(fieldWidgetContainer);
+        serialNumberTypeEditor.show(fieldWidgetContainer);
+        enumTypeEditor.show(fieldWidgetContainer);
     }
 
     /**

@@ -32,6 +32,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.store.hrd.HrdFormStorage;
+import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
@@ -265,7 +266,8 @@ public class FormResource {
         
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer);
+        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
+                new HrdSerialNumberProvider());
 
         try {
             updater.create(formId, jsonObject.getAsJsonObject());
@@ -286,8 +288,13 @@ public class FormResource {
 
         JsonElement jsonObject = new JsonParser().parse(body);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer);
-        updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
+        try {
+            Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
+                    new HrdSerialNumberProvider());
+            updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
+        } catch (InvalidUpdateException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
 
         return Response.ok().build();
     }

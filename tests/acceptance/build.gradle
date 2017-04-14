@@ -43,13 +43,27 @@ dependencies {
 // as we have our own test harness
 test.enabled = false
 
+task run(type: JavaExec) {
+    group = "Verification"
+    description = 'Runs end-to-end tests'
+
+    main = 'org.activityinfo.test.TestMain'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir"
+
+    if(project.hasProperty("testArgs")) {
+        def testArgs = project.getProperty("testArgs").split(" ")
+        for(testArg in testArgs) {
+            args testArg
+        }
+    }
+}
 
 task acceptanceTest(type: JavaExec) {
     group = "Verification"
     description = 'Runs acceptance test suite'
 
     dependsOn 'classes'
-    dependsOn ':server:configureDatabase'
 
     args '--url', project.environment.url
     args '--api'

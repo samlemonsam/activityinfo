@@ -4,12 +4,14 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,17 @@ public class Hierarchy {
         });
     }
 
+
+    public static Hierarchy get(FormTree.Node rootField) {
+        Map<ResourceId, FormClass> formClasses = new HashMap<>();
+        for (FormTree.Node childNode : rootField.getChildren()) {
+            FormClass childForm = childNode.getDefiningFormClass();
+            if(!formClasses.containsKey(childForm.getId())) {
+                formClasses.put(childForm.getId(), childForm);
+            }
+        }
+        return new Hierarchy(Lists.<FormClass>newArrayList(formClasses.values()));
+    }
 
     public Hierarchy(List<FormClass> rangeFormClasses) {
 
@@ -96,4 +109,5 @@ public class Hierarchy {
     public boolean hasLevel(ResourceId classId) {
         return levelMap.containsKey(classId);
     }
+
 }

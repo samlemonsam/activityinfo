@@ -33,6 +33,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.ui.client.dispatch.state.SafeStateProvider;
 import org.activityinfo.ui.client.inject.AppInjector;
 import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
+import org.activityinfo.ui.client.page.common.ApplicationBundle;
 import org.activityinfo.ui.client.page.print.PrintFormPanel;
 
 /**
@@ -49,6 +50,7 @@ public class ActivityInfoEntryPoint implements EntryPoint {
         Log.info("Application: onModuleLoad starting");
         Log.info("Application Permutation: " + GWT.getPermutationStrongName());
 
+        ApplicationBundle.INSTANCE.styles().ensureInjected();
 
         try {
             new ClientSideAuthProvider().get();

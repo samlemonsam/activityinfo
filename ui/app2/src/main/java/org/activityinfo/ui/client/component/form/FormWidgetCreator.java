@@ -25,7 +25,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gwt.cell.client.ValueUpdater;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
@@ -33,7 +32,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.event.FieldMessageEvent;
+import org.activityinfo.ui.client.component.form.field.FieldUpdater;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidgetFactory;
 import org.activityinfo.ui.client.component.form.subform.PeriodSubFormPanel;
@@ -66,17 +65,8 @@ public class FormWidgetCreator {
         this.containerFactory = containerFactory;
         this.widgetFactory = widgetFactory;
 
-        bindEvents();
     }
 
-    private void bindEvents() {
-        model.getEventBus().addHandler(FieldMessageEvent.TYPE, new FieldMessageEvent.Handler() {
-            @Override
-            public void handle(FieldMessageEvent event) {
-                showFieldMessage(event);
-            }
-        });
-    }
 
     public SubFormPanel createSubformPanel(FormClass subForm, int depth, RelevanceHandler relevanceHandler, PanelFiller filler) {
         final SubFormPanel panel;
@@ -113,12 +103,18 @@ public class FormWidgetCreator {
                     promises.add(subFormWidgetsPromise);
                 }
             } else {
-                Promise<Void> promise = widgetFactory.createWidget(formClass, field, new ValueUpdater<FieldValue>() {
+                Promise<Void> promise = widgetFactory.createWidget(formClass, field, new FieldUpdater<FieldValue>() {
+                    @Override
+                    public void onInvalid(String errorMessage) {
+                        containers.get(field.getId()).setInvalid(errorMessage);
+                    }
+
                     @Override
                     public void update(FieldValue value) {
+                        containers.get(field.getId()).setValid();
                         fieldUpdated.onFieldUpdated(field, value);
                     }
-                }, model.getValidationFormClass(), model.getEventBus()).then(new Function<FormFieldWidget, Void>() {
+                }).then(new Function<FormFieldWidget, Void>() {
                     @Override
                     public Void apply(FormFieldWidget widget) {
                         FieldContainer fieldContainer = containerFactory.createContainer(field, widget, 4);
@@ -143,12 +139,4 @@ public class FormWidgetCreator {
         return containers;
     }
 
-    private void showFieldMessage(FieldMessageEvent event) {
-        FieldContainer container = containers.get(event.getFieldId());
-        if (event.isClearMessage()) {
-            container.setValid();
-        } else {
-            container.setInvalid(event.getMessage());
-        }
-    }
 }

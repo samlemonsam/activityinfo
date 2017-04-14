@@ -76,7 +76,7 @@ public class DatabaseTargetForm implements Serializable {
         FormField nameField = new FormField(CuidAdapter.field(classId, CuidAdapter.NAME_FIELD));
         nameField.setCode("name");
         nameField.setLabel(I18N.CONSTANTS.name());
-        nameField.setType(TextType.INSTANCE);
+        nameField.setType(TextType.SIMPLE);
         nameField.setRequired(true);
         
         FormField startDateField = new FormField(CuidAdapter.field(classId, CuidAdapter.START_DATE_FIELD));

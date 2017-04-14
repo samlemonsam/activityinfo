@@ -115,9 +115,35 @@ task compileApp(type: JavaExec) {
 
     main = 'com.google.gwt.dev.Compiler'
 
-    args '-logLevel', 'ERROR'
+    args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
     args '-war', outputDir
+    args 'org.activityinfo.ui.AppProd'
+
+}
+
+
+
+task soyc(type: JavaExec) {
+
+    outputs.dir outputDir
+    inputs.dir sourceSets.main.allSource.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath sourceSets.main.output.generatedSourcesDir
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    main = 'com.google.gwt.dev.Compiler'
+
+    args '-logLevel', 'INFO'
+    args '-sourceLevel', '1.8'
+    args '-war', outputDir
+    args '-compileReport'
+    args '-extra', "${buildDir}/gwt-extra"
     args 'org.activityinfo.ui.AppProd'
 
 }

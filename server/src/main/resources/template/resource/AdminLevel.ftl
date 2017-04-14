@@ -61,11 +61,14 @@
 
 
     </@content>
+<link href="https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css" rel="stylesheet" />
+<script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
 <script type="application/javascript">
-    var map = L.map('map').setView([${country.bounds.centerLat?c}, ${country.bounds.centerLon?c}], 6);
-    L.tileLayer('/resources/adminLevel/${id?c}/tiles/{z}/{x}/{y}.png', {
-        attribution: 'ActivityInfo',
-        maxZoom: 10
-    }).addTo(map);
+    L.mapbox.accessToken = 'pk.eyJ1IjoiYWN0aXZpdHlpbmZvIiwiYSI6Ik5xVDlfRkkifQ.47_5IbyfXQWGWqxpCI80AQ';
+    var map = L.mapbox.map('map').setView([${country.bounds.centerLat?c}, ${country.bounds.centerLon?c}], 6);
+    L.mapbox.styleLayer('mapbox://styles/mapbox/light-v9').addTo(map);
+    var featureLayer = L.mapbox.featureLayer()
+            .loadURL('/resources/adminLevel/${id?c}/entities/features')
+            .addTo(map);
 </script>
 </@scaffolding>

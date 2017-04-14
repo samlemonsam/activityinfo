@@ -3,7 +3,6 @@ evaluationDependsOn ":ui:app"
 evaluationDependsOn ":ui:app2"
 evaluationDependsOn ":clients:gwtrest"
 
-apply plugin: 'gwt-base'
 apply plugin: 'war'
 apply plugin: 'appengine'
 
@@ -22,28 +21,6 @@ ext {
     configFile = project.file("$buildDir/config.properties")
 }
 
-gwt {
-    gwtVersion = project.gwtVersion
-
-    minHeapSize = "512M";
-    maxHeapSize = "2048M";
-    if (gwtMode.equals('safari')) {
-        modules 'org.activityinfo.ui.ActivityInfoSafariTest'
-        compiler {
-            draftCompile = true
-        }
-    } else {
-        modules 'org.activityinfo.ui.ActivityInfoRelease',
-                'org.activityinfo.ui.ActivityInfoReleaseLogging',
-                'org.activityinfo.ui.Embed'
-    }
-}
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [ configurations.gwt ]
-    }
-}
 
 appengine {
     downloadSdk = true

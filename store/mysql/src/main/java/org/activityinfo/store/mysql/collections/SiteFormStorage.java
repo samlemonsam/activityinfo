@@ -298,6 +298,7 @@ public class SiteFormStorage implements FormStorage {
         
         if(update.isDeleted()) {
             baseTable.delete();
+            indicatorValues.delete();
         } else {
 
             for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {

@@ -12,10 +12,7 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Updates the indicator value table
@@ -24,6 +21,7 @@ public class IndicatorValueTableUpdater {
 
     private final int siteId;
     private int reportingPeriodId;
+    private boolean deleted = false;
 
     private Date date1;
     private Date date2;
@@ -53,16 +51,29 @@ public class IndicatorValueTableUpdater {
         updates.add(new IndicatorUpdate(CuidAdapter.getLegacyIdFromCuid(fieldId), value));
     }
 
+    public void delete() {
+        deleted = true;
+    }
 
     public void setDate1(FieldValue value) {
-        this.date1 = ((LocalDate)value).atMidnightInMyTimezone();
+        if(value != null) {
+            this.date1 = ((LocalDate) value).atMidnightInMyTimezone();
+        }
     }
 
     public void setDate2(FieldValue value) {
-        this.date2 = ((LocalDate)value).atMidnightInMyTimezone();
+        if(value != null) {
+            this.date2 = ((LocalDate) value).atMidnightInMyTimezone();
+        }
     }
     
     public void execute(QueryExecutor executor) throws SQLException {
+
+        if(deleted) {
+            executor.update("UPDATE reportingperiod SET deleted = 1 WHERE siteId = ?", Collections.singletonList(siteId));
+            return;
+        }
+
         if(!updates.isEmpty()) {
             reportingPeriodId = queryReportingPeriod(executor);
 
@@ -86,6 +97,8 @@ public class IndicatorValueTableUpdater {
         // But we are not ready to remove the date1/date2 fields from the reportingperiod table
         if(date1 == null) {
             date1 = new Date(0);
+        }
+        if(date2 == null) {
             date2 = new Date(0);
         }
         

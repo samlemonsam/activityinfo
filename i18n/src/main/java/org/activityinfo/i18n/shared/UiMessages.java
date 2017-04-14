@@ -219,6 +219,9 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Please enter a number. For example: {0} or {1} or {2}")
     String quantityFieldInvalidValue(int integer, String doubleWithoutPoint, String doubleWithPoint);
 
+    @DefaultMessage("Please enter a value that matches the pattern ''{0}''")
+    String invalidTextInput(String mask);
+
     @Messages.DefaultMessage("{0} Users")
     String databaseUserGroup(String databaseName);
 

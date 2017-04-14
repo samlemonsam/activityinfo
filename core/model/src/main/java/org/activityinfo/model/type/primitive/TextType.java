@@ -1,17 +1,27 @@
 package org.activityinfo.model.type.primitive;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.FieldTypeVisitor;
-import org.activityinfo.model.type.FieldValue;
+import com.google.gson.JsonObject;
+import org.activityinfo.model.type.*;
 
 /**
  * A value type representing a single line of unicode text
  */
-public class TextType implements FieldType {
+public class TextType implements ParametrizedFieldType {
 
-    public static final FieldTypeClass TYPE_CLASS = new FieldTypeClass() {
+    public static final FieldTypeClass TYPE_CLASS = new ParametrizedFieldTypeClass() {
+        @Override
+        public FieldType deserializeType(JsonObject parametersObject) {
+            String inputMask = null;
+            if(parametersObject != null) {
+                if(parametersObject.has("inputMask")) {
+                    inputMask = parametersObject.get("inputMask").getAsString();
+                }
+            }
+            return new TextType(inputMask);
+        }
+
         @Override
         public String getId() {
             return "FREE_TEXT";
@@ -19,14 +29,30 @@ public class TextType implements FieldType {
 
         @Override
         public FieldType createType() {
-            return INSTANCE;
+            return SIMPLE;
         }
     };
 
-    public static final TextType INSTANCE = new TextType();
+    /**
+     * A simple text type, with no input mask.
+     */
+    public static final TextType SIMPLE = new TextType();
 
+    private String inputMask;
 
     private TextType() {
+    }
+
+    private TextType(String inputMask) {
+        this.inputMask = Strings.emptyToNull(inputMask);
+    }
+
+    /**
+     *
+     * @return a new TextType with the given input mask.
+     */
+    public TextType withInputMask(String inputMask) {
+        return new TextType(inputMask);
     }
 
     @Override
@@ -48,15 +74,35 @@ public class TextType implements FieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "TextType";
     }
 
-    
-    /**
-     * Returns the singleton instance for serialization
-     */
-    TextType readResolve() {
-        return INSTANCE;    
+
+    @Override
+    public JsonObject getParametersAsJson() {
+        JsonObject object = new JsonObject();
+        if(inputMask != null) {
+            object.addProperty("inputMask", inputMask);
+        }
+        return object;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    public String getInputMask() {
+        return inputMask;
+    }
+
+    public boolean hasInputMask() {
+        return inputMask != null;
     }
 }

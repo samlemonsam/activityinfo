@@ -69,7 +69,7 @@ public class SingleClassImporter implements FieldImporter {
             @Nullable
             @Override
             public Void apply(@Nullable ColumnSet input) {
-                scoreSource = new InstanceScoreSourceBuilder(referenceFields, sources).build(input);
+                scoreSource = new InstanceScoreSourceBuilder(rangeFormId, referenceFields, sources).build(input);
                 instanceScorer = new InstanceScorer(scoreSource);
                 return null;
             }

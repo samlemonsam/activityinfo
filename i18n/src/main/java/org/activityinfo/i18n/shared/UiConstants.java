@@ -1666,4 +1666,35 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Total")
     String tableTotal();
+
+    @DefaultStringValue("Input Mask")
+    String inputMask();
+
+    @DefaultStringValue("Learn more about input masks")
+    String learnMoreAboutInputMasks();
+
+    @DefaultStringValue("Learn more about serial numbers")
+    String learnMoreAboutSerialNumbers();
+
+
+
+    @DefaultStringValue("(Pending)")
+    String pending();
+
+    @DefaultStringValue("Serial Number")
+    String serialNumber();
+
+    @DefaultStringValue("Prefix Formula")
+    String prefixFormula();
+
+
+    @DefaultStringValue("Show as dropdown")
+    String dropdownPresentation();
+
+    @DefaultStringValue("Show as checkboxes")
+    String checkboxPresentation();
+
+    @DefaultStringValue("Presentation")
+    String presentation();
 }
+

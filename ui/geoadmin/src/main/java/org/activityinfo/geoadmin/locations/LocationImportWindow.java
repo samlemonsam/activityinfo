@@ -7,7 +7,7 @@ import net.miginfocom.swing.MigLayout;
 import org.activityinfo.geoadmin.ImportFeature;
 import org.activityinfo.geoadmin.ImportSource;
 import org.activityinfo.geoadmin.Sql;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
 import org.activityinfo.geoadmin.model.NewLocation;
@@ -32,13 +32,13 @@ public class LocationImportWindow extends JFrame {
     private LocationImportForm importForm;
 	private JTable table;
 	private List<LocationFeature> locations;
-	private ActivityInfoClient client;
+	private GeoAdminClient client;
 	private List<AdminLevel> levels;
 	private ImportSource source;
 	private GenericTableModel<LocationFeature> tableModel;
 	private int locationTypeId;
 
-	public LocationImportWindow(JFrame parent, ActivityInfoClient client,
+	public LocationImportWindow(JFrame parent, GeoAdminClient client,
 			int locationTypeId,
 			List<AdminLevel> levels, ImportSource source) throws Exception {
         super("Import - " + source.getFile().getName());

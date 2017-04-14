@@ -218,14 +218,14 @@ public class FormModelTest extends CommandTestCase2 {
 
         FormField labelField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
         labelField.setLabel("label1");
-        labelField.setType(TextType.INSTANCE);
+        labelField.setType(TextType.SIMPLE);
 
         subFormClass = new FormClass(ResourceId.generateId());
         subFormClass.setDatabaseId(masterFormClass.getDatabaseId());
         subFormClass.setParentFormId(masterFormId);
         subFormClass.setSubFormKind(SubFormKind.MONTHLY);
         subFormChildField = subFormClass.addField();
-        subFormChildField.setType(TextType.INSTANCE);
+        subFormChildField.setType(TextType.SIMPLE);
 
         subFormField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
         subFormField.setType(new SubFormReferenceType(subFormClass.getId()));
