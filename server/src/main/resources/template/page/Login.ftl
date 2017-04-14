@@ -26,29 +26,27 @@
     <div class="row row--padded">
         <h1>Login</h1>
 
-        <div class="grid grid--spaced">
-            <form action="/login" method="POST">
-                <label>
-                    ${label.emailAddress}
-                    <input name="email" type="email" required>
-                </label>
+        <form action="/login" method="POST">
+            <label>
+                ${label.emailAddress}
+                <input name="email" type="email" required>
+            </label>
 
-                <label>
-                    ${label.password}
-                    <input type="password" name="password" required>
-                </label>
+            <label>
+                ${label.password}
+                <input type="password" name="password" required>
+            </label>
 
-                <#if loginError>
-                <div>
-                ${label.incorrectLogin}
-                </div>
-                </#if>
+            <#if loginError>
+            <div>
+            ${label.incorrectLogin}
+            </div>
+            </#if>
 
-                <button type="submit">${label.login}</button>
+            <button type="submit">${label.login}</button>
 
-                <div class="login-problem"><a href="loginProblem">${label.forgottenYourPassword}</a></div>
-            </form>
-        </div>
+            <div class="login-problem"><a href="loginProblem">${label.forgottenYourPassword}</a></div>
+        </form>
     </div>
     </@content>
     <@footer/>
