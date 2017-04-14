@@ -24,7 +24,6 @@ package org.activityinfo.model.form;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -126,6 +125,9 @@ public class FormInstance {
         }
     }
 
+    public void setAll(Map<ResourceId, FieldValue> valueMap) {
+        fieldMap.putAll(valueMap);
+    }
 
     public FormInstance set(@Nonnull ResourceId fieldId, String value) {
         if(value == null) {
@@ -180,7 +182,7 @@ public class FormInstance {
      */
     public FieldValue get(ResourceId fieldId, FieldTypeClass typeClass) {
         FieldValue value = get(fieldId);
-        if(value.getTypeClass() == typeClass) {
+        if(value != null && value.getTypeClass() == typeClass) {
             return value;
         } else {
             return null;

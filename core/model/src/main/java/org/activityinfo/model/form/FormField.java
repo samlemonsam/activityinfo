@@ -83,6 +83,10 @@ public class FormField extends FormElement {
         return this;
     }
 
+    public boolean hasRelevanceCondition() {
+        return !Strings.isNullOrEmpty(relevanceConditionExpression);
+    }
+
     public String getRelevanceConditionExpression() {
         return relevanceConditionExpression;
     }

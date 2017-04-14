@@ -11,16 +11,12 @@ import org.activityinfo.ui.client.store.FormStore;
 public class InputPanel implements IsWidget {
 
     private final Observable<FormTree> formTree;
-    private FormStore formStore;
-    private ResourceId formId;
 
     private FieldPanel fieldPanel = null;
 
     private VerticalLayoutContainer container;
 
     public InputPanel(FormStore formStore, ResourceId formId) {
-        this.formStore = formStore;
-        this.formId = formId;
         this.formTree = formStore.getFormTree(formId);
         this.formTree.subscribe(this::onTreeChanged);
 

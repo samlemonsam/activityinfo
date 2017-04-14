@@ -1,123 +1,78 @@
 package org.activityinfo.ui.client.input.view;
 
-import com.google.common.base.Strings;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.cell.core.client.form.DateCell;
-import com.sencha.gxt.core.client.dom.XDOM;
+import com.sencha.gxt.core.client.dom.ScrollSupport;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
+import org.activityinfo.ui.client.input.view.field.FieldView;
+import org.activityinfo.ui.client.input.view.field.FieldWidget;
+import org.activityinfo.ui.client.input.view.field.FieldWidgetFactory;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FieldPanel extends Widget {
 
-    private final FormInputModel formModel;
+    private final FormInputViewModelBuilder viewModelBuilder;
+    private final VerticalLayoutContainer container;
 
-    private Map<String, FieldContext> cells = new HashMap<>();
+    private final List<FieldView> fieldViews = new ArrayList<>();
+
+    private FormInputModel inputModel;
+    private FormInputViewModel viewModel;
 
     public FieldPanel(FormTree formTree) {
-        setElement((Element) XDOM.create(renderForm(formTree)));
 
         InputResources.INSTANCE.style().ensureInjected();
-        formModel = new FormInputModel(formTree);
 
-        getElement().addClassName(InputResources.INSTANCE.style().form());
-        getElement().setInnerSafeHtml(renderForm(formTree));
+        this.viewModelBuilder = new FormInputViewModelBuilder(formTree);
 
-        Set<String> consumedEvents = new HashSet<>();
-        for (FieldContext fieldContext : cells.values()) {
-            consumedEvents.addAll(fieldContext.getCell().getConsumedEvents());
-        }
-        sinkEvents(this, consumedEvents);
-    }
+        container = new VerticalLayoutContainer();
+        container.setScrollMode(ScrollSupport.ScrollMode.AUTOY);
 
-    public native static void sinkEvents(Widget widget, Set<String> typeNames)/*-{
-        var c = @com.google.gwt.user.cellview.client.CellBasedWidgetImpl::get()();
-        c.@com.google.gwt.user.cellview.client.CellBasedWidgetImpl::sinkEvents(Lcom/google/gwt/user/client/ui/Widget;Ljava/util/Set;)(widget, typeNames);
-    }-*/;
+        for (FormTree.Node node : formTree.getRootFields()) {
+            FieldWidget fieldWidget = FieldWidgetFactory.create(node.getType(),
+                    input -> onInput(node.getFieldId(), input));
 
-
-    private SafeHtml renderForm(FormTree tree) {
-        SafeHtmlBuilder builder = new SafeHtmlBuilder();
-
-        builder.appendHtmlConstant("<div class=\"" + InputResources.INSTANCE.style().form() + "\">");
-
-        for (FormTree.Node node : tree.getRootFields()) {
-
-            builder.appendHtmlConstant("<div class=\"" + InputResources.INSTANCE.style().field() + "\">");
-
-            builder.appendHtmlConstant("<div class=\"" + InputResources.INSTANCE.style().fieldLabel() + "\">");
-            builder.appendEscaped(node.getField().getLabel());
-            builder.appendHtmlConstant("</div>");
-
-            builder.appendHtmlConstant("<div data-field-id=\"" + node.getFieldId().asString() + "\">");
-
-            Cell<?> cell = createCell(node);
-            if(cell != null) {
-                FieldContext context = new FieldContext(node, cell);
-                context.getCell().render(context, null, builder);
-                cells.put(node.getFieldId().asString(), context);
-            }
-            builder.appendHtmlConstant("</div>");
-
-
-            builder.appendHtmlConstant("</div>");
-        }
-
-        builder.appendHtmlConstant("</div>");
-
-        return builder.toSafeHtml();
-    }
-
-    private Cell<?> createCell(FormTree.Node node) {
-        if(node.getType() instanceof TextType) {
-            return new com.sencha.gxt.cell.core.client.form.TextInputCell();
-        } else if(node.getType() instanceof LocalDateType) {
-            DateCell dateCell = new DateCell();
-            dateCell.setHideTrigger(false);
-            return dateCell;
-        } else if(node.getType() instanceof EnumType) {
-
-        }
-        return null;
-    }
-
-    @Override
-    public void onBrowserEvent(Event event) {
-        final Element target = event.getEventTarget().cast();
-        Element cellParent = findCellParent(target);
-        if(cellParent != null) {
-            FieldContext context = cells.get(cellParent.getAttribute("data-field-id"));
-            if(context != null) {
-                if (context.getCell().getConsumedEvents().contains(event.getType())) {
-                    context.getCell().onBrowserEvent(context, cellParent, null, event, null);
-                }
+            if(fieldWidget != null) {
+                addField(node, fieldWidget);
             }
         }
+
+        onInput(new FormInputModel());
     }
 
-    private Element findCellParent(Element target) {
+    private void onInput(ResourceId fieldId, FieldInput input) {
+        onInput(inputModel.update(fieldId, input));
+    }
 
-        while(true) {
-            if (target == null) {
-                return null;
-            }
-            String fieldId = target.getAttribute("data-field-id");
-            if (!Strings.isNullOrEmpty(fieldId)) {
-                return target;
-            }
-            target = target.getParentElement();
+    private void onInput(FormInputModel inputModel) {
+        this.inputModel = inputModel;
+        this.viewModel = viewModelBuilder.build(inputModel);
+
+        // Update Field Views
+        for (FieldView fieldView : fieldViews) {
+            fieldView.getWidget().setRelevant(viewModel.isRelevant(fieldView.getFieldId()));
         }
     }
+
+    private void addField(FormTree.Node node, FieldWidget fieldWidget) {
+
+        Label fieldLabel = new Label(node.getField().getLabel());
+        fieldLabel.addStyleName(InputResources.INSTANCE.style().fieldLabel());
+
+        VerticalLayoutContainer.VerticalLayoutData fieldWidgetLayout = new VerticalLayoutContainer.VerticalLayoutData(1.0, -1);
+
+        container.add(fieldLabel);
+        container.add(fieldWidget, fieldWidgetLayout);
+        fieldViews.add(new FieldView(node.getFieldId(), fieldWidget));
+    }
+
+
 }

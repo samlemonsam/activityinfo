@@ -32,19 +32,32 @@ public class Survey implements TestForm {
 
     public static final ResourceId CHILDREN_FIELD_ID = ResourceId.valueOf("F6");
 
+    public static final ResourceId PREGNANT_FIELD_ID = ResourceId.valueOf("F6");
+
+    public static final ResourceId PRENATALE_CARE_FIELD_ID = ResourceId.valueOf("F7");
+
+
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
 
     public static final ResourceId FEMALE_ID = ResourceId.valueOf("G2");
-
 
     public static final ResourceId MARRIED_ID = ResourceId.valueOf("M1");
 
     public static final ResourceId SINGLE_ID = ResourceId.valueOf("M2");
 
+    public static final ResourceId PREGNANT_ID = ResourceId.valueOf("PY");
+
+    public static final ResourceId NOT_PREGANT_ID = ResourceId.valueOf("PN");
+
+
+    public static final ResourceId PRENATALE_ID = ResourceId.valueOf("PNY");
+
+    public static final ResourceId NO_PRENATALE_ID = ResourceId.valueOf("PNN");
+
     public static final int ROW_COUNT = 536;
 
     private final FormClass formClass;
-    private final FormField dobField;
+
 
     private List<FormInstance> records = null;
     private final FormField nameField;
@@ -52,6 +65,9 @@ public class Survey implements TestForm {
     private final FormField numChildrenField;
     private final FormField genderField;
     private final FormField marriedField;
+    private final FormField dobField;
+    private final FormField pregnantField;
+    private final FormField prenataleCareField;
 
     public Survey() {
         formClass = new FormClass(FORM_ID);
@@ -84,9 +100,25 @@ public class Survey implements TestForm {
 
         genderField = formClass.addField(GENDER_FIELD_ID)
                 .setLabel("Gender")
+                .setCode("GENDER")
                 .setType(new EnumType(Cardinality.SINGLE,
                         new EnumItem(FEMALE_ID, "Female"),
                         new EnumItem(MALE_ID, "Male")));
+
+        pregnantField = formClass.addField(PREGNANT_FIELD_ID)
+                .setLabel("Are you currently pregnant?")
+                .setCode("PREGNANT")
+                .setRelevanceConditionExpression("GENDER==G2")
+                .setType(new EnumType(Cardinality.SINGLE,
+                        new EnumItem(PREGNANT_ID, "Yes"),
+                        new EnumItem(NOT_PREGANT_ID, "No")));
+
+        prenataleCareField = formClass.addField(PRENATALE_CARE_FIELD_ID)
+                .setLabel("Have you received pre-natale care?")
+                .setRelevanceConditionExpression("PREGNANT==PY")
+                .setType(new EnumType(Cardinality.SINGLE,
+                        new EnumItem(PRENATALE_ID, "Yes"),
+                        new EnumItem(NO_PRENATALE_ID, "No")));
 
         marriedField = formClass.addField(MARRIED_FIELD_ID)
                 .setCode("MARRIED")

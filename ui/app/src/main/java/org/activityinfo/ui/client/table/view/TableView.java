@@ -56,13 +56,13 @@ public class TableView implements IsWidget {
         sidePaneLayout.setSplit(true);
         sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
-        SubFormPane subFormPane = new SubFormPane(viewModel);
-        BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
-        subFormPaneLayout.setSplit(true);
-        subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
+//        SubFormPane subFormPane = new SubFormPane(viewModel);
+//        BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
+//        subFormPaneLayout.setSplit(true);
+//        subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
         this.container.setEastWidget(sidePanel, sidePaneLayout);
-        this.container.setSouthWidget(subFormPane, subFormPaneLayout);
+//        this.container.setSouthWidget(subFormPane, subFormPaneLayout);
         this.container.setCenterWidget(center);
 
         this.panel = new ContentPanel() {
