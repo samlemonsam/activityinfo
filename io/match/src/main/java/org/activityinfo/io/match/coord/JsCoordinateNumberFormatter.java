@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.dispatch.type;
+package org.activityinfo.io.match.coord;
 
 /*
  * #%L
@@ -24,7 +24,6 @@ package org.activityinfo.ui.client.dispatch.type;
 
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateParser;
 
 public class JsCoordinateNumberFormatter implements CoordinateParser.NumberFormatter {
 

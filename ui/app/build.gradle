@@ -48,6 +48,7 @@ dependencies {
     gwt project(':store:query');
     gwt project(':i18n')
     gwt project(':clients:gwtrest')
+    gwt project(':io:match')
 
     gwt project(':ui:codemirror')
 

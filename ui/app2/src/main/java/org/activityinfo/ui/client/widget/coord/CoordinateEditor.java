@@ -26,11 +26,11 @@ import com.extjs.gxt.ui.client.widget.form.Field;
 import com.extjs.gxt.ui.client.widget.form.PropertyEditor;
 import com.extjs.gxt.ui.client.widget.form.Validator;
 import com.google.common.annotations.VisibleForTesting;
+import org.activityinfo.io.match.coord.CoordinateAxis;
+import org.activityinfo.io.match.coord.CoordinateFormatException;
+import org.activityinfo.io.match.coord.CoordinateParser;
+import org.activityinfo.io.match.coord.JsCoordinateNumberFormatter;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateAxis;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateFormatException;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateParser;
-import org.activityinfo.ui.client.dispatch.type.JsCoordinateNumberFormatter;
 
 public class CoordinateEditor implements PropertyEditor<Double>, Validator {
 

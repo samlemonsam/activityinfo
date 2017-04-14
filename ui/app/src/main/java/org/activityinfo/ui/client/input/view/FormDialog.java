@@ -19,6 +19,7 @@ public class FormDialog {
         dialog = new Dialog();
         dialog.setHeading("Form");
         dialog.setPixelSize(640, 480);
+        dialog.setModal(true);
         dialog.add(panel);
     }
 

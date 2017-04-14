@@ -31,6 +31,6 @@ public class TextWidget implements FieldWidget {
 
     @Override
     public void setRelevant(boolean relevant) {
-        field.setReadOnly(!relevant);
+        field.setEnabled(relevant);
     }
 }

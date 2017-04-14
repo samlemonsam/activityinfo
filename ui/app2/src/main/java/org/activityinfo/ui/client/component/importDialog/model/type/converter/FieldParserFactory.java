@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.component.importDialog.model.type.converter;
 
+import org.activityinfo.io.match.coord.CoordinateParser;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeType;

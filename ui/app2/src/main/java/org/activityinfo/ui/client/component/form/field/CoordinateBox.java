@@ -19,10 +19,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateAxis;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateFormatException;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateParser;
-import org.activityinfo.ui.client.dispatch.type.JsCoordinateNumberFormatter;
+import org.activityinfo.io.match.coord.CoordinateAxis;
+import org.activityinfo.io.match.coord.CoordinateFormatException;
+import org.activityinfo.io.match.coord.CoordinateParser;
+import org.activityinfo.io.match.coord.JsCoordinateNumberFormatter;
 import org.activityinfo.ui.client.widget.TextBox;
 
 /**

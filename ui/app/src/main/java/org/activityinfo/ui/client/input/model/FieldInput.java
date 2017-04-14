@@ -18,9 +18,13 @@ public class FieldInput {
     public static final FieldInput EMPTY = new FieldInput(State.EMPTY, null);
 
     public FieldInput(FieldValue value) {
-        assert value != null;
-        this.state = State.VALID;
-        this.fieldValue = value;
+        if(value == null) {
+            this.state = State.EMPTY;
+            this.fieldValue = null;
+        } else {
+            this.state = State.VALID;
+            this.fieldValue = value;
+        }
     }
 
     private FieldInput(State state, FieldValue fieldValue) {

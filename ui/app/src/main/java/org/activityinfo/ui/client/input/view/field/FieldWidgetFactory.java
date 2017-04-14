@@ -20,7 +20,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     private FieldUpdater updater;
 
-    public static FieldWidget create(FieldType type, FieldUpdater updater) {
+    public static FieldWidget createWidget(FieldType type, FieldUpdater updater) {
         return type.accept(new FieldWidgetFactory(updater));
     }
 
@@ -45,7 +45,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitNarrative(NarrativeType narrativeType) {
-        return null;
+        return new NarrativeWidget(updater);
     }
 
     @Override
@@ -55,12 +55,12 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitQuantity(QuantityType type) {
-        return null;
+        return new QuantityWidget(type, updater);
     }
 
     @Override
     public FieldWidget visitGeoPoint(GeoPointType geoPointType) {
-        return null;
+        return new GeoPointWidget(updater);
     }
 
     @Override
@@ -70,7 +70,11 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitEnum(EnumType enumType) {
-        return new EnumWidget(enumType, updater);
+        if(enumType.getCardinality() == Cardinality.SINGLE) {
+            return new RadioGroupWidget(enumType, updater);
+        } else {
+            return new MultipleSelectWidget(enumType, updater);
+        }
     }
 
     @Override
@@ -85,7 +89,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitLocalDate(LocalDateType localDateType) {
-        return null;
+        return new LocalDateWidget(updater);
     }
 
     @Override

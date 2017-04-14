@@ -26,9 +26,9 @@ import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.model.type.geo.Extents;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateAxis;
 
 public class CoordinateFields {
     private CoordinateField latitudeField;

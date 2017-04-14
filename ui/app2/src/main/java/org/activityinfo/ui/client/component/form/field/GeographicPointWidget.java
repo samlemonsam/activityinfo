@@ -25,10 +25,10 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateAxis;
 
 /**
  * @author yuriyz on 1/31/14.

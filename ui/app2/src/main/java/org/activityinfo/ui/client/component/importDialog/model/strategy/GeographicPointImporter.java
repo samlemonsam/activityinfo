@@ -1,13 +1,13 @@
 package org.activityinfo.ui.client.component.importDialog.model.strategy;
 
+import org.activityinfo.io.match.coord.CoordinateAxis;
+import org.activityinfo.io.match.coord.CoordinateFormatException;
+import org.activityinfo.io.match.coord.CoordinateParser;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.importDialog.model.source.SourceRow;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateAxis;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateFormatException;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateParser;
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidationResult;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 

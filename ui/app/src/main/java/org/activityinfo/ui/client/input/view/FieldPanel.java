@@ -1,26 +1,27 @@
 package org.activityinfo.ui.client.input.view;
 
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.dom.ScrollSupport;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.input.view.field.FieldView;
 import org.activityinfo.ui.client.input.view.field.FieldWidget;
-import org.activityinfo.ui.client.input.view.field.FieldWidgetFactory;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FieldPanel extends Widget {
+import static org.activityinfo.ui.client.input.view.field.FieldWidgetFactory.createWidget;
+
+public class FieldPanel implements IsWidget {
 
     private final FormInputViewModelBuilder viewModelBuilder;
-    private final VerticalLayoutContainer container;
+    private final FlowPanel panel;
 
     private final List<FieldView> fieldViews = new ArrayList<>();
 
@@ -33,12 +34,11 @@ public class FieldPanel extends Widget {
 
         this.viewModelBuilder = new FormInputViewModelBuilder(formTree);
 
-        container = new VerticalLayoutContainer();
-        container.setScrollMode(ScrollSupport.ScrollMode.AUTOY);
+        panel = new FlowPanel();
+        panel.addStyleName(InputResources.INSTANCE.style().form());
 
         for (FormTree.Node node : formTree.getRootFields()) {
-            FieldWidget fieldWidget = FieldWidgetFactory.create(node.getType(),
-                    input -> onInput(node.getFieldId(), input));
+            FieldWidget fieldWidget = createWidget(node.getType(), input -> onInput(node.getFieldId(), input));
 
             if(fieldWidget != null) {
                 addField(node, fieldWidget);
@@ -67,12 +67,18 @@ public class FieldPanel extends Widget {
         Label fieldLabel = new Label(node.getField().getLabel());
         fieldLabel.addStyleName(InputResources.INSTANCE.style().fieldLabel());
 
-        VerticalLayoutContainer.VerticalLayoutData fieldWidgetLayout = new VerticalLayoutContainer.VerticalLayoutData(1.0, -1);
+        FlowPanel fieldPanel = new FlowPanel();
+        fieldPanel.setStyleName(InputResources.INSTANCE.style().field());
+        fieldPanel.add(fieldLabel);
+        fieldPanel.add(fieldWidget);
+        panel.add(fieldPanel);
 
-        container.add(fieldLabel);
-        container.add(fieldWidget, fieldWidgetLayout);
         fieldViews.add(new FieldView(node.getFieldId(), fieldWidget));
     }
 
 
+    @Override
+    public Widget asWidget() {
+        return panel;
+    }
 }

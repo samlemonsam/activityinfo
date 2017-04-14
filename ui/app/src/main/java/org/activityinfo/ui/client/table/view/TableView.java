@@ -2,7 +2,6 @@ package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
@@ -51,17 +50,17 @@ public class TableView implements IsWidget {
         this.container = new BorderLayoutContainer();
 
 
-        SidePanel sidePanel = new SidePanel(viewModel);
-        BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
-        sidePaneLayout.setSplit(true);
-        sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
+//        SidePanel sidePanel = new SidePanel(viewModel);
+//        BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
+//        sidePaneLayout.setSplit(true);
+//        sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
 //        SubFormPane subFormPane = new SubFormPane(viewModel);
 //        BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
 //        subFormPaneLayout.setSplit(true);
 //        subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
-        this.container.setEastWidget(sidePanel, sidePaneLayout);
+//        this.container.setEastWidget(sidePanel, sidePaneLayout);
 //        this.container.setSouthWidget(subFormPane, subFormPaneLayout);
         this.container.setCenterWidget(center);
 

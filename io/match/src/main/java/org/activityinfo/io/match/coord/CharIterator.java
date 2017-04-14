@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.importDialog.model.type.converter;
+package org.activityinfo.io.match.coord;
 
 class CharIterator  {
 
