@@ -1,18 +1,15 @@
 package org.activityinfo.store.mysql.mapping;
 
 import com.google.common.collect.Lists;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.store.mysql.Join;
 import org.activityinfo.store.mysql.metadata.Activity;
@@ -85,12 +82,6 @@ public class ActivityTableMappingBuilder {
 
         sortFormClassFields(mapping.formClass, activity.getFieldsOrder());
 
-
-        if(activity.getReportingFrequency() == Activity.REPORT_MONTHLY) {
-            mapping.addMonthlySubForm(activity);
-        }
-
-
         return mapping;
     }
 
@@ -138,8 +129,6 @@ public class ActivityTableMappingBuilder {
         mapping.formClass = new FormClass(mapping.classId);
         mapping.formClass.setLabel(activity.getName() + " Monthly Reports");
         mapping.formClass.setDatabaseId(activity.getDatabaseId());
-        mapping.formClass.setSubFormKind(SubFormKind.MONTHLY);
-        mapping.formClass.setParentFormId(activity.getSiteFormClassId());
         mapping.primaryKeyMapping = new PrimaryKeyMapping(CuidAdapter.MONTHLY_REPORT, "reportingPeriodId");
         
         mapping.addSiteField();
@@ -282,19 +271,6 @@ public class ActivityTableMappingBuilder {
             }
         }));
     }
-
-
-    private void addMonthlySubForm(Activity activity) {
-
-        FormField monthlyField = new FormField(CuidAdapter.field(activity.getSiteFormClassId(),
-                CuidAdapter.MONTHLY_SUBFORM_FIELD));
-
-        monthlyField.setLabel(I18N.CONSTANTS.monthlyReports());
-        monthlyField.setType(new SubFormReferenceType(activity.getLeafFormClassId()));
-
-        formClass.addElement(monthlyField);
-    }
-
 
     public TableMapping build() {
         return new TableMapping("site", baseFromClause, baseFilter, primaryKeyMapping, mappings, formClass,
