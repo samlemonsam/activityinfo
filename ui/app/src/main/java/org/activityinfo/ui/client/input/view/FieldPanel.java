@@ -1,9 +1,8 @@
 package org.activityinfo.ui.client.input.view;
 
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.*;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -67,13 +66,21 @@ public class FieldPanel implements IsWidget {
         Label fieldLabel = new Label(node.getField().getLabel());
         fieldLabel.addStyleName(InputResources.INSTANCE.style().fieldLabel());
 
+        HTML missingMessage = missingMessage();
+        missingMessage.setVisible(false);
+
         FlowPanel fieldPanel = new FlowPanel();
         fieldPanel.setStyleName(InputResources.INSTANCE.style().field());
         fieldPanel.add(fieldLabel);
         fieldPanel.add(fieldWidget);
+        fieldPanel.add(missingMessage);
         panel.add(fieldPanel);
 
-        fieldViews.add(new FieldView(node.getFieldId(), fieldWidget));
+        fieldViews.add(new FieldView(node.getFieldId(), fieldWidget, missingMessage));
+    }
+
+    private HTML missingMessage() {
+        return new HTML(SafeHtmlUtils.fromString(I18N.CONSTANTS.requiredFieldMessage()));
     }
 
 
