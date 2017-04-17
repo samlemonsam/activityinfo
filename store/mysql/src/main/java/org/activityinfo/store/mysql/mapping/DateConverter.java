@@ -22,7 +22,11 @@ public class DateConverter implements FieldValueConverter {
     
     @Override
     public FieldValue toFieldValue(ResultSet rs, int index) throws SQLException {
-        return new LocalDate(rs.getDate(index));
+        java.sql.Date date = rs.getDate(index);
+        if(date == null) {
+            return null;
+        }
+        return new LocalDate(date);
     }
 
     @Override
