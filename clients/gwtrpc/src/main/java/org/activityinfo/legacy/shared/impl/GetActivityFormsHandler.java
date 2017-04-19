@@ -66,7 +66,7 @@ public class GetActivityFormsHandler implements CommandHandlerAsync<GetActivityF
 
                                 return new ActivityFormResults(forms);
                             }
-                        });
+                        }).then(callback);
                     }
                 });
             }

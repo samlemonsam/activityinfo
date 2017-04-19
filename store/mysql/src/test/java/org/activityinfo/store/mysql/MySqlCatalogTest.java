@@ -16,7 +16,6 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
@@ -455,24 +454,5 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("toDate"), hasValues("2012-01-01"));
         assertThat(column(targetValue12451), hasValues(9999));
         assertThat(column("partner.name"), hasValues("NRC"));
-    }
-
-    @Test
-    public void monthlySubForm() {
-
-        ResourceId parentFormId = CuidAdapter.activityFormClass(3);
-        FormStorage form = catalog.getForm(parentFormId).get();
-        FormField field = form.getFormClass().getField(CuidAdapter.field(parentFormId, CuidAdapter.MONTHLY_SUBFORM_FIELD));
-        SubFormReferenceType subFormType = (SubFormReferenceType) field.getType();
-
-        ResourceId subFormId = subFormType.getClassId();
-        FormStorage subForm = catalog.getForm(subFormId).get();
-        FormRecord subRecord = subForm.get(CuidAdapter.cuid(CuidAdapter.MONTHLY_REPORT, 91)).get();
-
-        // Make sure we can build a FormTree without recursive shenanigans
-        FormTreeBuilder formTreeBuilder = new FormTreeBuilder(catalog);
-        FormTree formTree = formTreeBuilder.queryTree(parentFormId);
-
-//        assertThat(subRecord.getParentRecordId(), equalTo(CuidAdapter.cuid(SITE_DOMAIN, 9).asString()));
     }
 }
