@@ -224,6 +224,13 @@ public class FormFieldWidgetFactory {
             }
         }
 
+        // Then fall back to a serial number...
+        for (FormField field : formClass.getFields()) {
+            if(field.getType() instanceof SerialNumberType) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
         // If no such field exists, pick the first text field
         for (FormField field : formClass.getFields()) {
             if(field.getType() instanceof TextType) {
