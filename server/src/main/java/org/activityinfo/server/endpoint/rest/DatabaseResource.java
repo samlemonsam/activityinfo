@@ -15,6 +15,7 @@ import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.spi.FormCatalog;
 import org.codehaus.jackson.map.annotate.JsonView;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -24,11 +25,13 @@ import javax.ws.rs.core.UriInfo;
 public class DatabaseResource {
 
     private Provider<FormCatalog> catalog;
+    private Provider<EntityManager> entityManager;
     private final DispatcherSync dispatcher;
     private final int databaseId;
 
-    public DatabaseResource(Provider<FormCatalog> catalog, DispatcherSync dispatcher, int databaseId) {
+    public DatabaseResource(Provider<FormCatalog> catalog, Provider<EntityManager> entityManager, DispatcherSync dispatcher, int databaseId) {
         this.catalog = catalog;
+        this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.databaseId = databaseId;
     }
@@ -77,6 +80,18 @@ public class DatabaseResource {
         return writeCsv("schema-v3_" + databaseId + ".csv", writer.toString());
     }
 
+    @GET
+    @Path("audit-log.csv")
+    public Response getAuditLog() {
+        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
+
+        AuditLogWriter writer = new AuditLogWriter(entityManager.get(), db);
+        for (ActivityDTO activityDTO : db.getActivities()) {
+            writer.writeForm(catalog.get(), activityDTO.getFormClassId());
+        }
+
+        return writeCsv("audit-log_" + databaseId + ".csv", writer.toString());
+    }
 
     private Response writeCsv(String filename, String text) {
         return Response.ok()

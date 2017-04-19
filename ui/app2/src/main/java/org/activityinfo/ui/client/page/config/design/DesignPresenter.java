@@ -84,6 +84,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
 
 
 
+
     @ImplementedBy(DesignView.class)
     public interface View extends TreeGridView<DesignPresenter, ModelData> {
         public void init(DesignPresenter presenter, UserDatabaseDTO db, TreeStore store);
@@ -267,6 +268,11 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     public void exportFormAsXlsForm() {
         Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
     }
+
+    public void exportAuditLog() {
+        Window.open("/resources/database/" + db.getId() + "/audit-log.csv", "_blank", null);
+    }
+
 
     @Override
     public void onUIAction(String actionId) {
