@@ -32,9 +32,9 @@ public class Survey implements TestForm {
 
     public static final ResourceId CHILDREN_FIELD_ID = ResourceId.valueOf("F6");
 
-    public static final ResourceId PREGNANT_FIELD_ID = ResourceId.valueOf("F6");
+    public static final ResourceId PREGNANT_FIELD_ID = ResourceId.valueOf("F7");
 
-    public static final ResourceId PRENATALE_CARE_FIELD_ID = ResourceId.valueOf("F7");
+    public static final ResourceId PRENATALE_CARE_FIELD_ID = ResourceId.valueOf("F8");
 
 
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
