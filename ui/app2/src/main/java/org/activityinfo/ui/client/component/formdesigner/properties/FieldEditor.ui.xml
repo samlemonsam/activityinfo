@@ -42,6 +42,9 @@
     <f:FormGroup ui:field="visibleGroup" label="{i18n.visible}" columnLabelWidth="4" columnWidgetWidth="2">
       <a:CheckBox ui:field="visible"/>
     </f:FormGroup>
+    <f:FormGroup ui:field="keyGroup" label="{i18n.keyField}" columnLabelWidth="4" columnWidgetWidth="2">
+      <a:CheckBox ui:field="key"/>
+    </f:FormGroup>
 
     <!-- Relevance -->
     <g:HTMLPanel addStyleNames="form-group" ui:field="relevanceGroup" width="100%">

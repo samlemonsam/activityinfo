@@ -1696,5 +1696,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Presentation")
     String presentation();
+
+    @DefaultStringValue("Key")
+    String keyField();
 }
 

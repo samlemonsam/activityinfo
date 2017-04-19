@@ -33,6 +33,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
@@ -80,6 +84,10 @@ public class FieldEditor implements IsWidget {
     @UiField
     FormGroup visibleGroup;
     @UiField
+    CheckBox key;
+    @UiField
+    FormGroup keyGroup;
+    @UiField
     RadioButton relevanceEnabled;
     @UiField
     RadioButton relevanceEnabledIf;
@@ -101,6 +109,7 @@ public class FieldEditor implements IsWidget {
     SerialNumberTypeEditor serialNumberTypeEditor;
     @UiField
     EnumTypeEditor enumTypeEditor;
+
 
 
     private FormDesigner formDesigner;
@@ -152,11 +161,13 @@ public class FieldEditor implements IsWidget {
         description.setValue(Strings.nullToEmpty(formField.getDescription()));
         required.setValue(formField.isRequired());
         visible.setValue(formField.isVisible());
+        key.setVisible(formField.isKey());
         code.setValue(Strings.nullToEmpty(formField.getCode()));
 
         required.setEnabled(!isPartner);
         visible.setEnabled(!isPartner);
         relevanceGroup.setVisible(!isPartner);
+        keyGroup.setVisible(isElligbleToBeKey(formField));
 
         setRelevanceState(formField, true);
         validateCode(fieldWidgetContainer);
@@ -167,6 +178,20 @@ public class FieldEditor implements IsWidget {
         textTypeEditor.show(fieldWidgetContainer);
         serialNumberTypeEditor.show(fieldWidgetContainer);
         enumTypeEditor.show(fieldWidgetContainer);
+    }
+
+    private boolean isElligbleToBeKey(FormField formField) {
+        FieldType type = formField.getType();
+        if(type instanceof TextType) {
+            return true;
+        }
+        if(type instanceof ReferenceType) {
+            ReferenceType referenceType = (ReferenceType) type;
+            if(referenceType.getCardinality() == Cardinality.SINGLE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
