@@ -215,6 +215,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
                 targetField.setRequired(sourceField.isRequired());
                 targetField.setSuperProperties(sourceField.getSuperProperties());
                 targetField.setVisible(sourceField.isVisible());
+                targetField.setKey(sourceField.isKey());
 
                 targetContainer.addElement(targetField);
                 sourceIdToTargetFormElementMapping.put(sourceField, targetField);
