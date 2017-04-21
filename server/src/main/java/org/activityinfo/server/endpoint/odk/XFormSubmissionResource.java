@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
+import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -216,6 +217,13 @@ public class XFormSubmissionResource {
 
     private VoidResult createLocation(int id, int locationTypeId, String name, Optional<GeoPoint> geoPoint) {
         Preconditions.checkNotNull(name, geoPoint);
+
+        // Trim location names to maximum length permitted by
+        // classical MySQL table.
+        if(name.length() > LocationDTO.MAX_NAME_LENGTH) {
+            name = name.substring(0, LocationDTO.MAX_NAME_LENGTH);
+        }
+
         Map<String, Object> properties = Maps.newHashMap();
 
         properties.put("id", id);
