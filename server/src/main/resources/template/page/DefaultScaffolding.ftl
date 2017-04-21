@@ -52,9 +52,7 @@
 </header>
 
 <main role="main" id="main">
-    <div class="row row--small">
     ${body}
-    </div>
 </main>
 
 

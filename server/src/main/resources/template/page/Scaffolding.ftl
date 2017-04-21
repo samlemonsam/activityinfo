@@ -21,11 +21,7 @@
 -->
 
 <#macro content>
-<div class="container">
-
 <#nested>
-
-</div>
 </#macro>
 
 <#macro scripts>

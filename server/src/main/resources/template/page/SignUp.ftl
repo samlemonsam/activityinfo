@@ -26,7 +26,9 @@
 
     <@content>
 
-        <div class="row row--small">
+        <div class="row row--padded">
+
+            <h1>Signup</h1>
 
             <#if genericError == true || formError == true>
                 <div class="alert alert--error">
@@ -40,132 +42,73 @@
                 </div>
 
             <#else>
-                <form action="" method="post" id="signUpForm">
 
-                    <div class="control-group" id="nameGroup">
-                        <label class="control-label" for="nameInput">${label.name}:</label>
+                <div class="grid grid--spaced">
 
-                        <div class="controls">
-                            <input type="text" name="name" id="nameInput" value="${name}">
-                            <span class="help-inline hide" id="nameHelp">${label.pleaseEnterYourFullName}</span>
-                        </div>
-                    </div>
+                    <form action="" method="post" id="signUpForm">
 
-                    <div class="control-group">
-                        <label class="control-label" for="organizationInput">${label.organization}:</label>
+                        <label>
+                            Name
+                            <input type="text" name="name" required>
+                        </label>
 
-                        <div class="controls">
-                            <input type="text" name="organization" id="organizationInput" value="${organization}">
-                        </div>
-                    </div>
 
-                    <div class="control-group">
-                        <label class="control-label" for="jobtitleInput">${label.jobtitle}:</label>
+                        <label>
+                            E-mail address
+                            <input type="email" name="email" required>
+                        </label>
 
-                        <div class="controls">
-                            <input type="text" name="jobtitle" id="jobtitleInput" value="${jobtitle}">
-                        </div>
-                    </div>
+                        <label>
+                            Organization
+                            <input type="text" name="organization" required>
+                        </label>
 
-                    <div class="control-group" id="emailGroup">
-                        <label class="control-label" for="emailInput">${label.emailAddress}:</label>
 
-                        <div class="controls">
-                            <input type="text" name="email" id="emailInput" value="${email}">
-                            <span class="help-inline hide"
-                                  id="emailHelp">${label.pleaseEnterAValidEmailAddress}</span>
-                        </div>
-                    </div>
+                        <label>
+                            Job Title
+                            <input type="text" name="jobtitle" required>
+                        </label>
 
-                    <div class="control-group">
-                        <label class="control-label" for="localeInput">${label.preferredLanguage}:</label>
-
-                        <div class="controls">
+                        <label>
+                            Prefered language
                             <select name="locale" id="localeInput">
-                            <#list availableLocales as locale>
-                                <option value="${locale.code}">${locale.localizedName}</option>
-                            </#list>
+                                <#list availableLocales as locale>
+                                    <option value="${locale.code}">${locale.localizedName}</option>
+                                </#list>
                             </select>
-                        </div>
-                    </div>
+                        </label>
 
-                    <div class="control-group">
-                        <label class="control-label">&nbsp;</label>
+                        <button type="submit">Sign up</button>
+                    </form>
 
-                        <div class="controls">
-                            <button type="submit" class="btn btn-primary btn-large">${label.signUpButton}</button>
-                        </div>
+                    <div>
+                        <section class="learning-center" id="howto">
+
+                            <div class="phototeaser">
+                                <img src="/about/assets/images/waterpump.jpg" alt="">
+
+                                <div>
+                                    <h2>Want to learn more?</h2>
+
+                                    <ul class="list--arrow">
+                                        <li><a href="/about/faq.html">Frequently Asked Questions</a></li>
+                                        <li><a href="/about/webinar.html">Register for our next webinar</a></li>
+                                    </ul>
+
+                                    <a href="/about/assets/subscribe.html" class="cta-link cta-link--secondary">Purchase a support package</a>
+                                </div>
+                            </div>
+                        </section>
                     </div>
-                </form>
+                </div>
             </#if>
         </div>
-        <div class="span6">
-
-
-            <div class="well">
-                <h4>Free for teams of ten or less</h4>
-
-                <p>Please feel free to use ActivityInfo.org for
-                    small field teams. If you plan to adopt the system
-                    across your organization, we'll ask to you to make
-                    an annual contribution to the system's running costs.
-
-                <p>
-
-                <p><a href="mailto:support@activityinfo.org">Contact us</a>
-                    for more information.</p>
-
-                <p>In any case, you're welcome to evaluate the system without
-                    restriction as long as needed!</p>
-
-            </div>
-            <div class="alert">
-                <h4>Looking for your Cluster's database?</h4>
-
-                <p>Only your cluster lead can grant you access
-                    to the cluster's database. Please contact your local
-                    focal point and request access.</p>
-
-            </div>
-        </div>
-    </@content>
+       </@content>
 
     <@footer/>
 
     <@scripts>
     <script type="text/javascript">
-        var validateName = function () {
-            var name = $('#nameInput').val();
-            var valid = name && name.length <= 50;
-
-            $('#nameGroup').toggleClass('error', !valid);
-            $('#nameHelp').toggleClass('hide', valid);
-            return valid;
-        };
-
-        var validateEmail = function () {
-            var email = $('#emailInput').val();
-            var valid = !!email;
-            if (valid) {
-                var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-                valid = regex.test(email);
-            }
-            $('#emailGroup').toggleClass('error', !valid);
-            $('#emailHelp').toggleClass('hide', valid);
-            return valid;
-        };
-
-        $("#nameInput").change(validateName);
-        $("#emailInput").change(validateEmail);
-        $("#signUpForm").submit(function () {
-            var valid = validateName() && validateEmail();
-            return !!valid;
-        });
-
-        $(document).ready(function () {
-            $("#localeInput").val("${locale}");
-            $("#nameInput").focus();
-        });
     </script>
     </@scripts>
 </@scaffolding>

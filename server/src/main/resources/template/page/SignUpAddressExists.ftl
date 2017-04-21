@@ -25,7 +25,7 @@
     <@content>
     <div class="row row--small">
 
-        <h3>${label.signUpAddressExistsHeader}</h3>
+        <h1>${label.signUpAddressExistsHeader}</h1>
 
         <p>${label.signUpAddressExistsDetail1}</p>
 
