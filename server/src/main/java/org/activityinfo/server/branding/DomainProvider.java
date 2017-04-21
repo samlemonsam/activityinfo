@@ -24,6 +24,7 @@ package org.activityinfo.server.branding;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.Domain;
 
 import javax.persistence.EntityManager;
@@ -60,13 +61,20 @@ public class DomainProvider implements Provider<Domain> {
         if (result == null) {
             result = new Domain();
             result.setTitle("ActivityInfo");
-            result.setHost(host);
             result.setSignUpAllowed(true);
+
         } else {
             entityManager.get().detach(result);
         }
+
         result.setHost(getExternalHostName());
-        result.setPort(request.get().getServerPort());
+
+        // Force SSL over 443 unless we are in development
+        if(DeploymentEnvironment.isAppEngineDevelopment()) {
+            result.setPort(request.get().getServerPort());
+        } else {
+            result.setPort(443);
+        }
         return result;
     }
 
