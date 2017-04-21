@@ -23,39 +23,36 @@
 <@scaffolding title="${label.signUpAddressExistsHeader}">
 
     <@content>
-    <div class="row">
-        <div class="span12">
+    <div class="row row--small">
 
-            <h3>${label.signUpAddressExistsHeader}</h3>
+        <h3>${label.signUpAddressExistsHeader}</h3>
 
-            <p>${label.signUpAddressExistsDetail1}</p>
+        <p>${label.signUpAddressExistsDetail1}</p>
 
-            <p>${label.signUpAddressExistsDetail2}</p>
+        <p>${label.signUpAddressExistsDetail2}</p>
 
-            <#if loginError != true && emailSent != true & emailError != true>
-                <form class="form-inline" action="signUpAddressExists" method="POST">
-                    <input type="hidden" name="email" value="${email}"/>
-                    <button type="submit" class="btn btn-primary">${label.signUpAddressExistsSendEmail}</button>
-                </form>
-            </#if>
+        <#if loginError != true && emailSent != true & emailError != true>
+            <form class="form-inline" action="signUpAddressExists" method="POST">
+                <input type="hidden" name="email" value="${email}"/>
+                <button type="submit" class="btn btn-primary">${label.signUpAddressExistsSendEmail}</button>
+            </form>
+        </#if>
 
-            <#if loginError == true>
-                <div class="alert alert-error">
-                    <a class="close" data-dismiss="alert" href="#">&times;</a>
-                ${label.loginError}
-                </div>
-            </#if>
-            <#if emailSent == true>
-                <div class="alert alert-success">
-                ${label.emailSent}
-                </div>
-            </#if>
-            <#if emailError == true>
-                <div class="alert alert-error">
-                ${label.emailErrorAlert}
-                </div>
-            </#if>
-        </div>
+        <#if loginError == true>
+            <div class="alert alert--error">
+            ${label.loginError}
+            </div>
+        </#if>
+        <#if emailSent == true>
+            <div class="alert alert--success">
+            ${label.emailSent}
+            </div>
+        </#if>
+        <#if emailError == true>
+            <div class="alert alert--error">
+            ${label.emailErrorAlert}
+            </div>
+        </#if>
     </div>
     </@content>
     <@footer/>

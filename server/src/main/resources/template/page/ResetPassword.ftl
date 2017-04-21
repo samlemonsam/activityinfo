@@ -23,7 +23,7 @@
 <@scaffolding title="${label.resetYourPassword}">
 
     <@content>
-    <div class="row row--padded">
+    <div class="row row--small">
 
         <h1>${label.resetYourPassword}</h1>
 
@@ -38,17 +38,17 @@
         </form>
 
         <#if loginError == true>
-            <div class="alert alert-error">
+            <div class="alert alert--error">
             ${label.loginError}
             </div>
         </#if>
         <#if emailSent == true>
-            <div class="alert alert-success">
+            <div class="alert alert--success">
             ${label.emailSent}
             </div>
         </#if>
         <#if emailError == true>
-            <div class="alert alert-error">
+            <div class="alert alert--error">
             ${label.emailErrorAlert}
             </div>
         </#if>

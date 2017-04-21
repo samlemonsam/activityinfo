@@ -23,7 +23,7 @@
 <@scaffolding title="${label.login}">
 
     <@content>
-    <div class="row row--padded">
+    <div class="row row--small">
         <h1>Login</h1>
 
         <form action="/login" method="POST">
@@ -39,13 +39,13 @@
 
             <#if loginError>
             <div>
-            ${label.incorrectLogin}
+            <p class="alert alert--error">${label.incorrectLogin}</p>
             </div>
             </#if>
 
             <button type="submit">${label.login}</button>
 
-            <div class="login-problem"><a href="loginProblem">${label.forgottenYourPassword}</a></div>
+            <div class="login-problem"><a href="loginProblem">Forgotten your password?</a></div>
         </form>
     </div>
     </@content>

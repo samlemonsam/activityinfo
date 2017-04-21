@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
 
-  <!-- IMPORTANT -->
-  <!-- This descriptor is used ONLY during development. -->
-  <!-- We use maven filtering to set the application and version values -->
-  <!-- but the AppEngine plugin doesn't like them so we need this extra copy -->
-  <!-- with literal values -->
-
-
   <application>ai-dev</application>
   <version>new-website</version>
+  <module>app</module>
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     <property name="user.name" value="ActivityInfo"/>
@@ -32,11 +26,8 @@
     <include path="/ActivityInfo/**.swf" expiration="365d"/>
     <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
     <include path="/**.nocache.html" expiration="0s"/>
-    <include path="/Login/**.css" expiration="365d"/>
-    <include path="/Login/**.cache.html" expiration="365d"/>
     <include path="/static/**.png" expiration="365d"/>
     <include path="/error.html"/>
-    <include path="/app.html"/> 
   </static-files>
  
   <inbound-services>

@@ -26,121 +26,108 @@
 
     <@content>
 
-        <#if !domain.signUpAllowed>
-        <p>Please contact your local focal point to connect to this
-            ActivityInfo database.</p>
-        <#else>
-        <div class="row">
-            <div class="span12">
-                <h3>${label.signUpTitle}</h3>
+        <div class="row row--small">
+
+            <#if genericError == true || formError == true>
+                <div class="alert alert--error">
+                ${label.signUpGenericError}
+                </div>
+            </#if>
+
+            <#if confirmationEmailSent == true>
+                <div class="alert alert--success">
+                ${label.signUpEmailSent}
+                </div>
+
+            <#else>
+                <form action="" method="post" id="signUpForm">
+
+                    <div class="control-group" id="nameGroup">
+                        <label class="control-label" for="nameInput">${label.name}:</label>
+
+                        <div class="controls">
+                            <input type="text" name="name" id="nameInput" value="${name}">
+                            <span class="help-inline hide" id="nameHelp">${label.pleaseEnterYourFullName}</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="organizationInput">${label.organization}:</label>
+
+                        <div class="controls">
+                            <input type="text" name="organization" id="organizationInput" value="${organization}">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="jobtitleInput">${label.jobtitle}:</label>
+
+                        <div class="controls">
+                            <input type="text" name="jobtitle" id="jobtitleInput" value="${jobtitle}">
+                        </div>
+                    </div>
+
+                    <div class="control-group" id="emailGroup">
+                        <label class="control-label" for="emailInput">${label.emailAddress}:</label>
+
+                        <div class="controls">
+                            <input type="text" name="email" id="emailInput" value="${email}">
+                            <span class="help-inline hide"
+                                  id="emailHelp">${label.pleaseEnterAValidEmailAddress}</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="localeInput">${label.preferredLanguage}:</label>
+
+                        <div class="controls">
+                            <select name="locale" id="localeInput">
+                            <#list availableLocales as locale>
+                                <option value="${locale.code}">${locale.localizedName}</option>
+                            </#list>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">&nbsp;</label>
+
+                        <div class="controls">
+                            <button type="submit" class="btn btn-primary btn-large">${label.signUpButton}</button>
+                        </div>
+                    </div>
+                </form>
+            </#if>
+        </div>
+        <div class="span6">
+
+
+            <div class="well">
+                <h4>Free for teams of ten or less</h4>
+
+                <p>Please feel free to use ActivityInfo.org for
+                    small field teams. If you plan to adopt the system
+                    across your organization, we'll ask to you to make
+                    an annual contribution to the system's running costs.
+
+                <p>
+
+                <p><a href="mailto:support@activityinfo.org">Contact us</a>
+                    for more information.</p>
+
+                <p>In any case, you're welcome to evaluate the system without
+                    restriction as long as needed!</p>
+
+            </div>
+            <div class="alert">
+                <h4>Looking for your Cluster's database?</h4>
+
+                <p>Only your cluster lead can grant you access
+                    to the cluster's database. Please contact your local
+                    focal point and request access.</p>
+
             </div>
         </div>
-        <div class="row">
-            <div class="span6">
-
-                <#if genericError == true || formError == true>
-                    <div class="alert alert-error">
-                    ${label.signUpGenericError}
-                    </div>
-                </#if>
-
-                <#if confirmationEmailSent == true>
-                    <div class="alert alert-success">
-                    ${label.signUpEmailSent}
-                    </div>
-
-                <#else>
-
-                    <form action="" method="post" id="signUpForm">
-
-                        <div class="control-group" id="nameGroup">
-                            <label class="control-label" for="nameInput">${label.name}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="name" id="nameInput" value="${name}">
-                                <span class="help-inline hide" id="nameHelp">${label.pleaseEnterYourFullName}</span>
-                            </div>
-                        </div>
-
-                        <div class="control-group">
-                            <label class="control-label" for="organizationInput">${label.organization}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="organization" id="organizationInput" value="${organization}">
-                            </div>
-                        </div>
-
-                        <div class="control-group">
-                            <label class="control-label" for="jobtitleInput">${label.jobtitle}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="jobtitle" id="jobtitleInput" value="${jobtitle}">
-                            </div>
-                        </div>
-
-                        <div class="control-group" id="emailGroup">
-                            <label class="control-label" for="emailInput">${label.emailAddress}:</label>
-
-                            <div class="controls">
-                                <input type="text" name="email" id="emailInput" value="${email}">
-                                <span class="help-inline hide"
-                                      id="emailHelp">${label.pleaseEnterAValidEmailAddress}</span>
-                            </div>
-                        </div>
-
-                        <div class="control-group">
-                            <label class="control-label" for="localeInput">${label.preferredLanguage}:</label>
-
-                            <div class="controls">
-                                <select name="locale" id="localeInput">
-                                <#list availableLocales as locale>
-                                    <option value="${locale.code}">${locale.localizedName}</option>
-                                </#list>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="control-group">
-                            <label class="control-label">&nbsp;</label>
-
-                            <div class="controls">
-                                <button type="submit" class="btn btn-primary btn-large">${label.signUpButton}</button>
-                            </div>
-                        </div>
-                    </form>
-                </#if>
-            </div>
-            <div class="span6">
-
-
-                <div class="well">
-                    <h4>Free for teams of ten or less</h4>
-
-                    <p>Please feel free to use ActivityInfo.org for
-                        small field teams. If you plan to adopt the system
-                        across your organization, we'll ask to you to make
-                        an annual contribution to the system's running costs.
-
-                    <p>
-
-                    <p><a href="mailto:support@activityinfo.org">Contact us</a>
-                        for more information.</p>
-
-                    <p>In any case, you're welcome to evaluate the system without
-                        restriction as long as needed!</p>
-
-                </div>
-                <div class="alert">
-                    <h4>Looking for your Cluster's database?</h4>
-
-                    <p>Only your cluster lead can grant you access
-                        to the cluster's database. Please contact your local
-                        focal point and request access.</p>
-
-                </div>
-            </div>
-        </div>
-        </#if>
     </@content>
 
     <@footer/>
