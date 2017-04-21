@@ -35,7 +35,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.dispatch.type.IndicatorNumberFormat;
-import org.activityinfo.ui.client.page.common.columns.EditableLocalDateColumn;
+import org.activityinfo.ui.client.page.common.columns.LocalDateColumn;
 import org.activityinfo.ui.client.page.common.columns.ReadTextColumn;
 
 import java.util.List;
@@ -302,7 +302,7 @@ public class ColumnModelBuilder {
 
     public ColumnModelBuilder maybeAddDateColumn(ActivityFormDTO activity) {
         if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            columns.add(new EditableLocalDateColumn("date2", I18N.CONSTANTS.endDate(), 100));
+            columns.add(new LocalDateColumn("date2", I18N.CONSTANTS.endDate(), 100));
         }
         return this;
     }
