@@ -3,7 +3,6 @@
 
   <application>ai-dev</application>
   <version>new-website</version>
-  <module>app</module>
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     <property name="user.name" value="ActivityInfo"/>

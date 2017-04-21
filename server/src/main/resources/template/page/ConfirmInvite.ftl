@@ -30,38 +30,47 @@
 
         <p>${label.setupAccount}</p>
 
-        <form action="" method="post" id="confirmForm">
-            <input type="hidden" name="key" value="${user.changePasswordKey}">
-            <label>
-                ${label.confirmYourName}:
-                <input type="text" name="name" id="nameInput" value="${user.name}" required>
-            </label>
+        <div class="grid grid--spaced">
 
-            <label>
-                ${label.confirmYourPreferredLanguage}:
-                <select name="locale">
-                <#list availableLocales as locale>
-                    <option value="${locale.code}">${locale.localizedName}</option>
-                </#list>
-                </select>
-            </label>
+            <form action="" method="post" id="confirmForm">
+                <input type="hidden" name="key" value="${user.changePasswordKey}">
+                <label>
+                    ${label.confirmYourName}:
+                    <input type="text" name="name" id="nameInput" value="${user.name}" required>
+                </label>
 
-            <label>
-                ${label.choosePassword}:
-                <input type="password" name="password" required>
-            </label>
+                <label>
+                    ${label.confirmYourPreferredLanguage}:
+                    <select name="locale">
+                    <#list availableLocales as locale>
+                        <option value="${locale.code}">${locale.localizedName}</option>
+                    </#list>
+                    </select>
+                </label>
 
-            <label>
-                ${label.confirmYourPassword}:
-                <input type="password" name="password2" required>
-            </label>
-            <label class="checkbox">
-                <input type="checkbox" checked name="newsletter" value="true">
-                ${label.newsletter}
-            </label>
+                <label>
+                    ${label.choosePassword}:
+                    <input type="password" name="password" required>
+                </label>
 
-            <button type="submit">${label.continue} &raquo;</button>
-        </form>
+                <label>
+                    ${label.confirmYourPassword}:
+                    <input type="password" name="password2" required>
+                </label>
+
+                <label>
+                    <input type="checkbox" name="terms">
+                    I agree to <a href="/about/terms.html">ActivityInfo's terms and conditions</a>
+                </label>
+
+                <label>
+                    <input type="checkbox" checked name="newsletter" value="true">
+                    ${label.newsletter}
+                </label>
+
+                <button type="submit">${label.continue} &raquo;</button>
+            </form>
+        </div>
     </div>
     </@content>
     <@footer/>
