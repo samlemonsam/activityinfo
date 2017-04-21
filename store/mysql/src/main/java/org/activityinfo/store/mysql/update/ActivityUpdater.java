@@ -294,6 +294,7 @@ public class ActivityUpdater {
             if(existingItem == null) {
                 SqlInsert insert = SqlInsert.insertInto("attribute");
                 insert.value("attributeId", CuidAdapter.getLegacyIdFromCuid(updatedItem.getId()));
+                insert.value("attributeGroupId", existingField.getId());
                 insert.value("name", updatedItem.getLabel(), 255);
                 insert.value("sortOrder", sortOrder);
                 insert.execute(executor);

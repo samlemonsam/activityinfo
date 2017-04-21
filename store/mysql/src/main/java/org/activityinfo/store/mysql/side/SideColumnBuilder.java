@@ -12,6 +12,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -36,6 +37,7 @@ public class SideColumnBuilder {
      * Maps indicatorId to the value buffer
      */
     private Map<Integer, ValueBuffer> fieldMap = Maps.newHashMap();
+    private Map<Integer, ValueBuffer> attributeMap = Maps.newHashMap();
     
     private final String newLine;
     private final FormClass formClass;
@@ -57,6 +59,15 @@ public class SideColumnBuilder {
         if (buffer == null) {
             buffer = createBuffer(field.getFormField().getType(), observer);
             fieldMap.put(field.getId(), buffer);
+            if(field.isAttributeGroup()) {
+                // Map each individual attribute id to this buffer so we don't need to query
+                // the attribute group from the database
+                EnumType enumType = (EnumType) field.getFormField().getType();
+                for (EnumItem enumItem : enumType.getValues()) {
+                    int attributeId = CuidAdapter.getLegacyIdFromCuid(enumItem.getId());
+                    attributeMap.put(attributeId, buffer);
+                }
+            }
         }
     
         buffer.add(observer);
@@ -124,10 +135,9 @@ public class SideColumnBuilder {
             throw new UnsupportedOperationException("Attributes are not fields of reporting periods");
         }
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT site.siteId, a.attributeGroupId, av.attributeId, av.value").append(newLine);
+        sql.append("SELECT site.siteId, -1, av.attributeId, av.value").append(newLine);
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN attributevalue av ON (site.siteId = av.siteId)").append(newLine);
-        sql.append("LEFT JOIN attribute a ON (av.attributeId = a.attributeId and av.value=1)").append(newLine);
         if(siteId.isPresent()) {
             sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
         } else {
@@ -153,7 +163,13 @@ public class SideColumnBuilder {
                 }
                 int fieldId = rs.getInt(ValueBuffer.FIELD_ID_COLUMN);
                 if(!rs.wasNull()) {
-                    ValueBuffer valueBuffer = fieldMap.get(fieldId);
+                    ValueBuffer valueBuffer;
+                    if(fieldId > 0) {
+                        valueBuffer = fieldMap.get(fieldId);
+                    } else {
+                        int attributeId = rs.getInt(ValueBuffer.ATTRIBUTE_ID_COLUMN);
+                        valueBuffer = attributeMap.get(attributeId);
+                    }
                     if(valueBuffer != null) {
                         valueBuffer.set(rs);
                     }

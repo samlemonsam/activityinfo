@@ -10,9 +10,15 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextType;
@@ -28,6 +34,7 @@ import java.sql.SQLException;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 
@@ -299,6 +306,61 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         storage.get().updateGeometry(recordId, fieldId, polygon);
 
         query(formId, "_id", "ST_XMIN(boundary)", "ST_XMAX(boundary)");
+    }
+
+    @Test
+    public void addNewAttributes() {
+        KeyGenerator generator = new KeyGenerator();
+        int activityId = generator.generateInt();
+
+        EnumType enumType = new EnumType(Cardinality.SINGLE,
+                new EnumItem(EnumItem.generateId(), "A"),
+                new EnumItem(EnumItem.generateId(), "B"));
+
+        FormField selectField = new FormField(ResourceId.generateFieldId(EnumType.TYPE_CLASS))
+                .setType(enumType)
+                .setLabel("Select");
+
+        FormClass formClass = new FormClass(CuidAdapter.activityFormClass(activityId));
+        formClass.setDatabaseId(1);
+        formClass.setLabel("New Form");
+
+        formClass.addElement(selectField);
+
+        catalog.createOrUpdateFormSchema(formClass);
+
+        System.out.println("Created activity " + activityId);
+
+        // Now change the enum items
+        EnumType updatedType = new EnumType(Cardinality.SINGLE,
+                new EnumItem(EnumItem.generateId(), "C"),
+                new EnumItem(EnumItem.generateId(), "D"));
+
+        selectField.setType(updatedType);
+
+        newRequest();
+
+        catalog.createOrUpdateFormSchema(formClass);
+
+        newRequest();
+
+
+        // Now try to save a new instance with the value
+
+        FieldValue valueC = new EnumValue(updatedType.getValues().get(0).getId());
+
+        FormInstance newRecord = new FormInstance(CuidAdapter.generateSiteCuid(), formClass.getId());
+        newRecord.set(selectField.getId(), new EnumValue(updatedType.getValues().get(0).getId()));
+        newRecord.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerRef(1, 1));
+
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater.execute(newRecord);
+
+        // Ensure that the select field has been saved
+        FormRecord saved = catalog.getForm(formClass.getId()).get().get(newRecord.getId()).get();
+        FormInstance savedInstance = FormInstance.toFormInstance(formClass, saved);
+
+        assertThat(savedInstance.get(selectField.getId()), equalTo(valueC));
     }
 
 
