@@ -24,7 +24,6 @@ package org.activityinfo.server.branding;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.Domain;
 
 import javax.persistence.EntityManager;
@@ -62,19 +61,12 @@ public class DomainProvider implements Provider<Domain> {
             result = new Domain();
             result.setTitle("ActivityInfo");
             result.setSignUpAllowed(true);
-
         } else {
             entityManager.get().detach(result);
         }
 
         result.setHost(getExternalHostName());
-
-        // Force SSL over 443 unless we are in development
-        if(DeploymentEnvironment.isAppEngineDevelopment()) {
-            result.setPort(request.get().getServerPort());
-        } else {
-            result.setPort(443);
-        }
+        result.setPort(request.get().getServerPort());
         return result;
     }
 
@@ -83,7 +75,15 @@ public class DomainProvider implements Provider<Domain> {
         if(host != null) {
             return host;
         }
-        return request.get().getServerName();
+
+        String requestHost = request.get().getServerName();
+
+        // Requests initiated by the task service will use
+        // the internal name. For our production server, pretty it up.
+        if(requestHost.equals("activityinfoeu.appspot.com")) {
+            return "www.activityinfo.org";
+        }
+        return requestHost;
     }
 
     /**
