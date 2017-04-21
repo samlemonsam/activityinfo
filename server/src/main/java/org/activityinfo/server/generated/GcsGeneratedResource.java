@@ -50,7 +50,6 @@ class GcsGeneratedResource implements GeneratedResource {
     @Override
     public String getDownloadUri() {
         return UriBuilder.fromUri(domain.getRootUrl())
-                .port(domain.getPort())
                 .path("generated")
                 .path(metadata.getId())
                 .path(metadata.getFilename())
