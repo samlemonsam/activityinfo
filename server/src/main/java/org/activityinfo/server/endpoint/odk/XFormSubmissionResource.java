@@ -216,7 +216,8 @@ public class XFormSubmissionResource {
     }
 
     private VoidResult createLocation(int id, int locationTypeId, String name, Optional<GeoPoint> geoPoint) {
-        Preconditions.checkNotNull(name, geoPoint);
+        Preconditions.checkNotNull(name);
+        Preconditions.checkNotNull(geoPoint);
 
         // Trim location names to maximum length permitted by
         // classical MySQL table.
