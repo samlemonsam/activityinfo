@@ -103,7 +103,7 @@
                                         <li><a href="/about/webinar.html">Register for our next webinar</a></li>
                                     </ul>
 
-                                    <a href="/about/assets/subscribe.html" class="cta-link cta-link--secondary">Purchase a support package</a>
+                                    <a href="/about/subscribe.html" class="cta-link cta-link--secondary">Purchase a support package</a>
                                 </div>
                             </div>
                         </section>
