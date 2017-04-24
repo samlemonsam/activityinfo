@@ -45,10 +45,10 @@
 
                 <div class="grid grid--spaced">
 
-                    <p>Complete the following form to create a new account on
-                    ActivityInfo.org.</p>
-
                     <form action="" method="post" id="signUpForm">
+
+                        <p>Complete the following form to create a new account on
+                            ActivityInfo.org.</p>
 
                         <label>
                             Name
@@ -82,7 +82,7 @@
                         </label>
 
                         <label>
-                            <input type="checkbox" id="terms-checkbox" name="terms_accepted">
+                            <input type="checkbox" id="termsCheckbox" name="terms_accepted">
                             I agree to ActivityInfo's <a href="/about/terms.html">terms and conditions</a>
                         </label>
 
@@ -117,6 +117,15 @@
 
     <@scripts>
     <script type="text/javascript">
+        var theForm = document.getElementById("signUpForm");
+        var theTerms = document.getElementById("termsCheckbox");
+        theForm.addEventListener('submit', function(event) {
+           if(!theTerms.checked) {
+               event.preventDefault();
+               alert("Please accept the terms and conditions to continue.");
+               return;
+           }
+        });
     </script>
     </@scripts>
 </@scaffolding>
