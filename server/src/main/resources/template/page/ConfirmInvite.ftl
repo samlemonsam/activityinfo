@@ -59,7 +59,7 @@
                 </label>
 
                 <label>
-                    <input type="checkbox" name="terms">
+                    <input type="checkbox" name="termsCheckbox">
                     I agree to <a href="/about/terms.html">ActivityInfo's terms and conditions</a>
                 </label>
 
@@ -75,5 +75,16 @@
     </@content>
     <@footer/>
     <@scripts>
+    <script type="application/javascript">
+        var theForm = document.getElementById("signUpForm");
+        var theTerms = document.getElementById("termsCheckbox");
+        theForm.addEventListener('submit', function(event) {
+            if(!theTerms.checked) {
+                event.preventDefault();
+                alert("Please accept the terms and conditions to continue.");
+                return;
+            }
+        });
+    </script>
     </@scripts>
 </@scaffolding>
