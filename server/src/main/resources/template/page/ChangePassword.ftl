@@ -38,11 +38,15 @@
             </label>
 
             <#if passwordLengthInvalid>
+                <div class="alert alert--error">
                 <p>${label.passwordHelp}</p>
+                </div>
             </#if>
 
             <#if passwordsNotMatched>
+                <div class="alert alert--error">
                 <p>${label.passwordDoNotMatch}</p>
+                </div>
             </#if>
 
             <button type="submit">${label.continue} &raquo;</button>
