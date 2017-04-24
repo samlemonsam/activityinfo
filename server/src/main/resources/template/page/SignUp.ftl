@@ -45,6 +45,9 @@
 
                 <div class="grid grid--spaced">
 
+                    <p>Complete the following form to create a new account on
+                    ActivityInfo.org.</p>
+
                     <form action="" method="post" id="signUpForm">
 
                         <label>
@@ -76,6 +79,11 @@
                                     <option value="${locale.code}">${locale.localizedName}</option>
                                 </#list>
                             </select>
+                        </label>
+
+                        <label>
+                            <input type="checkbox" id="terms-checkbox" name="terms_accepted">
+                            I agree to ActivityInfo's <a href="/about/terms.html">terms and conditions</a>
                         </label>
 
                         <button type="submit">Sign up</button>
