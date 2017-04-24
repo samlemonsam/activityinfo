@@ -93,6 +93,7 @@ compileJava {
 
 processResources {
     inputs.property "project.version", project.version.toString()
+    filteringCharset = "UTF-8"
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
             .replace('$[git.commit.id]', commitId)
