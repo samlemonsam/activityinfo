@@ -19,6 +19,7 @@ class ObservableForm extends Observable<FormClass> {
     private static final Logger LOGGER = Logger.getLogger(ObservableForm.class.getName());
 
     private final HttpBus httpBus;
+    private OfflineStore offlineStore;
     private final ResourceId formId;
 
     /**
@@ -39,8 +40,9 @@ class ObservableForm extends Observable<FormClass> {
 
     private HttpSubscription httpSubscription = null;
 
-    public ObservableForm(HttpBus httpBus, ResourceId formId) {
+    public ObservableForm(HttpBus httpBus, OfflineStore offlineStore, ResourceId formId) {
         this.httpBus = httpBus;
+        this.offlineStore = offlineStore;
         this.formId = formId;
     }
 
@@ -62,13 +64,23 @@ class ObservableForm extends Observable<FormClass> {
                 public void onSuccess(FormClass result) {
                     LOGGER.info(formId + ": received version " + result.getSchemaVersion());
                     if (result.getSchemaVersion() > schemaVersion) {
-                        formSchema = result;
-                        ObservableForm.this.schemaVersion = result.getSchemaVersion();
-                        ObservableForm.this.fireChange();
+                        newVersionFetched(result);
                     }
                 }
             });
         }
+    }
+
+    /**
+     * A new version has been loaded from the network.
+     */
+    private void newVersionFetched(FormClass result) {
+        formSchema = result;
+
+        offlineStore.putSchema(result);
+
+        ObservableForm.this.schemaVersion = result.getSchemaVersion();
+        ObservableForm.this.fireChange();
     }
 
     @Override

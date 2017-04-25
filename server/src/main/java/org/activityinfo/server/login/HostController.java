@@ -84,9 +84,12 @@ public class HostController {
 
         User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
         model.setFeatureFlags(authenticatedUser.getFeatures());
-        model.setNewUI("3".equals(ui));
+        model.setNewUI("3".equals(ui) || "3dev".equals(ui));
 
-        if(!Strings.isNullOrEmpty(codeServer)) {
+        if("3dev".equals(ui)) {
+            model.setBootstrapScript("/App/App.nocache.js");
+
+        } else if(!Strings.isNullOrEmpty(codeServer)) {
             // Running in development mode
             // Use the default bootstrap script
             model.setBootstrapScript("/ActivityInfo/ActivityInfo.nocache.js");

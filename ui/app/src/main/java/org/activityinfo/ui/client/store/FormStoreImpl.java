@@ -25,18 +25,20 @@ public class FormStoreImpl implements FormStore {
     private static final Logger LOGGER = Logger.getLogger(FormStoreImpl.class.getName());
 
     private HttpBus httpBus;
+    private OfflineStore offlineStore;
 
     private Map<ResourceId, ObservableForm> formMap = Maps.newHashMap();
 
-    public FormStoreImpl(HttpBus httpBus) {
+    public FormStoreImpl(HttpBus httpBus, OfflineStore offlineStore) {
         this.httpBus = httpBus;
+        this.offlineStore = offlineStore;
     }
 
     @Override
     public Observable<FormClass> getFormClass(ResourceId formId) {
         ObservableForm form = formMap.get(formId);
         if(form == null) {
-            form = new ObservableForm(httpBus, formId);
+            form = new ObservableForm(httpBus, offlineStore, formId);
             formMap.put(formId, form);
         }
         return form;

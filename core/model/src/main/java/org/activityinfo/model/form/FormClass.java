@@ -334,6 +334,10 @@ public class FormClass implements FormElementContainer {
         return object;
     }
 
+    public FormClass copy() {
+        return fromJson(toJsonObject());
+    }
+
     static JsonArray toJsonArray(Iterable<FormElement> elements) {
         JsonArray elementsArray = new JsonArray();
         for (FormElement element : elements) {

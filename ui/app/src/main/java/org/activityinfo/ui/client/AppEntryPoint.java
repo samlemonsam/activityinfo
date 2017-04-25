@@ -18,6 +18,7 @@ import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.http.HttpBus;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
+import org.activityinfo.ui.client.store.IndexedDBOfflineStore;
 
 import java.util.logging.Logger;
 
@@ -39,9 +40,11 @@ public class AppEntryPoint implements EntryPoint {
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
+        IndexedDBOfflineStore offlineStore = new IndexedDBOfflineStore();
+
         ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
         HttpBus httpBus = new HttpBus(client);
-        FormStore formStore = new FormStoreImpl(httpBus);
+        FormStore formStore = new FormStoreImpl(httpBus, offlineStore);
 
         Viewport viewport = new Viewport();
         AppFrame appFrame = new AppFrame(httpBus);
