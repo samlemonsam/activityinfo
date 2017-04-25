@@ -7,7 +7,7 @@
         <h3>You're offline!</h3>
 
         <p>You currently have no connection to the internet. However, ActivityInfo has been
-        cached offline!</p>
+        cached offline.</p>
 
         <a href="/app" class="cta-link">Open Application</a>
     </div>

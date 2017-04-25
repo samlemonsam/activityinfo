@@ -22,7 +22,7 @@
  #L%
 -->
 <#include "Scaffolding.ftl">
-<@scaffolding title="${label.signUpTitle}">
+<@scaffolding title="Signup">
 
     <@content>
 
