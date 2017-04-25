@@ -30,10 +30,15 @@
     <set-property name="locale" value="en,fr"/>
     <set-property name="gxt.device" value="desktop"/>
 
-    <!-- for debugging -->
-    <set-property name="user.agent" value="safari"/>
-    <set-property name="gxt.user.agent" value="chrome"/>
+    <!-- Limit to supported browsers -->
+    <set-property name="user.agent" value="safari,ie9,ie10,gecko1_8"/>
+    <set-property name="gxt.user.agent" value="safari5,chrome,ie10,ie11,gecko1_9"/>
 
+    <!-- Collapse gxt permutations to match gwt -->
+    <collapse-property name="user.agent" values="ie*" />
+    <collapse-property name="gxt.user.agent" values="ie*" />
+    <collapse-property name="gxt.user.agent" values="gecko*" />
+    <collapse-property name="gxt.user.agent" values="safari*,chrome" />
 
     <!-- Generate AppCache manifests -->
     <define-linker name="std" class="com.bedatadriven.rebar.appcache.linker.AppCacheIFrameLinker"/>
