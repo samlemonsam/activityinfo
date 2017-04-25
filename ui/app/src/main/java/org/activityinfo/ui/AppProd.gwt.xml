@@ -27,9 +27,16 @@
     <!-- Minimize CSS names -->
     <set-configuration-property name="CssResource.style" value="obf"/>
 
-    <set-property name="locale" value="en"/>
+    <set-property name="locale" value="en,fr"/>
     <set-property name="gxt.device" value="desktop"/>
 
-    <collapse-all-properties />
+    <!-- for debugging -->
+    <set-property name="user.agent" value="safari"/>
+    <set-property name="gxt.user.agent" value="chrome"/>
+
+
+    <!-- Generate AppCache manifests -->
+    <define-linker name="std" class="com.bedatadriven.rebar.appcache.linker.AppCacheIFrameLinker"/>
+    <add-linker name="std"/>
 
 </module>

@@ -22,7 +22,6 @@ package org.activityinfo.server.login;
  * #L%
  */
 
-import com.bedatadriven.rebar.appcache.server.UserAgentProvider;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -87,10 +86,7 @@ public class HostController {
         model.setFeatureFlags(authenticatedUser.getFeatures());
         model.setNewUI("3".equals(ui));
 
-        if(model.isNewUI()) {
-            model.setBootstrapScript("App/App.nocache.js");
-
-        } else if(!Strings.isNullOrEmpty(codeServer)) {
+        if(!Strings.isNullOrEmpty(codeServer)) {
             // Running in development mode
             // Use the default bootstrap script
             model.setBootstrapScript("/ActivityInfo/ActivityInfo.nocache.js");
@@ -105,8 +101,14 @@ public class HostController {
             if(Strings.isNullOrEmpty(locale)) {
                 locale = authProvider.get().getUserLocale();
             }
-            model.setBootstrapScript("/ActivityInfo/" + locale + ".js");
-            model.setAppCacheManifest("/ActivityInfo/" + locale + ".appcache");
+            String module;
+            if(model.isNewUI()) {
+                module = "App";
+            } else {
+                module = "ActivityInfo";
+            }
+            model.setBootstrapScript(String.format("/%s/%s.js", module, locale));
+            model.setAppCacheManifest(String.format("/%s/%s.appcache", module, locale));
         }
         
         return Response.ok(model.asViewable())
@@ -126,17 +128,6 @@ public class HostController {
     @Produces(MediaType.TEXT_HTML)
     public Viewable getUnsupportedBrowserMessage() {
         return new Viewable("/page/UnsupportedBrowser.ftl", new HashMap());
-    }
-
-    private boolean checkAppCacheEnabled(HttpServletRequest req) {
-        // for browsers that only support database synchronisation via gears at
-        // this point,
-        // we would rather use gears managed resources stores than HTML5
-        // appcache
-        // so that we only have to display one permission
-        // (this really only applies to FF <= 3.6 right now)
-        UserAgentProvider userAgentProvider = new UserAgentProvider();
-        return !userAgentProvider.canSupportGears(req);
     }
 
 }
