@@ -93,7 +93,7 @@ class ObservableForm extends Observable<FormClass> {
      */
     private void cachedVersionLoaded(FormClass cachedSchema) {
         if(cachedSchema.getSchemaVersion() > this.schemaVersion) {
-            LOGGER.info("Loaded version " + cachedSchema.getSchemaVersion() + " from offline store");
+            LOGGER.info(formId + ": Loaded version " + cachedSchema.getSchemaVersion() + " from offline store");
             this.schema = cachedSchema;
             this.schemaVersion = cachedSchema.getSchemaVersion();
             fireChange();
