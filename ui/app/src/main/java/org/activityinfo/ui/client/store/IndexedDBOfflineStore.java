@@ -4,13 +4,17 @@ import com.google.gwt.core.client.JavaScriptObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class IndexedDBOfflineStore implements OfflineStore {
 
-    private Map<ResourceId, FormClass> pendingQueue = new HashMap<>();
+    private abstract static class PendingRequest<T> {
+        public abstract void execute(IndexedDB indexedDB);
+    }
+
+    private List<PendingRequest> pendingRequests = new ArrayList<>();
 
     private enum State {
         UNINITIALIZED,
@@ -25,24 +29,52 @@ public class IndexedDBOfflineStore implements OfflineStore {
 
     @Override
     public void putSchema(FormClass formSchema) {
+        execute(new PendingRequest() {
+            @Override
+            public void execute(IndexedDB indexedDB) {
+                indexedDB.putSchema(formSchema);
+            }
+        });
+    }
+
+    @Override
+    public void loadSchema(ResourceId formId, CallbackMaybe<FormClass> callback) {
+        execute(new PendingRequest<FormClass>() {
+            @Override
+            public void execute(IndexedDB indexedDB) {
+                indexedDB.loadSchema(formId, new IDBCallback<FormClass>() {
+                    @Override
+                    public void onSuccess(FormClass result) {
+                        callback.onSuccess(result);
+                    }
+
+                    @Override
+                    public void onFailure(JavaScriptObject error) {
+                    }
+                });
+            }
+        });
+    }
+
+    private void execute(PendingRequest request) {
 
         switch (state) {
             // If we haven't succeeded in opening
             // the IndexedDB database, then put the form schema
             // in a holding pattern and start opening the database.
             case UNINITIALIZED:
-                pendingQueue.put(formSchema.getId(), formSchema);
+                pendingRequests.add(request);
                 startOpeningDatabase();
                 break;
 
             // Still waiting on permissions or something...
             case LOADING:
-                pendingQueue.put(formSchema.getId(), formSchema);
+                pendingRequests.add(request);
                 break;
 
             // Database ready to go!
             case LOADED:
-                indexedDB.putSchema(formSchema);
+                request.execute(indexedDB);
                 break;
 
             // Permission was refused, or the browser doesn't support or
@@ -61,10 +93,8 @@ public class IndexedDBOfflineStore implements OfflineStore {
             public void onSuccess(IndexedDB result) {
                 // Expect to be LOADING
                 assert state == State.LOADING : "Invalid state: " + state;
-
                 onLoaded(result);
             }
-
 
             @Override
             public void onFailure(JavaScriptObject error) {
@@ -83,12 +113,12 @@ public class IndexedDBOfflineStore implements OfflineStore {
         this.indexedDB = result;
         this.state = State.LOADED;
 
-        // Store all pending form schemas then destroy the
-        // pending queue
-        for (FormClass schema : pendingQueue.values()) {
-            indexedDB.putSchema(schema);
+        // Execute all pending requests and then destory the pending
+        // queue
+        for (PendingRequest pendingRequest : pendingRequests) {
+            pendingRequest.execute(indexedDB);
         }
-        pendingQueue = null;
+        pendingRequests = null;
     }
 
 }

@@ -36,7 +36,7 @@ class ObservableForm extends Observable<FormClass> {
     /**
      * Pending/completed fetch of this form's schema.
      */
-    private FormClass formSchema = null;
+    private FormClass schema = null;
 
     private HttpSubscription httpSubscription = null;
 
@@ -51,8 +51,11 @@ class ObservableForm extends Observable<FormClass> {
         LOGGER.info(formId + ": Connected.");
         connected = true;
 
-        if (formSchema == null) {
+        if (schema == null) {
             LOGGER.info(formId + ": fetching...");
+
+            // Try to load from the offline cache while starting a network request at the same time
+            this.offlineStore.loadSchema(formId, this::cachedVersionLoaded);
 
             this.httpSubscription = httpBus.submit(new FormSchemaRequest(formId), new AsyncCallback<FormClass>() {
                 @Override
@@ -62,7 +65,6 @@ class ObservableForm extends Observable<FormClass> {
 
                 @Override
                 public void onSuccess(FormClass result) {
-                    LOGGER.info(formId + ": received version " + result.getSchemaVersion());
                     if (result.getSchemaVersion() > schemaVersion) {
                         newVersionFetched(result);
                     }
@@ -75,13 +77,29 @@ class ObservableForm extends Observable<FormClass> {
      * A new version has been loaded from the network.
      */
     private void newVersionFetched(FormClass result) {
-        formSchema = result;
+
+        LOGGER.info(formId + ": received version from network " + result.getSchemaVersion());
+
+        this.schema = result;
+        this.schemaVersion = result.getSchemaVersion();
+        this.fireChange();
 
         offlineStore.putSchema(result);
-
-        ObservableForm.this.schemaVersion = result.getSchemaVersion();
-        ObservableForm.this.fireChange();
     }
+
+
+    /**
+     * A cached version has been loaded from the offline store
+     */
+    private void cachedVersionLoaded(FormClass cachedSchema) {
+        if(cachedSchema.getSchemaVersion() > this.schemaVersion) {
+            LOGGER.info("Loaded version " + cachedSchema.getSchemaVersion() + " from offline store");
+            this.schema = cachedSchema;
+            this.schemaVersion = cachedSchema.getSchemaVersion();
+            fireChange();
+        }
+    }
+
 
     @Override
     protected void onDisconnect() {
@@ -95,12 +113,12 @@ class ObservableForm extends Observable<FormClass> {
 
     @Override
     public boolean isLoading() {
-        return formSchema == null;
+        return schema == null;
     }
 
     @Override
     public FormClass get() {
         assert !isLoading() : "loading: " + formId;
-        return formSchema;
+        return schema;
     }
 }

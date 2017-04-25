@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.ResourceId;
 
 /**
  * IndexedDB access
@@ -49,8 +50,31 @@ public class IndexedDB extends JavaScriptObject {
         tx.oncomplete = function(event) {
             console.log("putSchema complete.");
         }
-        var formStore = txt.objectStore("forms");
+        var formStore = tx.objectStore("forms");
         var schemaStore = tx.objectStore("formSchemas");
         schemaStore.put(schema);
+    }-*/;
+
+    public final void loadSchema(ResourceId formId, IDBCallback<FormClass> callback) {
+        loadSchema(formId.asString(), callback);
+    }
+
+    private native void loadSchema(String formId, IDBCallback<FormClass> callback) /*-{
+
+        var tx = this.db.transaction("formSchemas", "readonly");
+        tx.onerror = function(event) {
+            console.log("loadSchema Error: " + event);
+            callback.@IDBCallback::onFailure(*)(event);
+        }
+        tx.oncomplete = function(event) {
+            console.log("loadSchema tx completed");
+        }
+        var schemaStore = tx.objectStore("formSchemas");
+        var schemaReq = schemaStore.get(formId);
+        schemaReq.onsuccess = function(event) {
+            var schemaJson = JSON.stringify(event.target.result);
+            var schema = @FormClass::fromJson(Ljava/lang/String;)(schemaJson);
+            callback.@IDBCallback::onSuccess(*)(schema);
+        }
     }-*/;
 }
