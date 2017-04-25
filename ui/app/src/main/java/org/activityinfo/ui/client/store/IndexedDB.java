@@ -50,7 +50,6 @@ public class IndexedDB extends JavaScriptObject {
         tx.oncomplete = function(event) {
             console.log("putSchema complete.");
         }
-        var formStore = tx.objectStore("forms");
         var schemaStore = tx.objectStore("formSchemas");
         schemaStore.put(schema);
     }-*/;
