@@ -2,7 +2,7 @@ package org.activityinfo.ui.client.http;
 
 
 import com.google.common.collect.Iterables;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.observable.Observable;
@@ -22,6 +22,7 @@ public class HttpBus {
     private static final Logger LOGGER = Logger.getLogger(HttpBus.class.getName());
 
     private int nextRequestId = 1;
+    private Scheduler scheduler;
 
     private class PendingRequest<T> implements HttpSubscription {
         private int id = nextRequestId++;
@@ -80,10 +81,16 @@ public class HttpBus {
     private final List<PendingRequest<?>> pendingRequests = new ArrayList<>();
     private final StatefulValue<HttpStatus> status = new StatefulValue<>();
 
-    private Timer retryTimer = null;
+    private RetryTask retryTask = new RetryTask();
 
     public HttpBus(ActivityInfoClientAsync client) {
         this.client = client;
+        scheduler = Scheduler.get();
+    }
+
+    public HttpBus(ActivityInfoClientAsync client, Scheduler scheduler) {
+        this.client = client;
+        this.scheduler = scheduler;
     }
 
     public Observable<HttpStatus> getStatus() {
@@ -137,15 +144,9 @@ public class HttpBus {
 
         // We want to keep retrying the request, but we don't want to trigger a stampede and
         // retry queued tasks all at once.
-        if (retryTimer == null) {
-            retryTimer = new Timer() {
-                @Override
-                public void run() {
-                    retry();
-                }
-
-            };
-            retryTimer.schedule(2500);
+        if(!retryTask.scheduled) {
+            retryTask.scheduled = true;
+            scheduler.scheduleFixedDelay(retryTask, 2500);
         }
     }
 
@@ -165,22 +166,30 @@ public class HttpBus {
     /**
      * Retries the oldest request in the queue.
      */
-    private void retry() {
+    private class RetryTask implements Scheduler.RepeatingCommand {
 
-        Iterable<PendingRequest<?>> failedRequests = failedRequests();
+        private boolean scheduled = false;
 
-        LOGGER.info("Retrying. Failed requests: " + Iterables.size(failedRequests));
+        @Override
+        public boolean execute() {
 
-        // Clear retry timer. If this request succeeds, additional retry
-        retryTimer.cancel();
-        retryTimer = null;
+            scheduled = false;
 
-        // When retrying, attempt only one request at a time until we have some success.
-        Iterator<PendingRequest<?>> requestIt = failedRequests.iterator();
-        if (requestIt.hasNext()) {
-            PendingRequest<?> request = requestIt.next();
-            LOGGER.info("Retrying request #" + request.id + "...");
-            request.execute();
+            Iterable<PendingRequest<?>> failedRequests = failedRequests();
+
+            LOGGER.info("Retrying. Failed requests: " + Iterables.size(failedRequests));
+
+            // When retrying, attempt only one request at a time until we have some success.
+            Iterator<PendingRequest<?>> requestIt = failedRequests.iterator();
+            if (requestIt.hasNext()) {
+                PendingRequest<?> request = requestIt.next();
+                LOGGER.info("Retrying request #" + request.id + "...");
+                request.execute();
+            }
+
+            // Do not repeat. will be rescheduled as neccessary
+            // if the connection fails again.
+            return false;
         }
     }
 

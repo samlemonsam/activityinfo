@@ -54,8 +54,6 @@ public class FormStoreImpl implements FormStore {
         return httpBus.get(new QueryRequest(queryModel));
     }
 
-
-
     @Override
     public Observable<List<CatalogEntry>> getCatalogRoots() {
         return httpBus.get(new CatalogRequest());
