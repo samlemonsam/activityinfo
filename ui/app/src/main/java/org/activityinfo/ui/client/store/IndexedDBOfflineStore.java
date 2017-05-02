@@ -56,6 +56,11 @@ public class IndexedDBOfflineStore implements OfflineStore {
         });
     }
 
+    @Override
+    public void enableOffline(ResourceId formId, boolean offline) {
+
+    }
+
     private void execute(PendingRequest request) {
 
         switch (state) {

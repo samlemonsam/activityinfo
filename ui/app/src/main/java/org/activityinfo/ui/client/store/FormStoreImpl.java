@@ -17,6 +17,7 @@ import org.activityinfo.ui.client.http.RecordRequest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 
@@ -67,6 +68,16 @@ public class FormStoreImpl implements FormStore {
     @Override
     public Observable<FormRecord> getRecord(RecordRef recordRef) {
         return httpBus.get(new RecordRequest(recordRef));
+    }
+
+    @Override
+    public void enableFormOffline(ResourceId formId, boolean offline) {
+
+    }
+
+    @Override
+    public Observable<Set<ResourceId>> getSyncSet() {
+        return null;
     }
 
 }

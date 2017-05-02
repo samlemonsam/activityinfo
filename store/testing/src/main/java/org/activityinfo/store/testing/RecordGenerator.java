@@ -66,7 +66,8 @@ public class RecordGenerator {
     public List<FormInstance> generate(int rowCount) {
         List<FormInstance> records = new ArrayList<>();
         for (int i = 0; i < rowCount; i++) {
-            FormInstance record = new FormInstance(ResourceId.generateId(), schema.getId());
+            ResourceId recordId = ResourceId.valueOf("c" + i);
+            FormInstance record = new FormInstance(recordId, schema.getId());
             for (Map.Entry<ResourceId, Supplier<FieldValue>> entry : generators.entrySet()) {
                 record.set(entry.getKey(), entry.getValue().get());
             }

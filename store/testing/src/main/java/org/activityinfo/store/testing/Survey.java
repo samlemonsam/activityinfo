@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -127,6 +128,10 @@ public class Survey implements TestForm {
                         new EnumItem(MARRIED_ID, "Married"),
                         new EnumItem(SINGLE_ID, "Single")));
 
+    }
+
+    public static RecordRef getRecordRef(int index) {
+        return new RecordRef(FORM_ID, ResourceId.valueOf("c" + index));
     }
 
     @Override

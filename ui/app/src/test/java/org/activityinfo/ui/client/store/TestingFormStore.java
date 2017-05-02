@@ -14,7 +14,9 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.testing.TestingCatalog;
 
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -94,6 +96,16 @@ public class TestingFormStore implements FormStore {
     @Override
     public Observable<FormRecord> getRecord(RecordRef recordRef) {
         return maybeExecute(() -> testingCatalog.getForm(recordRef.getFormId()).get().get(recordRef.getRecordId()).get());
+    }
+
+    @Override
+    public void enableFormOffline(ResourceId formId, boolean offline) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Observable<Set<ResourceId>> getSyncSet() {
+        return Observable.just(Collections.emptySet());
     }
 
     private <T> Observable<T> maybeExecute(Supplier<T> task) {

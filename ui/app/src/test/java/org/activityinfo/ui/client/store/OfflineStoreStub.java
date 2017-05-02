@@ -24,4 +24,9 @@ public class OfflineStoreStub implements OfflineStore {
             callback.onSuccess(formSchema);
         }
     }
+
+    @Override
+    public void enableOffline(ResourceId formId, boolean offline) {
+
+    }
 }
