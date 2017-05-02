@@ -9,6 +9,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The state of the user's input into the form as well any sub forms.
+ * Immutable.
+ */
 public class FormInputModel {
 
     private final RecordRef recordRef;
@@ -21,7 +25,9 @@ public class FormInputModel {
         subRecords = Collections.emptyMap();
     }
 
-    private FormInputModel(RecordRef recordRef, Map<ResourceId, FieldInput> fieldInputs, Map<RecordRef, FormInputModel> subRecords) {
+    private FormInputModel(RecordRef recordRef,
+                           Map<ResourceId, FieldInput> fieldInputs,
+                           Map<RecordRef, FormInputModel> subRecords) {
         this.recordRef = recordRef;
         this.fieldInputs = fieldInputs;
         this.subRecords = subRecords;
@@ -39,10 +45,22 @@ public class FormInputModel {
         return recordRef;
     }
 
+    /**
+     * Returns a new, updated version of this model with the change to the given root field.
+     */
     public FormInputModel update(ResourceId fieldId, FieldInput input) {
         return update(recordRef, fieldId, input);
     }
 
+    /**
+     * Returns a new, updated version of this model with the change to the given field on the given
+     * record.
+     *
+     * @param recordRef the record to change, either the parent record or one of the sub records.
+     * @param fieldId the id of the field to change
+     * @param input the user's input.
+     * @return a new copy of
+     */
     public FormInputModel update(RecordRef recordRef, ResourceId fieldId, FieldInput input) {
 
         Map<ResourceId, FieldInput> updatedInputs = this.fieldInputs;

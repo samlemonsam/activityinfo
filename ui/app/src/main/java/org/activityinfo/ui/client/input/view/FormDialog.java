@@ -8,13 +8,13 @@ import org.activityinfo.ui.client.store.FormStore;
 public class FormDialog {
 
     private ResourceId formId;
-    private InputPanel inputPanel;
+    private FormInputView formInputView;
     private final Dialog dialog;
 
     public FormDialog(FormStore formStore, ResourceId formId) {
         this.formId = formId;
 
-        InputPanel panel = new InputPanel(formStore, formId);
+        FormInputView panel = new FormInputView(formStore, formId);
 
         dialog = new Dialog();
         dialog.setHeading("Form");

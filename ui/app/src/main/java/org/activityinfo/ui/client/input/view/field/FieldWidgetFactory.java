@@ -16,6 +16,9 @@ import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.model.type.time.MonthType;
 import org.activityinfo.model.type.time.YearType;
 
+/**
+ * Constructs a {@link FieldWidget} for a given field.
+ */
 public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     private FieldUpdater updater;
@@ -73,7 +76,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
         if(enumType.getCardinality() == Cardinality.SINGLE) {
             return new RadioGroupWidget(enumType, updater);
         } else {
-            return new MultipleSelectWidget(enumType, updater);
+            return new CheckBoxGroupWidget(enumType, updater);
         }
     }
 
@@ -114,6 +117,6 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitSerialNumber(SerialNumberType serialNumberType) {
-        return null;
+        return new SerialNumberWidget();
     }
 }

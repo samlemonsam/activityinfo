@@ -5,6 +5,9 @@ import com.sencha.gxt.widget.core.client.form.DateField;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
+/**
+ * FieldWidget for {@link org.activityinfo.model.type.time.LocalDateType} fields.
+ */
 public class LocalDateWidget implements FieldWidget {
 
     private DateField field;

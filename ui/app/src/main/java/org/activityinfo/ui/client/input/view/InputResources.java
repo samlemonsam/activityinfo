@@ -5,7 +5,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
 /**
- * Created by alex on 16-2-17.
+ * Styles and resources for form input.
  */
 public interface InputResources extends ClientBundle {
 

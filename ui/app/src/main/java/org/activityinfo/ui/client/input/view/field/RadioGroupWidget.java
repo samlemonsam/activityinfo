@@ -14,6 +14,10 @@ import org.activityinfo.ui.client.input.model.FieldInput;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * FieldWidget for a {@link EnumType} field that displays options as a group
+ * of radio buttons.
+ */
 public class RadioGroupWidget implements FieldWidget {
 
     private final FlowLayoutContainer container;

@@ -9,7 +9,12 @@ import org.activityinfo.ui.client.input.model.FormInputModel;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * View model of the {@link FormInputModel}.
+ *
+ * <p>This view model combines the users' input in {@code FormInputModel} with the form's schema to compute
+ * an augmented model that includes relevancy status, field and form validity, and existing state.</p>
+ */
 public class FormInputViewModel {
 
     private FormTree formTree;

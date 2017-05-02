@@ -5,7 +5,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
 /**
- * Applies updates from the view to the model
+ * Applies inputs from the view to the model.
  */
 public interface InputHandler {
 

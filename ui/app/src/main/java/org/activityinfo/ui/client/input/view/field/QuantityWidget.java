@@ -9,6 +9,9 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
+/**
+ * FieldWidget for {@link QuantityType} fields.
+ */
 public class QuantityWidget implements FieldWidget {
 
     private FlowPanel container;
@@ -20,6 +23,7 @@ public class QuantityWidget implements FieldWidget {
 
         this.field = new DoubleField();
         this.field.addKeyUpHandler(event -> updater.update(input()));
+
         InlineHTML units = new InlineHTML(SafeHtmlUtils.fromString(quantityType.getUnits()));
 
         container = new FlowPanel("span");

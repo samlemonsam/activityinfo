@@ -6,6 +6,9 @@ import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
+/**
+ * FieldWidget for {@link org.activityinfo.model.type.geo.GeoPointType} fields.
+ */
 public class GeoPointWidget implements FieldWidget {
 
     private FlowPanel flowPanel;

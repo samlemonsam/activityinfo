@@ -9,6 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * View model for a SubForm field.
+ */
 public class SubFormInputViewModel {
 
     private ResourceId fieldId;
@@ -35,6 +38,10 @@ public class SubFormInputViewModel {
         return subRecordRefs;
     }
 
+    /**
+     * Returns the placeholder {@link SubRecordViewModel} for this sub form field
+     * if one exists.
+     */
     public Optional<SubRecordViewModel> getPlaceholder() {
         for (SubRecordViewModel subRecord : subRecords) {
             if(subRecord.isPlaceholder()) {

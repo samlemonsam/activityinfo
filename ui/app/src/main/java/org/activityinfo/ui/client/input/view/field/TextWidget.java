@@ -6,6 +6,9 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
+/**
+ * FieldWidget for {@link org.activityinfo.model.type.primitive.TextType} fields.
+ */
 public class TextWidget implements FieldWidget {
 
     private final TextField field;

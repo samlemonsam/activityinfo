@@ -17,7 +17,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Helper class which constructs a {@link FormInputViewModel}.
  *
+ * <p>This class is built from a form's tree and includes all parsed formulas needed to calculate
+ * field values and relevancy, so they don't need to be re-parsed every time the {@link FormInputModel} changes.</p>
  */
 public class FormInputViewModelBuilder {
 
@@ -48,8 +51,7 @@ public class FormInputViewModelBuilder {
     private SubFormInputViewModelBuilder buildSubBuilder(FormTree.Node node) {
         SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
         FormTree subTree = formTree.subTree(subFormType.getClassId());
-        SubFormInputViewModelBuilder builder = new SubFormInputViewModelBuilder(node, subTree);
-        return builder;
+        return new SubFormInputViewModelBuilder(node, subTree);
     }
 
     private void buildRelevanceCalculator(FormTree.Node node) {
@@ -150,6 +152,13 @@ public class FormInputViewModelBuilder {
         return relevantSet;
     }
 
+    /**
+     * Adds or removes a field from the relevancy set.
+     * @param relevantSet the relevancy set
+     * @param fieldId the id of the field to add or remove
+     * @param relevant true if the field is relevant
+     * @return {@code true} if the field was previously relevant.
+     */
     private boolean toggle(Set<ResourceId> relevantSet, ResourceId fieldId, boolean relevant) {
         if(relevant) {
             boolean wasNotPresent = relevantSet.add(fieldId);
@@ -161,6 +170,9 @@ public class FormInputViewModelBuilder {
     }
 
 
+    /**
+     * Computes the set of fields that are relevant, required, but still missing values.
+     */
     private Set<ResourceId> computeMissing(FormInstance record, Set<ResourceId> relevantSet) {
         Set<ResourceId> missing = new HashSet<>();
         for (FormTree.Node node : formTree.getRootFields()) {

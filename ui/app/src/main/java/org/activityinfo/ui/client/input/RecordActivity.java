@@ -4,7 +4,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import org.activityinfo.ui.client.input.view.InputPanel;
+import org.activityinfo.ui.client.input.view.FormInputView;
 import org.activityinfo.ui.client.store.FormStore;
 
 public class RecordActivity extends AbstractActivity {
@@ -19,11 +19,11 @@ public class RecordActivity extends AbstractActivity {
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        InputPanel inputPanel = new InputPanel(formStore, place.getFormId());
+        FormInputView formInputView = new FormInputView(formStore, place.getFormId());
 
         ContentPanel contentPanel = new ContentPanel();
         contentPanel.setHeading("Record");
-        contentPanel.add(inputPanel);
+        contentPanel.add(formInputView);
 
         panel.setWidget(contentPanel);
     }

@@ -16,17 +16,20 @@ import java.util.List;
 
 import static org.activityinfo.ui.client.input.view.field.FieldWidgetFactory.createWidget;
 
-public class FieldPanel implements IsWidget {
+/**
+ * View that displays a form's fields and sub forms and accepts user input.
+ */
+public class FormPanel implements IsWidget {
 
     private final FlowPanel panel;
 
     private final List<FieldView> fieldViews = new ArrayList<>();
-    private final List<SubFormPanel> subFormViews = new ArrayList<>();
+    private final List<RepeatingSubFormPanel> subFormViews = new ArrayList<>();
 
     private InputHandler inputHandler;
     private RecordRef recordRef;
 
-    public FieldPanel(FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
+    public FormPanel(FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
         InputResources.INSTANCE.style().ensureInjected();
 
         this.recordRef = recordRef;
@@ -59,7 +62,7 @@ public class FieldPanel implements IsWidget {
         }
 
         // Update Subforms
-        for (SubFormPanel subFormView : subFormViews) {
+        for (RepeatingSubFormPanel subFormView : subFormViews) {
             subFormView.update(viewModel.getSubFormField(subFormView.getFieldId()));
         }
     }
@@ -90,7 +93,7 @@ public class FieldPanel implements IsWidget {
         SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
         FormTree subTree = formTree.subTree(subFormType.getClassId());
 
-        SubFormPanel subPanel = new SubFormPanel(node, subTree, inputHandler);
+        RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(node, subTree, inputHandler);
 
         panel.add(subPanel);
         subFormViews.add(subPanel);

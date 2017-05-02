@@ -2,6 +2,9 @@ package org.activityinfo.ui.client.input.viewModel;
 
 import org.activityinfo.model.type.RecordRef;
 
+/**
+ * View model for a single sub form record.
+ */
 public class SubRecordViewModel {
 
     private RecordRef recordRef;
@@ -14,6 +17,9 @@ public class SubRecordViewModel {
         this.placeholder = placeholder;
     }
 
+    /**
+     * @return this sub form record's id
+     */
     public RecordRef getRecordRef() {
         return recordRef;
     }
@@ -22,6 +28,10 @@ public class SubRecordViewModel {
         return subFormViewModel;
     }
 
+    /**
+     *
+     * @return true if this an empty sub record for a sub form with no entries.
+     */
     public boolean isPlaceholder() {
         return placeholder;
     }

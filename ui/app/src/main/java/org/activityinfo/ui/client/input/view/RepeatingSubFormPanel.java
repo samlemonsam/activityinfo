@@ -17,9 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Contains repeating
+ * View containing a list of {@link FormPanel}s, one for each sub record.
  */
-public class SubFormPanel implements IsWidget {
+public class RepeatingSubFormPanel implements IsWidget {
 
     private final ResourceId fieldId;
     private InputHandler inputHandler;
@@ -27,11 +27,11 @@ public class SubFormPanel implements IsWidget {
 
     private final FlowLayoutContainer container;
     private final FlowLayoutContainer recordContainer;
-    private final Map<RecordRef, FieldPanel> panelMap = new HashMap<>();
+    private final Map<RecordRef, FormPanel> panelMap = new HashMap<>();
 
     private SubFormInputViewModel viewModel;
 
-    public SubFormPanel(FormTree.Node node, FormTree subTree, InputHandler inputHandler) {
+    public RepeatingSubFormPanel(FormTree.Node node, FormTree subTree, InputHandler inputHandler) {
         this.subTree = subTree;
         this.fieldId = node.getFieldId();
         this.inputHandler = inputHandler;
@@ -57,9 +57,9 @@ public class SubFormPanel implements IsWidget {
 
         // First add any records which are not yet present.
         for (SubRecordViewModel subRecord : viewModel.getSubRecords()) {
-            FieldPanel subPanel = panelMap.get(subRecord.getRecordRef());
+            FormPanel subPanel = panelMap.get(subRecord.getRecordRef());
             if(subPanel == null) {
-                subPanel = new FieldPanel(subTree, subRecord.getRecordRef(), inputHandler);
+                subPanel = new FormPanel(subTree, subRecord.getRecordRef(), inputHandler);
                 recordContainer.add(subPanel);
                 panelMap.put(subRecord.getRecordRef(), subPanel);
             }
@@ -67,9 +67,9 @@ public class SubFormPanel implements IsWidget {
         }
 
         // Now remove any that have been deleted
-        for (FieldPanel fieldPanel : panelMap.values()) {
-            if(!viewModel.getSubRecordRefs().contains(fieldPanel.getRecordRef())) {
-                recordContainer.remove(fieldPanel);
+        for (FormPanel formPanel : panelMap.values()) {
+            if(!viewModel.getSubRecordRefs().contains(formPanel.getRecordRef())) {
+                recordContainer.remove(formPanel);
             }
         }
     }

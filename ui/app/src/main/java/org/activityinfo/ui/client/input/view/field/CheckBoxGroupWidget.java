@@ -15,7 +15,11 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class MultipleSelectWidget implements FieldWidget {
+/**
+ * FieldWidget for {@link EnumType} fields with multiple cardinality that presents the options
+ * as check boxes.
+ */
+public class CheckBoxGroupWidget implements FieldWidget {
 
 
     private FlowPanel flowPanel;
@@ -23,7 +27,7 @@ public class MultipleSelectWidget implements FieldWidget {
 
     private boolean relevant = true;
 
-    public MultipleSelectWidget(EnumType enumType, FieldUpdater fieldUpdater) {
+    public CheckBoxGroupWidget(EnumType enumType, FieldUpdater fieldUpdater) {
 
         this.flowPanel = new FlowPanel();
         for (EnumItem enumItem : enumType.getValues()) {
@@ -53,7 +57,6 @@ public class MultipleSelectWidget implements FieldWidget {
     public void setRelevant(boolean relevant) {
         if (this.relevant != relevant) {
             this.relevant = relevant;
-
             for (CheckBox checkBox : checkBoxes.values()) {
                 checkBox.setEnabled(relevant);
             }

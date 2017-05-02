@@ -9,7 +9,13 @@ import org.activityinfo.ui.client.input.model.FormInputModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SubFormInputViewModelBuilder {
+/**
+ * Helper class which constructs a {@link SubFormInputViewModel}.
+ *
+ * <p>This class is built from a sub form's form tree and includes all the pre-computed information
+ * need to quickly compute a {@link SubFormInputViewModel} from a {@link FormInput}.
+ */
+class SubFormInputViewModelBuilder {
 
     private final ResourceId fieldId;
     private final ResourceId subFormId;
@@ -17,7 +23,7 @@ public class SubFormInputViewModelBuilder {
 
     private ResourceId placeholderRecordId;
 
-    public SubFormInputViewModelBuilder(FormTree.Node node, FormTree subTree) {
+    SubFormInputViewModelBuilder(FormTree.Node node, FormTree subTree) {
         this.fieldId = node.getFieldId();
         this.subFormId = subTree.getRootFormClass().getId();
         this.formBuilder = new FormInputViewModelBuilder(subTree);

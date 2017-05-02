@@ -4,14 +4,20 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
 
-public class SerialNumberEditor implements FieldWidget {
+/**
+ * FieldWidget for {@link org.activityinfo.model.type.SerialNumberType} fields.
+ *
+ * <p>Only displays values and does not allow input.</p>
+ */
+public class SerialNumberWidget implements FieldWidget {
 
     private TextField field;
 
-    public SerialNumberEditor() {
+    public SerialNumberWidget() {
+
         this.field = new TextField();
         this.field.setReadOnly(true);
-        this.field.getElement().setAttribute("placeholder", I18N.CONSTANTS.pending());
+        this.field.setEmptyText(I18N.CONSTANTS.pending());
     }
 
     @Override

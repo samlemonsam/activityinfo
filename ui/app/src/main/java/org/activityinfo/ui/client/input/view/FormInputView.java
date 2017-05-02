@@ -13,11 +13,14 @@ import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
 import org.activityinfo.ui.client.store.FormStore;
 
-public class InputPanel implements IsWidget, InputHandler {
+/**
+ * Root view for a {@link FormInputModel}
+ */
+public class FormInputView implements IsWidget, InputHandler {
 
     private final Observable<FormTree> formTree;
 
-    private FieldPanel fieldPanel = null;
+    private FormPanel formPanel = null;
 
     private FormInputModel inputModel;
     private FormInputViewModelBuilder viewModelBuilder = null;
@@ -25,7 +28,7 @@ public class InputPanel implements IsWidget, InputHandler {
 
     private VerticalLayoutContainer container;
 
-    public InputPanel(FormStore formStore, ResourceId formId) {
+    public FormInputView(FormStore formStore, ResourceId formId) {
 
         inputModel = new FormInputModel(new RecordRef(formId, ResourceId.generateSubmissionId(formId)));
 
@@ -42,14 +45,14 @@ public class InputPanel implements IsWidget, InputHandler {
         }
 
 
-        if(fieldPanel == null) {
+        if(formPanel == null) {
             viewModelBuilder = new FormInputViewModelBuilder(formTree.get());
-            fieldPanel = new FieldPanel(formTree.get(), inputModel.getRecordRef(), this);
-            container.add(fieldPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+            formPanel = new FormPanel(formTree.get(), inputModel.getRecordRef(), this);
+            container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
             container.forceLayout();
 
             FormInputViewModel viewModel = viewModelBuilder.build(inputModel);
-            fieldPanel.update(viewModel);
+            formPanel.update(viewModel);
 
         } else {
             // Alert the user that the schema has been updated.
@@ -75,6 +78,6 @@ public class InputPanel implements IsWidget, InputHandler {
     private void update(FormInputModel updatedModel) {
         this.inputModel = updatedModel;
         FormInputViewModel viewModel = viewModelBuilder.build(inputModel);
-        fieldPanel.update(viewModel);
+        formPanel.update(viewModel);
     }
 }

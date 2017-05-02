@@ -39,7 +39,5 @@ public class CoordinateField extends ValueBaseField<Double> {
                 return parser.format(object);
             }
         });
-
     }
-
 }
