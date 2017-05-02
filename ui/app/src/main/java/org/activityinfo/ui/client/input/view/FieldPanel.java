@@ -4,13 +4,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.input.model.FieldInput;
-import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.input.view.field.FieldView;
 import org.activityinfo.ui.client.input.view.field.FieldWidget;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
-import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,46 +18,54 @@ import static org.activityinfo.ui.client.input.view.field.FieldWidgetFactory.cre
 
 public class FieldPanel implements IsWidget {
 
-    private final FormInputViewModelBuilder viewModelBuilder;
     private final FlowPanel panel;
 
     private final List<FieldView> fieldViews = new ArrayList<>();
+    private final List<SubFormPanel> subFormViews = new ArrayList<>();
 
-    private FormInputModel inputModel;
-    private FormInputViewModel viewModel;
+    private InputHandler inputHandler;
+    private RecordRef recordRef;
 
-    public FieldPanel(FormTree formTree) {
-
+    public FieldPanel(FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
         InputResources.INSTANCE.style().ensureInjected();
 
-        this.viewModelBuilder = new FormInputViewModelBuilder(formTree);
+        this.recordRef = recordRef;
+        this.inputHandler = inputHandler;
 
         panel = new FlowPanel();
         panel.addStyleName(InputResources.INSTANCE.style().form());
 
         for (FormTree.Node node : formTree.getRootFields()) {
-            FieldWidget fieldWidget = createWidget(node.getType(), input -> onInput(node.getFieldId(), input));
+            if(node.isSubForm()) {
+                addSubForm(formTree, node);
+            } else {
+                FieldWidget fieldWidget = createWidget(node.getType(), input -> onInput(node, input));
 
-            if(fieldWidget != null) {
-                addField(node, fieldWidget);
+                if (fieldWidget != null) {
+                    addField(node, fieldWidget);
+                }
             }
         }
-
-        onInput(new FormInputModel());
     }
 
-    private void onInput(ResourceId fieldId, FieldInput input) {
-        onInput(inputModel.update(fieldId, input));
+    public RecordRef getRecordRef() {
+        return recordRef;
     }
 
-    private void onInput(FormInputModel inputModel) {
-        this.inputModel = inputModel;
-        this.viewModel = viewModelBuilder.build(inputModel);
-
+    public void update(FormInputViewModel viewModel) {
         // Update Field Views
         for (FieldView fieldView : fieldViews) {
             fieldView.getWidget().setRelevant(viewModel.isRelevant(fieldView.getFieldId()));
         }
+
+        // Update Subforms
+        for (SubFormPanel subFormView : subFormViews) {
+            subFormView.update(viewModel.getSubFormField(subFormView.getFieldId()));
+        }
+    }
+
+    private void onInput(FormTree.Node node, FieldInput input) {
+        inputHandler.updateModel(recordRef, node.getFieldId(), input);
     }
 
     private void addField(FormTree.Node node, FieldWidget fieldWidget) {
@@ -77,6 +84,16 @@ public class FieldPanel implements IsWidget {
         panel.add(fieldPanel);
 
         fieldViews.add(new FieldView(node.getFieldId(), fieldWidget, missingMessage));
+    }
+
+    private void addSubForm(FormTree formTree, FormTree.Node node) {
+        SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
+        FormTree subTree = formTree.subTree(subFormType.getClassId());
+
+        SubFormPanel subPanel = new SubFormPanel(node, subTree, inputHandler);
+
+        panel.add(subPanel);
+        subFormViews.add(subPanel);
     }
 
     private HTML missingMessage() {

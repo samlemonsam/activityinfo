@@ -109,9 +109,9 @@ public class FormInputViewModelBuilder {
         }
 
         // Build subform view models
-        Map<ResourceId, SubFormFieldViewModel> subFormMap = new HashMap<>();
+        Map<ResourceId, SubFormInputViewModel> subFormMap = new HashMap<>();
         for (SubFormInputViewModelBuilder subBuilder : subBuilders) {
-            subFormMap.put(subBuilder.getFieldId(), subBuilder.build());
+            subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel));
         }
 
         return new FormInputViewModel(formTree, inputModel,
@@ -140,7 +140,7 @@ public class FormInputViewModelBuilder {
                     record.set(field.getKey(), (FieldValue)null);
                 }
 
-                boolean wasRelevant = !relevantSet.add(field.getKey());
+                boolean wasRelevant = toggle(relevantSet, field.getKey(), relevant);
                 if(relevant != wasRelevant) {
                     changing = true;
 
@@ -148,6 +148,16 @@ public class FormInputViewModelBuilder {
             }
         } while(changing);
         return relevantSet;
+    }
+
+    private boolean toggle(Set<ResourceId> relevantSet, ResourceId fieldId, boolean relevant) {
+        if(relevant) {
+            boolean wasNotPresent = relevantSet.add(fieldId);
+            return !wasNotPresent;
+        } else {
+            boolean wasPresent = relevantSet.remove(fieldId);
+            return wasPresent;
+        }
     }
 
 

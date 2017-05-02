@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.input.viewModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 
 import java.util.Map;
@@ -14,7 +15,7 @@ public class FormInputViewModel {
     private FormTree formTree;
     private FormInputModel inputModel;
     private final Map<ResourceId, FieldValue> fieldValueMap;
-    private final Map<ResourceId, SubFormFieldViewModel> subFormMap;
+    private final Map<ResourceId, SubFormInputViewModel> subFormMap;
     private final Set<ResourceId> relevant;
     private final Set<ResourceId> missing;
     private final boolean valid;
@@ -22,7 +23,7 @@ public class FormInputViewModel {
     FormInputViewModel(FormTree formTree,
                        FormInputModel inputModel,
                        Map<ResourceId, FieldValue> fieldValueMap,
-                       Map<ResourceId, SubFormFieldViewModel> subFormMap,
+                       Map<ResourceId, SubFormInputViewModel> subFormMap,
                        Set<ResourceId> relevant,
                        Set<ResourceId> missing,
                        boolean valid) {
@@ -37,6 +38,10 @@ public class FormInputViewModel {
         this.valid = valid;
     }
 
+    public RecordRef getRecordRef() {
+        return inputModel.getRecordRef();
+    }
+
     public boolean isRelevant(ResourceId fieldId) {
         return relevant.contains(fieldId);
     }
@@ -45,7 +50,7 @@ public class FormInputViewModel {
         return valid;
     }
 
-    public SubFormFieldViewModel getSubFormField(ResourceId fieldId) {
+    public SubFormInputViewModel getSubFormField(ResourceId fieldId) {
         return subFormMap.get(fieldId);
     }
 }

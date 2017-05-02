@@ -2,19 +2,29 @@ package org.activityinfo.ui.client.input.model;
 
 
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class FormInputModel {
 
-    private final HashMap<ResourceId, FieldInput> fieldInputs;
+    private final RecordRef recordRef;
+    private final Map<ResourceId, FieldInput> fieldInputs;
+    private final Map<RecordRef, FormInputModel> subRecords;
 
-    public FormInputModel() {
-        fieldInputs = new HashMap<>();
+    public FormInputModel(RecordRef recordRef) {
+        this.recordRef = recordRef;
+        fieldInputs = Collections.emptyMap();
+        subRecords = Collections.emptyMap();
     }
 
-    private FormInputModel(HashMap<ResourceId, FieldInput> fieldInputs) {
-        this.fieldInputs = new HashMap<>(fieldInputs);
+    private FormInputModel(RecordRef recordRef, Map<ResourceId, FieldInput> fieldInputs, Map<RecordRef, FormInputModel> subRecords) {
+        this.recordRef = recordRef;
+        this.fieldInputs = fieldInputs;
+        this.subRecords = subRecords;
     }
 
     public FieldInput get(ResourceId fieldId) {
@@ -25,9 +35,48 @@ public class FormInputModel {
         return fieldInput;
     }
 
+    public RecordRef getRecordRef() {
+        return recordRef;
+    }
+
     public FormInputModel update(ResourceId fieldId, FieldInput input) {
-        FormInputModel newModel = new FormInputModel(this.fieldInputs);
-        newModel.fieldInputs.put(fieldId, input);
-        return newModel;
+        return update(recordRef, fieldId, input);
+    }
+
+    public FormInputModel update(RecordRef recordRef, ResourceId fieldId, FieldInput input) {
+
+        Map<ResourceId, FieldInput> updatedInputs = this.fieldInputs;
+        Map<RecordRef, FormInputModel> updatedSubRecords = this.subRecords;
+
+        if(recordRef.equals(this.recordRef)) {
+            updatedInputs = new HashMap<>(this.fieldInputs);
+            updatedInputs.put(fieldId, input);
+        } else {
+            updatedSubRecords = new HashMap<>(this.subRecords);
+            FormInputModel subRecord = updatedSubRecords.get(recordRef);
+            if(subRecord == null) {
+                subRecord = new FormInputModel(recordRef);
+            }
+            updatedSubRecords.put(recordRef, subRecord.update(recordRef, fieldId, input));
+        }
+
+        return new FormInputModel(this.recordRef, updatedInputs, updatedSubRecords);
+    }
+
+    public FormInputModel addSubRecord(RecordRef newRecordRef) {
+        assert !newRecordRef.equals(this.recordRef);
+
+        if(subRecords.containsKey(newRecordRef)) {
+            return this;
+        }
+
+        Map<RecordRef, FormInputModel> updatedSubRecords = new HashMap<>(this.subRecords);
+        updatedSubRecords.put(newRecordRef, new FormInputModel(newRecordRef));
+
+        return new FormInputModel(recordRef, fieldInputs, updatedSubRecords);
+    }
+
+    public Collection<FormInputModel> getSubRecords() {
+        return subRecords.values();
     }
 }
