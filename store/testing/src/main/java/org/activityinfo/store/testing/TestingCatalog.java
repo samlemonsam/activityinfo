@@ -22,12 +22,23 @@ public class TestingCatalog implements FormCatalog {
 
 
     public TestingCatalog() {
+
+        // Survey Use case
         add(new Survey());
-        add(new IntakeForm());
+
+        // Case Tracking use case
+        IntakeForm intake = new IntakeForm();
+        BioDataForm bioData = new BioDataForm(intake);
+        IncidentForm incidentForm = new IncidentForm(bioData);
+        ReferralSubForm referralSubForm = new ReferralSubForm(incidentForm);
+        add(intake, bioData, incidentForm, referralSubForm);
+
     }
 
-    private void add(TestForm testForm) {
-        formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
+    private void add(TestForm... testForms) {
+        for (TestForm testForm : testForms) {
+            formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
+        }
     }
 
 

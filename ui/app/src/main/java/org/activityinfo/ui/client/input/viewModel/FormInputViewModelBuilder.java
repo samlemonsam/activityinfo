@@ -8,14 +8,11 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,16 +28,28 @@ public class FormInputViewModelBuilder {
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
+    private List<SubFormInputViewModelBuilder> subBuilders = new ArrayList<>();
+
 
     public FormInputViewModelBuilder(FormTree formTree) {
         this.formTree = formTree;
         this.evalContext = new FormEvalContext(formTree.getRootFormClass());
 
         for (FormTree.Node node : formTree.getRootFields()) {
+            if(node.isSubForm()) {
+                subBuilders.add(buildSubBuilder(node));
+            }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
             }
         }
+    }
+
+    private SubFormInputViewModelBuilder buildSubBuilder(FormTree.Node node) {
+        SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
+        FormTree subTree = formTree.subTree(subFormType.getClassId());
+        SubFormInputViewModelBuilder builder = new SubFormInputViewModelBuilder(node, subTree);
+        return builder;
     }
 
     private void buildRelevanceCalculator(FormTree.Node node) {
@@ -55,16 +64,13 @@ public class FormInputViewModelBuilder {
             return;
         }
 
-        relevanceCalculators.put(node.getFieldId(), new Predicate<FormInstance>() {
-            @Override
-            public boolean apply(@Nullable FormInstance instance) {
-                evalContext.setInstance(instance);
-                try {
-                    return rootNode.evaluateAsBoolean(evalContext);
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Failed to evaluate relevance condition", e);
-                    return true;
-                }
+        relevanceCalculators.put(node.getFieldId(), instance -> {
+            evalContext.setInstance(instance);
+            try {
+                return rootNode.evaluateAsBoolean(evalContext);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Failed to evaluate relevance condition", e);
+                return true;
             }
         });
     }
@@ -91,12 +97,38 @@ public class FormInputViewModelBuilder {
             }
         }
 
-        // Determine which fields are "relevant"
-        Map<ResourceId, Boolean> relevantMap = new HashMap<>();
-        for (FormTree.Node node : formTree.getRootFields()) {
-            relevantMap.put(node.getFieldId(), true);
+        // Determine which fields are "relevant" and can be enabled
+        Set<ResourceId> relevantSet = computeRelevance(record);
+
+        // Finally, check to ensure that all required -AND- relevant
+        // values are provided
+        Set<ResourceId> missing = computeMissing(record, relevantSet);
+
+        if(!missing.isEmpty()) {
+            valid = false;
         }
 
+        // Build subform view models
+        Map<ResourceId, SubFormFieldViewModel> subFormMap = new HashMap<>();
+        for (SubFormInputViewModelBuilder subBuilder : subBuilders) {
+            subFormMap.put(subBuilder.getFieldId(), subBuilder.build());
+        }
+
+        return new FormInputViewModel(formTree, inputModel,
+                record.getFieldValueMap(),
+                subFormMap,
+                relevantSet,
+                missing, valid);
+    }
+
+    private Set<ResourceId> computeRelevance(FormInstance record) {
+        // All fields are relevant by default
+        Set<ResourceId> relevantSet = new HashSet<>();
+        for (FormTree.Node node : formTree.getRootFields()) {
+            relevantSet.add(node.getFieldId());
+        }
+
+        // Now keep updating the set until it converges
         boolean changing;
         do {
             changing = false;
@@ -108,30 +140,28 @@ public class FormInputViewModelBuilder {
                     record.set(field.getKey(), (FieldValue)null);
                 }
 
-                Boolean wasRelevant = relevantMap.put(field.getKey(), relevant);
+                boolean wasRelevant = !relevantSet.add(field.getKey());
                 if(relevant != wasRelevant) {
                     changing = true;
 
                 }
             }
         } while(changing);
+        return relevantSet;
+    }
 
-        // Finally, check to ensure that all required -AND- relevant
-        // values are provided
 
+    private Set<ResourceId> computeMissing(FormInstance record, Set<ResourceId> relevantSet) {
         Set<ResourceId> missing = new HashSet<>();
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.getField().isRequired()) {
-                if(relevantMap.get(node.getFieldId()) == Boolean.TRUE) {
+                if(relevantSet.contains(node.getFieldId())) {
                     if(record.get(node.getFieldId()) == null) {
                         missing.add(node.getFieldId());
-                        valid = false;
                     }
                 }
             }
         }
-
-        return new FormInputViewModel(formTree, inputModel, record.getFieldValueMap(),
-                relevantMap, missing, valid);
+        return missing;
     }
 }

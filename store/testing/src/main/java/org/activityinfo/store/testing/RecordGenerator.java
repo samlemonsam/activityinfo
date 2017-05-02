@@ -25,6 +25,7 @@ import java.util.Map;
 public class RecordGenerator {
 
     private final FormClass schema;
+    private Supplier<ResourceId> parentDistribution = Suppliers.ofInstance(null);
     private final Map<ResourceId, Supplier<FieldValue>> generators = new HashMap<>();
     private final Map<ResourceId, FormField> fieldMap = new HashMap<>();
 
@@ -39,6 +40,11 @@ public class RecordGenerator {
                 generators.put(field.getId(), generator(field));
             }
         }
+    }
+
+    public RecordGenerator parentForm(final TestForm parentForm) {
+        parentDistribution = new ParentGenerator(parentForm);
+        return this;
     }
 
     /**
@@ -68,6 +74,7 @@ public class RecordGenerator {
         for (int i = 0; i < rowCount; i++) {
             ResourceId recordId = ResourceId.valueOf("c" + i);
             FormInstance record = new FormInstance(recordId, schema.getId());
+            record.setParentRecordId(parentDistribution.get());
             for (Map.Entry<ResourceId, Supplier<FieldValue>> entry : generators.entrySet()) {
                 record.set(entry.getKey(), entry.getValue().get());
             }

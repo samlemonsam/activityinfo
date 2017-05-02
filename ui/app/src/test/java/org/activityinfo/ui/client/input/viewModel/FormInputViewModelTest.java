@@ -1,10 +1,12 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.store.testing.IncidentForm;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.store.TestingFormStore;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -53,4 +55,20 @@ public class FormInputViewModelTest {
 
     }
 
+    @Test
+    public void testSubFormInput() {
+
+        TestingFormStore store = new TestingFormStore();
+
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store.getFormTree(IncidentForm.FORM_ID).get());
+
+        // Start with empty input
+        FormInputModel inputModel = new FormInputModel();
+
+        // Should see one (empty) subform record
+        FormInputViewModel viewModel = builder.build(inputModel);
+        SubFormFieldViewModel referralSubForm = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
+
+        assertThat(referralSubForm.getSubRecords(), Matchers.hasSize(1));
+    }
 }

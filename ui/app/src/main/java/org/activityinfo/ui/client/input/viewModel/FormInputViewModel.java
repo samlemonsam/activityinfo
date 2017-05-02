@@ -14,19 +14,23 @@ public class FormInputViewModel {
     private FormTree formTree;
     private FormInputModel inputModel;
     private final Map<ResourceId, FieldValue> fieldValueMap;
-    private final Map<ResourceId, Boolean> relevantMap;
+    private final Map<ResourceId, SubFormFieldViewModel> subFormMap;
+    private final Set<ResourceId> relevant;
     private final Set<ResourceId> missing;
     private final boolean valid;
 
     FormInputViewModel(FormTree formTree,
                        FormInputModel inputModel,
                        Map<ResourceId, FieldValue> fieldValueMap,
-                       Map<ResourceId, Boolean> relevantMap, Set<ResourceId> missing,
+                       Map<ResourceId, SubFormFieldViewModel> subFormMap,
+                       Set<ResourceId> relevant,
+                       Set<ResourceId> missing,
                        boolean valid) {
         this.formTree = formTree;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
-        this.relevantMap = relevantMap;
+        this.subFormMap = subFormMap;
+        this.relevant = relevant;
 
 
         this.missing = missing;
@@ -34,10 +38,14 @@ public class FormInputViewModel {
     }
 
     public boolean isRelevant(ResourceId fieldId) {
-        return relevantMap.get(fieldId) == Boolean.TRUE;
+        return relevant.contains(fieldId);
     }
 
     public boolean isValid() {
         return valid;
+    }
+
+    public SubFormFieldViewModel getSubFormField(ResourceId fieldId) {
+        return subFormMap.get(fieldId);
     }
 }

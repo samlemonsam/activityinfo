@@ -28,6 +28,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
@@ -88,6 +89,10 @@ public class FormInstance {
 
     public ResourceId getId() {
         return id;
+    }
+
+    public RecordRef getRef() {
+        return new RecordRef(getFormId(), getId());
     }
 
     public FormInstance setId(ResourceId id) {
@@ -285,4 +290,5 @@ public class FormInstance {
 
         return object;
     }
+
 }
