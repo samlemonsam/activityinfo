@@ -340,8 +340,15 @@ public class Updater {
             }
             validateType(field, change.getValue());
         }
-        
-        // Verify that all required fields are provided for new resources
+
+        // AI-1578 Allow missing fields
+        //validateRequiredFields(formClass, existingResource, update);
+    }
+
+    /**
+     * Verify that all required fields are provided for new resources
+     */
+    private static void validateRequiredFields(FormClass formClass, Optional<FormRecord> existingResource, RecordUpdate update) {
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
                 if (formField.isRequired() &&
