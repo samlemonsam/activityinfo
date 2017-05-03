@@ -21,9 +21,21 @@ package org.activityinfo.ui.client.component.formdesigner.skip;
  * #L%
  */
 
+import com.google.common.collect.Lists;
+import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.functions.BooleanFunctions;
 import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.HasSetFieldValue;
+import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.primitive.BooleanFieldValue;
+import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.primitive.TextValue;
+
+import java.util.List;
 
 /**
  * @author yuriyz on 7/25/14.
@@ -76,6 +88,83 @@ public class RowData {
 
     public void setValue(FieldValue value) {
         this.value = value;
+    }
+
+    /**
+     * Constructs a boolean-typed predicate expression node
+     */
+    public ExprNode buildPredicateExpr() {
+
+        SymbolExpr fieldExpr = new SymbolExpr(formField.getId());
+
+        // FUNCTIONS building
+        if (RelevanceRowPresenter.SET_FUNCTIONS.contains(function)) {
+            return buildSetPredicate(fieldExpr);
+
+        } else {
+            // OPERATOR building
+            if (value instanceof BooleanFieldValue || value instanceof Quantity || value instanceof TextValue) {
+                return new FunctionCallNode(function, fieldExpr, newConstant(value));
+
+            } else if (value instanceof HasSetFieldValue) {
+                List<ResourceId> idSet = Lists.newArrayList(((HasSetFieldValue) value).getResourceIds());
+                if (idSet.size() == 1) {
+                    return new FunctionCallNode(function, fieldExpr, new SymbolExpr(idSet.get(0)));
+                } else {
+                    return new GroupExpr(buildNodeForSet(fieldExpr, idSet));
+                }
+            } else {
+                throw new UnsupportedOperationException("Not supported value: " + value);
+            }
+        }
+    }
+
+    /**
+     * Builds an expression for a set predicate like containsAll, containsAny
+     */
+    private ExprNode buildSetPredicate(SymbolExpr fieldExpr) {
+        List<ExprNode> arguments = Lists.newArrayList();
+        arguments.add(fieldExpr);
+
+        if (value instanceof BooleanFieldValue || value instanceof Quantity || value instanceof TextValue) {
+            arguments.add(newConstant(value));
+
+        } else if (value instanceof HasSetFieldValue) {
+            List<ResourceId> idSet = Lists.newArrayList(((HasSetFieldValue)value).getResourceIds());
+            for (ResourceId resourceId : idSet) {
+                arguments.add(new SymbolExpr(resourceId.asString()));
+            }
+        } else {
+            throw new UnsupportedOperationException("Not supported value: " + value);
+        }
+        return new FunctionCallNode(function, arguments);
+    }
+
+
+    private static ExprNode newConstant(FieldValue value) {
+        if (value instanceof BooleanFieldValue) {
+            return new ConstantExpr(value, BooleanType.INSTANCE);
+        } else if (value instanceof Quantity) {
+            return new ConstantExpr((Quantity)value);
+        } else if (value instanceof TextValue) {
+            return new ConstantExpr(value, TextType.SIMPLE);
+        } else {
+            throw new IllegalArgumentException("value: "+ value);
+        }
+    }
+
+
+    private ExprNode buildNodeForSet(ExprNode left, List<ResourceId> values) {
+        ExprFunction internalFunction = BooleanFunctions.OR;
+        if (function == BooleanFunctions.NOT_EQUAL) {
+            internalFunction = BooleanFunctions.AND;
+        }
+
+        final List<ExprNode> arguments = Lists.newArrayList();
+        for (ResourceId value : values) {
+            arguments.add(new GroupExpr(new FunctionCallNode(function, left, new SymbolExpr(value))));
+        }
+        return new FunctionCallNode(internalFunction, arguments);
     }
 
     @Override

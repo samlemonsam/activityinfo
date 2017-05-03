@@ -98,6 +98,26 @@ public class ExpressionBuilderTest {
         assertCorrectRoundTripTranslation("containsAll(test_f1, test_ev1)", row);
     }
 
+
+    @Test
+    public void multipleConditions() {
+        RowData row = new RowData();
+        row.setFormField(formClass.getField(GENDER_FIELD_ID));
+        row.setFunction(ContainsAllFunction.INSTANCE);
+        row.setValue(new EnumValue(Sets.newHashSet(enumValue(GENDER_FIELD_ID, "Male").getId())));
+        row.setJoinFunction(BooleanFunctions.AND);
+
+        RowData row2 = new RowData();
+        row2.setFormField(formClass.getField(PREGNANT_FIELD_ID));
+        row2.setFunction(BooleanFunctions.NOT_EQUAL);
+        row2.setValue(new EnumValue(Arrays.asList(enumValue(PREGNANT_FIELD_ID, "No").getId())));
+        row2.setJoinFunction(BooleanFunctions.OR);
+
+        assertCorrectRoundTripTranslation("(containsAll(test_f1, test_ev1))||(test_f2!=test_ev4)", row, row2);
+    }
+
+
+
     @Test
     public void text() {
         RowData row = new RowData();
