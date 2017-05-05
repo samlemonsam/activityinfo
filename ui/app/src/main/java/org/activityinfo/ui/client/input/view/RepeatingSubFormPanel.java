@@ -85,7 +85,7 @@ public class RepeatingSubFormPanel implements IsWidget {
         }
 
         // Add a new sub record with unique ID
-        ResourceId subFormId = subTree.getRootFormClass().getId();
+        ResourceId subFormId = subTree.getRootFormId();
         ResourceId newSubRecordId = ResourceId.generateId();
 
         inputHandler.addSubRecord(new RecordRef(subFormId, newSubRecordId));

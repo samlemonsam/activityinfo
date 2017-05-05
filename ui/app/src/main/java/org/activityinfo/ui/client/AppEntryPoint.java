@@ -3,6 +3,7 @@ package org.activityinfo.ui.client;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
@@ -44,7 +45,7 @@ public class AppEntryPoint implements EntryPoint {
 
         ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
         HttpBus httpBus = new HttpBus(client);
-        FormStore formStore = new FormStoreImpl(httpBus, offlineStore);
+        FormStore formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
 
         Viewport viewport = new Viewport();
         AppFrame appFrame = new AppFrame(httpBus);

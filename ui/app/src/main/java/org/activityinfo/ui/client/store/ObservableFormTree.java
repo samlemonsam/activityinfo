@@ -1,8 +1,9 @@
 package org.activityinfo.ui.client.store;
 
-import com.google.gwt.core.client.impl.SchedulerImpl;
-import org.activityinfo.model.form.FormClass;
+import com.google.gwt.core.client.Scheduler;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.ResourceId;
@@ -26,10 +27,11 @@ class ObservableFormTree extends Observable<FormTree> {
 
     private static final Logger LOGGER = Logger.getLogger(ObservableFormTree.class.getName());
 
-    private ResourceId rootFormId;
-    private Function<ResourceId, Observable<FormClass>> provider;
+    private final ResourceId rootFormId;
+    private final Function<ResourceId, Observable<FormMetadata>> provider;
+    private final Scheduler scheduler;
 
-    private Map<ResourceId, Observable<FormClass>> forms = new HashMap<>();
+    private Map<ResourceId, Observable<FormMetadata>> forms = new HashMap<>();
     private Map<ResourceId, Subscription> subscriptions = new HashMap<>();
 
     private FormTree tree;
@@ -37,10 +39,18 @@ class ObservableFormTree extends Observable<FormTree> {
     private boolean crawling = false;
     private boolean crawlPending = false;
 
-    public ObservableFormTree(ResourceId rootFormId, Function<ResourceId, Observable<FormClass>> provider) {
+    public ObservableFormTree(ResourceId rootFormId, Function<ResourceId, Observable<FormMetadata>> provider,
+                              Scheduler scheduler) {
         this.rootFormId = rootFormId;
         this.provider = provider;
+        this.scheduler = scheduler;
     }
+
+    public ObservableFormTree(ResourceId rootFormId, Function<ResourceId, Observable<FormMetadata>> provider) {
+        this(rootFormId, provider, Scheduler.get());
+    }
+
+
 
     @Override
     public boolean isLoading() {
@@ -61,10 +71,10 @@ class ObservableFormTree extends Observable<FormTree> {
     private void connectTo(ResourceId formId) {
         if(!forms.containsKey(formId)) {
 
-            Observable<FormClass> formClass = provider.apply(formId);
-            Subscription subscription = formClass.subscribe(this::onFormClassChanged);
+            Observable<FormMetadata> metadata = provider.apply(formId);
+            Subscription subscription = metadata.subscribe(this::onFormMetadataChanged);
 
-            forms.put(formId, formClass);
+            forms.put(formId, metadata);
             subscriptions.put(formId, subscription);
         }
     }
@@ -75,7 +85,7 @@ class ObservableFormTree extends Observable<FormTree> {
         subscription.unsubscribe();
     }
 
-    private void onFormClassChanged(Observable<FormClass> formClass) {
+    private void onFormMetadataChanged(Observable<FormMetadata> formClass) {
         if(formClass.isLoaded()) {
             if(crawling) {
                 crawlPending = true;
@@ -127,7 +137,7 @@ class ObservableFormTree extends Observable<FormTree> {
                 rebuildTree();
 
             } else if(crawlPending) {
-                SchedulerImpl.INSTANCE.scheduleDeferred(this::recrawl);
+                scheduler.scheduleDeferred(this::recrawl);
                 crawlPending = false;
             }
 
@@ -146,21 +156,25 @@ class ObservableFormTree extends Observable<FormTree> {
             return;
         }
 
-        Observable<FormClass> form = forms.get(parentId);
-        if(form == null) {
+        Observable<FormMetadata> metadata = forms.get(parentId);
+        if(metadata == null) {
             missing.add(parentId);
-        } else if(form.isLoading()) {
+
+        } else if(metadata.isLoading()) {
             loading.add(parentId);
-        } else {
-            for (FormField field : form.get().getFields()) {
-                if(field.getType() instanceof ReferenceType) {
-                    ReferenceType type = (ReferenceType) field.getType();
-                    for (ResourceId childId : type.getRange()) {
-                        crawl(childId, reachable, missing, loading);
+
+        } else if(metadata.isLoaded()) {
+            if(metadata.get().isAccessible()) {
+                for (FormField field : metadata.get().getSchema().getFields()) {
+                    if (field.getType() instanceof ReferenceType) {
+                        ReferenceType type = (ReferenceType) field.getType();
+                        for (ResourceId childId : type.getRange()) {
+                            crawl(childId, reachable, missing, loading);
+                        }
+                    } else if (field.getType() instanceof SubFormReferenceType) {
+                        SubFormReferenceType type = (SubFormReferenceType) field.getType();
+                        crawl(type.getClassId(), reachable, missing, loading);
                     }
-                } else if(field.getType() instanceof SubFormReferenceType) {
-                    SubFormReferenceType type = (SubFormReferenceType) field.getType();
-                    crawl(type.getClassId(), reachable, missing, loading);
                 }
             }
         }
@@ -170,13 +184,17 @@ class ObservableFormTree extends Observable<FormTree> {
      * After we have a loaded copy of all the form schemas, build the form tree and fire listeners.
      */
     private void rebuildTree() {
-        try {
-            FormTreeBuilder builder = new FormTreeBuilder(formId -> {
-                Observable<FormClass> formClass = forms.get(formId);
-                assert formClass != null : "Form " + formId + " is missing!";
-                assert formClass.isLoaded() : "Form " + formId + " is still loading!";
 
-                return formClass.get();
+        try {
+            FormTreeBuilder builder = new FormTreeBuilder(new FormMetadataProvider() {
+                @Override
+                public FormMetadata getFormMetadata(ResourceId formId) {
+                    Observable<FormMetadata> metadata = forms.get(formId);
+                    assert metadata != null : "Form " + formId + " is missing!";
+                    assert !metadata.isLoading() : "Form " + formId + " is still loading!";
+
+                    return metadata.get();
+                }
             });
 
             this.tree = builder.queryTree(rootFormId);

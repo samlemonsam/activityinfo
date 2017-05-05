@@ -26,6 +26,7 @@ public class ReferralSubForm implements TestForm {
     public ReferralSubForm(IncidentForm parentForm) {
         this.parentForm = parentForm;
         formClass = new FormClass(FORM_ID);
+        formClass.setLabel("Referral Form");
         formClass.setSubFormKind(SubFormKind.REPEATING);
         formClass.setParentFormId(parentForm.getFormId());
 

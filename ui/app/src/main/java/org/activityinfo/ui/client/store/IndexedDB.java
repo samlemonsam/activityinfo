@@ -25,7 +25,9 @@ public class IndexedDB extends JavaScriptObject {
         request.onupgradeneeded = function(event) {
             var db = event.target.result;
             var schemaStore = db.createObjectStore("formSchemas", { keyPath: "id" });
+
             var formStore = db.createObjectStore("forms", {keyPath: "formId"});
+
             var recordStore = db.createObjectStore("records", {keyPath: [ "formId", "recordId"]});
             recordStore.createIndex("formId", "formId", { unique: false });
             recordStore.createIndex("parentFormId", "parentFormId", { unique: false });

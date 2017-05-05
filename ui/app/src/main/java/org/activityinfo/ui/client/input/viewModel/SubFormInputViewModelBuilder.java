@@ -25,7 +25,7 @@ class SubFormInputViewModelBuilder {
 
     SubFormInputViewModelBuilder(FormTree.Node node, FormTree subTree) {
         this.fieldId = node.getFieldId();
-        this.subFormId = subTree.getRootFormClass().getId();
+        this.subFormId = subTree.getRootFormId();
         this.formBuilder = new FormInputViewModelBuilder(subTree);
         this.placeholderRecordId = ResourceId.generateId();
     }

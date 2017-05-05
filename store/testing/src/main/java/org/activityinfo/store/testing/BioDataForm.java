@@ -28,6 +28,8 @@ public class BioDataForm implements TestForm {
     public BioDataForm(IntakeForm intakeForm) {
         this.intakeForm = intakeForm;
         formClass = new FormClass(FORM_ID);
+        formClass.setLabel("Confidential BioData");
+
         codeField = formClass.addField(PROTECTION_CODE_FIELD_ID)
                 .setCode("PCODE")
                 .setLabel("Protection Code")

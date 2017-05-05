@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -70,6 +71,26 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         } else {
             return Promise.rejected(new UnsupportedOperationException("No such form: " + formId));
         }
+    }
+
+    @Override
+    public Promise<FormMetadata> getFormMetadata(String formId) {
+        if(!connected) {
+            return Promise.rejected(new RuntimeException("Offline"));
+        }
+
+        FormMetadata metadata = new FormMetadata();
+        metadata.setId(ResourceId.valueOf(formId));
+        metadata.setVersion(1);
+        metadata.setSchemaVersion(1);
+
+        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        if(!form.isPresent()) {
+            metadata.setDeleted(false);
+        } else {
+            metadata.setSchema(form.get().getFormClass());
+        }
+        return Promise.resolved(metadata);
     }
 
     @Override

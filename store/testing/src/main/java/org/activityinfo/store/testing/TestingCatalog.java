@@ -37,6 +37,7 @@ public class TestingCatalog implements FormCatalog {
 
     private void add(TestForm... testForms) {
         for (TestForm testForm : testForms) {
+            assert testForm.getFormClass().getLabel() != null : testForm.getFormId() + " is missing label";
             formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
         }
     }

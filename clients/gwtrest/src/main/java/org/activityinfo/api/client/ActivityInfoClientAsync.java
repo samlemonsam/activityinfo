@@ -2,6 +2,7 @@ package org.activityinfo.api.client;
 
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -71,6 +72,9 @@ public interface ActivityInfoClientAsync {
    * @param formId Id of the form
    */
   Promise<FormClass> getFormSchema(String formId);
+
+
+  Promise<FormMetadata> getFormMetadata(String formId);
 
   /**
    * Updates a Form's Schema

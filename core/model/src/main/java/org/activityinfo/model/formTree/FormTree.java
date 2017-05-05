@@ -3,7 +3,6 @@ package org.activityinfo.model.formTree;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.UnmodifiableIterator;
@@ -26,6 +25,13 @@ import java.util.*;
  */
 public class FormTree implements FormClassProvider {
 
+    private ResourceId rootFormId;
+
+    public enum State {
+        VALID,
+        DELETED,
+        FORBIDDEN
+    }
 
     public class Node {
 
@@ -258,12 +264,25 @@ public class FormTree implements FormClassProvider {
         BREADTH_FIRST
     }
 
+    private State rootState = State.VALID;
     private List<Node> rootFields = Lists.newArrayList();
     private Map<FieldPath, Node> nodeMap = Maps.newHashMap();
     private Map<ResourceId, FormClass> formClassMap = new HashMap<>();
 
-    public FormTree() {
+    public FormTree(ResourceId rootFormId) {
+        this.rootFormId = rootFormId;
+    }
 
+    public ResourceId getRootFormId() {
+        return rootFormId;
+    }
+
+    public State getRootState() {
+        return rootState;
+    }
+
+    public void setRootState(State rootState) {
+        this.rootState = rootState;
     }
 
     public Node addRootField(FormClass declaringClass, FormField field) {
@@ -320,15 +339,7 @@ public class FormTree implements FormClassProvider {
     }
 
     public FormClass getRootFormClass() {
-        return Iterables.getOnlyElement(getRootFormClasses().values());
-    }
-    
-    public Map<ResourceId, FormClass> getRootFormClasses() {
-        Map<ResourceId, FormClass> map = Maps.newHashMap();
-        for(Node node : rootFields) {
-            map.put(node.getDefiningFormClass().getId(), node.getDefiningFormClass());
-        }
-        return map;
+        return formClassMap.get(rootFormId);
     }
 
     public FormClass getFormClass(ResourceId formClassId) {

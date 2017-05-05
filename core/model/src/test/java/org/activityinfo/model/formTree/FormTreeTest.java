@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class FormTreeTest {
 
@@ -51,8 +52,6 @@ public class FormTreeTest {
         FormTree reTree = JsonFormTreeBuilder.fromJson(object);
         
         checkStudentTree(reTree);
-        
-
 
     }
     
@@ -60,7 +59,7 @@ public class FormTreeTest {
 
         FormTreePrettyPrinter.print(tree);
 
-        assertThat(tree.getRootFormClasses().values(), contains(hasProperty("id", equalTo(forms.student.getId()))));
+        assertThat(tree.getRootFormId(), equalTo(forms.student.getId()));
         assertThat(tree, hasNode(path("name"), notNullValue()));
         assertThat(tree, hasNode(path("school", "schoolId"), notNullValue()));
         assertThat(tree, hasNode(path("school", "village", "name"), notNullValue()));

@@ -31,10 +31,12 @@ public class IncidentForm implements TestForm {
     public IncidentForm(BioDataForm bioDataForm) {
         this.bioDataForm = bioDataForm;
         formClass = new FormClass(FORM_ID);
+        formClass.setLabel("Incident Form");
+
         codeField = formClass.addField(PROTECTION_CODE_FIELD_ID)
                 .setCode("PCODE")
                 .setLabel("Protection Code")
-                .setType(new ReferenceType(Cardinality.SINGLE, Survey.FORM_ID))
+                .setType(new ReferenceType(Cardinality.SINGLE, BioDataForm.FORM_ID))
                 .setRequired(true)
                 .setVisible(true);
 

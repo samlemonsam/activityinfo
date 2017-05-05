@@ -1,8 +1,9 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.collect.Maps;
+import com.google.gwt.core.client.Scheduler;
 import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
@@ -10,6 +11,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.http.CatalogRequest;
 import org.activityinfo.ui.client.http.HttpBus;
 import org.activityinfo.ui.client.http.QueryRequest;
@@ -25,18 +27,20 @@ public class FormStoreImpl implements FormStore {
 
     private static final Logger LOGGER = Logger.getLogger(FormStoreImpl.class.getName());
 
-    private HttpBus httpBus;
-    private OfflineStore offlineStore;
+    private final HttpBus httpBus;
+    private final OfflineStore offlineStore;
+    private final Scheduler scheduler;
 
     private Map<ResourceId, ObservableForm> formMap = Maps.newHashMap();
 
-    public FormStoreImpl(HttpBus httpBus, OfflineStore offlineStore) {
+    public FormStoreImpl(HttpBus httpBus, OfflineStore offlineStore, Scheduler scheduler) {
         this.httpBus = httpBus;
         this.offlineStore = offlineStore;
+        this.scheduler = scheduler;
     }
 
     @Override
-    public Observable<FormClass> getFormClass(ResourceId formId) {
+    public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
         ObservableForm form = formMap.get(formId);
         if(form == null) {
             form = new ObservableForm(httpBus, offlineStore, formId);
@@ -46,8 +50,13 @@ public class FormStoreImpl implements FormStore {
     }
 
     @Override
+    public Promise<Void> deleteForm(ResourceId formId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Observable<FormTree> getFormTree(ResourceId rootFormId) {
-        return new ObservableFormTree(rootFormId, this::getFormClass);
+        return new ObservableFormTree(rootFormId, this::getFormMetadata, scheduler);
     }
 
     @Override

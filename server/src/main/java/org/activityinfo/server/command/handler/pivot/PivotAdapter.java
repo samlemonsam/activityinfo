@@ -714,7 +714,7 @@ public class PivotAdapter {
         Preconditions.checkNotNull(formTree, "formTree");
         Preconditions.checkNotNull(formTree.getRootFormClass(), "formTree.rootFormClass");
 
-        ResourceId rootFormClassId = formTree.getRootFormClass().getId();
+        ResourceId rootFormClassId = formTree.getRootFormId();
         if(rootFormClassId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Root form class is the site, we need to compare against the ID
             return ColumnModel.ID_SYMBOL;

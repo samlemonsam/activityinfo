@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -62,6 +63,11 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
             return Promise.rejected(e);
         }
         return Promise.resolved(formClass);
+    }
+
+    @Override
+    public Promise<FormMetadata> getFormMetadata(String formId) {
+        return Promise.rejected(new UnsupportedOperationException());
     }
 
 

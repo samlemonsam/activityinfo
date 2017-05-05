@@ -2,9 +2,10 @@ package org.activityinfo.ui.client.store;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.http.FormSchemaRequest;
+import org.activityinfo.ui.client.http.FormMetadataRequest;
 import org.activityinfo.ui.client.http.HttpBus;
 import org.activityinfo.ui.client.http.HttpSubscription;
 
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
  * Maintains a cache of a FormSchema.
  *
  */
-class ObservableForm extends Observable<FormClass> {
+class ObservableForm extends Observable<FormMetadata> {
 
     private static final Logger LOGGER = Logger.getLogger(ObservableForm.class.getName());
 
@@ -38,6 +39,8 @@ class ObservableForm extends Observable<FormClass> {
      */
     private FormClass schema = null;
 
+    private FormMetadata metadata = null;
+
     private HttpSubscription httpSubscription = null;
 
     public ObservableForm(HttpBus httpBus, OfflineStore offlineStore, ResourceId formId) {
@@ -57,35 +60,44 @@ class ObservableForm extends Observable<FormClass> {
             // Try to load from the offline cache while starting a network request at the same time
             this.offlineStore.loadSchema(formId, this::cachedVersionLoaded);
 
-            this.httpSubscription = httpBus.submit(new FormSchemaRequest(formId), new AsyncCallback<FormClass>() {
+            this.httpSubscription = httpBus.submit(new FormMetadataRequest(formId), new AsyncCallback<FormMetadata>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     // TODO: handle deleted / no permission...
                 }
 
                 @Override
-                public void onSuccess(FormClass result) {
-                    if (result.getSchemaVersion() > schemaVersion) {
-                        newVersionFetched(result);
-                    }
+                public void onSuccess(FormMetadata result) {
+                    newMetadataFetched(result);
                 }
+
             });
         }
+    }
+
+
+    private void newMetadataFetched(FormMetadata result) {
+        if (result.getSchemaVersion() > schemaVersion) {
+            newSchemaVersionFetched(result.getSchema());
+        }
+        this.metadata = result;
+        this.fireChange();
     }
 
     /**
      * A new version has been loaded from the network.
      */
-    private void newVersionFetched(FormClass result) {
+    private void newSchemaVersionFetched(FormClass result) {
 
         LOGGER.info(formId + ": received version from network " + result.getSchemaVersion());
 
         this.schema = result;
         this.schemaVersion = result.getSchemaVersion();
-        this.fireChange();
 
         offlineStore.putSchema(result);
     }
+
+
 
 
     /**
@@ -96,6 +108,14 @@ class ObservableForm extends Observable<FormClass> {
             LOGGER.info(formId + ": Loaded version " + cachedSchema.getSchemaVersion() + " from offline store");
             this.schema = cachedSchema;
             this.schemaVersion = cachedSchema.getSchemaVersion();
+
+            // TODO: this is not complete
+            this.metadata = new FormMetadata();
+            this.metadata.setId(this.formId);
+            this.metadata.setVersion(cachedSchema.getSchemaVersion());
+            this.metadata.setSchemaVersion(cachedSchema.getSchemaVersion());
+            this.metadata.setSchema(cachedSchema);
+
             fireChange();
         }
     }
@@ -117,8 +137,8 @@ class ObservableForm extends Observable<FormClass> {
     }
 
     @Override
-    public FormClass get() {
+    public FormMetadata get() {
         assert !isLoading() : "loading: " + formId;
-        return schema;
+        return metadata;
     }
 }

@@ -72,6 +72,8 @@ public class Survey implements TestForm {
 
     public Survey() {
         formClass = new FormClass(FORM_ID);
+        formClass.setLabel("Household Survey");
+
         nameField = formClass.addField(NAME_FIELD_ID)
                 .setCode("NAME")
                 .setLabel("Respondent Name")

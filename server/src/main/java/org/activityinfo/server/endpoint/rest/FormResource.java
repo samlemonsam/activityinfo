@@ -13,6 +13,7 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.Pair;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -84,6 +85,42 @@ public class FormResource {
         this.permissionOracle = permissionOracle;
         this.blobAuthorizer = blobAuthorizer;
         this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
+    }
+
+    @GET
+    @Produces(JSON_CONTENT_TYPE)
+    public Response getMetadataResponse(@QueryParam("localVersion") long localVersion) {
+        FormMetadata metadata = getFormMetadata(localVersion);
+
+        return Response.ok()
+                .entity(prettyPrintingGson.toJson(metadata.toJsonObject()))
+                .type(JSON_CONTENT_TYPE).build();
+    }
+
+    private FormMetadata getFormMetadata(long localVersion) {
+        FormMetadata metadata = new FormMetadata();
+        metadata.setId(formId);
+        Optional<FormStorage> collection = this.catalog.get().getForm(formId);
+        if(!collection.isPresent()) {
+            metadata.setDeleted(true);
+            return metadata;
+        }
+        FormPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
+        if(!permissions.isVisible()) {
+            metadata.setVisible(false);
+            return metadata;
+        }
+
+        FormClass schema = collection.get().getFormClass();
+
+        metadata.setVersion(collection.get().cacheVersion());
+        metadata.setSchemaVersion(schema.getSchemaVersion());
+
+        if(localVersion < schema.getSchemaVersion()) {
+            metadata.setSchema(schema);
+        }
+
+        return metadata;
     }
 
     /**

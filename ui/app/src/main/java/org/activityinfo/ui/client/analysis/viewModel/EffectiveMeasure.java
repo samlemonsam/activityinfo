@@ -33,7 +33,7 @@ public class EffectiveMeasure {
     }
 
     public ResourceId getFormId() {
-        return formTree.getRootFormClass().getId();
+        return formTree.getRootFormId();
     }
 
     public MeasureModel getModel() {

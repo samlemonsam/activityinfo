@@ -5,6 +5,7 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.safehtml.shared.UriUtils;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -321,7 +322,40 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     return result;
   }
 
-  /**
+    @Override
+    public Promise<FormMetadata> getFormMetadata(String formId) {
+      StringBuilder urlBuilder = new StringBuilder(baseUrl);
+      urlBuilder.append("/form");
+      urlBuilder.append("/").append(formId);
+      final String url = urlBuilder.toString();
+      final Promise<FormMetadata> result = new Promise<>();
+      RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, url);
+      requestBuilder.setCallback(new RequestCallback() {
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+          if(response.getStatusCode() == 200) {
+            result.resolve(FormMetadata.fromJson(JSON_PARSER.parse(response.getText()).getAsJsonObject()));
+            return;
+          }
+          LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getStatusText());
+          result.reject(new ApiException(response.getStatusCode()));
+        }
+
+        @Override
+        public void onError(Request request, Throwable error) {
+          LOGGER.log(Level.SEVERE, "Request to " + url + " failed: " + error.getMessage(), error);
+          result.reject(error);
+        }
+      });
+      try {
+        requestBuilder.send();
+      } catch(RequestException e) {
+        result.reject(e);
+      }
+      return result;
+    }
+
+    /**
    * Updates a Form's Schema
    *
    * Updates the form

@@ -1,9 +1,11 @@
 package org.activityinfo.ui.client.input.viewModel;
 
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.observable.ObservableTesting;
 import org.activityinfo.store.testing.IncidentForm;
 import org.activityinfo.store.testing.ReferralSubForm;
 import org.activityinfo.store.testing.Survey;
@@ -23,7 +25,7 @@ public class FormInputViewModelTest {
 
         TestingFormStore store = new TestingFormStore();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store.getFormTree(Survey.FORM_ID).get());
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(fetchTree(store, Survey.FORM_ID));
 
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(Survey.FORM_ID, ResourceId.generateId()));
@@ -64,7 +66,7 @@ public class FormInputViewModelTest {
 
         TestingFormStore store = new TestingFormStore();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store.getFormTree(IncidentForm.FORM_ID).get());
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(fetchTree(store, IncidentForm.FORM_ID));
 
         // Start with empty input
         FormInputModel inputModel = new FormInputModel(new RecordRef(IncidentForm.FORM_ID, ResourceId.generateId()));
@@ -92,5 +94,11 @@ public class FormInputViewModelTest {
 
         assertThat(referralSubForm.getSubRecords(), hasSize(2));
     }
+
+
+    private FormTree fetchTree(TestingFormStore store, ResourceId formId) {
+        return ObservableTesting.connect(store.getFormTree(formId)).assertLoaded();
+    }
+
 
 }

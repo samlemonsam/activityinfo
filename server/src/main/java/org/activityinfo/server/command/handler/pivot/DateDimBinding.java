@@ -34,7 +34,7 @@ public class DateDimBinding extends DimBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        ResourceId classId = formTree.getRootFormClass().getId();
+        ResourceId classId = formTree.getRootFormId();
 
         return Collections.singletonList(new ColumnModel()
                 .setExpression(CuidAdapter.field(classId, CuidAdapter.END_DATE_FIELD))

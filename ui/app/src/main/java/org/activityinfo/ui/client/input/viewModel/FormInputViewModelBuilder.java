@@ -79,7 +79,7 @@ public class FormInputViewModelBuilder {
 
     public FormInputViewModel build(FormInputModel inputModel) {
 
-        FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormClass().getId());
+        FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormId());
 
         // Keep track if this form is valid and ready to submit
         boolean valid = true;

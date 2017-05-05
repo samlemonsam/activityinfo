@@ -26,6 +26,7 @@ import java.util.List;
  */
 public class EffectiveTableModel {
 
+
     public static final String ID_COLUMN_ID = "$$id";
 
     private FormTree formTree;
@@ -89,11 +90,11 @@ public class EffectiveTableModel {
     }
 
     public ResourceId getFormId() {
-        return formTree.getRootFormClass().getId();
+        return formTree.getRootFormId();
     }
 
     private QueryModel buildQuery(List<EffectiveTableColumn> columns) {
-        QueryModel queryModel = new QueryModel(formTree.getRootFormClass().getId());
+        QueryModel queryModel = new QueryModel(formTree.getRootFormId());
         queryModel.selectResourceId().as(ID_COLUMN_ID);
         for (EffectiveTableColumn column : columns) {
             queryModel.addColumn(column.getQueryModel());

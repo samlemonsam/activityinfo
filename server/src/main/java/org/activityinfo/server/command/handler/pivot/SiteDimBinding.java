@@ -44,7 +44,7 @@ public class SiteDimBinding extends DimBinding {
     }
 
     private SymbolExpr siteId(FormTree formTree) {
-        if(formTree.getRootFormClass().getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+        if(formTree.getRootFormId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             return new SymbolExpr(ColumnModel.ID_SYMBOL);
         } else {
             return new SymbolExpr("site");

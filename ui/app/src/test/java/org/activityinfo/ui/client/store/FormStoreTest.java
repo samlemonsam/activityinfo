@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.testing.StubScheduler;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.ObservableTesting;
 import org.activityinfo.store.testing.Survey;
@@ -12,6 +12,8 @@ import org.junit.Test;
 
 public class FormStoreTest {
 
+
+    private final ImmediateScheduler scheduler = new ImmediateScheduler();
 
     /**
      * If at first the remote fetch does not succeed because
@@ -29,8 +31,8 @@ public class FormStoreTest {
         client.setConnected(false);
 
         // Now the view connects and should remain in loading state...
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore);
-        Connection<FormClass> view = ObservableTesting.connect(formStore.getFormClass(Survey.FORM_ID));
+        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+        Connection<FormTree> view = ObservableTesting.connect(formStore.getFormTree(Survey.FORM_ID));
         view.assertLoading();
 
         // Start retries, but we're still offline
@@ -59,8 +61,8 @@ public class FormStoreTest {
 
         // So we start online.
         // But nothing happens until a UI view starts observing a form class
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore);
-        Connection<FormClass> view = ObservableTesting.connect(formStore.getFormClass(Survey.FORM_ID));
+        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+        Connection<FormTree> view = ObservableTesting.connect(formStore.getFormTree(Survey.FORM_ID));
         view.assertLoaded();
 
         // Then we navigate away and the view releases the connection
@@ -71,11 +73,11 @@ public class FormStoreTest {
         client.setConnected(false);
 
         // And start a new session
-        FormStoreImpl formStoreOffline = new FormStoreImpl(httpBus, offlineStore);
+        FormStoreImpl formStoreOffline = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // So when the form schema is needed again then verify that
         // it can be loaded from the offline store
-        view = ObservableTesting.connect(formStoreOffline.getFormClass(Survey.FORM_ID));
+        view = ObservableTesting.connect(formStoreOffline.getFormTree(Survey.FORM_ID));
         view.assertLoaded();
 
     }
@@ -87,7 +89,7 @@ public class FormStoreTest {
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, new StubScheduler());
         OfflineStoreStub offlineStore = new OfflineStoreStub();
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore);
+        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // Start online
         // and mark the survey form for offline usage
@@ -100,7 +102,7 @@ public class FormStoreTest {
         client.setConnected(false);
 
         // Should be able to view the form class and a record
-        Connection<FormClass> schemaView = ObservableTesting.connect(formStore.getFormClass(Survey.FORM_ID));
+        Connection<FormTree> schemaView = ObservableTesting.connect(formStore.getFormTree(Survey.FORM_ID));
         Connection<FormRecord> recordView = ObservableTesting.connect(formStore.getRecord(Survey.getRecordRef(0)));
 
         schemaView.assertLoaded();

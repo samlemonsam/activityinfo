@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
 
@@ -17,30 +18,59 @@ public class FormTreeBuilder {
 
     private static final Logger LOGGER = Logger.getLogger(FormTreeBuilder.class.getName());
 
-    private final FormClassProvider store;
+    private final FormMetadataProvider metadataProvider;
 
-    public FormTreeBuilder(FormClassProvider store) {
-        this.store = store;
+    public FormTreeBuilder(final FormClassProvider schemaProvider) {
+       metadataProvider = new FormMetadataProvider() {
+           @Override
+           public FormMetadata getFormMetadata(ResourceId formId) {
+               FormClass formClass = schemaProvider.getFormClass(formId);
+
+               FormMetadata metadata = new FormMetadata();
+               metadata.setId(formId);
+               metadata.setSchema(formClass);
+               metadata.setSchemaVersion(formClass.getSchemaVersion());
+               metadata.setVersion(formClass.getSchemaVersion());
+
+               return metadata;
+           }
+       };
     }
 
-    public FormTree queryTree(ResourceId rootFormClassId) {
+    public FormTreeBuilder(FormMetadataProvider metadataProvider) {
+        this.metadataProvider = metadataProvider;
+    }
 
-        FormTree tree = new FormTree();
-        FormClass rootClass = store.getFormClass(rootFormClassId);
+    public FormTree queryTree(ResourceId rootFormId) {
 
-        List<ResourceId> stack = Lists.newArrayList(rootFormClassId);
+        FormTree tree = new FormTree(rootFormId);
+        FormMetadata root = metadataProvider.getFormMetadata(rootFormId);
 
-        Optional<FormField> parentField = rootClass.getParentField();
+        if(!root.isVisible()) {
+            tree.setRootState(FormTree.State.FORBIDDEN);
+            return tree;
+        }
+
+        if(root.isDeleted()) {
+            tree.setRootState(FormTree.State.DELETED);
+            return tree;
+        }
+
+        FormClass rootSchema = root.getSchema();
+
+        List<ResourceId> stack = Lists.newArrayList(rootFormId);
+
+        Optional<FormField> parentField = rootSchema.getParentField();
         if(parentField.isPresent()) {
             if(!stack.contains(parentField.get().getId())) {
-                FormTree.Node node = tree.addRootField(rootClass, parentField.get());
-                fetchChildren(stack, node, rootClass.getParentFormId().asSet());
+                FormTree.Node node = tree.addRootField(rootSchema, parentField.get());
+                fetchChildren(stack, node, rootSchema.getParentFormId().asSet());
             }
         }
         
         // Add fields defined by this FormClass
-        for(FormField field : rootClass.getFields()) {
-            FormTree.Node node = tree.addRootField(rootClass, field);
+        for(FormField field : rootSchema.getFields()) {
+            FormTree.Node node = tree.addRootField(rootSchema, field);
             if(node.isReference()) {
                 fetchChildren(stack, node, node.getRange());
             } else if(field.getType() instanceof RecordFieldType) {
@@ -55,27 +85,32 @@ public class FormTreeBuilder {
      * formClassId, add it's children.
      *
      */
-    private void fetchChildren(List<ResourceId> stack, FormTree.Node parent, Iterable<ResourceId> formClassIds)  {
-        for(ResourceId childClassId : formClassIds) {
-            if(!stack.contains(childClassId)) {
-                FormClass childClass = store.getFormClass(childClassId);
-                assert childClass != null;
-                addChildren(stack, parent, childClass);
+    private void fetchChildren(List<ResourceId> stack, FormTree.Node parent, Iterable<ResourceId> childFormIds)  {
+        for(ResourceId childFormId : childFormIds) {
+            if(!stack.contains(childFormId)) {
+                FormMetadata childMetadata =  metadataProvider.getFormMetadata(childFormId);
+                FormClass childSchema = childMetadata.getSchema();
+                assert childSchema != null;
+                assert childSchema.getId().equals(childFormId);
+                addChildren(stack, parent, childSchema);
             }
         }
     }
 
-    private void addChildren(List<ResourceId> stack, FormTree.Node parent, FormClass childClass) {
+    private void addChildren(List<ResourceId> stack, FormTree.Node parent, FormClass childSchema) {
         stack.add(parent.getDefiningFormClass().getId());
-        for(FormField field : childClass.getFields()) {
-            FormTree.Node childNode = parent.addChild(childClass, field);
-            if(childNode.isReference()) {
-               fetchChildren(stack, childNode, childNode.getRange());
-            } else if(childNode.getType() instanceof RecordFieldType) {
-                addChildren(stack, childNode, ((RecordFieldType) childNode.getType()).getFormClass());
+        try {
+            for (FormField field : childSchema.getFields()) {
+                FormTree.Node childNode = parent.addChild(childSchema, field);
+                if (childNode.isReference()) {
+                    fetchChildren(stack, childNode, childNode.getRange());
+                } else if (childNode.getType() instanceof RecordFieldType) {
+                    addChildren(stack, childNode, ((RecordFieldType) childNode.getType()).getFormClass());
+                }
             }
+        } finally {
+            stack.remove(stack.size() - 1);
         }
-        stack.remove(stack.size() - 1);
     }
 
 }
