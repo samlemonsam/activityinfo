@@ -3,10 +3,12 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +39,17 @@ public class TestingFormStorage implements FormStorage {
     @Override
     public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+        List<FormRecord> records = new ArrayList<>();
+        if(localVersion < 1) {
+            for (FormInstance record : testForm.getRecords()) {
+                records.add(FormRecord.fromInstance(record));
+            }
+        }
+        return records;
     }
 
     @Override

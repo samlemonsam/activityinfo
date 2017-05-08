@@ -91,7 +91,9 @@ public class FormRecord {
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {
-                record.fields.add(field, entry.getValue().toJsonElement());
+                if(entry.getValue() != null) {
+                    record.fields.add(field, entry.getValue().toJsonElement());
+                }
             }
         }
         return record;

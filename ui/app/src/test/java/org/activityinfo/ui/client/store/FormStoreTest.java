@@ -94,7 +94,9 @@ public class FormStoreTest {
         formStore.enableFormOffline(Survey.FORM_ID, true);
 
         // Now synchronize...
-        // (TODO)
+        RecordSynchronizer synchronizer = new RecordSynchronizer(formStore, httpBus);
+        scheduler.executeCommands();
+
 
         // We go offline...
         client.setConnected(false);

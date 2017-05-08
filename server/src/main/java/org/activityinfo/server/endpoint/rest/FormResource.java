@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -173,7 +174,6 @@ public class FormResource {
         
         FormStorage collection = assertVisible(formId);
 
-
         Optional<FormRecord> record = collection.get(ResourceId.valueOf(recordId));
         if(!record.isPresent()) {
             return Response
@@ -184,6 +184,19 @@ public class FormResource {
 
         return Response.ok()
                 .entity(record.get().toJsonElement().toString())
+                .type(JSON_CONTENT_TYPE)
+                .build();
+    }
+
+    @GET
+    @Path("records/versionRange")
+    public Response getVersionRange(@QueryParam("localVersion") long localVersion, @QueryParam("version") long version) {
+        FormStorage collection = assertVisible(formId);
+
+        List<FormRecord> versionRange = collection.getVersionRange(localVersion, version);
+
+        return Response.ok()
+                .entity(encode(versionRange))
                 .type(JSON_CONTENT_TYPE)
                 .build();
     }
@@ -285,15 +298,19 @@ public class FormResource {
         HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
         Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
 
+        return Response.ok(encode(records), JSON_CONTENT_TYPE).build();
+    }
+
+    private String encode(Iterable<FormRecord> records) {
         FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
         recordSet.setFormId(formId.asString());
-        
+
         for (FormRecord record : records) {
             recordSet.addRecord(record);
-        }        
-        return Response.ok(recordSet.toJsonString(), JSON_CONTENT_TYPE).build();
+        }
+        return recordSet.toJsonString();
     }
-    
+
     @POST
     @Path("records")
     @Consumes(MediaType.APPLICATION_JSON)

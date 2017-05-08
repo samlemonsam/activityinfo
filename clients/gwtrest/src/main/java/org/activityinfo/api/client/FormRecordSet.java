@@ -17,6 +17,10 @@ public class FormRecordSet {
   public FormRecordSet() {
   }
 
+  public FormRecordSet(List<FormRecord> records) {
+    this.records = records;
+  }
+
   public String getFormId() {
     return formId;
   }

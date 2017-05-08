@@ -54,6 +54,17 @@ public interface ActivityInfoClientAsync {
   Promise<FormRecordSet> getRecords(String formId, String parentId);
 
   /**
+   *
+   * Retrieves all records between a range of versions (localVersion, toVersion]
+   *
+   * @param formId the id of the form to sync
+   * @param localVersion the form version that is locally present.
+   * @param toVersion the desired version update
+   * @return
+   */
+  Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion);
+
+  /**
    * Create a New Record
    *
    * @param formId Id of the Form

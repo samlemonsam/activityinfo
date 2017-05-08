@@ -1,10 +1,14 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.offline.SchemaStore;
+import org.activityinfo.ui.client.store.offline.VoidWork;
+import org.activityinfo.ui.client.store.offline.Work;
 
 /**
  * IndexedDB access
@@ -40,7 +44,7 @@ public class IndexedDB extends JavaScriptObject {
         };
     }-*/;
 
-    private static void fail(AsyncCallback<?> callback, JavaScriptObject error) {
+    public static void fail(AsyncCallback<?> callback, JavaScriptObject error) {
         callback.onFailure(new RuntimeException("JS failure"));
     }
 
@@ -50,57 +54,88 @@ public class IndexedDB extends JavaScriptObject {
         return result;
     }
 
+    public static TxBuilder begin(String... objectStores) {
+        return new TxBuilder().objectStores(objectStores);
+    }
 
-    public final native void putSchema(FormClass formSchema, AsyncCallback<Void> callback) /*-{
+    public static final Promise<FormClass> loadSchema(ResourceId formId) {
+        return IndexedDB.begin(SchemaStore.NAME).query(tx -> tx.schemas().get(formId));
+    }
 
-        // Convert to "clonable" javascript object
-        var schema = JSON.parse(formSchema.@FormClass::toJsonString()());
-
-        // Start a new transaction
-        var tx = this.db.transaction("formSchemas", "readwrite");
-        tx.onerror = function(event) {
-            console.log("putSchema Error: " + event);
-        }
-        tx.oncomplete = function(event) {
-            callback.@AsyncCallback::onSuccess(*)(null);
-            console.log("putSchema complete.");
-        }
-        var schemaStore = tx.objectStore("formSchemas");
-        schemaStore.put(schema);
+    public final native void close() /*-{
+        this.db.close();
     }-*/;
 
-    public final Promise<Void> putSchema(FormClass schema) {
-        Promise<Void> result = new Promise<>();
-        putSchema(schema, result);
-        return result;
-    }
-
-    public final Promise<FormClass> loadSchema(ResourceId formId) {
-        Promise<FormClass> result = new Promise<>();
-        loadSchema(formId.asString(), result);
-        return result;
-    }
-
-    public final void loadSchema(ResourceId formId, AsyncCallback<FormClass> callback) {
-        loadSchema(formId.asString(), callback);
-    }
-
-    private native void loadSchema(String formId, AsyncCallback<FormClass> callback) /*-{
-
-        var tx = this.db.transaction("formSchemas", "readonly");
+    private native Promise transact(JsArrayString objectStores, String mode, Work work, AsyncCallback<Void> callback) /*-{
+        var tx = this.db.transaction(objectStores, mode);
         tx.onerror = function(event) {
-            console.log("loadSchema Error: " + event);
+            console.log("transact error: " + event);
             @IndexedDB::fail(*)(callback, event);
         }
         tx.oncomplete = function(event) {
-            console.log("loadSchema tx completed");
+            console.log("transact completed");
+            callback.@AsyncCallback::onSuccess(*)(null);
         }
-        var schemaStore = tx.objectStore("formSchemas");
-        var schemaReq = schemaStore.get(formId);
-        schemaReq.onsuccess = function(event) {
-            var schemaJson = JSON.stringify(event.target.result);
-            var schema = @FormClass::fromJson(Ljava/lang/String;)(schemaJson);
-            callback.@AsyncCallback::onSuccess(*)(schema);
-        }
+        return work.@org.activityinfo.ui.client.store.offline.Work::query(*)(tx);
     }-*/;
+
+
+    public static class TxBuilder {
+        private JsArrayString objectStores = JsArrayString.createArray().cast();
+        private String mode = "readonly";
+
+        public TxBuilder objectStores(String... names) {
+            for (String name : names) {
+                objectStores.push(name);
+            }
+            return this;
+        }
+
+        public TxBuilder objectStore(String name) {
+            objectStores.push(name);
+            return this;
+        }
+
+        public TxBuilder readwrite() {
+            this.mode = "readwrite";
+            return this;
+        }
+
+        public Promise<Void> execute(VoidWork work) {
+            return query(transaction -> {
+                work.execute(transaction);
+                return Promise.done();
+            });
+        }
+
+        public <T> Promise<T> query(Work<T> work) {
+            Promise<Void> txResult = new Promise<>();
+            Promise<T> queryResult = new Promise<>();
+            IndexedDB.open(new AsyncCallback<IndexedDB>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    txResult.reject(caught);
+                }
+
+                @Override
+                public void onSuccess(IndexedDB db) {
+                    db.transact(objectStores, mode, work, new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            db.close();
+                            txResult.onFailure(caught);
+                        }
+
+                        @Override
+                        public void onSuccess(Void voidResult) {
+                            db.close();
+                            txResult.onSuccess(null);
+                        }
+                    }).then(queryResult);
+                }
+            });
+            return txResult.join(finishedTx -> queryResult);
+        }
+
+    }
 }

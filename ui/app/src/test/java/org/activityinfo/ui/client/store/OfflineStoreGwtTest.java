@@ -6,6 +6,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.offline.SchemaStore;
 
 /**
  * Tests the compiled Javascript offline store against a real browser.
@@ -26,50 +28,35 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 .setLabel("Name of Respondant")
                 .setType(TextType.SIMPLE);
 
-        IndexedDB.open(new AsyncCallback<IndexedDB>() {
 
+        // First put the schema to the store
+        Promise<Void> put = IndexedDB.begin(SchemaStore.NAME)
+                .readwrite()
+                .execute(tx -> tx.schemas().put(surveyForm));
 
-            @Override
-            public void onSuccess(IndexedDB db) {
-                db.putSchema(surveyForm, new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        fail();
-                    }
+        // Once that's complete, verify that it can be read
+        Promise<FormClass> read = put.join(done -> IndexedDB.loadSchema(surveyForm.getId()));
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        // Ensure that we can also retrieve it
-                        db.loadSchema(surveyForm.getId(), new AsyncCallback<FormClass>() {
-                            @Override
-                            public void onSuccess(FormClass result) {
-                                assertEquals(surveyForm.getId(), result.getId());
-                                assertEquals(surveyForm.getLabel(), result.getLabel());
-
-                                FormField expectedField = surveyForm.getField(fieldId);
-                                FormField field = result.getField(fieldId);
-
-                                assertEquals(expectedField.getId(), field.getId());
-                                assertEquals(expectedField.getLabel(), field.getLabel());
-                                finishTest();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                fail();
-                            }
-                        });
-                    }
-                });
-
-            }
-
+        read.then(new AsyncCallback<FormClass>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail();
             }
 
+            @Override
+            public void onSuccess(FormClass result) {
+                assertEquals(surveyForm.getId(), result.getId());
+                assertEquals(surveyForm.getLabel(), result.getLabel());
+
+                FormField expectedField = surveyForm.getField(fieldId);
+                FormField field = result.getField(fieldId);
+
+                assertEquals(expectedField.getId(), field.getId());
+                assertEquals(expectedField.getLabel(), field.getLabel());
+                finishTest();
+            }
         });
+
 
         delayTestFinish(5000);
     }

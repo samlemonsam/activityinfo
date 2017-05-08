@@ -32,6 +32,8 @@ public interface FormStorage {
     
     List<RecordVersion> getVersionsForParent(ResourceId parentRecordId);
 
+    List<FormRecord> getVersionRange(long localVersion, long toVersion);
+
     /**
      * @return this collection's schema
      */
@@ -72,4 +74,5 @@ public interface FormStorage {
      * Update the geometry associated with a specific record and field.
      */
     void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value);
+
 }

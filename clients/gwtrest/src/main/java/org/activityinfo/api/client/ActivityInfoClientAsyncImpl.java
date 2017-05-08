@@ -210,7 +210,24 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     if(parentId != null) {
       urlBuilder.append("?parentId=").append(UriUtils.encode(parentId));
     }
-    final String url = urlBuilder.toString();
+    return fetchRecords(urlBuilder.toString());
+  }
+
+  @Override
+  public Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+    StringBuilder urlBuilder = new StringBuilder(baseUrl);
+    urlBuilder.append("/form");
+    urlBuilder.append("/").append(formId);
+    urlBuilder.append("/records/versionRange");
+    urlBuilder.append("?localVersion=" + localVersion);
+    urlBuilder.append("&version=" + toVersion);
+
+    return fetchRecords(urlBuilder.toString());
+
+  }
+
+
+  private Promise<FormRecordSet> fetchRecords(final String url) {
     final Promise<FormRecordSet> result = new Promise<>();
     RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, url);
     requestBuilder.setCallback(new RequestCallback() {
@@ -237,6 +254,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
     return result;
   }
+
 
   /**
    * Create a New Record

@@ -54,15 +54,26 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
+    public Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+        if(!connected) {
+            return offlineResult();
+        }
+        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        if(!form.isPresent()) {
+            return Promise.rejected(new RuntimeException("No such form"));
+        }
+        return Promise.resolved(new FormRecordSet(form.get().getVersionRange(localVersion, toVersion)));
+    }
+
+    @Override
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder newRecord) {
         return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override
     public Promise<FormClass> getFormSchema(String formId) {
-
         if(!connected) {
-            return Promise.rejected(new RuntimeException("Offline"));
+            return offlineResult();
         }
 
         Optional<FormStorage> formSchema = catalog.getForm(ResourceId.valueOf(formId));
@@ -76,7 +87,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     @Override
     public Promise<FormMetadata> getFormMetadata(String formId) {
         if(!connected) {
-            return Promise.rejected(new RuntimeException("Offline"));
+            return offlineResult();
         }
 
         FormMetadata metadata = new FormMetadata();
@@ -102,4 +113,9 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
         return Promise.rejected(new UnsupportedOperationException());
     }
+
+    private <T> Promise<T> offlineResult() {
+        return Promise.rejected(new RuntimeException("Offline"));
+    }
+
 }

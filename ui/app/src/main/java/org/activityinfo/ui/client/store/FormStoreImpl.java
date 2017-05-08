@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Scheduler;
 import org.activityinfo.model.form.CatalogEntry;
@@ -11,12 +12,14 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.http.CatalogRequest;
 import org.activityinfo.ui.client.http.HttpBus;
 import org.activityinfo.ui.client.http.QueryRequest;
 import org.activityinfo.ui.client.http.RecordRequest;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +35,7 @@ public class FormStoreImpl implements FormStore {
     private final Scheduler scheduler;
 
     private Map<ResourceId, ObservableForm> formMap = Maps.newHashMap();
+    private StatefulValue<Set<ResourceId>> offlineForms = new StatefulValue<>(ImmutableSet.of());
 
     public FormStoreImpl(HttpBus httpBus, OfflineStore offlineStore, Scheduler scheduler) {
         this.httpBus = httpBus;
@@ -81,12 +85,19 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public void enableFormOffline(ResourceId formId, boolean offline) {
-        offlineStore.enableOffline(formId, offline);
+
+        HashSet<ResourceId> newSet = new HashSet<>(offlineForms.get());
+        if(offline) {
+            newSet.add(formId);
+        } else {
+            newSet.remove(formId);
+        }
+        offlineForms.updateIfNotEqual(ImmutableSet.copyOf(newSet));
     }
 
     @Override
     public Observable<Set<ResourceId>> getSyncSet() {
-        return null;
+        return offlineForms;
     }
 
 }
