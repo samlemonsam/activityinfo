@@ -41,10 +41,7 @@ import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
-import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormCatalog;
-import org.activityinfo.store.spi.FormPermissions;
-import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.*;
 import org.activityinfo.xlsform.XlsColumnSetWriter;
 import org.activityinfo.xlsform.XlsFormBuilder;
 
@@ -56,6 +53,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -193,8 +191,12 @@ public class FormResource {
     public Response getVersionRange(@QueryParam("localVersion") long localVersion, @QueryParam("version") long version) {
         FormStorage collection = assertVisible(formId);
 
-        List<FormRecord> versionRange = collection.getVersionRange(localVersion, version);
-
+        List<FormRecord> versionRange;
+        if(collection instanceof VersionedFormStorage) {
+            versionRange = ((VersionedFormStorage) collection).getVersionRange(localVersion, version);
+        } else {
+            versionRange = Collections.emptyList();
+        }
         return Response.ok()
                 .entity(encode(versionRange))
                 .type(JSON_CONTENT_TYPE)

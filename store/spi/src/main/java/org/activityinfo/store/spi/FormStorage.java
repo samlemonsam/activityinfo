@@ -32,7 +32,6 @@ public interface FormStorage {
     
     List<RecordVersion> getVersionsForParent(ResourceId parentRecordId);
 
-    List<FormRecord> getVersionRange(long localVersion, long toVersion);
 
     /**
      * @return this collection's schema
