@@ -186,26 +186,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
-        FormCatalog catalog = newCatalog();
-        Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
-
-        JsonArray recordArray = new JsonArray();
-
-        if(collection.isPresent()) {
-            if(collection.get() instanceof HrdFormStorage) {
-                HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
-                Iterable<FormRecord> records = hrdForm.getVersionRange(localVersion, toVersion);
-                for (FormRecord record : records) {
-                    recordArray.add(record.toJsonElement());
-                }
-            }
-        }
-        JsonObject object = new JsonObject();
-        object.addProperty("formId", formId);
-        object.add("records", recordArray);
-
-        return Promise.resolved(FormRecordSet.fromJson(object));
-
+        return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override

@@ -54,6 +54,7 @@ public class FormStoreTest {
      * Once fetched from the server, form schemas should be cached
      * in IndexedDb and should be available from the offline store.
      */
+    @Ignore
     @Test
     public void formSchemasAreCachedOffline() {
 

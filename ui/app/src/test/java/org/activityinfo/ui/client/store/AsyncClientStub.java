@@ -11,6 +11,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.VersionedFormStorage;
 import org.activityinfo.store.testing.TestingCatalog;
 
 import java.util.List;
@@ -62,7 +63,8 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         if(!form.isPresent()) {
             return Promise.rejected(new RuntimeException("No such form"));
         }
-        return Promise.resolved(new FormRecordSet(form.get().getVersionRange(localVersion, toVersion)));
+        VersionedFormStorage formStorage = (VersionedFormStorage) form.get();
+        return Promise.resolved(new FormRecordSet(formStorage.getVersionRange(localVersion, toVersion)));
     }
 
     @Override

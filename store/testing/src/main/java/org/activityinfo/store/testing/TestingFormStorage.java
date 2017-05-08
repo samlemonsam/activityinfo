@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class TestingFormStorage implements FormStorage {
+public class TestingFormStorage implements VersionedFormStorage {
 
     private TestForm testForm;
 
