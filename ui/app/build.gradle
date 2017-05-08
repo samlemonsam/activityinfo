@@ -30,6 +30,11 @@ task explodedWar(type: Copy) {
 }
 
 
+test {
+    // Browser tests that require special handling
+    include '**GwtTest'
+}
+
 dependencies {
     compile "com.google.guava:guava:21.0"
 
@@ -125,6 +130,7 @@ task compileApp(type: JavaExec) {
     args 'org.activityinfo.ui.AppProd'
 
 }
+
 
 task testOffline(type: JavaExec) {
 

@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.store;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
@@ -41,7 +40,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                     @Override
                     public void onSuccess(Void result) {
                         // Ensure that we can also retrieve it
-                        db.loadSchema(surveyForm.getId(), new IDBCallback<FormClass>() {
+                        db.loadSchema(surveyForm.getId(), new AsyncCallback<FormClass>() {
                             @Override
                             public void onSuccess(FormClass result) {
                                 assertEquals(surveyForm.getId(), result.getId());
@@ -56,7 +55,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                             }
 
                             @Override
-                            public void onFailure(JavaScriptObject error) {
+                            public void onFailure(Throwable caught) {
                                 fail();
                             }
                         });

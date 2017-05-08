@@ -4,6 +4,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 
 /**
  * IndexedDB access
@@ -21,7 +22,7 @@ public class IndexedDB extends JavaScriptObject {
 
         var request = indexedDB.open("ActivityInfo", 2);
         request.onerror = function(event) {
-            callback.@IDBCallback::onFailure(*)(event);
+            @IndexedDB::fail(*)(callback, event);
         };
         request.onupgradeneeded = function(event) {
             var db = event.target.result;
@@ -35,9 +36,19 @@ public class IndexedDB extends JavaScriptObject {
         };
         request.onsuccess = function(event) {
             api.db = event.target.result;
-            callback.@IDBCallback::onSuccess(*)(api);
+            callback.@AsyncCallback::onSuccess(*)(api);
         };
     }-*/;
+
+    private static void fail(AsyncCallback<?> callback, JavaScriptObject error) {
+        callback.onFailure(new RuntimeException("JS failure"));
+    }
+
+    public static Promise<IndexedDB> open() {
+        Promise<IndexedDB> result = new Promise<>();
+        open(result);
+        return result;
+    }
 
 
     public final native void putSchema(FormClass formSchema, AsyncCallback<Void> callback) /*-{
@@ -58,16 +69,28 @@ public class IndexedDB extends JavaScriptObject {
         schemaStore.put(schema);
     }-*/;
 
-    public final void loadSchema(ResourceId formId, IDBCallback<FormClass> callback) {
+    public final Promise<Void> putSchema(FormClass schema) {
+        Promise<Void> result = new Promise<>();
+        putSchema(schema, result);
+        return result;
+    }
+
+    public final Promise<FormClass> loadSchema(ResourceId formId) {
+        Promise<FormClass> result = new Promise<>();
+        loadSchema(formId.asString(), result);
+        return result;
+    }
+
+    public final void loadSchema(ResourceId formId, AsyncCallback<FormClass> callback) {
         loadSchema(formId.asString(), callback);
     }
 
-    private native void loadSchema(String formId, IDBCallback<FormClass> callback) /*-{
+    private native void loadSchema(String formId, AsyncCallback<FormClass> callback) /*-{
 
         var tx = this.db.transaction("formSchemas", "readonly");
         tx.onerror = function(event) {
             console.log("loadSchema Error: " + event);
-            callback.@IDBCallback::onFailure(*)(event);
+            @IndexedDB::fail(*)(callback, event);
         }
         tx.oncomplete = function(event) {
             console.log("loadSchema tx completed");
@@ -77,7 +100,7 @@ public class IndexedDB extends JavaScriptObject {
         schemaReq.onsuccess = function(event) {
             var schemaJson = JSON.stringify(event.target.result);
             var schema = @FormClass::fromJson(Ljava/lang/String;)(schemaJson);
-            callback.@IDBCallback::onSuccess(*)(schema);
+            callback.@AsyncCallback::onSuccess(*)(schema);
         }
     }-*/;
 }

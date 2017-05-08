@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -17,7 +18,7 @@ public class OfflineStoreStub implements OfflineStore {
     }
 
     @Override
-    public void loadSchema(ResourceId formId, CallbackMaybe<FormClass> callback) {
+    public void loadSchema(ResourceId formId, AsyncCallback<FormClass> callback) {
         String formSchemaJson = formSchemaMap.get(formId);
         if(formSchemaJson != null) {
             FormClass formSchema = FormClass.fromJson(formSchemaJson);

@@ -81,7 +81,7 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public void enableFormOffline(ResourceId formId, boolean offline) {
-
+        offlineStore.enableOffline(formId, offline);
     }
 
     @Override

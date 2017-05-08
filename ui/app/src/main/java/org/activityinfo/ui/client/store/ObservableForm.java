@@ -58,7 +58,17 @@ class ObservableForm extends Observable<FormMetadata> {
             LOGGER.info(formId + ": fetching...");
 
             // Try to load from the offline cache while starting a network request at the same time
-            this.offlineStore.loadSchema(formId, this::cachedVersionLoaded);
+            this.offlineStore.loadSchema(formId, new AsyncCallback<FormClass>() {
+                @Override
+                public void onFailure(Throwable caught) {
+
+                }
+
+                @Override
+                public void onSuccess(FormClass result) {
+                    cachedVersionLoaded(result);
+                }
+            });
 
             this.httpSubscription = httpBus.submit(new FormMetadataRequest(formId), new AsyncCallback<FormMetadata>() {
                 @Override
