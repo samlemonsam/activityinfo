@@ -150,7 +150,7 @@ task testOffline(type: JavaExec) {
 
     main = 'junit.textui.TestRunner'
 
-    jvmArgs '-Dgwt.args=-runStyle Manual:1 -style pretty'
+    jvmArgs "-Dgwt.args=-runStyle Manual:1 -style pretty -war ${buildDir}/tesWar -workDir ${buildDir}/testGwtWork"
     args 'org.activityinfo.ui.client.store.OfflineStoreGwtTest'
 
 }
