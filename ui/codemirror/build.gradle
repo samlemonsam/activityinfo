@@ -52,6 +52,7 @@ task concatenateCss {
 
 task minifyJs(type: JavaExec){
 
+
     dependsOn unzip
 
     classpath configurations.closureCompiler
@@ -59,11 +60,16 @@ task minifyJs(type: JavaExec){
 
     def dist = new File("${buildDir}/unpacked/codemirror-5.23.0");
     def outputDir = new File("${buildDir}/combined/org/activityinfo/ui/codemirror/client");
+    def outputFile = "${outputDir}/codemirror.js"
+
+    inputs.dir "${dist}"
+    inputs.dir "${projectDir}/src/main/js";
+    outputs.file outputFile
 
     def closureArgs = []
     //append all your command line options here
     closureArgs << "--compilation_level=SIMPLE_OPTIMIZATIONS"
-    closureArgs << "--js_output_file=${outputDir}/codemirror.js"
+    closureArgs << "--js_output_file=${outputFile}"
     closureArgs << "${dist}/lib/codemirror.js"
     closureArgs << "${dist}/addon/lint/lint.js"
     closureArgs << "${dist}/addon/edit/matchbrackets.js"
