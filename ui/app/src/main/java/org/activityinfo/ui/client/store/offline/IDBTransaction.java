@@ -1,24 +1,17 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gwt.core.client.JavaScriptObject;
+/**
+ * Interface to an Indexed DB Transaction
+ */
+public interface IDBTransaction {
 
+    IDBObjectStore objectStore(String name);
 
-public class IDBTransaction extends JavaScriptObject {
-
-
-    protected IDBTransaction() {
+    public default SchemaStore schemas() {
+        return new SchemaStore(objectStore(SchemaStore.NAME));
     }
 
-    private native ObjectStore objectStore(String name) /*-{
-        return this.objectStore(name);
-    }-*/;
-
-    public final SchemaStore schemas() {
-        return objectStore(SchemaStore.NAME).cast();
-    }
-
-    public final RecordStore records() {
-        return objectStore(RecordStore.NAME).cast();
+    public default RecordStore records() {
+        return new RecordStore(objectStore(RecordStore.NAME));
     }
 }
-

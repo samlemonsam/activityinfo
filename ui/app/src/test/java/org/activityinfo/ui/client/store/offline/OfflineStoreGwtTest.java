@@ -30,12 +30,12 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
 
         // First put the schema to the store
-        Promise<Void> put = IndexedDB.begin(SchemaStore.NAME)
+        Promise<Void> put = IDBDatabaseImpl.begin(SchemaStore.NAME)
                 .readwrite()
                 .execute(tx -> tx.schemas().put(surveyForm));
 
         // Once that's complete, verify that it can be read
-        Promise<FormClass> read = put.join(done -> IndexedDB.loadSchema(surveyForm.getId()));
+        Promise<FormClass> read = put.join(done -> IDBDatabaseImpl.loadSchema(surveyForm.getId()));
 
         read.then(new AsyncCallback<FormClass>() {
             @Override

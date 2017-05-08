@@ -3,9 +3,7 @@ package org.activityinfo.ui.client.store.http;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.observable.Observable;
 
-/**
- * Created by alex on 27-1-17.
- */
+
 class ObservableRequest<T> extends Observable<T> {
 
     private final HttpBus bus;

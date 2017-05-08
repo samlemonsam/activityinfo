@@ -1,37 +1,77 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.form.FormClass;
+import com.google.common.collect.ImmutableSet;
+import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.ui.client.store.Snapshot;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Interface to *something* that can store stuff offline.
  */
-public interface OfflineStore {
+public class OfflineStore {
 
-    void putSchema(FormClass formSchema);
+
+    private IDBExecutor executor;
+
+    private StatefulValue<Set<ResourceId>> offlineForms = new StatefulValue<>(ImmutableSet.of());
+
+    public OfflineStore(IDBExecutor executor) {
+        this.executor = executor;
+    }
 
     /**
      * Try to load a cached FormSchema from the offline store.
      */
-    void loadSchema(ResourceId resourceId, AsyncCallback<FormClass> formSchema);
+    public Observable<FormMetadata> getCachedMetadata(ResourceId formId) {
+        return new CachedMetdata(executor, formId);
+    }
 
     /**
      * Updates whether a form should be available offline.
      */
-    void enableOffline(ResourceId formId, boolean offline);
+    public void enableOffline(ResourceId formId, boolean offline) {
+        Set<ResourceId> newSet = new HashSet<>(offlineForms.get());
+        if(offline) {
+            newSet.add(formId);
+        } else {
+            newSet.remove(formId);
+        }
+        offlineForms.updateIfNotEqual(ImmutableSet.copyOf(newSet));
+    }
 
     /**
      * @return the set of forms that should be made available offline.
      */
-    Observable<Set<ResourceId>> getOfflineForms();
+    public Observable<Set<ResourceId>> getOfflineForms() {
+        return offlineForms;
+    }
 
     /**
      * Stores a new snapshot to the remote store
      */
-    void store(Snapshot snapshot);
+    public void store(Snapshot snapshot) {
+        executor.begin()
+        .objectStore(SchemaStore.NAME)
+        .objectStore(RecordStore.NAME)
+        .readwrite()
+        .execute(tx -> {
+            SchemaStore schemaStore = tx.schemas();
+            for (FormMetadata metadata : snapshot.getForms()) {
+                schemaStore.put(metadata.getSchema());
+            }
+            RecordStore recordStore = tx.records();
+            for (FormRecordSet formRecordSet : snapshot.getRecordSets()) {
+                for (FormRecord record : formRecordSet.getRecords()) {
+                    recordStore.put(record);
+                }
+            }
+        });
+    }
 }

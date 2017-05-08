@@ -7,6 +7,8 @@ import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.ObservableTesting;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
+import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,7 +27,7 @@ public class FormStoreTest {
         AsyncClientStub client = new AsyncClientStub();
         StubScheduler retryScheduler = new StubScheduler();
         HttpBus httpBus = new HttpBus(client, retryScheduler);
-        OfflineStoreStub offlineStore = new OfflineStoreStub();
+        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
 
         // We start offline
         client.setConnected(false);
@@ -57,7 +59,7 @@ public class FormStoreTest {
 
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, new StubScheduler());
-        OfflineStoreStub offlineStore = new OfflineStoreStub();
+        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
 
         // So we start online.
         // But nothing happens until a UI view starts observing a form class
@@ -88,15 +90,15 @@ public class FormStoreTest {
     public void offlineRecordFetching() {
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, new StubScheduler());
-        OfflineStoreStub offlineStore = new OfflineStoreStub();
+        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // Start online
         // and mark the survey form for offline usage
-        formStore.enableFormOffline(Survey.FORM_ID, true);
+        offlineStore.enableOffline(Survey.FORM_ID, true);
 
         // Now synchronize...
-        RecordSynchronizer synchronizer = new RecordSynchronizer(formStore, httpBus);
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
         scheduler.executeCommands();
 
 

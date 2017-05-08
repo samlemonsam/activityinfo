@@ -10,11 +10,11 @@ import org.activityinfo.promise.Promise;
 /**
  * IndexedDB access
  */
-public class IndexedDB extends JavaScriptObject {
+public class IDBDatabaseImpl extends JavaScriptObject {
 
-    protected IndexedDB() {}
+    protected IDBDatabaseImpl() {}
 
-    public static native void open(AsyncCallback<IndexedDB> callback) /*-{
+    public static native void open(AsyncCallback<IDBDatabaseImpl> callback) /*-{
 
         var api = {};
         api.indexedDb = $wnd.indexedDB || $wnd.mozIndexedDB || $wnd.webkitIndexedDB || $wnd.msIndexedDB;
@@ -23,7 +23,7 @@ public class IndexedDB extends JavaScriptObject {
 
         var request = indexedDB.open("ActivityInfo", 2);
         request.onerror = function(event) {
-            @IndexedDB::fail(*)(callback, event);
+            @org.activityinfo.ui.client.store.offline.IDBDatabaseImpl::fail(*)(callback, event);
         };
         request.onupgradeneeded = function(event) {
             var db = event.target.result;
@@ -45,18 +45,18 @@ public class IndexedDB extends JavaScriptObject {
         callback.onFailure(new RuntimeException("JS failure"));
     }
 
-    public static Promise<IndexedDB> open() {
-        Promise<IndexedDB> result = new Promise<>();
+    public static Promise<IDBDatabaseImpl> open() {
+        Promise<IDBDatabaseImpl> result = new Promise<>();
         open(result);
         return result;
     }
 
-    public static TxBuilder begin(String... objectStores) {
-        return new TxBuilder().objectStores(objectStores);
+    public static IDBTransactionBuilder begin(String... objectStores) {
+        return new TxBuilderImpl().objectStores(objectStores);
     }
 
     public static final Promise<FormClass> loadSchema(ResourceId formId) {
-        return IndexedDB.begin(SchemaStore.NAME).query(tx -> tx.schemas().get(formId));
+        return IDBDatabaseImpl.begin(SchemaStore.NAME).query(tx -> tx.schemas().get(formId));
     }
 
     public final native void close() /*-{
@@ -67,7 +67,7 @@ public class IndexedDB extends JavaScriptObject {
         var tx = this.db.transaction(objectStores, mode);
         tx.onerror = function(event) {
             console.log("transact error: " + event);
-            @IndexedDB::fail(*)(callback, event);
+            @org.activityinfo.ui.client.store.offline.IDBDatabaseImpl::fail(*)(callback, event);
         }
         tx.oncomplete = function(event) {
             console.log("transact completed");
@@ -77,45 +77,33 @@ public class IndexedDB extends JavaScriptObject {
     }-*/;
 
 
-    public static class TxBuilder {
+    public static class TxBuilderImpl extends IDBTransactionBuilder {
         private JsArrayString objectStores = JsArrayString.createArray().cast();
         private String mode = "readonly";
 
-        public TxBuilder objectStores(String... names) {
-            for (String name : names) {
-                objectStores.push(name);
-            }
-            return this;
-        }
-
-        public TxBuilder objectStore(String name) {
+        public TxBuilderImpl objectStore(String name) {
             objectStores.push(name);
             return this;
         }
 
-        public TxBuilder readwrite() {
+        @Override
+        public TxBuilderImpl readwrite() {
             this.mode = "readwrite";
             return this;
         }
 
-        public Promise<Void> execute(VoidWork work) {
-            return query(transaction -> {
-                work.execute(transaction);
-                return Promise.done();
-            });
-        }
-
+        @Override
         public <T> Promise<T> query(Work<T> work) {
             Promise<Void> txResult = new Promise<>();
             Promise<T> queryResult = new Promise<>();
-            IndexedDB.open(new AsyncCallback<IndexedDB>() {
+            IDBDatabaseImpl.open(new AsyncCallback<IDBDatabaseImpl>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     txResult.reject(caught);
                 }
 
                 @Override
-                public void onSuccess(IndexedDB db) {
+                public void onSuccess(IDBDatabaseImpl db) {
                     db.transact(objectStores, mode, work, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {

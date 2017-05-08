@@ -10,11 +10,12 @@ import org.activityinfo.promise.Promise;
  * <p>A new subclass should be defined for each new IndexedDb with typed
  * get and put methods.</p>
  */
-public class ObjectStore extends JavaScriptObject {
-    protected ObjectStore() {
+public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectStore {
+    protected IDBObjectStoreImpl() {
     }
 
-    protected final native void putJson(String json) /*-{
+    @Override
+    public final native void putJson(String json) /*-{
         this.put(JSON.parse(json));
     }-*/;
 
@@ -29,7 +30,8 @@ public class ObjectStore extends JavaScriptObject {
         }
     }-*/;
 
-    protected final Promise<String> getJson(String key) {
+    @Override
+    public final Promise<String> getJson(String key) {
         Promise<String> result = new Promise<>();
         getJson(key, result);
         return result;

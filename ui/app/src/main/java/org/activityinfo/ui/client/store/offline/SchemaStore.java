@@ -7,19 +7,22 @@ import org.activityinfo.promise.Promise;
 /**
  * IndexedDB object store for form schemas.
  */
-public class SchemaStore extends ObjectStore {
+public class SchemaStore {
 
     public static final String NAME = "formSchemas";
 
-    protected SchemaStore() {
+    private IDBObjectStore impl;
+
+    SchemaStore(IDBObjectStore impl) {
+        this.impl = impl;
     }
 
     public final void put(FormClass formClass) {
-        putJson(formClass.toJsonString());
+        impl.putJson(formClass.toJsonString());
     }
 
     public final Promise<FormClass> get(ResourceId formId) {
-        return getJson(formId.asString()).then(FormClass::fromJson);
+        return impl.getJson(formId.asString()).then(FormClass::fromJson);
     }
 
 }

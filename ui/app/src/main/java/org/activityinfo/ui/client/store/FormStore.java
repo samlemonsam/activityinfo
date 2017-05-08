@@ -12,7 +12,6 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
-import java.util.Set;
 
 public interface FormStore {
 
@@ -30,12 +29,4 @@ public interface FormStore {
     Observable<ColumnSet> query(QueryModel queryModel);
 
     Observable<FormRecord> getRecord(RecordRef recordRef);
-
-    void enableFormOffline(ResourceId formId, boolean offline);
-
-    /**
-     *
-     * @return the set of ids of forms that should be synchronized for offline
-     */
-    Observable<Set<ResourceId>> getSyncSet();
 }

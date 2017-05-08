@@ -5,15 +5,17 @@ import org.activityinfo.model.form.FormRecord;
 /**
  * IndexedDB object store for individual form records.
  */
-public class RecordStore extends ObjectStore {
+public class RecordStore {
 
     public static final String NAME = "formRecords";
+    private IDBObjectStore impl;
 
-    protected RecordStore() {
+    protected RecordStore(IDBObjectStore impl) {
+        this.impl = impl;
     }
 
     public final void put(FormRecord record) {
-        putJson(record.toJsonElement().toString());
+        impl.putJson(record.toJsonElement().toString());
     }
 
 }
