@@ -42,6 +42,7 @@ dependencies {
 
     gwt "com.google.gwt:gwt-user:2.8.0"
     gwt 'com.google.guava:guava-gwt:21.0'
+    gwt 'com.google.elemental2:elemental2-indexeddb:1.0.0-beta-1'
     gwt libraries.gwt.gson
 
     gwt project(':core:model')
@@ -125,6 +126,28 @@ task compileApp(type: JavaExec) {
 
 }
 
+task testOffline(type: JavaExec) {
+
+    dependsOn compileTestJava
+
+    classpath configurations.gwtSdk
+    classpath configurations.gwt
+
+
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath sourceSets.main.output.generatedSourcesDir
+    classpath sourceSets.test.java.srcDirs
+    classpath sourceSets.test.runtimeClasspath
+    classpath configurations.testCompile
+
+    main = 'junit.textui.TestRunner'
+
+    jvmArgs '-Dgwt.args=-runStyle Manual:1'
+    args 'org.activityinfo.ui.client.store.OfflineStoreGwtTest'
+
+}
 
 
 task soyc(type: JavaExec) {

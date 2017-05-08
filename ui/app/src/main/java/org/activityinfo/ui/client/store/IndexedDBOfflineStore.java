@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -32,7 +33,17 @@ public class IndexedDBOfflineStore implements OfflineStore {
         execute(new PendingRequest() {
             @Override
             public void execute(IndexedDB indexedDB) {
-                indexedDB.putSchema(formSchema);
+                indexedDB.putSchema(formSchema, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+
+                    }
+                });
             }
         });
     }
@@ -93,7 +104,7 @@ public class IndexedDBOfflineStore implements OfflineStore {
         // Transition our state to loading, start opening the database
         this.state = State.LOADING;
 
-        IndexedDB.open(new IDBCallback<IndexedDB>() {
+        IndexedDB.open(new AsyncCallback<IndexedDB>() {
             @Override
             public void onSuccess(IndexedDB result) {
                 // Expect to be LOADING
@@ -102,7 +113,7 @@ public class IndexedDBOfflineStore implements OfflineStore {
             }
 
             @Override
-            public void onFailure(JavaScriptObject error) {
+            public void onFailure(Throwable error) {
                 // Expect to be LOADING
                 // Transition to ERROR state
                 assert state == State.LOADING : "Invalid state: " + state;

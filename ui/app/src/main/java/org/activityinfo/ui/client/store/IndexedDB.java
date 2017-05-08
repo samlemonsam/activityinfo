@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -11,7 +12,7 @@ public class IndexedDB extends JavaScriptObject {
 
     protected IndexedDB() {}
 
-    public static native void open(IDBCallback<IndexedDB> callback) /*-{
+    public static native void open(AsyncCallback<IndexedDB> callback) /*-{
 
         var api = {};
         api.indexedDb = $wnd.indexedDB || $wnd.mozIndexedDB || $wnd.webkitIndexedDB || $wnd.msIndexedDB;
@@ -39,7 +40,7 @@ public class IndexedDB extends JavaScriptObject {
     }-*/;
 
 
-    public final native void putSchema(FormClass formSchema) /*-{
+    public final native void putSchema(FormClass formSchema, AsyncCallback<Void> callback) /*-{
 
         // Convert to "clonable" javascript object
         var schema = JSON.parse(formSchema.@FormClass::toJsonString()());
@@ -50,6 +51,7 @@ public class IndexedDB extends JavaScriptObject {
             console.log("putSchema Error: " + event);
         }
         tx.oncomplete = function(event) {
+            callback.@AsyncCallback::onSuccess(*)(null);
             console.log("putSchema complete.");
         }
         var schemaStore = tx.objectStore("formSchemas");
