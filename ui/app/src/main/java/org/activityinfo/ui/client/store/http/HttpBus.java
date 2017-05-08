@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.http;
+package org.activityinfo.ui.client.store.http;
 
 
 import com.google.common.collect.Iterables;

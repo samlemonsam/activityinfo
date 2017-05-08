@@ -16,10 +16,10 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.ui.client.analysis.AnalysisPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
-import org.activityinfo.ui.client.http.HttpBus;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
-import org.activityinfo.ui.client.store.IndexedDBOfflineStore;
+import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.offline.IndexedDBOfflineStore;
 
 import java.util.logging.Logger;
 

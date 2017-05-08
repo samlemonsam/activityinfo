@@ -14,10 +14,11 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.http.CatalogRequest;
-import org.activityinfo.ui.client.http.HttpBus;
-import org.activityinfo.ui.client.http.QueryRequest;
-import org.activityinfo.ui.client.http.RecordRequest;
+import org.activityinfo.ui.client.store.http.CatalogRequest;
+import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.QueryRequest;
+import org.activityinfo.ui.client.store.http.RecordRequest;
+import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 import java.util.HashSet;
 import java.util.List;

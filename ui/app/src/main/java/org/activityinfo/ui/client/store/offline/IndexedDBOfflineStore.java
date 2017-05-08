@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.store;
+package org.activityinfo.ui.client.store.offline;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.FormRecordSet;
@@ -8,10 +8,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.ui.client.store.offline.IDBTransaction;
-import org.activityinfo.ui.client.store.offline.RecordStore;
-import org.activityinfo.ui.client.store.offline.SchemaStore;
-import org.activityinfo.ui.client.store.offline.VoidWork;
+import org.activityinfo.ui.client.store.Snapshot;
 
 import java.util.Set;
 

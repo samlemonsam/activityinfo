@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.store;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
-import org.activityinfo.ui.client.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpBus;
 
 /**
  * Periodically compares the local state with the server and updates the local store.

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.store;
+package org.activityinfo.ui.client.store.offline;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
@@ -6,9 +6,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.offline.SchemaStore;
-import org.activityinfo.ui.client.store.offline.VoidWork;
-import org.activityinfo.ui.client.store.offline.Work;
 
 /**
  * IndexedDB access

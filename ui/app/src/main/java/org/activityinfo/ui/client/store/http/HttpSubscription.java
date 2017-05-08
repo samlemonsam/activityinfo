@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.http;
+package org.activityinfo.ui.client.store.http;
 
 /**
  * A reference to a {@link HttpRequest} submitted to the {@link HttpBus} that can be used

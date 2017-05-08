@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.http;
+package org.activityinfo.ui.client.store.http;
 
 /**
  * The current state of the connection with the server.

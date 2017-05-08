@@ -4,9 +4,9 @@ import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.http.FormMetadataRequest;
-import org.activityinfo.ui.client.http.HttpBus;
-import org.activityinfo.ui.client.http.VersionRangeRequest;
+import org.activityinfo.ui.client.store.http.FormMetadataRequest;
+import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.VersionRangeRequest;
 
 import java.util.ArrayList;
 import java.util.List;

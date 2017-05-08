@@ -1,13 +1,13 @@
-package org.activityinfo.ui.client.store;
+package org.activityinfo.ui.client.store.offline;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import junit.framework.TestCase;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.offline.SchemaStore;
 
 /**
  * Tests the compiled Javascript offline store against a real browser.
@@ -40,19 +40,19 @@ public class OfflineStoreGwtTest extends GWTTestCase {
         read.then(new AsyncCallback<FormClass>() {
             @Override
             public void onFailure(Throwable caught) {
-                fail();
+                TestCase.fail();
             }
 
             @Override
             public void onSuccess(FormClass result) {
-                assertEquals(surveyForm.getId(), result.getId());
-                assertEquals(surveyForm.getLabel(), result.getLabel());
+                TestCase.assertEquals(surveyForm.getId(), result.getId());
+                TestCase.assertEquals(surveyForm.getLabel(), result.getLabel());
 
                 FormField expectedField = surveyForm.getField(fieldId);
                 FormField field = result.getField(fieldId);
 
-                assertEquals(expectedField.getId(), field.getId());
-                assertEquals(expectedField.getLabel(), field.getLabel());
+                TestCase.assertEquals(expectedField.getId(), field.getId());
+                TestCase.assertEquals(expectedField.getLabel(), field.getLabel());
                 finishTest();
             }
         });

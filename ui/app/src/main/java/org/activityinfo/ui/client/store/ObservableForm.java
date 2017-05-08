@@ -5,9 +5,10 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.http.FormMetadataRequest;
-import org.activityinfo.ui.client.http.HttpBus;
-import org.activityinfo.ui.client.http.HttpSubscription;
+import org.activityinfo.ui.client.store.http.FormMetadataRequest;
+import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpSubscription;
+import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 import java.util.logging.Logger;
 
