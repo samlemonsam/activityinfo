@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store.offline;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.promise.Promise;
 
@@ -19,17 +20,21 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
         this.put(JSON.parse(json));
     }-*/;
 
-    protected final native void getJson(String[] keys, AsyncCallback<String> callback) /*-{
-        var request = this.get(keys);
+    protected final native void getJson(JavaScriptObject key, AsyncCallback<String> callback) /*-{
+        var request = this.get(key);
         request.onsuccess = function(event) {
             var object = event.target.result;
-            callback.@AsyncCallback::onSuccess(*)(JSON.stringify(object));
+            if(object) {
+                callback.@AsyncCallback::onSuccess(*)(JSON.stringify(object));
+            } else {
+                callback.@AsyncCallback::onFailure(*)(@RuntimeException::new(Ljava/lang/String;)(
+                    "No object with key " + JSON.stringify(key) + " in object store " + this.name));
+            }
         }
         request.onerror = function(event) {
             callback.@AsyncCallback::onFailure(*)(@RuntimeException::new()());
         }
     }-*/;
-
 
 
     @Override
@@ -40,7 +45,23 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
     @Override
     public final Promise<String> getJson(String[] keys) {
         Promise<String> result = new Promise<>();
-        getJson(keys, result);
+        getJson(createKey(keys), result);
         return result;
     }
+
+    private JavaScriptObject createKey(String[] keys) {
+        if(keys.length == 1) {
+            return createKey(keys[0]);
+        }
+        JsArrayString array = JsArrayString.createArray().cast();
+        for (String key : keys) {
+            array.push(key);
+        }
+        return array;
+    }
+
+    private static native JavaScriptObject createKey(String key) /*-{
+        return key;
+    }-*/;
+
 }
