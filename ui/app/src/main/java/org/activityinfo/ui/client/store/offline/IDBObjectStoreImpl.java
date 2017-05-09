@@ -20,16 +20,16 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
         this.put(JSON.parse(json));
     }-*/;
 
+    @Override
+    public final native void putJson(String json, String key) /*-{
+        this.put(JSON.parse(json), key);
+    }-*/;
+
     protected final native void getJson(JavaScriptObject key, AsyncCallback<String> callback) /*-{
         var request = this.get(key);
         request.onsuccess = function(event) {
             var object = event.target.result;
-            if(object) {
-                callback.@AsyncCallback::onSuccess(*)(JSON.stringify(object));
-            } else {
-                callback.@AsyncCallback::onFailure(*)(@RuntimeException::new(Ljava/lang/String;)(
-                    "No object with key " + JSON.stringify(key) + " in object store " + this.name));
-            }
+            callback.@AsyncCallback::onSuccess(*)(JSON.stringify(object));
         }
         request.onerror = function(event) {
             callback.@AsyncCallback::onFailure(*)(@RuntimeException::new()());

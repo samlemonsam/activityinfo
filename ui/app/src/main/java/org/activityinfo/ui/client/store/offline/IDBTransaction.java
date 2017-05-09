@@ -15,4 +15,8 @@ public interface IDBTransaction {
         return new RecordStore(objectStore(RecordStore.NAME));
     }
 
+    public default KeyValueStore values() {
+        return new KeyValueStore(objectStore(KeyValueStore.NAME));
+    }
+
 }

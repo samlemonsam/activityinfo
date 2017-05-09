@@ -19,19 +19,26 @@ public class IDBDatabaseImpl extends JavaScriptObject {
         api.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
         api.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 
-        var request = indexedDB.open("ActivityInfo", 2);
+        var request = indexedDB.open("ActivityInfo", 4);
         request.onerror = function(event) {
             @org.activityinfo.ui.client.store.offline.IDBDatabaseImpl::fail(*)(callback, event);
         };
         request.onupgradeneeded = function(event) {
             var db = event.target.result;
-            var schemaStore = db.createObjectStore("formSchemas", { keyPath: "id" });
+            if (event.oldVersion < 2) {
 
-            var formStore = db.createObjectStore("forms", {keyPath: "formId"});
+                var schemaStore = db.createObjectStore("formSchemas", {keyPath: "id"});
 
-            var recordStore = db.createObjectStore("records", {keyPath: [ "formId", "recordId"]});
-            recordStore.createIndex("formId", "formId", { unique: false });
-            recordStore.createIndex("parentFormId", "parentFormId", { unique: false });
+                var formStore = db.createObjectStore("forms", {keyPath: "formId"});
+
+                var recordStore = db.createObjectStore("records", {keyPath: ["formId", "recordId"]});
+                recordStore.createIndex("formId", "formId", {unique: false});
+                recordStore.createIndex("parentFormId", "parentFormId", {unique: false});
+            }
+            if (event.oldVersion < 4) {
+                var snapshotStore = db.createObjectStore("values");
+
+            }
         };
         request.onsuccess = function(event) {
             api.db = event.target.result;

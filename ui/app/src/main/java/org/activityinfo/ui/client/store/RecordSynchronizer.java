@@ -5,6 +5,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.Snapshot;
 
 import java.util.logging.Logger;
 

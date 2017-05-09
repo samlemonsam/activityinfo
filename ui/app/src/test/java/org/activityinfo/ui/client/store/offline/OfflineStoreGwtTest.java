@@ -10,7 +10,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
-import org.activityinfo.ui.client.store.Snapshot;
 
 import java.util.Collections;
 

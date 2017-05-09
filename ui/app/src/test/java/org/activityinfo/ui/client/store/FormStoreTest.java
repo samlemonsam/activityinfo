@@ -4,12 +4,15 @@ import com.google.gwt.core.client.testing.StubScheduler;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.observable.Connection;
-import org.activityinfo.observable.ObservableTesting;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.junit.Test;
+
+import static org.activityinfo.observable.ObservableTesting.connect;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class FormStoreTest {
 
@@ -34,7 +37,7 @@ public class FormStoreTest {
 
         // Now the view connects and should remain in loading state...
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
-        Connection<FormTree> view = ObservableTesting.connect(formStore.getFormTree(Survey.FORM_ID));
+        Connection<FormTree> view = connect(formStore.getFormTree(Survey.FORM_ID));
         view.assertLoading();
 
         // Start retries, but we're still offline
@@ -58,8 +61,16 @@ public class FormStoreTest {
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // Start online
+        Connection<OfflineStatus> offlineStatusView = connect(formStore.getOfflineStatus(Survey.FORM_ID));
+
+        // Initially form should not be loaded
+        assertFalse(offlineStatusView.assertLoaded().isEnabled());
+
         // and mark the survey form for offline usage
         offlineStore.enableOffline(Survey.FORM_ID, true);
+
+        assertTrue(offlineStatusView.assertLoaded().isEnabled());
+        assertFalse(offlineStatusView.assertLoaded().isCached());
 
         // Now synchronize...
         RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
@@ -70,11 +81,13 @@ public class FormStoreTest {
         client.setConnected(false);
 
         // Should be able to view the form class and a record
-        Connection<FormTree> schemaView = ObservableTesting.connect(formStore.getFormTree(Survey.FORM_ID));
-        Connection<FormRecord> recordView = ObservableTesting.connect(formStore.getRecord(Survey.getRecordRef(0)));
-
+        Connection<FormTree> schemaView = connect(formStore.getFormTree(Survey.FORM_ID));
+        Connection<FormRecord> recordView = connect(formStore.getRecord(Survey.getRecordRef(0)));
         schemaView.assertLoaded();
         recordView.assertLoaded();
+
+        assertTrue(offlineStatusView.assertLoaded().isEnabled());
+        assertTrue(offlineStatusView.assertLoaded().isCached());
     }
 
 

@@ -4,6 +4,8 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
 
+import java.util.Optional;
+
 /**
  * IndexedDB object store for individual form records.
  */
@@ -12,7 +14,7 @@ public class RecordStore {
     public static final String NAME = "records";
     private IDBObjectStore impl;
 
-    protected RecordStore(IDBObjectStore impl) {
+    RecordStore(IDBObjectStore impl) {
         this.impl = impl;
     }
 
@@ -20,10 +22,16 @@ public class RecordStore {
         impl.putJson(record.toJsonElement().toString());
     }
 
-    public final Promise<FormRecord> get(RecordRef ref) {
+    public final Promise<Optional<FormRecord>> get(RecordRef ref) {
         return impl
-                .getJson(key(ref))
-                .then(json -> FormRecord.fromJson(json));
+        .getJson(key(ref))
+        .then(json -> {
+            if(json == null) {
+                return Optional.empty();
+            } else {
+                return Optional.of(FormRecord.fromJson(json));
+            }
+        });
     }
 
     private String[] key(RecordRef ref) {

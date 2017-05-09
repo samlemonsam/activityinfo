@@ -5,6 +5,8 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 
+import java.util.Optional;
+
 public class CachedRecord extends Observable<FormRecord> {
 
     private final RecordRef recordRef;
@@ -20,16 +22,18 @@ public class CachedRecord extends Observable<FormRecord> {
     @Override
     protected void onConnect() {
         super.onConnect();
-        executor.begin(RecordStore.NAME).query(tx -> tx.records().get(recordRef)).then(new AsyncCallback<FormRecord>() {
+        executor.begin(RecordStore.NAME).query(tx -> tx.records().get(recordRef)).then(new AsyncCallback<Optional<FormRecord>>() {
             @Override
             public void onFailure(Throwable caught) {
 
             }
 
             @Override
-            public void onSuccess(FormRecord result) {
-                record = result;
-                fireChange();
+            public void onSuccess(Optional<FormRecord> result) {
+                if(result.isPresent()) {
+                    record = result.get();
+                    fireChange();
+                }
             }
         });
     }

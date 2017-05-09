@@ -125,7 +125,7 @@ public class TestingFormStore implements FormStore {
 
     @Override
     public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
-        return Observable.just(new OfflineStatus(false));
+        return Observable.just(new OfflineStatus(false, false));
     }
 
     private <T> Observable<T> maybeExecute(Supplier<T> task) {

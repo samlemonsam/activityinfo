@@ -5,7 +5,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.activityinfo.promise.Promise;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 public class IDBExecutorStub implements IDBExecutor {
@@ -16,7 +19,9 @@ public class IDBExecutorStub implements IDBExecutor {
 
     public IDBExecutorStub() {
         storeMap.put(SchemaStore.NAME, new ObjectStore(SchemaStore.NAME, new String[] { "id" }));
-        storeMap.put(RecordStore.NAME, new ObjectStore(SchemaStore.NAME, new String[] { "formId", "recordId" }));
+        storeMap.put(RecordStore.NAME, new ObjectStore(RecordStore.NAME, new String[] { "formId", "recordId" }));
+        storeMap.put(KeyValueStore.NAME, new ObjectStore(KeyValueStore.NAME));
+
 
     }
 
@@ -45,7 +50,7 @@ public class IDBExecutorStub implements IDBExecutor {
 
         @Override
         public <T> Promise<T> query(Work<T> work) {
-            Tx tx = new Tx(objectStores);
+            Tx tx = new Tx(objectStores, readwrite);
             return work.query(tx);
         }
     }
@@ -53,9 +58,11 @@ public class IDBExecutorStub implements IDBExecutor {
     private class Tx implements IDBTransaction {
 
         private Set<String> objectStores = new HashSet<>();
+        private boolean readwrite;
 
-        public Tx(Set<String> objectStores) {
+        public Tx(Set<String> objectStores, boolean readwrite) {
             this.objectStores = objectStores;
+            this.readwrite = readwrite;
         }
 
         @Override
@@ -67,12 +74,11 @@ public class IDBExecutorStub implements IDBExecutor {
             if(store == null) {
                 throw new IllegalStateException("Object store " + name + " does not exist.");
             }
-            return store;
+            return new ObjectStoreInTx(store, readwrite);
         }
     }
 
-    private class ObjectStore implements IDBObjectStore {
-
+    private class ObjectStore {
 
         private final String name;
         private final String[] keys;
@@ -83,16 +89,49 @@ public class IDBExecutorStub implements IDBExecutor {
             this.keys = keys;
         }
 
+        public ObjectStore(String name) {
+            this.name = name;
+            this.keys = null;
+        }
+
+
+    }
+
+    private class ObjectStoreInTx implements IDBObjectStore {
+
+        private ObjectStore store;
+        private boolean readwrite;
+
+        public ObjectStoreInTx(ObjectStore store, boolean readwrite) {
+            this.store = store;
+            this.readwrite = readwrite;
+        }
         @Override
         public void putJson(String json) {
+            if(!readwrite) {
+                throw new IllegalStateException("The transaction is read-only.");
+            }
             JsonObject object = JSON_PARSER.parse(json).getAsJsonObject();
             String key = buildKey(object);
-            objectMap.put(key, json);
+            store.objectMap.put(key, json);
+        }
+
+        @Override
+        public void putJson(String json, String key) {
+            if(!readwrite) {
+                throw new IllegalStateException("The transaction is read-only.");
+            }
+            store.objectMap.put(key, json);
         }
 
         private String buildKey(JsonObject object) {
+            if(store.keys == null) {
+                throw new IllegalStateException("Object store " + store.name +
+                        " has no key path defined, must use out-of-line key");
+            }
+
             StringBuilder keyString = new StringBuilder();
-            for (String  key : keys) {
+            for (String  key : store.keys) {
                 JsonElement keyPart = object.get(key);
                 if(keyPart == null) {
                     throw new IllegalStateException("Missing key '" + key + "' for object " + object);
@@ -113,12 +152,8 @@ public class IDBExecutorStub implements IDBExecutor {
             for (String key : keys) {
                 keyString.append(key);
             }
-            String object = objectMap.get(keyString.toString());
-            if(object != null) {
-                return Promise.resolved(object);
-            } else {
-                return Promise.rejected(new IllegalArgumentException("No such element: " + Arrays.toString(keys)));
-            }
+            String object = store.objectMap.get(keyString.toString());
+            return Promise.resolved(object);
         }
     }
 

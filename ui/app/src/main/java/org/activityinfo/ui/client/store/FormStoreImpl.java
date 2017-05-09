@@ -13,6 +13,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.*;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -80,7 +81,10 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
-        return Observable.just(new OfflineStatus(false));
+        Observable<Boolean> enabled = offlineStore.getOfflineForms().transform(set -> set.contains(formId));
+        Observable<SnapshotStatus> snapshot = offlineStore.getCurrentSnapshot();
+
+        return Observable.transform(enabled, snapshot, (e, s) -> new OfflineStatus(e, s.isFormCached(formId)));
     }
 
 }
