@@ -9,7 +9,6 @@ import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class FormStoreTest {
@@ -50,43 +49,6 @@ public class FormStoreTest {
     }
 
 
-    /**
-     * Once fetched from the server, form schemas should be cached
-     * in IndexedDb and should be available from the offline store.
-     */
-    @Ignore
-    @Test
-    public void formSchemasAreCachedOffline() {
-
-        AsyncClientStub client = new AsyncClientStub();
-        HttpBus httpBus = new HttpBus(client, new StubScheduler());
-        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
-
-        // So we start online.
-        // But nothing happens until a UI view starts observing a form class
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
-        Connection<FormTree> view = ObservableTesting.connect(formStore.getFormTree(Survey.FORM_ID));
-        view.assertLoaded();
-
-        // Then we navigate away and the view releases the connection
-        // to the form class.
-        view.disconnect();
-
-        // Now we go offline...
-        client.setConnected(false);
-
-        // And start a new session
-        FormStoreImpl formStoreOffline = new FormStoreImpl(httpBus, offlineStore, scheduler);
-
-        // So when the form schema is needed again then verify that
-        // it can be loaded from the offline store
-        view = ObservableTesting.connect(formStoreOffline.getFormTree(Survey.FORM_ID));
-        view.assertLoaded();
-
-    }
-
-
-    @Ignore
     @Test
     public void offlineRecordFetching() {
         AsyncClientStub client = new AsyncClientStub();

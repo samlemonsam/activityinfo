@@ -6,6 +6,7 @@ import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -26,7 +27,7 @@ public class CachedMetdata extends Observable<FormMetadata> {
                 .then(new AsyncCallback<FormClass>() {
             @Override
             public void onFailure(Throwable caught) {
-                LOGGER.info("Failed to retrieve " + formId + " schema from offline store");
+                LOGGER.log(Level.SEVERE, "Failed to retrieve " + formId + " schema from offline store", caught);
             }
 
             @Override

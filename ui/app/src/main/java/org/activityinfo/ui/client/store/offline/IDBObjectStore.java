@@ -10,4 +10,6 @@ public interface IDBObjectStore {
     void putJson(String json);
 
     Promise<String> getJson(String key);
+
+    Promise<String> getJson(String[] keys);
 }

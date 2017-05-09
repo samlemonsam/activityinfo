@@ -19,8 +19,8 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
         this.put(JSON.parse(json));
     }-*/;
 
-    protected final native void getJson(String key, AsyncCallback<String> callback) /*-{
-        var request = this.get(key);
+    protected final native void getJson(String[] keys, AsyncCallback<String> callback) /*-{
+        var request = this.get(keys);
         request.onsuccess = function(event) {
             var object = event.target.result;
             callback.@AsyncCallback::onSuccess(*)(JSON.stringify(object));
@@ -30,10 +30,17 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
         }
     }-*/;
 
+
+
     @Override
     public final Promise<String> getJson(String key) {
+        return getJson(new String[] { key });
+    }
+
+    @Override
+    public final Promise<String> getJson(String[] keys) {
         Promise<String> result = new Promise<>();
-        getJson(key, result);
+        getJson(keys, result);
         return result;
     }
 }

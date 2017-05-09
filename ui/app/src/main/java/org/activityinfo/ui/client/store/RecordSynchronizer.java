@@ -23,7 +23,7 @@ public class RecordSynchronizer {
 
     public RecordSynchronizer(HttpBus httpBus, OfflineStore offlineStore) {
         this.offlineStore = offlineStore;
-        this.snapshot = Snapshot.get(offlineStore.getOfflineForms(), httpBus);
+        this.snapshot = Snapshot.compute(offlineStore.getOfflineForms(), httpBus);
         this.subscription = snapshot.subscribe(this::onSnapshotUpdated);
     }
 

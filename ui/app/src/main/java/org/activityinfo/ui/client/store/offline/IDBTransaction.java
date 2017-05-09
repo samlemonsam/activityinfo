@@ -14,4 +14,5 @@ public interface IDBTransaction {
     public default RecordStore records() {
         return new RecordStore(objectStore(RecordStore.NAME));
     }
+
 }

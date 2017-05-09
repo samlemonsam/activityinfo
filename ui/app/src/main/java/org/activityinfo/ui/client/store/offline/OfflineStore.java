@@ -5,6 +5,7 @@ import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.ui.client.store.Snapshot;
@@ -45,6 +46,12 @@ public class OfflineStore {
         }
         offlineForms.updateIfNotEqual(ImmutableSet.copyOf(newSet));
     }
+
+
+    public Observable<FormRecord> getCachedRecord(RecordRef recordRef) {
+        return new CachedRecord(recordRef, executor);
+    }
+
 
     /**
      * @return the set of forms that should be made available offline.

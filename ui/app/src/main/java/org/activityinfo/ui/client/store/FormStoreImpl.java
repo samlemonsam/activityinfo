@@ -67,7 +67,10 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<FormRecord> getRecord(RecordRef recordRef) {
-        return httpBus.get(new RecordRequest(recordRef));
+        Observable<FormRecord> online = httpBus.get(new RecordRequest(recordRef));
+        Observable<FormRecord> offline = offlineStore.getCachedRecord(recordRef);
+
+        return new Best<>(online, offline, (x, y) -> 0);
     }
 
 }

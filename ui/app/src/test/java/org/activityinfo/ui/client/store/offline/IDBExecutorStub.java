@@ -1,13 +1,11 @@
 package org.activityinfo.ui.client.store.offline;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.activityinfo.promise.Promise;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class IDBExecutorStub implements IDBExecutor {
@@ -18,6 +16,8 @@ public class IDBExecutorStub implements IDBExecutor {
 
     public IDBExecutorStub() {
         storeMap.put(SchemaStore.NAME, new ObjectStore(SchemaStore.NAME, new String[] { "id" }));
+        storeMap.put(RecordStore.NAME, new ObjectStore(SchemaStore.NAME, new String[] { "formId", "recordId" }));
+
     }
 
     @Override
@@ -93,14 +93,32 @@ public class IDBExecutorStub implements IDBExecutor {
         private String buildKey(JsonObject object) {
             StringBuilder keyString = new StringBuilder();
             for (String  key : keys) {
-                keyString.append(key);
+                JsonElement keyPart = object.get(key);
+                if(keyPart == null) {
+                    throw new IllegalStateException("Missing key '" + key + "' for object " + object);
+                }
+                keyString.append(keyPart.getAsString());
             }
             return keyString.toString();
         }
 
         @Override
         public Promise<String> getJson(String key) {
-            return Promise.resolved(key);
+            return getJson(new String[] { key });
+        }
+
+        @Override
+        public Promise<String> getJson(String[] keys) {
+            StringBuilder keyString = new StringBuilder();
+            for (String key : keys) {
+                keyString.append(key);
+            }
+            String object = objectMap.get(keyString.toString());
+            if(object != null) {
+                return Promise.resolved(object);
+            } else {
+                return Promise.rejected(new IllegalArgumentException("No such element: " + Arrays.toString(keys)));
+            }
         }
     }
 
