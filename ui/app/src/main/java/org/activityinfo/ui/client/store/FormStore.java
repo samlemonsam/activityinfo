@@ -29,4 +29,9 @@ public interface FormStore {
     Observable<ColumnSet> query(QueryModel queryModel);
 
     Observable<FormRecord> getRecord(RecordRef recordRef);
+
+    void setFormOffline(ResourceId formId, boolean offline);
+
+    Observable<OfflineStatus> getOfflineStatus(ResourceId formId);
+
 }

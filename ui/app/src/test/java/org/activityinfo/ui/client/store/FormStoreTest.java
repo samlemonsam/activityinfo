@@ -31,6 +31,7 @@ public class FormStoreTest {
         // We start offline
         client.setConnected(false);
 
+
         // Now the view connects and should remain in loading state...
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
         Connection<FormTree> view = ObservableTesting.connect(formStore.getFormTree(Survey.FORM_ID));

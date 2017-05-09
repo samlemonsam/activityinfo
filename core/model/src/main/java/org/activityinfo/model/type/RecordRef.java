@@ -21,6 +21,8 @@ public class RecordRef {
     private ResourceId recordId;
 
     public RecordRef(ResourceId formId, ResourceId recordId) {
+        assert formId != null : "formId is null";
+        assert recordId != null : "recordId is null";
         this.formId = formId;
         this.recordId = recordId;
     }

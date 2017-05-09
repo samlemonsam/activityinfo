@@ -73,4 +73,14 @@ public class FormStoreImpl implements FormStore {
         return new Best<>(online, offline, (x, y) -> 0);
     }
 
+    @Override
+    public void setFormOffline(ResourceId formId, boolean offline) {
+        offlineStore.enableOffline(formId, offline);
+    }
+
+    @Override
+    public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
+        return Observable.just(new OfflineStatus(false));
+    }
+
 }

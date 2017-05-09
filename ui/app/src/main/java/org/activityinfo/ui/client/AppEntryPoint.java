@@ -18,6 +18,7 @@ import org.activityinfo.ui.client.analysis.AnalysisPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
+import org.activityinfo.ui.client.store.RecordSynchronizer;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorImpl;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
@@ -58,6 +59,9 @@ public class AppEntryPoint implements EntryPoint {
         AppPlaceHistoryMapper historyMapper = new AppPlaceHistoryMapper();
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, DEFAULT_PLACE);
+
+        // Start synchronizer...
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
 
         viewport.add(appFrame);
 

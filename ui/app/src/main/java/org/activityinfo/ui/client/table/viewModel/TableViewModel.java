@@ -89,4 +89,5 @@ public class TableViewModel {
     public void select(RecordRef ref) {
         selectedRecordRef.updateIfNotEqual(Optional.of(ref));
     }
+
 }

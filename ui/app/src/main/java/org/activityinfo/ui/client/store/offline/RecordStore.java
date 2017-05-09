@@ -9,7 +9,7 @@ import org.activityinfo.promise.Promise;
  */
 public class RecordStore {
 
-    public static final String NAME = "formRecords";
+    public static final String NAME = "records";
     private IDBObjectStore impl;
 
     protected RecordStore(IDBObjectStore impl) {

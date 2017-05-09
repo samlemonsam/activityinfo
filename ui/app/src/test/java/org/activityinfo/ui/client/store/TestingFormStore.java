@@ -118,6 +118,16 @@ public class TestingFormStore implements FormStore {
         return maybeExecute(() -> testingCatalog.getForm(recordRef.getFormId()).get().get(recordRef.getRecordId()).get());
     }
 
+    @Override
+    public void setFormOffline(ResourceId formId, boolean offline) {
+
+    }
+
+    @Override
+    public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
+        return Observable.just(new OfflineStatus(false));
+    }
+
     private <T> Observable<T> maybeExecute(Supplier<T> task) {
         if (delayLoading) {
             PendingTask<T> pending = new PendingTask<T>(task);

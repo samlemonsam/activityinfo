@@ -27,9 +27,17 @@ class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer
         }
 
         public void onSuccess(ColumnSet columnSet) {
+
+            int actualRows = columnSet.getNumRows() - config.getOffset();
+            if(actualRows < 0) {
+                actualRows = 0;
+            } else if(actualRows > config.getLimit()) {
+                actualRows = config.getLimit();
+            }
+
             PagingLoadResultBean<Integer> result = new PagingLoadResultBean<>();
             result.setOffset(config.getOffset());
-            result.setData(new RowIndexList(config.getOffset(), config.getLimit()));
+            result.setData(new RowIndexList(config.getOffset(), actualRows));
             result.setTotalLength(columnSet.getNumRows());
             callback.onSuccess(result);
         }

@@ -8,6 +8,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.Snapshot;
 
 import java.util.HashSet;
@@ -63,8 +64,8 @@ public class OfflineStore {
     /**
      * Stores a new snapshot to the remote store
      */
-    public void store(Snapshot snapshot) {
-        executor.begin()
+    public Promise<Void> store(Snapshot snapshot) {
+        return executor.begin()
         .objectStore(SchemaStore.NAME)
         .objectStore(RecordStore.NAME)
         .readwrite()

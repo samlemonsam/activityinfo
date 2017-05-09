@@ -54,6 +54,10 @@ public class EffectiveTableModel {
         this.columnSet = formStore.query(buildQuery(columns));
     }
 
+    public FormTree.State getRootFormState() {
+        return this.formTree.getRootState();
+    }
+
     private boolean isSimple(FieldType type) {
         return type instanceof TextType ||
                type instanceof QuantityType ||
@@ -115,6 +119,10 @@ public class EffectiveTableModel {
     }
 
     public String getFormLabel() {
-        return formTree.getRootFormClass().getLabel();
+        if(formTree.getRootState() == FormTree.State.VALID) {
+            return formTree.getRootFormClass().getLabel();
+        } else {
+            return "";
+        }
     }
 }

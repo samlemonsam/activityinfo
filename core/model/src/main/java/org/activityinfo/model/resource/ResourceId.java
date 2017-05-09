@@ -35,6 +35,7 @@ public final class ResourceId implements Serializable {
      * used as a Jersey {@code @PathParam}
      */
     public static ResourceId valueOf(@Nonnull String string) {
+        assert string != null : "resourceid cannot be null";
         return new ResourceId(string);
     }
 

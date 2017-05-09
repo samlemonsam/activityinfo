@@ -3,8 +3,6 @@ package org.activityinfo.ui.client.store.offline;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
 /**
@@ -53,10 +51,6 @@ public class IDBDatabaseImpl extends JavaScriptObject {
 
     public static IDBTransactionBuilder begin(String... objectStores) {
         return new TxBuilderImpl().objectStores(objectStores);
-    }
-
-    public static final Promise<FormClass> loadSchema(ResourceId formId) {
-        return IDBDatabaseImpl.begin(SchemaStore.NAME).query(tx -> tx.schemas().get(formId));
     }
 
     public final native void close() /*-{

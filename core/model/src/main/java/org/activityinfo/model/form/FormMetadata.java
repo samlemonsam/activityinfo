@@ -117,19 +117,19 @@ public class FormMetadata {
         metadata.id = ResourceId.valueOf(object.getAsJsonPrimitive("id").getAsString());
 
         if(object.has("version")) {
-            metadata.version = object.getAsJsonPrimitive("version").getAsLong();
+            metadata.version = object.get("version").getAsLong();
         }
         if(object.has("schemaVersion")) {
-            metadata.version = object.getAsJsonPrimitive("schemaVersion").getAsLong();
+            metadata.version = object.get("schemaVersion").getAsLong();
         }
         if(object.has("schema")) {
             metadata.schema = FormClass.fromJson(object.getAsJsonObject("schema"));
         }
         if(object.has("visible")) {
-            metadata.visible = object.getAsJsonObject("visible").getAsBoolean();
+            metadata.visible = object.get("visible").getAsBoolean();
         }
         if(object.has("deleted")) {
-            metadata.visible = object.getAsJsonObject("deleted").getAsBoolean();
+            metadata.visible = object.get("deleted").getAsBoolean();
         }
         return metadata;
     }
