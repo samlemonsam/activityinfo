@@ -5,9 +5,13 @@ import com.google.common.collect.Iterables;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.ObservableFormTree;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -121,6 +125,14 @@ public class HttpBus {
 
     public <T> Observable<T> get(HttpRequest<T> request) {
         return new ObservableRequest<T>(this, request);
+    }
+
+    public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
+        return get(new FormMetadataRequest(formId));
+    }
+
+    public Observable<FormTree> getFormTree(ResourceId rootFormId) {
+        return new ObservableFormTree(rootFormId, this::getFormMetadata, scheduler);
     }
 
     /**

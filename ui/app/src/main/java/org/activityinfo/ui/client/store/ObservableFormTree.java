@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 /**
  * FormTree that
  */
-class ObservableFormTree extends Observable<FormTree> {
+public class ObservableFormTree extends Observable<FormTree> {
 
     private static final Logger LOGGER = Logger.getLogger(ObservableFormTree.class.getName());
 

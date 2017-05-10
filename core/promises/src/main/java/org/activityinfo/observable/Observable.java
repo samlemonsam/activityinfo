@@ -190,6 +190,24 @@ public abstract class Observable<T> {
         return flatten(SynchronousScheduler.INSTANCE, list);
     }
 
+    /**
+     * Given a collection which is observable, apply the function {@code f} to each of its elements, and join the results
+     * in a new list which is itself observable.
+     *
+     */
+    public static <T, TT extends Iterable<T>, R> Observable<List<R>> flatMap(Observable<TT> observableCollection, final Function<T, Observable<R>> f) {
+        return observableCollection.join(new Function<TT, Observable<List<R>>>() {
+            @Override
+            public Observable<List<R>> apply(TT collection) {
+                List < Observable < R >> list = new ArrayList<>();
+                for (T element : collection) {
+                    list.add(f.apply(element));
+                }
+                return flatten(list);
+            }
+        });
+    }
+
     public static <T> Observable<T> flattenOptional(Observable<Optional<T>> observable) {
         return observable.join(new Function<Optional<T>, Observable<T>>() {
             @Override

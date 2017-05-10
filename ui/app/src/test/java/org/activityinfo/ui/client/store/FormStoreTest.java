@@ -4,10 +4,14 @@ import com.google.gwt.core.client.testing.StubScheduler;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.observable.Connection;
+import org.activityinfo.store.testing.IncidentForm;
+import org.activityinfo.store.testing.IntakeForm;
+import org.activityinfo.store.testing.ReferralSubForm;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 import org.junit.Test;
 
 import static org.activityinfo.observable.ObservableTesting.connect;
@@ -17,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 public class FormStoreTest {
 
 
-    private final ImmediateScheduler scheduler = new ImmediateScheduler();
+    private final StubScheduler scheduler = new StubScheduler();
 
     /**
      * If at first the remote fetch does not succeed because
@@ -27,8 +31,7 @@ public class FormStoreTest {
     public void formSchemaFetchesAreRetried() {
 
         AsyncClientStub client = new AsyncClientStub();
-        StubScheduler retryScheduler = new StubScheduler();
-        HttpBus httpBus = new HttpBus(client, retryScheduler);
+        HttpBus httpBus = new HttpBus(client, scheduler);
         OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
 
         // We start offline
@@ -41,12 +44,14 @@ public class FormStoreTest {
         view.assertLoading();
 
         // Start retries, but we're still offline
-        retryScheduler.executeRepeatingCommands();
+        scheduler.executeCommands();
+
         view.assertLoading();
 
         // Now connect and retry
         client.setConnected(true);
-        retryScheduler.executeRepeatingCommands();
+
+        scheduler.executeCommands();
 
         // View should be loaded
         view.assertLoaded();
@@ -54,9 +59,22 @@ public class FormStoreTest {
 
 
     @Test
+    public void httpBus() {
+        AsyncClientStub client = new AsyncClientStub();
+        HttpBus httpBus = new HttpBus(client, scheduler);
+
+        Connection<FormTree> view = connect(httpBus.getFormTree(Survey.FORM_ID));
+
+        runScheduled();
+
+        view.assertLoaded();
+    }
+
+
+    @Test
     public void offlineRecordFetching() {
         AsyncClientStub client = new AsyncClientStub();
-        HttpBus httpBus = new HttpBus(client, new StubScheduler());
+        HttpBus httpBus = new HttpBus(client, scheduler);
         OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
@@ -74,8 +92,8 @@ public class FormStoreTest {
 
         // Now synchronize...
         RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
-        scheduler.executeCommands();
 
+        runScheduled();
 
         // We go offline...
         client.setConnected(false);
@@ -83,6 +101,9 @@ public class FormStoreTest {
         // Should be able to view the form class and a record
         Connection<FormTree> schemaView = connect(formStore.getFormTree(Survey.FORM_ID));
         Connection<FormRecord> recordView = connect(formStore.getRecord(Survey.getRecordRef(0)));
+
+        runScheduled();
+
         schemaView.assertLoaded();
         recordView.assertLoaded();
 
@@ -90,6 +111,34 @@ public class FormStoreTest {
         assertTrue(offlineStatusView.assertLoaded().isCached());
     }
 
+    @Test
+    public void relatedFormsAreAlsoCached() {
+        AsyncClientStub client = new AsyncClientStub();
+        HttpBus httpBus = new HttpBus(client, scheduler);
+        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
+        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
+        // Start online, and enable offline mode for incidents
+        formStore.setFormOffline(IncidentForm.FORM_ID, true);
+
+        // Now synchronize...
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
+
+        runScheduled();
+
+        // Ensure that related forms and subforms are also synchronized
+        SnapshotStatus snapshot = connect(offlineStore.getCurrentSnapshot()).assertLoaded();
+
+        assertTrue("incident form is cached", snapshot.isFormCached(IncidentForm.FORM_ID));
+        assertTrue("sub form is cached", snapshot.isFormCached(ReferralSubForm.FORM_ID));
+        assertTrue("related form is cached", snapshot.isFormCached(IntakeForm.FORM_ID));
+    }
+
+
+    private void runScheduled() {
+        while(scheduler.executeScheduledCommands()) {
+            System.err.println("Still executing...");
+        }
+    }
 
 }
