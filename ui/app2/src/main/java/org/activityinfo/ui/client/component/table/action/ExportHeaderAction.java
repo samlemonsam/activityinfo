@@ -7,7 +7,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
 import org.activityinfo.ui.icons.Icons;
 
@@ -38,10 +37,10 @@ public class ExportHeaderAction implements TableHeaderAction {
                 .setPath("/resources/form/" + table.getRootFormClass().getId().asString()
                         + "/query/columns.xls");
 
-        for (FieldColumn column : table.getColumns()) {
-            String id = column.get().getNode().getFieldId().asString();
-            urlBuilder.setParameter(id, id);
-        }
+//        for (FieldColumn column : table.getColumns()) {
+//            String id = column.get().getNode().getFieldId().asString();
+//            urlBuilder.setParameter(id, id);
+//        }
 
         Window.open(urlBuilder.buildString(), "_blank", "");
     }
