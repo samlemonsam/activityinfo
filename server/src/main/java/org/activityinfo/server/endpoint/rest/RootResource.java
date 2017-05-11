@@ -220,6 +220,7 @@ public class RootResource {
     }
 
     @Path("reindexSnapshots")
+    @GET
     public Response reindexSnapshots() {
         FormRecordSnapshotEntity.reindexSnapshots();
 

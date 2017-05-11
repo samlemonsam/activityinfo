@@ -9,6 +9,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.RecordChangeType;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 
 @Entity(name = "FormRecordSnapshot")
@@ -120,7 +121,10 @@ public class FormRecordSnapshotEntity {
                 .load()
                 .type(FormRecordSnapshotEntity.class);
 
+        Logger logger = Logger.getLogger(FormRecordSnapshotEntity.class.getName());
+
         for (FormRecordSnapshotEntity entity : query.iterable()) {
+            logger.info(entity.getRecordKey() + " = " + entity.version);
             if(entity.version == 0) {
                 entity.version = entity.id;
                 ObjectifyService.ofy().save().entity(entity).now();
