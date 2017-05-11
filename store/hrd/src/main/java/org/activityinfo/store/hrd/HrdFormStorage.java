@@ -109,7 +109,7 @@ public class HrdFormStorage implements VersionedFormStorage {
                 .ancestor(FormEntity.key(formClass));
 
         if(localVersion > 0) {
-            query = query.filterKey(">", localVersion);
+            query = query.filter("version >", localVersion);
         }
 
         List<FormRecord> records = new ArrayList<>();

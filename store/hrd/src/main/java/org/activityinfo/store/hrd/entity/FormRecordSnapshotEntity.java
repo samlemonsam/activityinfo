@@ -2,7 +2,9 @@ package org.activityinfo.store.hrd.entity;
 
 import com.google.common.base.Preconditions;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.*;
+import com.googlecode.objectify.cmd.LoadType;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.RecordChangeType;
 
@@ -16,7 +18,7 @@ public class FormRecordSnapshotEntity {
     private Key<FormRecordEntity> recordKey;
     
     @Id
-    private long version;
+    private long id;
     
     @Index
     private String parentRecordId;
@@ -26,6 +28,9 @@ public class FormRecordSnapshotEntity {
     
     @Index
     private long userId;
+
+    @Index
+    private long version;
     
     @Unindex
     private RecordChangeType type;
@@ -40,6 +45,7 @@ public class FormRecordSnapshotEntity {
         Preconditions.checkArgument(userId != 0);
         
         this.recordKey = Key.create(record);
+        this.id = record.getVersion();
         this.version = record.getVersion();
         this.parentRecordId = record.getParentRecordId();
         this.type = changeType;
@@ -61,11 +67,11 @@ public class FormRecordSnapshotEntity {
     }
 
     public long getVersion() {
-        return version;
+        return id;
     }
 
     public void setVersion(long version) {
-        this.version = version;
+        this.id = version;
     }
 
     public String getParentRecordId() {
@@ -106,5 +112,19 @@ public class FormRecordSnapshotEntity {
 
     public void setRecord(FormRecordEntity record) {
         this.record = record;
+    }
+
+    public static void reindexSnapshots() {
+        LoadType<FormRecordSnapshotEntity> query = ObjectifyService
+                .ofy()
+                .load()
+                .type(FormRecordSnapshotEntity.class);
+
+        for (FormRecordSnapshotEntity entity : query.iterable()) {
+            if(entity.version == 0) {
+                entity.version = entity.id;
+                ObjectifyService.ofy().save().entity(entity).now();
+            }
+        }
     }
 }

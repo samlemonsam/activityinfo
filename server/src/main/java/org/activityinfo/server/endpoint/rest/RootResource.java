@@ -43,6 +43,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
+import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
@@ -216,6 +217,13 @@ public class RootResource {
     @Path("/catalog")
     public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
         return new CatalogResource(catalog, userProvider);
+    }
+
+    @Path("reindexSnapshots")
+    public Response reindexSnapshots() {
+        FormRecordSnapshotEntity.reindexSnapshots();
+
+        return Response.ok().entity("Done").build();
     }
     
 }

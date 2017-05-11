@@ -286,12 +286,12 @@ public class HrdCatalogTest {
         assertTrue(updatedRecords.isEmpty());
 
         // Add a new record
-        RecordUpdate update = new RecordUpdate();
-        update.setUserId(1);
-        update.setRecordId(ResourceId.generateId());
-        update.set(villageField, TextValue.valueOf("Goma"));
+        RecordUpdate firstUpdate = new RecordUpdate();
+        firstUpdate.setUserId(1);
+        firstUpdate.setRecordId(ResourceId.generateId());
+        firstUpdate.set(villageField, TextValue.valueOf("Goma"));
 
-        catalog.getForm(collectionId).get().add(update);
+        catalog.getForm(collectionId).get().add(firstUpdate);
 
         // Verify that the version is incremented and the version range
         // (0, 2] includes our new record
@@ -301,6 +301,20 @@ public class HrdCatalogTest {
         List<FormRecord> updated = formStorage.getVersionRange(0, 2L);
         assertThat(updated, hasSize(1));
 
+        // Update the first record and add a new one
+        RecordUpdate secondUpdate = new RecordUpdate();
+        secondUpdate.setUserId(1);
+        secondUpdate.setRecordId(ResourceId.generateId());
+        secondUpdate.set(villageField, TextValue.valueOf("Rutshuru"));
+        catalog.getForm(collectionId).get().add(firstUpdate);
+
+        // Verify that the version is incremented and the version range
+        // (1, 2] includes our new record
+
+        assertThat(formStorage.cacheVersion(), equalTo(3L));
+
+        updated = formStorage.getVersionRange(2L, 3L);
+        assertThat(updated, hasSize(1));
 
     }
 
