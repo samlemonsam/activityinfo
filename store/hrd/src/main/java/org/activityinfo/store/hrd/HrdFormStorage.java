@@ -1,17 +1,22 @@
 package org.activityinfo.store.hrd;
 
+import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.base.Optional;
+import com.googlecode.objectify.cmd.Query;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
+import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
 import org.activityinfo.store.hrd.op.QuerySubRecords;
 import org.activityinfo.store.hrd.op.QueryVersions;
 import org.activityinfo.store.spi.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
@@ -19,8 +24,9 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 /**
  * Accessor for forms backed by the AppEngine High-Replication Datastore (HRD)
  */
-public class HrdFormStorage implements FormStorage {
+public class HrdFormStorage implements VersionedFormStorage {
 
+    private long version;
     private FormClass formClass;
 
     public HrdFormStorage(FormClass formClass) {
@@ -83,7 +89,8 @@ public class HrdFormStorage implements FormStorage {
 
     @Override
     public long cacheVersion() {
-        return 0;
+        FormEntity entity = ofy().load().type(FormEntity.class).id(formClass.getId().asString()).now();
+        return entity.getVersion();
     }
 
     @Override
@@ -93,5 +100,26 @@ public class HrdFormStorage implements FormStorage {
 
     public Iterable<FormRecord> getSubRecords(ResourceId parentId) {
         return ofy().transact(new QuerySubRecords(formClass, parentId));
+    }
+
+    @Override
+    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+
+        Query<FormRecordSnapshotEntity> query = ofy().load().type(FormRecordSnapshotEntity.class)
+                .ancestor(FormEntity.key(formClass));
+
+        if(localVersion > 0) {
+            query = query.filterKey(">", localVersion);
+        }
+
+        List<FormRecord> records = new ArrayList<>();
+
+        QueryResultIterator<FormRecordSnapshotEntity> it = query.iterator();
+        while(it.hasNext()) {
+            FormRecordSnapshotEntity snapshot = it.next();
+            FormRecord record = snapshot.getRecord().toFormRecord(formClass);
+            records.add(record);
+        }
+        return records;
     }
 }

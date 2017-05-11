@@ -92,29 +92,22 @@ public class Updater {
         
         ResourceId recordId = parseId(changeObject, "@id");
 
-        // First determine whether the resource already exists. 
-        Optional<FormStorage> accessor = catalog.lookupForm(recordId);
-        
-        if(!accessor.isPresent()) {
-            // If the record id is not present, then we need the @class attribute in order to
-            // know where to put the new resource 
-            if(!changeObject.has("@class")) {
-                throw new InvalidUpdateException(format(
-                    "Resource with id '%s' does not exist and no '@class' attribute has been provided.", recordId));
-            } 
-            
-            ResourceId formId = parseId(changeObject, "@class");
-            accessor = catalog.getForm(formId);
-            
-            if(!accessor.isPresent()) {
-                throw new InvalidUpdateException(format("@class '%s' does not exist.", formId));
-            }
+        if(!changeObject.has("@class")) {
+            throw new InvalidUpdateException(format(
+                "Resource with id '%s' does not exist and no '@class' attribute has been provided.", recordId));
         }
 
-        FormClass formClass = accessor.get().getFormClass();
+        ResourceId formId = parseId(changeObject, "@class");
+        Optional<FormStorage> storage = catalog.getForm(formId);
+
+        if(!storage.isPresent()) {
+            throw new InvalidUpdateException(format("@class '%s' does not exist.", formId));
+        }
+
+        FormClass formClass = storage.get().getFormClass();
         RecordUpdate update = parseChange(formClass, changeObject, this.userId);
 
-        executeUpdate(accessor.get(), update);
+        executeUpdate(storage.get(), update);
     }
 
     @VisibleForTesting
@@ -242,12 +235,15 @@ public class Updater {
 
 
     public void execute(RecordUpdate update) {
-        Optional<FormStorage> collection = catalog.lookupForm(update.getRecordId());
-        if(!collection.isPresent()) {
+        if(update.getFormId() == null) {
+            throw new IllegalArgumentException("No formId provided.");
+        }
+        Optional<FormStorage> storage = catalog.getForm(update.getFormId());
+        if(!storage.isPresent()) {
             throw new InvalidUpdateException("No such resource: " + update.getRecordId());
         }
 
-        executeUpdate(collection.get(), update);
+        executeUpdate(storage.get(), update);
     }
 
     private void executeUpdate(FormStorage form, RecordUpdate update) {

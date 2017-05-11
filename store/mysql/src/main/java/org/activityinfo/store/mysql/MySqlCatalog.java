@@ -100,7 +100,6 @@ public class MySqlCatalog implements FormCatalog {
         }
     }
 
-    @Override
     public Optional<FormStorage> lookupForm(ResourceId recordId) {
         for (FormProvider mapping : providers) {
             try {

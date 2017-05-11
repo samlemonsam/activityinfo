@@ -12,6 +12,7 @@ import java.util.Map;
 public class RecordUpdate {
     
     private long userId;
+    private ResourceId formId;
     private ResourceId recordId;
     private ResourceId parentId;
     private boolean deleted = false;
@@ -31,6 +32,14 @@ public class RecordUpdate {
     
     public ResourceId getRecordId() {
         return recordId;
+    }
+
+    public ResourceId getFormId() {
+        return formId;
+    }
+
+    public void setFormId(ResourceId formId) {
+        this.formId = formId;
     }
 
     public ResourceId getParentId() {

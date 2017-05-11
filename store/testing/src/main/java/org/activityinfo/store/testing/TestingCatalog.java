@@ -67,11 +67,6 @@ public class TestingCatalog implements FormCatalog {
     }
 
     @Override
-    public Optional<FormStorage> lookupForm(ResourceId recordId) {
-        return Optional.absent();
-    }
-
-    @Override
     public List<CatalogEntry> getRootEntries() {
         return Collections.emptyList();
     }

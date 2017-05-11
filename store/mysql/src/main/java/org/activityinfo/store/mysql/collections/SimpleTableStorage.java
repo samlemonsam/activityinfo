@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class SimpleTableStorage implements FormStorage {
+public class SimpleTableStorage implements VersionedFormStorage {
 
     protected final TableMapping mapping;
     protected final Authorizer authorizer;
@@ -82,6 +82,11 @@ public class SimpleTableStorage implements FormStorage {
     @Override
     public ColumnQueryBuilder newColumnQuery() {
         return new SimpleTableColumnQueryBuilder(new MySqlCursorBuilder(mapping, executor));
+    }
+
+    @Override
+    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+        return null;
     }
 
     @Override

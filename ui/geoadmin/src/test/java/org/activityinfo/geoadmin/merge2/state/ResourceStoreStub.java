@@ -80,11 +80,6 @@ public class ResourceStoreStub implements ResourceStore {
         }
 
         @Override
-        public Optional<FormStorage> lookupForm(ResourceId recordId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
             throw new UnsupportedOperationException();
         }

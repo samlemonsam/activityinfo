@@ -69,6 +69,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSite() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
+        changeObject.addProperty("@class", activityFormClass(1).asString());
         changeObject.addProperty("partner", partnerRecordId(2).asString());
 
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
@@ -85,6 +86,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSiteSetValueToBlank() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
+        changeObject.addProperty("@class", activityFormClass(1).asString());
         changeObject.add("BENE", JsonNull.INSTANCE);
         changeObject.add("comments", JsonNull.INSTANCE);
 
@@ -104,6 +106,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateAdminEntity() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
+        changeObject.addProperty("@class", adminLevelFormClass(2).asString());
         changeObject.addProperty("name", "Nouveau Irumu");
         
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
@@ -121,6 +124,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void deleteAdminEntity() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
+        changeObject.addProperty("@class", adminLevelFormClass(2).asString());
         changeObject.addProperty("@deleted", true);
 
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
@@ -138,6 +142,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void deleteSite() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
+        changeObject.addProperty("@class", activityFormClass(1).asString());
         changeObject.addProperty("@deleted", true);
 
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
@@ -159,6 +164,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000009");
+        changeObject.addProperty("@class", activityFormClass(3).asString());
         changeObject.addProperty("@deleted", true);
 
         newRequest();
@@ -177,7 +183,9 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSiteWithMultipleProperties() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
+        changeObject.addProperty("@class", activityFormClass(1).asString());
         changeObject.addProperty("partner", partnerRecordId(2).asString());
+
         changeObject.addProperty("BENE", 2100);
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
 
@@ -197,6 +205,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void updateSiteWithMultiAttributes() {
         JsonObject changeObject = new JsonObject();
         changeObject.addProperty("@id", "s0000000001");
+        changeObject.addProperty("@class", activityFormClass(1).asString());
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
         changeObject.addProperty(attributeGroupField(2).asString(), "Casserole");
 
@@ -258,11 +267,12 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void testSingleSiteResource() throws IOException {
 
         int databaseId = 1;
-        ResourceId formClass = CuidAdapter.activityFormClass(1);
+        ResourceId formId = CuidAdapter.activityFormClass(1);
         RecordUpdate update = new RecordUpdate();
         update.setUserId(userId);
+        update.setFormId(formId);
         update.setRecordId(cuid(SITE_DOMAIN, 1));
-        update.set(field(formClass, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
+        update.set(field(formId, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 

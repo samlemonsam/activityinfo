@@ -47,17 +47,8 @@ public class HrdCatalog implements FormCatalog {
         return Optional.<FormStorage>of(accessor);
     }
 
-    @Override
     public Optional<FormStorage> lookupForm(ResourceId recordId) {
-        if(recordId.getDomain() != ResourceId.GENERATED_ID_DOMAIN) {
-            return Optional.absent();
-        }
-        String parts[] = recordId.asString().split("-");
-        if(parts.length != 2) {
-            throw new IllegalArgumentException("Invalid submission id: " + recordId + 
-                    ". Expected format c00000-000000");
-        }
-        return getForm(ResourceId.valueOf(parts[0]));
+        return Optional.absent();
     }
 
     @Override

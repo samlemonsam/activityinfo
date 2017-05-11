@@ -8,6 +8,7 @@ import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -145,6 +146,7 @@ public class HrdCatalogTest {
         for (String villageName : villageNames) {
             RecordUpdate update = new RecordUpdate();
             update.setUserId(userId);
+            update.setFormId(formClass.getId());
             update.setRecordId(ResourceId.generateSubmissionId(formClass));
             update.set(nameField.getId(), TextValue.valueOf(villageName));
         
@@ -247,6 +249,59 @@ public class HrdCatalogTest {
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+    }
+
+    @Test
+    public void versionRangeTest() {
+
+
+        ResourceId collectionId = ResourceId.generateId();
+        ResourceId villageField = ResourceId.valueOf("FV");
+        ResourceId countField = ResourceId.valueOf("FC");
+
+        FormClass formClass = new FormClass(collectionId);
+        formClass.setParentFormId(ResourceId.valueOf("foo"));
+        formClass.setLabel("NFI Distributions");
+        formClass.addField(villageField)
+                .setLabel("Village name")
+                .setCode("VILLAGE")
+                .setType(TextType.SIMPLE);
+        formClass.addField(countField)
+                .setLabel("Number of Beneficiaries")
+                .setCode("BENE")
+                .setType(new QuantityType("Beneficiaries"));
+
+
+        HrdCatalog catalog = new HrdCatalog();
+        catalog.create(formClass);
+
+        VersionedFormStorage formStorage = (VersionedFormStorage) catalog.getForm(collectionId).get();
+
+        // Initially, with no records added, the form should be at version 1
+        // and the version range (0, 1] should be empty.
+        assertThat(formStorage.cacheVersion(), equalTo(1L));
+
+        List<FormRecord> updatedRecords = formStorage.getVersionRange(0, 1L);
+
+        assertTrue(updatedRecords.isEmpty());
+
+        // Add a new record
+        RecordUpdate update = new RecordUpdate();
+        update.setUserId(1);
+        update.setRecordId(ResourceId.generateId());
+        update.set(villageField, TextValue.valueOf("Goma"));
+
+        catalog.getForm(collectionId).get().add(update);
+
+        // Verify that the version is incremented and the version range
+        // (0, 2] includes our new record
+
+        assertThat(formStorage.cacheVersion(), equalTo(2L));
+
+        List<FormRecord> updated = formStorage.getVersionRange(0, 2L);
+        assertThat(updated, hasSize(1));
+
+
     }
 
 }
