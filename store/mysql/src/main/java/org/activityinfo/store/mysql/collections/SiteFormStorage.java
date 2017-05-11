@@ -11,6 +11,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
@@ -33,7 +34,7 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 /**
  * Collection of Sites
  */
-public class SiteFormStorage implements FormStorage {
+public class SiteFormStorage implements VersionedFormStorage {
     
     private final Activity activity;
     private final TableMapping baseMapping;
@@ -354,5 +355,11 @@ public class SiteFormStorage implements FormStorage {
     @Override
     public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+        HrdFormStorage delegate = new HrdFormStorage(getFormClass());
+        return delegate.getVersionRange(localVersion, toVersion);
     }
 }
