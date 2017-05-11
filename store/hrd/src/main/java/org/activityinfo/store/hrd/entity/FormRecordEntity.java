@@ -55,12 +55,7 @@ public class FormRecordEntity {
     }
 
     public ResourceId getRecordId() {
-        ResourceId formId = getFormId();
-        if(formId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-            return ResourceId.valueOf(formKey.getName() + "-" + id);
-        } else {
-            return ResourceId.valueOf(id);
-        }
+        return ResourceId.valueOf(id);
     }
     
     public String getParentRecordId() {
