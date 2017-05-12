@@ -428,9 +428,10 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void nonExistingSite() {
 
-        Optional<FormStorage> collection = catalog.lookupForm(CuidAdapter.locationFormClass(9444441));
+        Optional<FormStorage> storage = catalog.getForm(CuidAdapter.locationFormClass(1));
+        Optional<FormRecord> record = storage.get().get(CuidAdapter.locationFormClass(9444441));
     
-        assertFalse(collection.isPresent());
+        assertFalse(record.isPresent());
     }
 
     @Test

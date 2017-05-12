@@ -1,7 +1,6 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -34,11 +33,6 @@ public class TargetFormProvider implements FormProvider {
             throw new IllegalArgumentException("no such target collection: " + formId);
         }
         return collection;
-    }
-
-    @Override
-    public Optional<ResourceId> lookupForm(QueryExecutor executor, ResourceId recordId) throws SQLException {
-        return Optional.absent();
     }
 
     @Override

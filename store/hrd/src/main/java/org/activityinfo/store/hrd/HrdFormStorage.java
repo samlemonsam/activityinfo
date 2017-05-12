@@ -19,7 +19,8 @@ import org.activityinfo.store.spi.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import static org.activityinfo.store.hrd.Hrd.ofy;
+
 
 /**
  * Accessor for forms backed by the AppEngine High-Replication Datastore (HRD)

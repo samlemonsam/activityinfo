@@ -5,6 +5,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.*;
 import com.googlecode.objectify.cmd.LoadType;
+import com.googlecode.objectify.condition.IfFalse;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.RecordChangeType;
 
@@ -38,6 +39,11 @@ public class FormRecordSnapshotEntity {
     
     @Unindex
     private FormRecordEntity record;
+
+    @Unindex
+    @IgnoreSave(IfFalse.class)
+    private boolean migrated;
+
 
     public FormRecordSnapshotEntity() {
     }
@@ -73,6 +79,14 @@ public class FormRecordSnapshotEntity {
 
     public void setVersion(long version) {
         this.id = version;
+    }
+
+    public boolean isMigrated() {
+        return migrated;
+    }
+
+    public void setMigrated(boolean migrated) {
+        this.migrated = migrated;
     }
 
     public String getParentRecordId() {

@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -31,8 +32,12 @@ public class PartnerTable implements SimpleTable {
 
     @Override
     public TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException {
+        return getMapping(formId);
+    }
+
+    private TableMapping getMapping(ResourceId formId) throws SQLException {
         int databaseId = CuidAdapter.getLegacyIdFromCuid(formId);
-        
+
         TableMappingBuilder mapping = TableMappingBuilder.newMapping(formId, "partner");
         mapping.setFormLabel("Partner");
         mapping.setDatabaseId(CuidAdapter.databaseId(databaseId));
@@ -41,27 +46,33 @@ public class PartnerTable implements SimpleTable {
         mapping.setBaseFilter("pd.databaseId=" + databaseId);
         mapping.setVersion(databaseVersionMap.getSchemaVersion(databaseId));
         mapping.setSchemaVersion(1L); // Schema is static
-        
+
         FormField nameField = new FormField(field(formId, NAME_FIELD))
                 .setRequired(true)
                 .setLabel("Name")
                 .setCode("label")
                 .setKey(true)
-          //      .setSuperProperty(ApplicationProperties.LABEL_PROPERTY)
                 .setType(TextType.SIMPLE);
-        
+
         mapping.addTextField(nameField, "name");
-        
-        
+
+
         FormField fullNameField = new FormField(field(formId, FULL_NAME_FIELD))
                 .setLabel("Full Name")
-            //    .setSuperProperty(ApplicationProperties.DESCRIPTION_PROPERTY)
                 .setRequired(false)
                 .setType(TextType.SIMPLE);
-        
+
         mapping.addTextField(fullNameField, "FullName");
 
         return mapping.build();
+    }
+
+    public HrdFormStorage getHrdStorage(int databaseId) {
+        try {
+            return new HrdFormStorage(getMapping(CuidAdapter.partnerFormId(databaseId)).getFormClass());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

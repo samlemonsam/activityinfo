@@ -13,7 +13,7 @@ import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
-import org.activityinfo.store.mysql.metadata.DatabaseCache;
+import org.activityinfo.store.mysql.metadata.DatabaseCacheImpl;
 import org.activityinfo.store.mysql.update.ActivityUpdater;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormNotFoundException;
@@ -42,7 +42,7 @@ public class MySqlCatalog implements FormCatalog {
     public MySqlCatalog(final QueryExecutor executor) {
 
         activityLoader = new ActivityLoader(executor);
-        DatabaseCache databaseCache = new DatabaseCache(executor);
+        DatabaseCacheImpl databaseCache = new DatabaseCacheImpl(executor);
 
         providers.add(new SimpleTableStorageProvider(new UserTable(), FormPermissions.readonly()));
         providers.add(new SimpleTableStorageProvider(new CountryTable(), FormPermissions.readonly()));
@@ -98,20 +98,6 @@ public class MySqlCatalog implements FormCatalog {
         } catch (ExecutionException e) {
             throw new RuntimeException(e.getCause());
         }
-    }
-
-    public Optional<FormStorage> lookupForm(ResourceId recordId) {
-        for (FormProvider mapping : providers) {
-            try {
-                Optional<ResourceId> collectionId = mapping.lookupForm(executor, recordId);
-                if (collectionId.isPresent()) {
-                    return getForm(collectionId.get());
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return Optional.absent();
     }
 
     @Override
