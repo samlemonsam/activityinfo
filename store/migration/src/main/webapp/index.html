@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>ActivityInfo Migration Service</title>
+
+</head>
+<body>
+
+    <h1>Datastore Migration Service</h1>
+
+    <form action="/migrate" method="post">
+
+        <select name="job">
+            <option value="projects">Migrate projects</option>
+            <option value="snapshots">Reindex Snapshots</option>
+        </select>
+
+        <input type="submit" value="Submit">
+
+    </form>
+
+
+</body>
+</html>
