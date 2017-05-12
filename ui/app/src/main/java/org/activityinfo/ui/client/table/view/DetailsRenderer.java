@@ -139,9 +139,11 @@ public class DetailsRenderer {
     private final List<FieldRenderer> renderers = new ArrayList<>();
 
     public DetailsRenderer(FormTree tree) {
-        FormClass formClass = tree.getRootFormClass();
-        for (FormField field : formClass.getFields()) {
-            renderers.add(new FieldRenderer(field, buildRenderer(field.getType())));
+        if(tree.getRootState() == FormTree.State.VALID) {
+            FormClass formClass = tree.getRootFormClass();
+            for (FormField field : formClass.getFields()) {
+                renderers.add(new FieldRenderer(field, buildRenderer(field.getType())));
+            }
         }
     }
 
