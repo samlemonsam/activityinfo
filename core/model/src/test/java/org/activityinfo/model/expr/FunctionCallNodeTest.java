@@ -18,7 +18,7 @@ public class FunctionCallNodeTest {
     public void binaryInfix() {
         assertThat(
             new FunctionCallNode(PlusFunction.INSTANCE, new SymbolExpr("X"), new SymbolExpr("Y")).asExpression(),
-                equalTo("X+Y"));
+                equalTo("X + Y"));
     }
 
 
@@ -45,7 +45,7 @@ public class FunctionCallNodeTest {
                     new FunctionCallNode(EqualFunction.INSTANCE, new ConstantExpr(true), new ConstantExpr(false)),
                     new ConstantExpr(true),
                     new ConstantExpr(false)).asExpression(),
-                    equalTo("if(true==false, true, false)"));
+                    equalTo("if(true == false, true, false)"));
     }
 
 }

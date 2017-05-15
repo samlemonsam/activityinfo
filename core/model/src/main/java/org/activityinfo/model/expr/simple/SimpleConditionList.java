@@ -5,6 +5,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,6 +17,10 @@ public class SimpleConditionList {
     private Criteria criteria;
     private List<SimpleCondition> conditions;
 
+    public SimpleConditionList() {
+        this.criteria = Criteria.ALL_TRUE;
+        this.conditions = Collections.emptyList();
+    }
 
     public SimpleConditionList(SimpleCondition condition) {
         this.criteria = Criteria.ALL_TRUE;

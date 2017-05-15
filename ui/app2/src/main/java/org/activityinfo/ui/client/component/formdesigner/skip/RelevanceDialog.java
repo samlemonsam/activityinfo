@@ -36,7 +36,6 @@ import org.activityinfo.ui.client.widget.ModalDialog;
 public class RelevanceDialog {
 
     public static final int DIALOG_WIDTH = 900;
-//    public static final int DIALOG_HEIGHT = 800;
 
     private final FormField formField;
     private final ModalDialog dialog;

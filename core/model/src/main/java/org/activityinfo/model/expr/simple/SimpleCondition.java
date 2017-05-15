@@ -82,7 +82,6 @@ public class SimpleCondition {
                 return binaryFunction(LessOrEqualFunction.INSTANCE);
             case INCLUDES:
                 return new CompoundExpr(fieldId, getEnumId().asString());
-
             case NOT_INCLUDES:
                 return new FunctionCallNode(NotFunction.INSTANCE,
                         new CompoundExpr(fieldId, getEnumId().asString()));
