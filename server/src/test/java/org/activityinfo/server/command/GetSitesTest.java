@@ -163,6 +163,7 @@ public class GetSitesTest extends CommandTestCase2 {
     }
 
 
+    @Ignore
     @Test
     public void testActivityQueryPaged() throws CommandException {
 

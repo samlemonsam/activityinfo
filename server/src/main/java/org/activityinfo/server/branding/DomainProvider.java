@@ -60,11 +60,11 @@ public class DomainProvider implements Provider<Domain> {
         if (result == null) {
             result = new Domain();
             result.setTitle("ActivityInfo");
-            result.setHost(host);
             result.setSignUpAllowed(true);
         } else {
             entityManager.get().detach(result);
         }
+
         result.setHost(getExternalHostName());
         result.setPort(request.get().getServerPort());
         return result;
@@ -75,7 +75,15 @@ public class DomainProvider implements Provider<Domain> {
         if(host != null) {
             return host;
         }
-        return request.get().getServerName();
+
+        String requestHost = request.get().getServerName();
+
+        // Requests initiated by the task service will use
+        // the internal name. For our production server, pretty it up.
+        if(requestHost.equals("activityinfoeu.appspot.com")) {
+            return "www.activityinfo.org";
+        }
+        return requestHost;
     }
 
     /**

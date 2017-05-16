@@ -39,7 +39,7 @@ public class LocationDTO extends BaseModelData implements EntityDTO, HasAdminEnt
 
     public static final String VALIDATED = "validated";
     public static final String REJECTED = "rejected";
-
+    public static final int MAX_NAME_LENGTH = 50;
 
     public LocationDTO() {
         super();

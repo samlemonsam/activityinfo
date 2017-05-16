@@ -35,6 +35,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.promise.Promise;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -43,15 +44,20 @@ import java.util.Set;
 public class EnumDropDownWidget implements FormFieldWidget<EnumValue> {
 
     private final ListBox dropBox;
+    private final EnumType enumType;
     private final ValueUpdater<EnumValue> valueUpdater;
 
     public EnumDropDownWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater) {
+        this.enumType = enumType;
         this.valueUpdater = valueUpdater;
         dropBox = new ListBox(enumType.getCardinality() == Cardinality.MULTIPLE);
         dropBox.addStyleName("form-control");
 
+        // Empty value
+        dropBox.addItem("");
+
         for (EnumItem enumItem : enumType.getValues()) {
-            dropBox.addItem(enumItem.getLabel(), enumItem.getId().asString());
+            dropBox.addItem(enumItem.getLabel());
         }
         dropBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -82,20 +88,26 @@ public class EnumDropDownWidget implements FormFieldWidget<EnumValue> {
     }
 
     private EnumValue updatedValue() {
-        Set<ResourceId> value = Sets.newHashSet();
-        for (int i = 0; i < dropBox.getItemCount(); i++) {
-            if (dropBox.isItemSelected(i)) {
-                value.add(ResourceId.valueOf(dropBox.getValue(i)));
-            }
+        if(dropBox.getSelectedIndex() <= 0) {
+            return null;
         }
-        return new EnumValue(value);
+        EnumItem enumItem = enumType.getValues().get(dropBox.getSelectedIndex() - 1);
+        return new EnumValue(enumItem.getId());
     }
 
     @Override
     public Promise<Void> setValue(EnumValue value) {
-        for (int i = 0; i != dropBox.getItemCount(); ++i) {
-            ResourceId id = ResourceId.valueOf(dropBox.getValue(i));
-            dropBox.setItemSelected(i, value.getResourceIds().contains(id));
+
+        dropBox.setSelectedIndex(-1);
+
+        if(value.getResourceIds().size() == 1) {
+            List<EnumItem> values = enumType.getValues();
+            for (int i = 0; i < values.size(); i++) {
+                if (values.get(i).getId().equals(value.getValueId())) {
+                    dropBox.setSelectedIndex(i + 1);
+                    break;
+                }
+            }
         }
         return Promise.done();
     }

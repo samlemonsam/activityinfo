@@ -21,31 +21,149 @@ package org.activityinfo.ui.client.component.formdesigner.skip;
  * #L%
  */
 
+import com.google.common.base.Optional;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.*;
+import org.activityinfo.model.expr.simple.Criteria;
+import org.activityinfo.model.expr.simple.SimpleCondition;
+import org.activityinfo.model.expr.simple.SimpleConditionList;
+import org.activityinfo.model.expr.simple.SimpleOperators;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.ui.client.component.form.field.OptionSetProvider;
+import org.activityinfo.ui.client.widget.Button;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yuriyz on 7/23/14.
  */
-public class RelevancePanel extends Composite {
+public class RelevancePanel implements IsWidget {
+
+    private static final int ALL_INDEX = 0;
+    private static final int ANY_INDEX = 1;
+
+    private static final int MAX_CONDITIONS = 5;
+
 
     private static OurUiBinder uiBinder = GWT.create(OurUiBinder.class);
 
-    interface OurUiBinder extends UiBinder<Widget, RelevancePanel> {
+    interface OurUiBinder extends UiBinder<HTMLPanel, RelevancePanel> {
     }
 
-    @UiField
+    private List<FormField> selectableFields;
+    private OptionSetProvider optionSetProvider;
+
+
     HTMLPanel rootPanel;
 
-    public RelevancePanel() {
-        initWidget(uiBinder.createAndBindUi(this));
+    @UiField
+    FlowPanel conditionPanel;
+
+    @UiField
+    ListBox criteria;
+    @UiField
+    Button addButton;
+
+    private List<RelevanceRow> rows = new ArrayList<>();
+
+    public RelevancePanel(OptionSetProvider optionSetProvider) {
+        this.optionSetProvider = optionSetProvider;
+        this.rootPanel = uiBinder.createAndBindUi(this);
     }
 
-    public HTMLPanel getRootPanel() {
+    public void init(List<FormField> fields, SimpleConditionList model) {
+        assert rows.isEmpty();
+
+        this.selectableFields = new ArrayList<>();
+        for (FormField field : fields) {
+            if(!SimpleOperators.forType(field.getType()).isEmpty()) {
+                selectableFields.add(field);
+            }
+        }
+
+        if(model.getCriteria() == Criteria.ALL_TRUE) {
+            criteria.setSelectedIndex(ALL_INDEX);
+        } else {
+            criteria.setSelectedIndex(ANY_INDEX);
+        }
+
+
+        for (SimpleCondition condition : model.getConditions()) {
+            addRow(Optional.of(condition));
+        }
+        if(rows.isEmpty()) {
+            addRow(Optional.<SimpleCondition>absent());
+        }
+        onRowCountUpdated();
+    }
+
+    public Criteria getSelectedCriteria() {
+        if(criteria.getSelectedIndex() == ANY_INDEX) {
+            return Criteria.ANY_TRUE;
+        } else {
+            return Criteria.ALL_TRUE;
+        }
+    }
+
+
+    @Override
+    public Widget asWidget() {
         return rootPanel;
     }
+
+    @UiHandler("addButton")
+    public void addButtonClick(ClickEvent event) {
+        addRow(Optional.<SimpleCondition>absent());
+        onRowCountUpdated();
+    }
+
+    private void addRow(Optional<SimpleCondition> condition) {
+        final RelevanceRow row = new RelevanceRow(selectableFields, condition, optionSetProvider);
+        row.addRemoveHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                removeCondition(row);
+            }
+
+        });
+        rows.add(row);
+        conditionPanel.add(row);
+    }
+
+
+    private void removeCondition(RelevanceRow row) {
+        if (rows.remove(row)) {
+            conditionPanel.remove(row);
+            onRowCountUpdated();
+        }
+    }
+
+
+
+    private void onRowCountUpdated() {
+        for (RelevanceRow row : rows) {
+            row.setRemoveEnabled(rows.size() > 1);
+        }
+        addButton.setVisible(rows.size() < MAX_CONDITIONS);
+    }
+
+
+    public String build() {
+
+        List<SimpleCondition> conditions = new ArrayList<>();
+        for (RelevanceRow row : rows) {
+            conditions.add(row.buildCondition());
+        }
+
+        return new SimpleConditionList(getSelectedCriteria(), conditions)
+                .toFormula()
+                .asExpression();
+    }
+
 }

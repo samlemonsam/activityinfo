@@ -37,7 +37,7 @@ public class FormRecord {
         return fields;
     }
 
-    
+
     public static FormRecord fromJson(String json) {
         JsonParser parser = new JsonParser();
         return fromJson(parser.parse(json));

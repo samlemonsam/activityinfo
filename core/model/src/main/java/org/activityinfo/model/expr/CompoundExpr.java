@@ -1,9 +1,14 @@
 package org.activityinfo.model.expr;
 
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.eval.EvalContext;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.primitive.BooleanFieldValue;
+import org.activityinfo.model.type.primitive.BooleanType;
 
 import javax.annotation.Nonnull;
 
@@ -35,12 +40,30 @@ public class CompoundExpr extends ExprNode {
 
     @Override
     public FieldValue evaluate(EvalContext context) {
-        return null;
+        FieldValue baseValue = value.evaluate(context);
+        if(baseValue instanceof EnumValue) {
+            EnumValue enumValue = (EnumValue) baseValue;
+            return evaluateEnumValue(enumValue);
+        }
+        throw new ExprSyntaxException(asExpression());
+    }
+
+    private FieldValue evaluateEnumValue(EnumValue enumValue) {
+        for (ResourceId enumId : enumValue.getResourceIds()) {
+            if(enumId.asString().equals(field.getName())) {
+                return BooleanFieldValue.TRUE;
+            }
+        }
+        return BooleanFieldValue.FALSE;
     }
 
     @Override
     public FieldType resolveType(EvalContext context) {
-        return null;
+        FieldType fieldType = value.resolveType(context);
+        if(fieldType instanceof EnumType) {
+            return BooleanType.INSTANCE;
+        }
+        throw new ExprSyntaxException("Cannot resolve type of compound expression with base expression type: " + fieldType);
     }
 
 

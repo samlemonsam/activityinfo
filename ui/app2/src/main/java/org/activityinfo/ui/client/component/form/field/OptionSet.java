@@ -25,7 +25,11 @@ public class OptionSet {
         this.longitude = columnSet.getColumnView("longitude");
         this.latitude = columnSet.getColumnView("latitude");
     }
-    
+
+    public ResourceId getFormId() {
+        return formId;
+    }
+
     public int getCount() {
         return columnSet.getNumRows();
     }

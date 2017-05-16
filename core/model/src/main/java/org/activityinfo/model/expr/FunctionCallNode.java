@@ -78,7 +78,7 @@ public class FunctionCallNode extends ExprNode {
     @Override
     public String asExpression() {
         if(function.isInfix() && arguments.size() == 2) {
-                return arguments.get(0).asExpression() + "" + function.getId() + "" + arguments.get(1).asExpression();
+                return arguments.get(0).asExpression() + " " + function.getId() + " " + arguments.get(1).asExpression();
         }
         String argumentString = "";
         for (ExprNode arg : arguments) {
