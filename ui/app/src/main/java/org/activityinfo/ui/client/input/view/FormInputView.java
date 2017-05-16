@@ -1,8 +1,12 @@
 package org.activityinfo.ui.client.input.view;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.CloseEvent;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -22,13 +26,17 @@ public class FormInputView implements IsWidget, InputHandler {
 
     private FormPanel formPanel = null;
 
+    private FormStore formStore;
     private FormInputModel inputModel;
     private FormInputViewModelBuilder viewModelBuilder = null;
 
+    private FormInputViewModel viewModel = null;
 
     private VerticalLayoutContainer container;
 
+
     public FormInputView(FormStore formStore, ResourceId formId) {
+        this.formStore = formStore;
 
         inputModel = new FormInputModel(new RecordRef(formId, ResourceId.generateSubmissionId(formId)));
 
@@ -44,15 +52,15 @@ public class FormInputView implements IsWidget, InputHandler {
             return;
         }
 
-
         if(formPanel == null) {
             viewModelBuilder = new FormInputViewModelBuilder(formTree.get());
             formPanel = new FormPanel(formTree.get(), inputModel.getRecordRef(), this);
             container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
             container.forceLayout();
 
-            FormInputViewModel viewModel = viewModelBuilder.build(inputModel);
+            viewModel = viewModelBuilder.build(inputModel);
             formPanel.update(viewModel);
+
 
         } else {
             // Alert the user that the schema has been updated.
@@ -79,5 +87,41 @@ public class FormInputView implements IsWidget, InputHandler {
         this.inputModel = updatedModel;
         FormInputViewModel viewModel = viewModelBuilder.build(inputModel);
         formPanel.update(viewModel);
+    }
+
+    public boolean isValid() {
+        if(viewModel == null) {
+            return false;
+        }
+        return false;
+    }
+
+    public void save(CloseEvent.CloseHandler closeHandler) {
+        // If the view model is still loading, ignore this click
+        if(viewModel == null) {
+            return;
+        }
+
+        if(!viewModel.isValid()) {
+            MessageBox box = new MessageBox(I18N.CONSTANTS.error(), I18N.CONSTANTS.pleaseFillInAllRequiredFields());
+            box.setModal(true);
+            box.show();
+            return;
+        }
+
+        // Good to go...
+        formStore.updateRecords(viewModel.buildTransaction()).then(new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                MessageBox box = new MessageBox(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorOnServer());
+                box.setModal(true);
+                box.show();
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                closeHandler.onClose(new CloseEvent(null));
+            }
+        });
     }
 }

@@ -8,10 +8,14 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.SerialNumberProvider;
 
 import java.util.*;
 
@@ -20,6 +24,15 @@ public class TestingCatalog implements FormCatalog {
 
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
 
+
+    private SerialNumberProvider serialNumberProvider = new SerialNumberProvider() {
+        @Override
+        public int next(ResourceId formId, ResourceId fieldId, String prefix) {
+            TestingFormStorage testingFormStorage = formMap.get(formId);
+            assert testingFormStorage != null;
+            return testingFormStorage.nextSerialNumber(fieldId, prefix);
+        }
+    };
 
     public TestingCatalog() {
 
@@ -34,6 +47,7 @@ public class TestingCatalog implements FormCatalog {
         add(intake, bioData, incidentForm, referralSubForm);
 
     }
+
 
     private void add(TestForm... testForms) {
         for (TestForm testForm : testForms) {
@@ -79,5 +93,10 @@ public class TestingCatalog implements FormCatalog {
     public ColumnSet query(QueryModel queryModel) {
         ColumnSetBuilder builder = new ColumnSetBuilder(this, new NullFormScanCache());
         return builder.build(queryModel);
+    }
+
+    public void updateRecords(TransactionBuilder transaction) {
+        Updater updater = new Updater(this, 1, new BlobAuthorizerStub(), serialNumberProvider);
+        updater.execute(transaction.build());
     }
 }

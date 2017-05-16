@@ -8,6 +8,7 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
@@ -27,6 +28,7 @@ public class HttpBus {
 
     private int nextRequestId = 1;
     private Scheduler scheduler;
+
 
     private class PendingRequest<T> implements HttpSubscription {
         private int id = nextRequestId++;
@@ -129,6 +131,12 @@ public class HttpBus {
 
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
         return get(new FormMetadataRequest(formId));
+    }
+
+
+    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
+        return client.updateRecords(transactionBuilder);
+
     }
 
     public Observable<FormTree> getFormTree(ResourceId rootFormId) {

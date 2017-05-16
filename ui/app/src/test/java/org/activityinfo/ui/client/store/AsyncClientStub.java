@@ -9,6 +9,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
@@ -114,6 +115,15 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     @Override
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
         return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
+    public Promise<Void> updateRecords(TransactionBuilder transactions) {
+        if(!connected) {
+            return offlineResult();
+        }
+
+        throw new UnsupportedOperationException();
     }
 
     private <T> Promise<T> offlineResult() {

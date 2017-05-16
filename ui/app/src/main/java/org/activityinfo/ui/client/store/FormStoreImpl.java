@@ -8,6 +8,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
@@ -85,6 +86,11 @@ public class FormStoreImpl implements FormStore {
         Observable<SnapshotStatus> snapshot = offlineStore.getCurrentSnapshot();
 
         return Observable.transform(enabled, snapshot, (e, s) -> new OfflineStatus(e, s.isFormCached(formId)));
+    }
+
+    @Override
+    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
+        return httpBus.updateRecords(transactionBuilder);
     }
 
 }

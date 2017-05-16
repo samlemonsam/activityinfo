@@ -28,6 +28,14 @@ public class FieldInput {
     private final State state;
     private final FieldValue fieldValue;
 
+    /**
+     * True if the field has been touched by the user in some way.
+     *
+     * (We generally want to hold of showing "required" errors before the user
+     * has started filling out the form.)
+     */
+    private boolean touched;
+
     public static final FieldInput INVALID_INPUT = new FieldInput(State.INVALID, null);
 
     public static final FieldInput EMPTY = new FieldInput(State.EMPTY, null);
@@ -53,5 +61,9 @@ public class FieldInput {
 
     public FieldValue getValue() {
         return fieldValue;
+    }
+
+    public boolean isTouched() {
+        return touched;
     }
 }

@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 
 public class FieldView {
     private final ResourceId fieldId;
@@ -20,5 +21,10 @@ public class FieldView {
 
     public FieldWidget getWidget() {
         return widget;
+    }
+
+    public void update(FormInputViewModel viewModel) {
+        widget.setRelevant(viewModel.isRelevant(fieldId));
+        missingMessage.setVisible(viewModel.isMissing(fieldId));
     }
 }

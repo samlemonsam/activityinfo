@@ -12,6 +12,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
@@ -199,5 +200,10 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         } catch (Exception e) {
             return Promise.rejected(e);
         }
+    }
+
+    @Override
+    public Promise<Void> updateRecords(TransactionBuilder transactions) {
+        throw new UnsupportedOperationException("TODO");
     }
 }

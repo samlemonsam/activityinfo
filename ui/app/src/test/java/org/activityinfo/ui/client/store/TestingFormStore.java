@@ -7,6 +7,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
@@ -126,6 +127,12 @@ public class TestingFormStore implements FormStore {
     @Override
     public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
         return Observable.just(new OfflineStatus(false, false));
+    }
+
+    @Override
+    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
+        testingCatalog.updateRecords(transactionBuilder);
+        return Promise.done();
     }
 
     private <T> Observable<T> maybeExecute(Supplier<T> task) {

@@ -1,8 +1,7 @@
-package org.activityinfo.geoadmin.model;
+package org.activityinfo.model.resource;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.ResourceId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,17 +13,29 @@ public class TransactionBuilder {
     
     private List<UpdateBuilder> updates = new ArrayList<>();
     
-    public UpdateBuilder create(ResourceId collectionId, ResourceId resourceId)  {
+    public UpdateBuilder create(ResourceId formId, ResourceId resourceId)  {
         UpdateBuilder update = new UpdateBuilder();
-        update.setId(resourceId);
-        update.setClass(collectionId);
+        update.setRecordId(resourceId);
+        update.setFormId(formId);
         updates.add(update);
         return update;
     }
-    
+
+    public TransactionBuilder add(UpdateBuilder update) {
+        updates.add(update);
+        return this;
+    }
+
+    public TransactionBuilder add(Iterable<UpdateBuilder> updates) {
+        for (UpdateBuilder update : updates) {
+            this.updates.add(update);
+        }
+        return this;
+    }
+
     public TransactionBuilder delete(ResourceId id) {
         UpdateBuilder update = new UpdateBuilder();
-        update.setId(id);
+        update.setRecordId(id);
         update.delete();
         updates.add(update);
         return this;
@@ -32,7 +43,7 @@ public class TransactionBuilder {
 
     public UpdateBuilder update(ResourceId id) {
         UpdateBuilder update = new UpdateBuilder();
-        update.setId(id);
+        update.setRecordId(id);
         updates.add(update);
         return update;
     }

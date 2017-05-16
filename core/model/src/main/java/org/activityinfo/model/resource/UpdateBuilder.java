@@ -1,8 +1,7 @@
-package org.activityinfo.geoadmin.model;
+package org.activityinfo.model.resource;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
 /**
@@ -12,12 +11,12 @@ public class UpdateBuilder {
     
     private JsonObject update = new JsonObject();
     
-    public UpdateBuilder setId(ResourceId id) {
+    public UpdateBuilder setRecordId(ResourceId id) {
         update.addProperty("@id", id.asString());
         return this;
     }
     
-    public UpdateBuilder setClass(ResourceId id) {
+    public UpdateBuilder setFormId(ResourceId id) {
         update.addProperty("@class", id.asString());
         return this;
     }

@@ -6,6 +6,7 @@ import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
@@ -103,4 +104,7 @@ public interface ActivityInfoClientAsync {
    * @param query The shape of the table to retrieve
    */
   Promise<ColumnSet> queryTableColumns(QueryModel query);
+
+  Promise<Void> updateRecords(TransactionBuilder transactions);
+
 }
