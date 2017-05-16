@@ -30,6 +30,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.simple.SimpleCondition;
 import org.activityinfo.model.expr.simple.SimpleOperator;
 import org.activityinfo.model.expr.simple.SimpleOperators;
@@ -209,21 +210,21 @@ public class RelevanceRow implements IsWidget {
     private String labelFor(SimpleOperator operator) {
         switch (operator) {
             case EQUALS:
-                return "is";
+                return I18N.CONSTANTS.operatorIs();
             case NOT_EQUALS:
-                return "is not";
+                return I18N.CONSTANTS.operatorIsNot();
             case GREATER_THAN:
-                return "is greater than";
+                return I18N.CONSTANTS.operatorGreaterThan();
             case GREATER_THAN_EQUAL:
-                return "is greater than or equal";
+                return I18N.CONSTANTS.operatorGreaterThanEqual();
             case LESS_THAN:
-                return "is less than";
+                return I18N.CONSTANTS.operatorLessThan();
             case LESS_THAN_EQUAL:
-                return "is less than or equal to";
+                return I18N.CONSTANTS.operatorLessThanEqualTo();
             case INCLUDES:
-                return "includes";
+                return I18N.CONSTANTS.operatorIncludes();
             case NOT_INCLUDES:
-                return "does not include";
+                return I18N.CONSTANTS.operatorDoesNotInclude();
             default:
                 throw new IllegalArgumentException();
         }

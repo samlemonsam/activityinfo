@@ -29,6 +29,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.simple.Criteria;
 import org.activityinfo.model.expr.simple.SimpleCondition;
 import org.activityinfo.model.expr.simple.SimpleConditionList;
@@ -64,7 +65,8 @@ public class RelevancePanel implements IsWidget {
     FlowPanel conditionPanel;
 
     @UiField
-    ListBox criteria;
+    ListBox criteriaListBox;
+
     @UiField
     Button addButton;
 
@@ -72,6 +74,9 @@ public class RelevancePanel implements IsWidget {
 
     public RelevancePanel() {
         this.rootPanel = uiBinder.createAndBindUi(this);
+
+        criteriaListBox.addItem(I18N.CONSTANTS.relevanceCriteriaAll());
+        criteriaListBox.addItem(I18N.CONSTANTS.relevanceCriteriaAny());
     }
 
     public void init(List<FormField> fields, SimpleConditionList model) {
@@ -85,9 +90,9 @@ public class RelevancePanel implements IsWidget {
         }
 
         if(model.getCriteria() == Criteria.ALL_TRUE) {
-            criteria.setSelectedIndex(ALL_INDEX);
+            criteriaListBox.setSelectedIndex(ALL_INDEX);
         } else {
-            criteria.setSelectedIndex(ANY_INDEX);
+            criteriaListBox.setSelectedIndex(ANY_INDEX);
         }
 
 
@@ -101,7 +106,7 @@ public class RelevancePanel implements IsWidget {
     }
 
     public Criteria getSelectedCriteria() {
-        if(criteria.getSelectedIndex() == ANY_INDEX) {
+        if(criteriaListBox.getSelectedIndex() == ANY_INDEX) {
             return Criteria.ANY_TRUE;
         } else {
             return Criteria.ALL_TRUE;
