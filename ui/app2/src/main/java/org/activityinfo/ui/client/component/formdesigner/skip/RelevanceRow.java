@@ -29,14 +29,17 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.simple.SimpleCondition;
 import org.activityinfo.model.expr.simple.SimpleOperator;
 import org.activityinfo.model.expr.simple.SimpleOperators;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -44,17 +47,22 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.OptionSet;
+import org.activityinfo.ui.client.component.form.field.OptionSetProvider;
 import org.activityinfo.ui.client.widget.Button;
 
 import java.util.List;
 
 /**
- * @author yuriyz on 7/24/14.
+ * Allows the user to select a field, an operator (==, !=, etc), which together form
+ * a {@link SimpleCondition}
  */
 public class RelevanceRow implements IsWidget {
 
 
     private List<SimpleOperator> operators;
+    private OptionSetProvider optionSetProvider;
 
     interface OurUiBinder extends UiBinder<Widget, RelevanceRow> {
     }
@@ -71,17 +79,18 @@ public class RelevanceRow implements IsWidget {
     @UiField
     ListBox operatorListBox;
     @UiField
-    TextBox textBox;
+    TextBox operandTextBox;
     @UiField
-    DoubleBox doubleBox;
+    DoubleBox operandDoubleBox;
     @UiField
-    ListBox valueListBox;
+    ListBox operandListBox;
     @UiField
     Button removeButton;
 
-    private List<EnumItem> enumItems;
+    private OperandEditor operandEditor;
 
-    public RelevanceRow(List<FormField> fields, Optional<SimpleCondition> condition) {
+    public RelevanceRow(List<FormField> fields, Optional<SimpleCondition> condition, OptionSetProvider optionSetProvider) {
+        this.optionSetProvider = optionSetProvider;
         this.panel = uiBinder.createAndBindUi(this);
         this.fields = fields;
 
@@ -95,7 +104,7 @@ public class RelevanceRow implements IsWidget {
         } else if(!fields.isEmpty()) {
             fieldListBox.setSelectedIndex(0);
             updateOperators(fields.get(0), null);
-            updateValue(fields.get(0), null);
+            updateOperandChoices(fields.get(0), null);
         } else {
         }
     }
@@ -106,7 +115,7 @@ public class RelevanceRow implements IsWidget {
 
         FormField field = fields.get(fieldIndex);
         updateOperators(field, simpleCondition.getOperator());
-        updateValue(field, simpleCondition.getValue());
+        updateOperandChoices(field, simpleCondition.getValue());
     }
 
     private int indexOfField(ResourceId fieldId) {
@@ -131,7 +140,7 @@ public class RelevanceRow implements IsWidget {
         FormField field = getSelectedField();
         if(field != null) {
             updateOperators(field, getSelectedOperator());
-            updateValue(field, getValue());
+            updateOperandChoices(field, getValue());
         }
     }
 
@@ -171,67 +180,42 @@ public class RelevanceRow implements IsWidget {
     }
 
 
-    private void updateValue(FormField field, FieldValue value) {
-        textBox.setVisible(field.getType() instanceof TextType);
-        doubleBox.setVisible(field.getType() instanceof QuantityType);
-        valueListBox.setVisible(field.getType() instanceof EnumType);
+    /**
+     * Updates the operand interface based on the field type.
+     *
+     * @param field the chosen field
+     * @param value the current operand choice.
+     */
+    private void updateOperandChoices(FormField field, FieldValue value) {
+        if(operandEditor != null) {
+            operandEditor.stop();
+        }
 
         if(field.getType() instanceof TextType) {
-            if(value instanceof TextValue) {
-                textBox.setValue(((TextValue) value).asString());
-            }
-        }
+            operandEditor = TEXT_OPERAND_EDITOR;
 
-        if(field.getType() instanceof QuantityType) {
-            if(value instanceof Quantity) {
-                doubleBox.setValue(((Quantity) value).getValue());
-            }
-        }
+        } else if(field.getType() instanceof QuantityType) {
+            operandEditor = QUANTITY_OPERAND_EDITOR;
 
-        if(field.getType() instanceof EnumType) {
-            EnumType type = (EnumType) field.getType();
-            this.enumItems = type.getValues();
-            valueListBox.clear();
-            for (EnumItem enumItem : enumItems) {
-                valueListBox.addItem(enumItem.getLabel());
-            }
+        } else if(field.getType() instanceof EnumType) {
+            operandEditor = ENUM_OPERAND_EDITOR;
 
-            if(value instanceof EnumValue) {
-                selectEnumItem(((EnumValue) value));
-            }
-        }
-    }
+        } else if (field.getType() instanceof ReferenceType) {
+            operandEditor = REFERENCE_OPERAND_EDITOR;
 
-    private void selectEnumItem(EnumValue value) {
-        for (int i = 0; i < enumItems.size(); i++) {
-            if (enumItems.get(i).getId().equals(value.getValueId())) {
-                valueListBox.setSelectedIndex(i);
-                return;
-            }
-        }
-    }
-
-    public FieldValue getValue() {
-        FieldType selectedType = getSelectedField().getType();
-        if(selectedType instanceof TextType) {
-            return TextValue.valueOf(textBox.getValue());
-        } else if(selectedType instanceof QuantityType) {
-            Double doubleValue = doubleBox.getValue();
-            if(doubleValue == null) {
-                return null;
-            } else {
-                return new Quantity(doubleValue);
-            }
-        } else if(selectedType instanceof EnumType) {
-            int selectedItem = valueListBox.getSelectedIndex();
-            if(selectedItem < 0) {
-                return null;
-            } else {
-                return new EnumValue(enumItems.get(selectedItem).getId());
-            }
         } else {
             throw new IllegalStateException();
         }
+
+        operandEditor.init(field, value);
+    }
+
+    public FieldValue getValue() {
+        if(operandEditor == null) {
+            return null;
+        }
+
+        return operandEditor.getValue();
     }
 
     private String labelFor(SimpleOperator operator) {
@@ -267,5 +251,195 @@ public class RelevanceRow implements IsWidget {
     public SimpleCondition buildCondition() {
         return new SimpleCondition(getSelectedField().getId(), getSelectedOperator(), getValue());
     }
+
+    private interface OperandEditor {
+        void init(FormField field, FieldValue value);
+        FieldValue getValue();
+        void stop();
+    }
+
+    private final OperandEditor TEXT_OPERAND_EDITOR = new OperandEditor() {
+
+        @Override
+        public void init(FormField field, FieldValue value) {
+            operandTextBox.setVisible(true);
+
+            if(value instanceof TextValue) {
+                operandTextBox.setValue(((TextValue) value).asString());
+            }
+        }
+
+        @Override
+        public FieldValue getValue() {
+            return TextValue.valueOf(operandTextBox.getValue());
+        }
+
+        @Override
+        public void stop() {
+            operandTextBox.setVisible(false);
+        }
+    };
+
+    private final OperandEditor QUANTITY_OPERAND_EDITOR = new OperandEditor() {
+        @Override
+        public void init(FormField field, FieldValue value) {
+            operandDoubleBox.setVisible(true);
+
+            if(value instanceof Quantity) {
+                operandDoubleBox.setValue(((Quantity) value).getValue());
+            }
+        }
+
+        @Override
+        public FieldValue getValue() {
+            if(operandDoubleBox.getValue() == null) {
+                return null;
+            } else {
+                return new Quantity(operandDoubleBox.getValue());
+            }
+        }
+
+        @Override
+        public void stop() {
+            operandDoubleBox.setVisible(false);
+        }
+    };
+
+    private final OperandEditor ENUM_OPERAND_EDITOR = new OperandEditor() {
+        private List<EnumItem> enumItems;
+
+        @Override
+        public void init(FormField field, FieldValue value) {
+            operandListBox.setVisible(true);
+
+            EnumType type = (EnumType) field.getType();
+            this.enumItems = type.getValues();
+
+            operandListBox.clear();
+            for (EnumItem enumItem : enumItems) {
+                operandListBox.addItem(enumItem.getLabel());
+            }
+
+            if(value instanceof EnumValue) {
+                selectEnumItem(((EnumValue) value));
+            }
+        }
+
+        private void selectEnumItem(EnumValue value) {
+            for (int i = 0; i < enumItems.size(); i++) {
+                if (enumItems.get(i).getId().equals(value.getValueId())) {
+                    operandListBox.setSelectedIndex(i);
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public FieldValue getValue() {
+            int selectedItem = operandListBox.getSelectedIndex();
+            if(selectedItem < 0) {
+                return null;
+            } else {
+                return new EnumValue(enumItems.get(selectedItem).getId());
+            }
+        }
+
+        @Override
+        public void stop() {
+            operandListBox.setVisible(false);
+        }
+    };
+
+    private final OperandEditor REFERENCE_OPERAND_EDITOR = new OperandEditor() {
+
+        private ReferenceType currentType;
+        private Promise<OptionSet> currentOptions;
+
+        private FieldValue pendingValue;
+
+        @Override
+        public void init(FormField field, FieldValue value) {
+
+            showLoading();
+
+            pendingValue = value;
+
+            final ReferenceType type = (ReferenceType) field.getType();
+            currentType = type;
+            currentOptions = optionSetProvider.queryOptionSet(type);
+            currentOptions.then(new AsyncCallback<OptionSet>() {
+                @Override
+                public void onFailure(Throwable caught) {
+
+                }
+
+                @Override
+                public void onSuccess(OptionSet result) {
+                    if(currentType == type) {
+                        populateListBox(result);
+                        selectPending();
+                    }
+                }
+            });
+
+            operandListBox.setVisible(true);
+        }
+
+        private void showLoading() {
+            operandListBox.clear();
+            operandListBox.setEnabled(false);
+            operandListBox.addItem(I18N.CONSTANTS.loading());
+            operandListBox.setSelectedIndex(0);
+        }
+
+        private void populateListBox(OptionSet options) {
+            operandListBox.clear();
+            for (int i = 0; i < options.getCount(); i++) {
+                operandListBox.addItem(options.getLabel(i));
+            }
+            operandListBox.setEnabled(true);
+        }
+
+        private void selectPending() {
+            if(pendingValue instanceof ReferenceValue) {
+                ReferenceValue value = (ReferenceValue) pendingValue;
+                for (int i = 0; i < currentOptions.get().getCount(); i++) {
+                    if(value.getReferences().contains(currentOptions.get().getRef(i))) {
+                        operandListBox.setSelectedIndex(i);
+                        return;
+                    }
+                }
+            }
+        }
+
+
+        @Override
+        public FieldValue getValue() {
+            switch(currentOptions.getState()) {
+                case FULFILLED:
+                    return selectedValue();
+                case REJECTED:
+                case PENDING:
+                default:
+                    return pendingValue;
+            }
+        }
+
+        private FieldValue selectedValue() {
+            int index = operandListBox.getSelectedIndex();
+            if(index < 0) {
+                return null;
+            }
+            return new ReferenceValue(currentOptions.get().getRef(index));
+        }
+
+        @Override
+        public void stop() {
+            currentOptions = null;
+            pendingValue = null;
+            operandListBox.setVisible(false);
+        }
+    };
+
 
 }

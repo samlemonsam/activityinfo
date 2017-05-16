@@ -28,6 +28,7 @@ import org.activityinfo.model.expr.simple.SimpleConditionParser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.form.field.OptionSetProvider;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 
 import java.util.ArrayList;
@@ -39,10 +40,13 @@ import java.util.List;
 public class RelevancePanelPresenter {
 
     private final FieldWidgetContainer fieldWidgetContainer;
-    private final RelevancePanel view = new RelevancePanel();
+    private final RelevancePanel view;
+    private final OptionSetProvider optionSetProvider;
 
     public RelevancePanelPresenter(final FieldWidgetContainer container) {
         this.fieldWidgetContainer = container;
+        this.optionSetProvider = new OptionSetProvider(container.getFormDesigner().getResourceLocator());
+        view = new RelevancePanel(optionSetProvider);
         this.view.init(fieldList(container), model(container));
     }
 

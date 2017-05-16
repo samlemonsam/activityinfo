@@ -3,6 +3,7 @@ package org.activityinfo.model.expr.simple;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class SimpleOperators {
 
-    private static final ArrayList<SimpleOperator> TEXT_OPERATORS = Lists.newArrayList(
+    private static final ArrayList<SimpleOperator> EQUALITY_OPERATORS = Lists.newArrayList(
             SimpleOperator.EQUALS,
             SimpleOperator.NOT_EQUALS);
 
@@ -32,13 +33,15 @@ public class SimpleOperators {
 
     public static List<SimpleOperator> forType(FieldType type) {
         if(type instanceof TextType) {
-            return TEXT_OPERATORS;
+            return EQUALITY_OPERATORS;
         } else if(type instanceof QuantityType) {
             return QUANTITY_OPERATORS;
+        } else if(type instanceof ReferenceType) {
+            return EQUALITY_OPERATORS;
         } else if(type instanceof EnumType) {
             EnumType enumType = (EnumType) type;
             if(enumType.getCardinality() == Cardinality.SINGLE) {
-                return TEXT_OPERATORS;
+                return EQUALITY_OPERATORS;
             } else {
                 return INCLUDE_OPERATORS;
             }

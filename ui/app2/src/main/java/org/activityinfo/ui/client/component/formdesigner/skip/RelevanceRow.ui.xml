@@ -21,9 +21,9 @@
         <g:ListBox addStyleNames="form-control" ui:field="operatorListBox"/>
       </div>
       <g:HTMLPanel addStyleNames="col-xs-4">
-        <g:ListBox addStyleNames="form-control" ui:field="valueListBox"/>
-        <g:TextBox addStyleNames="form-control" ui:field="textBox"/>
-        <g:DoubleBox addStyleNames="form-control" ui:field="doubleBox"/>
+        <g:ListBox addStyleNames="form-control" ui:field="operandListBox" visible="false" />
+        <g:TextBox addStyleNames="form-control" ui:field="operandTextBox" visible="false"/>
+        <g:DoubleBox addStyleNames="form-control" ui:field="operandDoubleBox" visible="false"/>
       </g:HTMLPanel>
     </div>
   </g:HTMLPanel>

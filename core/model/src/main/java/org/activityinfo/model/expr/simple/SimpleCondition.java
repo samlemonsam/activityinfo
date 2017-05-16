@@ -5,6 +5,7 @@ import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -100,6 +101,8 @@ public class SimpleCondition {
             right = new ConstantExpr(((Quantity) value));
         } else if(value instanceof TextValue) {
             right = new ConstantExpr(((TextValue) value));
+        } else if(value instanceof ReferenceValue) {
+            right = new SymbolExpr(((ReferenceValue) value).getOnlyReference().getRecordId());
         } else {
             throw new IllegalStateException("value: " + value);
         }
