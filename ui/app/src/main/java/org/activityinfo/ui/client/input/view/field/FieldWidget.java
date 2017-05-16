@@ -8,4 +8,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 public interface FieldWidget extends IsWidget {
 
     void setRelevant(boolean relevant);
+
+
+
 }

@@ -26,6 +26,7 @@ public class FormInputViewModel {
     private final Map<ResourceId, SubFormInputViewModel> subFormMap;
     private final Set<ResourceId> relevant;
     private final Set<ResourceId> missing;
+    private final Map<ResourceId, ReferenceChoices> choices;
     private final boolean valid;
 
     FormInputViewModel(FormTree formTree,
@@ -34,7 +35,7 @@ public class FormInputViewModel {
                        Map<ResourceId, SubFormInputViewModel> subFormMap,
                        Set<ResourceId> relevant,
                        Set<ResourceId> missing,
-                       boolean valid) {
+                       Map<ResourceId, ReferenceChoices> choices, boolean valid) {
         this.formTree = formTree;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
@@ -43,6 +44,7 @@ public class FormInputViewModel {
 
 
         this.missing = missing;
+        this.choices = choices;
         this.valid = valid;
     }
 
@@ -64,6 +66,10 @@ public class FormInputViewModel {
 
     public boolean isMissing(ResourceId fieldId) {
         return missing.contains(fieldId);
+    }
+
+    public ReferenceChoices getChoices(ResourceId fieldId) {
+        return choices.get(fieldId);
     }
 
     public UpdateBuilder buildUpdate() {

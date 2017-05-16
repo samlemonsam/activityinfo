@@ -44,7 +44,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         loader = new PagingLoader<>(proxy);
         loader.setRemoteSort(true);
 
-        store = new ListStore<>(i -> i.toString());
+        store = new ListStore<>(index -> index.toString());
 
         // Build a grid column model based on the user's selection of columns
         GridColumnModelBuilder columns = new GridColumnModelBuilder(proxy);

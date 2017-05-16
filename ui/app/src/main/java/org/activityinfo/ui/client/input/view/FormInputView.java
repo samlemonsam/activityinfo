@@ -17,10 +17,14 @@ import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
 import org.activityinfo.ui.client.store.FormStore;
 
+import java.util.logging.Logger;
+
 /**
  * Root view for a {@link FormInputModel}
  */
 public class FormInputView implements IsWidget, InputHandler {
+
+    private static final Logger LOGGER = Logger.getLogger(FormInputView.class.getName());
 
     private final Observable<FormTree> formTree;
 
@@ -53,7 +57,7 @@ public class FormInputView implements IsWidget, InputHandler {
         }
 
         if(formPanel == null) {
-            viewModelBuilder = new FormInputViewModelBuilder(formTree.get());
+            viewModelBuilder = new FormInputViewModelBuilder(formStore, formTree.get());
             formPanel = new FormPanel(formTree.get(), inputModel.getRecordRef(), this);
             container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
             container.forceLayout();
@@ -85,7 +89,7 @@ public class FormInputView implements IsWidget, InputHandler {
 
     private void update(FormInputModel updatedModel) {
         this.inputModel = updatedModel;
-        FormInputViewModel viewModel = viewModelBuilder.build(inputModel);
+        this.viewModel = viewModelBuilder.build(inputModel);
         formPanel.update(viewModel);
     }
 

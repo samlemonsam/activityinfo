@@ -7,11 +7,10 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.ObservableTesting;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.store.testing.IncidentForm;
-import org.activityinfo.store.testing.ReferralSubForm;
-import org.activityinfo.store.testing.Survey;
+import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.store.TestingFormStore;
@@ -28,7 +27,7 @@ public class FormInputViewModelTest {
 
         TestingFormStore store = new TestingFormStore();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(fetchTree(store, Survey.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, Survey.FORM_ID));
 
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(Survey.FORM_ID, ResourceId.generateId()));
@@ -65,11 +64,30 @@ public class FormInputViewModelTest {
     }
 
     @Test
+    public void testReferenceFields() {
+
+        TestingFormStore store = new TestingFormStore();
+
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, BioDataForm.FORM_ID));
+        FormInputModel inputModel = new FormInputModel(new RecordRef(BioDataForm.FORM_ID, ResourceId.generateId()));
+
+        FormInputViewModel viewModel = builder.build(inputModel);
+
+        ReferenceChoices choices = viewModel.getChoices(BioDataForm.PROTECTION_CODE_FIELD_ID);
+        Connection<ReferenceChoiceSet> choiceView = ObservableTesting.connect(choices.getChoices());
+
+        ReferenceChoiceSet choiceSet = choiceView.assertLoaded();
+
+        assertThat(choiceSet.getCount(), equalTo(IntakeForm.ROW_COUNT));
+        assertThat(choiceSet.getLabel(0), equalTo("c0"));
+    }
+
+    @Test
     public void testSubFormInput() {
 
         TestingFormStore store = new TestingFormStore();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(fetchTree(store, IncidentForm.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, IncidentForm.FORM_ID));
 
         // Start with empty input
         FormInputModel inputModel = new FormInputModel(new RecordRef(IncidentForm.FORM_ID, ResourceId.generateId()));
@@ -103,7 +121,7 @@ public class FormInputViewModelTest {
 
         TestingFormStore store = new TestingFormStore();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(fetchTree(store, Survey.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, Survey.FORM_ID));
 
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(Survey.FORM_ID, ResourceId.generateId()))

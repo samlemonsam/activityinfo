@@ -42,7 +42,7 @@ public class FormPanel implements IsWidget {
             if(node.isSubForm()) {
                 addSubForm(formTree, node);
             } else {
-                FieldWidget fieldWidget = createWidget(node.getType(), input -> onInput(node, input));
+                FieldWidget fieldWidget = createWidget(formTree, node.getType(), input -> onInput(node, input));
 
                 if (fieldWidget != null) {
                     addField(node, fieldWidget);

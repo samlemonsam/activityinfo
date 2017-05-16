@@ -26,5 +26,10 @@ public class FieldView {
     public void update(FormInputViewModel viewModel) {
         widget.setRelevant(viewModel.isRelevant(fieldId));
         missingMessage.setVisible(viewModel.isMissing(fieldId));
+
+        if(widget instanceof ReferenceFieldWidget) {
+            ((ReferenceFieldWidget) widget).setChoices(viewModel.getChoices(fieldId));
+        }
     }
 }
+

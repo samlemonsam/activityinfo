@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.input.view.field;
 
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -21,13 +22,15 @@ import org.activityinfo.model.type.time.YearType;
  */
 public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
+    private FormTree formTree;
     private FieldUpdater updater;
 
-    public static FieldWidget createWidget(FieldType type, FieldUpdater updater) {
-        return type.accept(new FieldWidgetFactory(updater));
+    public static FieldWidget createWidget(FormTree formTree, FieldType type, FieldUpdater updater) {
+        return type.accept(new FieldWidgetFactory(formTree, updater));
     }
 
-    private FieldWidgetFactory(FieldUpdater updater) {
+    private FieldWidgetFactory(FormTree formTree, FieldUpdater updater) {
+        this.formTree = formTree;
         this.updater = updater;
     }
 
@@ -43,7 +46,10 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitReference(ReferenceType referenceType) {
-        return null;
+        if(referenceType.getRange().size() != 1) {
+            return null;
+        }
+        return new ReferenceFieldWidget(updater);
     }
 
     @Override

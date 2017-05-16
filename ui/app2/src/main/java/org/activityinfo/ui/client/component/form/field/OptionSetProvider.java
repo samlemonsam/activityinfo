@@ -2,17 +2,11 @@ package org.activityinfo.ui.client.component.form.field;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.SerialNumberType;
-import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 
@@ -39,7 +33,7 @@ public class OptionSetProvider {
 
                 QueryModel queryModel = new QueryModel(formId);
                 queryModel.selectResourceId().as("id");
-                queryModel.selectExpr(findLabelExpression(formClass)).as("label");
+                queryModel.selectExpr(formClass.findLabelExpression()).as("label");
 
                 return resourceLocator
                     .queryTable(queryModel)
@@ -57,29 +51,5 @@ public class OptionSetProvider {
     }
 
 
-    private ExprNode findLabelExpression(FormClass formClass) {
-        // Look for a field with the "label" tag
-        for (FormField field : formClass.getFields()) {
-            if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
-                return new SymbolExpr(field.getId());
-            }
-        }
 
-        // Then fall back to a serial number...
-        for (FormField field : formClass.getFields()) {
-            if(field.getType() instanceof SerialNumberType) {
-                return new SymbolExpr(field.getId());
-            }
-        }
-
-        // If no such field exists, pick the first text field
-        for (FormField field : formClass.getFields()) {
-            if(field.getType() instanceof TextType) {
-                return new SymbolExpr(field.getId());
-            }
-        }
-
-        // Otherwise fall back to the generated id
-        return new SymbolExpr(ColumnModel.ID_SYMBOL);
-    }
 }

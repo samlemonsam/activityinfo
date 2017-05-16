@@ -5,6 +5,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.input.model.FormInputModel;
+import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +24,10 @@ class SubFormInputViewModelBuilder {
 
     private ResourceId placeholderRecordId;
 
-    SubFormInputViewModelBuilder(FormTree.Node node, FormTree subTree) {
+    SubFormInputViewModelBuilder(FormStore store, FormTree.Node node, FormTree subTree) {
         this.fieldId = node.getFieldId();
         this.subFormId = subTree.getRootFormId();
-        this.formBuilder = new FormInputViewModelBuilder(subTree);
+        this.formBuilder = new FormInputViewModelBuilder(store, subTree);
         this.placeholderRecordId = ResourceId.generateId();
     }
 

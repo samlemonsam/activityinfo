@@ -8,9 +8,11 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
+import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -26,6 +28,7 @@ public class FormInputViewModelBuilder {
 
     private final Logger LOGGER = Logger.getLogger(FormInputViewModelBuilder.class.getName());
 
+    private FormStore formStore;
     private final FormTree formTree;
     private final FormEvalContext evalContext;
 
@@ -33,8 +36,14 @@ public class FormInputViewModelBuilder {
 
     private List<SubFormInputViewModelBuilder> subBuilders = new ArrayList<>();
 
+    /**
+     * Maps reference fields to their choices.
+     */
+    private Map<ResourceId, ReferenceChoices> referenceChoices = new HashMap<>();
 
-    public FormInputViewModelBuilder(FormTree formTree) {
+
+    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
+        this.formStore = formStore;
         this.formTree = formTree;
         this.evalContext = new FormEvalContext(formTree.getRootFormClass());
 
@@ -42,16 +51,23 @@ public class FormInputViewModelBuilder {
             if(node.isSubForm()) {
                 subBuilders.add(buildSubBuilder(node));
             }
+            if(node.getType() instanceof ReferenceType) {
+                referenceChoices.put(node.getFieldId(), choices(formStore, node));
+            }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
             }
         }
     }
 
+    private ReferenceChoices choices(FormStore formStore, FormTree.Node node) {
+        return new ReferenceChoices(formStore, formTree, (ReferenceType) node.getType());
+    }
+
     private SubFormInputViewModelBuilder buildSubBuilder(FormTree.Node node) {
         SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
         FormTree subTree = formTree.subTree(subFormType.getClassId());
-        return new SubFormInputViewModelBuilder(node, subTree);
+        return new SubFormInputViewModelBuilder(formStore, node, subTree);
     }
 
     private void buildRelevanceCalculator(FormTree.Node node) {
@@ -93,6 +109,7 @@ public class FormInputViewModelBuilder {
                         record.set(node.getFieldId(), fieldInput.getValue());
                         break;
                     case INVALID:
+                        LOGGER.fine("Field with invalid input = " + node.getFieldId());
                         valid = false;
                         break;
                 }
@@ -106,6 +123,8 @@ public class FormInputViewModelBuilder {
         // values are provided
         Set<ResourceId> missing = computeMissing(record, relevantSet);
 
+        LOGGER.fine("Missing fields = " + missing);
+
         if(!missing.isEmpty()) {
             valid = false;
         }
@@ -116,11 +135,14 @@ public class FormInputViewModelBuilder {
             subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel));
         }
 
+        LOGGER.fine("Valid = " + valid);
+
+
         return new FormInputViewModel(formTree, inputModel,
                 record.getFieldValueMap(),
                 subFormMap,
                 relevantSet,
-                missing, valid);
+                missing, referenceChoices, valid);
     }
 
     private Set<ResourceId> computeRelevance(FormInstance record) {

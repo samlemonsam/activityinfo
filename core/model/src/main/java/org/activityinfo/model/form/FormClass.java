@@ -10,9 +10,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.SerialNumberType;
+import org.activityinfo.model.type.primitive.TextType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -348,6 +353,32 @@ public class FormClass implements FormElementContainer {
 
     public String toJsonString() {
         return toJsonObject().toString();
+    }
+
+    public ExprNode findLabelExpression() {
+        // Look for a field with the "label" tag
+        for (FormField field : getFields()) {
+            if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
+        // Then fall back to a serial number...
+        for (FormField field : getFields()) {
+            if(field.getType() instanceof SerialNumberType) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
+        // If no such field exists, pick the first text field
+        for (FormField field : getFields()) {
+            if(field.getType() instanceof TextType) {
+                return new SymbolExpr(field.getId());
+            }
+        }
+
+        // Otherwise fall back to the generated id
+        return new SymbolExpr(ColumnModel.ID_SYMBOL);
     }
 
     public static FormClass fromJson(JsonObject object) {
