@@ -34,7 +34,6 @@ import org.activityinfo.model.expr.simple.SimpleCondition;
 import org.activityinfo.model.expr.simple.SimpleConditionList;
 import org.activityinfo.model.expr.simple.SimpleOperators;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.ui.client.component.form.field.OptionSetProvider;
 import org.activityinfo.ui.client.widget.Button;
 
 import java.util.ArrayList;
@@ -57,7 +56,6 @@ public class RelevancePanel implements IsWidget {
     }
 
     private List<FormField> selectableFields;
-    private OptionSetProvider optionSetProvider;
 
 
     HTMLPanel rootPanel;
@@ -72,8 +70,7 @@ public class RelevancePanel implements IsWidget {
 
     private List<RelevanceRow> rows = new ArrayList<>();
 
-    public RelevancePanel(OptionSetProvider optionSetProvider) {
-        this.optionSetProvider = optionSetProvider;
+    public RelevancePanel() {
         this.rootPanel = uiBinder.createAndBindUi(this);
     }
 
@@ -124,7 +121,7 @@ public class RelevancePanel implements IsWidget {
     }
 
     private void addRow(Optional<SimpleCondition> condition) {
-        final RelevanceRow row = new RelevanceRow(selectableFields, condition, optionSetProvider);
+        final RelevanceRow row = new RelevanceRow(selectableFields, condition);
         row.addRemoveHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
