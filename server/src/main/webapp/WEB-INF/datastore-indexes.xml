@@ -3,4 +3,8 @@
     <datastore-index kind="FormRecordSnapshot" ancestor="true" source="manual">
         <property name="version" direction="asc"/>
     </datastore-index>
+    <datastore-index kind="Job" source="manual">
+        <property name="userId" direction="asc"/>
+        <property name="startTime" direction="desc"/>
+    </datastore-index>
 </datastore-indexes>
