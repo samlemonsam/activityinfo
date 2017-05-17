@@ -161,7 +161,7 @@ public class FieldEditor implements IsWidget {
         description.setValue(Strings.nullToEmpty(formField.getDescription()));
         required.setValue(formField.isRequired());
         visible.setValue(formField.isVisible());
-        key.setVisible(formField.isKey());
+        key.setValue(formField.isKey());
         code.setValue(Strings.nullToEmpty(formField.getCode()));
 
         required.setEnabled(!isPartner);
