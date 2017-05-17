@@ -16,11 +16,8 @@
   <g:HTMLPanel addStyleNames="{style.condition-panel}">
     <div class="form-inline">
       <div class="form-group">
-        <label>Show this field only if
-          <g:ListBox ui:field="criteria" addStyleNames="form-control">
-            <g:item>all</g:item>
-            <g:item>any</g:item>
-          </g:ListBox> of the following conditions are met:</label>
+        <label><ui:text from="{i18n.relevanceShowIf}"/>
+          <g:ListBox ui:field="criteriaListBox" addStyleNames="form-control"/> <ui:text from="{i18n.relevanceConditionsMet}"/></label>
       </div>
     </div>
 

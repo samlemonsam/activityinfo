@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static java.lang.String.format;
 
@@ -21,6 +22,9 @@ import static java.lang.String.format;
  * 
  */
 public class BaseTableUpdater {
+
+    private static final Logger LOGGER = Logger.getLogger(BaseTableUpdater.class.getName());
+
     private TableMapping mapping;
     
     private List<String> updates = new ArrayList<>();
@@ -60,8 +64,11 @@ public class BaseTableUpdater {
     }
 
     private void clearValue(FieldMapping fieldMapping) {
-        Preconditions.checkArgument(!fieldMapping.getFormField().isRequired(),
-                "Field %s ('%s') is required and cannot be set to null");
+
+        if(fieldMapping.getFormField().isRequired()) {
+            LOGGER.warning(String.format("Field %s ('%s') is required and cannot be set to null",
+                    fieldMapping.getFieldId(), fieldMapping.getFormField().getLabel()));
+        }
 
         for (String column : fieldMapping.getColumnNames()) {
             updates.add(format("%s = NULL", column));

@@ -24,8 +24,8 @@ public class Project {
         sourceDirectory = new File("src/main/java");
         defaultLanguage = "en";
         translationSource = new PoEditorSource(ACTIVITYINFO_PROJECT_ID, System.getProperty("poApiKey"));
-        resourceClasses.add("org.activityinfo.i18n.model.UiConstants");
-        resourceClasses.add("org.activityinfo.i18n.model.UiMessages");
+        resourceClasses.add("org.activityinfo.i18n.shared.UiConstants");
+        resourceClasses.add("org.activityinfo.i18n.shared.UiMessages");
     }
 
     public List<String> getResourceClasses() {

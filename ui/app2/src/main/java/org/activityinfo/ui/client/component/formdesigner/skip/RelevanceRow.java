@@ -29,7 +29,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.simple.SimpleCondition;
@@ -38,8 +37,6 @@ import org.activityinfo.model.expr.simple.SimpleOperators;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -47,9 +44,6 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.component.form.field.OptionSet;
-import org.activityinfo.ui.client.component.form.field.OptionSetProvider;
 import org.activityinfo.ui.client.widget.Button;
 
 import java.util.List;
@@ -62,7 +56,6 @@ public class RelevanceRow implements IsWidget {
 
 
     private List<SimpleOperator> operators;
-    private OptionSetProvider optionSetProvider;
 
     interface OurUiBinder extends UiBinder<Widget, RelevanceRow> {
     }
@@ -89,8 +82,7 @@ public class RelevanceRow implements IsWidget {
 
     private OperandEditor operandEditor;
 
-    public RelevanceRow(List<FormField> fields, Optional<SimpleCondition> condition, OptionSetProvider optionSetProvider) {
-        this.optionSetProvider = optionSetProvider;
+    public RelevanceRow(List<FormField> fields, Optional<SimpleCondition> condition) {
         this.panel = uiBinder.createAndBindUi(this);
         this.fields = fields;
 
@@ -200,9 +192,6 @@ public class RelevanceRow implements IsWidget {
         } else if(field.getType() instanceof EnumType) {
             operandEditor = ENUM_OPERAND_EDITOR;
 
-        } else if (field.getType() instanceof ReferenceType) {
-            operandEditor = REFERENCE_OPERAND_EDITOR;
-
         } else {
             throw new IllegalStateException();
         }
@@ -221,21 +210,21 @@ public class RelevanceRow implements IsWidget {
     private String labelFor(SimpleOperator operator) {
         switch (operator) {
             case EQUALS:
-                return "is";
+                return I18N.CONSTANTS.operatorIs();
             case NOT_EQUALS:
-                return "is not";
+                return I18N.CONSTANTS.operatorIsNot();
             case GREATER_THAN:
-                return "is greater than";
+                return I18N.CONSTANTS.operatorGreaterThan();
             case GREATER_THAN_EQUAL:
-                return "is greater than or equal";
+                return I18N.CONSTANTS.operatorGreaterThanEqual();
             case LESS_THAN:
-                return "is less than";
+                return I18N.CONSTANTS.operatorLessThan();
             case LESS_THAN_EQUAL:
-                return "is less than or equal to";
+                return I18N.CONSTANTS.operatorLessThanEqualTo();
             case INCLUDES:
-                return "includes";
+                return I18N.CONSTANTS.operatorIncludes();
             case NOT_INCLUDES:
-                return "does not include";
+                return I18N.CONSTANTS.operatorDoesNotInclude();
             default:
                 throw new IllegalArgumentException();
         }
@@ -350,96 +339,6 @@ public class RelevanceRow implements IsWidget {
         }
     };
 
-    private final OperandEditor REFERENCE_OPERAND_EDITOR = new OperandEditor() {
-
-        private ReferenceType currentType;
-        private Promise<OptionSet> currentOptions;
-
-        private FieldValue pendingValue;
-
-        @Override
-        public void init(FormField field, FieldValue value) {
-
-            showLoading();
-
-            pendingValue = value;
-
-            final ReferenceType type = (ReferenceType) field.getType();
-            currentType = type;
-            currentOptions = optionSetProvider.queryOptionSet(type);
-            currentOptions.then(new AsyncCallback<OptionSet>() {
-                @Override
-                public void onFailure(Throwable caught) {
-
-                }
-
-                @Override
-                public void onSuccess(OptionSet result) {
-                    if(currentType == type) {
-                        populateListBox(result);
-                        selectPending();
-                    }
-                }
-            });
-
-            operandListBox.setVisible(true);
-        }
-
-        private void showLoading() {
-            operandListBox.clear();
-            operandListBox.setEnabled(false);
-            operandListBox.addItem(I18N.CONSTANTS.loading());
-            operandListBox.setSelectedIndex(0);
-        }
-
-        private void populateListBox(OptionSet options) {
-            operandListBox.clear();
-            for (int i = 0; i < options.getCount(); i++) {
-                operandListBox.addItem(options.getLabel(i));
-            }
-            operandListBox.setEnabled(true);
-        }
-
-        private void selectPending() {
-            if(pendingValue instanceof ReferenceValue) {
-                ReferenceValue value = (ReferenceValue) pendingValue;
-                for (int i = 0; i < currentOptions.get().getCount(); i++) {
-                    if(value.getReferences().contains(currentOptions.get().getRef(i))) {
-                        operandListBox.setSelectedIndex(i);
-                        return;
-                    }
-                }
-            }
-        }
-
-
-        @Override
-        public FieldValue getValue() {
-            switch(currentOptions.getState()) {
-                case FULFILLED:
-                    return selectedValue();
-                case REJECTED:
-                case PENDING:
-                default:
-                    return pendingValue;
-            }
-        }
-
-        private FieldValue selectedValue() {
-            int index = operandListBox.getSelectedIndex();
-            if(index < 0) {
-                return null;
-            }
-            return new ReferenceValue(currentOptions.get().getRef(index));
-        }
-
-        @Override
-        public void stop() {
-            currentOptions = null;
-            pendingValue = null;
-            operandListBox.setVisible(false);
-        }
-    };
 
 
 }

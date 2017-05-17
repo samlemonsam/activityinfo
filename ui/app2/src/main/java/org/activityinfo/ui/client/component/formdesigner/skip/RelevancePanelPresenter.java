@@ -46,7 +46,7 @@ public class RelevancePanelPresenter {
     public RelevancePanelPresenter(final FieldWidgetContainer container) {
         this.fieldWidgetContainer = container;
         this.optionSetProvider = new OptionSetProvider(container.getFormDesigner().getResourceLocator());
-        view = new RelevancePanel(optionSetProvider);
+        view = new RelevancePanel();
         this.view.init(fieldList(container), model(container));
     }
 

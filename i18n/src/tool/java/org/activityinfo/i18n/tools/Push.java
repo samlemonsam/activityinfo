@@ -47,7 +47,7 @@ public class Push {
         if(dryRun) {
             Project.INSTANCE.getTranslationSource().dumpNewTerms(terms);
         } else {
-           // Project.INSTANCE.getTranslationSource().updateTerms(terms, purge);
+            Project.INSTANCE.getTranslationSource().updateTerms(terms, purge);
         }
     }
 }
