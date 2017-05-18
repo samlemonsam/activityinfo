@@ -2,14 +2,17 @@ package org.activityinfo.ui.client.component.table.action;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.Window;
-import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.job.ExportColumn;
+import org.activityinfo.model.job.ExportFormJob;
+import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTable;
+import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.icons.Icons;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -17,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class ExportHeaderAction implements TableHeaderAction {
 
-    public static final Logger LOGGER = Logger.getLogger(ActivityInfoClientAsync.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ExportHeaderAction.class.getName());
 
     private final InstanceTable table;
     private final String uniqueId;
@@ -33,28 +36,16 @@ public class ExportHeaderAction implements TableHeaderAction {
     }
 
     public void export() {
-        UrlBuilder urlBuilder = urlBuilder()
-                .setPath("/resources/form/" + table.getRootFormClass().getId().asString()
-                        + "/query/columns.xls");
 
-//        for (FieldColumn column : table.getColumns()) {
-//            String id = column.get().getNode().getFieldId().asString();
-//            urlBuilder.setParameter(id, id);
-//        }
-
-        Window.open(urlBuilder.buildString(), "_blank", "");
-    }
-
-    private UrlBuilder urlBuilder() {
-        UrlBuilder builder = new UrlBuilder();
-        builder.setProtocol(Window.Location.getProtocol());
-        builder.setHost(Window.Location.getHost());
-
-        String port = Window.Location.getPort();
-        if (port != null && port.length() > 0) {
-            builder.setPort(Integer.parseInt(port));
+        List<ExportColumn> columns = new ArrayList<>();
+        for (FieldColumn column : table.getColumns()) {
+            columns.add(new ExportColumn(column.get().getExpr()));
         }
-        return builder;
+
+        ExportFormJob job = new ExportFormJob(table.getRootFormClass().getId(), columns);
+
+        ExportDialog dialog = new ExportDialog();
+        dialog.start(new ExportJobTask(job));
     }
 
     @Override

@@ -17,10 +17,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-/**
- * Created by yuriyz on 9/2/2016.
- */
 public class XlsColumnSetWriter {
+
+    public static final String EXCEL_MIME_TYPE = "application/vnd.ms-excel";
 
     private static final short FONT_SIZE = 8;
     private static final short TITLE_FONT_SIZE = 12;
@@ -35,12 +34,14 @@ public class XlsColumnSetWriter {
     private CellStyle textStyle;
     private CellStyle headerStyle;
 
+    private SheetNamer sheetNamer = new SheetNamer();
+
     public XlsColumnSetWriter() {
         declareStyles();
     }
 
     public XlsColumnSetWriter addSheet(FormTree formTree, ColumnSet columnSet) {
-        HSSFSheet sheet = book.createSheet(formTree.getRootFormClass().getLabel());
+        HSSFSheet sheet = book.createSheet(sheetNamer.name(formTree.getRootFormClass().getLabel()));
 
         writeColumnSet(sheet, formTree, columnSet);
 

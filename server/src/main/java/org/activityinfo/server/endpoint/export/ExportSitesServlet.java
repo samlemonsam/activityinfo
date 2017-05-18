@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
+import org.activityinfo.xlsform.XlsColumnSetWriter;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -68,7 +69,7 @@ public class ExportSitesServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // Create a unique key from which the user can retrieve the file from GCS
-        GeneratedResource export = storageProvider.create("application/vnd.ms-excel", fileName());
+        GeneratedResource export = storageProvider.create(XlsColumnSetWriter.EXCEL_MIME_TYPE, fileName());
 
         TaskOptions options = TaskOptions.Builder.withUrl(ExportSitesTask.END_POINT);
         for(Map.Entry<String, String[]> entry : req.getParameterMap().entrySet()) {

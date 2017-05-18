@@ -452,8 +452,8 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
         fileName.append(" ");
         fileName.append(DateTimeFormat.getFormat("yyyyMMdd_HHmm").format(new Date()));
 
-        ExportDialog dialog = new ExportDialog(dispatcher);
-        dialog.export(fileName.toString(), currentEditor.getModel(), format);
+        ExportDialog dialog = new ExportDialog();
+        dialog.start(new ExportReportTask(dispatcher, format, currentEditor.getModel(), fileName.toString()));
     }
 
     private boolean untitled() {

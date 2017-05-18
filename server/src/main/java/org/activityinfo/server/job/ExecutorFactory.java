@@ -1,5 +1,6 @@
 package org.activityinfo.server.job;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.model.job.ExportFormJob;
 
@@ -10,6 +11,7 @@ public class ExecutorFactory {
 
     private Injector injector;
 
+    @Inject
     public ExecutorFactory(Injector injector) {
         this.injector = injector;
     }

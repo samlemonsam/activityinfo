@@ -1,5 +1,6 @@
 package org.activityinfo.server.endpoint.export;
 
+import org.activityinfo.xlsform.SheetNamer;
 import org.junit.Test;
 
 import java.util.HashSet;

@@ -52,6 +52,9 @@ public class JobEntity {
     @Unindex
     private String result;
 
+    public JobEntity() {
+    }
+
     public JobEntity(long userId) {
         this.userId = userId;
     }

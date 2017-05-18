@@ -9,6 +9,9 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.job.JobDescriptor;
+import org.activityinfo.model.job.JobResult;
+import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -204,6 +207,16 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Void> updateRecords(TransactionBuilder transactions) {
-        throw new UnsupportedOperationException("TODO");
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public <T extends JobDescriptor<R>, R extends JobResult> Promise<JobStatus<T, R>> startJob(T job) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 }

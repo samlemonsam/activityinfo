@@ -202,7 +202,8 @@ public class RootResource {
     public UsersResource getUsers() {
         return new UsersResource(config, entityManager);
     }
-    
+
+
     @Path("/usage")
     public UsageResource getUsage() {
         return new UsageResource(entityManager, config);

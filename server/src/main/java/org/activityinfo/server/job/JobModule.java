@@ -22,11 +22,13 @@ package org.activityinfo.server.job;
  * #L%
  */
 
-import com.google.inject.servlet.ServletModule;
+import org.activityinfo.server.endpoint.rest.RestApiModule;
 
-public class JobModule extends ServletModule {
-
+public class JobModule extends RestApiModule {
     @Override
-    protected void configureServlets() {
+    protected void configureResources() {
+        bindResource(JobResource.class);
+        serve(JobTaskServlet.END_POINT).with(JobTaskServlet.class);
+
     }
 }

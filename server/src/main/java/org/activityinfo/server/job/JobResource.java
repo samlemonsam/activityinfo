@@ -1,10 +1,10 @@
 package org.activityinfo.server.job;
 
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.RetryOptions;
-import com.google.appengine.api.taskqueue.TaskHandle;
-import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.*;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.JsonParser;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.job.JobRequest;
@@ -20,18 +20,25 @@ import java.util.logging.Logger;
 /*
  * REST endpoint for a user's scheduled jobs
  */
+@Path("/resources/jobs")
 public class JobResource {
 
     private static final Logger LOGGER = Logger.getLogger(JobResource.class.getName());
 
     private static final JsonParser PARSER = new JsonParser();
-    public static final String QUEUE_NAME = "user-tasks";
+    public static final String QUEUE_NAME = "user-jobs";
     public static final String JOB_KEY_PARAM = "key";
 
-    private AuthenticatedUser user;
+    private Provider<AuthenticatedUser> user;
     private Queue queue;
 
-    public JobResource(AuthenticatedUser user, Queue queue) {
+    @Inject
+    public JobResource(Provider<AuthenticatedUser> user) {
+        this(user, QueueFactory.getQueue(QUEUE_NAME));
+    }
+
+    @VisibleForTesting
+    JobResource(Provider<AuthenticatedUser> user, Queue queue) {
         this.user = user;
         this.queue = queue;
     }
@@ -42,6 +49,11 @@ public class JobResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response start(String json) {
+
+        if(user.get().isAnonymous()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
         JobRequest request;
         try {
             request = JobRequest.fromJson(PARSER.parse(json).getAsJsonObject());
@@ -50,17 +62,17 @@ public class JobResource {
         }
 
         // now create the job record in the datastore
-        JobEntity record = new JobEntity(user.getUserId());
+        JobEntity record = new JobEntity(user.get().getUserId());
         record.setType(request.getDescriptor().getType());
         record.setDescriptor(request.getDescriptor().toJsonObject().toString());
         record.setState(JobState.STARTED);
         record.setStartTime(new Date());
-        record.setLocale(user.getUserLocale());
+        record.setLocale(user.get().getUserLocale());
 
         Key<JobEntity> key = JobStore.ofy().save().entity(record).now();
 
         // And launch a task to execute the job
-        TaskHandle taskHandle = queue.add(TaskOptions.Builder.withUrl("/tasks/job")
+        TaskHandle taskHandle = queue.add(TaskOptions.Builder.withUrl(JobTaskServlet.END_POINT)
                 .retryOptions(RetryOptions.Builder.withTaskRetryLimit(4))
                 .param(JOB_KEY_PARAM, key.toWebSafeString()));
 
@@ -77,16 +89,20 @@ public class JobResource {
     @Path("{jobId}")
     public Response get(@PathParam("jobId") String jobId) {
 
+        if(user.get().isAnonymous()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
         JobEntity job = JobStore.getUserJob(jobId).now();
         if(job == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        if(job.getUserId() != user.getUserId()) {
+        if(job.getUserId() != user.get().getUserId()) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
         JobStatus status = buildStatus(job);
-        return Response.ok().entity(status.toString()).build();
+        return Response.ok().entity(status.toJsonObject().toString()).build();
     }
 
     private JobStatus buildStatus(JobEntity job) {

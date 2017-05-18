@@ -5,14 +5,14 @@ import com.google.gson.JsonObject;
 /**
  * Shows the status of the job status
  */
-public class JobStatus {
+public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
 
     private String id;
-    private JobDescriptor descriptor;
+    private T descriptor;
     private JobState state;
-    private JobResult result;
+    private R result;
 
-    public JobStatus(String id, JobDescriptor descriptor, JobState state, JobResult jobResult) {
+    public JobStatus(String id, T descriptor, JobState state, R jobResult) {
         this.id = id;
         this.descriptor = descriptor;
         this.state = state;
@@ -23,11 +23,11 @@ public class JobStatus {
         return id;
     }
 
-    public JobDescriptor getDescriptor() {
+    public T getDescriptor() {
         return descriptor;
     }
 
-    public JobResult getResult() {
+    public R getResult() {
         return result;
     }
 

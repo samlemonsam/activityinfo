@@ -1,4 +1,4 @@
-package org.activityinfo.server.endpoint.export;
+package org.activityinfo.xlsform;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 
@@ -15,7 +15,7 @@ public class SheetNamer {
     private Map<String, Integer> existingNames = new HashMap<>();
 
     /**
-     * Creates a unique name for
+     * Creates a unique name for a worksheet and remove
      * @param desiredName
      * @return
      */

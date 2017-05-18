@@ -8,6 +8,8 @@ import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -44,8 +46,14 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        return catalog.get().getFormClass(resourceId);
+    public FormClass getFormClass(ResourceId formId) {
+        return catalog.get().getFormClass(formId);
+    }
+
+    @Override
+    public FormTree getFormTree(ResourceId formId) {
+        FormTreeBuilder builder = new FormTreeBuilder(this);
+        return builder.queryTree(formId);
     }
 
     @Override
@@ -80,6 +88,12 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
             throw new IllegalArgumentException("no such formId:" + formClass.getId());
         }
         form.get().updateFormClass(formClass);
+    }
+
+    @Override
+    public ColumnSet query(QueryModel model) {
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
+        return builder.build(model);
     }
 
     @Override
