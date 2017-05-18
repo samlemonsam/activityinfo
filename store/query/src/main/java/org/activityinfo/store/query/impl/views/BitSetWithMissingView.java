@@ -66,4 +66,9 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
             return FALSE;
         }
     }
+
+    @Override
+    public boolean isMissing(int row) {
+        return missing.get(row);
+    }
 }

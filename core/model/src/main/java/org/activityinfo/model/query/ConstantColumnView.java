@@ -106,6 +106,11 @@ public class ConstantColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public boolean isMissing(int row) {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "[ " + get(0) + " x " + numRows + " rows ]";
     }

@@ -3,6 +3,7 @@ package org.activityinfo.observable;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Function3;
 
@@ -219,5 +220,23 @@ public abstract class Observable<T> {
                 }
             }
         });
+    }
+
+    @GwtIncompatible
+    public final T waitFor() {
+        final List<T> collector = new ArrayList<>();
+        Subscription subscription = this.subscribe(new Observer<T>() {
+            @Override
+            public void onChange(Observable<T> observable) {
+                if (observable.isLoaded()) {
+                    collector.add(observable.get());
+                }
+            }
+        });
+        if(collector.isEmpty()) {
+            throw new IllegalStateException("Did not load synchronously.");
+        }
+        subscription.unsubscribe();
+        return collector.get(0);
     }
 }

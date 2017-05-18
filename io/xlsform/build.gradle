@@ -10,4 +10,9 @@ dependencies {
     
     testCompile libraries.junit
     testCompile libraries.easymock
+    testCompile project(':store:testing')
+
+    // Testing XLS sheets
+    testCompile "bad.robot:simple-excel:1.0"
 }
+

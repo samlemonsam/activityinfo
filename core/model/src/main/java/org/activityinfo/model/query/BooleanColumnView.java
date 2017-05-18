@@ -53,4 +53,9 @@ public class BooleanColumnView implements ColumnView {
   public int getBoolean(int row) {
     return values[row];
   }
+
+    @Override
+    public boolean isMissing(int row) {
+        return values[row] == NA;
+    }
 }

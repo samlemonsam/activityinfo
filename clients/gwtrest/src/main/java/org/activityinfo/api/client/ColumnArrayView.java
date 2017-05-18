@@ -54,6 +54,19 @@ class ColumnArrayView implements ColumnView {
         return getBoolean(array, row);
     }
 
+    @Override
+    public boolean isMissing(int row) {
+        switch (columnType) {
+            case STRING:
+                return getString(row) == null;
+            case NUMBER:
+                return Double.isNaN(getDouble(row));
+            case BOOLEAN:
+                return getBoolean(row) == NA;
+        }
+        return true;
+    }
+
     private static native int getLength(JavaScriptObject array) /*-{
         return array.length;
     }-*/;

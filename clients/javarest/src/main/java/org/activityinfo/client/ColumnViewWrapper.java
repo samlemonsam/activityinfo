@@ -63,6 +63,11 @@ public class ColumnViewWrapper implements ColumnView {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean isMissing(int row) {
+        return array.get(row).isJsonNull();
+    }
+
 
     @Override
     public String toString() {

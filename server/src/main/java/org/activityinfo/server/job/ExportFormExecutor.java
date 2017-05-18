@@ -1,57 +1,50 @@
 package org.activityinfo.server.job;
 
 import com.google.inject.Inject;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.job.ExportColumn;
+import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.io.xls.XlsTableWriter;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.server.endpoint.odk.ResourceLocatorSync;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
-import org.activityinfo.xlsform.XlsColumnSetWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResult> {
 
+    private final ServerFormSource formSource;
     private final StorageProvider storageProvider;
-    private ResourceLocatorSync resourceLocator;
 
 
     @Inject
-    public ExportFormExecutor(ResourceLocatorSync resourceLocator, StorageProvider storageProvider) {
-        this.resourceLocator = resourceLocator;
+    public ExportFormExecutor(ServerFormSource formSource, StorageProvider storageProvider) {
+        this.formSource = formSource;
         this.storageProvider = storageProvider;
     }
 
     @Override
     public ExportResult execute(ExportFormJob descriptor) throws IOException {
 
-        FormTree tree = resourceLocator.getFormTree(descriptor.getFormId());
-        ColumnSet columnSet = queryColumns(descriptor);
+        TableModel tableModel = descriptor.getTableModel();
 
-        GeneratedResource export = storageProvider.create(XlsColumnSetWriter.EXCEL_MIME_TYPE, "Export.xls");
+        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, "Export.xls");
 
-        XlsColumnSetWriter writer = new XlsColumnSetWriter();
-        writer.addSheet(tree, columnSet);
+        TableViewModel viewModel = new TableViewModel(formSource, tableModel);
+
+        EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();
+        ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
+
+        XlsTableWriter writer = new XlsTableWriter();
+        writer.addSheet(effectiveTableModel, columnSet);
 
         try(OutputStream out = export.openOutputStream()) {
             writer.write(out);
         }
 
         return new ExportResult(export.getDownloadUri());
-    }
-
-    private ColumnSet queryColumns(ExportFormJob descriptor) {
-        QueryModel model = new QueryModel(descriptor.getFormId());
-        for (ExportColumn exportColumn : descriptor.getColumns()) {
-            model.selectExpr(exportColumn.getFormula()).as(exportColumn.getFormula());
-        }
-
-        return resourceLocator.query(model);
-
     }
 }

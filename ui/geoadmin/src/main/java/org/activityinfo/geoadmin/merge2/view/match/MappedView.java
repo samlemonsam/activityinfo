@@ -56,4 +56,13 @@ public abstract class MappedView implements ColumnView {
         return source.getBoolean(newRow);
     }
 
+    @Override
+    public boolean isMissing(int row) {
+        int newRow = transformRow(row);
+        if(newRow == -1) {
+            return true;
+        }
+        return source.isMissing(newRow);
+    }
+
 }

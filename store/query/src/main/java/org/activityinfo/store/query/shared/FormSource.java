@@ -1,4 +1,4 @@
-package org.activityinfo.analysis;
+package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;

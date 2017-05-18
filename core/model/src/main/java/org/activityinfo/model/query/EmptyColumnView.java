@@ -46,6 +46,11 @@ public class EmptyColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public boolean isMissing(int row) {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "[ " + numRows() + " empty values ]";
     }

@@ -1,4 +1,4 @@
-package org.activityinfo.xlsform;
+package org.activityinfo.io.xlsform;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;

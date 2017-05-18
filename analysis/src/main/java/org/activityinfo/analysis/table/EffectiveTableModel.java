@@ -1,6 +1,5 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.analysis.FormSource;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
@@ -17,6 +16,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.store.query.shared.FormSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +52,10 @@ public class EffectiveTableModel {
         }
 
         this.columnSet = formSource.query(buildQuery(columns));
+    }
+
+    public String getTitle() {
+        return formTree.getRootFormClass().getLabel();
     }
 
     public FormTree.State getRootFormState() {

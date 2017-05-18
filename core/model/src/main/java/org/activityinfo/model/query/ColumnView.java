@@ -25,4 +25,6 @@ public interface ColumnView extends Serializable {
      * @return ColumnView#TRUE, ColumnView#FALSE, or ColumnView#NA if the value is not null or missing
      */
     int getBoolean(int row);
+
+    boolean isMissing(int row);
 }

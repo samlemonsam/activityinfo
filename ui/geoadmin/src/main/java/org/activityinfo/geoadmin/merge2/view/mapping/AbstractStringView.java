@@ -24,4 +24,9 @@ public abstract class AbstractStringView implements ColumnView {
     public final int getBoolean(int row) {
         return -1;
     }
+
+    @Override
+    public final boolean isMissing(int row) {
+        return getString(row) == null;
+    }
 }

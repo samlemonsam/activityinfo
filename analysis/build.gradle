@@ -1,10 +1,15 @@
 
 
 apply plugin: 'gwt-base'
+apply plugin: 'me.tatarka.retrolambda'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
-    compile project(':core:model')
-    compile project(':store:query')
+    compile     project(':core:model')
+    compile     project(':store:query')
+    testCompile project(':store:testing')
 
     compile libraries.guava
     gwt     libraries.gwt.guava

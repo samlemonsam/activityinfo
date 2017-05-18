@@ -44,6 +44,11 @@ public class FilteredColumnView implements ColumnView {
     }
 
     @Override
+    public boolean isMissing(int row) {
+        return view.isMissing(row);
+    }
+
+    @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("[");

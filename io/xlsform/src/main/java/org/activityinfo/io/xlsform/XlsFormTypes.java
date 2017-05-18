@@ -1,4 +1,4 @@
-package org.activityinfo.xlsform;
+package org.activityinfo.io.xlsform;
 
 /**
  * Types used in XLS Form

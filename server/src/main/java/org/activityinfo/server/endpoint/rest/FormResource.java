@@ -9,8 +9,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import org.activityinfo.api.client.FormRecordSetBuilder;
+import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.legacy.shared.Pair;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormMetadata;
@@ -42,8 +42,6 @@ import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.spi.*;
-import org.activityinfo.xlsform.XlsColumnSetWriter;
-import org.activityinfo.xlsform.XlsFormBuilder;
 
 import javax.inject.Provider;
 import javax.ws.rs.*;
@@ -452,27 +450,7 @@ public class FormResource {
         return Response.ok(output).type(JSON_CONTENT_TYPE).build();
     }
 
-    @GET
-    @Path("query/columns.xls")
-    @Produces("application/vnd.ms-excel")
-    public Response queryColumnsAsXls(@Context UriInfo uriInfo) {
-        final Pair<FormTree, ColumnSet> pair = queryColumnSet(uriInfo);
-
-        final StreamingOutput output = new StreamingOutput() {
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                new XlsColumnSetWriter().addSheet(pair.getA(), pair.getB()).write(outputStream);
-            }
-        };
-
-        return Response.ok(output, "application/vnd.ms-excel").build();
-    }
-
     private ColumnSet query(final UriInfo uriInfo) {
-        return queryColumnSet(uriInfo).getB();
-    }
-
-    private Pair<FormTree, ColumnSet> queryColumnSet(final UriInfo uriInfo) {
 
         assertVisible(formId);
 
@@ -498,7 +476,7 @@ public class FormResource {
         }
 
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
-        return new Pair<>(tree, builder.build(queryModel));
+        return builder.build(queryModel);
     }
 
     private boolean includeInDefaultQuery(FormTree.Node leaf) {

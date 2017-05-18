@@ -55,6 +55,11 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public boolean isMissing(int row) {
+        return Double.isNaN(values[row]);
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");

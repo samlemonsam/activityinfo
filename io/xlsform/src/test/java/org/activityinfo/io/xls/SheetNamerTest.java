@@ -1,4 +1,4 @@
-package org.activityinfo.xlsform;
+package org.activityinfo.io.xls;
 
 import org.junit.Test;
 

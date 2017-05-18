@@ -2,7 +2,6 @@ package org.activityinfo.analysis.table;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import org.activityinfo.analysis.FormSource;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.form.FormRecord;
@@ -11,6 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.store.query.shared.FormSource;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -28,33 +28,25 @@ public class TableViewModel {
 
     private Map<ResourceId, Observable<EffectiveTableModel>> effectiveSubTables = new HashMap<>();
 
-    private StatefulValue<Optional<RecordRef>> selectedRecordRef = new StatefulValue<>(Optional.<RecordRef>absent());
+    private StatefulValue<Optional<RecordRef>> selectedRecordRef = new StatefulValue<>(Optional.absent());
     private final Observable<Optional<FormRecord>> selectedRecord;
 
     public TableViewModel(final FormSource formStore, final TableModel tableModel) {
         this.formId = tableModel.getFormId();
         this.formStore = formStore;
         this.formTree = formStore.getFormTree(formId);
-        this.effectiveTable = formTree.transform(new Function<FormTree, EffectiveTableModel>() {
-            @Override
-            public EffectiveTableModel apply(FormTree formTree) {
-                return new EffectiveTableModel(formStore, formTree, tableModel);
+        this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(formStore, tree, tableModel));
+        this.selectedRecord = selectedRecordRef.join(selection -> {
+            if (!selection.isPresent()) {
+                return Observable.just(Optional.absent());
             }
-        });
-        this.selectedRecord = selectedRecordRef.join(new Function<Optional<RecordRef>, Observable<Optional<FormRecord>>>() {
-            @Override
-            public Observable<Optional<FormRecord>> apply(Optional<RecordRef> selection) {
-                if (!selection.isPresent()) {
-                    return Observable.just(Optional.<FormRecord>absent());
+            return formStore.getRecord(selection.get()).transform(new Function<FormRecord, Optional<FormRecord>>() {
+                @Nullable
+                @Override
+                public Optional<FormRecord> apply(@Nullable FormRecord reference) {
+                    return Optional.of(reference);
                 }
-                return formStore.getRecord(selection.get()).transform(new Function<FormRecord, Optional<FormRecord>>() {
-                    @Nullable
-                    @Override
-                    public Optional<FormRecord> apply(@Nullable FormRecord reference) {
-                        return Optional.of(reference);
-                    }
-                });
-            }
+            });
         });
     }
 
@@ -78,18 +70,8 @@ public class TableViewModel {
                     .build();
 
             effectiveSubTable = formTree
-                    .transform(new Function<FormTree, FormTree>() {
-                        @Override
-                        public FormTree apply(FormTree tree) {
-                            return tree.subTree(subFormId);
-                        }
-                    })
-                    .transform(new Function<FormTree, EffectiveTableModel>() {
-                        @Override
-                        public EffectiveTableModel apply(FormTree subTree) {
-                            return new EffectiveTableModel(formStore, subTree, subModel);
-                        }
-                    });
+                    .transform(tree -> tree.subTree(subFormId))
+                    .transform(subTree -> new EffectiveTableModel(formStore, subTree, subModel));
 
             effectiveSubTables.put(subFormId, effectiveSubTable);
         }

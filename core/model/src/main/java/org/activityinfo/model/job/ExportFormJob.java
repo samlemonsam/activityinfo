@@ -2,6 +2,8 @@ package org.activityinfo.model.job;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.activityinfo.model.analysis.ImmutableTableModel;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.ArrayList;
@@ -38,6 +40,10 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     @Override
     public ExportResult parseResult(JsonObject resultObject) {
         return ExportResult.fromJson(resultObject);
+    }
+
+    public TableModel getTableModel() {
+        return ImmutableTableModel.builder().formId(formId).build();
     }
 
     @Override

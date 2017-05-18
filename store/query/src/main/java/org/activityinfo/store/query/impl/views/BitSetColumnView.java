@@ -52,4 +52,9 @@ public class BitSetColumnView implements ColumnView, Serializable {
     public int getBoolean(int row) {
         return bitSet.get(row) ? TRUE : FALSE;
     }
+
+    @Override
+    public boolean isMissing(int row) {
+        return false;
+    }
 }

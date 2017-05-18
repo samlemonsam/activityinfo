@@ -53,6 +53,11 @@ public class StringArrayColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public boolean isMissing(int row) {
+        return values[row] == null;
+    }
+
+    @Override
     public String toString() {
         return Arrays.toString(values);
     }

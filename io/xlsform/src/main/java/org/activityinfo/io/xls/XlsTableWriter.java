@@ -1,11 +1,9 @@
-package org.activityinfo.xlsform;
+package org.activityinfo.io.xls;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import org.activityinfo.model.formTree.ColumnNode;
-import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.analysis.table.EffectiveTableColumn;
+import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,9 +13,10 @@ import org.apache.poi.ss.usermodel.Row;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
-public class XlsColumnSetWriter {
+public class XlsTableWriter {
 
     public static final String EXCEL_MIME_TYPE = "application/vnd.ms-excel";
 
@@ -31,42 +30,42 @@ public class XlsColumnSetWriter {
     private final HSSFWorkbook book = new HSSFWorkbook();
 
     private CellStyle titleStyle;
-    private CellStyle textStyle;
     private CellStyle headerStyle;
 
     private SheetNamer sheetNamer = new SheetNamer();
 
-    public XlsColumnSetWriter() {
+    public XlsTableWriter() {
         declareStyles();
     }
 
-    public XlsColumnSetWriter addSheet(FormTree formTree, ColumnSet columnSet) {
-        HSSFSheet sheet = book.createSheet(sheetNamer.name(formTree.getRootFormClass().getLabel()));
+    public XlsTableWriter addSheet(EffectiveTableModel tableModel, ColumnSet columnSet) {
+        HSSFSheet sheet = book.createSheet(sheetNamer.name(tableModel.getTitle()));
 
-        writeColumnSet(sheet, formTree, columnSet);
+        writeColumnSet(sheet, tableModel, columnSet);
 
         return this;
     }
 
-    private void writeColumnSet(HSSFSheet sheet, FormTree formTree, ColumnSet columnSet) {
-        List<ColumnNode> columnNodes = getColumnNodesWithView(formTree, columnSet);
+    private void writeColumnSet(HSSFSheet sheet, EffectiveTableModel tableModel, ColumnSet columnSet) {
 
-        writeColumnSetHeader(sheet, columnNodes, formTree.getRootFormClass().getLabel());
-        writeColumnSetData(sheet, columnSet, columnNodes);
-    }
+        XlsColumnStyleFactory styleFactory = new XlsColumnStyleFactory(book);
 
-    private List<ColumnNode> getColumnNodesWithView(FormTree formTree, ColumnSet columnSet) {
-        List<ColumnNode> columnNodes = Lists.newArrayList();
 
-        for (ColumnNode column : formTree.getColumnNodes()) {
-            if (columnSet.getColumnView(column.getNode().getFieldId().asString()) != null) {
-                columnNodes.add(column);
-            }
+        List<XlsColumn> excelColumns = new ArrayList<>();
+        int columnIndex = 0;
+        for (EffectiveTableColumn tableColumn : tableModel.getColumns()) {
+            XlsColumn excelColumn = new XlsColumn(tableColumn, columnSet, columnIndex,
+                    styleFactory.create(tableColumn.getType()));
+
+            excelColumns.add(excelColumn);
+            columnIndex++;
         }
-        return columnNodes;
+
+        writeHeaders(sheet, tableModel.getTitle(), excelColumns);
+        writeData(sheet, excelColumns, columnSet.getNumRows());
     }
 
-    private void writeColumnSetHeader(HSSFSheet sheet, List<ColumnNode> columnNodes, String title) {
+    private void writeHeaders(HSSFSheet sheet, String title, List<XlsColumn> columns) {
         Cell titleCell = sheet.createRow(0).createCell(0);
         titleCell.setCellValue(book.getCreationHelper().createRichTextString(title));
         titleCell.setCellStyle(titleStyle);
@@ -74,36 +73,37 @@ public class XlsColumnSetWriter {
         Row columnHeaderRow = sheet.createRow(1);
         columnHeaderRow.setHeightInPoints(HEADER_CELL_HEIGHT);
 
-        for (ColumnNode column : columnNodes) {
-            Cell cell = columnHeaderRow.createCell(columnNodes.indexOf(column));
+        int columnIndex = 0;
+        for (XlsColumn column : columns) {
+            Cell cell = columnHeaderRow.createCell(columnIndex);
             cell.setCellStyle(headerStyle);
-            cell.setCellValue(column.getHeader());
-            sheet.setColumnWidth(columnNodes.indexOf(column), width(column.getHeader()));
+            cell.setCellValue(column.getHeading());
+            sheet.setColumnWidth(columnIndex, width(column.getHeading()));
+            columnIndex ++;
         }
     }
 
-    private void writeColumnSetData(HSSFSheet sheet, ColumnSet columnSet, List<ColumnNode> columnNodes) {
-        for (int row = 0; row < columnSet.getNumRows(); row++) {
+    private void writeData(HSSFSheet sheet, List<XlsColumn> columns, int numRows) {
+        for (int row = 0; row < numRows; row++) {
 
             Row sheetRow = sheet.createRow((row + 2));
+            for (XlsColumn column : columns) {
+                if(!column.isMissing(row)) {
+                    Cell cell = sheetRow.createCell(column.getColumnIndex());
+                    cell.setCellStyle(column.getStyle());
 
-            for (ColumnNode key : columnNodes) {
-                ColumnView view = columnSet.getColumns().get(key.getNode().getFieldId().asString());
-                Object value = view != null ? view.get(row) : null;
-
-                Cell cell = sheetRow.createCell(columnNodes.indexOf(key));
-                cell.setCellValue(key.getValueAsString(value));
-                cell.setCellStyle(cellStyle());
+                    column.setValue(cell, row);
+                }
             }
         }
     }
 
-    private CellStyle cellStyle() {
-        return textStyle;
-    }
-
     public void write(OutputStream outputStream) throws IOException {
         book.write(outputStream);
+    }
+
+    public HSSFWorkbook getBook() {
+        return book;
     }
 
     private static int width(String label) {
@@ -122,7 +122,6 @@ public class XlsColumnSetWriter {
     }
 
     private void declareStyles() {
-        textStyle = book.createCellStyle();
 
         Font headerFont = book.createFont();
         headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);

@@ -9,7 +9,5 @@ package org.activityinfo.model.query;
 public enum ColumnType {
     STRING,
     NUMBER,
-    BOOLEAN,
-    GEOGRAPHIC_AREA,
-    GEOGRAPHIC_POINT
+    BOOLEAN
 }

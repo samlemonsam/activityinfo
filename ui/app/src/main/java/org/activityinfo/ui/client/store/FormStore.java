@@ -1,12 +1,12 @@
 package org.activityinfo.ui.client.store;
 
-import org.activityinfo.analysis.FormSource;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.store.query.shared.FormSource;
 
 import java.util.List;
 

@@ -54,6 +54,11 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public boolean isMissing(int row) {
+        return getString(row) == null;
+    }
+
+    @Override
     public String toString() {  
         return ColumnViewToString.toString(this);
     }
