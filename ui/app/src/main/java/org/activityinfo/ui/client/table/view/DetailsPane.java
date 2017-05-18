@@ -5,10 +5,10 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.table.viewModel.TableViewModel;
 
 
 public class DetailsPane implements IsWidget {

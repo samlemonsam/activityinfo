@@ -1,10 +1,10 @@
-package org.activityinfo.ui.client.table.model;
+package org.activityinfo.model.analysis;
 
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
-import java.util.Optional;
 
 @Value.Immutable
 public abstract class TableColumn {

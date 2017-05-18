@@ -22,6 +22,8 @@ include 'store:migration'
 
 include 'server'
 
+include 'analysis'
+
 include 'io:xform'
 include 'io:match'
 include 'io:xlsform'

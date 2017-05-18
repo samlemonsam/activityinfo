@@ -3,10 +3,10 @@ package org.activityinfo.ui.client.table;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.ui.client.store.FormStore;
-import org.activityinfo.ui.client.table.model.ImmutableTableModel;
 import org.activityinfo.ui.client.table.view.TableView;
-import org.activityinfo.ui.client.table.viewModel.TableViewModel;
 
 public class TableActivity extends AbstractActivity {
 
@@ -26,7 +26,7 @@ public class TableActivity extends AbstractActivity {
                 .build();
 
         TableViewModel tableViewModel = new TableViewModel(formStore, tableModel);
-        TableView view = new TableView(tableViewModel);
+        TableView view = new TableView(formStore, tableViewModel);
         panel.setWidget(view);
     }
 }

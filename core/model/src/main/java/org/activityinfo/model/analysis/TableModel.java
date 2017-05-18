@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.table.model;
+package org.activityinfo.model.analysis;
 
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;

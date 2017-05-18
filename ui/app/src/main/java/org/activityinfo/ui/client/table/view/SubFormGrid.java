@@ -1,11 +1,11 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
-import org.activityinfo.ui.client.table.viewModel.EffectiveTableModel;
-import org.activityinfo.ui.client.table.viewModel.TableViewModel;
 
 /**
  * Holds a sub form grid

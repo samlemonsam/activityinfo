@@ -1,10 +1,5 @@
 
 
-plugins {
-    id "net.ltgt.apt" version "0.9"
-}
-
-
 apply plugin: 'gwt-base'
 
 sourceCompatibility = 1.8
@@ -38,12 +33,7 @@ test {
 dependencies {
     compile "com.google.guava:guava:21.0"
 
-    apt "org.immutables:value:2.4.4"
-
-    compileOnly "org.immutables:value:2.4.4:annotations"
-
-    gwt  "org.immutables:value:2.4.4:annotations"
-
+    gwt libraries.immutables.annotations
 
     gwt "com.google.gwt:gwt-user:2.8.0"
     gwt 'com.google.guava:guava-gwt:21.0'
@@ -55,6 +45,8 @@ dependencies {
     gwt project(':i18n')
     gwt project(':clients:gwtrest')
     gwt project(':io:match')
+    gwt project(':analysis')
+
 
     gwt project(':ui:codemirror')
 

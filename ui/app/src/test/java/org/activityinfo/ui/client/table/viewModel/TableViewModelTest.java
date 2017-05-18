@@ -1,11 +1,14 @@
 package org.activityinfo.ui.client.table.viewModel;
 
+import org.activityinfo.analysis.table.EffectiveTableColumn;
+import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.model.analysis.ImmutableTableModel;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.TestingFormStore;
-import org.activityinfo.ui.client.table.model.ImmutableTableModel;
-import org.activityinfo.ui.client.table.model.TableModel;
 import org.junit.Test;
 
 import static org.activityinfo.observable.ObservableTesting.connect;

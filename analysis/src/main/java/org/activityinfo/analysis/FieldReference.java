@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.formulaDialog;
+package org.activityinfo.analysis;
 
 import org.activityinfo.model.expr.SourceRange;
 import org.activityinfo.store.query.shared.NodeMatch;
@@ -17,7 +17,7 @@ public class FieldReference {
         return sourceRange;
     }
 
-    String getDescription() {
+    public String getDescription() {
         if(match.isEnumBoolean()) {
             return match.getFieldNode().getField().getLabel() + " is " + match.getEnumItem().getLabel();
         } else {

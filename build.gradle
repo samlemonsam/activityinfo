@@ -32,12 +32,14 @@ idea {
 subprojects {
 
   apply plugin: 'java'
+  apply plugin: "net.ltgt.apt"
+
 
   sourceCompatibility = 1.7
   targetCompatibility = 1.7
 
   /**
-   * Keep the version out of the jars to avoid re
+   * Keep the version out of the jars to avoid unnecessary rebuilds
    */
   jar {
     archiveName = "activityinfo-${project.name}.jar"
@@ -59,6 +61,9 @@ subprojects {
   dependencies {
     compile libraries.slf4j.api
     compile libraries.slf4j.impl
+
+    apt libraries.immutables.apt
+    compileOnly libraries.immutables.annotations
 
     testCompile libraries.junit
     testCompile libraries.hamcrest
@@ -89,5 +94,6 @@ buildscript {
     classpath 'com.moowork.gradle:gradle-grunt-plugin:0.12'
     classpath "com.moowork.gradle:gradle-node-plugin:0.12"
     classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
+    classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
   }
 }

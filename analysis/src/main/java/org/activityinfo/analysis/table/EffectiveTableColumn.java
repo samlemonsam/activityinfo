@@ -1,10 +1,10 @@
-package org.activityinfo.ui.client.table.viewModel;
+package org.activityinfo.analysis.table;
 
+import org.activityinfo.analysis.ParsedFormula;
+import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.ui.client.formulaDialog.ParsedFormula;
-import org.activityinfo.ui.client.table.model.TableColumn;
 
 public class EffectiveTableColumn {
 

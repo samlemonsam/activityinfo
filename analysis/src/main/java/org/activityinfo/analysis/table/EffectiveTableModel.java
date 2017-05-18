@@ -1,5 +1,8 @@
-package org.activityinfo.ui.client.table.viewModel;
+package org.activityinfo.analysis.table;
 
+import org.activityinfo.analysis.FormSource;
+import org.activityinfo.model.analysis.ImmutableTableColumn;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -14,9 +17,6 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.ui.client.store.FormStore;
-import org.activityinfo.ui.client.table.model.ImmutableTableColumn;
-import org.activityinfo.ui.client.table.model.TableModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class EffectiveTableModel {
     private List<EffectiveTableColumn> columns;
     private Observable<ColumnSet> columnSet;
 
-    public EffectiveTableModel(FormStore formStore, FormTree formTree, TableModel tableModel) {
+    public EffectiveTableModel(FormSource formSource, FormTree formTree, TableModel tableModel) {
         this.formTree = formTree;
         this.columnSet = new StatefulValue<>();
         this.columns = new ArrayList<>();
@@ -51,7 +51,7 @@ public class EffectiveTableModel {
             }
         }
 
-        this.columnSet = formStore.query(buildQuery(columns));
+        this.columnSet = formSource.query(buildQuery(columns));
     }
 
     public FormTree.State getRootFormState() {
@@ -74,13 +74,11 @@ public class EffectiveTableModel {
 
     private void addKeyColumns(List<EffectiveTableColumn> columns, FormTree.Node node) {
 
-        boolean hasKeys = false;
 
         // First add reference key fields
         for (FormTree.Node childNode : node.getChildren()) {
             if(childNode.getField().isKey() && childNode.isReference()) {
                 addKeyColumns(columns, childNode);
-                hasKeys = true;
             }
         }
 
@@ -88,7 +86,6 @@ public class EffectiveTableModel {
         for (FormTree.Node childNode : node.getChildren()) {
             if(childNode.getField().isKey() && !childNode.isReference()) {
                 columns.add(new EffectiveTableColumn(formTree, columnModel(childNode)));
-                hasKeys = true;
             }
         }
     }

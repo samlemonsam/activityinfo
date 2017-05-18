@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.table.view;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
-import org.activityinfo.ui.client.table.viewModel.TableViewModel;
+import org.activityinfo.analysis.table.TableViewModel;
 
 /**
  * Sidebar panel containing details, history, etc.

@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.formulaDialog;
+package org.activityinfo.analysis;
 
 import com.google.common.base.Strings;
 import org.activityinfo.i18n.shared.I18N;

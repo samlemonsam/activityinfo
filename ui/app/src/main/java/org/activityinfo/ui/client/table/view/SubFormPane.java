@@ -2,12 +2,12 @@ package org.activityinfo.ui.client.table.view;
 
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
+import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
-import org.activityinfo.ui.client.table.viewModel.TableViewModel;
 
 /**
  * Hosts subform tabs

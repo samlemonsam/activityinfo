@@ -11,13 +11,14 @@ import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
+import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.input.view.FormDialog;
-import org.activityinfo.ui.client.table.viewModel.EffectiveTableModel;
-import org.activityinfo.ui.client.table.viewModel.TableViewModel;
+import org.activityinfo.ui.client.store.FormStore;
 
 /**
  * Displays a Form as a Table
@@ -39,9 +40,11 @@ public class TableView implements IsWidget {
     private Subscription subscription;
 
     private Dialog forbiddenDialog;
+    private FormStore formStore;
 
 
-    public TableView(final TableViewModel viewModel) {
+    public TableView(FormStore formStore, final TableViewModel viewModel) {
+        this.formStore = formStore;
 
         TableBundle.INSTANCE.style().ensureInjected();
 
@@ -51,7 +54,7 @@ public class TableView implements IsWidget {
         newButton.addSelectHandler(this::onNewRecordClicked);
 
 
-        OfflineStatusButton offlineButton = new OfflineStatusButton(viewModel.getFormStore(), viewModel.getFormId());
+        OfflineStatusButton offlineButton = new OfflineStatusButton(formStore, viewModel.getFormId());
 
         this.toolBar = new ToolBar();
         toolBar.add(newButton);
@@ -96,7 +99,7 @@ public class TableView implements IsWidget {
     }
 
     private void onNewRecordClicked(SelectEvent event) {
-        FormDialog dialog = new FormDialog(viewModel.getFormStore(), viewModel.getFormId());
+        FormDialog dialog = new FormDialog(formStore, viewModel.getFormId());
         dialog.show();
     }
 

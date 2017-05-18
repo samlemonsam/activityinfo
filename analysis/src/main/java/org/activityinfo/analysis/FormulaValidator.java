@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.formulaDialog;
+package org.activityinfo.analysis;
 
 import com.google.common.collect.Iterables;
 import org.activityinfo.model.expr.*;
