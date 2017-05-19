@@ -137,6 +137,13 @@ public class FormResource {
 
         return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
     }
+
+    @POST
+    @Path("schema")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response postUpdatedFormSchema(String updatedSchemaJson) {
+        return updateFormSchema(updatedSchemaJson);
+    }
     
     @PUT
     @Path("schema")
