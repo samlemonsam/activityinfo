@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.input.model;
 
 
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 
 import java.util.Collection;
@@ -52,6 +53,10 @@ public class FormInputModel {
         return update(recordRef, fieldId, input);
     }
 
+    public FormInputModel update(ResourceId fieldId, FieldValue value) {
+        return update(recordRef, fieldId, new FieldInput(value));
+    }
+
     /**
      * Returns a new, updated version of this model with the change to the given field on the given
      * record.
@@ -80,6 +85,7 @@ public class FormInputModel {
 
         return new FormInputModel(this.recordRef, updatedInputs, updatedSubRecords);
     }
+
 
     public FormInputModel addSubRecord(RecordRef newRecordRef) {
         assert !newRecordRef.equals(this.recordRef);

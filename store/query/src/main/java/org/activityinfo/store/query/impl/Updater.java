@@ -13,6 +13,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
@@ -211,26 +212,45 @@ public class Updater {
         if(jsonValue.isJsonNull()) {
             return null;
         } else if(field.getType() instanceof EnumType) {
-            return parseEnumValue((EnumType)field.getType(), jsonValue.getAsString());
+            return parseEnumValue((EnumType)field.getType(), jsonValue);
         } else {
             return field.getType().parseJsonValue(jsonValue);
         }
     }
 
-    private static FieldValue parseEnumValue(EnumType type, String jsonValue) {
+    private static FieldValue parseEnumValue(EnumType type, JsonElement jsonElement) {
+
+        Set<ResourceId> itemIds = new HashSet<>();
+
+        if(jsonElement.isJsonPrimitive()) {
+            itemIds.add(parseEnumId(type, jsonElement.getAsString()));
+        } else if(jsonElement.isJsonArray()) {
+            for (JsonElement element : jsonElement.getAsJsonArray()) {
+                itemIds.add(parseEnumId(type, element.getAsString()));
+            }
+        }
+        if(type.getCardinality() == Cardinality.SINGLE && itemIds.size() > 1) {
+            throw new InvalidUpdateException("Field with SINGLE enum type has multiple values.");
+        }
+
+        return new EnumValue(itemIds);
+    }
+
+    private static ResourceId parseEnumId(EnumType type, String item) {
+
         for (EnumItem enumItem : type.getValues()) {
-            if(enumItem.getId().asString().equals(jsonValue)) {
-                return new EnumValue(enumItem.getId());
+            if(enumItem.getId().asString().equals(item)) {
+                return enumItem.getId();
             }
         }
         for (EnumItem enumItem : type.getValues()) {
-            if(enumItem.getLabel().equals(jsonValue)) {
-                return new EnumValue(enumItem.getId());
+            if(enumItem.getLabel().equals(item)) {
+                return enumItem.getId();
             }
         }
 
         throw new InvalidUpdateException(format("Invalid enum value '%s', expected one of: %s",
-                jsonValue, Joiner.on(", ").join(type.getValues())));
+                item, Joiner.on(", ").join(type.getValues())));
     }
 
 

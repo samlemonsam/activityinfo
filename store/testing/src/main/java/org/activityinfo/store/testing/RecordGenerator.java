@@ -7,6 +7,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -59,6 +60,8 @@ public class RecordGenerator {
             return new DiscreteTextGenerator(field.isRequired() ? 0 : 0.25, DiscreteTextGenerator.NAMES);
         } else if(field.getType() instanceof LocalDateType) {
             return new DateGenerator(field);
+        } else if(field.getType() instanceof SerialNumberType) {
+            return new SerialNumberGenerator();
         } else {
             return Suppliers.ofInstance(null);
         }

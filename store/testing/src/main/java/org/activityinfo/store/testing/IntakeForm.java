@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -49,7 +50,7 @@ public class IntakeForm implements TestForm {
                 .setCode("CODE")
                 .setLabel("Protection Code")
                 .setRequired(true)
-                .setType(LocalDateType.INSTANCE);
+                .setType(new SerialNumberType());
 
         openDateField = formClass.addField(OPEN_DATE_FIELD_ID)
                 .setCode("OPENED")

@@ -141,6 +141,23 @@ public class FormInputViewModelTest {
     }
 
 
+    @Test
+    public void testMultipleSelectPersistance() {
+        TestingFormStore store = new TestingFormStore();
+
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, IntakeForm.FORM_ID));
+
+        FormInputModel inputModel = new FormInputModel(new RecordRef(IntakeForm.FORM_ID, ResourceId.generateId()))
+                .update(IntakeForm.OPEN_DATE_FIELD_ID, new LocalDate(2017,1,1))
+                .update(IntakeForm.NATIONALITY_FIELD_ID, new EnumValue(IntakeForm.PALESTINIAN_ID, IntakeForm.JORDANIAN_ID));
+
+        FormInputViewModel viewModel = builder.build(inputModel);
+        assertThat(viewModel.isValid(), equalTo(true));
+
+        Promise<Void> completed = store.updateRecords(viewModel.buildTransaction());
+        assertThat(completed.getState(), equalTo(Promise.State.FULFILLED));
+    }
+
     private FormTree fetchTree(TestingFormStore store, ResourceId formId) {
         return ObservableTesting.connect(store.getFormTree(formId)).assertLoaded();
     }

@@ -9,6 +9,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -109,7 +110,7 @@ public class FormInputViewModelBuilder {
                         record.set(node.getFieldId(), fieldInput.getValue());
                         break;
                     case INVALID:
-                        LOGGER.fine("Field with invalid input = " + node.getFieldId());
+                        LOGGER.info("Field with invalid input = " + node.getFieldId());
                         valid = false;
                         break;
                 }
@@ -123,7 +124,7 @@ public class FormInputViewModelBuilder {
         // values are provided
         Set<ResourceId> missing = computeMissing(record, relevantSet);
 
-        LOGGER.fine("Missing fields = " + missing);
+        LOGGER.info("Missing fields = " + missing);
 
         if(!missing.isEmpty()) {
             valid = false;
@@ -135,7 +136,7 @@ public class FormInputViewModelBuilder {
             subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel));
         }
 
-        LOGGER.fine("Valid = " + valid);
+        LOGGER.info("Valid = " + valid);
 
 
         return new FormInputViewModel(formTree, inputModel,
@@ -198,6 +199,9 @@ public class FormInputViewModelBuilder {
     private Set<ResourceId> computeMissing(FormInstance record, Set<ResourceId> relevantSet) {
         Set<ResourceId> missing = new HashSet<>();
         for (FormTree.Node node : formTree.getRootFields()) {
+            if(node.getType() instanceof SerialNumberType) {
+                continue;
+            }
             if(node.getField().isRequired()) {
                 if(relevantSet.contains(node.getFieldId())) {
                     if(record.get(node.getFieldId()) == null) {
