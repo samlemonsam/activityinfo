@@ -41,7 +41,19 @@ public class EnumType implements ParametrizedFieldType {
 
             Presentation presentation = Presentation.AUTOMATIC;
             if(parametersObject.has("presentation")) {
-                presentation = Presentation.valueOf(parametersObject.get("presentation").getAsString().toUpperCase());
+                String presentationType = parametersObject.get("presentation").getAsString().toUpperCase();
+                switch (presentationType) {
+                    case "CHECKBOX":
+                    case "RADIO_BUTTON":
+                        presentation = Presentation.RADIO_BUTTON;
+                        break;
+                    case "DROPDOWN":
+                        presentation = Presentation.DROPDOWN;
+                        break;
+                    default:
+                        presentation = Presentation.AUTOMATIC;
+                        break;
+                }
             }
 
             List<EnumItem> enumItems = Lists.newArrayList();
