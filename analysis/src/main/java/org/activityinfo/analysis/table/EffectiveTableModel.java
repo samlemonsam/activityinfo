@@ -11,6 +11,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -67,7 +68,8 @@ public class EffectiveTableModel {
                type instanceof QuantityType ||
                type instanceof BarcodeType ||
                (type instanceof EnumType && ((EnumType) type).getCardinality() == Cardinality.SINGLE) ||
-               type instanceof LocalDateType;
+               type instanceof LocalDateType ||
+               type instanceof CalculatedFieldType;
     }
 
     private ImmutableTableColumn columnModel(FormTree.Node node) {
