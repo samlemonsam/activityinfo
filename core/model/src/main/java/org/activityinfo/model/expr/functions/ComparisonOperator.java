@@ -1,6 +1,7 @@
 package org.activityinfo.model.expr.functions;
 
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
@@ -69,7 +70,7 @@ public abstract class ComparisonOperator extends ExprFunction implements ColumnF
         } else if(a.getType() == ColumnType.STRING && b.getType() == ColumnType.STRING) {
             return columnApplyString(a, b);
         } else {
-            throw new UnsupportedOperationException(a.getType() + ", " + b.getType());
+            throw new ExprSyntaxException("Comparsion between incompatible types: " + a.getType() + ", " + b.getType());
         }
     }
 
