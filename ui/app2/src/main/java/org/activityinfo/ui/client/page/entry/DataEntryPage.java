@@ -201,8 +201,13 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         betaLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                navigateToNewInterface();
+                if(clickEvent.isControlKeyDown()) {
+                    navigateToNewNewInterface();
+                } else {
+                    navigateToNewInterface();
+                }
             }
+
         });
         betaLinkPanel.add(betaLink);
         return betaLinkPanel;
@@ -530,6 +535,15 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
                     new ResourcePlace(formClassId, ResourcePage.TABLE_PAGE_ID)));
+        }
+    }
+
+
+    private void navigateToNewNewInterface() {
+        Optional<Integer> activityId = getCurrentActivityId();
+        if(activityId.isPresent()) {
+            com.google.gwt.user.client.Window.open("/?ui=3#table/" + CuidAdapter.activityFormClass(activityId.get()),
+                "_blank", null);
         }
     }
 

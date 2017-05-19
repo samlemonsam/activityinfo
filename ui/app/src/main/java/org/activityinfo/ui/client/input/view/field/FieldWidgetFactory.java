@@ -80,7 +80,11 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
     @Override
     public FieldWidget visitEnum(EnumType enumType) {
         if(enumType.getCardinality() == Cardinality.SINGLE) {
-            return new RadioGroupWidget(enumType, updater);
+            if(enumType.getEffectivePresentation() == EnumType.Presentation.RADIO_BUTTON) {
+                return new RadioGroupWidget(enumType, updater);
+            } else {
+                return new DropDownEnumWidget(enumType, updater);
+            }
         } else {
             return new CheckBoxGroupWidget(enumType, updater);
         }

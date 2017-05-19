@@ -16,15 +16,15 @@ public class EnumFieldWidget implements FormFieldWidget<EnumValue> {
     }
 
     private FormFieldWidget<EnumValue> createWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater, FieldWidgetMode fieldWidgetMode) {
-        EnumType.Presentation presentation = EnumType.Presentation.CHECKBOX;
+        EnumType.Presentation presentation = EnumType.Presentation.RADIO_BUTTON;
         if(fieldWidgetMode == FieldWidgetMode.NORMAL) {
             // Only apply presentation choices in data entry mode
             presentation = enumType.getEffectivePresentation();
         } else {
-            presentation = EnumType.Presentation.CHECKBOX;
+            presentation = EnumType.Presentation.RADIO_BUTTON;
         }
 
-        if(presentation == EnumType.Presentation.CHECKBOX) {
+        if(presentation == EnumType.Presentation.RADIO_BUTTON) {
             return new EnumCheckboxWidget(enumType, valueUpdater, fieldWidgetMode);
         } else {
             return new EnumDropDownWidget(enumType, valueUpdater);

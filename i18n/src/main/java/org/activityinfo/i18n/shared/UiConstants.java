@@ -1724,8 +1724,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Show as dropdown")
     String dropdownPresentation();
 
-    @DefaultStringValue("Show as checkboxes")
-    String checkboxPresentation();
+    @DefaultStringValue("Show as radio buttons")
+    String radioButtonPresentation();
 
     @DefaultStringValue("Presentation")
     String presentation();

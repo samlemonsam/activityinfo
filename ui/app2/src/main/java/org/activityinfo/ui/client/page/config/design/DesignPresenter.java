@@ -43,10 +43,12 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.job.ExportAuditLog;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.component.table.action.ExportJobTask;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
@@ -66,6 +68,7 @@ import org.activityinfo.ui.client.page.config.DbPageState;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImportDialog;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporterV2;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporterV3;
+import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 
@@ -270,7 +273,8 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     }
 
     public void exportAuditLog() {
-        Window.open("/resources/database/" + db.getId() + "/audit-log.csv", "_blank", null);
+        ExportDialog dialog = new ExportDialog();
+        dialog.start(new ExportJobTask(new ExportAuditLog(db.getId())));
     }
 
 

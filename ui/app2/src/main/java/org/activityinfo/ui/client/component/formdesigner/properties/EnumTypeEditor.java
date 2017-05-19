@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.enumerated.EnumType;
 
@@ -43,13 +44,13 @@ public class EnumTypeEditor extends TypeEditor<EnumType> {
 
     @Override
     protected boolean accept(FieldType type) {
-        return type instanceof EnumType;
+        return type instanceof EnumType && ((EnumType) type).getCardinality() == Cardinality.SINGLE;
     }
 
     @Override
     protected void show(EnumType type) {
         automaticPresentation.setValue(type.getPresentation() == EnumType.Presentation.AUTOMATIC);
-        checkboxPresentation.setValue(type.getPresentation() == EnumType.Presentation.CHECKBOX);
+        checkboxPresentation.setValue(type.getPresentation() == EnumType.Presentation.RADIO_BUTTON);
         dropdownPresentation.setValue(type.getPresentation() == EnumType.Presentation.DROPDOWN);
     }
 
@@ -60,7 +61,7 @@ public class EnumTypeEditor extends TypeEditor<EnumType> {
 
     @UiHandler("checkboxPresentation")
     void onCheckBoxPresentation(ValueChangeEvent<Boolean> event) {
-        updatePresentation(EnumType.Presentation.CHECKBOX);
+        updatePresentation(EnumType.Presentation.RADIO_BUTTON);
     }
 
     @UiHandler("dropdownPresentation")

@@ -12,14 +12,17 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
-import org.activityinfo.store.spi.FormCatalog;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.StringWriter;
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
@@ -31,7 +34,7 @@ public class MySqlCatalogIntegrationTest {
 
     private static DbUnit dbunit;
     private static ColumnSetBuilder columnSetBuilder;
-    private static FormCatalog catalogProvider;
+    private static MySqlCatalog catalog;
 
     @BeforeClass
     public static void setup() throws Throwable {
@@ -43,8 +46,8 @@ public class MySqlCatalogIntegrationTest {
         dbunit.openDatabase();
         dbunit.dropAllRows();
         dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "rdc.db.xml"));
-        catalogProvider = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        columnSetBuilder = new ColumnSetBuilder(catalogProvider);
+        catalog = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
+        columnSetBuilder = new ColumnSetBuilder(catalog);
     }
 
 
@@ -55,10 +58,10 @@ public class MySqlCatalogIntegrationTest {
         model.selectField("date2");
         model.selectExpr("Partner.name");
 
-        FormTree formTree = new FormTreeBuilder(catalogProvider).queryTree(activityFormClass(33));
+        FormTree formTree = new FormTreeBuilder(catalog).queryTree(activityFormClass(33));
         FormTreePrettyPrinter.print(formTree);
 
-        FormClass formClass = catalogProvider.getForm(activityFormClass(33)).get().getFormClass();
+        FormClass formClass = catalog.getForm(activityFormClass(33)).get().getFormClass();
         for(FormField field : formClass.getFields()) {
             if(field.getType() instanceof QuantityType) {
                 model.selectField(field.getId()).as("I" + CuidAdapter.getLegacyIdFromCuid(field.getId()));
@@ -76,5 +79,13 @@ public class MySqlCatalogIntegrationTest {
         writer.write(columnSet);
         
         System.out.println(stringWriter.toString());
+    }
+
+    @Test
+    public void testSerializeActivity() throws SQLException, IOException {
+        Activity activity = catalog.getActivityLoader().load(33);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(activity);
     }
 }

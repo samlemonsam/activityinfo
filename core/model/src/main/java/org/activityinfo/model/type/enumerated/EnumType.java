@@ -22,7 +22,7 @@ public class EnumType implements ParametrizedFieldType {
 
     public enum Presentation {
         AUTOMATIC,
-        CHECKBOX,
+        RADIO_BUTTON,
         DROPDOWN
     }
 
@@ -103,7 +103,7 @@ public class EnumType implements ParametrizedFieldType {
             if(values.size() > MAX_CHECKBOX_ITEMS) {
                 return Presentation.DROPDOWN;
             } else {
-                return Presentation.CHECKBOX;
+                return Presentation.RADIO_BUTTON;
             }
         } else {
             return presentation;
