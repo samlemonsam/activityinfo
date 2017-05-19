@@ -81,6 +81,7 @@ public class AuditLogWriter {
                     formId.asString(),
                     formClass.getLabel(),
                     "", // Field ID
+                    "", // Field Name
                     snapshot.getRecordId().asString(),
                     partner()
             );
