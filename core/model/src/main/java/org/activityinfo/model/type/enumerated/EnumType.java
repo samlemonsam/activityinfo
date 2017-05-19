@@ -18,7 +18,10 @@ public class EnumType implements ParametrizedFieldType {
      */
     public static final int MAX_CHECKBOX_ITEMS = 10;
 
-    public interface EnumTypeClass extends ParametrizedFieldTypeClass, RecordFieldTypeClass { }
+    public interface EnumTypeClass extends ParametrizedFieldTypeClass, RecordFieldTypeClass {
+        @Override
+        EnumType deserializeType(JsonObject parametersObject);
+    }
 
     public enum Presentation {
         AUTOMATIC,
@@ -35,7 +38,7 @@ public class EnumType implements ParametrizedFieldType {
 
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public EnumType deserializeType(JsonObject parametersObject) {
             Cardinality cardinality = Cardinality.valueOf(
                     parametersObject.get("cardinality").getAsString().toUpperCase());
 
