@@ -21,6 +21,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
 
 public class DatabaseResource {
 
@@ -60,7 +61,7 @@ public class DatabaseResource {
 
     @GET
     @Path("schema.csv")
-    public Response getDatabaseSchemaCsv() {
+    public Response getDatabaseSchemaCsv() throws IOException {
         SchemaCsvWriter writer = new SchemaCsvWriter(dispatcher);
         writer.write(databaseId);
 
@@ -70,7 +71,7 @@ public class DatabaseResource {
 
     @GET
     @Path("schema-v3.csv")
-    public Response getDatabaseSchemaV3() {
+    public Response getDatabaseSchemaV3() throws IOException {
 
         UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
 
@@ -78,19 +79,6 @@ public class DatabaseResource {
         writer.writeForms(db);
 
         return writeCsv("schema-v3_" + databaseId + ".csv", writer.toString());
-    }
-
-    @GET
-    @Path("audit-log.csv")
-    public Response getAuditLog() {
-        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
-
-        AuditLogWriter writer = new AuditLogWriter(entityManager.get(), db);
-        for (ActivityDTO activityDTO : db.getActivities()) {
-            writer.writeForm(catalog.get(), activityDTO.getFormClassId());
-        }
-
-        return writeCsv("audit-log_" + databaseId + ".csv", writer.toString());
     }
 
     private Response writeCsv(String filename, String text) {

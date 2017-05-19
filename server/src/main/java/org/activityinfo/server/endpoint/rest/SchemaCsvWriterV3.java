@@ -20,6 +20,7 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -226,11 +227,11 @@ public class SchemaCsvWriterV3 {
     private final CsvWriter csv = new CsvWriter();
     private BatchFormClassProvider catalog;
 
-    public SchemaCsvWriterV3(BatchFormClassProvider catalog) {
+    public SchemaCsvWriterV3(BatchFormClassProvider catalog) throws IOException {
         this.catalog = catalog;
     }
 
-    public void writeForms(UserDatabaseDTO db) {
+    public void writeForms(UserDatabaseDTO db) throws IOException {
         List<ResourceId> formIds = new ArrayList<>();
 
         for (ActivityDTO activity : db.getActivities()) {
@@ -243,7 +244,7 @@ public class SchemaCsvWriterV3 {
     }
 
     @VisibleForTesting
-    void writeForms(UserDatabaseDTO db, List<ResourceId> formIds) {
+    void writeForms(UserDatabaseDTO db, List<ResourceId> formIds) throws IOException {
         writeHeaders();
         Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(formIds);
         for (ResourceId formId : formIds) {
@@ -255,7 +256,7 @@ public class SchemaCsvWriterV3 {
         }
     }
 
-    private void writeHeaders() {
+    private void writeHeaders() throws IOException {
         Column[] columns = Column.values();
         Object[] headers = new Object[columns.length];
 
@@ -266,7 +267,7 @@ public class SchemaCsvWriterV3 {
         csv.writeLine(headers);
     }
 
-    private void writeForm(UserDatabaseDTO db, FormClass formClass) {
+    private void writeForm(UserDatabaseDTO db, FormClass formClass) throws IOException {
         FieldContext context = new FieldContext(db, formClass);
         List<FormField> fields = formClass.getFields();
         
@@ -290,7 +291,7 @@ public class SchemaCsvWriterV3 {
                 field.getId().equals(CuidAdapter.projectField(activityId));
     }
 
-    private void writeSubForm(FieldContext context, FormField field) {
+    private void writeSubForm(FieldContext context, FormField field) throws IOException {
         SubFormReferenceType fieldType = (SubFormReferenceType) field.getType();
         FormClass subFormClass = catalog.getFormClass(fieldType.getClassId());
         FieldContext subFormContext = context.subForm(field, subFormClass);
@@ -304,11 +305,11 @@ public class SchemaCsvWriterV3 {
         }
     }
 
-    private void writeField(FieldContext context, FormField field) {
+    private void writeField(FieldContext context, FormField field) throws IOException {
         writeRow(context, field, null);
     }
 
-    private void writeEnumItems(FieldContext context, FormField field, List<EnumItem> values) {
+    private void writeEnumItems(FieldContext context, FormField field, List<EnumItem> values) throws IOException {
         if(values.size() == 0) {
             writeRow(context, field, null);
         } else {
@@ -318,7 +319,7 @@ public class SchemaCsvWriterV3 {
         }
     }
 
-    private void writeRow(FieldContext context, FormField field, EnumItem value) {
+    private void writeRow(FieldContext context, FormField field, EnumItem value) throws IOException {
         Column[] columns = Column.values();
         Object[] values = new Object[columns.length];
 

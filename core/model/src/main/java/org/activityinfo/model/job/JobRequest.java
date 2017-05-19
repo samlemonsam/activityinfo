@@ -46,6 +46,8 @@ public class JobRequest {
         switch (type) {
             case ExportFormJob.TYPE:
                 return ExportFormJob.fromJson(descriptor);
+            case ExportAuditLog.TYPE:
+                return ExportAuditLog.fromJson(descriptor);
 
         }
         throw new IllegalArgumentException(type);

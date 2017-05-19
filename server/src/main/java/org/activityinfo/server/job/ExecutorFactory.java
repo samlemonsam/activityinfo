@@ -2,6 +2,7 @@ package org.activityinfo.server.job;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.activityinfo.model.job.ExportAuditLog;
 import org.activityinfo.model.job.ExportFormJob;
 
 /**
@@ -19,6 +20,8 @@ public class ExecutorFactory {
     public JobExecutor create(String type) {
         if(type.equals(ExportFormJob.TYPE)) {
             return injector.getInstance(ExportFormExecutor.class);
+        } else if(type.equals(ExportAuditLog.TYPE)) {
+            return injector.getInstance(ExportAuditLogExecutor.class);
         }
         throw new IllegalArgumentException("No such type " + type);
     }
