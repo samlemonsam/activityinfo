@@ -203,7 +203,7 @@ public class SchemaCsvWriterV3Test {
     }
 
     @Test
-    public void exportWashForm() {
+    public void exportWashForm() throws IOException {
         SchemaCsvWriterV3 writer = new SchemaCsvWriterV3(formClassProvider);
         writer.writeForms(database, Collections.singletonList(washForm.getId()));
 

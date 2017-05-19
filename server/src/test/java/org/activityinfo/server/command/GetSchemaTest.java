@@ -39,6 +39,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+
 import static org.activityinfo.promise.PromiseMatchers.resolvesTo;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasProperty;
@@ -184,7 +186,7 @@ public class GetSchemaTest extends CommandTestCase2 {
     }
 
     @Test
-    public void toCSV() {
+    public void toCSV() throws IOException {
         int databaseId = 1;
 
         SchemaCsvWriter writer = new SchemaCsvWriter(getDispatcherSync());
