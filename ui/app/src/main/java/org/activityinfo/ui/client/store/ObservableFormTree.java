@@ -165,6 +165,9 @@ public class ObservableFormTree extends Observable<FormTree> {
 
         } else if(metadata.isLoaded()) {
             if(metadata.get().isAccessible()) {
+
+                assert metadata.get().getSchema() != null : "Missing schema " + metadata.get().getId();
+
                 for (FormField field : metadata.get().getSchema().getFields()) {
                     if (field.getType() instanceof ReferenceType) {
                         ReferenceType type = (ReferenceType) field.getType();

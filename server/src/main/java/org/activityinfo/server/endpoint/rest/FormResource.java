@@ -86,7 +86,7 @@ public class FormResource {
 
     @GET
     @Produces(JSON_CONTENT_TYPE)
-    public Response getMetadataResponse(@QueryParam("localVersion") long localVersion) {
+    public Response getMetadataResponse(@QueryParam("localVersion") Long localVersion) {
         FormMetadata metadata = getFormMetadata(localVersion);
 
         return Response.ok()
@@ -94,7 +94,7 @@ public class FormResource {
                 .type(JSON_CONTENT_TYPE).build();
     }
 
-    private FormMetadata getFormMetadata(long localVersion) {
+    private FormMetadata getFormMetadata(Long localVersion) {
         FormMetadata metadata = new FormMetadata();
         metadata.setId(formId);
         Optional<FormStorage> collection = this.catalog.get().getForm(formId);
@@ -113,7 +113,7 @@ public class FormResource {
         metadata.setVersion(collection.get().cacheVersion());
         metadata.setSchemaVersion(schema.getSchemaVersion());
 
-        if(localVersion < schema.getSchemaVersion()) {
+        if(localVersion == null || localVersion < schema.getSchemaVersion()) {
             metadata.setSchema(schema);
         }
 

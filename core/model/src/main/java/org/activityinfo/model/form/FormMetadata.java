@@ -129,7 +129,7 @@ public class FormMetadata {
             metadata.visible = object.get("visible").getAsBoolean();
         }
         if(object.has("deleted")) {
-            metadata.visible = object.get("deleted").getAsBoolean();
+            metadata.deleted = object.get("deleted").getAsBoolean();
         }
         return metadata;
     }
