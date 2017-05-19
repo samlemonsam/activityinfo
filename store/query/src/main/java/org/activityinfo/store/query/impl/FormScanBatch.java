@@ -1,5 +1,7 @@
 package org.activityinfo.store.query.impl;
 
+import com.google.apphosting.api.ApiProxy;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
@@ -18,6 +20,11 @@ import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.spi.FormCatalog;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -42,6 +49,8 @@ public class FormScanBatch {
 
     private Map<ReferenceJoinKey, ReferenceJoin> joinLinks = new HashMap<>();
     private Map<JoinedColumnKey, JoinedReferenceColumnViewSlot> joinedColumns = new HashMap<>();
+
+    private List<Future<Integer>> pendingCachePuts = new ArrayList<>();
 
     public FormScanBatch(FormCatalog store) {
         this.store = store;
@@ -268,7 +277,10 @@ public class FormScanBatch {
         try {
             Map<String, Object> toPut = scan.getValuesToCache();
             if(!toPut.isEmpty()) {
-                cache.enqueuePut(toPut);
+                Future<Integer> future = cache.enqueuePut(toPut);
+                if(!future.isDone()) {
+                    pendingCachePuts.add(future);
+                }
             }
         } catch (Exception e) {
             LOGGER.severe("Failed to start memcache put for " + scan);
@@ -279,6 +291,29 @@ public class FormScanBatch {
      * Wait for caching to finish, if there is time left in this request.
      */
     public void waitForCachingToFinish() {
-        cache.waitUntilCached();
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        int columnCount = 0;
+        for (Future<Integer> future : pendingCachePuts) {
+            if (!future.isDone()) {
+                long remainingMillis = ApiProxy.getCurrentEnvironment().getRemainingMillis();
+                if (remainingMillis > 100) {
+                    try {
+                        Integer cachedCount = future.get(remainingMillis - 50, TimeUnit.MILLISECONDS);
+                        columnCount += cachedCount;
+
+                    } catch (InterruptedException | TimeoutException e) {
+                        LOGGER.warning("Ran out of time while waiting for caching of results to complete.");
+                        return;
+
+                    } catch (ExecutionException e) {
+                        LOGGER.log(Level.WARNING, "Exception caching results of query", e);
+                    }
+                }
+            }
+        }
+
+        LOGGER.info("Waited " + stopwatch + " for " + columnCount + " columns to finish caching.");
     }
 }

@@ -10,18 +10,19 @@ import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
+import org.activityinfo.store.query.server.FormSourceSyncImpl;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResult> {
 
-    private final ServerFormSource formSource;
+    private final FormSourceSyncImpl formSource;
     private final StorageProvider storageProvider;
 
 
     @Inject
-    public ExportFormExecutor(ServerFormSource formSource, StorageProvider storageProvider) {
+    public ExportFormExecutor(FormSourceSyncImpl formSource, StorageProvider storageProvider) {
         this.formSource = formSource;
         this.storageProvider = storageProvider;
     }

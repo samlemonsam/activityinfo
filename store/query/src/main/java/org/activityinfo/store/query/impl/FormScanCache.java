@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 
 public interface FormScanCache {
@@ -13,11 +14,8 @@ public interface FormScanCache {
 
     /**
      * Starts an asynchronous request to cache the given key/value pairs.
+     * @return a Future containing the number of columns cached.
      */
-    void enqueuePut(Map<String, Object> toPut);
+    Future<Integer> enqueuePut(Map<String, Object> toPut);
 
-    /**
-     * Blocks until requests started by calls to {@link #enqueuePut(Map)} complete.
-     */
-    void waitUntilCached();
 }

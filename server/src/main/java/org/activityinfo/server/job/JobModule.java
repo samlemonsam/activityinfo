@@ -22,13 +22,23 @@ package org.activityinfo.server.job;
  * #L%
  */
 
+import com.google.inject.Provides;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.endpoint.rest.RestApiModule;
+import org.activityinfo.store.query.impl.AppEngineFormScanCache;
+import org.activityinfo.store.query.server.FormSourceSyncImpl;
+import org.activityinfo.store.query.shared.FormSource;
+import org.activityinfo.store.spi.FormCatalog;
 
 public class JobModule extends RestApiModule {
     @Override
     protected void configureResources() {
         bindResource(JobResource.class);
         serve(JobTaskServlet.END_POINT).with(JobTaskServlet.class);
+    }
 
+    @Provides
+    public FormSource provideFormSource(FormCatalog catalog, AuthenticatedUser user) {
+        return new FormSourceSyncImpl(catalog, new AppEngineFormScanCache(), user.getUserId());
     }
 }

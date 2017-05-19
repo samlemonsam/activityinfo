@@ -1,9 +1,6 @@
-package org.activityinfo.server.job;
+package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormMetadataProvider;
@@ -14,25 +11,36 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.store.query.impl.AppEngineFormScanCache;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.FormScanCache;
+import org.activityinfo.store.query.impl.NullFormScanCache;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
-public class ServerFormSource implements FormSource {
+/**
+ * Synchronous implementation of the {@link FormSource} interface, that
+ * also ensures permissions are respected.
+ */
+public class FormSourceSyncImpl implements FormSource {
 
     private FormCatalog formCatalog;
-    private Provider<AuthenticatedUser> user;
+    private int userId;
+    private FormScanCache formScanCache;
 
-    @Inject
-    public ServerFormSource(FormCatalog formCatalog, Provider<AuthenticatedUser> user) {
+    public FormSourceSyncImpl(FormCatalog formCatalog, FormScanCache cache, int userId) {
         this.formCatalog = formCatalog;
-        this.user = user;
+        this.userId = userId;
+        this.formScanCache = cache;
     }
 
-    public FormMetadata getFormClass(ResourceId formId) {
+    public FormSourceSyncImpl(FormCatalog formCatalog, int userId) {
+        this(formCatalog, new NullFormScanCache(), userId);
+    }
+
+
+    public FormMetadata getFormMetadata(ResourceId formId) {
         Optional<FormStorage> storage = formCatalog.getForm(formId);
         if(!storage.isPresent()) {
             FormMetadata formMetadata = new FormMetadata();
@@ -40,8 +48,8 @@ public class ServerFormSource implements FormSource {
             formMetadata.setVisible(false);
             return formMetadata;
         }
-        FormPermissions permissions = storage.get().getPermissions(user.get().getUserId());
-        if(permissions.isVisible()) {
+        FormPermissions permissions = storage.get().getPermissions(userId);
+        if(!permissions.isVisible()) {
             FormMetadata formMetadata = new FormMetadata();
             formMetadata.setId(formId);
             formMetadata.setVisible(false);
@@ -62,7 +70,7 @@ public class ServerFormSource implements FormSource {
         FormTreeBuilder builder = new FormTreeBuilder(new FormMetadataProvider() {
             @Override
             public FormMetadata getFormMetadata(ResourceId formId) {
-                return getFormMetadata(formId);
+                return FormSourceSyncImpl.this.getFormMetadata(formId);
             }
         });
         return Observable.just(builder.queryTree(formId));
@@ -75,7 +83,7 @@ public class ServerFormSource implements FormSource {
 
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
-        ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, new AppEngineFormScanCache());
+        ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, formScanCache);
         return Observable.just(builder.build(queryModel));
     }
 }

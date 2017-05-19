@@ -5,9 +5,11 @@ import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.store.query.server.FormSourceSyncImpl;
 import org.activityinfo.store.testing.Survey;
-import org.activityinfo.store.testing.TestingFormSource;
+import org.activityinfo.store.testing.TestingCatalog;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
@@ -33,10 +35,15 @@ public class XlsTableWriterTest {
     }
 
     private HSSFWorkbook export(TableModel tableModel) throws IOException {
-        TestingFormSource formSource = new TestingFormSource();
+        FormSourceSyncImpl formSource = new FormSourceSyncImpl(new TestingCatalog(), 1);
 
         TableViewModel viewModel = new TableViewModel(formSource, tableModel);
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();
+
+        if(effectiveTableModel.getRootFormState() != FormTree.State.VALID) {
+            throw new IllegalStateException("Root Form has state: " + effectiveTableModel.getRootFormState());
+        }
+
         ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
 
         XlsTableWriter writer = new XlsTableWriter();
