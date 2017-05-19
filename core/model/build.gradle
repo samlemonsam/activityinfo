@@ -21,6 +21,7 @@ dependencies {
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
+    from project.sourceSets.main.output.generatedSourcesDir
 }
 
 test {
