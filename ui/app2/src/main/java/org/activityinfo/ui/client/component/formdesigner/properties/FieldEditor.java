@@ -273,6 +273,14 @@ public class FieldEditor implements IsWidget {
         fireUpdate();
     }
 
+
+    @UiHandler("key")
+    void onKeyChanged(ValueChangeEvent<Boolean> event) {
+        formField.setKey(event.getValue());
+        fireUpdate();
+    }
+
+
     @UiHandler("relevanceButton")
     void onRelevanceClicked(ClickEvent event) {
         RelevanceDialog dialog = new RelevanceDialog(fieldWidgetContainer, FieldEditor.this);
