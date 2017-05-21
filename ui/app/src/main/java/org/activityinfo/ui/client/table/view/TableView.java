@@ -19,6 +19,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.input.view.FormDialog;
 import org.activityinfo.ui.client.store.FormStore;
+import org.activityinfo.ui.client.table.ColumnDialog;
 
 /**
  * Displays a Form as a Table
@@ -53,11 +54,14 @@ public class TableView implements IsWidget {
         TextButton newButton = new TextButton("New Record");
         newButton.addSelectHandler(this::onNewRecordClicked);
 
+        TextButton columnsButton = new TextButton(I18N.CONSTANTS.chooseColumns());
+        columnsButton.addSelectHandler(this::onChooseColumnsSelected);
 
         OfflineStatusButton offlineButton = new OfflineStatusButton(formStore, viewModel.getFormId());
 
         this.toolBar = new ToolBar();
         toolBar.add(newButton);
+        toolBar.add(columnsButton);
         toolBar.add(offlineButton);
 
         center = new VerticalLayoutContainer();
@@ -98,9 +102,18 @@ public class TableView implements IsWidget {
         this.panel.add(container);
     }
 
+
     private void onNewRecordClicked(SelectEvent event) {
         FormDialog dialog = new FormDialog(formStore, viewModel.getFormId());
         dialog.show();
+    }
+
+
+    private void onChooseColumnsSelected(SelectEvent event) {
+        if(viewModel.getEffectiveTable().isLoaded()) {
+            ColumnDialog dialog = new ColumnDialog(viewModel.getEffectiveTable().get());
+            dialog.show();
+        }
     }
 
     @Override

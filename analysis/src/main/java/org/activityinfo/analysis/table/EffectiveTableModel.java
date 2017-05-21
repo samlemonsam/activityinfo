@@ -41,18 +41,24 @@ public class EffectiveTableModel {
 
 
         if(this.columns.isEmpty()) {
-            // Populate with a default set of columns
-            for (FormTree.Node node : formTree.getRootFields()) {
-                if (isSimple(node.getType())) {
-                    columns.add(new EffectiveTableColumn(formTree, columnModel(node)));
-
-                } else if (node.getType() instanceof ReferenceType) {
-                    addKeyColumns(columns,  node);
-                }
-            }
+            addDefaultColumns(formTree);
         }
 
         this.columnSet = formSource.query(buildQuery(columns));
+    }
+
+    private void addDefaultColumns(FormTree formTree) {
+        if(formTree.getRootFormClass().isSubForm()) {
+            addDefaultColumns(formTree.parentTree());
+        }
+        for (FormTree.Node node : formTree.getRootFields()) {
+            if (isSimple(node.getType())) {
+                columns.add(new EffectiveTableColumn(formTree, columnModel(node)));
+
+            } else if (node.getType() instanceof ReferenceType) {
+                addKeyColumns(columns,  node);
+            }
+        }
     }
 
     public String getTitle() {

@@ -9,7 +9,7 @@ import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 /**
- * Meausure based on a quantity
+ * Measure based on a quantity
  */
 public class QuantityNode extends MeasureTreeNode {
 

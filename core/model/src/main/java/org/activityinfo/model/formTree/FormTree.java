@@ -3,6 +3,7 @@ package org.activityinfo.model.formTree;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.UnmodifiableIterator;
@@ -51,6 +52,23 @@ public class FormTree implements FormClassProvider {
         public boolean isReference() {
             return field.getType() instanceof ReferenceType ||
                     field.getType() instanceof SubFormReferenceType;
+        }
+
+        public boolean isParentReference() {
+            if(!formClass.isSubForm()) {
+                return false;
+            }
+            if(!(field.getType() instanceof ReferenceType)) {
+                return false;
+            }
+            ReferenceType type = (ReferenceType) getType();
+            if(type.getRange().size() != 1) {
+                return false;
+            }
+            ResourceId rangeFormId = Iterables.getOnlyElement(type.getRange());
+            ResourceId parentFormId = formClass.getParentFormId().get();
+
+            return rangeFormId.equals(parentFormId);
         }
 
         public boolean isEnum() {
@@ -338,9 +356,11 @@ public class FormTree implements FormClassProvider {
         return paths;
     }
 
+
     public FormClass getRootFormClass() {
         return formClassMap.get(rootFormId);
     }
+
 
     public FormClass getFormClass(ResourceId formClassId) {
         Optional<FormClass> formClass = getFormClassIfPresent(formClassId);
@@ -453,6 +473,14 @@ public class FormTree implements FormClassProvider {
     public FormTree subTree(ResourceId formId) {
         FormTreeBuilder treeBuilder = new FormTreeBuilder(this);
         return treeBuilder.queryTree(formId);
+    }
+
+    public FormTree parentTree() {
+        FormClass rootFormClass = getRootFormClass();
+        assert rootFormClass.isSubForm();
+
+        ResourceId parentFormId = rootFormClass.getParentFormId().get();
+        return subTree(parentFormId);
     }
 
     @Override

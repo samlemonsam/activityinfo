@@ -13,6 +13,7 @@ import com.sencha.gxt.widget.core.client.tree.Tree;
 import com.sencha.gxt.widget.core.client.tree.TreeSelectionModel;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.observable.Observable;
@@ -23,7 +24,7 @@ public class FieldTreeView implements IsWidget {
 
     private final Observable<FormForest> formSet;
     private final VerticalLayoutContainer container;
-    private TreeStore<MeasureTreeNode> treeStore;
+    private final TreeStore<MeasureTreeNode> treeStore;
     private final Tree<MeasureTreeNode, String> tree;
     private final TextButton calculateButton;
 
@@ -79,17 +80,23 @@ public class FieldTreeView implements IsWidget {
         treeStore.clear();
         if(formSet.isLoaded()) {
             if(!formSet.get().isEmpty()) {
-                FormClass formClass = formSet.get().getFirst();
-                treeStore.add(new CountNode(formClass));
-
-                for (FormField field : formSet.get().getCommonFields()) {
-                    if (field.getType() instanceof QuantityType || field.getType() instanceof CalculatedFieldType) {
-                        treeStore.add(new QuantityNode(formClass.getId(), field));
-                    }
-                }
+                fillStore(formSet.get().getFirstTree());
             }
         }
     }
+
+    /**
+     * Fills the tree store with fields that can be selected from our FormTree.
+     *
+     * <p>To keep the presentation </p>
+     *
+     * @param tree
+     */
+    private void fillStore(FormTree tree) {
+        FieldTreeBuilder builder = new FieldTreeBuilder(treeStore);
+        builder.build(tree);
+    }
+
 
 
     @Override

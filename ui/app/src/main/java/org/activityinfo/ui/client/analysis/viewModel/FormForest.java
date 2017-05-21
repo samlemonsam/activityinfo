@@ -62,6 +62,11 @@ public class FormForest {
         return trees.isEmpty();
     }
 
+    public FormTree getFirstTree() {
+        return trees.values().iterator().next();
+    }
+
+
     public FormClass getFirst() {
         return trees.values().iterator().next().getRootFormClass();
     }

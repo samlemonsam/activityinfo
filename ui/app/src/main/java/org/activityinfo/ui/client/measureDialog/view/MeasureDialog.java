@@ -53,7 +53,6 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
         TabPanel tabPanel = new TabPanel();
         tabPanel.add(formTree,  formTreeTab);
         tabPanel.add(fieldTree, fieldTab);
-//        tabPanel.add(formulaPanel, formulaTab);
 
         this.dialog = new Dialog();
         this.dialog.setHeading("Add New Measure");
