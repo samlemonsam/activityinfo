@@ -356,7 +356,7 @@ public class FormClass implements FormElementContainer {
     }
 
     public ExprNode findLabelExpression() {
-        // Look for a field with the "label" tag
+        // Look for a field with the "label" tag or that is a key
         for (FormField field : getFields()) {
             if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
                 return new SymbolExpr(field.getId());

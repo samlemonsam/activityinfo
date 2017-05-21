@@ -41,6 +41,8 @@ public class FormPanel implements IsWidget {
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.isSubForm()) {
                 addSubForm(formTree, node);
+            } else if(node.isParentReference()) {
+                // ignore
             } else {
                 FieldWidget fieldWidget = createWidget(formTree, node.getType(), input -> onInput(node, input));
 
@@ -109,4 +111,5 @@ public class FormPanel implements IsWidget {
     public Widget asWidget() {
         return panel;
     }
+
 }

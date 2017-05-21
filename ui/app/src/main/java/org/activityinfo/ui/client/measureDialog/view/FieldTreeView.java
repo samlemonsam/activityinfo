@@ -68,6 +68,10 @@ public class FieldTreeView implements IsWidget {
         formSet.subscribe(this::onFormSetChanged);
     }
 
+    public void setBorders(boolean show) {
+        tree.setBorders(show);
+    }
+
     public TextButton getCalculateButton() {
         return calculateButton;
     }
@@ -103,4 +107,6 @@ public class FieldTreeView implements IsWidget {
     public Widget asWidget() {
         return container;
     }
+
+
 }
