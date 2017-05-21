@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -113,6 +114,9 @@ public class JobTaskServlet extends HttpServlet {
 
 
     private void markFailed(final JobEntity jobEntity, Exception e) {
+
+        LOGGER.log(Level.SEVERE, "Job " + jobEntity.getType() + " failed: " + e.getMessage(), e);
+
         JobStore.ofy().transact(new VoidWork() {
             @Override
             public void vrun() {
