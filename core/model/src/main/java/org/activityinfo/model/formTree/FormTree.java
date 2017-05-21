@@ -451,6 +451,9 @@ public class FormTree implements FormClassProvider {
     }
 
     public FormTree subTree(ResourceId formId) {
+        if (formId.equals(this.rootFormId)) {
+            return this;
+        }
         FormTreeBuilder treeBuilder = new FormTreeBuilder(this);
         return treeBuilder.queryTree(formId);
     }

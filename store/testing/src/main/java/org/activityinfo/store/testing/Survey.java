@@ -8,6 +8,7 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -36,6 +37,9 @@ public class Survey implements TestForm {
     public static final ResourceId PREGNANT_FIELD_ID = ResourceId.valueOf("F7");
 
     public static final ResourceId PRENATALE_CARE_FIELD_ID = ResourceId.valueOf("F8");
+
+    public static final ResourceId CALCULATED_FIELD_ID = ResourceId.valueOf("F9");
+
 
 
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
@@ -69,6 +73,8 @@ public class Survey implements TestForm {
     private final FormField dobField;
     private final FormField pregnantField;
     private final FormField prenataleCareField;
+    private final FormField calculatedField;
+
 
     public Survey() {
         formClass = new FormClass(FORM_ID);
@@ -94,6 +100,10 @@ public class Survey implements TestForm {
                 .setType(new QuantityType("years"))
                 .setRequired(true);
 
+
+        calculatedField = formClass.addField(CALCULATED_FIELD_ID)
+                .setLabel("Family Size")
+                .setType(new CalculatedFieldType("CHILDREN + 1"));
 
         numChildrenField = formClass.addField(CHILDREN_FIELD_ID)
                 .setCode("CHILDREN")
