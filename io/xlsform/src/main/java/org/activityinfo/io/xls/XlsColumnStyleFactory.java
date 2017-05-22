@@ -31,6 +31,10 @@ public class XlsColumnStyleFactory implements FieldTypeVisitor<CellStyle> {
         dateStyle.setDataFormat(book.getCreationHelper().createDataFormat().getFormat("yyyy-mm-dd"));
     }
 
+    public CellStyle getTextStyle() {
+        return textStyle;
+    }
+
     @Override
     public CellStyle visitAttachment(AttachmentType attachmentType) {
         return textStyle;

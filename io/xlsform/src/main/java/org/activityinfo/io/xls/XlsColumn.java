@@ -2,7 +2,9 @@ package org.activityinfo.io.xls;
 
 import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.EmptyColumnView;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 
@@ -16,13 +18,21 @@ public class XlsColumn {
     private final CellStyle style;
     private final ColumnView view;
 
-    public XlsColumn(EffectiveTableColumn tableColumn, ColumnSet columnSet, int columnIndex, CellStyle style) {
+    public XlsColumn(EffectiveTableColumn tableColumn, ColumnSet columnSet, int columnIndex,
+                     XlsColumnStyleFactory styleFactory) {
 
         this.tableColumn = tableColumn;
         this.columnIndex = columnIndex;
-        this.columnType = XlsColumnTypeFactory.get(tableColumn.getType());
-        this.style = style;
-        this.view = columnSet.getColumnView(tableColumn.getId());
+
+        if(tableColumn.isValid()) {
+            this.columnType = XlsColumnTypeFactory.get(tableColumn.getType());
+            this.style = styleFactory.create(tableColumn.getType());
+            this.view = columnSet.getColumnView(tableColumn.getId());
+        } else {
+            this.columnType = XlsColumnType.EMPTY;
+            this.style = styleFactory.getTextStyle();
+            this.view = new EmptyColumnView(ColumnType.STRING, columnSet.getNumRows());
+        }
     }
 
     public String getHeading() {

@@ -25,6 +25,7 @@ public class XlsColumnTypeFactory implements FieldTypeVisitor<XlsColumnType> {
         return type.accept(new XlsColumnTypeFactory());
     }
 
+
     @Override
     public XlsColumnType visitAttachment(AttachmentType attachmentType) {
         return XlsColumnType.EMPTY;
@@ -109,4 +110,5 @@ public class XlsColumnTypeFactory implements FieldTypeVisitor<XlsColumnType> {
     public XlsColumnType visitSerialNumber(SerialNumberType serialNumberType) {
         return XlsColumnType.STRING;
     }
+
 }

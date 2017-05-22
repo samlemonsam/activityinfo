@@ -40,6 +40,7 @@ public class Survey implements TestForm {
 
     public static final ResourceId CALCULATED_FIELD_ID = ResourceId.valueOf("F9");
 
+    private static final ResourceId BAD_CALCULATED_FIELD_ID = ResourceId.valueOf("F10");
 
 
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
@@ -104,6 +105,12 @@ public class Survey implements TestForm {
         calculatedField = formClass.addField(CALCULATED_FIELD_ID)
                 .setLabel("Family Size")
                 .setType(new CalculatedFieldType("CHILDREN + 1"));
+
+
+        formClass.addField(BAD_CALCULATED_FIELD_ID)
+                .setLabel("Bad calculation")
+                .setType(new CalculatedFieldType("NO_SUCH_VARIABLE + 1"));
+
 
         numChildrenField = formClass.addField(CHILDREN_FIELD_ID)
                 .setCode("CHILDREN")
