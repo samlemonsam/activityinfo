@@ -2,6 +2,7 @@ package org.activityinfo.api.client;
 
 import com.google.common.base.Function;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -10,16 +11,22 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formTree.FormClassProvider;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.promise.Promise;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -194,6 +201,31 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
             @Override
             public FormMetadata apply(JsonElement jsonElement) {
                 return FormMetadata.fromJson(jsonElement.getAsJsonObject());
+            }
+        });
+    }
+
+    @Override
+    public Promise<FormTree> getFormTree(final ResourceId formId) {
+        return get(baseUrl + "/form/" + formId.asString() + "/tree", new Function<JsonElement, FormTree>() {
+            @Override
+            public FormTree apply(JsonElement jsonElement) {
+                JsonObject root = jsonElement.getAsJsonObject();
+                JsonObject forms = root.get("forms").getAsJsonObject();
+                final Map<ResourceId, FormClass> formMap = new HashMap<ResourceId, FormClass>();
+                for (Map.Entry<String, JsonElement> entry : forms.entrySet()) {
+                    FormClass formClass = FormClass.fromJson(entry.getValue().getAsJsonObject());
+                    formMap.put(formClass.getId(), formClass);
+                }
+                FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
+                    @Override
+                    public FormClass getFormClass(ResourceId resourceId) {
+                        FormClass formClass = formMap.get(resourceId);
+                        assert formClass != null;
+                        return formClass;
+                    }
+                });
+                return builder.queryTree(formId);
             }
         });
     }

@@ -6,6 +6,7 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.AsyncFormClassProvider;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -27,6 +28,8 @@ public interface ResourceLocator extends AsyncFormClassProvider {
      * @return
      */
     Promise<FormClass> getFormClass(ResourceId formId);
+
+    Promise<FormTree> getFormTree(ResourceId formId);
 
 
     /**

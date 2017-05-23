@@ -9,6 +9,7 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -46,6 +47,11 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<FormClass> getFormClass(ResourceId classId) {
         return client.getFormSchema(classId.asString());
+    }
+
+    @Override
+    public Promise<FormTree> getFormTree(ResourceId formId) {
+        return client.getFormTree(formId);
     }
 
     @Override

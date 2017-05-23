@@ -2,7 +2,6 @@ package org.activityinfo.ui.client.pageView.formClass;
 
 import com.google.common.base.Function;
 import com.google.gwt.user.client.ui.Widget;
-import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -34,8 +33,7 @@ public class TableTab implements DisplayWidget<ResourceId> {
 
     @Override
     public Promise<Void> show(final ResourceId resourceId) {
-        return new AsyncFormTreeBuilder(resourceLocator)
-                .apply(resourceId)
+        return resourceLocator.getFormTree(resourceId)
                 .join(new Function<FormTree, Promise<Void>>() {
                     @Override
                     public Promise<Void> apply(FormTree input) {

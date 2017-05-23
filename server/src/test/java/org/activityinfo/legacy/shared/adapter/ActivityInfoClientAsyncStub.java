@@ -9,6 +9,7 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
@@ -72,6 +73,11 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<FormMetadata> getFormMetadata(String formId) {
         return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
+    public Promise<FormTree> getFormTree(ResourceId formId) {
+        throw new UnsupportedOperationException();
     }
 
 
