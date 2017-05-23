@@ -6,6 +6,7 @@ import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.table.FieldColumn;
 import org.activityinfo.ui.client.component.table.InstanceTableView;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
@@ -26,9 +27,9 @@ public class TableTab implements DisplayWidget<ResourceId> {
     private List<FieldColumn> columns;
     private ResourceLocator resourceLocator;
 
-    public TableTab(ResourceLocator resourceLocator, StateProvider stateProvider) {
+    public TableTab(EventBus eventBus, ResourceLocator resourceLocator, StateProvider stateProvider) {
         this.resourceLocator = resourceLocator;
-        this.tableView = new InstanceTableView(resourceLocator, stateProvider);
+        this.tableView = new InstanceTableView(resourceLocator, stateProvider, eventBus);
     }
 
     @Override
