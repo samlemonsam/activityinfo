@@ -7,6 +7,6 @@
     <ui:with field='style' type='org.activityinfo.ui.client.component.table.InstanceTableStyle'/>
 
     <g:HTMLPanel>
-        <g:ListBox ui:field="subFormList"/>
+        <g:ListBox ui:field="subFormList" width="100%"/>
     </g:HTMLPanel>
 </ui:UiBinder>

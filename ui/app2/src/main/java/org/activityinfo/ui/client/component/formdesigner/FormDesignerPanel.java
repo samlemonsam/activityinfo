@@ -228,7 +228,7 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                         @Override
                         public Void apply(FormClass subform) {
                             formDesigner.getModel().registerSubform(formField.getId(), subform);
-                            containerMap.put(formField.getId(), FieldsHolderWidgetContainer.subform(formDesigner, subform, container.getId()));
+                            containerMap.put(formField.getId(), FieldsHolderWidgetContainer.subform(formDesigner, formField, subform, container.getId()));
                             buildWidgetContainers(formDesigner, subform, subform, depth + 1, promises);
                             return null;
                         }

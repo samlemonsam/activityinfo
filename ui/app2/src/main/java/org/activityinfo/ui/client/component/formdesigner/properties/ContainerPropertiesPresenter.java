@@ -63,7 +63,7 @@ public class ContainerPropertiesPresenter {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 if (validateLabel()) {
-                    fieldsHolder.getElementContainer().setLabel(view.getLabel().getValue());
+                    fieldsHolder.setLabel(view.getLabel().getValue());
                     fieldsHolder.updateUi();
                 }
             }
