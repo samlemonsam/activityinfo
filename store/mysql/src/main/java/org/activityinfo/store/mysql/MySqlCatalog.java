@@ -66,14 +66,14 @@ public class MySqlCatalog implements FormCatalog {
                     if (provider.accept(id)) {
                         try {
                             Stopwatch stopwatch = Stopwatch.createStarted();
-                            FormStorage collection;
+                            FormStorage storage;
                             try {
-                                collection = provider.openForm(executor, id);
+                                storage = provider.openForm(executor, id);
                             } catch (FormNotFoundException e) {
                                 return Optional.absent();
                             }
-                            Optional<FormStorage> result = Optional.of(collection);
-                            
+                            Optional<FormStorage> result = Optional.of(storage);
+
                             LOGGER.log(Level.INFO, "Opened collection " + id + " in " + stopwatch);
                             
                             return result;

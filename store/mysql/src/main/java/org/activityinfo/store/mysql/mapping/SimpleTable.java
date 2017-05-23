@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.mapping;
 
-import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
@@ -15,13 +14,4 @@ public interface SimpleTable {
 
     TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException;
 
-    /**
-     * Map a resourceId to it's collection
-     *
-     * @param queryExecutor
-     * @param id the id of the resource
-     * @return the id of the collection
-     */
-    Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException;
-    
 }

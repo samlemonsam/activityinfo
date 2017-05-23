@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.collections;
 
-import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -75,8 +74,4 @@ public class PartnerTable implements SimpleTable {
         }
     }
 
-    @Override
-    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
-        return Optional.absent();
-    }
 }
