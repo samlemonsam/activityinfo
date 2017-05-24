@@ -20,6 +20,8 @@ public class TestingFormStorage implements VersionedFormStorage {
 
     private List<FormInstance> records = null;
 
+    private Map<ResourceId, FormInstance> index = null;
+
     public TestingFormStorage(TestForm testForm) {
         this.testForm = testForm;
     }
@@ -37,6 +39,10 @@ public class TestingFormStorage implements VersionedFormStorage {
             for (FormInstance record : testForm.getRecords()) {
                 records.add(record.copy());
             }
+            index = new HashMap<>();
+            for (FormInstance record : records) {
+                index.put(record.getId(), record);
+            }
         }
     }
 
@@ -47,7 +53,14 @@ public class TestingFormStorage implements VersionedFormStorage {
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        return Optional.absent();
+        ensureWeHaveOwnCopy();
+
+        FormInstance instance = index.get(resourceId);
+        if(instance == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(FormRecord.fromInstance(instance));
+        }
     }
 
     @Override
@@ -91,17 +104,24 @@ public class TestingFormStorage implements VersionedFormStorage {
 
         ensureWeHaveOwnCopy();
         records.add(newRecord);
+        index.put(newRecord.getId(), newRecord);
     }
 
 
     @Override
     public void update(RecordUpdate update) {
-        throw new UnsupportedOperationException();
+        ensureWeHaveOwnCopy();
+        if(update.isDeleted()) {
+            FormInstance deleted = index.remove(update.getRecordId());
+            records.remove(deleted);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        return new TestingFormQueryBuilder(records());
+        return new TestingFormQueryBuilder(getFormClass(), records());
     }
 
     @Override

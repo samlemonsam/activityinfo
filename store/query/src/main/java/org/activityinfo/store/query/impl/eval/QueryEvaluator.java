@@ -2,6 +2,7 @@ package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ExprException;
@@ -10,9 +11,11 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.store.query.impl.FormScanBatch;
 import org.activityinfo.store.query.impl.Slot;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
+import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
 import org.activityinfo.store.query.impl.views.ColumnFilter;
 import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.query.shared.NodeMatcher;
@@ -57,11 +60,19 @@ public class QueryEvaluator {
     }
 
     public Function<ColumnView, ColumnView> filter(ExprNode filter) {
-        if(filter == null) {
+        Optional<Slot<ColumnView>> parentColumn = batch.addParentMask(rootFormClass);
+        if(filter == null && !parentColumn.isPresent()) {
             return Functions.identity();
-        } else {
-            return new ColumnFilter(evaluateExpression(filter));
         }
+
+        Slot<ColumnView> filterView;
+        if(filter == null) {
+            filterView = new ConstantColumnBuilder(batch.addRowCount(rootFormClass), BooleanFieldValue.TRUE);
+        } else {
+            filterView = evaluateExpression(filter);
+        }
+
+        return new ColumnFilter(filterView, batch.addParentMask(rootFormClass));
     }
 
     private class ColumnExprVisitor implements ExprVisitor<Slot<ColumnView>> {

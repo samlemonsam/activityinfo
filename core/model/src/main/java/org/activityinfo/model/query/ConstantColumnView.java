@@ -1,5 +1,6 @@
 package org.activityinfo.model.query;
 
+import com.google.common.base.Strings;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NullFieldValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -16,6 +17,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
     private String stringValue;
     private int booleanValue;
     private int numRows;
+    private boolean missing;
 
     protected ConstantColumnView() {
     }
@@ -25,6 +27,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
         this.doubleValue = doubleValue;
         this.stringValue = null;
         this.booleanValue = (doubleValue != 0) ? TRUE : FALSE;
+        this.missing = Double.isNaN(doubleValue);
         this.numRows = numRows;
     }
 
@@ -33,6 +36,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
         this.doubleValue = Double.NaN;
         this.stringValue = value;
         this.booleanValue = NA;
+        this.missing = Strings.isNullOrEmpty(value);
         this.numRows = numRows;
     }
 
@@ -42,6 +46,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
         this.stringValue = null;
         this.booleanValue = value ? TRUE : FALSE;
         this.numRows = numRows;
+        this.missing = false;
     }
     
     public static ConstantColumnView nullBoolean(int numRows) {
@@ -51,6 +56,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
         view.stringValue = null;
         view.booleanValue = ColumnView.NA;
         view.numRows = numRows;
+        view.missing = true;
         return view;
     }
 
@@ -87,7 +93,15 @@ public class ConstantColumnView implements ColumnView, Serializable {
 
     @Override
     public Object get(int row) {
-        return stringValue;
+        switch (type) {
+            case BOOLEAN:
+                return getBoolean(row);
+            case NUMBER:
+                return getDouble(row);
+            case STRING:
+                return getString(row);
+        }
+        throw new IllegalStateException("type: " + type);
     }
 
     @Override
@@ -107,7 +121,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
 
     @Override
     public boolean isMissing(int row) {
-        return false;
+        return missing;
     }
 
     @Override

@@ -2,9 +2,12 @@ package org.activityinfo.store.testing;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.CursorObserver;
 
@@ -16,10 +19,13 @@ public class TestingFormQueryBuilder implements ColumnQueryBuilder {
 
     private final List<FormInstance> records;
     private final List<CursorObserver<ResourceId>> idObservers = new ArrayList<>();
+    private final List<CursorObserver<FieldValue>> parentObservers = new ArrayList<>();
     private final Multimap<ResourceId, CursorObserver<FieldValue>> fieldObservers = HashMultimap.create();
+    private final FormClass formClass;
 
-    public TestingFormQueryBuilder(List<FormInstance> records) {
+    public TestingFormQueryBuilder(FormClass formClass, List<FormInstance> records) {
         this.records = records;
+        this.formClass = formClass;
     }
 
     @Override
@@ -34,7 +40,14 @@ public class TestingFormQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
-        fieldObservers.put(fieldId, observer);
+        if(fieldId.equals(FormClass.PARENT_FIELD_ID)) {
+            if(!formClass.isSubForm()) {
+                throw new IllegalStateException("Form " + formClass.getId() + " is not a sub form");
+            }
+            parentObservers.add(observer);
+        } else {
+            fieldObservers.put(fieldId, observer);
+        }
     }
 
     @Override
@@ -42,6 +55,9 @@ public class TestingFormQueryBuilder implements ColumnQueryBuilder {
         for (FormInstance record : records) {
             for (CursorObserver<ResourceId> idObserver : idObservers) {
                 idObserver.onNext(record.getId());
+            }
+            for (CursorObserver<FieldValue> parentObserver : parentObservers) {
+                parentObserver.onNext(new ReferenceValue(new RecordRef(formClass.getParentFormId().get(), record.getParentRecordId())));
             }
             for (Map.Entry<ResourceId, CursorObserver<FieldValue>> field : fieldObservers.entries()) {
                 ResourceId fieldId = field.getKey();
@@ -53,6 +69,9 @@ public class TestingFormQueryBuilder implements ColumnQueryBuilder {
 
         for (CursorObserver<ResourceId> observer : idObservers) {
             observer.done();
+        }
+        for (CursorObserver<FieldValue> parentObserver : parentObservers) {
+            parentObserver.done();
         }
         for (CursorObserver<FieldValue> observer : fieldObservers.values()) {
             observer.done();

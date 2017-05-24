@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.impl;
 
 import com.google.apphosting.api.ApiProxy;
+import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -78,6 +79,21 @@ public class FormScanBatch {
             tableMap.put(formClassId, scan);
         }
         return scan;
+    }
+
+    public com.google.common.base.Optional<Slot<ColumnView>> addParentMask(FormClass subFormClass) {
+
+        if(!subFormClass.isSubForm()) {
+            return Optional.absent();
+        }
+
+        SymbolExpr parentExpr = new SymbolExpr(FormClass.PARENT_FIELD_ID);
+        ResourceId parentFormId = subFormClass.getParentFormId().get();
+
+        ReferenceJoin join = addJoinLink(new JoinNode(JoinType.REFERENCE, subFormClass.getId(), parentExpr, parentFormId));
+
+        return Optional.<Slot<ColumnView>>of(new ParentMask(join));
+
     }
 
 

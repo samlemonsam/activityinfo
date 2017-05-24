@@ -126,7 +126,7 @@ public class ImportView {
             if (!matchRow.isMatched(MatchSide.SOURCE)) {
                 // no corresponding row in the source:
                 // delete unmatched target
-                tx.delete(matchRow.getTargetId().get());
+                tx.delete(targetFormId, matchRow.getTargetId().get());
 
             } else {
 
@@ -135,7 +135,7 @@ public class ImportView {
                 if (matchRow.isMatched(MatchSide.TARGET)) {
                     // update target with properties from the source
                     targetId = matchRow.getTargetId().get();
-                    update = tx.update(targetId);
+                    update = tx.update(targetFormId, targetId);
                 } else {
                     // create a new instance with properties from the source
                     targetId = CuidAdapter.entity(generator.generateInt());

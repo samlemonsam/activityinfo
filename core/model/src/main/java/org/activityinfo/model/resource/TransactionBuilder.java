@@ -33,16 +33,18 @@ public class TransactionBuilder {
         return this;
     }
 
-    public TransactionBuilder delete(ResourceId id) {
+    public TransactionBuilder delete(ResourceId formId, ResourceId id) {
         UpdateBuilder update = new UpdateBuilder();
+        update.setFormId(formId);
         update.setRecordId(id);
         update.delete();
         updates.add(update);
         return this;
     }
 
-    public UpdateBuilder update(ResourceId id) {
+    public UpdateBuilder update(ResourceId formId, ResourceId id) {
         UpdateBuilder update = new UpdateBuilder();
+        update.setFormId(formId);
         update.setRecordId(id);
         updates.add(update);
         return update;
@@ -56,7 +58,7 @@ public class TransactionBuilder {
         
         JsonObject object = new JsonObject();
         object.add("changes", changes);
-        
+
         return object;
     }
 }
