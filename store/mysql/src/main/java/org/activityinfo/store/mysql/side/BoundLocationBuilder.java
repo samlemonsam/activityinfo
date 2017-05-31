@@ -8,21 +8,25 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.spi.CursorObserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class BoundLocationBuilder {
-    
-    private int activityId;
+
+    private static final Logger LOGGER = Logger.getLogger(BoundLocationBuilder.class.getName());
+
     private Integer siteId;
 
     private List<CursorObserver<FieldValue>> observers = Lists.newArrayList();
+    private Activity activity;
 
-    public BoundLocationBuilder(int activityId) {
-        this.activityId = activityId;
+    public BoundLocationBuilder(Activity activity) {
+        this.activity = activity;
     }
 
     public void addObserver(CursorObserver<FieldValue> observer) {
@@ -39,47 +43,38 @@ public class BoundLocationBuilder {
     }
 
     public void execute(QueryExecutor executor) throws SQLException {
-        String sql = "SELECT s.siteId,  t.boundAdminLevelId, s.locationId, e.adminEntityId, l.locationTypeId " +
+
+        if(activity.getAdminLevelId() == null) {
+            LOGGER.severe("Activity " + activity.getId() + " is not bound to an admin level");
+            throw new IllegalStateException("Activity not bound to admin level");
+        }
+
+        ResourceId referenceFormId = CuidAdapter.adminLevelFormClass(activity.getAdminLevelId());
+
+        String sql = "SELECT s.siteId, k.adminEntityId " +
                 "FROM site s " +
-                "LEFT JOIN location l ON (s.locationId = l.locationId) " +
-                "LEFT JOIN locationtype t ON (l.locationTypeId = t.locationTypeId) " +
-                "LEFT JOIN locationadminlink k ON (l.locationId = k.locationid) " +
-                "LEFT JOIN adminentity e " +
-                        "ON (k.adminEntityId=e.adminEntityId AND (e.adminLevelId = t.boundAdminLevelId)) " +
-                "WHERE s.deleted = 0 AND s.activityId = " + activityId;
+                "LEFT JOIN locationadminlink k ON (s.locationId = k.locationId AND k.adminLevelId = " + activity.getAdminLevelId() + ") " +
+                "WHERE s.deleted = 0 AND s.activityId = " + activity.getId();
 
         if(siteId != null) {
             sql += " AND s.siteId=" + siteId;
         }
 
         sql +=  " ORDER BY s.siteId";
-        
+
         System.out.println(sql);
-        
+
         int lastSiteId = -1;
         try(ResultSet rs = executor.query(sql)) {
             while(rs.next()) {
                 int siteId = rs.getInt(1);
-                int boundLevelId = rs.getInt(2);
-                if(rs.wasNull()) {
-                    // "Normal" location type. Use only first row
-                    // There will be duplicates
-                    if (siteId != lastSiteId) {
-                        int locationId = rs.getInt(3);
-                        emit(new ReferenceValue(
-                                new RecordRef(
-                                    CuidAdapter.locationFormClass(rs.getInt(5)),
-                                    CuidAdapter.locationInstanceId(locationId))));
-                    }
-                } else {
-                    // Bound admin level id 
-                    int entityId = rs.getInt(4);
-                    if(!rs.wasNull()) {
-                        emit(new ReferenceValue(
-                                new RecordRef(
-                                    CuidAdapter.adminLevelFormClass(boundLevelId),
-                                    CuidAdapter.entity(entityId))));
-                    }
+                if(siteId != lastSiteId) {
+                    int adminEntityId = rs.getInt(2);
+                    emit(new ReferenceValue(
+                            new RecordRef(
+                                referenceFormId,
+                                CuidAdapter.entity(adminEntityId))));
+
                 }
                 lastSiteId = siteId;
             }

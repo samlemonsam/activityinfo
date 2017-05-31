@@ -8,7 +8,6 @@ import com.google.gson.JsonParser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.mysql.collections.BETA;
 
 import java.io.*;
 import java.util.*;
@@ -169,14 +168,11 @@ public class Activity implements Serializable {
     }
 
     public Collection<ResourceId> getLocationFormClassIds() {
-        if(BETA.ENABLE_LOCATION_UNION_FIELDS) {
-            return locationRange;
-
-        } else if(adminLevelId != null) {
+        if(adminLevelId != null) {
             return Collections.singleton(CuidAdapter.adminLevelFormClass(adminLevelId));
 
         } else {
-            return Collections.singleton(CuidAdapter.locationFormClass(locationTypeId));
+            return locationRange;
         }
     }
 

@@ -29,7 +29,7 @@ public class FormScan {
      * This can be changed to ensure that new versions do not use results cached by earlier versions
      * of ActivityInfo.
      */
-    private static final String CACHE_KEY_VERSION = "3:";
+    private static final String CACHE_KEY_VERSION = "4:";
 
     private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
     private static final SymbolExpr PK_COLUMN_KEY = new SymbolExpr("@id");

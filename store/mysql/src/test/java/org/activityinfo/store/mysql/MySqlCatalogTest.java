@@ -89,7 +89,6 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         FormTreePrettyPrinter.print(tree);
 
         assertTrue(locationNode.getRange().contains(CuidAdapter.adminLevelFormClass(2)));
-        assertTrue(locationNode.getRange().contains(CuidAdapter.locationFormClass(1)));
 
         query(formClassId, "territoire.name", "territoire.province.name");
         
