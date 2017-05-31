@@ -38,7 +38,8 @@ public class AdminEntityTable implements SimpleTable {
 
     @Override
     public boolean accept(ResourceId formClassId) {
-        return formClassId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN;
+        return formClassId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN &&
+                CuidAdapter.isValidLegacyId(formClassId);
     }
 
     @Override

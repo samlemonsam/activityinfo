@@ -24,8 +24,9 @@ public class ProjectTable implements SimpleTable {
     }
 
     @Override
-    public boolean accept(ResourceId formClassId) {
-        return formClassId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
+    public boolean accept(ResourceId formId) {
+        return formId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN &&
+                CuidAdapter.isValidLegacyId(formId);
     }
 
     @Override

@@ -383,6 +383,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(permissions.getVisibilityFilter(), nullValue());
         assertThat(permissions.isEditAllowed(), equalTo(false));
     }
+
+    @Test
+    public void malformedFormId() {
+
+
+        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf("a1"));
+        assertTrue("form should not exist", !form.isPresent());
+    }
     
     @Test
     public void batchOpenCollections() {

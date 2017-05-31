@@ -22,7 +22,8 @@ import java.util.Set;
 public class TargetFormProvider implements FormProvider {
     @Override
     public boolean accept(ResourceId formId) {
-        return formId.getDomain() == CuidAdapter.TARGET_FORM_CLASS_DOMAIN;
+        return formId.getDomain() == CuidAdapter.TARGET_FORM_CLASS_DOMAIN &&
+                CuidAdapter.isValidLegacyId(formId);
     }
 
     @Override

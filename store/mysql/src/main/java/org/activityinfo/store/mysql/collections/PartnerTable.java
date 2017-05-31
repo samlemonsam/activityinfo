@@ -25,8 +25,9 @@ public class PartnerTable implements SimpleTable {
     }
 
     @Override
-    public boolean accept(ResourceId formClassId) {
-        return formClassId.getDomain() == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN;
+    public boolean accept(ResourceId formId) {
+        return formId.getDomain() == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN &&
+                CuidAdapter.isValidLegacyId(formId);
     }
 
     @Override
