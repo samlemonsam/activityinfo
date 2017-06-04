@@ -1,6 +1,7 @@
 package org.activityinfo.model.expr.functions;
 
 import com.google.common.base.Preconditions;
+import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
@@ -108,10 +109,9 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
             return new QuantityType().setUnits(applyUnits(t1.getUnits(), t2.getUnits()));
 
         } else {
-            throw new UnsupportedOperationException("TODO : not implemented, " +
-                    "arg 1 : " + argumentTypes.get(0) +
-                    "arg 2 : " + argumentTypes.get(1)
-            );
+            throw new InvalidTypeException("Cannot compare types " +
+                    argumentTypes.get(0).getTypeClass().getId() + " and " +
+                    argumentTypes.get(1).getTypeClass().getId());
         }
     }
 
