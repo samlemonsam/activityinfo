@@ -18,6 +18,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.FormCatalog;
@@ -64,7 +65,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
         
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         ColumnView id = columnSet.getColumnView("id");
@@ -92,7 +93,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public ColumnSet query(QueryModel model) {
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), new NullFormSupervisor());
         return builder.build(model);
     }
 

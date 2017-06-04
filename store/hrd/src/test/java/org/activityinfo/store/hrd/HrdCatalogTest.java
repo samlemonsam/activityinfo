@@ -22,6 +22,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.*;
 import org.junit.After;
@@ -111,7 +112,7 @@ public class HrdCatalogTest {
         queryModel.selectField("BENE").as("family_count");
         queryModel.selectExpr("BENE*5").as("individual_count");
         
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
         
         System.out.println(columnSet);
@@ -203,7 +204,7 @@ public class HrdCatalogTest {
         queryModel.selectResourceId().as("id");
         queryModel.selectField("VILLAGE").as("village");
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         
@@ -288,7 +289,7 @@ public class HrdCatalogTest {
         queryModel.selectField("Name").as("member_name");
         queryModel.selectField("Age").as("member_age");
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         System.out.println(columnSet);

@@ -81,6 +81,8 @@ public class ConstantColumnView implements ColumnView, Serializable {
         }
     }
 
+
+
     @Override
     public ColumnType getType() {
         return type;
@@ -122,6 +124,38 @@ public class ConstantColumnView implements ColumnView, Serializable {
     @Override
     public boolean isMissing(int row) {
         return missing;
+    }
+
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        if(missing) {
+            return new EmptyColumnView(this.type, selectedRows.length);
+        } else {
+            if(noneMissing(selectedRows)) {
+                return copyOf(selectedRows.length);
+            }
+        }
+        return new FilteredColumnView(this, selectedRows);
+    }
+
+    private boolean noneMissing(int[] selectedRows) {
+        for (int i = 0; i < selectedRows.length; i++) {
+            if(selectedRows[i] == -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private ConstantColumnView copyOf(int length) {
+        ConstantColumnView copy = new ConstantColumnView();
+        copy.numRows = length;
+        copy.type = type;
+        copy.doubleValue = this.doubleValue;
+        copy.stringValue = this.stringValue;
+        copy.booleanValue = this.booleanValue;
+        copy.missing = this.missing;
+        return copy;
     }
 
     @Override

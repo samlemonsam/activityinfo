@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.FilteredColumnView;
 
 
 public class ColumnViewWrapper implements ColumnView {
@@ -66,6 +67,11 @@ public class ColumnViewWrapper implements ColumnView {
     @Override
     public boolean isMissing(int row) {
         return array.get(row).isJsonNull();
+    }
+
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        return new FilteredColumnView(this, selectedRows);
     }
 
 

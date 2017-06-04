@@ -14,6 +14,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class MySqlCatalogIntegrationTest {
         dbunit.dropAllRows();
         dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, "rdc.db.xml"));
         catalog = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        columnSetBuilder = new ColumnSetBuilder(catalog);
+        columnSetBuilder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
     }
 
 

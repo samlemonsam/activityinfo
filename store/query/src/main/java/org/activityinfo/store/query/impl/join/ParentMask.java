@@ -2,31 +2,36 @@ package org.activityinfo.store.query.impl.join;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.impl.Slot;
-import org.activityinfo.store.query.impl.views.BitSetColumnView;
+import org.activityinfo.store.query.impl.TableFilter;
 
 import java.util.BitSet;
 
 
-public class ParentMask implements Slot<ColumnView> {
+public class ParentMask implements Slot<TableFilter> {
 
-    private ReferenceJoin join;
-    private ColumnView columnView = null;
+    private final Slot<PrimaryKeyMap> parentKeySlot;
+    private final Slot<ColumnView> parentIdSlot;
 
-    public ParentMask(ReferenceJoin join) {
-        this.join = join;
+    private TableFilter result = null;
+
+    public ParentMask(Slot<PrimaryKeyMap> parentKeySlot, Slot<ColumnView> parentIdSlot) {
+        this.parentKeySlot = parentKeySlot;
+        this.parentIdSlot = parentIdSlot;
     }
 
-
     @Override
-    public ColumnView get() {
-        if(columnView == null) {
-            int[] mapping = join.mapping();
+    public TableFilter get() {
+        if(result == null) {
             BitSet bitSet = new BitSet();
-            for (int i = 0; i < mapping.length; i++) {
-                bitSet.set(i, (mapping[i] != -1));
+            PrimaryKeyMap parentKeyMap = parentKeySlot.get();
+            ColumnView parentView = parentIdSlot.get();
+
+            for (int i = 0; i < parentView.numRows(); i++) {
+                String parentId = parentView.getString(i);
+                bitSet.set(i, parentKeyMap.contains(parentId));
             }
-            columnView = new BitSetColumnView(mapping.length, bitSet);
+            result = new TableFilter(bitSet);
         }
-        return columnView;
+        return result;
     }
 }

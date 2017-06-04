@@ -67,6 +67,11 @@ class ColumnArrayView implements ColumnView {
         return true;
     }
 
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        throw new UnsupportedOperationException();
+    }
+
     private static native int getLength(JavaScriptObject array) /*-{
         return array.length;
     }-*/;

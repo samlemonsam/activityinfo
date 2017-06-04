@@ -3,6 +3,10 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
@@ -61,23 +65,25 @@ public class SiteFormStorage implements VersionedFormStorage {
 
             FormPermissions permissions = new FormPermissions();
 
-            String partnerFilter = String.format("%s=%s",
-                    CuidAdapter.partnerField(activity.getId()),
-                    CuidAdapter.partnerRecordId(databasePermission.getPartnerId()));
+            ExprNode partnerFilter = Exprs.equals(
+                    new SymbolExpr(
+                        CuidAdapter.partnerField(activity.getId())),
+                    new ConstantExpr(
+                        CuidAdapter.partnerRecordId(databasePermission.getPartnerId()).asString()));
 
             if(databasePermission.isViewAll()) {
                 permissions.setVisible(true);
 
             } else if(databasePermission.isView()) {
                 permissions.setVisible(true);
-                permissions.setVisibilityFilter(partnerFilter);
+                permissions.setVisibilityFilter(partnerFilter.asExpression());
 
             }
             if(databasePermission.isEditAll()) {
                 permissions.setEditAllowed(true);
             } else if(databasePermission.isEdit()) {
                 permissions.setEditAllowed(true);
-                permissions.setEditFilter(partnerFilter);
+                permissions.setEditFilter(partnerFilter.asExpression());
             }
        
             // published property of activity overrides user permissions

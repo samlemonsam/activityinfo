@@ -6,8 +6,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
-import org.activityinfo.store.query.impl.FormScanBatch;
-import org.activityinfo.store.query.impl.Slot;
+import org.activityinfo.store.query.impl.*;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -34,8 +33,10 @@ public class QueryEvaluatorTest {
         FormCatalogStub catalog = new FormCatalogStub();
         catalog.addForm(formClass).withRowCount(10);
 
-        FormScanBatch batch = new FormScanBatch(catalog);
-        QueryEvaluator evaluator = new QueryEvaluator(catalog.getTree(formClass.getId()), formClass, batch);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
+        FormScanBatch batch = builder.createNewBatch();
+
+        QueryEvaluator evaluator = new QueryEvaluator(FilterLevel.BASE, catalog.getTree(formClass.getId()), batch);
 
         Slot<ColumnView> a = evaluator.evaluateExpression(new SymbolExpr("A"));
         Slot<ColumnView> aPlusOne = evaluator.evaluateExpression(ExprParser.parse("A+1"));

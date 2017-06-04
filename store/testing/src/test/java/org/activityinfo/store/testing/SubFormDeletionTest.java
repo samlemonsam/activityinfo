@@ -9,6 +9,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,7 +50,7 @@ public class SubFormDeletionTest {
     }
 
     private ColumnSet query(QueryModel queryModel) {
-        ColumnSetBuilder builder = new ColumnSetBuilder(testingCatalog, new NullFormScanCache());
+        ColumnSetBuilder builder = new ColumnSetBuilder(testingCatalog, new NullFormScanCache(), new NullFormSupervisor());
         return builder.build(queryModel);
     }
 

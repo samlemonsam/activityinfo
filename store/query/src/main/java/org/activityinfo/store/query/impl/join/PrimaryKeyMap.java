@@ -59,4 +59,8 @@ public class PrimaryKeyMap implements Serializable {
     public int getNumRows() {
         return map.size();
     }
+
+    public boolean contains(String parentId) {
+        return map.containsKey(parentId);
+    }
 }

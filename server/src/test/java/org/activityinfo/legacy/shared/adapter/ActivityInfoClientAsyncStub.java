@@ -23,6 +23,7 @@ import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.FormCatalog;
@@ -203,7 +204,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
         try {
             FormCatalog catalog = newCatalog();
-            ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+            ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
 
             return Promise.resolved(builder.build(query));
         } catch (Exception e) {

@@ -60,6 +60,15 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public ColumnView select(int[] selectedRows) {
+        double filteredValues[] = new double[selectedRows.length];
+        for (int i = 0; i < filteredValues.length; i++) {
+            filteredValues[i] = values[selectedRows[i]];
+        }
+        return new DoubleArrayColumnView(filteredValues);
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");

@@ -1,7 +1,4 @@
-package org.activityinfo.store.query.impl.views;
-
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
+package org.activityinfo.model.query;
 
 import java.io.Serializable;
 import java.util.BitSet;
@@ -21,6 +18,10 @@ public class BitSetColumnView implements ColumnView, Serializable {
     public BitSetColumnView(int numRows, BitSet bitSet) {
         this.numRows = numRows;
         this.bitSet = bitSet;
+    }
+
+    public BitSet getBitSet() {
+        return bitSet;
     }
 
     @Override
@@ -57,4 +58,24 @@ public class BitSetColumnView implements ColumnView, Serializable {
     public boolean isMissing(int row) {
         return false;
     }
+
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        BitSet filtered = new BitSet();
+        BitSet filteredMissing = new BitSet();
+        for (int i = 0; i < selectedRows.length; i++) {
+            int selectedRow = selectedRows[i];
+            if(selectedRow == -1) {
+                filteredMissing.set(selectedRow);
+            } else {
+                filtered.set(i, bitSet.get(selectedRow));
+            }
+        }
+        if(filteredMissing.isEmpty()) {
+            return new BitSetColumnView(selectedRows.length, filtered);
+        } else {
+            return new BitSetWithMissingView(selectedRows.length, filtered, filteredMissing);
+        }
+    }
+
 }

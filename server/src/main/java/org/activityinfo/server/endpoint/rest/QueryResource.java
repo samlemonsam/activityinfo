@@ -2,10 +2,12 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.sun.jersey.api.core.HttpRequestContext;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.query.ColumnModelException;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.FormSupervisorAdapter;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.spi.FormCatalog;
 
@@ -19,9 +21,11 @@ import java.io.OutputStream;
 public class QueryResource {
 
     private final Provider<FormCatalog> catalog;
+    private final Provider<AuthenticatedUser> user;
 
-    public QueryResource(Provider<FormCatalog> catalog) {
+    public QueryResource(Provider<FormCatalog> catalog, Provider<AuthenticatedUser> user) {
         this.catalog = catalog;
+        this.user = user;
     }
 
     @POST
@@ -35,7 +39,9 @@ public class QueryResource {
         } catch (ColumnModelException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(),
+                new FormSupervisorAdapter(catalog.get(), user.get().getId()));
+
         final ColumnSet columnSet = builder.build(model);
 
         final StreamingOutput output = new StreamingOutput() {

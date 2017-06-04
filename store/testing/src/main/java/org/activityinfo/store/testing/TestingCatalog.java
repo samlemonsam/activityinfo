@@ -11,6 +11,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.FormCatalog;
@@ -91,7 +92,7 @@ public class TestingCatalog implements FormCatalog {
     }
 
     public ColumnSet query(QueryModel queryModel) {
-        ColumnSetBuilder builder = new ColumnSetBuilder(this, new NullFormScanCache());
+        ColumnSetBuilder builder = new ColumnSetBuilder(this, new NullFormScanCache(), new NullFormSupervisor());
         return builder.build(queryModel);
     }
 

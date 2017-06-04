@@ -5,6 +5,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.junit.Test;
 
 /**
@@ -16,7 +17,7 @@ public class DateFunctionQueryTest {
     @Test
     public void testToday() {
         TestingCatalog catalog = new TestingCatalog();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache());
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
         QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
         queryModel.selectExpr("TODAY()").as("today");

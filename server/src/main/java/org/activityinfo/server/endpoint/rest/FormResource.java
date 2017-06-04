@@ -37,6 +37,7 @@ import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.FormSupervisorAdapter;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
@@ -482,7 +483,10 @@ public class FormResource {
             }
         }
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
+        ColumnSetBuilder builder = new ColumnSetBuilder(
+                catalog.get(),
+                new FormSupervisorAdapter(catalog.get(), userProvider.get().getId()));
+
         return builder.build(queryModel);
     }
 
