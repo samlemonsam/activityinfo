@@ -14,6 +14,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservablePromise;
 import org.activityinfo.promise.Promise;
@@ -125,12 +126,21 @@ ResourceLocatorAdaptor implements ResourceLocator {
             if(!field.equals("classId")) {
                 if(entry.getValue() == null) {
                     update.setFieldValue(field, JsonNull.INSTANCE);
-                } else {
+                } else if(isSaveable(entry.getValue())){
                     update.setFieldValue(field, entry.getValue().toJsonElement());
                 }
             }
         }
         return update;
+    }
+
+    private boolean isSaveable(FieldValue value) {
+        // Quick fix for the user interface which incorrectly
+        // tries to include serial numbers in the update
+        if(value instanceof SerialNumber) {
+            return false;
+        }
+        return true;
     }
 
     @Override
