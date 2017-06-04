@@ -100,7 +100,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         urlBuilder.append("/record");
         urlBuilder.append("/").append(recordId);
 
-        return post(urlBuilder.toString(), update.toJsonString());
+        return post(RequestBuilder.PUT, urlBuilder.toString(), update.toJsonString());
     }
 
 
@@ -173,7 +173,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param newRecord The record to create
      */
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder newRecord) {
-        return post(baseUrl + "/form" + "/" + formId + "/records", newRecord.toJsonString());
+        return post(RequestBuilder.POST, baseUrl + "/form" + "/" + formId + "/records", newRecord.toJsonString());
     }
 
     /**
@@ -239,7 +239,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param updatedSchema Updates the schema describing this form's fields
      */
     public Promise<Void> updateFormSchema(String formId, FormClass updatedSchema) {
-        return post(schemaUrl(formId), updatedSchema.toJsonString());
+        return post(RequestBuilder.PUT, schemaUrl(formId), updatedSchema.toJsonString());
     }
 
     private String schemaUrl(String formId) {
@@ -252,7 +252,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param query The shape of the table to retrieve
      */
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
-        return post(baseUrl + "/query/columns", query.toJsonString(), new Function<String, ColumnSet>() {
+        return post(RequestBuilder.POST, baseUrl + "/query/columns", query.toJsonString(), new Function<String, ColumnSet>() {
             @Override
             public ColumnSet apply(String responseText) {
                 return ColumnSetParser.fromJson(responseText);
@@ -262,7 +262,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Void> updateRecords(TransactionBuilder transaction) {
-        return post(baseUrl + "/update", transaction.build().toString());
+        return post(RequestBuilder.POST, baseUrl + "/update", transaction.build().toString());
     }
 
     @Override
@@ -270,7 +270,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
         JobRequest request = new JobRequest(job, LocaleInfo.getCurrentLocale().getLocaleName());
 
-        return post(baseUrl + "/jobs", request.toJsonObject().toString(), new Function<String, JobStatus<T, R>>() {
+        return post(RequestBuilder.POST, baseUrl + "/jobs", request.toJsonObject().toString(), new Function<String, JobStatus<T, R>>() {
             @Override
             public JobStatus<T, R> apply(String s) {
                 return JobStatus.fromJson(JSON_PARSER.parse(s).getAsJsonObject());
@@ -322,8 +322,8 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return result;
     }
 
-    private Promise<Void> post(final String url, String jsonRequest) {
-        return post(url, jsonRequest, new Function<String, Void>() {
+    private Promise<Void> post(RequestBuilder.Method method, final String url, String jsonRequest) {
+        return post(method, url, jsonRequest, new Function<String, Void>() {
             @Override
             public Void apply(String s) {
                 return null;
@@ -331,9 +331,9 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         });
     }
 
-    private <R> Promise<R> post(final String url, String jsonRequest, final Function<String, R> parser) {
+    private <R> Promise<R> post(RequestBuilder.Method method, final String url, String jsonRequest, final Function<String, R> parser) {
         final Promise<R> result = new Promise<>();
-        RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, url);
+        RequestBuilder requestBuilder = new RequestBuilder(method, url);
         requestBuilder.setHeader("Content-Type", "application/json");
         requestBuilder.setRequestData(jsonRequest);
         requestBuilder.setCallback(new RequestCallback() {
