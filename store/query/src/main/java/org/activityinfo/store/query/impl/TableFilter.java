@@ -92,7 +92,7 @@ public class TableFilter {
         if(isAllSelected()) {
             return foreignKeyMap;
         } else {
-            return foreignKeyMap.filter(bitSet);
+            return foreignKeyMap.filter(getSelectedRows());
         }
     }
 

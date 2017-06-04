@@ -49,6 +49,16 @@ public class SubFormDeletionTest {
 
     }
 
+    @Test
+    public void parentQueries() {
+        QueryModel queryModel = new QueryModel(ReferralSubForm.FORM_ID);
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr("URGENCY").as("Urgency");
+
+        ColumnSet columnSet = query(queryModel);
+
+    }
+
     private ColumnSet query(QueryModel queryModel) {
         ColumnSetBuilder builder = new ColumnSetBuilder(testingCatalog, new NullFormScanCache(), new NullFormSupervisor());
         return builder.build(queryModel);

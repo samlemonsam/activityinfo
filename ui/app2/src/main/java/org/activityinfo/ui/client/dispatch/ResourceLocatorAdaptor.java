@@ -29,7 +29,8 @@ import java.util.Map;
 /**
  * Exposes a legacy {@code Dispatcher} implementation as new {@code ResourceLocator}
  */
-public class ResourceLocatorAdaptor implements ResourceLocator {
+public class
+ResourceLocatorAdaptor implements ResourceLocator {
 
     private ActivityInfoClientAsync client;
 

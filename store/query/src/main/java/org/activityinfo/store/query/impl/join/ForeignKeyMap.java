@@ -6,10 +6,8 @@ import com.google.common.collect.Multimaps;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.io.Serializable;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * Maps row indices to reference values for a given field.
@@ -38,16 +36,16 @@ public class ForeignKeyMap implements Serializable {
         return keys.get(rowIndex);
     }
 
-    public ForeignKeyMap filter(BitSet bitSet) {
-        Multimap<Integer, ResourceId> filteredKeys = HashMultimap.create(this.keys);
-        for (Map.Entry<Integer, ResourceId> entry : keys.entries()) {
-            int rowIndex = entry.getKey();
-            if(bitSet.get(rowIndex)) {
-                filteredKeys.put(rowIndex, entry.getValue());
+    public ForeignKeyMap filter(int[] selectedRows) {
+
+        Multimap<Integer, ResourceId> filteredKeys = HashMultimap.create();
+        for (int i = 0; i < selectedRows.length; i++) {
+            int selectedRow = selectedRows[i];
+            if(selectedRow != -1) {
+                filteredKeys.putAll(i, keys.get(selectedRow));
             }
         }
-        int numRows = bitSet.cardinality();
 
-        return new ForeignKeyMap(numRows, filteredKeys);
+        return new ForeignKeyMap(selectedRows.length, filteredKeys);
     }
 }
