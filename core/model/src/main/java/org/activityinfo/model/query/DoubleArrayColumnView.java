@@ -63,7 +63,13 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
     public ColumnView select(int[] selectedRows) {
         double filteredValues[] = new double[selectedRows.length];
         for (int i = 0; i < filteredValues.length; i++) {
-            filteredValues[i] = values[selectedRows[i]];
+
+            int selectedRow = selectedRows[i];
+            if(selectedRow == -1) {
+                filteredValues[i] = Double.NaN;
+            } else {
+                filteredValues[i] = values[selectedRow];
+            }
         }
         return new DoubleArrayColumnView(filteredValues);
     }
