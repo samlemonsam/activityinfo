@@ -24,6 +24,7 @@ package org.activityinfo.server.login;
 
 import com.google.inject.Inject;
 import com.sun.jersey.api.view.Viewable;
+import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.authentication.Authenticator;
 import org.activityinfo.server.database.hibernate.dao.UserDAO;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -37,11 +38,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.net.URI;
 import java.util.logging.Logger;
 
 @Path(LoginController.ENDPOINT)
 public class LoginController {
-    
+
     private static final Logger LOGGER = Logger.getLogger(LoginController.ENDPOINT);
 
     public static final String ENDPOINT = "/login";
@@ -101,7 +103,11 @@ public class LoginController {
             return Response.ok(model.asViewable()).type(MediaType.TEXT_HTML).build();
         }
 
-        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/").build())
+        return loginAndRedirectToApp(uri.getBaseUri(), user);
+    }
+
+    public Response loginAndRedirectToApp(URI baseUri, User user) {
+        return Response.seeOther(baseUri)
                        .cookie(authTokenProvider.get().createNewAuthCookies(user))
                        .build();
     }

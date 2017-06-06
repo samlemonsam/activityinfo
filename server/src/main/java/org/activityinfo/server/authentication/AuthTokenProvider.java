@@ -1,4 +1,4 @@
-package org.activityinfo.server.login;
+package org.activityinfo.server.authentication;
 
 /*
  * #%L
