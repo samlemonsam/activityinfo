@@ -64,7 +64,7 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
     public int getBoolean(int row) {
         if(missing.get(row)) {
             return NA;
-        } else if(missing.get(row)) {
+        } else if(bitSet.get(row)) {
             return TRUE;
         } else {
             return FALSE;
@@ -84,7 +84,7 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
             if(selectedRow == -1) {
-                filtered.set(i);
+                filteredMissing.set(i);
             } else {
                 filtered.set(i, bitSet.get(selectedRow));
                 filteredMissing.set(i, missing.get(selectedRow));

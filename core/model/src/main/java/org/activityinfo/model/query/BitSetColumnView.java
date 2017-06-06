@@ -66,7 +66,7 @@ public class BitSetColumnView implements ColumnView, Serializable {
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
             if(selectedRow == -1) {
-                filteredMissing.set(selectedRow);
+                filteredMissing.set(i);
             } else {
                 filtered.set(i, bitSet.get(selectedRow));
             }
