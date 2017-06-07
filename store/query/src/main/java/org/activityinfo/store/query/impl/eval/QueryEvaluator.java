@@ -83,7 +83,7 @@ public class QueryEvaluator {
             // loop and a StackOverflowException.
 
             if(evaluationStack.contains(symbolExpr)) {
-                return batch.addEmptyColumn(rootFormClass);
+                return batch.addEmptyColumn(filterLevel, rootFormClass);
             }
 
             evaluationStack.push(symbolExpr);
@@ -185,7 +185,7 @@ public class QueryEvaluator {
                 }
             }
             if(expandedNodes.isEmpty()) {
-                return batch.addEmptyColumn(rootFormClass);
+                return batch.addEmptyColumn(filterLevel, rootFormClass);
             } else if(expandedNodes.size() == 1) {
                 return expandedNodes.get(0);
             } else {
@@ -201,7 +201,7 @@ public class QueryEvaluator {
                         node.getFormClass().getId() + "." + node.getExpr() + " = " +
                         node.getCalculation() + ": " + e.getMessage(), e);
             
-                return batch.addEmptyColumn(node.getFormClass());
+                return batch.addEmptyColumn(filterLevel, node.getFormClass());
             }
         }
     }

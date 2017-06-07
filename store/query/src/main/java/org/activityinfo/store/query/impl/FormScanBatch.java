@@ -124,8 +124,8 @@ public class FormScanBatch {
      * Adds a query to the batch for an empty column. It may still be required to hit the data store
      * to find the number of rows.
      */
-    public Slot<ColumnView> addEmptyColumn(FormClass formClass) {
-        Slot<Integer> rowCount = getTable(formClass.getId()).addCount();
+    public Slot<ColumnView> addEmptyColumn(FilterLevel filterLevel, FormClass formClass) {
+        Slot<Integer> rowCount = addRowCount(filterLevel, formClass);
         return new ConstantColumnBuilder(rowCount, null);
     }
 
