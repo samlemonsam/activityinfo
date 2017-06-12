@@ -29,7 +29,7 @@
         <form action="/login" method="POST">
             <label>
                 ${label.emailAddress}
-                <input name="email" type="email" required>
+                <input name="email" type="email" required value="${email}">
             </label>
 
             <label>
