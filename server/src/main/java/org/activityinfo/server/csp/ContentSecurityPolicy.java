@@ -14,12 +14,14 @@ public class ContentSecurityPolicy {
     
     private static final String UNSAFE_INLINE = "'unsafe-inline'";
     private static final String UNSAFE_EVAL = "'unsafe-eval'";
-    
+
     private static final String GOOGLE_ANALYTICS = "https://ssl.google-analytics.com";
-    
+
     private static final String GOOGLE_STORAGE = "https://storage.googleapis.com";
 
     private static final String TYPOTHEQUE = "https://fonts.typotheque.com";
+
+    private static final String TYPOTHEQUE_FONTS = "https://s3-eu-west-1.amazonaws.com";
 
     private static final String HTTPS_ONLY = "https:";
     
@@ -50,7 +52,8 @@ public class ContentSecurityPolicy {
 
         append(sb, "font-src", SELF,
             SELF,
-            TYPOTHEQUE
+            TYPOTHEQUE,
+            TYPOTHEQUE_FONTS
         );
         
         append(sb, "script-src", SELF,
