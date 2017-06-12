@@ -54,8 +54,7 @@ public class XlsTableWriter {
         List<XlsColumn> excelColumns = new ArrayList<>();
         int columnIndex = 0;
         for (EffectiveTableColumn tableColumn : tableModel.getColumns()) {
-            XlsColumn excelColumn = new XlsColumn(tableColumn, columnSet, columnIndex,
-                    styleFactory.create(tableColumn.getType()));
+            XlsColumn excelColumn = new XlsColumn(tableColumn, columnSet, columnIndex, styleFactory);
 
             excelColumns.add(excelColumn);
             columnIndex++;

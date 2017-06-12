@@ -6,6 +6,7 @@ import com.google.inject.Provider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.formdesigner.FormSavedGuard;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
@@ -33,10 +34,12 @@ public class ResourcePage implements Page {
     private final LoadingPanel<ResourceId> loadingPanel;
 
     private final PageId pageId;
+    private EventBus eventBus;
     private final ResourceLocator locator;
     private final StateProvider stateProvider;
 
-    public ResourcePage(ResourceLocator resourceLocator, PageId pageId, StateProvider stateProvider) {
+    public ResourcePage(EventBus eventBus, ResourceLocator resourceLocator, PageId pageId, StateProvider stateProvider) {
+        this.eventBus = eventBus;
         this.locator = resourceLocator;
         this.pageId = pageId;
         this.stateProvider = stateProvider;
@@ -86,7 +89,7 @@ public class ResourcePage implements Page {
         if (resourcePlace.getPageId() == ResourcePage.DESIGN_PAGE_ID) {
             loadingPanel.setDisplayWidget(new DesignTab(locator, stateProvider));
         } else if (resourcePlace.getPageId() == ResourcePage.TABLE_PAGE_ID) {
-            loadingPanel.setDisplayWidget(new TableTab(locator, stateProvider));
+            loadingPanel.setDisplayWidget(new TableTab(eventBus, locator, stateProvider));
         } else {
             throw new UnsupportedOperationException("Unknown page id:" + resourcePlace.getPageId());
         }

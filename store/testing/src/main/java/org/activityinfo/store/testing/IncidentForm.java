@@ -6,6 +6,8 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import java.util.List;
@@ -18,7 +20,15 @@ public class IncidentForm implements TestForm {
 
     public static final ResourceId REFERRAL_FIELD_ID = ResourceId.valueOf("F2");
 
+    public static final ResourceId URGENCY = ResourceId.valueOf("F3");
+
+    private static final ResourceId HIGH = ResourceId.valueOf("U1");
+    private static final ResourceId MEDIUM = ResourceId.valueOf("U2");
+    private static final ResourceId LOW = ResourceId.valueOf("U3");
+
+
     public static final int ROW_COUNT = 940;
+
 
     private final BioDataForm bioDataForm;
 
@@ -39,6 +49,13 @@ public class IncidentForm implements TestForm {
                 .setType(new ReferenceType(Cardinality.SINGLE, BioDataForm.FORM_ID))
                 .setRequired(true)
                 .setVisible(true);
+
+        formClass.addField(URGENCY)
+                .setLabel("Urgency of the case")
+                .setType(new EnumType(Cardinality.SINGLE,
+                        new EnumItem(HIGH, "High"),
+                        new EnumItem(MEDIUM, "Medium"),
+                        new EnumItem(LOW, "Low")));
 
         referralField = formClass.addField(REFERRAL_FIELD_ID)
                 .setLabel("Referrals")

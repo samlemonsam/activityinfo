@@ -21,18 +21,11 @@
 -->
 
 <#macro content>
-<div class="container">
-
-    <#nested>
-
-
-</div>
+<#nested>
 </#macro>
 
 <#macro scripts>
-<script src="/js/jquery-1.9.1.min.js"></script>
-<script type="text/javascript" src="/js/bootstrap-modal-2.3.2-min.js"></script>
-    <#nested>
+<#nested>
 </#macro>
 
 <#macro footer>

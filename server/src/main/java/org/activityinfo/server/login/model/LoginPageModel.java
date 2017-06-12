@@ -23,18 +23,24 @@ package org.activityinfo.server.login.model;
  */
 
 public class LoginPageModel extends PageModel {
+    private String email = "";
     private boolean loginError;
 
     public LoginPageModel() {
     }
 
-    public static LoginPageModel unsuccessful() {
+    public static LoginPageModel unsuccessful(String email) {
         LoginPageModel model = new LoginPageModel();
+        model.email = email;
         model.loginError = true;
         return model;
     }
 
     public boolean isLoginError() {
         return loginError;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }

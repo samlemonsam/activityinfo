@@ -210,7 +210,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             SubFormReferenceType type = (SubFormReferenceType) formField.getType();
             type.setClassId(subForm.getId());
 
-            final FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.subform(formDesigner, subForm, formField.getId());
+            final FieldsHolderWidgetContainer widgetContainer = FieldsHolderWidgetContainer.subform(formDesigner, formField, subForm, formField.getId());
             containerMap.put(formField.getId(), widgetContainer); // parent drop container
 
             drop(widgetContainer.asWidget(), context);

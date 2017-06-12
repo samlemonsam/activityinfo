@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormElementContainer;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormSection;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.subform.PeriodTabStrip;
@@ -48,6 +49,7 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     private final ResourceId parentId;
     private boolean isSubform = false;
     private DropControllerExtended dropController;
+    private FormField subFormField;
 
     protected FieldsHolderWidgetContainer(final FormDesigner formDesigner, final FormElementContainer elementContainer, ResourceId parentId) {
         this.formDesigner = formDesigner;
@@ -96,9 +98,10 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
         return container;
     }
 
-    public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, final FormClass subForm, ResourceId parentId) {
+    public static FieldsHolderWidgetContainer subform(final FormDesigner formDesigner, FormField formField, final FormClass subForm, ResourceId parentId) {
         FieldsHolderWidgetContainer container = new FieldsHolderWidgetContainer(formDesigner, subForm, parentId);
         container.isSubform = true;
+        container.subFormField = formField;
         container.getPanel().getPanel().setOnRemoveConfirmationCallback(new ClickHandler() {
             @Override
             public void onClick(final ClickEvent event) {
@@ -155,6 +158,14 @@ public class FieldsHolderWidgetContainer implements WidgetContainer, FieldsHolde
     @Override
     public FormElementContainer getElementContainer() {
         return elementContainer;
+    }
+
+    @Override
+    public void setLabel(String label) {
+        if(subFormField != null) {
+            subFormField.setLabel(label);
+            elementContainer.setLabel(label);
+        }
     }
 
     @Override

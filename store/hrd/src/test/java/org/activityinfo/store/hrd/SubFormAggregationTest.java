@@ -20,6 +20,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.RecordUpdate;
 import org.junit.After;
@@ -141,7 +142,7 @@ public class SubFormAggregationTest {
         queryModel.selectField("Village Name").as("village");
         queryModel.selectField("BENE").as("max_hh");
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         System.out.println(columnSet);

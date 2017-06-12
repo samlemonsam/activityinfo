@@ -22,162 +22,109 @@
  #L%
 -->
 <#include "Scaffolding.ftl">
-<@scaffolding title="${label.signUpTitle}">
+<@scaffolding title="Signup">
 
     <@content>
 
-        <#if !domain.signUpAllowed>
-        <p>Please contact your local focal point to connect to this
-            ActivityInfo database.</p>
-        <#else>
-        <div class="row">
-            <div class="span12">
-                <h3>${label.signUpTitle}</h3>
-            </div>
-        </div>
-        <div class="row">
-            <div class="span6">
+        <div class="row row--padded">
 
-                <#if genericError == true || formError == true>
-                    <div class="alert alert-error">
-                    ${label.signUpGenericError}
-                    </div>
-                </#if>
+            <h1>Signup</h1>
 
-                <#if confirmationEmailSent == true>
-                    <div class="alert alert-success">
-                    ${label.signUpEmailSent}
-                    </div>
+            <#if genericError == true || formError == true>
+                <div class="alert alert--error">
+                ${label.signUpGenericError}
+                </div>
+            </#if>
 
-                <#else>
+            <#if confirmationEmailSent == true>
+                <div class="alert alert--success">
+                ${label.signUpEmailSent}
+                </div>
+
+            <#else>
+
+                <div class="grid grid--spaced">
 
                     <form action="" method="post" id="signUpForm">
 
-                        <div class="control-group" id="nameGroup">
-                            <label class="control-label" for="nameInput">${label.name}:</label>
+                        <p>Complete the following form to create a new account on
+                            ActivityInfo.org.</p>
 
-                            <div class="controls">
-                                <input type="text" name="name" id="nameInput" value="${name}">
-                                <span class="help-inline hide" id="nameHelp">${label.pleaseEnterYourFullName}</span>
-                            </div>
-                        </div>
+                        <label>
+                            Name
+                            <input type="text" name="name" required>
+                        </label>
 
-                        <div class="control-group">
-                            <label class="control-label" for="organizationInput">${label.organization}:</label>
 
-                            <div class="controls">
-                                <input type="text" name="organization" id="organizationInput" value="${organization}">
-                            </div>
-                        </div>
+                        <label>
+                            E-mail address
+                            <input type="email" name="email" required>
+                        </label>
 
-                        <div class="control-group">
-                            <label class="control-label" for="jobtitleInput">${label.jobtitle}:</label>
+                        <label>
+                            Organization
+                            <input type="text" name="organization" required>
+                        </label>
 
-                            <div class="controls">
-                                <input type="text" name="jobtitle" id="jobtitleInput" value="${jobtitle}">
-                            </div>
-                        </div>
 
-                        <div class="control-group" id="emailGroup">
-                            <label class="control-label" for="emailInput">${label.emailAddress}:</label>
+                        <label>
+                            Job Title
+                            <input type="text" name="jobtitle" required>
+                        </label>
 
-                            <div class="controls">
-                                <input type="text" name="email" id="emailInput" value="${email}">
-                                <span class="help-inline hide"
-                                      id="emailHelp">${label.pleaseEnterAValidEmailAddress}</span>
-                            </div>
-                        </div>
-
-                        <div class="control-group">
-                            <label class="control-label" for="localeInput">${label.preferredLanguage}:</label>
-
-                            <div class="controls">
-                                <select name="locale" id="localeInput">
+                        <label>
+                            Prefered language
+                            <select name="locale" id="localeInput">
                                 <#list availableLocales as locale>
                                     <option value="${locale.code}">${locale.localizedName}</option>
                                 </#list>
-                                </select>
-                            </div>
-                        </div>
+                            </select>
+                        </label>
 
-                        <div class="control-group">
-                            <label class="control-label">&nbsp;</label>
+                        <label>
+                            <input type="checkbox" id="termsCheckbox" name="terms_accepted">
+                            I agree to ActivityInfo's <a href="/about/terms.html">terms and conditions</a>
+                        </label>
 
-                            <div class="controls">
-                                <button type="submit" class="btn btn-primary btn-large">${label.signUpButton}</button>
-                            </div>
-                        </div>
+                        <button type="submit">Sign up</button>
                     </form>
-                </#if>
-            </div>
-            <div class="span6">
 
+                    <div>
+                        <section class="learning-center" id="howto">
 
-                <div class="well">
-                    <h4>Free for teams of ten or less</h4>
+                            <div class="phototeaser">
+                                <img src="/about/assets/images/waterpump.jpg" alt="">
 
-                    <p>Please feel free to use ActivityInfo.org for
-                        small field teams. If you plan to adopt the system
-                        across your organization, we'll ask to you to make
-                        an annual contribution to the system's running costs.
+                                <div>
+                                    <h2>Want to learn more?</h2>
 
-                    <p>
+                                    <ul class="list--arrow">
+                                        <li><a href="/about/faq.html">Frequently Asked Questions</a></li>
+                                        <li><a href="https://attendee.gotowebinar.com/rt/2895505976043289602">Register for our next webinar</a></li>
+                                    </ul>
 
-                    <p><a href="mailto:support@activityinfo.org">Contact us</a>
-                        for more information.</p>
-
-                    <p>In any case, you're welcome to evaluate the system without
-                        restriction as long as needed!</p>
-
+                                    <a href="/about/subscribe.html" class="cta-link cta-link--secondary">Purchase a support package</a>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
                 </div>
-                <div class="alert">
-                    <h4>Looking for your Cluster's database?</h4>
-
-                    <p>Only your cluster lead can grant you access
-                        to the cluster's database. Please contact your local
-                        focal point and request access.</p>
-
-                </div>
-            </div>
+            </#if>
         </div>
-        </#if>
-    </@content>
+       </@content>
 
     <@footer/>
 
     <@scripts>
     <script type="text/javascript">
-        var validateName = function () {
-            var name = $('#nameInput').val();
-            var valid = name && name.length <= 50;
-
-            $('#nameGroup').toggleClass('error', !valid);
-            $('#nameHelp').toggleClass('hide', valid);
-            return valid;
-        };
-
-        var validateEmail = function () {
-            var email = $('#emailInput').val();
-            var valid = !!email;
-            if (valid) {
-                var regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-                valid = regex.test(email);
-            }
-            $('#emailGroup').toggleClass('error', !valid);
-            $('#emailHelp').toggleClass('hide', valid);
-            return valid;
-        };
-
-        $("#nameInput").change(validateName);
-        $("#emailInput").change(validateEmail);
-        $("#signUpForm").submit(function () {
-            var valid = validateName() && validateEmail();
-            return !!valid;
-        });
-
-        $(document).ready(function () {
-            $("#localeInput").val("${locale}");
-            $("#nameInput").focus();
+        var theForm = document.getElementById("signUpForm");
+        var theTerms = document.getElementById("termsCheckbox");
+        theForm.addEventListener('submit', function(event) {
+           if(!theTerms.checked) {
+               event.preventDefault();
+               alert("Please accept the terms and conditions to continue.");
+               return;
+           }
         });
     </script>
     </@scripts>

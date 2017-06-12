@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.component.form.field;
 
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -16,7 +17,13 @@ public class EnumFieldWidget implements FormFieldWidget<EnumValue> {
     }
 
     private FormFieldWidget<EnumValue> createWidget(EnumType enumType, final ValueUpdater<EnumValue> valueUpdater, FieldWidgetMode fieldWidgetMode) {
-        EnumType.Presentation presentation = EnumType.Presentation.RADIO_BUTTON;
+
+        // Multiple selection should always use checkboxes.
+        if(enumType.getCardinality() == Cardinality.MULTIPLE) {
+            return new EnumCheckboxWidget(enumType, valueUpdater, fieldWidgetMode);
+        }
+
+        EnumType.Presentation presentation;
         if(fieldWidgetMode == FieldWidgetMode.NORMAL) {
             // Only apply presentation choices in data entry mode
             presentation = enumType.getEffectivePresentation();

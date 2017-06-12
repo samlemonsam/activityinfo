@@ -23,17 +23,16 @@
 <@scaffolding title="${label.invalidOrExpiredInvite}">
 
     <@content>
-    <div class="row">
-        <div class="span12">
-            <div class="page-header"><h1 class="page-title">${label.invalidInvitation}</h1></div>
+    <div class="row row--padded">
+        <h1>${label.invalidInvitation}</h1>
 
-        ${label.invalidInvitationDetail}
+        <p>${label.invalidInvitationDetail}</p>
 
-            <p><a href="login" class="btn btn-primary">${label.loginNow}</a></p>
-        </div>
+        <form action="/login">
+            <button type="submit">${label.loginNow}</button>
+        </form>
     </div>
     </@content>
-
     <@footer/>
     <@scripts/>
 </@scaffolding>

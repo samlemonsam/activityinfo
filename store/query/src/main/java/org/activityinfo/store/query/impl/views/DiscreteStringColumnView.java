@@ -59,6 +59,20 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public ColumnView select(int[] selectedRows) {
+        int filteredValues[] = new int[selectedRows.length];
+        for (int i = 0; i < selectedRows.length; i++) {
+            int selectedRow = selectedRows[i];
+            if(selectedRow < 0) {
+                filteredValues[i] = -1;
+            } else {
+                filteredValues[i] = values[selectedRow];
+            }
+        }
+        return new DiscreteStringColumnView(labels, filteredValues);
+    }
+
+    @Override
     public String toString() {  
         return ColumnViewToString.toString(this);
     }

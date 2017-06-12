@@ -4,8 +4,10 @@ import com.google.common.collect.Iterables;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ArgumentException;
 import org.activityinfo.model.expr.diagnostic.ExprException;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.query.shared.NodeMatcher;
@@ -103,9 +105,32 @@ public class FormulaValidator {
 
         if(match.isEnumBoolean()) {
             return BooleanType.INSTANCE;
+        } else if(match.getFieldNode().getType() instanceof CalculatedFieldType) {
+            return findCalculatedFieldType(match.getFieldNode());
         } else {
             return match.getFieldNode().getType();
         }
+    }
+
+    private FieldType findCalculatedFieldType(FormTree.Node fieldNode) {
+
+        CalculatedFieldType fieldType = (CalculatedFieldType) fieldNode.getType();
+        ExprNode rootNode;
+        try {
+            rootNode = ExprParser.parse(fieldType.getExpression());
+        } catch (ExprException e) {
+            throw new ValidationFailed();
+        }
+
+        FormClass formClass = fieldNode.getDefiningFormClass();
+        FormTree subTree = formTree.subTree(formClass.getId());
+        FormulaValidator validator = new FormulaValidator(subTree);
+
+        if (!validator.validate(rootNode)) {
+            throw new ValidationFailed();
+        }
+
+        return validator.getResultType();
     }
 
 

@@ -302,6 +302,7 @@ public class MatchTable {
             public int numRows() {
                 return rows.size();
             }
+
         };
     }
     
@@ -316,6 +317,7 @@ public class MatchTable {
             public int numRows() {
                 return rows.size();
             }
+
         };
     }
 }

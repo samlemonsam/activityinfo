@@ -43,13 +43,8 @@ public class LoginModule extends ServletModule {
 
         Map<String, String> initParams = Maps.newHashMap();
         filter("/login*").through(JaxRsContainer.class);
-        filter("/unsupportedBrowser").through(JaxRsContainer.class);
-
-        bind(AppResource.class);
         filter("/app*").through(JaxRsContainer.class);
-        
-        
-        
+
         filterContainer(initParams,
                 HostController.class,
                 LoginController.class,

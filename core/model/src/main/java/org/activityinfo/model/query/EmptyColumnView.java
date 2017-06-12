@@ -51,6 +51,11 @@ public class EmptyColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public ColumnView select(int[] selectedRows) {
+        return new EmptyColumnView(this.type, selectedRows.length);
+    }
+
+    @Override
     public String toString() {
         return "[ " + numRows() + " empty values ]";
     }

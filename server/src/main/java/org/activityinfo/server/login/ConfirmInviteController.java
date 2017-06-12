@@ -92,7 +92,7 @@ public class ConfirmInviteController {
                 mailingList.subscribe(user);
             }
 
-            return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/").build())
+            return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
                            .cookie(authTokenProvider.createNewAuthCookies(user))
                            .build();
 

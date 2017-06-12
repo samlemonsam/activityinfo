@@ -14,6 +14,7 @@ import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.base.Optional;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.login.HostController;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -190,12 +191,12 @@ public class HumanitarianId {
 
         entityManager.get().persist(user);
         entityManager.get().getTransaction().commit();
-        
+
         return redirectToApp(baseUri, user);
     }
 
     private Response redirectToApp(URI baseUri, User user) {
-        return Response.seeOther(baseUri)
+        return Response.seeOther(UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build())
                 .cookie(authTokenProvider.createNewAuthCookies(user))
                 .build();
     }

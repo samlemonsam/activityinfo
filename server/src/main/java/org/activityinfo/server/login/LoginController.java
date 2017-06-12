@@ -34,10 +34,7 @@ import org.activityinfo.server.login.model.LoginPageModel;
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.logging.Logger;
 
@@ -97,7 +94,7 @@ public class LoginController {
             checkPassword(password, user);
             
         } catch (Exception e) {
-            LoginPageModel model = LoginPageModel.unsuccessful();
+            LoginPageModel model = LoginPageModel.unsuccessful(email);
             LOGGER.warning("Failed login attempt for user " + email);
 
             return Response.ok(model.asViewable()).type(MediaType.TEXT_HTML).build();
@@ -107,7 +104,9 @@ public class LoginController {
     }
 
     public Response loginAndRedirectToApp(URI baseUri, User user) {
-        return Response.seeOther(baseUri)
+        URI appUri = UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build();
+
+        return Response.seeOther(appUri)
                        .cookie(authTokenProvider.get().createNewAuthCookies(user))
                        .build();
     }

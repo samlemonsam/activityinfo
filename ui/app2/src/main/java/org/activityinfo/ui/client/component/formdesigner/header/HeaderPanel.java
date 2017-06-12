@@ -124,6 +124,11 @@ public class HeaderPanel implements FieldsHolder, IsWidget {
     }
 
     @Override
+    public void setLabel(String label) {
+        formClass.setLabel(label);
+    }
+
+    @Override
     public void updateUi() {
         show();
     }

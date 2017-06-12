@@ -56,7 +56,9 @@ public class FormConverter {
     public static JsonObject fromEmbeddedEntity(EmbeddedEntity entity) {
         JsonObject record = new JsonObject();
         for (Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
-            record.add(entry.getKey(), fromPropertyValue(entry.getValue()));
+            if(entry.getValue() != null) {
+                record.add(entry.getKey(), fromPropertyValue(entry.getValue()));
+            }
         }
         return record;
     }

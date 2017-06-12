@@ -37,4 +37,8 @@ public class EffectiveTableColumn {
     public ColumnModel getQueryModel() {
         return new ColumnModel().setId(getId()).setExpression(formula.getFormula());
     }
+
+    public boolean isValid() {
+        return formula.isValid();
+    }
 }

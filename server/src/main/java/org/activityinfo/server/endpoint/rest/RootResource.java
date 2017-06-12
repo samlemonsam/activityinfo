@@ -174,7 +174,7 @@ public class RootResource {
     
     @Path("/query")
     public QueryResource query() {
-        return new QueryResource(catalog);
+        return new QueryResource(catalog, userProvider);
     }
     
     @POST

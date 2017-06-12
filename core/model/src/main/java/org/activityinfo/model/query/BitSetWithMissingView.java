@@ -1,7 +1,4 @@
-package org.activityinfo.store.query.impl.views;
-
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
+package org.activityinfo.model.query;
 
 import java.io.Serializable;
 import java.util.BitSet;
@@ -22,6 +19,13 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
         this.missing = missing;
     }
 
+    public BitSet getBitSet() {
+        return bitSet;
+    }
+
+    public BitSet getMissing() {
+        return missing;
+    }
 
     @Override
     public ColumnType getType() {
@@ -60,7 +64,7 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
     public int getBoolean(int row) {
         if(missing.get(row)) {
             return NA;
-        } else if(missing.get(row)) {
+        } else if(bitSet.get(row)) {
             return TRUE;
         } else {
             return FALSE;
@@ -70,5 +74,26 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
     @Override
     public boolean isMissing(int row) {
         return missing.get(row);
+    }
+
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        BitSet filtered = new BitSet();
+        BitSet filteredMissing = new BitSet();
+
+        for (int i = 0; i < selectedRows.length; i++) {
+            int selectedRow = selectedRows[i];
+            if(selectedRow == -1) {
+                filteredMissing.set(i);
+            } else {
+                filtered.set(i, bitSet.get(selectedRow));
+                filteredMissing.set(i, missing.get(selectedRow));
+            }
+        }
+        if(filteredMissing.cardinality() == 0) {
+            return new BitSetColumnView(selectedRows.length, filtered);
+        } else {
+            return new BitSetWithMissingView(selectedRows.length, filtered, filteredMissing);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.activityinfo.store.query.impl.join;
 
+import org.activityinfo.store.query.impl.FilterLevel;
 import org.activityinfo.store.query.impl.Slot;
 
 /**
@@ -7,10 +8,12 @@ import org.activityinfo.store.query.impl.Slot;
  */
 public class ReferenceJoinKey {
 
+  private final FilterLevel filterLevel;
   private final Slot<ForeignKeyMap> foreignKey;
   private final Slot<PrimaryKeyMap> primaryKeyMap;
 
-  public ReferenceJoinKey(Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap) {
+  public ReferenceJoinKey(FilterLevel filterLevel, Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap) {
+    this.filterLevel = filterLevel;
     this.foreignKey = foreignKey;
     this.primaryKeyMap = primaryKeyMap;
   }
@@ -22,6 +25,7 @@ public class ReferenceJoinKey {
 
     ReferenceJoinKey that = (ReferenceJoinKey) o;
 
+    if (filterLevel != that.filterLevel) return false;
     if (!foreignKey.equals(that.foreignKey)) return false;
     return primaryKeyMap.equals(that.primaryKeyMap);
 
@@ -29,7 +33,8 @@ public class ReferenceJoinKey {
 
   @Override
   public int hashCode() {
-    int result = foreignKey.hashCode();
+    int result = filterLevel.hashCode();
+    result = 31 * result + foreignKey.hashCode();
     result = 31 * result + primaryKeyMap.hashCode();
     return result;
   }

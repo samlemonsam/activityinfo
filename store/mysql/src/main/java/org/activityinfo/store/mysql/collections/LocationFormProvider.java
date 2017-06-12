@@ -23,7 +23,8 @@ public class LocationFormProvider implements FormProvider {
 
     @Override
     public boolean accept(ResourceId formId) {
-        return formId.getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN;
+        return formId.getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN &&
+                CuidAdapter.isValidLegacyId(formId);
     }
 
     @Override

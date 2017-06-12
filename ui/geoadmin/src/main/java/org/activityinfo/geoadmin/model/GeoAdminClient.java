@@ -30,6 +30,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
@@ -309,7 +310,7 @@ public class GeoAdminClient implements FormClassProvider {
     public ColumnSet queryColumns(QueryModel queryModel) {
         
         if(localCatalog.isLocalQuery(queryModel)) {
-            ColumnSetBuilder builder = new ColumnSetBuilder(localCatalog);
+            ColumnSetBuilder builder = new ColumnSetBuilder(localCatalog, new NullFormSupervisor());
             return builder.build(queryModel);
 
         } else {

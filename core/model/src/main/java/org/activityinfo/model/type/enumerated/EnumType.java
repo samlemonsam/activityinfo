@@ -61,7 +61,7 @@ public class EnumType implements ParametrizedFieldType {
 
             List<EnumItem> enumItems = Lists.newArrayList();
             JsonElement valuesArray = parametersObject.get("values");
-            if(valuesArray != null) {
+            if(valuesArray instanceof JsonArray) {
                 JsonArray enumItemArray = valuesArray.getAsJsonArray();
                 for (JsonElement record : enumItemArray) {
                     enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));

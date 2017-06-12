@@ -93,6 +93,7 @@ compileJava {
 
 processResources {
     inputs.property "project.version", project.version.toString()
+    filteringCharset = "UTF-8"
     filter { line ->
         line.replace('$[display.version]', project.version.toString())
             .replace('$[git.commit.id]', commitId)
@@ -151,7 +152,7 @@ task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
         
     } else {
         dependsOn 'appengineExplodeApp'
-        appVersion = 'qa'
+        appVersion = 'new-website'
     }
     
     dependsOn appengineDownloadSdk

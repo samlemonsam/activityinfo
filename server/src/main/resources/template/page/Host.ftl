@@ -32,16 +32,13 @@
     <meta name="description" content="ActivityInfo"/>
     <meta name="application-url" content="${appUrl}"/>
     <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <link rel="icon" href="/about/assets/images/logo-activityinfo.png">
 
     <#if newUI>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     </#if>
 
-    <link rel="icon" href="/ActivityInfo/desktopicons/16x16.png" sizes="16x16"/>
-    <link rel="icon" href="/ActivityInfo/desktopicons/32x32.png" sizes="32x32"/>
-    <link rel="icon" href="/ActivityInfo/desktopicons/48x48.png" sizes="48x48"/>
-    <link rel="icon" href="/ActivityInfo/desktopicons/64x64.png" sizes="64x64"/>
-    <link rel="icon" href="/ActivityInfo/desktopicons/128x128.png" sizes="128x128"/>
+
 
     <title>${domain.title}</title>
 

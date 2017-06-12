@@ -118,7 +118,7 @@ public class CuidAdapter {
         return Integer.parseInt(cuid.substring(1), ResourceId.RADIX);
     }
 
-    public static Optional<Integer> getLegacyIdFromCuidOptional(String cuid) {
+    public static Optional<Integer> getLegacyIdFromCuidOptional(ResourceId cuid) {
         try {
             return Optional.of(getLegacyIdFromCuid(cuid));
         } catch (NumberFormatException e) {
@@ -363,5 +363,21 @@ public class CuidAdapter {
         formField.setType(ReferenceType.single(partnerFormId(databaseId)));
         formField.setRequired(true);
         return formField;
+    }
+
+    /**
+     * Returns true if the given {@code formId} is a well-formed legacy id. It must start
+     * with a single character and have at least 10 digits.
+     *
+     */
+    public static boolean isValidLegacyId(ResourceId formId) {
+        Optional<Integer> legacyId = getLegacyIdFromCuidOptional(formId);
+        if(legacyId.isPresent()) {
+            // Ensure that appropriate number of zeros are present
+            ResourceId correctId = cuid(formId.getDomain(), legacyId.get());
+            return formId.equals(correctId);
+        } else {
+            return false;
+        }
     }
 }

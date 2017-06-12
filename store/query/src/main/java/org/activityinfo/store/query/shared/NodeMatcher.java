@@ -75,9 +75,7 @@ public class NodeMatcher {
                 }
             }
         }
-        if(matches.size() > 1) {
-            throw new AmbiguousSymbolException(queryPath.toString());
-        } else if(matches.size() == 1) {
+        if(matches.size() > 0) {
             return matches.get(0);
         }
 

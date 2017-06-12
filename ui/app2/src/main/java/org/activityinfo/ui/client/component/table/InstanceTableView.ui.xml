@@ -19,6 +19,12 @@
     <!-- If we can display all the columns, inform the user -->
     <a:AlertPanel ui:field="columnAlert" style="WARNING"/>
 
+    <a:AlertPanel ui:field="subFormChoice" style="WARNING">
+
+    </a:AlertPanel>
+
+
+
     <a:AlertPanel ui:field="errorMessages" style="DANGER"/>
 
     <table:InstanceTable ui:field="table"/>

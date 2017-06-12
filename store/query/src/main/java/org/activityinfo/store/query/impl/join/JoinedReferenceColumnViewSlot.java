@@ -1,9 +1,6 @@
 package org.activityinfo.store.query.impl.join;
 
-import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.DoubleArrayColumnView;
-import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.store.query.impl.Slot;
 
 import java.util.List;
@@ -59,56 +56,7 @@ public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
             }
         }
 
-        switch (nestedColumn.get().getType()) {
-            case STRING:
-                return joinStringColumn(nestedColumn.get(), left);
-            case NUMBER:
-                return joinDoubleColumn(nestedColumn.get(), left);
-            case BOOLEAN:
-                return joinBooleanColumn(nestedColumn.get(), left);
-            default:
-                throw new RuntimeException("columnType: " + nestedColumn.get().getType());
-        }
-        
-    }
-    private ColumnView joinStringColumn(ColumnView columnView, int[] joinMap) {
-        int numRows = joinMap.length;
-        String[] array = new String[numRows];
-        for(int row=0;row< numRows;++row) {
-            int right = joinMap[row];
-            if(right != -1) {
-                array[row] = columnView.getString(right);
-            }
-        }
-        return new StringArrayColumnView(array);        
-    }
-    
-    private ColumnView joinDoubleColumn(ColumnView columnView, int[] joinMap) {
-        int numRows = joinMap.length;
-        double[] array = new double[numRows];
-        for(int row=0;row< numRows;++row) {
-            int right = joinMap[row];
-            if(right != -1) {
-                array[row] = columnView.getDouble(right);
-            } else {
-                array[row] = Double.NaN;
-            }
-        }
-        return new DoubleArrayColumnView(array);    
-    }
-
-    private ColumnView joinBooleanColumn(ColumnView columnView, int[] joinMap) {
-        int numRows = joinMap.length;
-        int[] array = new int[numRows];
-        for(int row=0;row< numRows;++row) {
-            int right = joinMap[row];
-            if(right != -1) {
-                array[row] = columnView.getBoolean(right);
-            } else {
-                array[row] = ColumnView.NA;
-            }
-        }
-        return new BooleanColumnView(array);
+        return nestedColumn.get().select(left);
     }
 
     @Override

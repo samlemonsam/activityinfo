@@ -46,7 +46,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
 
     protected int userId = 1;
- 
+
     @BeforeClass
     public static void initDatabase() throws Throwable {
         resetDatabase("catalog-test.db.xml");
@@ -58,14 +58,14 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("label"), hasValues("Rdc"));
         assertThat(column("code"), hasValues("CD"));
     }
-    
+
     @Test
     public void testLocation() {
 
         System.out.println("***** testLocation() starting ******* ");
 
         FormTreePrettyPrinter.print(queryFormTree(locationFormClass(1)));
-        
+
         query(CuidAdapter.locationFormClass(1), "label", "axe", "territoire.province.name", "territoire.name",
                 "province.name", "province._id", "visible");
 
@@ -79,7 +79,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
         assertThat(column("province._id"), hasValues("z0000000002", "z0000000001", "z0000000004", "z0000000002"));
     }
-    
+
     @Test
     public void testBoundLocation() {
         ResourceId formClassId = CuidAdapter.activityFormClass(41);
@@ -89,20 +89,19 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         FormTreePrettyPrinter.print(tree);
 
         assertTrue(locationNode.getRange().contains(CuidAdapter.adminLevelFormClass(2)));
-        assertTrue(locationNode.getRange().contains(CuidAdapter.locationFormClass(1)));
 
         query(formClassId, "territoire.name", "territoire.province.name");
-        
+
         assertThat(column("_id"), hasValues("s0000009001", "s0000009002", "s0000009003"));
         assertThat(column("territoire.name"), hasValues("Bukavu", "Walungu", "Shabunda"));
         assertThat(column("territoire.province.name"), hasValues("Sud Kivu", "Sud Kivu", "Sud Kivu"));
-    }   
+    }
 
     @Test
     public void testLocationPoints() {
         query(CuidAdapter.locationFormClass(1), "label", "point.latitude", "point.longitude");
     }
-    
+
     @Test
     public void testAdmin() {
 
@@ -119,7 +118,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("ST_YMIN(boundary)"), hasValues(0, 0, 0, -22.0, 0));
         assertThat(column("ST_YMAX(boundary)"), hasValues(0, 0, 0, 40, 0));
     }
-    
+
     @Test
     public void testAdminTree() {
         FormTree formTree = queryFormTree(activityFormClass(1));
@@ -130,7 +129,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void project() {
         query(CuidAdapter.projectFormClass(1), "name", "description");
-        
+
         assertThat(column("name"), hasValues("RRMP", "USAID", "Kivu water"));
     }
 
@@ -146,11 +145,12 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testNoColumns() {
         QueryModel queryModel = new QueryModel(CuidAdapter.activityFormClass(1));
-        columnSet = executor.build(queryModel);
+
+        query(queryModel);
 
         assertThat(columnSet.getNumRows(), equalTo(3));
     }
-    
+
     @Test
     public void testActivitySerialization() throws SQLException, IOException {
         ActivityLoader loader = new ActivityLoader(dbunit.getExecutor());
@@ -160,11 +160,11 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
         oos.writeObject(activity);
     }
-    
+
 
     @Test
     public void testSiteSimple() {
-        query(CuidAdapter.activityFormClass(1), "_id", "date1", "date2", "partner", 
+        query(CuidAdapter.activityFormClass(1), "_id", "date1", "date2", "partner",
                 "partner.label", "location.label", "location.visible", "BENE", "cause", "project", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
@@ -175,11 +175,11 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("cause"), hasValues(null, "Deplacement", "Catastrophe Naturelle"));
         assertThat(column("project.name"), hasValues("USAID", "USAID", "RRMP"));
     }
-    
+
     @Test
     public void testAttributeBoolean() {
         query(CuidAdapter.activityFormClass(1), "_id", "[Contenu du Kit].Casserole", "[Contenu du Kit].Soap");
-        
+
         assertThat(column("[Contenu du Kit].Casserole"), hasValues(true, false, false));
         assertThat(column("[Contenu du Kit].Soap"), hasValues(true, true, false));
 
@@ -198,7 +198,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testSiteAggregated() {
         query(CuidAdapter.activityFormClass(1), "project.name", "sum(BENE)", "project.name");
-        
+
     }
 
     @Test
@@ -207,9 +207,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
                 asList("_id", "partner.name", "project.name"), "partner.name == 'NRC'");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2)));
-        
+
     }
-    
+
     @Test
     public void singleSite() {
         FormStorage siteStorage = catalog.getForm(CuidAdapter.activityFormClass(1)).get();
@@ -232,12 +232,12 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         FieldValue location = site.get(CuidAdapter.locationField(4));
     }
 
-    
+
     @Test
     public void siteFormClassWithNullaryLocations() {
 
         FormClass formClass = catalog.getForm(activityFormClass(ADVOCACY)).get().getFormClass();
-       
+
         // Make a list of field codes
         Set<String> codes = new HashSet<>();
         for (FormField formField : formClass.getFields()) {
@@ -253,27 +253,27 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         FormTree formTree = treeBuilder.queryTree(CuidAdapter.reportingPeriodFormClass(3));
 
         FormTreePrettyPrinter.print(formTree);
-        
+
         query(CuidAdapter.reportingPeriodFormClass(3), "rate", "date1", "date2", "site.partner", "site.partner.label",
                 "site.location.label");
-        
+
         assertThat(column("date1"), hasValues("2009-01-01", "2009-02-01", "2009-03-01"));
     }
 
 
     @Test
     public void testReportingPeriodWithDateFilter() {
-        queryWhere(CuidAdapter.reportingPeriodFormClass(3), Arrays.asList(ColumnModel.ID_SYMBOL, "date1"), 
-            "date1 > '2009-01-15'");
+        queryWhere(CuidAdapter.reportingPeriodFormClass(3), Arrays.asList(ColumnModel.ID_SYMBOL, "date1"),
+                "date1 > '2009-01-15'");
         assertThat(column(ColumnModel.ID_SYMBOL), hasValues("m0000000092", "m0000000093"));
-        assertThat(column("date1"),               hasValues("2009-02-01", "2009-03-01"));
+        assertThat(column("date1"), hasValues("2009-02-01", "2009-03-01"));
     }
 
     @Test
     public void testReportingPeriodCached() {
 
         String[] columns = {
-                "rate", "date1", "date2", "site.partner", 
+                "rate", "date1", "date2", "site.partner",
                 "site.partner.label",
                 "site.location.label"};
 
@@ -287,8 +287,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testSiteIndicator() {
         query(CuidAdapter.activityFormClass(1), "_id",
-                CuidAdapter.indicatorField(1).asString(), "contact")    ;
-        
+                CuidAdapter.indicatorField(1).asString(), "contact");
+
     }
 
 
@@ -300,16 +300,16 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void ownerPermissions() {
-        
+
         int ownerUserId = 1;
-        FormPermissions permissions = 
+        FormPermissions permissions =
                 catalog.getForm(activityFormClass(1)).get().getPermissions(ownerUserId);
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
         assertThat(permissions.getVisibilityFilter(), nullValue());
     }
-    
+
     @Test
     public void noPermissions() {
         int userId = 21;
@@ -320,7 +320,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
         assertThat(permissions.getVisibilityFilter(), nullValue());
-        
+
     }
 
     @Test
@@ -334,7 +334,19 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(permissions.isEditAllowed(), equalTo(false));
         assertThat(permissions.getVisibilityFilter(), nullValue());
     }
-    
+
+    @Test
+    public void queryFormWithNoPermissions() {
+
+        // Christian's view permissions have been revoked
+        setUserId(5);
+
+        query(CuidAdapter.activityFormClass(1), "_id", "partner.label");
+
+        assertThat(column("_id"), hasValues(new String[0]));
+
+    }
+
     @Test
     public void editPartnerPermissions() {
         int userId = 4;
@@ -344,8 +356,51 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), CoreMatchers.equalTo("a00000000010000000007=p0000000002"));
-        assertThat(permissions.getEditFilter(), CoreMatchers.equalTo("a00000000010000000007=p0000000002"));
+        assertThat(permissions.getVisibilityFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
+        assertThat(permissions.getEditFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
+    }
+
+    @Test
+    public void recordsAreFiltered() {
+
+        // User 4: Marlene (Solidarites)
+        // Can only view records with the partner Solidarites (2) in database 1
+
+        setUserId(4);
+
+        // Database 1:
+        // Activity 1: NFI (Once)
+
+        // Site 1: Partner: (1)
+        // Site 2: Partner: (1)
+        // Site 3: Partner: Solidarites (2)
+
+
+
+        query(CuidAdapter.activityFormClass(1), "_id", "partner.label");
+
+        assertThat(column("_id"), hasValues("s0000000003"));
+    }
+
+    @Test
+    public void recordCountsAreFiltered() {
+
+        // User 4: Marlene (Solidarites)
+        // Can only view records with the partner Solidarites (2) in database 1
+
+        setUserId(4);
+
+        // Database 1:
+        // Activity 1: NFI (Once)
+
+        // Site 1: Partner: (1)
+        // Site 2: Partner: (1)
+        // Site 3: Partner: Solidarites (2)
+
+
+        query(CuidAdapter.activityFormClass(1), "_id", "FOOOOOO");
+
+        assertThat(column("_id"), hasValues("s0000000003"));
     }
 
 
@@ -361,7 +416,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(permissions.getVisibilityFilter(), nullValue());
         assertThat(permissions.getEditFilter(),  nullValue());
     }
-    
+
     @Test
     public void viewAllPermissions() {
         int userId = 2;
@@ -372,18 +427,25 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(permissions.isEditAllowed(), equalTo(true));
         assertThat(permissions.getVisibilityFilter(), nullValue());
     }
-    
+
     @Test
     public void publicPermission() {
         ResourceId publicFormClassId = activityFormClass(41);
         FormPermissions permissions =
                 catalog.getForm(publicFormClassId).get().getPermissions(999);
-        
+
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.getVisibilityFilter(), nullValue());
         assertThat(permissions.isEditAllowed(), equalTo(false));
     }
-    
+
+    @Test
+    public void malformedFormId() {
+
+        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf("a1"));
+        assertTrue("form should not exist", !form.isPresent());
+    }
+
     @Test
     public void batchOpenCollections() {
 
@@ -391,21 +453,21 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         ResourceId activity2 = activityFormClass(2);
         ResourceId provinceId = adminLevelFormClass(1);
         ResourceId monthlyId = reportingPeriodFormClass(4000);
-        
+
         Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(
                 asList(activity1, activity2, provinceId, monthlyId));
 
         FormClass activityFormClass1 = formClasses.get(activity1);
         assertThat(activityFormClass1, notNullValue());
         assertThat(activityFormClass1.getLabel(), equalTo("NFI"));
-        
+
         FormClass activityFormClass2 = formClasses.get(activity2);
         assertThat(activityFormClass2, notNullValue());
         assertThat(activityFormClass2.getLabel(), equalTo("Distribution de Kits Scolaire"));
-        
+
         FormClass provinceFormClass = formClasses.get(provinceId);
         assertThat(provinceFormClass.getLabel(), equalTo("Province"));
-        
+
         FormClass monthlyForm = formClasses.get(monthlyId);
         assertThat(monthlyForm, Matchers.notNullValue());
     }
@@ -419,18 +481,18 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         FormClass provinceClass = formClasses.get(adminLevelFormClass(1));
         FormClass territoryClass = formClasses.get(adminLevelFormClass(2));
-        
+
         assertThat(provinceClass.getLabel(), equalTo("Province"));
         assertThat(territoryClass.getLabel(), equalTo("Territoire"));
     }
-    
-    
+
+
     @Test
     public void nonExistingSite() {
 
         Optional<FormStorage> storage = catalog.getForm(CuidAdapter.locationFormClass(1));
         Optional<FormRecord> record = storage.get().get(CuidAdapter.locationFormClass(9444441));
-    
+
         assertFalse(record.isPresent());
     }
 

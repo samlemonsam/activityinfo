@@ -32,8 +32,9 @@ public class ActivityFormProvider implements FormProvider {
 
     @Override
     public boolean accept(ResourceId formId) {
-        return formId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN ||
-               formId.getDomain() == CuidAdapter.MONTHLY_REPORT_FORM_CLASS;
+        return (formId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN ||
+                formId.getDomain() == CuidAdapter.MONTHLY_REPORT_FORM_CLASS) &&
+                CuidAdapter.isValidLegacyId(formId);
     }
 
     @Override

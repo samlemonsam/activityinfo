@@ -13,6 +13,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.FormScanCache;
+import org.activityinfo.store.query.impl.FormSupervisorAdapter;
 import org.activityinfo.store.query.impl.NullFormScanCache;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.spi.FormCatalog;
@@ -83,7 +84,8 @@ public class FormSourceSyncImpl implements FormSource {
 
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
-        ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, formScanCache);
+        ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, formScanCache,
+                new FormSupervisorAdapter(formCatalog, userId));
         return Observable.just(builder.build(queryModel));
     }
 }

@@ -153,7 +153,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
         ColumnSet columnSet = assertResolves(locator.queryTable(queryModel));
         assertThat(columnSet.getNumRows(), equalTo(1));
         assertThat(columnSet.getColumnView("name").getString(0), equalTo("Village 1"));
-        assertThat(columnSet.getColumnView("admin").getString(1),
+        assertThat(columnSet.getColumnView("admin").getString(0),
                 equalTo(CuidAdapter.cuid(CuidAdapter.ADMIN_ENTITY_DOMAIN, 2).asString()));
 
 

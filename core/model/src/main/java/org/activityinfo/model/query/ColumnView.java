@@ -27,4 +27,12 @@ public interface ColumnView extends Serializable {
     int getBoolean(int row);
 
     boolean isMissing(int row);
+
+    /**
+     * Creates a new ColumnView with the rows listed in {@code rows}.
+     *
+     * @param rows an array of rows indexes into this ColumnView
+     * @return a new ColumnView containing the selected rows.
+     */
+    ColumnView select(int[] rows);
 }

@@ -4,6 +4,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
@@ -12,12 +13,16 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.*;
 import org.junit.After;
@@ -25,6 +30,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -106,7 +112,7 @@ public class HrdCatalogTest {
         queryModel.selectField("BENE").as("family_count");
         queryModel.selectExpr("BENE*5").as("individual_count");
         
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
         
         System.out.println(columnSet);
@@ -122,7 +128,47 @@ public class HrdCatalogTest {
         assertThat(version.getUserId(), equalTo((long)userId));
         assertThat(version.getType(), equalTo(RecordChangeType.CREATED));
     }
-    
+
+
+    @Test
+    public void enumWithNoChoices() {
+
+        final ResourceId formId = ResourceId.generateId();
+        ResourceId villageField = ResourceId.valueOf("FV");
+        final ResourceId selectField = ResourceId.valueOf("FC");
+
+        FormClass formClass = new FormClass(formId);
+        formClass.setParentFormId(ResourceId.valueOf("foo"));
+        formClass.setLabel("NFI Distributions");
+        formClass.addField(villageField)
+                .setLabel("Village name")
+                .setCode("VILLAGE")
+                .setType(TextType.SIMPLE);
+        formClass.addField(selectField)
+                .setLabel("Favorite color")
+                .setType(new EnumType(Cardinality.SINGLE, EnumType.Presentation.AUTOMATIC, Collections.<EnumItem>emptyList()));
+
+        HrdCatalog catalog = new HrdCatalog();
+        catalog.create(formClass);
+
+        // Avoid cache
+//        objectifyCloseable.close();
+
+        ObjectifyService.run(new VoidWork() {
+            @Override
+            public void vrun() {
+
+                HrdCatalog catalog = new HrdCatalog();
+                Optional<FormStorage> storage = catalog.getForm(formId);
+
+                FormClass deserializedSchema = storage.get().getFormClass();
+
+            }
+        });
+    }
+
+
+
     @Test
     public void createResource() {
 
@@ -158,7 +204,7 @@ public class HrdCatalogTest {
         queryModel.selectResourceId().as("id");
         queryModel.selectField("VILLAGE").as("village");
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         
@@ -243,7 +289,7 @@ public class HrdCatalogTest {
         queryModel.selectField("Name").as("member_name");
         queryModel.selectField("Age").as("member_age");
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         System.out.println(columnSet);

@@ -23,74 +23,37 @@
 <@scaffolding title="${label.chooseNewPassword}">
 
     <@content>
-    <div class="row">
-        <div class="span12">
+    <div class="row row--padded">
+        <h3>${label.chooseNewPassword}</h3>
 
-            <h3>${label.chooseNewPassword}</h3>
+        <form class="form" method="post" id="changePasswordForm" action="changePassword" method="post">
+            <input type="hidden" name="key" value="${user.changePasswordKey}">
+            <label>
+            ${label.newPassword}
+                <input type="password" name="password">
+            </label>
+            <label>
+            ${label.confirmNewPassword}
+                <input type="password" name="password2">
+            </label>
 
-            <form class="form" method="post" id="changePasswordForm" action="changePassword" method="post">
-                <input type="hidden" name="key" value="${user.changePasswordKey}"></input>
-
-                <div class="control-group">
-                    <label class="control-label" for="newPasswordInput">${label.newPassword}</label>
-
-                    <div class="controls">
-                        <input type="password" name="password" id="newPasswordInput">
-                    </div>
+            <#if passwordLengthInvalid>
+                <div class="alert alert--error">
+                <p>${label.passwordHelp}</p>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="newPasswordInput">${label.confirmNewPassword}</label>
+            </#if>
 
-                    <div class="controls">
-                        <input type="password" name="password2" id="newPasswordInput2">
-                    </div>
+            <#if passwordsNotMatched>
+                <div class="alert alert--error">
+                <p>${label.passwordDoNotMatch}</p>
                 </div>
+            </#if>
 
-                <div class="control-group">
-                    <div class="alert alert-error <#if !passwordLengthInvalid> hide </#if>" id="alertLength">
-                        ${label.passwordHelp}
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="alert alert-error <#if !passwordsNotMatched> hide </#if>" id="alertNotMatch">
-                        ${label.passwordDoNotMatch}
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="controls">
-
-                        <button type="submit" class="btn btn-primary btn-large">${label.continue}  &raquo;</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+            <button type="submit">${label.continue} &raquo;</button>
+        </form>
     </div>
     </@content>
-
     <@footer/>
     <@scripts>
-    <script type="text/javascript">
-        $("#changePasswordForm").submit(function( event ) {
-
-            $("#alertLength").addClass( "hide" );
-            $("#alertNotMatch").addClass( "hide" );
-
-            var val1 = $("#newPasswordInput").val();
-            var val2 = $("#newPasswordInput2").val();
-
-            if (val1.length < 6) { // minimal length of password is 6
-                $("#alertLength").removeClass("hide");
-                event.preventDefault();
-                return;
-            }
-
-            if (val1 != val2) { // check whether passwords equals
-                $("#alertNotMatch").removeClass("hide");
-                event.preventDefault();
-                return;
-            }
-        });
-    </script>
     </@scripts>
 </@scaffolding>

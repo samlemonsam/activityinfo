@@ -322,11 +322,19 @@ public class FormTree implements FormClassProvider {
         List<ColumnNode> columns = Lists.newArrayList();
         Map<ResourceId, ColumnNode> columnMap = Maps.newHashMap();
 
+        enumerateParentColumns(getRootFormClass());
         enumerateColumns(getRootFields(), columns, columnMap);
         return columns;
     }
 
+    private void enumerateParentColumns(FormClass rootFormClass) {
+        if(rootFormClass.isSubForm()) {
+        }
+    }
+
     private void enumerateColumns(List<FormTree.Node> fields, List<ColumnNode> columns, Map<ResourceId, ColumnNode> columnMap) {
+
+
         for (FormTree.Node node : fields) {
 
             if (node.getType() instanceof SubFormReferenceType) { // skip subForm fields
@@ -471,6 +479,9 @@ public class FormTree implements FormClassProvider {
     }
 
     public FormTree subTree(ResourceId formId) {
+        if (formId.equals(this.rootFormId)) {
+            return this;
+        }
         FormTreeBuilder treeBuilder = new FormTreeBuilder(this);
         return treeBuilder.queryTree(formId);
     }

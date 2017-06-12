@@ -63,12 +63,10 @@ public class NewsPortlet extends Portlet {
         type.addField("excerpt");
         type.addField("url");
 
-        ScriptTagProxy<String> proxy = new ScriptTagProxy<String>(
-                "//about.activityinfo.org?json=get_category_posts&category_slug=news&count=3");
+        ScriptTagProxy<String> proxy = new ScriptTagProxy<String>("/about/news.json");
 
         // need a loader, proxy, and reader
-        JsonLoadResultReader<ListLoadResult<ModelData>> reader = new JsonLoadResultReader<ListLoadResult<ModelData>>(
-                type);
+        JsonLoadResultReader<ListLoadResult<ModelData>> reader = new JsonLoadResultReader<ListLoadResult<ModelData>>(type);
 
         final BaseListLoader<ListLoadResult<ModelData>> loader = new BaseListLoader<ListLoadResult<ModelData>>(proxy,
                 reader);
