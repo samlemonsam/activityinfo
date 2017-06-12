@@ -120,7 +120,7 @@ public class SignUpConfirmationController {
             }
 
             // go to the home page
-            return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/").build())
+            return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
                     .cookie(authTokenProvider.createNewAuthCookies(user))
                     .build();
 
