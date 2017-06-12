@@ -65,7 +65,7 @@ public class HostController {
 
         if (!authProvider.isAuthenticated()) {
             // Otherwise, go to the default ActivityInfo root page
-            return Response.temporaryRedirect(uri.getAbsolutePathBuilder().path("login").build()).build();
+            return Response.temporaryRedirect(uri.getAbsolutePathBuilder().replacePath("/login").build()).build();
         }
 
         if (redirect) {
