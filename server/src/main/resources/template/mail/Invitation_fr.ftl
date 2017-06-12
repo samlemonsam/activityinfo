@@ -27,6 +27,10 @@ votre adresse et connecter au système, visitez le lien suivante:
 
 https://${domain.host}/confirm?${newUser.changePasswordKey}
 
+Si vous disposez d'une compte Humanitarian ID, vous pouvez connecter directement:
+https://${domain.host}/oauth/oauthconnector_hid_oauth
+
+
 Cordialement,
 
 L'équipe ActivityInfo

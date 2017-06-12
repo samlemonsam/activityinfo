@@ -28,6 +28,9 @@ complete your user registration, click on the following link:
 
 https://${domain.host}/confirm?${newUser.changePasswordKey}
 
+If you have a Humanitarian ID, you can login directly via:
+https://${domain.host}/oauth/oauthconnector_hid_oauth
+
 Best regards,
 
 The ActivityInfo Team
