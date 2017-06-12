@@ -184,7 +184,7 @@ public class HumanitarianId {
         
         User user = new User();
         user.setEmail(account.getEmail());
-        user.setName(account.getGivenName() + " " + account.getFamilyName());
+        user.setName(account.getName());
         user.setDateCreated(new Date());
         user.setLocale("en");
 
