@@ -13,4 +13,4 @@ NETWORK:
 *
 
 FALLBACK:
-/ /offline
+/ /app/offline

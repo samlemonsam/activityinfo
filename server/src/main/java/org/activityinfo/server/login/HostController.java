@@ -41,7 +41,7 @@ import java.util.HashMap;
 
 @Path(HostController.ENDPOINT)
 public class HostController {
-    public static final String ENDPOINT = "/";
+    public static final String ENDPOINT = "/app";
 
     private final ServerSideAuthProvider authProvider;
     private Provider<EntityManager> entityManager;
