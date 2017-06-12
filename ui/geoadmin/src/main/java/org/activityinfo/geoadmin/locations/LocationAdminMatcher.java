@@ -7,9 +7,8 @@ import java.util.Map;
 import com.google.common.base.Strings;
 import org.activityinfo.geoadmin.GeoUtils;
 import org.activityinfo.geoadmin.ImportFeature;
-import org.activityinfo.geoadmin.ParentGuesser;
 import org.activityinfo.geoadmin.PlaceNames;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
 import org.activityinfo.geoadmin.model.AdminLevelNode;
@@ -23,13 +22,13 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class LocationAdminMatcher {
 
-	private ActivityInfoClient client;
+	private GeoAdminClient client;
 	private AdminLevelTree tree;
 	private Map<AdminLevelNode, Integer> attributeMap = Maps.newHashMap();
 
 	private Multimap<AdminLevelNode, AdminEntity> entities = HashMultimap.create();
 	
-	public LocationAdminMatcher(ActivityInfoClient client,
+	public LocationAdminMatcher(GeoAdminClient client,
 			List<AdminLevel> levels) {
 
 		this.client = client;

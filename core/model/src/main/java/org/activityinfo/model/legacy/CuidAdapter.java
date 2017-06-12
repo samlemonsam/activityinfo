@@ -2,8 +2,11 @@ package org.activityinfo.model.legacy;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 
 /**
@@ -80,6 +83,7 @@ public class CuidAdapter {
     public static final int LOCATION_NAME_FIELD = 15;
     public static final int GPS_FIELD = 16;
     public static final int SITE_FIELD = 17;
+    public static final int MONTHLY_SUBFORM_FIELD = 18;
 
     public static final int BLOCK_SIZE = 10;
     public static final String CLASS_FIELD = "_class";
@@ -87,6 +91,8 @@ public class CuidAdapter {
     public static final int[] BUILTIN_FIELDS = new int[] {
             START_DATE_FIELD, END_DATE_FIELD, PARTNER_FIELD, PROJECT_FIELD,
             LOCATION_FIELD, COMMENT_FIELD };
+
+
     /**
      * Avoid instance creation.
      */
@@ -112,7 +118,7 @@ public class CuidAdapter {
         return Integer.parseInt(cuid.substring(1), ResourceId.RADIX);
     }
 
-    public static Optional<Integer> getLegacyIdFromCuidOptional(String cuid) {
+    public static Optional<Integer> getLegacyIdFromCuidOptional(ResourceId cuid) {
         try {
             return Optional.of(getLegacyIdFromCuid(cuid));
         } catch (NumberFormatException e) {
@@ -342,5 +348,36 @@ public class CuidAdapter {
         return new ReferenceValue(new RecordRef(
                 CuidAdapter.projectFormClass(databaseId),
                 CuidAdapter.projectInstanceId(projectId)));
+    }
+
+    public static ResourceId generateActivityId() {
+        return CuidAdapter.activityFormClass(new KeyGenerator().generateInt());
+    }
+
+
+    public static FormField partnerField(FormClass formClass) {
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId());
+        ResourceId partnerId = field(formClass.getId(), PARTNER_FIELD);
+        FormField formField = new FormField(partnerId);
+        formField.setLabel("Partner");
+        formField.setType(ReferenceType.single(partnerFormId(databaseId)));
+        formField.setRequired(true);
+        return formField;
+    }
+
+    /**
+     * Returns true if the given {@code formId} is a well-formed legacy id. It must start
+     * with a single character and have at least 10 digits.
+     *
+     */
+    public static boolean isValidLegacyId(ResourceId formId) {
+        Optional<Integer> legacyId = getLegacyIdFromCuidOptional(formId);
+        if(legacyId.isPresent()) {
+            // Ensure that appropriate number of zeros are present
+            ResourceId correctId = cuid(formId.getDomain(), legacyId.get());
+            return formId.equals(correctId);
+        } else {
+            return false;
+        }
     }
 }

@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.collections;
 
-import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.activityinfo.i18n.shared.I18N;
@@ -16,7 +15,6 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.*;
 import org.activityinfo.store.mysql.metadata.AdminLevel;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +38,8 @@ public class AdminEntityTable implements SimpleTable {
 
     @Override
     public boolean accept(ResourceId formClassId) {
-        return formClassId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN;
+        return formClassId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN &&
+                CuidAdapter.isValidLegacyId(formClassId);
     }
 
     @Override
@@ -56,6 +55,7 @@ public class AdminEntityTable implements SimpleTable {
         FormField label = new FormField(CuidAdapter.field(formId, CuidAdapter.NAME_FIELD));
         label.setLabel(I18N.CONSTANTS.name());
         label.setCode("name");
+        label.setKey(true);
         label.setRequired(true);
         label.addSuperProperty(ResourceId.valueOf("label"));
         label.setType(TextType.SIMPLE);
@@ -78,6 +78,7 @@ public class AdminEntityTable implements SimpleTable {
             parent.setCode("parent");
             parent.setLabel(level.getParentName());
             parent.setRequired(true);
+            parent.setKey(true);
             parent.setType(ReferenceType.single(CuidAdapter.adminLevelFormClass(level.getParentId())));
             parent.addSuperProperty(ApplicationProperties.PARENT_PROPERTY);
         }
@@ -100,20 +101,6 @@ public class AdminEntityTable implements SimpleTable {
                     CuidAdapter.adminLevelFormClass(level.getParentId()), ADMIN_ENTITY_DOMAIN)));
         }
         return mapping.build();
-    }
-
-    @Override
-    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
-        if(id.getDomain() == ADMIN_ENTITY_DOMAIN) {
-            try(ResultSet rs = queryExecutor.query(String.format("SELECT adminLevelId FROM adminentity WHERE adminEntityId=%d",
-                    CuidAdapter.getLegacyIdFromCuid(id)))) {
-                if (rs.next()) {
-                    int adminLevelId = rs.getInt(1);
-                    return Optional.of(CuidAdapter.adminLevelFormClass(adminLevelId));
-                }
-            }
-        }
-        return Optional.absent();
     }
 
     public static void clearCache() {

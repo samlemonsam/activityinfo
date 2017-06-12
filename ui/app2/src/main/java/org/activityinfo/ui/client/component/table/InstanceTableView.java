@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.widget.AlertPanel;
@@ -55,14 +56,14 @@ public class InstanceTableView implements IsWidget, RequiresResize {
 
     private static InstanceTableViewUiBinder ourUiBinder = GWT.create(InstanceTableViewUiBinder.class);
 
-    public InstanceTableView(ResourceLocator resourceLocator, StateProvider stateProvider) {
+    public InstanceTableView(ResourceLocator resourceLocator, StateProvider stateProvider, EventBus eventBus) {
 
         InstanceTableStyle.INSTANCE.ensureInjected();
 
         this.resourceLocator = resourceLocator;
         this.stateProvider = stateProvider;
 
-        this.table = new InstanceTable(this);
+        this.table = new InstanceTable(this, eventBus);
         this.loadingIndicator = table.getLoadingIndicator();
         this.panel = ourUiBinder.createAndBindUi(this);
     }

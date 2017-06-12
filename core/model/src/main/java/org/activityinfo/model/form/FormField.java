@@ -29,6 +29,7 @@ public class FormField extends FormElement {
     private boolean visible = true;
     private Set<ResourceId> superProperties = Sets.newHashSet();
     private boolean required;
+    private boolean key;
 
     public FormField(ResourceId id) {
         checkNotNull(id);
@@ -82,6 +83,10 @@ public class FormField extends FormElement {
         return this;
     }
 
+    public boolean hasRelevanceCondition() {
+        return !Strings.isNullOrEmpty(relevanceConditionExpression);
+    }
+
     public String getRelevanceConditionExpression() {
         return relevanceConditionExpression;
     }
@@ -112,6 +117,16 @@ public class FormField extends FormElement {
 
     public FormField setType(FieldType type) {
         this.type = type;
+        return this;
+    }
+
+
+    public boolean isKey() {
+        return key;
+    }
+
+    public FormField setKey(boolean key) {
+        this.key = key;
         return this;
     }
 
@@ -204,6 +219,10 @@ public class FormField extends FormElement {
         
         object.addProperty("type", type.getTypeClass().getId());
 
+        if(key) {
+            object.addProperty("key", true);
+        }
+
         if(!superProperties.isEmpty()) {
             JsonArray superPropertiesArray = new JsonArray();
             for (ResourceId superProperty : superProperties) {
@@ -225,7 +244,7 @@ public class FormField extends FormElement {
         field.setLabel(Strings.nullToEmpty(JsonParsing.toNullableString(jsonObject.get("label"))));
         field.setCode(JsonParsing.toNullableString(jsonObject.get("code")));
         field.setDescription(JsonParsing.toNullableString(jsonObject.get("description")));
-        
+
         if(jsonObject.has("relevanceCondition")) {
             field.setRelevanceConditionExpression(JsonParsing.toNullableString(jsonObject.get("relevanceCondition")));
         } else if(jsonObject.has("relevanceConditionExpression")) {
@@ -237,6 +256,10 @@ public class FormField extends FormElement {
         }
         if(jsonObject.has("required")) {
             field.setRequired(jsonObject.get("required").getAsBoolean());
+        }
+
+        if(jsonObject.has("key")) {
+            field.setKey(jsonObject.get("key").getAsBoolean());
         }
 
         if(jsonObject.has("superProperties")) {

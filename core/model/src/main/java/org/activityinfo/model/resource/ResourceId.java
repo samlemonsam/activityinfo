@@ -35,6 +35,7 @@ public final class ResourceId implements Serializable {
      * used as a Jersey {@code @PathParam}
      */
     public static ResourceId valueOf(@Nonnull String string) {
+        assert string != null : "resourceid cannot be null";
         return new ResourceId(string);
     }
 
@@ -45,8 +46,8 @@ public final class ResourceId implements Serializable {
         return valueOf(GENERATED_ID_DOMAIN + generateCuid());
     }
 
-    public static ResourceId generatedPeriodSubmissionId(ResourceId formId, ResourceId rootInstanceId, String keyId) {
-        return ResourceId.valueOf(formId.asString() + "-" + rootInstanceId.asString() + "-" + keyId);
+    public static ResourceId generatedPeriodSubmissionId(ResourceId rootInstanceId, String keyId) {
+        return ResourceId.valueOf(rootInstanceId.asString() + "-" + keyId);
     }
 
     public static ResourceId generateSubmissionId(ResourceId collectionId) {
@@ -56,7 +57,7 @@ public final class ResourceId implements Serializable {
             case CuidAdapter.LOCATION_TYPE_DOMAIN:
                 return CuidAdapter.generateLocationCuid();
             case GENERATED_ID_DOMAIN:
-                return valueOf(collectionId.asString() + "-" + generateCuid());
+                return ResourceId.valueOf(generateCuid());
         }
         throw new IllegalArgumentException("Unsupported domain type: " + collectionId);
     }

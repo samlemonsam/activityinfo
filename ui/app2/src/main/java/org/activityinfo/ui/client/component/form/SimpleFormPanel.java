@@ -214,6 +214,10 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
             value = null;
         }
 
+        if (!container.isInputValid()) {
+            return false;
+        }
+
         if (!container.getFieldWidget().isValid()) {
             return false;
         }

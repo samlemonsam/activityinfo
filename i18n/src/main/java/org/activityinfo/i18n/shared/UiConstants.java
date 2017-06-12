@@ -1279,8 +1279,17 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Applicable IF (to define)")
     String relevanceEnabledIf();
 
-    @DefaultStringValue("This form field will only applicable based on the answer of another form field. Please define the relevance or applicability of the form field.")
-    String relevanceWelcomeText();
+    @DefaultStringValue("Show this field only if")
+    String relevanceShowIf();
+
+    @DefaultStringValue("all")
+    String relevanceCriteriaAll();
+
+    @DefaultStringValue("any")
+    String relevanceCriteriaAny();
+
+    @DefaultStringValue("of the following conditions are met:")
+    String relevanceConditionsMet();
 
     @DefaultStringValue("Invalid code. Valid code must start with a letter and contain only letters, numbers, and the underscore symbol.")
     String invalidCodeMessage();
@@ -1672,4 +1681,55 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Learn more about input masks")
     String learnMoreAboutInputMasks();
+
+    @DefaultStringValue("is")
+    String operatorIs();
+
+    @DefaultStringValue("is not")
+    String operatorIsNot();
+
+    @DefaultStringValue("is greater than")
+    String operatorGreaterThan();
+
+    @DefaultStringValue("is greater than or equal to")
+    String operatorGreaterThanEqual();
+
+    @DefaultStringValue("is less than")
+    String operatorLessThan();
+
+    @DefaultStringValue("is less than or equal to")
+    String operatorLessThanEqualTo();
+
+    @DefaultStringValue("includes")
+    String operatorIncludes();
+
+    @DefaultStringValue("does not include")
+    String operatorDoesNotInclude();
+
+    @DefaultStringValue("Learn more about serial numbers")
+    String learnMoreAboutSerialNumbers();
+
+
+
+    @DefaultStringValue("(Pending)")
+    String pending();
+
+    @DefaultStringValue("Serial Number")
+    String serialNumber();
+
+    @DefaultStringValue("Prefix Formula")
+    String prefixFormula();
+
+
+    @DefaultStringValue("Show as dropdown")
+    String dropdownPresentation();
+
+    @DefaultStringValue("Show as radio buttons")
+    String radioButtonPresentation();
+
+    @DefaultStringValue("Presentation")
+    String presentation();
+
+    @DefaultStringValue("Key")
+    String keyField();
 }

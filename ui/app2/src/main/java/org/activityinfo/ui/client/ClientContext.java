@@ -58,6 +58,8 @@ public final class ClientContext {
 
 
     public static boolean isNewFieldsFlagEnabled() {
-        return getFeatureFlags().contains("newfields") || Window.Location.getHostName().contains("ai-staging");
+        return getFeatureFlags().contains("newfields") ||
+                Window.Location.getHostName().contains("ai-staging") ||
+                Window.Location.getHostName().contains("ai-dev");
     }
 }

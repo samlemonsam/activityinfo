@@ -66,6 +66,12 @@ public class NewHeaderAction implements TableHeaderAction {
 
     @Override
     public void render(Cell.Context context, String value, SafeHtmlBuilder sb) {
+
+        // Do not show button for sub forms
+        if(table.getRootFormClass().isSubForm()) {
+            return;
+        }
+
         sb.append(TEMPLATE.rightAlignedButton(uniqueId, Icons.INSTANCE.add(), I18N.CONSTANTS.newText()));
     }
 

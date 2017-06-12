@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
+import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
@@ -14,17 +15,20 @@ public class FormPageLoader implements PageLoader {
 
     private final NavigationHandler pageManager;
     private ResourceLocator resourceLocator;
+    private final EventBus eventBus;
     private final StateProvider stateProvider;
+
 
     @Inject
     public FormPageLoader(NavigationHandler pageManager,
-                      PageStateSerializer placeSerializer,
-                      ResourceLocator resourceLocator,
-                      StateProvider stateProvider
+                          PageStateSerializer placeSerializer,
+                          ResourceLocator resourceLocator,
+                          EventBus eventBus, StateProvider stateProvider
     ) {
 
         this.resourceLocator = resourceLocator;
         this.pageManager = pageManager;
+        this.eventBus = eventBus;
         this.stateProvider = stateProvider;
 
         pageManager.registerPageLoader(ResourcePage.DESIGN_PAGE_ID, this);
@@ -44,7 +48,7 @@ public class FormPageLoader implements PageLoader {
             public void onSuccess() {
                 if (pageState instanceof ResourcePlace) {
                     ResourcePlace resourcePlace = (ResourcePlace) pageState;
-                    ResourcePage page = new ResourcePage(resourceLocator, resourcePlace.getPageId(), stateProvider);
+                    ResourcePage page = new ResourcePage(eventBus, resourceLocator, resourcePlace.getPageId(), stateProvider);
                     page.navigate(pageState);
                     callback.onSuccess(page);
                 }

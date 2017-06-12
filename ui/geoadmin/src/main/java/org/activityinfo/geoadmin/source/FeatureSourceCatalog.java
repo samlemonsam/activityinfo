@@ -66,11 +66,6 @@ public class FeatureSourceCatalog implements FormCatalog {
     }
 
     @Override
-    public Optional<FormStorage> lookupForm(ResourceId recordId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         Map<ResourceId, FormClass> map = new HashMap<>();
         for (ResourceId collectionId : formIds) {

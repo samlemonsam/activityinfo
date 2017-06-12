@@ -9,9 +9,7 @@ import org.activityinfo.geoadmin.merge2.view.match.*;
 import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.geoadmin.merge2.view.swing.SwingSchedulers;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
-import org.activityinfo.geoadmin.model.TransactionBuilder;
-import org.activityinfo.geoadmin.model.UpdateBuilder;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
 import org.activityinfo.geoadmin.source.FeatureSourceStorage;
 import org.activityinfo.geoadmin.source.GeometryConverter;
@@ -19,6 +17,8 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.UpdateBuilder;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Scheduler;
 import org.activityinfo.store.ResourceStore;
@@ -110,7 +110,7 @@ public class ImportView {
      * build a transaction to effect the import.
      * @param client
      */
-    public void runUpdate(ActivityInfoClient client) {
+    public void runUpdate(GeoAdminClient client) {
         TransactionBuilder tx = new TransactionBuilder();
 
         ResourceId targetFormId = model.getTargetFormId().get();
@@ -126,7 +126,7 @@ public class ImportView {
             if (!matchRow.isMatched(MatchSide.SOURCE)) {
                 // no corresponding row in the source:
                 // delete unmatched target
-                tx.delete(matchRow.getTargetId().get());
+                tx.delete(targetFormId, matchRow.getTargetId().get());
 
             } else {
 
@@ -135,7 +135,7 @@ public class ImportView {
                 if (matchRow.isMatched(MatchSide.TARGET)) {
                     // update target with properties from the source
                     targetId = matchRow.getTargetId().get();
-                    update = tx.update(targetId);
+                    update = tx.update(targetFormId, targetId);
                 } else {
                     // create a new instance with properties from the source
                     targetId = CuidAdapter.entity(generator.generateInt());
@@ -162,7 +162,7 @@ public class ImportView {
 
     }
 
-    private void updateGeometry(ActivityInfoClient client, Map<ResourceId, ResourceId> idMap) throws IOException {
+    private void updateGeometry(GeoAdminClient client, Map<ResourceId, ResourceId> idMap) throws IOException {
         FeatureSourceCatalog catalog = new FeatureSourceCatalog();
         FeatureSourceStorage formStorage = (FeatureSourceStorage) catalog.getForm(getModel().getSourceFormId().get()).get();
 

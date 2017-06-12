@@ -11,7 +11,6 @@ import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,11 +92,11 @@ public class SerialQueue {
             pollScheduled = false;
 
             // First check pending for any results
-            ListIterator<Task> pendingIt = pendingTasks.listIterator();
+            Iterator<Task> pendingIt = new ArrayList<>(pendingTasks).iterator();
             while (pendingIt.hasNext()) {
                 Task pending = pendingIt.next();
                 if (pending.result.isSettled()) {
-                    pendingIt.remove();
+                    pendingTasks.remove(pending);
                     onSettled(pending);
                 }
             }

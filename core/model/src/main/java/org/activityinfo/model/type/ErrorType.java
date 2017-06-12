@@ -36,6 +36,11 @@ public class ErrorType implements FieldType {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     /**
      *
      * @return the singleton instance for this type

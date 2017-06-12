@@ -1,9 +1,10 @@
 package org.activityinfo.server.endpoint.odk;
 
-import org.activityinfo.model.type.number.QuantityType;
+import com.google.common.base.Optional;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.BodyElement;
 import org.activityinfo.io.xform.form.Input;
+import org.activityinfo.model.type.number.QuantityType;
 
 class QuantityFieldBuilder implements OdkFormFieldBuilder {
     final private String units;
@@ -15,6 +16,11 @@ class QuantityFieldBuilder implements OdkFormFieldBuilder {
     @Override
     public BindingType getModelBindType() {
         return BindingType.DECIMAL;
+    }
+
+    @Override
+    public Optional<String> getConstraint() {
+        return Optional.absent();
     }
 
     @Override

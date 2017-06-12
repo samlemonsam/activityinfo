@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.collections;
 
-import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -25,8 +24,9 @@ public class ProjectTable implements SimpleTable {
     }
 
     @Override
-    public boolean accept(ResourceId formClassId) {
-        return formClassId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
+    public boolean accept(ResourceId formId) {
+        return formId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN &&
+                CuidAdapter.isValidLegacyId(formId);
     }
 
     @Override
@@ -47,6 +47,7 @@ public class ProjectTable implements SimpleTable {
                 .setRequired(true)
                 .setLabel("Name")
                 .setCode("label")
+                .setKey(true)
                 .setType(TextType.SIMPLE);
 
         mapping.addTextField(nameField, "name");
@@ -62,8 +63,4 @@ public class ProjectTable implements SimpleTable {
         return mapping.build();
     }
 
-    @Override
-    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
-        return Optional.absent();
-    }
 }

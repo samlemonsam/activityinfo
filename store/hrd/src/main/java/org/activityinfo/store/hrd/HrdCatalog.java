@@ -6,9 +6,6 @@ import com.googlecode.objectify.ObjectifyService;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.hrd.entity.FormEntity;
-import org.activityinfo.store.hrd.entity.FormRecordEntity;
-import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.spi.FormCatalog;
@@ -21,15 +18,9 @@ import java.util.*;
  */
 public class HrdCatalog implements FormCatalog {
 
-    static {
-        ObjectifyService.register(FormEntity.class);
-        ObjectifyService.register(FormRecordEntity.class);
-        ObjectifyService.register(FormRecordSnapshotEntity.class);
-        ObjectifyService.register(FormSchemaEntity.class);
-    }
-    
+
     public HrdFormStorage create(FormClass formClass) {
-        ObjectifyService.ofy().transact(new CreateOrUpdateForm(formClass));
+        Hrd.ofy().transact(new CreateOrUpdateForm(formClass));
         
         return new HrdFormStorage(formClass);
     }
@@ -37,7 +28,7 @@ public class HrdCatalog implements FormCatalog {
     @Override
     public Optional<FormStorage> getForm(ResourceId formId) {
 
-        FormSchemaEntity schemaEntity = ObjectifyService.ofy().load().key(FormSchemaEntity.key(formId)).now();
+        FormSchemaEntity schemaEntity = Hrd.ofy().load().key(FormSchemaEntity.key(formId)).now();
         if(schemaEntity == null) {
             return Optional.absent();
         }
@@ -45,19 +36,6 @@ public class HrdCatalog implements FormCatalog {
         HrdFormStorage accessor = new HrdFormStorage(schemaEntity.readFormClass());
         
         return Optional.<FormStorage>of(accessor);
-    }
-
-    @Override
-    public Optional<FormStorage> lookupForm(ResourceId recordId) {
-        if(recordId.getDomain() != ResourceId.GENERATED_ID_DOMAIN) {
-            return Optional.absent();
-        }
-        String parts[] = recordId.asString().split("-");
-        if(parts.length != 2) {
-            throw new IllegalArgumentException("Invalid submission id: " + recordId + 
-                    ". Expected format c00000-000000");
-        }
-        return getForm(ResourceId.valueOf(parts[0]));
     }
 
     @Override

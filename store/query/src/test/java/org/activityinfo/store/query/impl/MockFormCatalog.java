@@ -30,11 +30,6 @@ public class MockFormCatalog implements FormCatalog {
     }
 
     @Override
-    public Optional<FormStorage> lookupForm(ResourceId recordId) {
-        return Optional.absent();
-    }
-
-    @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         throw new UnsupportedOperationException();
     }

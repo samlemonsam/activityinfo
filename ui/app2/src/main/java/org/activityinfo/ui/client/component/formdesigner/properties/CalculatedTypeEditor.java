@@ -6,26 +6,21 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.ExprLexer;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.ui.client.widget.TextBox;
 import org.activityinfo.ui.client.widget.form.FormGroup;
 import org.activityinfo.ui.client.widget.form.ValidationStateType;
 
-public class CalculatedTypeEditor implements IsWidget {
-
-
-    private CalculatedFieldType currentType;
+public class CalculatedTypeEditor extends TypeEditor<CalculatedFieldType> {
 
     interface CalculatedTypeEditorUiBinder extends UiBinder<Widget, CalculatedTypeEditor> {
     }
-
     private static CalculatedTypeEditorUiBinder ourUiBinder = GWT.create(CalculatedTypeEditorUiBinder.class);
 
     private final Widget widget;
@@ -44,22 +39,22 @@ public class CalculatedTypeEditor implements IsWidget {
         return widget;
     }
 
-    public void show(FormField field) {
-        if(field.getType() instanceof CalculatedFieldType) {
-            currentType = (CalculatedFieldType) field.getType();
-            expressionTextBox.setText(currentType.getExpression());
-            validateExpression();
-            widget.setVisible(true);
-        } else {
-            widget.setVisible(false);
-        }
+    @Override
+    protected boolean accept(FieldType type) {
+        return type instanceof CalculatedFieldType;
+    }
+
+    @Override
+    protected void show(CalculatedFieldType type) {
+        expressionTextBox.setText(type.getExpression());
+        validateExpression();
     }
 
     @UiHandler("expressionTextBox")
     public void onExpressionChange(KeyUpEvent event) {
         validateExpression();
 
-        currentType.setExpression(expressionTextBox.getText());
+        updateType(currentType().withFormula(expressionTextBox.getText()));
     }
 
     private void validateExpression() {

@@ -2,6 +2,7 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.FilteredColumnView;
 
 public abstract class AbstractStringView implements ColumnView {
 
@@ -23,5 +24,15 @@ public abstract class AbstractStringView implements ColumnView {
     @Override
     public final int getBoolean(int row) {
         return -1;
+    }
+
+    @Override
+    public final boolean isMissing(int row) {
+        return getString(row) == null;
+    }
+
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        return new FilteredColumnView(this, selectedRows);
     }
 }

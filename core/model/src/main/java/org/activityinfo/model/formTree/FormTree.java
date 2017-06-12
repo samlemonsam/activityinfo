@@ -3,7 +3,6 @@ package org.activityinfo.model.formTree;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.UnmodifiableIterator;
@@ -24,9 +23,16 @@ import java.util.*;
 /**
  * Contains a tree of fields based on references to other {@code FormClasses}
  */
-public class FormTree {
+public class FormTree implements FormClassProvider {
 
-    
+    private ResourceId rootFormId;
+
+    public enum State {
+        VALID,
+        DELETED,
+        FORBIDDEN
+    }
+
     public class Node {
 
         private Node parent;
@@ -258,12 +264,25 @@ public class FormTree {
         BREADTH_FIRST
     }
 
+    private State rootState = State.VALID;
     private List<Node> rootFields = Lists.newArrayList();
     private Map<FieldPath, Node> nodeMap = Maps.newHashMap();
     private Map<ResourceId, FormClass> formClassMap = new HashMap<>();
 
-    public FormTree() {
+    public FormTree(ResourceId rootFormId) {
+        this.rootFormId = rootFormId;
+    }
 
+    public ResourceId getRootFormId() {
+        return rootFormId;
+    }
+
+    public State getRootState() {
+        return rootState;
+    }
+
+    public void setRootState(State rootState) {
+        this.rootState = rootState;
     }
 
     public Node addRootField(FormClass declaringClass, FormField field) {
@@ -285,11 +304,19 @@ public class FormTree {
         List<ColumnNode> columns = Lists.newArrayList();
         Map<ResourceId, ColumnNode> columnMap = Maps.newHashMap();
 
+        enumerateParentColumns(getRootFormClass());
         enumerateColumns(getRootFields(), columns, columnMap);
         return columns;
     }
 
+    private void enumerateParentColumns(FormClass rootFormClass) {
+        if(rootFormClass.isSubForm()) {
+        }
+    }
+
     private void enumerateColumns(List<FormTree.Node> fields, List<ColumnNode> columns, Map<ResourceId, ColumnNode> columnMap) {
+
+
         for (FormTree.Node node : fields) {
 
             if (node.getType() instanceof SubFormReferenceType) { // skip subForm fields
@@ -320,15 +347,7 @@ public class FormTree {
     }
 
     public FormClass getRootFormClass() {
-        return Iterables.getOnlyElement(getRootFormClasses().values());
-    }
-    
-    public Map<ResourceId, FormClass> getRootFormClasses() {
-        Map<ResourceId, FormClass> map = Maps.newHashMap();
-        for(Node node : rootFields) {
-            map.put(node.getDefiningFormClass().getId(), node.getDefiningFormClass());
-        }
-        return map;
+        return formClassMap.get(rootFormId);
     }
 
     public FormClass getFormClass(ResourceId formClassId) {
@@ -437,6 +456,14 @@ public class FormTree {
 
     public static Predicate<Node> pathNotIn(final Collection<FieldPath> paths) {
         return Predicates.not(pathIn(paths));
+    }
+
+    public FormTree subTree(ResourceId formId) {
+        if (formId.equals(this.rootFormId)) {
+            return this;
+        }
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(this);
+        return treeBuilder.queryTree(formId);
     }
 
     @Override

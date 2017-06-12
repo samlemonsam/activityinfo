@@ -86,6 +86,7 @@ public class LocationFormStorage implements FormStorage {
         nameFieldId = CuidAdapter.field(formClassId, CuidAdapter.NAME_FIELD);
         FormField labelField = new FormField(nameFieldId);
         labelField.setCode("name");
+        labelField.setKey(true);
         labelField.setLabel(I18N.CONSTANTS.name());
         labelField.addSuperProperty(ResourceId.valueOf("label"));
         labelField.setRequired(true);

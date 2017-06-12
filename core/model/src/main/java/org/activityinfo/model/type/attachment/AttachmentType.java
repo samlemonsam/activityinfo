@@ -103,6 +103,11 @@ public class AttachmentType implements ParametrizedFieldType {
         return visitor.visitAttachment(this);
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return true;
+    }
+
     public Cardinality getCardinality() {
         return cardinality;
     }

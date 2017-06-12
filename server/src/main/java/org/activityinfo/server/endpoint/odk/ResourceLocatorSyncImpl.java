@@ -8,13 +8,17 @@ import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.FormCatalog;
@@ -43,8 +47,14 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        return catalog.get().getFormClass(resourceId);
+    public FormClass getFormClass(ResourceId formId) {
+        return catalog.get().getFormClass(formId);
+    }
+
+    @Override
+    public FormTree getFormTree(ResourceId formId) {
+        FormTreeBuilder builder = new FormTreeBuilder(this);
+        return builder.queryTree(formId);
     }
 
     @Override
@@ -55,7 +65,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr("label").as("label");
         
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get());
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         ColumnView id = columnSet.getColumnView("id");
@@ -82,8 +92,15 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
+    public ColumnSet query(QueryModel model) {
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), new NullFormSupervisor());
+        return builder.build(model);
+    }
+
+    @Override
     public void persist(FormInstance formInstance) {
-        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), blobAuthorizer);
+        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), blobAuthorizer,
+                new HrdSerialNumberProvider());
         updater.execute(formInstance);
     }
 }

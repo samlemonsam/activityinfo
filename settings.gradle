@@ -8,6 +8,7 @@ include 'core:gwtrpc'
 include 'api'
 include 'clients:gwtrpc'
 include 'clients:gwtrest'
+include 'clients:javarest'
 
 include 'apiDocs'
 
@@ -17,8 +18,11 @@ include 'store:mysql'
 include 'store:hrd'
 include 'store:offline'
 include 'store:testing'
+include 'store:migration'
 
 include 'server'
+
+include 'analysis'
 
 include 'io:xform'
 include 'io:match'
@@ -31,3 +35,4 @@ include 'ui:codemirror'
 include 'ui:geoadmin'
 
 include 'tests:acceptance'
+include 'tests:api'

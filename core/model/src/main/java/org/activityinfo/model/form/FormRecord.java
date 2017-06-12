@@ -37,7 +37,7 @@ public class FormRecord {
         return fields;
     }
 
-    
+
     public static FormRecord fromJson(String json) {
         JsonParser parser = new JsonParser();
         return fromJson(parser.parse(json));
@@ -91,7 +91,9 @@ public class FormRecord {
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {
-                record.fields.add(field, entry.getValue().toJsonElement());
+                if(entry.getValue() != null) {
+                    record.fields.add(field, entry.getValue().toJsonElement());
+                }
             }
         }
         return record;

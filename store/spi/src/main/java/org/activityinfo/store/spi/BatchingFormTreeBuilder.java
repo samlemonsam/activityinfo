@@ -3,9 +3,12 @@ package org.activityinfo.store.spi;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -18,84 +21,86 @@ public class BatchingFormTreeBuilder {
     private final FormCatalog catalog;
 
     private final Map<ResourceId, FormClass> formCache = new HashMap<>();
-    
+
     public BatchingFormTreeBuilder(FormCatalog catalog) {
         this.catalog = catalog;
     }
 
-    public Map<ResourceId, FormTree> queryTrees(Collection<ResourceId> rootFormClassIds) {
+    public Map<ResourceId, FormTree> queryTrees(Collection<ResourceId> rootFormIds) {
 
-        Map<ResourceId, FormTree> treeMap = new HashMap<>();
+        // Fetch Required FormClasses in batches
 
-        Set<FormTree.Node> parentNodes = new HashSet<>();
+        Set<ResourceId> toFetch = Sets.newHashSet();
+        toFetch.addAll(rootFormIds);
 
-        // First round: fetch root form classes
-        fetchFormClasses(rootFormClassIds);
-        
-        for (ResourceId rootClassId : rootFormClassIds) {
-            FormTree tree = new FormTree();
-            FormClass rootForm = formCache.get(rootClassId);
-            for (FormField field : rootForm.getFields()) {
-                FormTree.Node node = tree.addRootField(rootForm, field);
-                if (field.getType() instanceof ReferenceType) {
-                    parentNodes.add(node);
-                }
-            }
-            treeMap.put(rootClassId, tree);
-        }
+        while(!toFetch.isEmpty()) {
 
-        // Round 2+ : Fetch form classes of children
-        while(!parentNodes.isEmpty()) {
-            
-            Set<ResourceId> toFetch = Sets.newHashSet();
+            // First round: fetch root form classes
+            List<FormClass> fetched = fetchFormClasses(toFetch);
+            toFetch.clear();
 
-            for (FormTree.Node parentNode : parentNodes) {
-                
-                // For each of the parentNodes and their potential range classes, fetch those
-                // that are not yet in our cache
-                for (ResourceId rangeFormClassId : parentNode.getRange()) {
-                    if(!formCache.containsKey(rangeFormClassId)) {
-                        toFetch.add(rangeFormClassId);
+            // Find newly referenced forms
+            for (FormClass formClass : fetched) {
+                if(formClass.isSubForm()) {
+                    if(!formCache.containsKey(formClass.getParentFormId().get())) {
+                        toFetch.add(formClass.getParentFormId().get());
                     }
                 }
-            }
-
-            // Fetch this next level of form Classes
-            fetchFormClasses(toFetch);
-
-            // Add child fields
-            Set<FormTree.Node> nextParents = new HashSet<>();
-            for (FormTree.Node parentNode : parentNodes) {
-                for (ResourceId rangeFormClassId : parentNode.getRange()) {
-                    FormClass childClass = formCache.get(rangeFormClassId);
-                    for (FormField childField : childClass.getFields()) {
-                        FormTree.Node childNode = parentNode.addChild(childClass, childField);
-                        if(childNode.isReference()) {
-                            nextParents.add(childNode);
+                for (FormField formField : formClass.getFields()) {
+                    if(formField.getType() instanceof ReferenceType) {
+                        ReferenceType refType = (ReferenceType) formField.getType();
+                        for (ResourceId refFormId : refType.getRange()) {
+                            if(!formCache.containsKey(refFormId)) {
+                                toFetch.add(refFormId);
+                            }
+                        }
+                    } else if(formField.getType() instanceof SubFormReferenceType) {
+                        SubFormReferenceType subFormType = (SubFormReferenceType) formField.getType();
+                        if(!formCache.containsKey(subFormType.getClassId())) {
+                            toFetch.add(subFormType.getClassId());
                         }
                     }
                 }
             }
-            parentNodes = nextParents;
         }
+
+        // Now assemble trees
+        Map<ResourceId, FormTree> treeMap = new HashMap<>();
+        FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
+            @Override
+            public FormClass getFormClass(ResourceId formId) {
+                return formCache.get(formId);
+            }
+        });
+
+        for (ResourceId rootFormId : rootFormIds) {
+            treeMap.put(rootFormId, builder.queryTree(rootFormId));
+        }
+
         return treeMap;
     }
 
 
-    private void fetchFormClasses(Iterable<ResourceId> formClassIds) {
+    private List<FormClass> fetchFormClasses(Iterable<ResourceId> formIds) {
+
+        List<FormClass> fetched = new ArrayList<>();
+
         // Identify the forms that we don't already have in the cache
         Set<ResourceId> toFetch = new HashSet<>();
-        for (ResourceId formClassId : formClassIds) {
+        for (ResourceId formClassId : formIds) {
             if(!formCache.containsKey(formClassId)) {
                 toFetch.add(formClassId);
             }
         }
         // Fetch from the store
         Map<ResourceId, FormClass> formClasses = catalog.getFormClasses(toFetch);
-        
+
         // Store back to the cache
         for (FormClass formClass : formClasses.values()) {
             formCache.put(formClass.getId(), formClass);
+            fetched.add(formClass);
         }
+
+        return fetched;
     }
 }

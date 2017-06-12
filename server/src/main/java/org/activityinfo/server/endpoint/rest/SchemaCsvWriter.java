@@ -6,16 +6,18 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.server.command.DispatcherSync;
 
+import java.io.IOException;
+
 public class SchemaCsvWriter {
 
     private final DispatcherSync dispatcher;
     private CsvWriter csv = new CsvWriter();
 
-    public SchemaCsvWriter(DispatcherSync dispatcher) {
+    public SchemaCsvWriter(DispatcherSync dispatcher) throws IOException {
         this.dispatcher = dispatcher;
     }
 
-    public void write(int databaseId) {
+    public void write(int databaseId) throws IOException {
 
         UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
 
@@ -27,7 +29,7 @@ public class SchemaCsvWriter {
 
     }
 
-    private void writeActivity(ActivityFormDTO activity) {
+    private void writeActivity(ActivityFormDTO activity) throws IOException {
 
         ActivityFormDTO form = dispatcher.execute(new GetActivityForm(activity.getId()));
 
@@ -43,7 +45,7 @@ public class SchemaCsvWriter {
         }
     }
 
-    private void writeHeaders() {
+    private void writeHeaders() throws IOException {
         csv.writeLine("DatabaseId",
                 "DatabaseName",
                 "FormVersion",
@@ -64,7 +66,7 @@ public class SchemaCsvWriter {
                 "Expression");
     }
 
-    private void writeElementLine(ActivityFormDTO activity, IndicatorDTO indicator) {
+    private void writeElementLine(ActivityFormDTO activity, IndicatorDTO indicator) throws IOException {
         csv.writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
                 activity.getClassicView() ? "2.0" : "3.0",
@@ -86,7 +88,7 @@ public class SchemaCsvWriter {
         );
     }
 
-    private void writeElementLine(ActivityFormDTO activity, AttributeGroupDTO attribGroup, AttributeDTO attrib) {
+    private void writeElementLine(ActivityFormDTO activity, AttributeGroupDTO attribGroup, AttributeDTO attrib) throws IOException {
         csv.writeLine(activity.getDatabaseId(),
                 activity.getDatabaseName(),
                 activity.getClassicView() ? "2.0" : "3.0",

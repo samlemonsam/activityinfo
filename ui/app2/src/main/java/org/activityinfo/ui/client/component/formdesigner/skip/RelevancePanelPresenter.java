@@ -21,15 +21,18 @@ package org.activityinfo.ui.client.component.formdesigner.skip;
  * #L%
  */
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import org.activityinfo.model.type.FieldValue;
+import com.google.common.base.Strings;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.expr.simple.SimpleConditionList;
+import org.activityinfo.model.expr.simple.SimpleConditionParser;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.component.form.field.OptionSetProvider;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author yuriyz on 7/24/14.
@@ -37,58 +40,41 @@ import java.util.Map;
 public class RelevancePanelPresenter {
 
     private final FieldWidgetContainer fieldWidgetContainer;
-    private final RelevancePanel view = new RelevancePanel();
-    private final Map<RelevanceRow, RelevanceRowPresenter> map = Maps.newHashMap();
-    private final RowDataBuilder rowDataBuilder;
+    private final RelevancePanel view;
+    private final OptionSetProvider optionSetProvider;
 
-    public RelevancePanelPresenter(final FieldWidgetContainer fieldWidgetContainer) {
-        this.fieldWidgetContainer = fieldWidgetContainer;
-
-        // todo this will not work with subforms!!!
-        this.rowDataBuilder = new RowDataBuilder(fieldWidgetContainer.getFormDesigner().getModel());
-
-        if (fieldWidgetContainer.getFormField().hasRelevanceConditionExpression()) {
-            List<RowData> build = rowDataBuilder.build(fieldWidgetContainer.getFormField().getRelevanceConditionExpression());
-            for (RowData rowData : build) {
-                RelevanceRowPresenter rowPresenter = addRow(fieldWidgetContainer);
-                rowPresenter.updateWith(rowData);
-            }
-        }
-
-        // add initial row if expression is not set
-        if (view.getRootPanel().getWidgetCount() == 0) {
-            addRow(fieldWidgetContainer);
-        }
+    public RelevancePanelPresenter(final FieldWidgetContainer container) {
+        this.fieldWidgetContainer = container;
+        this.optionSetProvider = new OptionSetProvider(container.getFormDesigner().getResourceLocator());
+        view = new RelevancePanel();
+        this.view.init(fieldList(container), model(container));
     }
 
-    private RelevanceRowPresenter addRow(final FieldWidgetContainer fieldWidgetContainer) {
-        final RelevanceRowPresenter rowPresenter = new RelevanceRowPresenter(fieldWidgetContainer);
-        view.getRootPanel().add(rowPresenter.getView());
-        map.put(rowPresenter.getView(), rowPresenter);
+    private List<FormField> fieldList(FieldWidgetContainer container) {
 
-        rowPresenter.getView().getAddButton().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addRow(fieldWidgetContainer);
-            }
-        });
-        rowPresenter.getView().getRemoveButton().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                view.getRootPanel().remove(rowPresenter.getView());
-                map.remove(rowPresenter.getView());
-                setFirstRowJoinFunctionVisible();
-            }
-        });
+        ResourceId thisFieldId = container.getFormField().getId();
+        FormClass formClass = container.getFormDesigner().getModel().getFormClassByElementId(thisFieldId);
 
-        setFirstRowJoinFunctionVisible();
-        return rowPresenter;
+        List<FormField> formFields = new ArrayList<>();
+        for (FormField formField : formClass.getFields()) {
+            if(!formField.getId().equals(thisFieldId)) {
+                formFields.add(formField);
+            }
+        }
+        return formFields;
     }
 
-    private void setFirstRowJoinFunctionVisible() {
-        if (view.getRootPanel().getWidgetCount() > 0) { // disable join function for first row
-            RelevanceRow firstRow = (RelevanceRow) view.getRootPanel().getWidget(0);
-            firstRow.getJoinFunction().setVisible(false);
+    private SimpleConditionList model(FieldWidgetContainer container) {
+
+        String formula = container.getFormField().getRelevanceConditionExpression();
+        if(Strings.isNullOrEmpty(formula)) {
+            return new SimpleConditionList();
+        }
+
+        try {
+            return SimpleConditionParser.parse(ExprParser.parse(formula));
+        } catch (Exception e) {
+            return new SimpleConditionList();
         }
     }
 
@@ -97,25 +83,7 @@ public class RelevancePanelPresenter {
     }
 
     public void updateFormField() {
-        fieldWidgetContainer.getFormField().setRelevanceConditionExpression(buildSkipExpression());
+        fieldWidgetContainer.getFormField().setRelevanceConditionExpression(view.build());
     }
 
-    private String buildSkipExpression() {
-        return new ExpressionBuilder(createRowDataList()).build();
-    }
-
-    private List<RowData> createRowDataList() {
-        final List<RowData> result = Lists.newArrayList();
-        final int widgetCount = view.getRootPanel().getWidgetCount();
-
-        for (int i = 0; i < widgetCount; i++) {
-            RelevanceRow row = (RelevanceRow) view.getRootPanel().getWidget(i);
-            FieldValue value = map.get(row).getValue();
-            if (value == null) {
-                throw new NullPointerException("Null value is not allowed.");
-            }
-            result.add(RowDataFactory.create(row, map.get(row).getValue(), fieldWidgetContainer.getFormDesigner().getModel()));
-        }
-        return result;
-    }
 }

@@ -14,6 +14,8 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.FormSupervisorAdapter;
+import org.activityinfo.store.query.impl.NullFormScanCache;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -33,11 +35,12 @@ public abstract class AbstractMySqlTest {
 
 
     public static DbUnit dbunit;
-    public static ColumnSetBuilder executor;
     public ColumnSet columnSet;
     public static MySqlCatalog catalog;
     
     private Closeable objectify;
+
+    private int userId = 1;
 
     @BeforeClass
     public static void initLocale() throws Throwable {
@@ -56,6 +59,10 @@ public abstract class AbstractMySqlTest {
         objectify.close();
         helper.tearDown();
     }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
     
     public static void resetDatabase(String resourceName) throws Throwable {
 
@@ -65,8 +72,11 @@ public abstract class AbstractMySqlTest {
         dbunit.dropAllRows();
         dbunit.loadDatset(Resources.getResource(MySqlCatalogTest.class, resourceName));
         catalog = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
-        executor = new ColumnSetBuilder(catalog);
         CountryStructure.clearCache();
+    }
+
+    protected final void newRequest() {
+        catalog = new MySqlCatalogProvider().openCatalog(dbunit.getExecutor());
     }
 
 
@@ -76,7 +86,7 @@ public abstract class AbstractMySqlTest {
         for(String field : fields) {
             queryModel.selectExpr(field).setId(field);
         }
-        execute(queryModel);
+        query(queryModel);
     }
 
     protected final void queryWhere(ResourceId formClassId, List<String> fields, String filter) {
@@ -87,12 +97,18 @@ public abstract class AbstractMySqlTest {
         }
         queryModel.setFilter(filter);
 
-        execute(queryModel);
+        query(queryModel);
     }
 
 
-    private void execute(QueryModel queryModel) {
-        columnSet = executor.build(queryModel);
+    protected final void query(QueryModel queryModel) {
+
+        ColumnSetBuilder builder = new ColumnSetBuilder(
+                catalog,
+                new NullFormScanCache(),
+                new FormSupervisorAdapter(catalog, userId));
+
+        columnSet = builder.build(queryModel);
 
         for(String field : columnSet.getColumns().keySet()) {
             System.out.println(field + ": " + column(field));

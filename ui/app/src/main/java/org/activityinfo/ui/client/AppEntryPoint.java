@@ -3,6 +3,7 @@ package org.activityinfo.ui.client;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
@@ -15,9 +16,12 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.ui.client.analysis.AnalysisPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
-import org.activityinfo.ui.client.http.HttpBus;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
+import org.activityinfo.ui.client.store.RecordSynchronizer;
+import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.offline.IDBExecutorImpl;
+import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 import java.util.logging.Logger;
 
@@ -39,9 +43,11 @@ public class AppEntryPoint implements EntryPoint {
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
+        OfflineStore offlineStore = new OfflineStore(new IDBExecutorImpl());
+
         ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
         HttpBus httpBus = new HttpBus(client);
-        FormStore formStore = new FormStoreImpl(httpBus);
+        FormStore formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
 
         Viewport viewport = new Viewport();
         AppFrame appFrame = new AppFrame(httpBus);
@@ -53,6 +59,9 @@ public class AppEntryPoint implements EntryPoint {
         AppPlaceHistoryMapper historyMapper = new AppPlaceHistoryMapper();
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, DEFAULT_PLACE);
+
+        // Start synchronizer...
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
 
         viewport.add(appFrame);
 

@@ -120,13 +120,20 @@ public class ExprQueryBuilder {
             queryBuilder.addField(field.getId(), target);
 
         } else if (expr instanceof FunctionCallNode) {
-            
-            FunctionCallNode call = (FunctionCallNode) expr;
-            List<CursorObserver<FieldValue>> argumentObservers =
-                    CursorObservers.collect(target, call.getArguments().size(), call.getFunction());
 
-            for (int i = 0; i < call.getArgumentCount(); i++) {
-                addExpr(call.getArgument(i), argumentObservers.get(i));
+            FunctionCallNode call = (FunctionCallNode) expr;
+            if(call.getArguments().isEmpty()) {
+
+
+
+            } else {
+
+                List<CursorObserver<FieldValue>> argumentObservers =
+                        CursorObservers.collect(target, call.getArguments().size(), call.getFunction());
+
+                for (int i = 0; i < call.getArgumentCount(); i++) {
+                    addExpr(call.getArgument(i), argumentObservers.get(i));
+                }
             }
 
         } else if (expr instanceof CompoundExpr) {

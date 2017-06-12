@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.analysis.viewModel;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Ordering;
+import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.expr.functions.date.MonthFunction;
@@ -19,7 +20,6 @@ import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.ui.client.analysis.model.DateLevel;
 import org.activityinfo.ui.client.analysis.model.DimensionMapping;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.formulaDialog.ParsedFormula;
 
 import java.util.*;
 

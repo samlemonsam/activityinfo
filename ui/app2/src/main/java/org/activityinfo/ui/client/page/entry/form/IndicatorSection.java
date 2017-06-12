@@ -24,13 +24,20 @@ package org.activityinfo.ui.client.page.entry.form;
 
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.Style.Scroll;
+import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.Text;
-import com.extjs.gxt.ui.client.widget.form.*;
+import com.extjs.gxt.ui.client.widget.form.Field;
+import com.extjs.gxt.ui.client.widget.form.NumberField;
+import com.extjs.gxt.ui.client.widget.form.TextArea;
+import com.extjs.gxt.ui.client.widget.form.TextField;
+import com.extjs.gxt.ui.client.widget.layout.FlowLayout;
+import com.extjs.gxt.ui.client.widget.layout.HBoxLayout;
 import com.extjs.gxt.ui.client.widget.layout.TableData;
 import com.extjs.gxt.ui.client.widget.layout.TableLayout;
 import com.extjs.gxt.ui.client.widget.tips.ToolTipConfig;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
@@ -46,19 +53,19 @@ import java.util.Set;
 public class IndicatorSection extends LayoutContainer implements FormSection<SiteDTO> {
 
     public static final int NUMBER_FIELD_WIDTH = 50;
-    public static final int TEXT_FIELD_WIDTH = 3 * NUMBER_FIELD_WIDTH;
+    public static final int TEXT_FIELD_WIDTH = 300;
+
+    public static final int UNITS_FIELD_WIDTH = 80;
 
     private List<Field> indicatorFields = Lists.newArrayList();
     private Set<IndicatorDTO> calculatedIndicators = Sets.newHashSet();
 
     public IndicatorSection(ActivityFormDTO activity) {
 
-        TableLayout layout = new TableLayout(3);
-        layout.setCellPadding(5);
-        layout.setCellVerticalAlign(Style.VerticalAlignment.TOP);
+        FlowLayout layout = new FlowLayout();
+        layout.setMargins(new Margins(5, 5, 5, 5));
 
         setLayout(layout);
-        setStyleAttribute("fontSize", "8pt");
         setScrollMode(Scroll.AUTOY);
 
         for (IndicatorGroup group : activity.groupIndicators()) {
@@ -67,105 +74,170 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
                 addGroupHeader(group.getName());
             }
 
-            for (IndicatorDTO indicator : group.getIndicators()) {
-                if (indicator.isCalculated()) {
-                    calculatedIndicators.add(indicator);
-                    continue; // it's not allowed to specify value for calculated indicators
-                }
-                if (indicator.getAggregation() != IndicatorDTO.AGGREGATE_SITE_COUNT) {
-                    addIndicator(indicator);
-                }
+            if(allQuantities(group.getIndicators())) {
+                addQuantityTable(group);
+
+            } else {
+                addMixedGroup(group);
+            }
+        }
+
+        for (IndicatorDTO indicator : activity.getIndicators()) {
+            if(indicator.isCalculated()) {
+                calculatedIndicators.add(indicator);
             }
         }
     }
 
-    private void addGroupHeader(String name) {
+    private boolean allQuantities(List<IndicatorDTO> indicators) {
+        for (IndicatorDTO indicator : indicators) {
+            if(!indicator.isCalculated()) {
+                if (indicator.getType() != FieldTypeClass.QUANTITY) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
-        TableData layoutData = new TableData();
-        layoutData.setColspan(3);
+    private void addGroupHeader(String name) {
 
         Text header = new Text(name);
         header.setStyleAttribute("fontSize", "9pt");
         header.setStyleAttribute("fontWeight", "bold");
         header.setStyleAttribute("marginTop", "6pt");
 
-        add(header, layoutData);
+        add(header);
     }
 
-    private void addIndicator(IndicatorDTO indicator) {
+    private void addQuantityTable(IndicatorGroup group) {
+        // Layout in three columns
+        // Label | Field | Units
+
+        TableData fieldLayout = new TableData();
+        fieldLayout.setWidth(NUMBER_FIELD_WIDTH + "px");
+        fieldLayout.setVerticalAlign(Style.VerticalAlignment.TOP);
+
+        TableData unitLayout = new TableData();
+        unitLayout.setWidth(UNITS_FIELD_WIDTH + "px");
+        unitLayout.setVerticalAlign(Style.VerticalAlignment.TOP);
+
+        TableLayout layout = new TableLayout();
+        layout.setWidth("100%");
+        layout.setColumns(3);
+        layout.setCellPadding(5);
+
+        LayoutContainer table = new LayoutContainer();
+        table.setLayout(layout);
+        table.setAutoHeight(true);
+
+        for (IndicatorDTO indicator : group.getIndicators()) {
+            if(!indicator.isCalculated()) {
+                Text fieldLabel = createLabel(indicator);
+
+                Field field = createField(indicator);
+                field.setWidth(NUMBER_FIELD_WIDTH);
+
+                Text unitLabel = new Text(indicator.getUnits());
+                unitLabel.setWidth(UNITS_FIELD_WIDTH);
+                unitLabel.setStyleAttribute("fontSize", "9pt");
+
+                table.add(fieldLabel);
+                table.add(field, fieldLayout);
+                table.add(unitLabel, unitLayout);
+            }
+        }
+
+        add(table);
+    }
+
+
+    private void addMixedGroup(IndicatorGroup group) {
+
+        // Layout in two rows
+        // Field Label
+        // Field Widget
+
+        for (IndicatorDTO indicator : group.getIndicators()) {
+            if(!indicator.isCalculated()) {
+
+                Text fieldLabel = createLabel(indicator);
+                fieldLabel.setStyleAttribute("marginTop", "8px");
+                fieldLabel.setStyleAttribute("marginBottom", "3px");
+                add(fieldLabel);
+
+                TextField field = createField(indicator);
+
+                if(indicator.getType() == FieldTypeClass.QUANTITY) {
+
+                    HBoxLayout rowLayout = new HBoxLayout();
+                    rowLayout.setHBoxLayoutAlign(HBoxLayout.HBoxLayoutAlign.MIDDLE);
+
+                    Text unitsLabel = new Text(indicator.getUnits());
+                    unitsLabel.setStyleAttribute("paddingLeft", "5px");
+
+                    LayoutContainer row = new LayoutContainer();
+                    row.setLayout(rowLayout);
+                    row.add(field);
+                    row.add(unitsLabel);
+                    add(row);
+                } else {
+                    field.setWidth(TEXT_FIELD_WIDTH);
+                    add(field);
+                }
+            }
+        }
+    }
+
+
+    private TextField createField(IndicatorDTO indicator) {
+        TextField field;
+        if(indicator.getType() == FieldTypeClass.NARRATIVE) {
+            field = new TextArea();
+        } else if(indicator.getType() == FieldTypeClass.QUANTITY) {
+            field = createQuantityField();
+        } else {
+            field = new TextField();
+        }
+        field.setName(indicator.getPropertyName());
+        field.setAllowBlank(!indicator.isMandatory());
+        field.setToolTip(toolTip(indicator));
+
+        indicatorFields.add(field);
+
+        return field;
+    }
+
+
+    private NumberField createQuantityField() {
+        NumberField numberField = new NumberField();
+        numberField.setFormat(IndicatorNumberFormat.INSTANCE);
+        numberField.setWidth(NUMBER_FIELD_WIDTH);
+        numberField.setStyleAttribute("textAlign", "right");
+        return numberField;
+    }
+
+    private Text createLabel(IndicatorDTO indicator) {
         String name = indicator.getName();
         if (indicator.isMandatory()) {
             name += " *";
         }
         Text indicatorLabel = new Text(name);
         indicatorLabel.setStyleAttribute("fontSize", "9pt");
-        add(indicatorLabel);
-
-        FieldTypeClass type = indicator.getType();
-
-        Field indicatorField = addIndicatorField(indicator, type);
-
-        indicatorField.setName(indicator.getPropertyName());
-
-        if (indicator.getDescription() != null && !indicator.getDescription().isEmpty()) {
-            ToolTipConfig tip = new ToolTipConfig();
-            tip.setDismissDelay(0);
-            tip.setShowDelay(100);
-            tip.setText(indicator.getDescription());
-
-            indicatorField.setToolTip(tip);
-        }
-
-        indicatorFields.add(indicatorField);
+        return indicatorLabel;
     }
 
-    private Field addIndicatorField(IndicatorDTO indicator, FieldTypeClass type) {
-        if (type == FieldTypeClass.NARRATIVE) {
 
-            TextArea textArea = new TextArea();
-
-            textArea.setEnabled(!indicator.isCalculated());
-            textArea.setWidth(TEXT_FIELD_WIDTH);
-            if (indicator.isMandatory()) {
-                textArea.setAllowBlank(false);
-            }
-            add(textArea);
-            add(new Text()); // avoid layout shift
-            return textArea;
-        } else if (type == FieldTypeClass.QUANTITY) {
-            NumberField numberField = new NumberField();
-            numberField.setFormat(IndicatorNumberFormat.INSTANCE);
-            numberField.setWidth(NUMBER_FIELD_WIDTH);
-            numberField.setStyleAttribute("textAlign", "right");
-            if (indicator.isMandatory()) {
-                numberField.setAllowBlank(false);
-            }
-
-            add(numberField);
-
-            Text unitLabel = new Text(indicator.getUnits());
-            unitLabel.setStyleAttribute("fontSize", "9pt");
-
-            add(unitLabel);
-            return numberField;
-        } else if (type == FieldTypeClass.FREE_TEXT) {
-            TextField textField = new TextField();
-
-            textField.setWidth(TEXT_FIELD_WIDTH);
-            if (indicator.isMandatory()) {
-                textField.setAllowBlank(false);
-            }
-            add(textField);
-            add(new Text()); // avoid layout shift
-            return textField;
-        } else if (type == FieldTypeClass.BOOLEAN) {
-            CheckBox checkBox = new CheckBox();
-
-            add(checkBox);
-            add(new Text()); // avoid layout shift
-            return checkBox;
+    private ToolTipConfig toolTip(IndicatorDTO indicator) {
+        if (Strings.isNullOrEmpty(indicator.getDescription())) {
+            return null;
         }
-        return new NumberField();
+
+        ToolTipConfig tip = new ToolTipConfig();
+        tip.setDismissDelay(0);
+        tip.setShowDelay(100);
+        tip.setText(indicator.getDescription());
+        return tip;
     }
 
     @Override

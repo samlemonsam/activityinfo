@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.formulaDialog;
 
+import org.activityinfo.analysis.FormulaValidator;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.FormulaError;
 import org.activityinfo.model.expr.SourcePos;

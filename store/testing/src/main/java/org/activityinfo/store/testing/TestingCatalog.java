@@ -8,10 +8,15 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.SerialNumberProvider;
 
 import java.util.*;
 
@@ -21,13 +26,35 @@ public class TestingCatalog implements FormCatalog {
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
 
 
+    private SerialNumberProvider serialNumberProvider = new SerialNumberProvider() {
+        @Override
+        public int next(ResourceId formId, ResourceId fieldId, String prefix) {
+            TestingFormStorage testingFormStorage = formMap.get(formId);
+            assert testingFormStorage != null;
+            return testingFormStorage.nextSerialNumber(fieldId, prefix);
+        }
+    };
+
     public TestingCatalog() {
+
+        // Survey Use case
         add(new Survey());
-        add(new IntakeForm());
+
+        // Case Tracking use case
+        IntakeForm intake = new IntakeForm();
+        BioDataForm bioData = new BioDataForm(intake);
+        IncidentForm incidentForm = new IncidentForm(bioData);
+        ReferralSubForm referralSubForm = new ReferralSubForm(incidentForm);
+        add(intake, bioData, incidentForm, referralSubForm);
+
     }
 
-    private void add(TestForm testForm) {
-        formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
+
+    private void add(TestForm... testForms) {
+        for (TestForm testForm : testForms) {
+            assert testForm.getFormClass().getLabel() != null : testForm.getFormId() + " is missing label";
+            formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
+        }
     }
 
 
@@ -55,11 +82,6 @@ public class TestingCatalog implements FormCatalog {
     }
 
     @Override
-    public Optional<FormStorage> lookupForm(ResourceId recordId) {
-        return Optional.absent();
-    }
-
-    @Override
     public List<CatalogEntry> getRootEntries() {
         return Collections.emptyList();
     }
@@ -70,7 +92,12 @@ public class TestingCatalog implements FormCatalog {
     }
 
     public ColumnSet query(QueryModel queryModel) {
-        ColumnSetBuilder builder = new ColumnSetBuilder(this, new NullFormScanCache());
+        ColumnSetBuilder builder = new ColumnSetBuilder(this, new NullFormScanCache(), new NullFormSupervisor());
         return builder.build(queryModel);
+    }
+
+    public void updateRecords(TransactionBuilder transaction) {
+        Updater updater = new Updater(this, 1, new BlobAuthorizerStub(), serialNumberProvider);
+        updater.execute(transaction.build());
     }
 }

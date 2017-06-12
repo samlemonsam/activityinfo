@@ -1,5 +1,7 @@
 package org.activityinfo.store.spi;
 
+import com.google.common.base.Strings;
+
 /**
  * Describes form-level permissions for a specific user
  */
@@ -77,5 +79,9 @@ public final class FormPermissions {
                 ", editAllowed=" + editAllowed +
                 ", editFilter='" + editFilter + '\'' +
                 '}';
+    }
+
+    public boolean hasVisiblityFilter() {
+        return !Strings.isNullOrEmpty(visibilityFilter);
     }
 }

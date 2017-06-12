@@ -1,45 +1,59 @@
 package org.activityinfo.server.endpoint.rest;
 
 
-public class CsvWriter {
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+
+public class CsvWriter implements AutoCloseable {
 
     /**
      * Writes a byte order mark that should help spreadsheet software detect the UTF-8 character set.
      */
     public static final char BYTEORDER_MARK = '\ufeff';
 
-    private StringBuilder csv;
+    private Writer writer;
 
-    public CsvWriter() {
-        this.csv = new StringBuilder();
-        csv.append(BYTEORDER_MARK);
+    public CsvWriter() throws IOException {
+        this.writer = new StringWriter();
+        writer.append(BYTEORDER_MARK);
+    }
+
+    public CsvWriter(Writer writer) throws IOException {
+        this.writer = writer;
+        this.writer.append(BYTEORDER_MARK);
     }
     
-    private void writeByteOrderMark() {
-        csv.append(BYTEORDER_MARK);
+    private void writeByteOrderMark() throws IOException {
+        writer.append(BYTEORDER_MARK);
     }
 
-    public void writeLine(Object... columns) {
+    public void writeLine(Object... columns) throws IOException {
 
         for (int i = 0; i != columns.length; ++i) {
             if (i > 0) {
-                csv.append(",");
+                writer.append(",");
             }
             Object val = columns[i];
             if (val != null) {
                 if (val instanceof String) {
                     String escaped = ((String) val).replace("\"", "\"\"");
-                    csv.append("\"").append(escaped).append("\"");
+                    writer.append("\"").append(escaped).append("\"");
                 } else {
-                    csv.append(val.toString());
+                    writer.append(val.toString());
                 }
             }
         }
-        csv.append("\n");
+        writer.append("\n");
     }
 
     @Override
     public String toString() {
-        return csv.toString();
+        return writer.toString();
+    }
+
+    @Override
+    public void close() throws IOException {
+        writer.close();
     }
 }

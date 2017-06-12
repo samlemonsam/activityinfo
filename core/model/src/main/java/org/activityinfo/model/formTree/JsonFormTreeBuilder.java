@@ -1,6 +1,5 @@
 package org.activityinfo.model.formTree;
 
-import com.google.common.collect.Iterables;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
@@ -17,7 +16,7 @@ public class JsonFormTreeBuilder {
 
     public static JsonObject toJson(FormTree tree)  {
 
-        ResourceId rootFormClassId = Iterables.getOnlyElement(tree.getRootFormClasses().keySet());
+        ResourceId rootFormClassId = tree.getRootFormId();
 
         JsonObject forms = new JsonObject();
         collectForms(forms, tree.getRootFields());

@@ -7,8 +7,12 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumber;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.query.impl.eval.SerialNumberProviderStub;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.RecordUpdate;
 import org.junit.Before;
@@ -26,7 +30,7 @@ public class UpdaterTest {
     @Before
     public void setUp() {
         MockFormCatalog catalog = new MockFormCatalog();
-        updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new SerialNumberProviderStub());
     }
 
     @Test(expected = InvalidUpdateException.class)
@@ -162,6 +166,35 @@ public class UpdaterTest {
         RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
         assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
+    }
+
+    @Test
+    public void serialNumber() {
+        FormClass formClass = new FormClass(ResourceId.valueOf("FORM1"));
+        formClass.addField(ResourceId.valueOf("FIELD0"))
+                .setType(TextType.SIMPLE)
+                .setLabel("Province Code")
+                .setCode("PROVINCE")
+                .setRequired(true);
+
+        FormField serialNumberField = formClass.addField(ResourceId.valueOf("FIELD1"))
+                .setType(new SerialNumberType("PROVINCE", 5))
+                .setRequired(true)
+                .setLabel("File Number")
+                .setCode("SN");
+
+        JsonObject change = new JsonObject();
+        change.addProperty("@id", "A");
+        change.addProperty("@class", "FORM1");
+        change.addProperty("PROVINCE", "KUNDUZ");
+
+        RecordUpdate update = Updater.parseChange(formClass, change, userId);
+
+        updater.generateSerialNumber(formClass, serialNumberField, update);
+
+        FieldValue serialValue = update.getChangedFieldValues().get(serialNumberField.getId());
+        assertThat(serialValue, equalTo((FieldValue)new SerialNumber("KUNDUZ", 1)));
+
     }
 
 

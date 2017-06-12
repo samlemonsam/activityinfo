@@ -4,19 +4,25 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.*;
 import org.junit.After;
@@ -24,6 +30,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -105,7 +112,7 @@ public class HrdCatalogTest {
         queryModel.selectField("BENE").as("family_count");
         queryModel.selectExpr("BENE*5").as("individual_count");
         
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
         
         System.out.println(columnSet);
@@ -121,7 +128,47 @@ public class HrdCatalogTest {
         assertThat(version.getUserId(), equalTo((long)userId));
         assertThat(version.getType(), equalTo(RecordChangeType.CREATED));
     }
-    
+
+
+    @Test
+    public void enumWithNoChoices() {
+
+        final ResourceId formId = ResourceId.generateId();
+        ResourceId villageField = ResourceId.valueOf("FV");
+        final ResourceId selectField = ResourceId.valueOf("FC");
+
+        FormClass formClass = new FormClass(formId);
+        formClass.setParentFormId(ResourceId.valueOf("foo"));
+        formClass.setLabel("NFI Distributions");
+        formClass.addField(villageField)
+                .setLabel("Village name")
+                .setCode("VILLAGE")
+                .setType(TextType.SIMPLE);
+        formClass.addField(selectField)
+                .setLabel("Favorite color")
+                .setType(new EnumType(Cardinality.SINGLE, EnumType.Presentation.AUTOMATIC, Collections.<EnumItem>emptyList()));
+
+        HrdCatalog catalog = new HrdCatalog();
+        catalog.create(formClass);
+
+        // Avoid cache
+//        objectifyCloseable.close();
+
+        ObjectifyService.run(new VoidWork() {
+            @Override
+            public void vrun() {
+
+                HrdCatalog catalog = new HrdCatalog();
+                Optional<FormStorage> storage = catalog.getForm(formId);
+
+                FormClass deserializedSchema = storage.get().getFormClass();
+
+            }
+        });
+    }
+
+
+
     @Test
     public void createResource() {
 
@@ -135,7 +182,8 @@ public class HrdCatalogTest {
                 .setType(TextType.SIMPLE);
 
         HrdCatalog catalog = new HrdCatalog();
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub());
+        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
+                new HrdSerialNumberProvider());
 
         catalog.create(formClass);
         
@@ -144,6 +192,7 @@ public class HrdCatalogTest {
         for (String villageName : villageNames) {
             RecordUpdate update = new RecordUpdate();
             update.setUserId(userId);
+            update.setFormId(formClass.getId());
             update.setRecordId(ResourceId.generateSubmissionId(formClass));
             update.set(nameField.getId(), TextValue.valueOf(villageName));
         
@@ -155,7 +204,7 @@ public class HrdCatalogTest {
         queryModel.selectResourceId().as("id");
         queryModel.selectField("VILLAGE").as("village");
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         
@@ -240,12 +289,79 @@ public class HrdCatalogTest {
         queryModel.selectField("Name").as("member_name");
         queryModel.selectField("Age").as("member_age");
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
 
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+    }
+
+    @Test
+    public void versionRangeTest() {
+
+
+        ResourceId collectionId = ResourceId.generateId();
+        ResourceId villageField = ResourceId.valueOf("FV");
+        ResourceId countField = ResourceId.valueOf("FC");
+
+        FormClass formClass = new FormClass(collectionId);
+        formClass.setParentFormId(ResourceId.valueOf("foo"));
+        formClass.setLabel("NFI Distributions");
+        formClass.addField(villageField)
+                .setLabel("Village name")
+                .setCode("VILLAGE")
+                .setType(TextType.SIMPLE);
+        formClass.addField(countField)
+                .setLabel("Number of Beneficiaries")
+                .setCode("BENE")
+                .setType(new QuantityType("Beneficiaries"));
+
+
+        HrdCatalog catalog = new HrdCatalog();
+        catalog.create(formClass);
+
+        VersionedFormStorage formStorage = (VersionedFormStorage) catalog.getForm(collectionId).get();
+
+        // Initially, with no records added, the form should be at version 1
+        // and the version range (0, 1] should be empty.
+        assertThat(formStorage.cacheVersion(), equalTo(1L));
+
+        List<FormRecord> updatedRecords = formStorage.getVersionRange(0, 1L);
+
+        assertTrue(updatedRecords.isEmpty());
+
+        // Add a new record
+        RecordUpdate firstUpdate = new RecordUpdate();
+        firstUpdate.setUserId(1);
+        firstUpdate.setRecordId(ResourceId.generateId());
+        firstUpdate.set(villageField, TextValue.valueOf("Goma"));
+
+        catalog.getForm(collectionId).get().add(firstUpdate);
+
+        // Verify that the version is incremented and the version range
+        // (0, 2] includes our new record
+
+        assertThat(formStorage.cacheVersion(), equalTo(2L));
+
+        List<FormRecord> updated = formStorage.getVersionRange(0, 2L);
+        assertThat(updated, hasSize(1));
+
+        // Update the first record and add a new one
+        RecordUpdate secondUpdate = new RecordUpdate();
+        secondUpdate.setUserId(1);
+        secondUpdate.setRecordId(ResourceId.generateId());
+        secondUpdate.set(villageField, TextValue.valueOf("Rutshuru"));
+        catalog.getForm(collectionId).get().add(firstUpdate);
+
+        // Verify that the version is incremented and the version range
+        // (1, 2] includes our new record
+
+        assertThat(formStorage.cacheVersion(), equalTo(3L));
+
+        updated = formStorage.getVersionRange(2L, 3L);
+        assertThat(updated, hasSize(1));
+
     }
 
 }

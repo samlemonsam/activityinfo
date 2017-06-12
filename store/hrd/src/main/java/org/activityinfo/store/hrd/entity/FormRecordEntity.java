@@ -47,32 +47,15 @@ public class FormRecordEntity {
 
     public FormRecordEntity(ResourceId formId, ResourceId recordId) {
         this.formKey = FormEntity.key(formId);
-        if(recordId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-            this.id = localId(formId, recordId);
-        } else {
-            this.id = recordId.asString();
-        }
+        this.id = recordId.asString();
     }
 
-    private String localId(ResourceId formId, ResourceId recordId) {
-        String id = recordId.asString();
-        if(!id.startsWith(formId.asString())) {
-            throw new IllegalStateException("recordId does not start with " + formId);
-        }
-        return id.substring(formId.asString().length() + 1);
-    }
-    
     public ResourceId getFormId() {
         return ResourceId.valueOf(formKey.getName());
     }
 
     public ResourceId getRecordId() {
-        ResourceId formId = getFormId();
-        if(formId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-            return ResourceId.valueOf(formKey.getName() + "-" + id);
-        } else {
-            return ResourceId.valueOf(id);
-        }
+        return ResourceId.valueOf(id);
     }
     
     public String getParentRecordId() {
@@ -159,27 +142,10 @@ public class FormRecordEntity {
         this.version = version;
     }
 
-    public static Key<FormRecordEntity> key(ResourceId recordId) {
-        ResourceId.checkSubmissionId(recordId);
-
-
-        String[] parts = recordId.asString().split("-", 2);
-        String recordLocalId = recordId.asString().substring(recordId.asString().indexOf("-") + 1);
-
-        Key<FormEntity> formKey = Key.create(FormEntity.class, parts[0]);
-        Key<FormRecordEntity> recordKey = Key.create(formKey, FormRecordEntity.class, recordLocalId);
-
-        return recordKey;
-    }
-
     public static Key<FormRecordEntity> key(ResourceId formId, ResourceId recordId) {
-        if(recordId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-            return key(recordId);
-        } else {
-            Key<FormEntity> formKey = Key.create(FormEntity.class, formId.asString());
-            Key<FormRecordEntity> recordKey = Key.create(formKey, FormRecordEntity.class, recordId.asString());
-            return recordKey;
-        }
+        Key<FormEntity> formKey = Key.create(FormEntity.class, formId.asString());
+        Key<FormRecordEntity> recordKey = Key.create(formKey, FormRecordEntity.class, recordId.asString());
+        return recordKey;
     }
     
     public static Key<FormRecordEntity> key(FormClass formClass, ResourceId recordId) {

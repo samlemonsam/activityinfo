@@ -271,6 +271,15 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
             }
         }));
 
+        menu.add(new SeparatorMenuItem());
+
+        menu.add(new MenuItem("Export audit log", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+            @Override
+            public void componentSelected(MenuEvent menuEvent) {
+                presenter.exportAuditLog();
+            }
+        }));
+
         Button exportButton = new Button(I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
         exportButton.setMenu(menu);
 

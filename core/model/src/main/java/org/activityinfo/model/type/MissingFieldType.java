@@ -37,6 +37,11 @@ public class MissingFieldType implements FieldType {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean isUpdatable() {
+        return false;
+    }
+
     /**
      *
      * @return the singleton instance for this type

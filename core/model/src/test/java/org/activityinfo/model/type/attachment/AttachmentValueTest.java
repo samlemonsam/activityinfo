@@ -42,4 +42,20 @@ public class AttachmentValueTest {
 
     }
 
+    @Test
+    public void parseNewMultiple() {
+        String json = "[{\"mimeType\":\"application/octet-stream\",\"width\":0,\"height\":0," +
+                "\"filename\":\"Maharashtra Budget 2017-18 Overview english.docx\",\"blobId\":\"cj11ps9053\"}," +
+                "{\"mimeType\":\"application/octet-stream\",\"width\":0,\"height\":0,\"filename\":\"Health.docx\",\"blobId\":\"cj11ptcya4\"}," +
+                "{\"mimeType\":\"application/octet-stream\",\"width\":0,\"height\":0,\"filename\":\"ABCD English 2017-18.docx\",\"blobId\":\"cj11ptjqe5\"}," +
+                "{\"mimeType\":\"application/msword\",\"width\":0,\"height\":0,\"filename\":\"School Education 20017-18.doc\",\"blobId\":\"cj11ptt5w6\"}," +
+                "{\"mimeType\":\"application/octet-stream\",\"width\":0,\"height\":0,\"filename\":\"Water supply and water resources English.docx\",\"blobId\":\"cj11ptzpo7\"}," +
+                "{\"mimeType\":\"application/msword\",\"width\":0,\"height\":0,\"filename\":\"Food security english for  17-18 march 22 (1).doc\",\"blobId\":\"cj11pu5hl8\"}," +
+                "{\"mimeType\":\"application/octet-stream\",\"width\":0,\"height\":0,\"filename\":\"Housing.docx\",\"blobId\":\"cj11pumvf9\"}]";
+
+        AttachmentValue fieldValue = AttachmentValue.fromJson(json);
+        assertThat(fieldValue.getValues(), Matchers.hasSize(7));
+
+    }
+
 }

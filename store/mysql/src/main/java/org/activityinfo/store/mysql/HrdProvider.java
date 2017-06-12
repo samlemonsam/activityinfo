@@ -32,16 +32,6 @@ public class HrdProvider implements FormProvider {
     }
 
     @Override
-    public Optional<ResourceId> lookupForm(QueryExecutor executor, ResourceId recordId) throws SQLException {
-        Optional<FormStorage> collection = catalog.lookupForm(recordId);
-        if(collection.isPresent()) {
-            return Optional.of(collection.get().getFormClass().getId());
-        } else {
-            return Optional.absent();
-        }
-    }
-
-    @Override
     public Map<ResourceId, FormStorage> openForms(QueryExecutor executor, Set<ResourceId> formIds) throws SQLException {
         Map<ResourceId, FormStorage> map = new HashMap<>();
         for (ResourceId resourceId : formIds) {

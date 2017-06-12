@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Envelope;
 import net.miginfocom.swing.MigLayout;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
 import org.activityinfo.geoadmin.model.Country;
@@ -35,7 +35,7 @@ public class ImportWindow extends JDialog {
     private static final Logger LOGGER = Logger.getLogger(ImportWindow.class.getName());
     private static final int MAX_NAME_LENGTH = 254;
 
-    private ActivityInfoClient client;
+    private GeoAdminClient client;
     private List<AdminEntity> parentEntities;
 
     private ImportTableModel tableModel;
@@ -47,7 +47,7 @@ public class ImportWindow extends JDialog {
     private AdminLevel parentLevel;
     private JTable table;
 
-    public ImportWindow(JFrame parent, ActivityInfoClient client,
+    public ImportWindow(JFrame parent, GeoAdminClient client,
                         Country country,
                         AdminLevel parentLevel,
                         File shapeFile) throws Exception {

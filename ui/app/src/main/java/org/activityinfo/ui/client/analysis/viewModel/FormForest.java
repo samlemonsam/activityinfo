@@ -20,13 +20,13 @@ public class FormForest {
 
     public FormForest(FormTree tree) {
         assert tree != null;
-        trees.put(tree.getRootFormClass().getId(), tree);
+        trees.put(tree.getRootFormId(), tree);
     }
 
     public FormForest(List<FormTree> trees) {
         for (FormTree tree : trees) {
             assert tree != null;
-            this.trees.put(tree.getRootFormClass().getId(), tree);
+            this.trees.put(tree.getRootFormId(), tree);
         }
     }
 

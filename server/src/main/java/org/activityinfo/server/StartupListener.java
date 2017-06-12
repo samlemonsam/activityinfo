@@ -42,6 +42,7 @@ import org.activityinfo.server.endpoint.odk.OdkModule;
 import org.activityinfo.server.endpoint.rest.RestApiModule;
 import org.activityinfo.server.generated.GeneratedModule;
 import org.activityinfo.server.geo.GeometryModule;
+import org.activityinfo.server.job.JobModule;
 import org.activityinfo.server.login.LoginModule;
 import org.activityinfo.server.mail.MailModule;
 import org.activityinfo.server.report.ReportModule;
@@ -90,6 +91,7 @@ public class StartupListener extends GuiceServletContextListener {
                 new GwtRpcModule(),
                 new JsonRpcModule(),
                 new ExportModule(),
+                new JobModule(),
                 new GeneratedModule(),
                 new KmlModule(),
                 new BrandingModule(),

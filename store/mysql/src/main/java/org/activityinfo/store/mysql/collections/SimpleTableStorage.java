@@ -8,11 +8,13 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.cursor.RecordCursor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
@@ -21,11 +23,10 @@ import org.activityinfo.store.spi.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
-public class SimpleTableStorage implements FormStorage {
+public class SimpleTableStorage implements VersionedFormStorage {
 
     protected final TableMapping mapping;
     protected final Authorizer authorizer;
@@ -82,6 +83,24 @@ public class SimpleTableStorage implements FormStorage {
     @Override
     public ColumnQueryBuilder newColumnQuery() {
         return new SimpleTableColumnQueryBuilder(new MySqlCursorBuilder(mapping, executor));
+    }
+
+    @Override
+    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+        if(localVersion == mapping.getVersion()) {
+            return Collections.emptyList();
+        }
+
+        // Otherwise send the whole shebang...
+        RecordCursor cursor = new RecordCursor(mapping, executor);
+        Iterator<FormInstance> it = cursor.execute();
+
+        List<FormRecord> records = new ArrayList<>();
+        while(it.hasNext()) {
+            records.add(FormRecord.fromInstance(it.next()));
+        }
+
+        return records;
     }
 
     @Override

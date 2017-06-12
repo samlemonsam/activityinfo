@@ -41,7 +41,7 @@ import java.util.HashMap;
 
 @Path(HostController.ENDPOINT)
 public class HostController {
-    public static final String ENDPOINT = "/app";
+    public static final String ENDPOINT = "/";
 
     private final ServerSideAuthProvider authProvider;
     private Provider<EntityManager> entityManager;
@@ -79,10 +79,10 @@ public class HostController {
 
         User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
         model.setFeatureFlags(authenticatedUser.getFeatures());
-        model.setNewUI("3".equals(ui));
+        model.setNewUI("3".equals(ui) || "3dev".equals(ui));
 
-        if(model.isNewUI()) {
-            model.setBootstrapScript("App/App.nocache.js");
+        if("3dev".equals(ui)) {
+            model.setBootstrapScript("/App/App.nocache.js");
 
         } else if(!Strings.isNullOrEmpty(codeServer)) {
             // Running in development mode
@@ -99,8 +99,14 @@ public class HostController {
             if(Strings.isNullOrEmpty(locale)) {
                 locale = authProvider.get().getUserLocale();
             }
-            model.setBootstrapScript("/ActivityInfo/" + locale + ".js");
-            model.setAppCacheManifest("/ActivityInfo/" + locale + ".appcache");
+            String module;
+            if(model.isNewUI()) {
+                module = "App";
+            } else {
+                module = "ActivityInfo";
+            }
+            model.setBootstrapScript(String.format("/%s/%s.js", module, locale));
+            model.setAppCacheManifest(String.format("/%s/%s.appcache", module, locale));
         }
         
         return Response.ok(model.asViewable())

@@ -60,6 +60,10 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         this.expression = expression;
     }
 
+    public CalculatedFieldType withFormula(String formula) {
+        return new CalculatedFieldType(formula);
+    }
+
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;
@@ -76,6 +80,11 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return false;
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         if (expression != null) {
@@ -88,4 +97,5 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     public boolean isValid() {
         return true;
     }
+
 }

@@ -25,6 +25,9 @@ package org.activityinfo.ui.client.component.importDialog.model.type.converter;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
+import org.activityinfo.io.match.coord.CoordinateAxis;
+import org.activityinfo.io.match.coord.CoordinateFormatException;
+import org.activityinfo.io.match.coord.CoordinateParser;
 import org.activityinfo.ui.client.component.importDialog.model.match.JreNumberFormats;
 import org.junit.After;
 import org.junit.Before;

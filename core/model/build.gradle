@@ -11,7 +11,7 @@ dependencies {
     gwt     libraries.gwt.gson
 
     runtime libraries.gwt.servlet
-    compile libraries.guava 
+    compile libraries.guava
     compile libraries.gson
     compile libraries.rebar.time
     compile libraries.jsr305
@@ -21,6 +21,7 @@ dependencies {
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
+    from project.sourceSets.main.output.generatedSourcesDir
 }
 
 test {

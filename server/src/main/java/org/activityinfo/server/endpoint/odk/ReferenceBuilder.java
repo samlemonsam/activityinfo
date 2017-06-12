@@ -1,5 +1,6 @@
 package org.activityinfo.server.endpoint.odk;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.BodyElement;
@@ -20,6 +21,11 @@ public class ReferenceBuilder implements OdkFormFieldBuilder {
     @Override
     public BindingType getModelBindType() {
         return BindingType.STRING;
+    }
+
+    @Override
+    public Optional<String> getConstraint() {
+        return Optional.absent();
     }
 
     @Override

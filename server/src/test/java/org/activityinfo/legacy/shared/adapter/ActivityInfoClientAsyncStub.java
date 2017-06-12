@@ -7,16 +7,23 @@ import com.google.inject.Inject;
 import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.job.JobDescriptor;
+import org.activityinfo.model.job.JobResult;
+import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.FormCatalog;
@@ -62,6 +69,16 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
             return Promise.rejected(e);
         }
         return Promise.resolved(formClass);
+    }
+
+    @Override
+    public Promise<FormMetadata> getFormMetadata(String formId) {
+        return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
+    public Promise<FormTree> getFormTree(ResourceId formId) {
+        throw new UnsupportedOperationException();
     }
 
 
@@ -122,7 +139,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer);
+            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer, new SerialNumberProviderStub());
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -145,7 +162,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
             FormCatalog catalog = newCatalog();
-            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer);
+            Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer,  new SerialNumberProviderStub());
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -179,14 +196,34 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
+    public Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+        return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
         try {
             FormCatalog catalog = newCatalog();
-            ColumnSetBuilder builder = new ColumnSetBuilder(catalog);
+            ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
 
             return Promise.resolved(builder.build(query));
         } catch (Exception e) {
             return Promise.rejected(e);
         }
+    }
+
+    @Override
+    public Promise<Void> updateRecords(TransactionBuilder transactions) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public <T extends JobDescriptor<R>, R extends JobResult> Promise<JobStatus<T, R>> startJob(T job) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 }

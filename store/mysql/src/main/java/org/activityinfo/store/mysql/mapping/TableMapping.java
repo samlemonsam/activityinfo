@@ -34,6 +34,7 @@ public class TableMapping implements Serializable {
         this.primaryKey = primaryKey;
         this.baseFilter = baseFilter;
         this.formClass = formClass;
+        this.formClass.setSchemaVersion(1);
         this.insertDefaults = insertDefaults;
         this.deleteMethod = Preconditions.checkNotNull(deleteMethod, "deleteMethod");
         for(FieldMapping mapping : mappings) {

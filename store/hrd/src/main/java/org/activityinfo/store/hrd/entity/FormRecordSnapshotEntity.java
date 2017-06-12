@@ -3,6 +3,7 @@ package org.activityinfo.store.hrd.entity;
 import com.google.common.base.Preconditions;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.*;
+import com.googlecode.objectify.condition.IfFalse;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.RecordChangeType;
 
@@ -16,7 +17,7 @@ public class FormRecordSnapshotEntity {
     private Key<FormRecordEntity> recordKey;
     
     @Id
-    private long version;
+    private long id;
     
     @Index
     private String parentRecordId;
@@ -26,12 +27,20 @@ public class FormRecordSnapshotEntity {
     
     @Index
     private long userId;
+
+    @Index
+    private long version;
     
     @Unindex
     private RecordChangeType type;
     
     @Unindex
     private FormRecordEntity record;
+
+    @Unindex
+    @IgnoreSave(IfFalse.class)
+    private boolean migrated;
+
 
     public FormRecordSnapshotEntity() {
     }
@@ -40,6 +49,7 @@ public class FormRecordSnapshotEntity {
         Preconditions.checkArgument(userId != 0);
         
         this.recordKey = Key.create(record);
+        this.id = record.getVersion();
         this.version = record.getVersion();
         this.parentRecordId = record.getParentRecordId();
         this.type = changeType;
@@ -61,11 +71,19 @@ public class FormRecordSnapshotEntity {
     }
 
     public long getVersion() {
-        return version;
+        return id;
     }
 
     public void setVersion(long version) {
-        this.version = version;
+        this.id = version;
+    }
+
+    public boolean isMigrated() {
+        return migrated;
+    }
+
+    public void setMigrated(boolean migrated) {
+        this.migrated = migrated;
     }
 
     public String getParentRecordId() {
@@ -107,4 +125,5 @@ public class FormRecordSnapshotEntity {
     public void setRecord(FormRecordEntity record) {
         this.record = record;
     }
+
 }

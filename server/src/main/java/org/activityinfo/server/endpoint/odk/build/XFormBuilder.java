@@ -75,7 +75,7 @@ public class XFormBuilder {
         for (FormField field : formClass.getFields()) {
             if(field.isVisible() && isValid(field)) {
                 OdkFormFieldBuilder builder = factory.get(field.getType());
-                if (builder != null) {
+                if (builder != OdkFormFieldBuilder.NONE) {
                     fields.add(new OdkField(field, builder));
                 }
             }
@@ -140,6 +140,7 @@ public class XFormBuilder {
                 Bind bind = new Bind();
                 bind.setNodeSet(field.getAbsoluteFieldName());
                 bind.setType(field.getBuilder().getModelBindType());
+                bind.setConstraint(field.getBuilder().getConstraint().orNull());
 
                 //TODO Fix this
                 //bind.calculate = formField.getExpression();

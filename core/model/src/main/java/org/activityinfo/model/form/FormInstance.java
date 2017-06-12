@@ -23,10 +23,12 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
@@ -89,6 +91,10 @@ public class FormInstance {
         return id;
     }
 
+    public RecordRef getRef() {
+        return new RecordRef(getFormId(), getId());
+    }
+
     public FormInstance setId(ResourceId id) {
         this.id = id;
         return this;
@@ -124,6 +130,9 @@ public class FormInstance {
         }
     }
 
+    public void setAll(Map<ResourceId, FieldValue> valueMap) {
+        fieldMap.putAll(valueMap);
+    }
 
     public FormInstance set(@Nonnull ResourceId fieldId, String value) {
         if(value == null) {
@@ -178,7 +187,7 @@ public class FormInstance {
      */
     public FieldValue get(ResourceId fieldId, FieldTypeClass typeClass) {
         FieldValue value = get(fieldId);
-        if(value.getTypeClass() == typeClass) {
+        if(value != null && value.getTypeClass() == typeClass) {
             return value;
         } else {
             return null;
@@ -266,4 +275,20 @@ public class FormInstance {
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
+
+    public JsonObject toJsonObject() {
+
+        JsonObject fields = new JsonObject();
+        for (Map.Entry<ResourceId, FieldValue> entry : fieldMap.entrySet()) {
+            fields.add(entry.getKey().asString(), entry.getValue().toJsonElement());
+        }
+
+        JsonObject object = new JsonObject();
+        object.addProperty("formId", getFormId().asString());
+        object.addProperty("recordId", getId().asString());
+        object.add("fieldValues", fields);
+
+        return object;
+    }
+
 }

@@ -53,6 +53,23 @@ public class StringArrayColumnView implements ColumnView, Serializable {
     }
 
     @Override
+    public boolean isMissing(int row) {
+        return values[row] == null;
+    }
+
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        String[] filteredValues = new String[selectedRows.length];
+        for (int i = 0; i < filteredValues.length; i++) {
+            int selectedRow = selectedRows[i];
+            if(selectedRow != -1) {
+                filteredValues[i] = this.values[selectedRow];
+            }
+        }
+        return new StringArrayColumnView(filteredValues);
+    }
+
+    @Override
     public String toString() {
         return Arrays.toString(values);
     }

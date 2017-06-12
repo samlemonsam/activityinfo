@@ -13,10 +13,12 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.QuerySyntaxException;
+import org.activityinfo.store.query.impl.builders.FilteredSlot;
 import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 import org.activityinfo.store.spi.FormCatalog;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -27,29 +29,32 @@ public class ColumnSetBuilder {
 
     private final FormCatalog catalog;
     private final FormTreeBuilder formTreeBuilder;
-    private FormScanCache cache;
-    private Function<ColumnView, ColumnView> filter;
-    private Map<String, Slot<ColumnView>> columnViews;
-    private Slot<ColumnView> columnForRowCount;
+    private final FormSupervisor supervisor;
+    private final FormScanCache cache;
 
-    public ColumnSetBuilder(FormCatalog catalog) {
-        this(catalog, new AppEngineFormScanCache());
-    }
-
-    public ColumnSetBuilder(FormCatalog catalog, FormScanCache cache) {
+    public ColumnSetBuilder(FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
         this.catalog = catalog;
         this.formTreeBuilder = new FormTreeBuilder(catalog);
         this.cache = cache;
+        this.supervisor = supervisor;
+    }
+
+    public ColumnSetBuilder(FormCatalog catalog, FormSupervisor supervisor) {
+        this(catalog, new AppEngineFormScanCache(), supervisor);
+    }
+
+    public FormScanBatch createNewBatch() {
+        return new FormScanBatch(catalog, supervisor, cache);
     }
 
     public ColumnSet build(QueryModel queryModel) {
 
         // We want to make at most one pass over every collection we need to scan,
         // so first queue up all necessary work before executing
-        FormScanBatch batch = new FormScanBatch(catalog, cache);
+        FormScanBatch batch = createNewBatch();
 
         // Enqueue the columns we need
-        enqueue(queryModel, batch);
+        Slot<ColumnSet> columnSet = enqueue(queryModel, batch);
 
         // Now execute the batch
         try {
@@ -58,61 +63,62 @@ public class ColumnSetBuilder {
             throw new RuntimeException("Failed to execute query batch", e);
         }
 
-        return build();
+        return columnSet.get();
     }
 
 
-    public void enqueue(QueryModel table, FormScanBatch batch) {
-        ResourceId classId = table.getRowSources().get(0).getRootFormId();
-        FormTree tree = formTreeBuilder.queryTree(classId);
+    public Slot<ColumnSet> enqueue(QueryModel table, FormScanBatch batch) {
+        ResourceId formId = table.getRowSources().get(0).getRootFormId();
+        FormTree tree = formTreeBuilder.queryTree(formId);
 
         FormClass formClass = tree.getRootFormClass();
         Preconditions.checkNotNull(formClass);
 
-        QueryEvaluator evaluator = new QueryEvaluator(tree, formClass, batch);
+        QueryEvaluator evaluator = new QueryEvaluator(FilterLevel.PERMISSIONS, tree, batch);
 
-        filter = evaluator.filter(table.getFilter());
+        Slot<TableFilter> filter = evaluator.filter(table.getFilter());
 
-        columnViews = Maps.newHashMap();
-        for(ColumnModel column : table.getColumns()) {
+        final HashMap<String, Slot<ColumnView>> columnViews = Maps.newHashMap();
+        for (ColumnModel column : table.getColumns()) {
             Slot<ColumnView> view;
             try {
                 view = evaluator.evaluateExpression(column.getExpression());
-            } catch(ExprException e) {
+            } catch (ExprException e) {
                 throw new QuerySyntaxException("Syntax error in column " + column.getId() +
                         " '" + column.getExpression() + "' : " + e.getMessage(), e);
             }
-            columnViews.put(column.getId(), view);
+            columnViews.put(column.getId(), new FilteredSlot(filter, view));
         }
 
-        columnForRowCount = null;
+        if (columnViews.isEmpty()) {
+            // Special case for result with no columns -- we need to query the number
+            // of rows explicitly
 
-        if(columnViews.isEmpty()) {
-            // handle empty queries as a special case: we still need the
-            // row count so query the id
-            columnForRowCount = batch.addResourceIdColumn(formClass);
+            return new MemoizedSlot<>(batch.addRowCount(FilterLevel.PERMISSIONS, formClass), new Function<Integer, ColumnSet>() {
+                @Override
+                public ColumnSet apply(Integer rowCount) {
+                    return new ColumnSet(rowCount, Collections.<String, ColumnView>emptyMap());
+                }
+            });
+        } else {
+            return new Slot<ColumnSet>() {
+                private ColumnSet result = null;
+
+                @Override
+                public ColumnSet get() {
+                    if (result == null) {
+                        // result
+                        Map<String, ColumnView> dataMap = Maps.newHashMap();
+                        for (Map.Entry<String, Slot<ColumnView>> entry : columnViews.entrySet()) {
+                            dataMap.put(entry.getKey(), entry.getValue().get());
+                        }
+
+                        result = new ColumnSet(commonLength(dataMap), dataMap);
+                    }
+                    return result;
+                }
+            };
         }
-    }
-
-    public ColumnSet build() {
-
-        // handle the special case of no columns
-        if(columnViews.isEmpty()) {
-            int numRows = columnForRowCount.get().numRows();
-            Map<String, ColumnView> columns = Collections.emptyMap();
-            return new ColumnSet(numRows, columns);
-        }
-
-        // Otherwise resolve the columns, filter, and package the
-        // result
-        Map<String, ColumnView> dataMap = Maps.newHashMap();
-        for (Map.Entry<String, Slot<ColumnView>> entry : columnViews.entrySet()) {
-            ColumnView view = filter.apply(entry.getValue().get());
-
-            dataMap.put(entry.getKey(), view);
-        }
-
-        return new ColumnSet(commonLength(dataMap), dataMap);
     }
 
     private static int commonLength(Map<String, ColumnView> dataMap) {

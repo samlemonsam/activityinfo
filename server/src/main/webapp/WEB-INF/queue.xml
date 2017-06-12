@@ -30,4 +30,9 @@
     <max-concurrent-requests>1</max-concurrent-requests>
   </queue>
 
+  <queue>
+    <name>user-jobs</name>
+    <rate>20/s</rate>
+  </queue>
+
 </queue-entries>

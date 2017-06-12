@@ -9,12 +9,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumber;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -22,9 +24,11 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.spi.*;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
@@ -42,13 +46,17 @@ public class Updater {
     private final FormCatalog catalog;
     private int userId;
     private BlobAuthorizer blobAuthorizer;
+    private SerialNumberProvider serialNumberProvider;
 
     private boolean enforcePermissions = true;
 
-    public Updater(FormCatalog catalog, int userId, BlobAuthorizer blobAuthorizer) {
+    public Updater(FormCatalog catalog, int userId,
+                   BlobAuthorizer blobAuthorizer,
+                   SerialNumberProvider serialNumberProvider) {
         this.catalog = catalog;
         this.userId = userId;
         this.blobAuthorizer = blobAuthorizer;
+        this.serialNumberProvider = serialNumberProvider;
     }
 
     public void setEnforcePermissions(boolean enforcePermissions) {
@@ -85,29 +93,22 @@ public class Updater {
         
         ResourceId recordId = parseId(changeObject, "@id");
 
-        // First determine whether the resource already exists. 
-        Optional<FormStorage> accessor = catalog.lookupForm(recordId);
-        
-        if(!accessor.isPresent()) {
-            // If the record id is not present, then we need the @class attribute in order to
-            // know where to put the new resource 
-            if(!changeObject.has("@class")) {
-                throw new InvalidUpdateException(format(
-                    "Resource with id '%s' does not exist and no '@class' attribute has been provided.", recordId));
-            } 
-            
-            ResourceId formId = parseId(changeObject, "@class");
-            accessor = catalog.getForm(formId);
-            
-            if(!accessor.isPresent()) {
-                throw new InvalidUpdateException(format("@class '%s' does not exist.", formId));
-            }
+        if(!changeObject.has("@class")) {
+            throw new InvalidUpdateException(format(
+                "Resource with id '%s' does not exist and no '@class' attribute has been provided.", recordId));
         }
 
-        FormClass formClass = accessor.get().getFormClass();
+        ResourceId formId = parseId(changeObject, "@class");
+        Optional<FormStorage> storage = catalog.getForm(formId);
+
+        if(!storage.isPresent()) {
+            throw new InvalidUpdateException(format("@class '%s' does not exist.", formId));
+        }
+
+        FormClass formClass = storage.get().getFormClass();
         RecordUpdate update = parseChange(formClass, changeObject, this.userId);
 
-        executeUpdate(accessor.get(), update);
+        executeUpdate(storage.get(), update);
     }
 
     @VisibleForTesting
@@ -211,36 +212,58 @@ public class Updater {
         if(jsonValue.isJsonNull()) {
             return null;
         } else if(field.getType() instanceof EnumType) {
-            return parseEnumValue((EnumType)field.getType(), jsonValue.getAsString());
+            return parseEnumValue((EnumType)field.getType(), jsonValue);
         } else {
             return field.getType().parseJsonValue(jsonValue);
         }
     }
 
-    private static FieldValue parseEnumValue(EnumType type, String jsonValue) {
+    private static FieldValue parseEnumValue(EnumType type, JsonElement jsonElement) {
+
+        Set<ResourceId> itemIds = new HashSet<>();
+
+        if(jsonElement.isJsonPrimitive()) {
+            itemIds.add(parseEnumId(type, jsonElement.getAsString()));
+        } else if(jsonElement.isJsonArray()) {
+            for (JsonElement element : jsonElement.getAsJsonArray()) {
+                itemIds.add(parseEnumId(type, element.getAsString()));
+            }
+        }
+        if(type.getCardinality() == Cardinality.SINGLE && itemIds.size() > 1) {
+            throw new InvalidUpdateException("Field with SINGLE enum type has multiple values.");
+        }
+
+        return new EnumValue(itemIds);
+    }
+
+    private static ResourceId parseEnumId(EnumType type, String item) {
+
         for (EnumItem enumItem : type.getValues()) {
-            if(enumItem.getId().asString().equals(jsonValue)) {
-                return new EnumValue(enumItem.getId());
+            if(enumItem.getId().asString().equals(item)) {
+                return enumItem.getId();
             }
         }
         for (EnumItem enumItem : type.getValues()) {
-            if(enumItem.getLabel().equals(jsonValue)) {
-                return new EnumValue(enumItem.getId());
+            if(enumItem.getLabel().equals(item)) {
+                return enumItem.getId();
             }
         }
 
         throw new InvalidUpdateException(format("Invalid enum value '%s', expected one of: %s",
-                jsonValue, Joiner.on(", ").join(type.getValues())));
+                item, Joiner.on(", ").join(type.getValues())));
     }
 
 
     public void execute(RecordUpdate update) {
-        Optional<FormStorage> collection = catalog.lookupForm(update.getRecordId());
-        if(!collection.isPresent()) {
+        if(update.getFormId() == null) {
+            throw new IllegalArgumentException("No formId provided.");
+        }
+        Optional<FormStorage> storage = catalog.getForm(update.getFormId());
+        if(!storage.isPresent()) {
             throw new InvalidUpdateException("No such resource: " + update.getRecordId());
         }
 
-        executeUpdate(collection.get(), update);
+        executeUpdate(storage.get(), update);
     }
 
     private void executeUpdate(FormStorage form, RecordUpdate update) {
@@ -259,7 +282,60 @@ public class Updater {
         if(existingResource.isPresent()) {
             form.update(update);
         } else {
+
+            generateSerialNumbers(formClass, update);
+
             form.add(update);
+        }
+    }
+
+    private void generateSerialNumbers(FormClass formClass, RecordUpdate update) {
+        for (FormField formField : formClass.getFields()) {
+            if(formField.getType() instanceof SerialNumberType) {
+                generateSerialNumber(formClass, formField, update);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void generateSerialNumber(FormClass formClass, FormField formField, RecordUpdate update) {
+
+        SerialNumberType type = (SerialNumberType) formField.getType();
+        String prefix = computeSerialNumberPrefix(formClass, type, update);
+
+        int serialNumber = serialNumberProvider.next(formClass.getId(), formField.getId(), prefix);
+
+        update.set(formField.getId(), new SerialNumber(prefix, serialNumber));
+    }
+
+    private String computeSerialNumberPrefix(FormClass formClass, SerialNumberType type, RecordUpdate update) {
+
+        if(!type.hasPrefix()) {
+            return null;
+        }
+
+        try {
+            FormInstance record = new FormInstance(update.getRecordId(), formClass.getId());
+            for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
+                record.set(entry.getKey(), entry.getValue());
+            }
+
+            FormEvalContext evalContext = new FormEvalContext(formClass);
+            evalContext.setInstance(record);
+
+            ExprNode formula = ExprParser.parse(type.getPrefixFormula());
+            FieldValue prefixValue = formula.evaluate(evalContext);
+
+            if(prefixValue instanceof TextValue) {
+                return ((TextValue) prefixValue).asString();
+            } else {
+                throw new IllegalStateException("Prefix " + type.getPrefixFormula() + " resolves to type " +
+                        prefixValue.getTypeClass().getId());
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to compute prefix for serial number", e);
+            return null;
         }
     }
 
@@ -280,11 +356,20 @@ public class Updater {
             }
             validateType(field, change.getValue());
         }
-        
-        // Verify that all required fields are provided for new resources
+
+        // AI-1578 Allow missing fields
+        //validateRequiredFields(formClass, existingResource, update);
+    }
+
+    /**
+     * Verify that all required fields are provided for new resources
+     */
+    private static void validateRequiredFields(FormClass formClass, Optional<FormRecord> existingResource, RecordUpdate update) {
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
-                if (formField.isRequired() && formField.isVisible() && !isProvided(formField, existingResource, update)) {
+                if (formField.isRequired() &&
+                    formField.isVisible() &&
+                    formField.getType().isUpdatable() && !isProvided(formField, existingResource, update)) {
                     throw new InvalidUpdateException("Required field '%s' [%s] is missing from record with schema %s",
                             formField.getCode(), formField.getId(), formClass.getId().asString());
                 }
@@ -337,11 +422,12 @@ public class Updater {
         Preconditions.checkNotNull(field);
         
         if(updatedValue != null) {
-            if ( field.getType() instanceof CalculatedFieldType) {
+            if ( !field.getType().isUpdatable()) {
                 throw new InvalidUpdateException(
-                        format("Field %s ('%s') is a calculated field and its value cannot be set. Found %s",
+                        format("Field %s ('%s') is a field of type '%s' and its value cannot be set. Found %s",
                                 field.getId(),
                                 field.getLabel(),
+                                field.getType().getTypeClass().getId(),
                                 updatedValue));
             }
             if (!field.getType().getTypeClass().equals(updatedValue.getTypeClass())) {

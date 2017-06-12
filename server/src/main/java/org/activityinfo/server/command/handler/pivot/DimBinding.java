@@ -34,7 +34,7 @@ public abstract class DimBinding {
     }
     
     protected final int activityIdOf(FormTree formTree) {
-        return CuidAdapter.getLegacyIdFromCuid(formTree.getRootFormClass().getId());
+        return CuidAdapter.getLegacyIdFromCuid(formTree.getRootFormId());
     }
 
     protected final DimensionCategory[] extractEntityCategories(ColumnSet columnSet, String idColumn, String labelColumn) {

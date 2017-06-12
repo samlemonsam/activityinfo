@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Observer;
-import org.activityinfo.ui.client.http.HttpStatus;
+import org.activityinfo.ui.client.store.http.HttpStatus;
 
 /**
  * Displays the current connection status.

@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.formulaDialog;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.resources.ThemeStyles;
+import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;

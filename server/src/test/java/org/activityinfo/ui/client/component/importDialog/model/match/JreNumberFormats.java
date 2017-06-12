@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.component.importDialog.model.match;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateFormatException;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.CoordinateParser;
+import org.activityinfo.io.match.coord.CoordinateFormatException;
+import org.activityinfo.io.match.coord.CoordinateParser;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

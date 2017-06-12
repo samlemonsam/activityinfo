@@ -30,6 +30,8 @@ public interface FieldsHolder {
 
     FormElementContainer getElementContainer();
 
+    void setLabel(String label);
+
     void updateUi();
 
 }

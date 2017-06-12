@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
-import org.activityinfo.ui.client.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpBus;
 
 /**
  * The outer application frame that houses the login menu, connection indicator, etc.

@@ -28,6 +28,7 @@ import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.io.xls.SheetNamer;
 import org.activityinfo.legacy.shared.UploadUrls;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.SiteResult;

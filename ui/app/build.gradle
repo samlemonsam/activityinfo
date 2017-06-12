@@ -1,10 +1,5 @@
 
 
-plugins {
-    id "net.ltgt.apt" version "0.9"
-}
-
-
 apply plugin: 'gwt-base'
 
 sourceCompatibility = 1.8
@@ -30,26 +25,32 @@ task explodedWar(type: Copy) {
 }
 
 
+test {
+    // Browser tests that require special handling
+    include '**GwtTest'
+}
+
 dependencies {
     compile "com.google.guava:guava:21.0"
 
-    apt "org.immutables:value:2.4.4"
-
-    compileOnly "org.immutables:value:2.4.4:annotations"
-
-    gwt  "org.immutables:value:2.4.4:annotations"
-
+    gwt libraries.immutables.annotations
 
     gwt "com.google.gwt:gwt-user:2.8.0"
     gwt 'com.google.guava:guava-gwt:21.0'
+    gwt 'com.google.elemental2:elemental2-indexeddb:1.0.0-beta-1'
     gwt libraries.gwt.gson
 
     gwt project(':core:model')
     gwt project(':store:query');
     gwt project(':i18n')
     gwt project(':clients:gwtrest')
+    gwt project(':io:match')
+    gwt project(':analysis')
+
 
     gwt project(':ui:codemirror')
+
+    gwt libraries.rebar.appcache
 
     gwt group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
     gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
@@ -115,9 +116,58 @@ task compileApp(type: JavaExec) {
 
     main = 'com.google.gwt.dev.Compiler'
 
-    args '-logLevel', 'ERROR'
+    args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
     args '-war', outputDir
+    args 'org.activityinfo.ui.AppProd'
+
+}
+
+
+task testOffline(type: JavaExec) {
+
+    dependsOn compileTestJava
+
+    classpath configurations.gwtSdk
+    classpath configurations.gwt
+
+
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath sourceSets.main.output.generatedSourcesDir
+    classpath sourceSets.test.java.srcDirs
+    classpath sourceSets.test.runtimeClasspath
+    classpath configurations.testCompile
+
+    main = 'junit.textui.TestRunner'
+
+    jvmArgs "-Dgwt.args=-runStyle Manual:1 -style pretty -war ${buildDir}/tesWar -workDir ${buildDir}/testGwtWork"
+    args 'org.activityinfo.ui.client.store.offline.OfflineStoreGwtTest'
+
+}
+
+
+task soyc(type: JavaExec) {
+
+    outputs.dir outputDir
+    inputs.dir sourceSets.main.allSource.srcDirs
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath sourceSets.main.output.generatedSourcesDir
+    classpath configurations.gwt
+    classpath configurations.gwtSdk
+
+    main = 'com.google.gwt.dev.Compiler'
+
+    args '-logLevel', 'INFO'
+    args '-sourceLevel', '1.8'
+    args '-war', outputDir
+    args '-compileReport'
+    args '-extra', "${buildDir}/gwt-extra"
     args 'org.activityinfo.ui.AppProd'
 
 }

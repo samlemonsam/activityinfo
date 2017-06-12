@@ -1,25 +1,32 @@
 package org.activityinfo.ui.client.store;
 
 import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Promise;
+import org.activityinfo.store.query.shared.FormSource;
 
 import java.util.List;
 
-public interface FormStore {
+public interface FormStore extends FormSource {
 
 
-    Observable<FormClass> getFormClass(ResourceId formId);
+    Observable<FormMetadata> getFormMetadata(ResourceId formId);
+
+    Promise<Void> deleteForm(ResourceId formId);
 
     Observable<List<CatalogEntry>> getCatalogRoots();
 
     Observable<List<CatalogEntry>> getCatalogChildren(ResourceId parentId);
 
-    Observable<FormTree> getFormTree(ResourceId formId);
+    void setFormOffline(ResourceId formId, boolean offline);
 
-    Observable<ColumnSet> query(QueryModel queryModel);
+    Observable<OfflineStatus> getOfflineStatus(ResourceId formId);
+
+    /**
+     * Applies an update transactionally to the Form store.
+     */
+    Promise<Void> updateRecords(TransactionBuilder transactionBuilder);
 }

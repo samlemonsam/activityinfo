@@ -15,8 +15,6 @@ import java.util.List;
 public interface FormCatalog extends FormClassProvider, BatchFormClassProvider {
 
     Optional<FormStorage> getForm(ResourceId formId);
-    
-    Optional<FormStorage> lookupForm(ResourceId recordId);
 
     List<CatalogEntry> getRootEntries();
     

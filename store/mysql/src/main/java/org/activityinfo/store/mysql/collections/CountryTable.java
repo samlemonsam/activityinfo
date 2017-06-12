@@ -1,6 +1,5 @@
 package org.activityinfo.store.mysql.collections;
 
-import com.google.common.base.Optional;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -61,8 +60,4 @@ public class CountryTable implements SimpleTable {
         return mapping.build();
     }
 
-    @Override
-    public Optional<ResourceId> lookupCollection(QueryExecutor queryExecutor, ResourceId id) throws SQLException {
-        return Optional.absent();
-    }
 }

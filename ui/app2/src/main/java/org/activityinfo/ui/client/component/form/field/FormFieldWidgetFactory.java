@@ -40,6 +40,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -100,6 +101,9 @@ public class FormFieldWidgetFactory {
         if (type instanceof QuantityType) {
             return Promise.resolved(new QuantityFieldWidget((QuantityType) type, valueUpdater));
 
+        } else if (type instanceof SerialNumberType) {
+            return Promise.resolved(new SerialNumberFieldWidget((SerialNumberType) type));
+
         } else if (type instanceof NarrativeType) {
             return Promise.resolved(new NarrativeFieldWidget(valueUpdater));
 
@@ -155,14 +159,7 @@ public class FormFieldWidgetFactory {
                 return Promise.rejected(new UnsupportedOperationException("TODO"));
             }
 
-            final ResourceId formId = Iterables.getOnlyElement(type.getRange());
-            return resourceLocator.getFormClass(formId).join(new Function<FormClass, Promise<FormFieldWidget>>() {
-                @Override
-                public Promise<FormFieldWidget> apply(FormClass formClass) {
-                    return createSimpleListWidget(formClass, type, updater);
-                }
-            });
-
+            return createSimpleListWidget(type, updater);
         }
     }
 
@@ -179,56 +176,30 @@ public class FormFieldWidgetFactory {
         return false;
     }
 
-    private Promise<FormFieldWidget> createSimpleListWidget(FormClass formClass, final ReferenceType type, final ValueUpdater valueUpdater) {
+    private Promise<FormFieldWidget> createSimpleListWidget(final ReferenceType type, final ValueUpdater valueUpdater) {
 
-        final ResourceId formId = Iterables.getOnlyElement(type.getRange());
-        QueryModel queryModel = new QueryModel(formId);
-        queryModel.selectResourceId().as("id");
-        queryModel.selectExpr(findLabelExpression(formClass)).as("label");
+        OptionSetProvider provider = new OptionSetProvider(resourceLocator);
+        return provider.queryOptionSet(type).then(new Function<OptionSet, FormFieldWidget>() {
+            @Override
+            public FormFieldWidget apply(OptionSet instances) {
 
-        return resourceLocator
-                .queryTable(queryModel)
-                .then(new Function<ColumnSet, FormFieldWidget>() {
-                    @Override
-                    public FormFieldWidget apply(ColumnSet input) {
+                int size = instances.getCount();
 
-                        int size = input.getNumRows();
+                if (size > 0 && size < SMALL_BALANCE_NUMBER) {
+                    // Radio buttons
+                    return new CheckBoxFieldWidget(type, instances, valueUpdater);
 
-                        OptionSet instances = new OptionSet(formId, input);
+                } else if (size < MEDIUM_BALANCE_NUMBER) {
+                    // Dropdown list
+                    return new ComboBoxFieldWidget(instances.getFormId(), instances, valueUpdater);
 
-                        if (size > 0 && size < SMALL_BALANCE_NUMBER) {
-                            // Radio buttons
-                            return new CheckBoxFieldWidget(type, instances, valueUpdater);
-
-                        } else if (size < MEDIUM_BALANCE_NUMBER) {
-                            // Dropdown list
-                            return new ComboBoxFieldWidget(formId, instances, valueUpdater);
-
-                        } else {
-                            // Suggest box
-                            return new SuggestBoxWidget(formId, instances, valueUpdater);
-                        }
-                    }
-                });
+                } else {
+                    // Suggest box
+                    return new SuggestBoxWidget(instances.getFormId(), instances, valueUpdater);
+                }
+            }
+        });
     }
 
-    private ExprNode findLabelExpression(FormClass formClass) {
-        // Look for a field with the "label" tag
-        for (FormField field : formClass.getFields()) {
-            if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
-                return new SymbolExpr(field.getId());
-            }
-        }
-
-        // If no such field exists, pick the first text field
-        for (FormField field : formClass.getFields()) {
-            if(field.getType() instanceof TextType) {
-                return new SymbolExpr(field.getId());
-            }
-        }
-
-        // Otherwise fall back to the generated id
-        return new SymbolExpr(ColumnModel.ID_SYMBOL);
-    }
 }
 

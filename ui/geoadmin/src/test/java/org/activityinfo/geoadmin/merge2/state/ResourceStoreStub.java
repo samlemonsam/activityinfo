@@ -13,6 +13,7 @@ import org.activityinfo.observable.ConstantObservable;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.ResourceStore;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
 
@@ -64,7 +65,7 @@ public class ResourceStoreStub implements ResourceStore {
     @Override
     public Observable<ColumnSet> queryColumns(QueryModel queryModel) {
 
-        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog);
+        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         return new ConstantObservable<>(columnSetBuilder.build(queryModel));
     }
     
@@ -77,11 +78,6 @@ public class ResourceStoreStub implements ResourceStore {
             } else {
                 return featureSourceCatalog.getForm(formId);
             }
-        }
-
-        @Override
-        public Optional<FormStorage> lookupForm(ResourceId recordId) {
-            throw new UnsupportedOperationException();
         }
 
         @Override

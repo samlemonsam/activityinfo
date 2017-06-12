@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.CreateLocation;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
+import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -42,7 +43,6 @@ import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.fromNullable;
 import static javax.ws.rs.core.Response.Status.*;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.activityinfo.server.endpoint.odk.OdkFieldValueParserFactory.fromFieldType;
 import static org.activityinfo.server.endpoint.odk.OdkHelper.isLocation;
 
 @Path("/submission")
@@ -89,38 +89,40 @@ public class XFormSubmissionResource {
         LOGGER.log(Level.INFO, "Saving XForm " + instance.getId() + " as " + formId);
 
         for (FormField formField : formClass.getFields()) {
-            Optional<Element> element = instance.getFieldContent(formField.getId());
-            if (element.isPresent()) {
-                formInstance.set(formField.getId(), tryParse(formInstance, formField, element.get()));
-            } else if (isLocation(formClass, formField)) {
-                FieldType fieldType = formField.getType();
-                Optional<Element> gpsField = instance.getFieldContent(field(formClass.getId(), GPS_FIELD));
-                Optional<Element> nameField = instance.getFieldContent(field(formClass.getId(), LOCATION_NAME_FIELD));
+            if(formField.getType().isUpdatable()) {
+                Optional<Element> element = instance.getFieldContent(formField.getId());
+                if (element.isPresent()) {
+                    formInstance.set(formField.getId(), tryParse(formInstance, formField, element.get()));
+                } else if (isLocation(formClass, formField)) {
+                    FieldType fieldType = formField.getType();
+                    Optional<Element> gpsField = instance.getFieldContent(field(formClass.getId(), GPS_FIELD));
+                    Optional<Element> nameField = instance.getFieldContent(field(formClass.getId(), LOCATION_NAME_FIELD));
 
-                if (fieldType instanceof ReferenceType && gpsField.isPresent() && nameField.isPresent()) {
+                    if (fieldType instanceof ReferenceType && gpsField.isPresent() && nameField.isPresent()) {
 
-                    ResourceId locationFieldId = field(formClass.getId(), LOCATION_FIELD);
-                    int newLocationId = new KeyGenerator().generateInt();
-                    ReferenceType locationRefType = (ReferenceType) fieldType;
-                    if(locationRefType.getRange().isEmpty()) {
-                        throw new IllegalStateException("Location field has empty range");
+                        ResourceId locationFieldId = field(formClass.getId(), LOCATION_FIELD);
+                        int newLocationId = new KeyGenerator().generateInt();
+                        ReferenceType locationRefType = (ReferenceType) fieldType;
+                        if (locationRefType.getRange().isEmpty()) {
+                            throw new IllegalStateException("Location field has empty range");
+                        }
+                        ResourceId locationFormId = locationRefType.getRange().iterator().next();
+                        int locationTypeId = getLegacyIdFromCuid(locationFormId);
+                        FieldValue fieldValue = new ReferenceValue(new RecordRef(locationFormId, locationInstanceId(newLocationId)));
+                        String name = OdkHelper.extractText(nameField.get());
+
+                        if (Strings.isNullOrEmpty(name)) {
+                            throw new WebApplicationException(
+                                    Response.status(BAD_REQUEST).
+                                            entity("Name value for location field is blank. ").
+                                            build());
+                        }
+
+                        Optional<GeoPoint> geoPoint = parseLocation(gpsField);
+
+                        formInstance.set(locationFieldId, fieldValue);
+                        createLocation(newLocationId, locationTypeId, name, geoPoint);
                     }
-                    ResourceId locationFormId = locationRefType.getRange().iterator().next();
-                    int locationTypeId = getLegacyIdFromCuid(locationFormId);
-                    FieldValue fieldValue = new ReferenceValue(new RecordRef(locationFormId, locationInstanceId(newLocationId)));
-                    String name = OdkHelper.extractText(nameField.get());
-
-                    if (Strings.isNullOrEmpty(name)) {
-                        throw new WebApplicationException(
-                                Response.status(BAD_REQUEST).
-                                        entity("Name value for location field is blank. ").
-                                        build());
-                    }
-
-                    Optional<GeoPoint> geoPoint = parseLocation(gpsField);
-
-                    formInstance.set(locationFieldId, fieldValue);
-                    createLocation(newLocationId, locationTypeId, name, geoPoint);
                 }
             }
         }
@@ -166,7 +168,7 @@ public class XFormSubmissionResource {
 
     private FieldValue tryParse(FormInstance formInstance, FormField formField, Element element) {
         try {
-            OdkFieldValueParser odkFieldValueParser = fromFieldType(formField.getType());
+            OdkFieldValueParser odkFieldValueParser = FieldValueParserFactory.create(formField.getType());
             return odkFieldValueParser.parse(element);
 
         } catch (Exception e) {
@@ -181,7 +183,7 @@ public class XFormSubmissionResource {
         Preconditions.checkNotNull(element);
         if (element.isPresent()) {
             try {
-                OdkFieldValueParser odkFieldValueParser = fromFieldType(GeoPointType.INSTANCE);
+                OdkFieldValueParser odkFieldValueParser = FieldValueParserFactory.create(GeoPointType.INSTANCE);
                 return fromNullable((GeoPoint) odkFieldValueParser.parse(element.get()));
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Can't parse form submission location data", e);
@@ -215,7 +217,15 @@ public class XFormSubmissionResource {
     }
 
     private VoidResult createLocation(int id, int locationTypeId, String name, Optional<GeoPoint> geoPoint) {
-        Preconditions.checkNotNull(name, geoPoint);
+        Preconditions.checkNotNull(name);
+        Preconditions.checkNotNull(geoPoint);
+
+        // Trim location names to maximum length permitted by
+        // classical MySQL table.
+        if(name.length() > LocationDTO.MAX_NAME_LENGTH) {
+            name = name.substring(0, LocationDTO.MAX_NAME_LENGTH);
+        }
+
         Map<String, Object> properties = Maps.newHashMap();
 
         properties.put("id", id);

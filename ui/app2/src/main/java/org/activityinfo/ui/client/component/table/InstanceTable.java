@@ -12,6 +12,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.GroupExpr;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.table.action.*;
 import org.activityinfo.ui.client.component.table.filter.FilterCellAction;
 import org.activityinfo.ui.client.component.table.filter.FilterHeader;
@@ -50,12 +51,14 @@ public class InstanceTable implements IsWidget {
 
     private FormClass rootFormClass;
     private List<FieldColumn> columns = Lists.newArrayList();
+    private EventBus eventBus;
 
-    public InstanceTable(InstanceTableView tableView) {
+    public InstanceTable(InstanceTableView tableView, EventBus eventBus) {
         this.tableView = tableView;
         this.resourceLocator = tableView.getResourceLocator();
         this.columnStatePersister = new ColumnStatePersister(tableView.getStateProvider());
         this.stateProvider = tableView.getStateProvider();
+        this.eventBus = eventBus;
 
         CellTableResources.INSTANCE.cellTableStyle().ensureInjected();
 
@@ -105,6 +108,7 @@ public class InstanceTable implements IsWidget {
         actions.add(new ImportHeaderAction(this));
         actions.add(new ExportHeaderAction(this));
         actions.add(new ChooseColumnsHeaderAction(this));
+        actions.add(new SubFormAction(this));
         return actions;
     }
 
@@ -202,5 +206,9 @@ public class InstanceTable implements IsWidget {
 
     public ColumnStatePersister getColumnStatePersister() {
         return columnStatePersister;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
     }
 }

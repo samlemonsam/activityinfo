@@ -21,6 +21,7 @@ package org.activityinfo.model.expr;
  * #L%
  */
 
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.expr.functions.Casting;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
@@ -55,6 +56,8 @@ public class SkipExpressionTest {
 
     @Before
     public void setUp() {
+        LocaleProxy.initialize();
+
         formClass = createFormClass();
     }
 

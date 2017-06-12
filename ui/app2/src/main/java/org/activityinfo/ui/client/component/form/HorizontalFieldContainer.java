@@ -42,6 +42,7 @@ public class HorizontalFieldContainer implements FieldContainer {
     private final FormGroup formGroup;
     private final FormField field;
     private final FormFieldWidget fieldWidget;
+    private boolean valid;
 
     public HorizontalFieldContainer(FormField formField, FormFieldWidget fieldWidget) {
         this(formField, fieldWidget, 4);
@@ -72,12 +73,19 @@ public class HorizontalFieldContainer implements FieldContainer {
 
     @Override
     public void setValid() {
+        valid = true;
         formGroup.showValidationMessage(false);
     }
 
     @Override
     public void setInvalid(String message) {
+        valid = false;
         formGroup.showValidationMessage(message);
+    }
+
+    @Override
+    public boolean isInputValid() {
+        return valid;
     }
 
     @Override

@@ -37,35 +37,33 @@ import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayout.VBoxLayoutAlign;
 import com.extjs.gxt.ui.client.widget.layout.VBoxLayoutData;
-import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.http.client.*;
-import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.legacy.shared.command.FilterUrlSerializer;
-import org.activityinfo.legacy.shared.command.RenderElement;
-import org.activityinfo.legacy.shared.command.RenderElement.Format;
-import org.activityinfo.legacy.shared.command.result.UrlResult;
-import org.activityinfo.legacy.shared.reports.model.ReportElement;
-import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.dispatch.Dispatcher;
 
 public class ExportDialog extends Dialog {
 
-    private final Dispatcher dispatcher;
+    public interface AsyncTaskPoller {
+        void poll(ProgressCallback callback);
+    }
+
+    public interface AsyncTask {
+        void start(AsyncCallback<AsyncTaskPoller> callback);
+    }
+
+    public interface ProgressCallback {
+        void onProgress(double percent);
+        void onDownloadReady(String url);
+        void onFailure(Throwable caught);
+    }
+
     private ProgressBar bar;
     private Text downloadLink;
     private boolean canceled = false;
     private Button button;
 
-    public ExportDialog(Dispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+    public ExportDialog() {
 
         setWidth(350);
         setHeight(175);
@@ -106,23 +104,28 @@ public class ExportDialog extends Dialog {
         getButtonBar().add(button);
     }
 
-    public void export(String filename, ReportElement model, Format format) {
+    public void start(AsyncTask task) {
         showStartProgress();
-
-        RenderElement command = new RenderElement(model, format);
-        command.setFilename(filename);
-
-        dispatcher.execute(command, new AsyncCallback<UrlResult>() {
-
+        task.start(new AsyncCallback<AsyncTaskPoller>() {
             @Override
             public void onFailure(Throwable caught) {
                 showError();
             }
 
             @Override
-            public void onSuccess(UrlResult result) {
-                if (!canceled) {
-                    initiateDownload(result.getUrl());
+            public void onSuccess(AsyncTaskPoller poller) {
+                if(!canceled) {
+                    schedulePoll(poller, new AsyncCallback<String>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            showError();
+                        }
+
+                        @Override
+                        public void onSuccess(String url) {
+                            initiateDownload(url);
+                        }
+                    });
                 }
             }
         });
@@ -155,97 +158,36 @@ public class ExportDialog extends Dialog {
         layout(true);
     }
 
-    public void exportSites(Filter filter) {
-
-        show();
-        bar.updateText(I18N.CONSTANTS.exportProgress());
-
-        RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.POST, "/ActivityInfo/export");
-        requestBuilder.setHeader("Content-type", "application/x-www-form-urlencoded");
-        requestBuilder.setRequestData("locale=" + LocaleInfo.getCurrentLocale().getLocaleName() + 
-                "&filter=" + FilterUrlSerializer.toUrlFragment(filter));
-        requestBuilder.setCallback(new RequestCallback() {
-            @Override
-            public void onResponseReceived(Request request, Response response) {
-                final String exportId = response.getText();
-                if(Strings.isNullOrEmpty(exportId)) {
-                    showError();
-                } else {
-                    getDownloadUrl(exportId).then(new AsyncCallback<String>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            showError();
-                        }
-
-                        @Override
-                        public void onSuccess(String downloadUrl) {
-                            initiateDownload(downloadUrl);
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onError(Request request, Throwable exception) {
-                showError();
-            }
-        });
-        try {
-            requestBuilder.send();
-        } catch (RequestException e) {
-            showError();
-        }
-    }
-
-    private Promise<String> getDownloadUrl(String exportId) {
-        final Promise<String> url = new Promise<>();
-        schedulePoll(exportId, url);
-        return url;
-    }
-
-    private void schedulePoll(final String exportId, final Promise<String> downloadUrl) {
+    private void schedulePoll(final AsyncTaskPoller poller, final AsyncCallback<String> urlCallback) {
         Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
             @Override
             public boolean execute() {
                 if(!canceled) {
-                    pollServer(exportId, downloadUrl);
+                    pollServer(poller, urlCallback);
                 }
                 return false;
             }
         }, 1000);
     }
 
-    private void pollServer(final String exportId, final Promise<String> downloadUrl) {
-        RequestBuilder request = new RequestBuilder(RequestBuilder.GET, "/generated/status/" + exportId);
-        request.setCallback(new RequestCallback() {
+    private void pollServer(final AsyncTaskPoller poller, final AsyncCallback<String> urlCallback) {
+        poller.poll(new ProgressCallback() {
             @Override
-            public void onResponseReceived(Request request, Response response) {
-                if (response.getStatusCode() == Response.SC_OK) {
-                    JSONObject status = JSONParser.parseStrict(response.getText()).isObject();
-                    double progress = status.get("progress").isNumber().doubleValue();
-                    JSONValue downloadUri = status.get("downloadUri");
-                    
-                    if(downloadUri != null) {
-                        downloadUrl.onSuccess(downloadUri.isString().stringValue());
-                    } else {
-                        bar.updateProgress(progress, I18N.CONSTANTS.exportProgress());
-                        schedulePoll(exportId, downloadUrl);
-                    }
-                } else {
-                    showError();
-                }
+            public void onProgress(double percent) {
+                bar.updateProgress(percent, I18N.CONSTANTS.exportProgress());
+                schedulePoll(poller, urlCallback);
             }
 
             @Override
-            public void onError(Request request, Throwable exception) {
-                downloadUrl.onFailure(exception);
+            public void onDownloadReady(String url) {
+                urlCallback.onSuccess(url);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                urlCallback.onFailure(caught);
             }
         });
-        try {
-            request.send();
-        } catch (RequestException e) {
-            downloadUrl.onFailure(e);
-        }
     }
 
     private void tryStartDownloadWithIframe(String url) {

@@ -1,7 +1,6 @@
 package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ExprException;
@@ -10,17 +9,12 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.store.query.impl.FormScanBatch;
-import org.activityinfo.store.query.impl.Slot;
+import org.activityinfo.store.query.impl.*;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
-import org.activityinfo.store.query.impl.views.ColumnFilter;
 import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.query.shared.NodeMatcher;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +27,7 @@ public class QueryEvaluator {
     private static final Logger LOGGER = Logger.getLogger(QueryEvaluator.class.getName());
 
     private FormScanBatch batch;
+    private FilterLevel filterLevel;
     private FormTree tree;
     private FormClass rootFormClass;
 
@@ -42,10 +37,11 @@ public class QueryEvaluator {
 
     private Deque<SymbolExpr> evaluationStack = new ArrayDeque<>();
 
-    public QueryEvaluator(FormTree formTree, FormClass rootFormClass, FormScanBatch batch) {
+    public QueryEvaluator(FilterLevel filterLevel, FormTree formTree, FormScanBatch batch) {
+        this.filterLevel = filterLevel;
         this.tree = formTree;
         this.resolver = new NodeMatcher(formTree);
-        this.rootFormClass = rootFormClass;
+        this.rootFormClass = tree.getRootFormClass();
         this.batch = batch;
     }
 
@@ -59,11 +55,16 @@ public class QueryEvaluator {
         return parsed.accept(columnVisitor);
     }
 
-    public Function<ColumnView, ColumnView> filter(ExprNode filter) {
+    public Slot<TableFilter> filter(ExprNode filter) {
         if(filter == null) {
-            return Functions.identity();
+            return new PendingSlot<>(TableFilter.ALL_SELECTED);
         } else {
-            return new ColumnFilter(evaluateExpression(filter));
+            return new MemoizedSlot<>(evaluateExpression(filter), new Function<ColumnView, TableFilter>() {
+                @Override
+                public TableFilter apply(ColumnView columnView) {
+                    return new TableFilter(columnView);
+                }
+            });
         }
     }
 
@@ -71,7 +72,7 @@ public class QueryEvaluator {
 
         @Override
         public Slot<ColumnView> visitConstant(ConstantExpr node) {
-            return batch.addConstantColumn(rootFormClass, node.getValue());
+            return batch.addConstantColumn(filterLevel, rootFormClass, node.getValue());
         }
 
         @Override
@@ -82,7 +83,7 @@ public class QueryEvaluator {
             // loop and a StackOverflowException.
 
             if(evaluationStack.contains(symbolExpr)) {
-                return batch.addEmptyColumn(rootFormClass);
+                return batch.addEmptyColumn(filterLevel, rootFormClass);
             }
 
             evaluationStack.push(symbolExpr);
@@ -90,10 +91,10 @@ public class QueryEvaluator {
             try {
 
                 if (symbolExpr.getName().equals(ColumnModel.ID_SYMBOL)) {
-                    return batch.addResourceIdColumn(rootFormClass);
+                    return batch.addResourceIdColumn(filterLevel, rootFormClass.getId());
 
                 } else if (symbolExpr.getName().equals(ColumnModel.CLASS_SYMBOL)) {
-                    return batch.addConstantColumn(rootFormClass, rootFormClass.getId().asString());
+                    return batch.addConstantColumn(filterLevel, rootFormClass, rootFormClass.getId().asString());
                 }
 
                 Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolExpr);
@@ -118,27 +119,50 @@ public class QueryEvaluator {
         @Override
         public Slot<ColumnView> visitFunctionCall(final FunctionCallNode call) {
             if(call.getFunction() instanceof ColumnFunction) {
-                final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
-                for(ExprNode argument : call.getArguments()) {
-                    argumentSlots.add(argument.accept(this));
+                if(call.getArguments().isEmpty()) {
+                    return createNullaryFunctionCall(call);
+                } else {
+                    return createFunctionCall(call);
                 }
-                return new Slot<ColumnView>() {
-                    @Override
-                    public ColumnView get() {
-                        List<ColumnView> arguments = Lists.newArrayList();
-                        for (Slot<ColumnView> argument : argumentSlots) {
-                            ColumnView view = argument.get();
-                            if(view == null) {
-                                throw new IllegalStateException();
-                            }
-                            arguments.add(view);
-                        }
-                        return ((ColumnFunction) call.getFunction()).columnApply(arguments);
-                    }
-                };
             } else {
-                return batch.addExpression(rootFormClass, call);
+                return batch.addExpression(filterLevel, rootFormClass, call);
             }
+        }
+
+        private Slot<ColumnView> createNullaryFunctionCall(final FunctionCallNode call) {
+            assert call.getArguments().isEmpty();
+
+            final Slot<Integer> rowCount = batch.addRowCount(filterLevel, rootFormClass);
+
+            return new Slot<ColumnView>() {
+                @Override
+                public ColumnView get() {
+                    return ((ColumnFunction) call.getFunction()).columnApply(rowCount.get(),
+                            Collections.<ColumnView>emptyList());
+                }
+            };
+
+        }
+
+        private Slot<ColumnView> createFunctionCall(final FunctionCallNode call) {
+            final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
+            for(ExprNode argument : call.getArguments()) {
+                argumentSlots.add(argument.accept(this));
+            }
+            return new Slot<ColumnView>() {
+                @Override
+                public ColumnView get() {
+                    List<ColumnView> arguments = Lists.newArrayList();
+                    for (Slot<ColumnView> argument : argumentSlots) {
+                        ColumnView view = argument.get();
+                        if(view == null) {
+                            throw new IllegalStateException();
+                        }
+                        arguments.add(view);
+                    }
+                    return ((ColumnFunction) call.getFunction()).columnApply(arguments.get(0).numRows(), arguments);
+                }
+            };
         }
 
         private Slot<ColumnView> addColumn(Collection<NodeMatch> nodes) {
@@ -147,7 +171,7 @@ public class QueryEvaluator {
             for (NodeMatch node : nodes) {
                 switch (node.getType()) {
                     case ID:
-                        expandedNodes.add(batch.addColumn(node));
+                        expandedNodes.add(batch.addColumn(filterLevel, node));
                         break;
                     case CLASS:
                         throw new UnsupportedOperationException();
@@ -155,13 +179,13 @@ public class QueryEvaluator {
                         if (node.isCalculated()) {
                             expandedNodes.add(expandCalculatedField(node));
                         } else {
-                            expandedNodes.add(batch.addColumn(node));
+                            expandedNodes.add(batch.addColumn(filterLevel, node));
                         }
                         break;
                 }
             }
             if(expandedNodes.isEmpty()) {
-                return batch.addEmptyColumn(rootFormClass);
+                return batch.addEmptyColumn(filterLevel, rootFormClass);
             } else if(expandedNodes.size() == 1) {
                 return expandedNodes.get(0);
             } else {
@@ -177,7 +201,7 @@ public class QueryEvaluator {
                         node.getFormClass().getId() + "." + node.getExpr() + " = " +
                         node.getCalculation() + ": " + e.getMessage(), e);
             
-                return batch.addEmptyColumn(node.getFormClass());
+                return batch.addEmptyColumn(filterLevel, node.getFormClass());
             }
         }
     }

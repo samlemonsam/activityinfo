@@ -1,17 +1,15 @@
 package org.activityinfo.store.mysql.metadata;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
+import com.google.gson.JsonParser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.mysql.collections.BETA;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 
 public class Activity implements Serializable {
@@ -170,14 +168,11 @@ public class Activity implements Serializable {
     }
 
     public Collection<ResourceId> getLocationFormClassIds() {
-        if(BETA.ENABLE_LOCATION_UNION_FIELDS) {
-            return locationRange;
-
-        } else if(adminLevelId != null) {
+        if(adminLevelId != null) {
             return Collections.singleton(CuidAdapter.adminLevelFormClass(adminLevelId));
 
         } else {
-            return Collections.singleton(CuidAdapter.locationFormClass(locationTypeId));
+            return locationRange;
         }
     }
 
@@ -275,13 +270,22 @@ public class Activity implements Serializable {
             if(value == null) {
                 out.writeBoolean(false);
             } else {
+                // Avoid writeUTF as it has a limit of 65k
                 out.writeBoolean(true);
-                out.writeUTF(value.toJsonString());
+                byte[] bytes = value.toJsonString().getBytes(Charsets.UTF_8);
+                out.writeInt(bytes.length);
+                out.write(bytes);
             }
         }
         private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
             if(in.readBoolean()) {
-                this.value = FormClass.fromJson(in.readUTF());
+                int length = in.readInt();
+                byte[] bytes = new byte[length];
+                in.readFully(bytes);
+                JsonParser parser = new JsonParser();
+                try(InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(bytes), Charsets.UTF_8)) {
+                    this.value = FormClass.fromJson(parser.parse(reader).getAsJsonObject());
+                }
             } else {
                 this.value = null;
             }

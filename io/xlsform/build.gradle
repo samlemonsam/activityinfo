@@ -4,9 +4,15 @@
 
 dependencies {
     compile project(':core:model')
+    compile project(':analysis')
     compile libraries.guava
     compile libraries.poi
     
     testCompile libraries.junit
     testCompile libraries.easymock
+    testCompile project(':store:testing')
+
+    // Testing XLS sheets
+    testCompile "bad.robot:simple-excel:1.0"
 }
+

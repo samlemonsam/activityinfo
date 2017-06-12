@@ -20,13 +20,13 @@ public class LocationWindow extends JFrame {
 
 	private Preferences prefs = Preferences.userNodeForPackage(GeoAdmin.class);
 
-	private ActivityInfoClient client;
+	private GeoAdminClient client;
 	private LocationType locationType;
 	private Country country;
 
 	private List<AdminLevel> levels;
 
-	public LocationWindow(JFrame parent, Country country, LocationType locationType, ActivityInfoClient client) {
+	public LocationWindow(JFrame parent, Country country, LocationType locationType, GeoAdminClient client) {
 		super(locationType.getName());
 		setSize(650, 350);
 		setLocationRelativeTo(parent);

@@ -1,0 +1,52 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
+
+
+    <!-- MapReduce/Pipeline -->
+    <servlet>
+        <servlet-name>mapreduce</servlet-name>
+        <servlet-class>
+            com.google.appengine.tools.mapreduce.MapReduceServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>mapreduce</servlet-name>
+        <url-pattern>/mapreduce/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>pipeline</servlet-name>
+        <servlet-class>
+            com.google.appengine.tools.pipeline.impl.servlets.PipelineServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>pipeline</servlet-name>
+        <url-pattern>/_ah/pipeline/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Servlet to start maprduce jobs -->
+
+    <servlet>
+        <servlet-name>MigrationServlet</servlet-name>
+        <servlet-class>org.activityinfo.store.migrate.MigrationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MigrationServlet</servlet-name>
+        <url-pattern>/migrate</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- Only allow access by administrators -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>admin</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+</web-app>

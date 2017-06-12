@@ -7,7 +7,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
-import java.util.Collections;
 import java.util.logging.Logger;
 
 /**
@@ -25,14 +24,11 @@ public class AsyncFormTreeBuilder implements Function<ResourceId, Promise<FormTr
 
     @Override
     public Promise<FormTree> apply(ResourceId formClassId) {
-        return execute(Collections.singleton(formClassId));
-    }
-
-    public Promise<FormTree> execute(Iterable<ResourceId> formClasses) {
         Promise<FormTree> result = new Promise<>();
-        new Resolver(formClasses, result);
+        new Resolver(formClassId, result);
         return result;
     }
+
 
     public class Resolver {
 
@@ -40,12 +36,10 @@ public class AsyncFormTreeBuilder implements Function<ResourceId, Promise<FormTr
         private FormTree tree;
         private int outstandingRequests = 0;
 
-        public Resolver(final Iterable<ResourceId> classIds, final AsyncCallback<FormTree> callback) {
+        public Resolver(ResourceId rootFormId, final AsyncCallback<FormTree> callback) {
             this.callback = callback;
-            this.tree = new FormTree();
-            for(ResourceId formClass : classIds) {
-                requestFormClassForNode(null, formClass);
-            }
+            this.tree = new FormTree(rootFormId);
+            requestFormClassForNode(null, rootFormId);
         }
 
         private void requestFormClassForNode(final FormTree.Node node, final ResourceId formClassId) {

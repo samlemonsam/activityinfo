@@ -10,4 +10,6 @@ package org.activityinfo.store.query.impl;
 public interface Slot<T> {
 
     T get();
+
+
 }

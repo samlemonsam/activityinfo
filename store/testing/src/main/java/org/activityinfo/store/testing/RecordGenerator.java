@@ -7,6 +7,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class RecordGenerator {
 
     private final FormClass schema;
+    private Supplier<ResourceId> parentDistribution = null;
     private final Map<ResourceId, Supplier<FieldValue>> generators = new HashMap<>();
     private final Map<ResourceId, FormField> fieldMap = new HashMap<>();
 
@@ -41,6 +43,11 @@ public class RecordGenerator {
         }
     }
 
+    public RecordGenerator parentForm(final TestForm parentForm) {
+        parentDistribution = new ParentGenerator(parentForm);
+        return this;
+    }
+
     /**
      * Creates a basic, default field generator based only on the field definition.
      */
@@ -53,6 +60,8 @@ public class RecordGenerator {
             return new DiscreteTextGenerator(field.isRequired() ? 0 : 0.25, DiscreteTextGenerator.NAMES);
         } else if(field.getType() instanceof LocalDateType) {
             return new DateGenerator(field);
+        } else if(field.getType() instanceof SerialNumberType) {
+            return new SerialNumberGenerator();
         } else {
             return Suppliers.ofInstance(null);
         }
@@ -66,7 +75,13 @@ public class RecordGenerator {
     public List<FormInstance> generate(int rowCount) {
         List<FormInstance> records = new ArrayList<>();
         for (int i = 0; i < rowCount; i++) {
-            FormInstance record = new FormInstance(ResourceId.generateId(), schema.getId());
+            ResourceId recordId = ResourceId.valueOf("c" + i);
+            FormInstance record = new FormInstance(recordId, schema.getId());
+
+            if(parentDistribution != null) {
+                record.setParentRecordId(parentDistribution.get());
+            }
+
             for (Map.Entry<ResourceId, Supplier<FieldValue>> entry : generators.entrySet()) {
                 record.set(entry.getKey(), entry.getValue().get());
             }

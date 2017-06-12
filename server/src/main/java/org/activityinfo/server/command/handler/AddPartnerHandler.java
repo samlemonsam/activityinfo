@@ -70,20 +70,24 @@ public class AddPartnerHandler implements CommandHandler<AddPartner> {
                                       .setParameter(1, cmd.getPartner().getName())
                                       .getResultList();
 
+
+        Partner partner;
         if (allPartners.size() != 0) {
-            db.getPartners().add(allPartners.get(0));
-            return new CreateResult(allPartners.get(0).getId());
+            partner = allPartners.get(0);
+
+        } else {
+            partner = new Partner();
+            partner.setName(cmd.getPartner().getName());
+            partner.setFullName(cmd.getPartner().getFullName());
+            em.persist(partner);
         }
 
-        // nope, have to create a new record
-        Partner newPartner = new Partner();
-        newPartner.setName(cmd.getPartner().getName());
-        newPartner.setFullName(cmd.getPartner().getFullName());
-        em.persist(newPartner);
+
         db.setLastSchemaUpdate(new Date());
         em.persist(db);
-        db.getPartners().add(newPartner);
 
-        return new CreateResult(newPartner.getId());
+        db.getPartners().add(partner);
+
+        return new CreateResult(partner.getId());
     }
 }

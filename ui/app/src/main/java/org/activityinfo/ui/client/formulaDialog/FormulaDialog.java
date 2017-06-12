@@ -14,6 +14,7 @@ import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
+import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;

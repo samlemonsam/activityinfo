@@ -1,5 +1,7 @@
 package org.activityinfo.ui.client.formulaDialog;
 
+import org.activityinfo.analysis.FieldReference;
+import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.model.expr.FormulaError;
 import org.activityinfo.model.expr.SourcePos;
 import org.activityinfo.model.expr.SourceRange;

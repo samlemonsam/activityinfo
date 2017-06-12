@@ -109,7 +109,7 @@ public class FormProfile {
         Observable<ColumnSet> columnSet = formTree.join(new Function<FormTree, Observable<ColumnSet>>() {
             @Override
             public Observable<ColumnSet> apply(FormTree tree) {
-                QueryModel queryModel = new QueryModel(tree.getRootFormClass().getId());
+                QueryModel queryModel = new QueryModel(tree.getRootFormId());
                 queryModel.selectResourceId().as(ID_COLUMN);
 
                 

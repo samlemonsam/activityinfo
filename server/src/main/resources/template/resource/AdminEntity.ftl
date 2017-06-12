@@ -39,7 +39,7 @@
             <h3>${childLevel.name}</h3>
             <ul>
                 <#list childLevel.entities?sort_by("name") as childEntity>
-                    <#if childEntity.parent.id == id>
+                    <#if !childEntity.deleted && childEntity.parent?? && childEntity.parent.id == id>
                         <li><a href="/resources/adminEntity/${childEntity.id?c}">${childEntity.name}</a></li>
                     </#if>
                 </#list>

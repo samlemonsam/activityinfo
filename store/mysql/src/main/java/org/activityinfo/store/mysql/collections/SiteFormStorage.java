@@ -3,6 +3,10 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
@@ -11,6 +15,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
@@ -28,12 +33,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
+import static org.activityinfo.store.hrd.Hrd.ofy;
+
 
 /**
  * Collection of Sites
  */
-public class SiteFormStorage implements FormStorage {
+public class SiteFormStorage implements VersionedFormStorage {
     
     private final Activity activity;
     private final TableMapping baseMapping;
@@ -59,23 +65,25 @@ public class SiteFormStorage implements FormStorage {
 
             FormPermissions permissions = new FormPermissions();
 
-            String partnerFilter = String.format("%s=%s",
-                    CuidAdapter.partnerField(activity.getId()),
-                    CuidAdapter.partnerRecordId(databasePermission.getPartnerId()));
+            ExprNode partnerFilter = Exprs.equals(
+                    new SymbolExpr(
+                        CuidAdapter.partnerField(activity.getId())),
+                    new ConstantExpr(
+                        CuidAdapter.partnerRecordId(databasePermission.getPartnerId()).asString()));
 
             if(databasePermission.isViewAll()) {
                 permissions.setVisible(true);
 
             } else if(databasePermission.isView()) {
                 permissions.setVisible(true);
-                permissions.setVisibilityFilter(partnerFilter);
+                permissions.setVisibilityFilter(partnerFilter.asExpression());
 
             }
             if(databasePermission.isEditAll()) {
                 permissions.setEditAllowed(true);
             } else if(databasePermission.isEdit()) {
                 permissions.setEditAllowed(true);
-                permissions.setEditFilter(partnerFilter);
+                permissions.setEditFilter(partnerFilter.asExpression());
             }
        
             // published property of activity overrides user permissions
@@ -298,6 +306,7 @@ public class SiteFormStorage implements FormStorage {
         
         if(update.isDeleted()) {
             baseTable.delete();
+            indicatorValues.delete();
         } else {
 
             for (Map.Entry<ResourceId, FieldValue> change : update.getChangedFieldValues().entrySet()) {
@@ -305,6 +314,13 @@ public class SiteFormStorage implements FormStorage {
                     indicatorValues.update(change.getKey(), change.getValue());
                 } else if (change.getKey().getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN) {
                     attributeValues.update(change.getKey(), change.getValue());
+                } else if(change.getKey().equals(CuidAdapter.locationField(activity.getId()))) {
+                    ReferenceValue value = (ReferenceValue) change.getValue();
+                    if(value.getOnlyReference().getRecordId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
+                        baseTable.update(change.getKey(), change.getValue());
+                    } else {
+                        baseTable.update(change.getKey(), dummyLocationReference(value.getOnlyReference()));
+                    }
                 } else {
                     baseTable.update(change.getKey(), change.getValue());
                 }
@@ -353,5 +369,11 @@ public class SiteFormStorage implements FormStorage {
     @Override
     public void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+        HrdFormStorage delegate = new HrdFormStorage(getFormClass());
+        return delegate.getVersionRange(localVersion, toVersion);
     }
 }

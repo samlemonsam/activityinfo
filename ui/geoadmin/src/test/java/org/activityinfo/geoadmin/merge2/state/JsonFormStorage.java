@@ -252,11 +252,6 @@ public class JsonFormStorage implements FormStorage {
 
         private ResourceId formId;
 
-        public ReferenceFieldBinding(ResourceId formId, String field, CursorObserver<FieldValue> observer) {
-            super(field, observer);
-            this.formId = formId;
-        }
-
         public ReferenceFieldBinding(String field, CursorObserver<FieldValue> observer) {
             super(field, observer);
         }

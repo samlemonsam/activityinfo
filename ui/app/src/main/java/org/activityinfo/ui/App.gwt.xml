@@ -22,43 +22,49 @@
 
 <module>
 
-  <inherits name='com.sencha.gxt.ui.GXT'/>
-  <inherits name='com.sencha.gxt.chart.Chart' />
-
+  <inherits name='com.google.gwt.user.User' />
   <inherits name='com.google.gwt.activity.Activity'/>
   <inherits name='com.google.gwt.place.Place'/>
 
-  <inherits name="org.activityinfo.model.Model"/>
-  <inherits name="org.activityinfo.store.query.Query"/>
+  <!-- Include only the GXT modules we need -->
+  <inherits name='com.sencha.gxt.ui.GXT' />
+  <inherits name='com.sencha.gxt.theme.triton.Theme' />
 
+  <inherits name="org.activityinfo.model.Model"/>
+  <inherits name="org.activityinfo.io.Match"/>
+  <inherits name="org.activityinfo.store.query.Query"/>
+  <inherits name="org.activityinfo.Analysis"/>
   <inherits name="org.activityinfo.api.ApiClient"/>
+
+  <inherits name="org.activityinfo.ui.codemirror.CodeMirror"/>
+
+  <inherits name="com.bedatadriven.rebar.appcache.AppCache"/>
+
 
   <set-property name="gwt.logging.logLevel" value="FINEST"/>
   <set-property name="gwt.logging.enabled" value="TRUE"/>
 
-  <inherits name='com.sencha.gxt.theme.triton.Theme' />
-  <inherits name="org.activityinfo.ui.codemirror.CodeMirror"/>
-
-    <!-- Specify the paths for translatable code -->
-  <source path='client'/>
-  <source path='shared'/>
-
   <!-- GZip the output files by default -->
   <!--<inherits name='com.google.gwt.precompress.Precompress'/>-->
+
+  <!-- Limit browser support -->
+  <set-property name="gxt.user.agent" value="ie9, ie10, gecko1_9, safari5, chrome" />
 
   <set-configuration-property name="CssResource.style" value="pretty"/>
 
   <entry-point class="org.activityinfo.ui.client.AppEntryPoint"/>
 
   <!-- collapse properties for fewer permutations -->
-  <collapse-property name="gxt.device" values="phone, tablet" />
 
-  <collapse-property name="gxt.user.agent" values="air, safari*, chrome*, gecko*, ie11" />
-  <collapse-property name="user.agent" values="safari*, gecko*" />
+  <!-- We need to collapse the GXT user agent property because
+       we can't do the server-side selection required for appcache -->
+  <collapse-property name="gxt.device" values="*" />
+  <collapse-property name="user.agent.os" values="*"/>
+  <collapse-property name="gxt.user.agent" values="*"/>
 
-  <collapse-property name="gxt.user.agent" values="ie8, ie9, ie10" />
-  <collapse-property name="user.agent" values="ie*" />
+  <!-- Specify the paths for translatable code -->
+  <source path='client'/>
+  <source path='shared'/>
 
-  <set-property name="locale" value="en"/>
 
 </module>

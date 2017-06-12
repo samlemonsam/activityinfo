@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.dispatch.type;
 
+import org.activityinfo.io.match.coord.JsCoordinateNumberFormatter;
 import org.activityinfo.ui.client.component.importDialog.model.type.converter.FieldParserFactory;
 
 /**

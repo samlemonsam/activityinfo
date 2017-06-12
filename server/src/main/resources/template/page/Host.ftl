@@ -76,15 +76,6 @@
         #loading-msg {
             font: normal 10px tahoma, arial, sans-serif;
         }
-
-        #loading-options {
-            position: absolute;
-            right: 10px;
-            bottom: 10px;
-            font: normal 13px tahoma, arial, sans-serif;
-            text-align: right;
-        }
-        <#include "Application.css">
     </style>
     </#if>
     <script type="text/javascript">

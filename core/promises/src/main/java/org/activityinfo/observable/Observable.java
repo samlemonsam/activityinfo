@@ -3,6 +3,7 @@ package org.activityinfo.observable;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Function3;
 
@@ -190,6 +191,24 @@ public abstract class Observable<T> {
         return flatten(SynchronousScheduler.INSTANCE, list);
     }
 
+    /**
+     * Given a collection which is observable, apply the function {@code f} to each of its elements, and join the results
+     * in a new list which is itself observable.
+     *
+     */
+    public static <T, TT extends Iterable<T>, R> Observable<List<R>> flatMap(Observable<TT> observableCollection, final Function<T, Observable<R>> f) {
+        return observableCollection.join(new Function<TT, Observable<List<R>>>() {
+            @Override
+            public Observable<List<R>> apply(TT collection) {
+                List < Observable < R >> list = new ArrayList<>();
+                for (T element : collection) {
+                    list.add(f.apply(element));
+                }
+                return flatten(list);
+            }
+        });
+    }
+
     public static <T> Observable<T> flattenOptional(Observable<Optional<T>> observable) {
         return observable.join(new Function<Optional<T>, Observable<T>>() {
             @Override
@@ -201,5 +220,23 @@ public abstract class Observable<T> {
                 }
             }
         });
+    }
+
+    @GwtIncompatible
+    public final T waitFor() {
+        final List<T> collector = new ArrayList<>();
+        Subscription subscription = this.subscribe(new Observer<T>() {
+            @Override
+            public void onChange(Observable<T> observable) {
+                if (observable.isLoaded()) {
+                    collector.add(observable.get());
+                }
+            }
+        });
+        if(collector.isEmpty()) {
+            throw new IllegalStateException("Did not load synchronously.");
+        }
+        subscription.unsubscribe();
+        return collector.get(0);
     }
 }

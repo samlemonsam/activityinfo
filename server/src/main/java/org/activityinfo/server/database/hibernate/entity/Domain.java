@@ -109,13 +109,18 @@ public class Domain implements Serializable {
     public void setPort(int port) {
         this.port = port;
     }
-    
+
+    /**
+     * @return the root url for this domain, including only protocal (http/https),
+     * host, and port number if neccessary.
+     */
     @Transient
     public String getRootUrl() {
         StringBuilder sb = new StringBuilder();
         if(host.equals("localhost")) {
             sb.append("http://localhost:").append(port);
         } else {
+            // Force HTTPS and drop port number
             sb.append("https://").append(host);
         }
         return sb.toString();

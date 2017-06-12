@@ -42,6 +42,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
+import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
@@ -142,7 +143,7 @@ public class RootResource {
 
     @Path("/database/{id}")
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
-        return new DatabaseResource(catalog, dispatcher, id);
+        return new DatabaseResource(catalog, entityManager, dispatcher, id);
     }
 
     @Path("/adminLevel/{id}")
@@ -173,7 +174,7 @@ public class RootResource {
     
     @Path("/query")
     public QueryResource query() {
-        return new QueryResource(catalog);
+        return new QueryResource(catalog, userProvider);
     }
     
     @POST
@@ -185,7 +186,8 @@ public class RootResource {
         final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
 
         Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(),
-                blobAuthorizer);
+                blobAuthorizer,
+                new HrdSerialNumberProvider());
         try {
             updater.execute(jsonElement.getAsJsonObject());
         } catch (InvalidUpdateException e) {
@@ -200,7 +202,8 @@ public class RootResource {
     public UsersResource getUsers() {
         return new UsersResource(config, entityManager);
     }
-    
+
+
     @Path("/usage")
     public UsageResource getUsage() {
         return new UsageResource(entityManager, config);
@@ -215,5 +218,5 @@ public class RootResource {
     public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
         return new CatalogResource(catalog, userProvider);
     }
-    
+
 }

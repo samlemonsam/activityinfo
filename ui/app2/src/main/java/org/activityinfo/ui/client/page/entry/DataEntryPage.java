@@ -71,6 +71,7 @@ import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
 import org.activityinfo.ui.client.page.report.ExportDialog;
+import org.activityinfo.ui.client.page.report.ExportSitesTask;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
@@ -200,8 +201,13 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         betaLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                navigateToNewInterface();
+                if(clickEvent.isControlKeyDown()) {
+                    navigateToNewNewInterface();
+                } else {
+                    navigateToNewInterface();
+                }
             }
+
         });
         betaLinkPanel.add(betaLink);
         return betaLinkPanel;
@@ -487,8 +493,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             form.print(activityId);
 
         } else if (UIActions.EXPORT.equals(actionId)) {
-            ExportDialog dialog = new ExportDialog(dispatcher);
-            dialog.exportSites(filter);
+            ExportDialog dialog = new ExportDialog();
+            dialog.start(new ExportSitesTask(dispatcher, filter));
 
         } else if ("EMBED".equals(actionId)) {
             EmbedDialog dialog = new EmbedDialog(dispatcher);
@@ -529,6 +535,15 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
                     new ResourcePlace(formClassId, ResourcePage.TABLE_PAGE_ID)));
+        }
+    }
+
+
+    private void navigateToNewNewInterface() {
+        Optional<Integer> activityId = getCurrentActivityId();
+        if(activityId.isPresent()) {
+            com.google.gwt.user.client.Window.open("/?ui=3#table/" + CuidAdapter.activityFormClass(activityId.get()),
+                "_blank", null);
         }
     }
 

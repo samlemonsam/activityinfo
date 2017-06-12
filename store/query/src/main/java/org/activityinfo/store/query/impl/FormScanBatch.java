@@ -1,23 +1,41 @@
 package org.activityinfo.store.query.impl;
 
+import com.google.apphosting.api.ApiProxy;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.query.impl.builders.ConstantColumnBuilder;
+import org.activityinfo.store.query.impl.builders.FilteredRowCountSlot;
+import org.activityinfo.store.query.impl.builders.FilteredSlot;
+import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
+import org.activityinfo.store.query.impl.eval.QueryEvaluator;
 import org.activityinfo.store.query.impl.join.*;
 import org.activityinfo.store.query.shared.JoinNode;
 import org.activityinfo.store.query.shared.JoinType;
 import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -30,9 +48,10 @@ public class FormScanBatch {
 
     private static final Logger LOGGER = Logger.getLogger(FormScanBatch.class.getName());
 
+    private final FormCatalog catalog;
     private final FormScanCache cache;
+    private final FormSupervisor supervisor;
 
-    private final FormCatalog store;
 
     /**
      * We want to do one pass over each FormClass so
@@ -40,43 +59,44 @@ public class FormScanBatch {
      */
     private Map<ResourceId, FormScan> tableMap = Maps.newHashMap();
 
+    private Map<FilterKey, Slot<TableFilter>> filterMap = Maps.newHashMap();
+    private Map<ResourceId, Slot<TableFilter>> parentFilterMap = Maps.newHashMap();
+
     private Map<ReferenceJoinKey, ReferenceJoin> joinLinks = new HashMap<>();
     private Map<JoinedColumnKey, JoinedReferenceColumnViewSlot> joinedColumns = new HashMap<>();
 
-    public FormScanBatch(FormCatalog store) {
-        this.store = store;
-        this.cache = new AppEngineFormScanCache();
-    }
+    private List<Future<Integer>> pendingCachePuts = new ArrayList<>();
 
-    public FormScanBatch(FormCatalog catalog, FormScanCache cache) {
-        this.store = catalog;
+    FormScanBatch(FormCatalog formCatalog, FormSupervisor supervisor, FormScanCache cache) {
+        this.catalog = formCatalog;
         this.cache = cache;
+        this.supervisor = supervisor;
     }
 
-
-    private FormScan getTable(FormTree.Node node) {
-        return getTable(node.getDefiningFormClass().getId());
-    }
-
-    private FormScan getTable(FormClass formClass) {
+    public FormScan getTable(FormClass formClass) {
         return getTable(formClass.getId());
     }
 
-    private FormScan getTable(ResourceId formClassId) {
-        FormScan scan = tableMap.get(formClassId);
+    public FormScan getTable(ResourceId formId) {
+        FormScan scan = tableMap.get(formId);
         if(scan == null) {
-            scan = new FormScan(store.getForm(formClassId).get());
-            tableMap.put(formClassId, scan);
+
+            Optional<FormStorage> storage = catalog.getForm(formId);
+            if (storage.isPresent()) {
+                scan = new FormStorageScan(storage.get());
+            } else {
+                scan = new EmptyFormScan();
+            }
+            tableMap.put(formId, scan);
         }
         return scan;
     }
 
-
     /**
      * Adds a ResourceId to the batch
      */
-    public Slot<ColumnView> addResourceIdColumn(FormClass classId) {
-        return getTable(classId.getId()).addResourceId();
+    public Slot<ColumnView> addResourceIdColumn(FilterLevel filterLevel, ResourceId formId) {
+        return filter(filterLevel, formId, getTable(formId).addResourceId());
     }
 
 
@@ -88,15 +108,15 @@ public class FormScanBatch {
      * @return a ColumnView Slot that can be used to retrieve the result after the batch
      * has finished executing.
      */
-    public Slot<ColumnView> addColumn(NodeMatch match) {
+    public Slot<ColumnView> addColumn(FilterLevel filterLevel, NodeMatch match) {
 
         if (match.isJoined()) {
             // requires join
-            return addJoinedColumn(match);
+            return addJoinedColumn(filterLevel, match);
 
         } else {
             // simple root column or embedded form
-            return getDataColumn(match.getFormClass(), match.getExpr());
+            return getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
         }
     }
 
@@ -104,8 +124,8 @@ public class FormScanBatch {
      * Adds a query to the batch for an empty column. It may still be required to hit the data store
      * to find the number of rows.
      */
-    public Slot<ColumnView> addEmptyColumn(FormClass formClass) {
-        Slot<Integer> rowCount = getTable(formClass.getId()).addCount();
+    public Slot<ColumnView> addEmptyColumn(FilterLevel filterLevel, FormClass formClass) {
+        Slot<Integer> rowCount = addRowCount(filterLevel, formClass);
         return new ConstantColumnBuilder(rowCount, null);
     }
 
@@ -116,33 +136,33 @@ public class FormScanBatch {
      * @return a ColumnView Slot that can be used to retrieve the result after the batch
      * has finished executing.
      */
-    private Slot<ColumnView> addJoinedColumn(NodeMatch match) {
+    private Slot<ColumnView> addJoinedColumn(FilterLevel filterLevel, NodeMatch match) {
 
         // For the moment, handle only the simple case of a single subform join
         if(match.getJoins().size() == 1 && match.getJoins().get(0).getType() == JoinType.SUBFORM) {
-            return addSubFormJoinedColumn(match);
+            return addSubFormJoinedColumn(filterLevel, match);
         }
 
         // Schedule the links we need to join the node to the base form
         List<ReferenceJoin> links = Lists.newArrayList();
         for (JoinNode joinNode : match.getJoins()) {
-            links.add(addJoinLink(joinNode));
+            links.add(addJoinLink(filterLevel, joinNode));
         }
 
         // Schedule the actual column to be joined
         Slot<ColumnView> column;
         switch (match.getType()) {
             case FIELD:
-                column = getDataColumn(match.getFormClass(), match.getExpr());
+                column = getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
                 break;
             case ID:
-                column = getTable(match.getFormClass()).addResourceId();
+                column = addResourceIdColumn(filterLevel, match.getFormClass().getId());
                 break;
             default:
                 throw new UnsupportedOperationException("type: " + match.getType());
         }
 
-        JoinedColumnKey key = new JoinedColumnKey(links, column);
+        JoinedColumnKey key = new JoinedColumnKey(filterLevel, links, column);
         JoinedReferenceColumnViewSlot slot = joinedColumns.get(key);
         if(slot == null) {
             slot = new JoinedReferenceColumnViewSlot(links, column);
@@ -152,28 +172,26 @@ public class FormScanBatch {
         return slot;
     }
 
-    private Slot<ColumnView> addSubFormJoinedColumn(NodeMatch match) {
+    private Slot<ColumnView> addSubFormJoinedColumn(FilterLevel filterLevel, NodeMatch match) {
         JoinNode node = match.getJoins().get(0);
-        FormScan left = getTable(node.getLeftFormId());
-        FormScan right = getTable(node.getFormClassId());
-
-        Slot<PrimaryKeyMap> primaryKey = left.addPrimaryKey();
-        Slot<ColumnView> parentColumn = right.addField(new SymbolExpr("@parent"));
-        Slot<ColumnView> dataColumn = getDataColumn(match.getFormClass(), match.getExpr());
+        Slot<PrimaryKeyMap> primaryKey =  addPrimaryKey(filterLevel, node.getLeftFormId());
+        Slot<ColumnView> parentColumn = addParentColumn(filterLevel, node.getFormClassId());
+        Slot<ColumnView> dataColumn = getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
 
         SubFormJoin join = new SubFormJoin(primaryKey, parentColumn);
 
         return new JoinedSubFormColumnViewSlot(Collections.singletonList(join), dataColumn);
     }
 
-    private ReferenceJoin addJoinLink(JoinNode node) {
-        FormScan left = getTable(node.getLeftFormId());
-        FormScan right = getTable(node.getFormClassId());
+    private Slot<ColumnView> addParentColumn(FilterLevel filterLevel, ResourceId formId) {
+        return getDataColumn(filterLevel, formId, new SymbolExpr("@parent"));
+    }
 
-        Slot<ForeignKeyMap> foreignKey = left.addForeignKey(node.getReferenceField());
-        Slot<PrimaryKeyMap> primaryKey = right.addPrimaryKey();
+    private ReferenceJoin addJoinLink(FilterLevel filterLevel, JoinNode node) {
+        Slot<ForeignKeyMap> foreignKey = addForeignKeyMap(filterLevel, node.getLeftFormId(), node.getReferenceField());
+        Slot<PrimaryKeyMap> primaryKey = addPrimaryKey(filterLevel, node.getFormClassId());
 
-        ReferenceJoinKey referenceJoinKey = new ReferenceJoinKey(foreignKey, primaryKey);
+        ReferenceJoinKey referenceJoinKey = new ReferenceJoinKey(filterLevel, foreignKey, primaryKey);
         ReferenceJoin joinLink = joinLinks.get(referenceJoinKey);
 
         if(joinLink == null) {
@@ -183,8 +201,25 @@ public class FormScanBatch {
         return joinLink;
     }
 
-    public Slot<ColumnView> getDataColumn(FormClass formClass, ExprNode fieldExpr) {
-        return getTable(formClass.getId()).addField(fieldExpr);
+    private Slot<PrimaryKeyMap> addPrimaryKey(FilterLevel filterLevel, ResourceId formId) {
+        Slot<ColumnView> filteredIdSlot = addResourceIdColumn(filterLevel, formId);
+        return new PrimaryKeySlot(filteredIdSlot);
+    }
+
+    private Slot<ForeignKeyMap> addForeignKeyMap(FilterLevel filterLevel, ResourceId formId, ExprNode referenceField) {
+        Slot<ForeignKeyMap> foreignKeyMap = getTable(formId).addForeignKey(referenceField);
+        Slot<TableFilter> filter = getFilter(filterLevel, formId);
+
+        return new MemoizedSlot2<>(foreignKeyMap, filter, new BiFunction<ForeignKeyMap, TableFilter, ForeignKeyMap>() {
+            @Override
+            public ForeignKeyMap apply(ForeignKeyMap foreignKeyMap, TableFilter filter) {
+                return filter.apply(foreignKeyMap);
+            }
+        });
+    }
+
+    public Slot<ColumnView> getDataColumn(FilterLevel filterLevel, ResourceId formId, ExprNode fieldExpr) {
+        return filter(filterLevel, formId, getTable(formId).addField(fieldExpr));
     }
 
     /**
@@ -194,8 +229,8 @@ public class FormScanBatch {
      * @param value
      * @return
      */
-    public Slot<ColumnView> addConstantColumn(FormClass rootFormClass, FieldValue value) {
-        return new ConstantColumnBuilder(addRowCount(rootFormClass), value);
+    public Slot<ColumnView> addConstantColumn(FilterLevel filterLevel, FormClass rootFormClass, FieldValue value) {
+        return new ConstantColumnBuilder(addRowCount(filterLevel, rootFormClass), value);
     }
 
     /**
@@ -205,17 +240,120 @@ public class FormScanBatch {
      * @param value
      * @return
      */
-    public Slot<ColumnView> addConstantColumn(FormClass rootFormClass, String value) {
-        return new ConstantColumnBuilder(addRowCount(rootFormClass), TextValue.valueOf(value));
+    public Slot<ColumnView> addConstantColumn(FilterLevel filterLevel, FormClass rootFormClass, String value) {
+        return new ConstantColumnBuilder(addRowCount(filterLevel, rootFormClass), TextValue.valueOf(value));
     }
 
-
-    public Slot<ColumnView> addExpression(FormClass formClassId, ExprNode node) {
-        return getTable(formClassId).addField(node);
+    public Slot<ColumnView> addExpression(FilterLevel filterLevel, FormClass formClass, ExprNode node) {
+        return filter(filterLevel, formClass.getId(), getTable(formClass).addField(node));
     }
 
-    public Slot<Integer> addRowCount(FormClass formClass) {
-        return getTable(formClass.getId()).addCount();
+    public Slot<Integer> addRowCount(FilterLevel filterLevel, ResourceId formId) {
+        Slot<TableFilter> filter = getFilter(filterLevel, formId);
+        Slot<Integer> countSlot = getTable(formId).addCount();
+
+        return new FilteredRowCountSlot(countSlot, filter);
+    }
+
+    public Slot<Integer> addRowCount(FilterLevel filterLevel, FormClass formClass) {
+        return addRowCount(filterLevel, formClass.getId());
+    }
+
+    private Slot<ColumnView> filter(FilterLevel filterLevel, ResourceId formId, Slot<ColumnView> viewSlot) {
+        return new FilteredSlot(getFilter(filterLevel, formId), viewSlot);
+    }
+
+    private Slot<TableFilter> getFilter(FilterLevel filterLevel, ResourceId formId) {
+
+        if(filterLevel == FilterLevel.NONE) {
+            return new PendingSlot<>(TableFilter.ALL_SELECTED);
+        }
+
+        FilterKey filterKey = new FilterKey(formId, filterLevel);
+        if(filterMap.containsKey(filterKey)) {
+            return filterMap.get(filterKey);
+        }
+
+        Slot<TableFilter> filter = computeFilter(filterLevel, formId);
+        filterMap.put(filterKey, filter);
+
+        return filter;
+    }
+
+    private Slot<TableFilter> computeFilter(FilterLevel filterLevel, ResourceId formId) {
+        final Slot<TableFilter> parentFilter = computeParentFilter(filterLevel, formId);
+
+        if(filterLevel == FilterLevel.BASE) {
+            // Only apply parent visibility filter for subforms
+            return parentFilter;
+
+        } else {
+
+            final Slot<TableFilter> permissionFilter = computePermissionFilter(formId);
+
+            return new MemoizedSlot2<>(parentFilter, permissionFilter, new BiFunction<TableFilter, TableFilter, TableFilter>() {
+                @Override
+                public TableFilter apply(TableFilter parentFilter, TableFilter permissionFilter) {
+                    return parentFilter.intersection(permissionFilter);
+                }
+            });
+        }
+    }
+
+    private Slot<TableFilter> computePermissionFilter(ResourceId formId) {
+
+        FormPermissions permissions = supervisor.getFormPermissions(formId);
+        if(!permissions.isVisible()) {
+            return new PendingSlot<>(TableFilter.NONE_SELECTED);
+        }
+
+        if(!permissions.hasVisiblityFilter()) {
+            return new PendingSlot<>(TableFilter.ALL_SELECTED);
+        }
+
+        // Otherwise apply per-record permissions
+        try {
+            FormTreeBuilder formTreeBuilder = new FormTreeBuilder(catalog);
+            FormTree formTree = formTreeBuilder.queryTree(formId);
+
+            ExprNode formula = ExprParser.parse(permissions.getVisibilityFilter());
+            QueryEvaluator evaluator = new QueryEvaluator(FilterLevel.NONE, formTree, this);
+            Slot<ColumnView> filterView = evaluator.evaluateExpression(formula);
+            return new MemoizedSlot<>(filterView, new Function<ColumnView, TableFilter>() {
+                @Override
+                public TableFilter apply(ColumnView columnView) {
+                    return new TableFilter(columnView);
+                }
+            });
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to parse visibility filter", e.getMessage());
+            LOGGER.severe("Error parsing visibility filter '" + permissions.getVisibilityFilter() +
+                    " in form " + formId + ": " + e.getMessage() + ". " +
+                    "For security reasons, no results will be shown");
+
+            return new PendingSlot<>(TableFilter.NONE_SELECTED);
+        }
+    }
+
+    private Slot<TableFilter> computeParentFilter(FilterLevel filterLevel, ResourceId formId) {
+
+        if(parentFilterMap.containsKey(formId)) {
+            return parentFilterMap.get(formId);
+        }
+
+        FormClass formClass = catalog.getFormClass(formId);
+        if(!formClass.isSubForm()) {
+            return new PendingSlot<>(TableFilter.ALL_SELECTED);
+        }
+
+        Slot<PrimaryKeyMap> parentPrimaryKeySlot = addPrimaryKey(filterLevel, formClass.getParentFormId().get());
+        Slot<ColumnView> parentId = addParentColumn(FilterLevel.NONE, formId);
+        ParentMask filter = new ParentMask(parentPrimaryKeySlot, parentId);
+
+        parentFilterMap.put(formId, filter);
+
+        return filter;
     }
 
     /**
@@ -268,7 +406,10 @@ public class FormScanBatch {
         try {
             Map<String, Object> toPut = scan.getValuesToCache();
             if(!toPut.isEmpty()) {
-                cache.enqueuePut(toPut);
+                Future<Integer> future = cache.enqueuePut(toPut);
+                if(!future.isDone()) {
+                    pendingCachePuts.add(future);
+                }
             }
         } catch (Exception e) {
             LOGGER.severe("Failed to start memcache put for " + scan);
@@ -279,6 +420,29 @@ public class FormScanBatch {
      * Wait for caching to finish, if there is time left in this request.
      */
     public void waitForCachingToFinish() {
-        cache.waitUntilCached();
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        int columnCount = 0;
+        for (Future<Integer> future : pendingCachePuts) {
+            if (!future.isDone()) {
+                long remainingMillis = ApiProxy.getCurrentEnvironment().getRemainingMillis();
+                if (remainingMillis > 100) {
+                    try {
+                        Integer cachedCount = future.get(remainingMillis - 50, TimeUnit.MILLISECONDS);
+                        columnCount += cachedCount;
+
+                    } catch (InterruptedException | TimeoutException e) {
+                        LOGGER.warning("Ran out of time while waiting for caching of results to complete.");
+                        return;
+
+                    } catch (ExecutionException e) {
+                        LOGGER.log(Level.WARNING, "Exception caching results of query", e);
+                    }
+                }
+            }
+        }
+
+        LOGGER.info("Waited " + stopwatch + " for " + columnCount + " columns to finish caching.");
     }
 }

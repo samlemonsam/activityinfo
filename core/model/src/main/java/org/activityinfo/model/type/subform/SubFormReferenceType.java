@@ -109,6 +109,11 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     }
 
     @Override
+    public boolean isUpdatable() {
+        return false;
+    }
+
+    @Override
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         object.add("formId", classId == null ? JsonNull.INSTANCE : new JsonPrimitive(classId.asString()));

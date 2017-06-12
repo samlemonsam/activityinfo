@@ -11,7 +11,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.activityinfo.geoadmin.ColumnGuesser;
 import org.activityinfo.geoadmin.ImportSource;
-import org.activityinfo.geoadmin.model.ActivityInfoClient;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
 
@@ -79,7 +79,7 @@ public class LocationImportForm extends JPanel {
 
     public int getCodeAttributeIndex() { return codeCombo.getSelectedIndex(); }
 
-    public void guessLevelColumns(ActivityInfoClient client) {
+    public void guessLevelColumns(GeoAdminClient client) {
     	for(AdminLevel level : levelCombos.keySet()) {
     		List<AdminEntity> entities = client.getAdminEntities(level);
     		setLevelAttribute(level,

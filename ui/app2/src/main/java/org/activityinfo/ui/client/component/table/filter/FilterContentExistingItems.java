@@ -185,7 +185,7 @@ public class FilterContentExistingItems extends Composite implements FilterConte
             @Override
             public Promise<List<RowView>> get() {
                 final QueryModel model = table.getDataLoader().newQueryModel();
-                model.selectExpr(column.get().getExpr());
+                model.selectExpr(column.get().getExpr()).as(column.get().getNode().getFieldId().asString());
 
                 final Promise<List<RowView>> result = new Promise<>();
                 table.getResourceLocator().getTable(model).subscribe(new Observer<ColumnSet>() {
