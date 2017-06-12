@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.event.LoadListener;
 import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.custom.Portlet;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -63,13 +64,13 @@ public class NewsPortlet extends Portlet {
         type.addField("excerpt");
         type.addField("url");
 
-        ScriptTagProxy<String> proxy = new ScriptTagProxy<String>("/about/news.json");
+        RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, "/about/news.json");
+        HttpProxy<String> proxy = new HttpProxy<>(requestBuilder);
 
         // need a loader, proxy, and reader
         JsonLoadResultReader<ListLoadResult<ModelData>> reader = new JsonLoadResultReader<ListLoadResult<ModelData>>(type);
 
-        final BaseListLoader<ListLoadResult<ModelData>> loader = new BaseListLoader<ListLoadResult<ModelData>>(proxy,
-                reader);
+        final BaseListLoader<ListLoadResult<ModelData>> loader = new BaseListLoader<ListLoadResult<ModelData>>(proxy, reader);
 
         loader.addLoadListener(new LoadListener() {
 
