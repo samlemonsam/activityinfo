@@ -27,7 +27,7 @@
 
     <h3>${label.signUpConfirmationInvalidTitle}</h3>
 
-    <p>${label.signUpConfirmationInvalidDet ail}</p>
+    <p>${label.signUpConfirmationInvalidDetail}</p>
 
     <a href="/login" class="cta-link">${label.loginNow}</a>
 

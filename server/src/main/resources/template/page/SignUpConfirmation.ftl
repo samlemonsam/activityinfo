@@ -44,7 +44,6 @@
 
                     <div class="controls">
                         <input type="password" name="password" id="passwordInput">
-                        <span class="help-inline hide" id="passwordHelp">${label.passwordHelp}.</span>
                     </div>
                 </div>
                 <div class="control-group" id="confirmPasswordGroup">
@@ -52,7 +51,6 @@
 
                     <div class="controls">
                         <input type="password" name="password2" id="confirmPasswordInput">
-                        <span class="help-inline hide" id="confirmPasswordHelp">${label.passwordDoNotMatch}</span>
                     </div>
                 </div>
 
@@ -78,11 +76,14 @@
     <@scripts>
     <script type="text/javascript">
 
+        var passwordInput = document.getElementById('passwordInput');
+        var confirmPasswordInput = document.getElementById('confirmPasswordInput');
         var validatePass = function () {
-            var pass1 = $('#passwordInput').val();
-            var pass2 = $('#confirmPasswordInput').val();
+            var pass1 = passwordInput.value;
+            var pass2 = confirmPasswordInput.value;
 
             var valid = pass1 && pass1.length >= 6;
+
             $('#passwordGroup').toggleClass('error', !valid);
             $('#passwordHelp').toggleClass('hide', valid);
 
