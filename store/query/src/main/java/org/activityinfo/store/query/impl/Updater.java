@@ -23,7 +23,6 @@ import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.spi.*;
 
@@ -536,7 +535,7 @@ public class Updater {
         FormClass formClass = collection.get().getFormClass();
         JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
         for (FormField formField : formClass.getFields()) {
-            if(!(formField.getType() instanceof CalculatedFieldType)) {
+            if(formField.getType().isUpdatable()) {
                 if (fieldValues.has(formField.getName())) {
                     JsonElement updatedValueElement = fieldValues.get(formField.getName());
                     FieldValue updatedValue;

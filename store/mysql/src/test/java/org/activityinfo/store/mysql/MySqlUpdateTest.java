@@ -17,11 +17,14 @@ import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumber;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
@@ -61,8 +64,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("BENE", 45000);
         changeObject.addProperty("location", locationInstanceId(3).asString());
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
-                new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE");
@@ -79,7 +81,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@class", activityFormClass(1).asString());
         changeObject.addProperty("partner", partnerRecordId(2).asString());
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE");
@@ -97,7 +99,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.add("BENE", JsonNull.INSTANCE);
         changeObject.add("comments", JsonNull.INSTANCE);
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "BENE", "comments");
@@ -115,9 +117,8 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@id", CuidAdapter.entity(21).asString());
         changeObject.addProperty("@class", adminLevelFormClass(2).asString());
         changeObject.addProperty("name", "Nouveau Irumu");
-        
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
-                new HrdSerialNumberProvider());
+
+        Updater updater = updater();
         updater.setEnforcePermissions(false);
         updater.executeChange(changeObject);
         
@@ -134,8 +135,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@class", adminLevelFormClass(2).asString());
         changeObject.addProperty("@deleted", true);
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
-                new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.setEnforcePermissions(false);
         updater.executeChange(changeObject);
 
@@ -152,7 +152,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty("@class", activityFormClass(1).asString());
         changeObject.addProperty("@deleted", true);
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(changeObject);
 
         newRequest();
@@ -176,7 +176,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         newRequest();
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(changeObject);
 
         newRequest();
@@ -197,7 +197,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
 
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id", "partner.label", "BENE", "cause");
@@ -216,7 +216,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         changeObject.addProperty(attributeGroupField(1).asString(), "Deplacement");
         changeObject.addProperty(attributeGroupField(2).asString(), "Casserole");
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(changeObject);
 
         query(activityFormClass(1), "_id",  "cause", "[contenu du kit]");
@@ -237,7 +237,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         change.addProperty("date1", "2015-01-01");
         change.addProperty("date2", "2015-01-31");
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.executeChange(change);
 
         query(activityFormClass(ADVOCACY), "_id", "partner");
@@ -269,6 +269,86 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 //        assertThat(partnerField.getType(), instanceOf(ReferenceType.class));
     }
 
+    @Test
+    public void createFormWithSerialNumber() {
+
+        userId = 1;
+
+        KeyGenerator generator = new KeyGenerator();
+        int activityId = generator.generateInt();
+
+        FormClass formClass = new FormClass(CuidAdapter.activityFormClass(activityId));
+        formClass.setDatabaseId(1);
+        formClass.setLabel("New Form");
+        FormField serialNumField = new FormField(CuidAdapter.generateIndicatorId())
+                .setType(new SerialNumberType())
+                .setLabel("NUM")
+                .setRequired(true);
+        formClass.addElement(serialNumField);
+
+        FormField nameField = new FormField(CuidAdapter.generateIndicatorId())
+                .setType(TextType.SIMPLE)
+                .setLabel("Name")
+                .setRequired(true);
+        formClass.addElement(nameField);
+
+        catalog.createOrUpdateFormSchema(formClass);
+
+        newRequest();
+
+        ResourceId siteId = CuidAdapter.generateSiteCuid();
+
+        // Create the record
+        FormInstance creation = new FormInstance(siteId, formClass.getId());
+        creation.set(nameField.getId(), TextValue.valueOf("Bob"));
+        creation.set(partnerField(activityId), CuidAdapter.partnerRef(1, 1));
+
+        executeUpdate(creation);
+
+        newRequest();
+
+        // Verify that the record has been created
+        FormInstance created = FormInstance.toFormInstance(formClass,
+                catalog.getForm(formClass.getId()).get().get(siteId).get());
+
+        assertThat(created.get(nameField.getId()), equalTo((FieldValue)TextValue.valueOf("Bob")));
+        assertThat(created.get(serialNumField.getId()), equalTo((FieldValue)new SerialNumber(1)));
+
+        newRequest();
+
+        // Now update the record's name
+        JsonObject fieldValues = new JsonObject();
+        fieldValues.add(nameField.getName(), TextValue.valueOf("Sue").toJsonElement());
+
+        // the UI may send null values
+        fieldValues.add(serialNumField.getName(), JsonNull.INSTANCE);
+
+        JsonObject update = new JsonObject();
+        update.add("fieldValues", fieldValues);
+
+        updater().execute(formClass.getId(), siteId, update);
+
+        newRequest();
+
+        // Finally verify that the serial number is unchanged
+        FormInstance updated = FormInstance.toFormInstance(formClass,
+                catalog.getForm(formClass.getId()).get().get(siteId).get());
+
+        assertThat(updated.get(nameField.getId()), equalTo((FieldValue)TextValue.valueOf("Sue")));
+        assertThat(updated.get(serialNumField.getId()), equalTo((FieldValue)new SerialNumber(1)));
+
+    }
+
+
+    private void executeUpdate(FormInstance creation) {
+        Updater updater = updater();
+        updater.execute(creation);
+    }
+
+    private Updater updater() {
+        return new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+    }
+
 
     @Test
     public void testSingleSiteResource() throws IOException {
@@ -283,7 +363,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         update.set(indicatorField(1), new Quantity(900, "units"));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        Updater updater = updater();
         updater.execute(update);
 
         query(CuidAdapter.activityFormClass(1), "_id", "partner", "BENE", "cause");
@@ -367,8 +447,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         newRecord.set(selectField.getId(), new EnumValue(updatedType.getValues().get(0).getId()));
         newRecord.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerRef(1, 1));
 
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
-        updater.execute(newRecord);
+        executeUpdate(newRecord);
 
         // Ensure that the select field has been saved
         FormRecord saved = catalog.getForm(formClass.getId()).get().get(newRecord.getId()).get();

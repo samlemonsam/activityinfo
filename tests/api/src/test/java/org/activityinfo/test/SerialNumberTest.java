@@ -75,6 +75,7 @@ public class SerialNumberTest {
         assertThat(record2.get(fileNumberField.getId()), equalTo((FieldValue) new SerialNumber(2)));
     }
 
+
     @Test
     public void testWithPrefix() {
 
