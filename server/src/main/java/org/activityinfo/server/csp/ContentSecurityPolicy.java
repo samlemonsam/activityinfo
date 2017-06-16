@@ -53,7 +53,8 @@ public class ContentSecurityPolicy {
         append(sb, "font-src", SELF,
             SELF,
             TYPOTHEQUE,
-            TYPOTHEQUE_FONTS
+            TYPOTHEQUE_FONTS,
+            DATA
         );
         
         append(sb, "script-src", SELF,
