@@ -6,10 +6,12 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
@@ -57,13 +59,20 @@ public class RecordGenerator {
         if(field.getType() instanceof QuantityType) {
             return new QuantityGenerator(field);
         } else if(field.getType() instanceof EnumType) {
-            return new EnumGenerator(field);
+            EnumType enumType = (EnumType) field.getType();
+            if(enumType.getCardinality() == Cardinality.SINGLE) {
+                return new EnumGenerator(field);
+            } else {
+                return new MultiEnumGenerator(field);
+            }
         } else if(field.getType() instanceof TextType) {
             return new DiscreteTextGenerator(field.isRequired() ? 0 : 0.25, DiscreteTextGenerator.NAMES);
         } else if(field.getType() instanceof LocalDateType) {
             return new DateGenerator(field);
         } else if(field.getType() instanceof SerialNumberType) {
             return new SerialNumberGenerator();
+        } else if(field.getType() instanceof GeoPointType) {
+            return new GeoPointGenerator(field);
         } else {
             return Suppliers.ofInstance(null);
         }

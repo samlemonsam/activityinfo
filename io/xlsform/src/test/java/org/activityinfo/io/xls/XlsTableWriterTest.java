@@ -1,6 +1,7 @@
 package org.activityinfo.io.xls;
 
 import com.google.common.io.Resources;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.analysis.ImmutableTableModel;
@@ -12,6 +13,7 @@ import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileOutputStream;
@@ -23,6 +25,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 
 public class XlsTableWriterTest {
+
+    @Before
+    public void setup() {
+        LocaleProxy.initialize();
+    }
 
     @Test
     public void surveyForm() throws IOException {

@@ -45,6 +45,8 @@ public class Survey implements TestForm {
 
     public static final ResourceId GEO_POINT_FIELD_ID = ResourceId.valueOf("F11");
 
+    public static final ResourceId WEALTH_FIELD_ID = ResourceId.valueOf("F12");
+
 
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
 
@@ -63,10 +65,16 @@ public class Survey implements TestForm {
 
     public static final ResourceId NO_PRENATALE_ID = ResourceId.valueOf("PNN");
 
+    public static final ResourceId WEALTH_TV = ResourceId.valueOf("W1");
+    public static final ResourceId WEALTH_RADIO = ResourceId.valueOf("W2");
+    public static final ResourceId WEALTH_FRIDGE = ResourceId.valueOf("W3");
+
+
     public static final int ROW_COUNT = 536;
 
     private final FormClass formClass;
 
+    private final RecordGenerator recordGenerator;
 
     private List<FormInstance> records = null;
     private final FormField nameField;
@@ -78,8 +86,8 @@ public class Survey implements TestForm {
     private final FormField pregnantField;
     private final FormField prenataleCareField;
     private final FormField calculatedField;
-    private final RecordGenerator recordGenerator;
     private final FormField geoPointField;
+    private final FormField wealthField;
 
 
     public Survey() {
@@ -157,6 +165,14 @@ public class Survey implements TestForm {
                 .setType(new EnumType(Cardinality.SINGLE,
                         new EnumItem(MARRIED_ID, "Married"),
                         new EnumItem(SINGLE_ID, "Single")));
+
+        wealthField = formClass.addField(WEALTH_FIELD_ID)
+                .setCode("WEALTH")
+                .setLabel("Which of the follow items do you have in your household?")
+                .setType(new EnumType(Cardinality.MULTIPLE,
+                        new EnumItem(WEALTH_TV, "TV"),
+                        new EnumItem(WEALTH_RADIO, "Radio"),
+                        new EnumItem(WEALTH_FRIDGE, "Fridge")));
 
         recordGenerator = new RecordGenerator(formClass)
                 .distribution(AGE_FIELD_ID, new IntegerGenerator(15, 99, 0.05, "years"))

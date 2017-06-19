@@ -55,8 +55,23 @@ public class TableView implements IsWidget {
 
         this.viewModel = viewModel;
 
-        TextButton newButton = new TextButton("New Record");
+        TextButton newButton = new TextButton(I18N.CONSTANTS.newText());
         newButton.addSelectHandler(this::onNewRecordClicked);
+
+        TextButton removeButton = new TextButton(I18N.CONSTANTS.remove());
+        removeButton.addSelectHandler(this::onDeleteRecordClicked);
+
+        TextButton editButton = new TextButton(I18N.CONSTANTS.edit());
+        editButton.addSelectHandler(this::onEditRecordClicked);
+
+        TextButton printButton = new TextButton(I18N.CONSTANTS.printForm());
+        printButton.addSelectHandler(this::onPrintRecordClicked);
+
+        TextButton importButton = new TextButton(I18N.CONSTANTS.importText());
+        importButton.addSelectHandler(this::onImportClicked);
+
+        TextButton exportButton = new TextButton(I18N.CONSTANTS.export());
+        exportButton.addSelectHandler(this::onExportClicked);
 
         TextButton columnsButton = new TextButton(I18N.CONSTANTS.chooseColumns());
         columnsButton.addSelectHandler(this::onChooseColumnsSelected);
@@ -65,6 +80,10 @@ public class TableView implements IsWidget {
 
         this.toolBar = new ToolBar();
         toolBar.add(newButton);
+        toolBar.add(editButton);
+        toolBar.add(removeButton);
+        toolBar.add(importButton);
+        toolBar.add(exportButton);
         toolBar.add(columnsButton);
         toolBar.add(offlineButton);
 
@@ -109,9 +128,32 @@ public class TableView implements IsWidget {
     }
 
 
+
     private void onNewRecordClicked(SelectEvent event) {
         FormDialog dialog = new FormDialog(formStore, viewModel.getFormId());
         dialog.show();
+    }
+
+    private void onEditRecordClicked(SelectEvent event) {
+
+    }
+
+    private void onPrintRecordClicked(SelectEvent event) {
+
+    }
+
+    private void onDeleteRecordClicked(SelectEvent event) {
+
+
+    }
+
+    private void onImportClicked(SelectEvent event) {
+
+    }
+
+
+    private void onExportClicked(SelectEvent event) {
+
     }
 
 
