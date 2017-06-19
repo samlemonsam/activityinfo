@@ -23,6 +23,7 @@ public class BioDataForm implements TestForm {
 
     private List<FormInstance> records = null;
     private IntakeForm intakeForm;
+    private RecordGenerator generator;
 
 
     public BioDataForm(IntakeForm intakeForm) {
@@ -38,6 +39,8 @@ public class BioDataForm implements TestForm {
                 .setKey(true)
                 .setVisible(true);
 
+        generator = new RecordGenerator(formClass)
+                .distribution(PROTECTION_CODE_FIELD_ID, new RefKeyGenerator(intakeForm));
     }
 
     @Override
@@ -54,10 +57,14 @@ public class BioDataForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .distribution(PROTECTION_CODE_FIELD_ID, new RefKeyGenerator(intakeForm))
-                    .generate(ROW_COUNT);
+
+            this.records = generator.generate(ROW_COUNT);
         }
         return records;
+    }
+
+    @Override
+    public RecordGenerator getGenerator() {
+        return generator;
     }
 }

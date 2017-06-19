@@ -3,11 +3,11 @@ package org.activityinfo.ui.client.store;
 import com.google.gwt.core.client.testing.StubScheduler;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Connection;
-import org.activityinfo.store.testing.IncidentForm;
-import org.activityinfo.store.testing.IntakeForm;
-import org.activityinfo.store.testing.ReferralSubForm;
-import org.activityinfo.store.testing.Survey;
+import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
@@ -15,8 +15,8 @@ import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 import org.junit.Test;
 
 import static org.activityinfo.observable.ObservableTesting.connect;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.*;
 
 public class FormStoreTest {
 
@@ -132,6 +132,34 @@ public class FormStoreTest {
         assertTrue("incident form is cached", snapshot.isFormCached(IncidentForm.FORM_ID));
         assertTrue("sub form is cached", snapshot.isFormCached(ReferralSubForm.FORM_ID));
         assertTrue("related form is cached", snapshot.isFormCached(IntakeForm.FORM_ID));
+    }
+
+    @Test
+    public void newRecordHitsQuery() {
+        TestingCatalog catalog = new TestingCatalog();
+        AsyncClientStub client = new AsyncClientStub(catalog);
+        HttpBus httpBus = new HttpBus(client, scheduler);
+        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
+        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+
+        // Open a query on a set of records
+
+        QueryModel queryModel = new QueryModel(Survey.FORM_ID);
+        queryModel.selectResourceId().as("id");
+
+        Connection<ColumnSet> tableView = connect(formStore.query(queryModel));
+        tableView.assertLoaded();
+
+        // Add an new record to Survey
+        tableView.resetChangeCounter();
+        formStore.updateRecords(new TransactionBuilder().add(catalog.addNew(Survey.FORM_ID)));
+
+
+        // Verify that the table view has been updated
+        tableView.assertLoaded();
+        tableView.assertChanged();
+
+        assertThat(tableView.assertLoaded().getNumRows(), equalTo(Survey.ROW_COUNT + 1));
     }
 
 

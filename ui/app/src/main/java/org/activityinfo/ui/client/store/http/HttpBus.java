@@ -1,22 +1,34 @@
 package org.activityinfo.ui.client.store.http;
 
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.RowSource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.FormChange;
+import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.ObservableFormTree;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 /**
@@ -28,6 +40,8 @@ public class HttpBus {
 
     private int nextRequestId = 1;
     private Scheduler scheduler;
+
+    private EventBus eventBus = new SimpleEventBus();
 
 
     private class PendingRequest<T> implements HttpSubscription {
@@ -73,6 +87,11 @@ public class HttpBus {
 
         private boolean isFailed() {
             return result.getState() == Promise.State.REJECTED;
+        }
+
+        @Override
+        public boolean isPending() {
+            return !cancelled && result.getState() != Promise.State.FULFILLED;
         }
 
         @Override
@@ -125,18 +144,46 @@ public class HttpBus {
         return pending;
     }
 
+    private <T> Observable<T> get(HttpRequest<T> request, Predicate<FormChange> eventPredicate) {
+        return new ObservableRequest<T>(eventBus, this, request, eventPredicate);
+    }
+
     public <T> Observable<T> get(HttpRequest<T> request) {
-        return new ObservableRequest<T>(this, request);
+        return new ObservableRequest<T>(eventBus, this, request, change -> true);
     }
 
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
-        return get(new FormMetadataRequest(formId));
+        // We consider the version range request to be immutable, as old versions
+        // don't change, so refeching shouldn't be necessary
+        return get(new FormMetadataRequest(formId), Predicates.alwaysFalse());
+    }
+
+    public Observable<ColumnSet> query(QueryModel queryModel) {
+        return get(new QueryRequest(queryModel), change -> {
+            // TODO: we need to check for related tables as well...
+            for (RowSource rowSource : queryModel.getRowSources()) {
+                if(change.isFormChanged(rowSource.getRootFormId())) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
 
-    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
-        return client.updateRecords(transactionBuilder);
+    public Observable<FormRecordSet> getVersionRange(ResourceId formId, long localVersion, long version) {
+        return get(new VersionRangeRequest(formId, localVersion, version), change -> false);
+    }
 
+    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
+        return client.updateRecords(transactionBuilder).then(new Function<Void, Void>() {
+            @Nullable
+            @Override
+            public Void apply(@Nullable Void aVoid) {
+                eventBus.fireEvent(new FormChangeEvent(FormChange.from(transactionBuilder)));
+                return null;
+            }
+        });
     }
 
     public Observable<FormTree> getFormTree(ResourceId rootFormId) {

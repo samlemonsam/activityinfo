@@ -7,7 +7,6 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.http.HttpBus;
-import org.activityinfo.ui.client.store.http.VersionRangeRequest;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,7 +55,7 @@ public class Snapshot {
         return metadata.join(forms -> {
             List<Observable<FormRecordSet>> recordSets = new ArrayList<>();
             for (FormMetadata form : forms) {
-                recordSets.add(httpBus.get(new VersionRangeRequest(form.getId(), 0, form.getVersion())));
+                recordSets.add(httpBus.getVersionRange(form.getId(), 0, form.getVersion()));
             }
 
             return Observable.flatten(recordSets).transform(x -> new Snapshot(forms, x));

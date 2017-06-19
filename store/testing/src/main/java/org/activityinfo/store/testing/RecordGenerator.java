@@ -30,6 +30,8 @@ public class RecordGenerator {
     private final Map<ResourceId, Supplier<FieldValue>> generators = new HashMap<>();
     private final Map<ResourceId, FormField> fieldMap = new HashMap<>();
 
+    private int nextRecordIndex = 0;
+
     public RecordGenerator(FormClass schema) {
         this.schema = schema;
         for (FormField field : schema.getFields()) {
@@ -75,18 +77,22 @@ public class RecordGenerator {
     public List<FormInstance> generate(int rowCount) {
         List<FormInstance> records = new ArrayList<>();
         for (int i = 0; i < rowCount; i++) {
-            ResourceId recordId = ResourceId.valueOf("c" + i);
-            FormInstance record = new FormInstance(recordId, schema.getId());
-
-            if(parentDistribution != null) {
-                record.setParentRecordId(parentDistribution.get());
-            }
-
-            for (Map.Entry<ResourceId, Supplier<FieldValue>> entry : generators.entrySet()) {
-                record.set(entry.getKey(), entry.getValue().get());
-            }
-            records.add(record);
+            records.add(generate());
         }
         return records;
+    }
+
+    public FormInstance generate() {
+        ResourceId recordId = ResourceId.valueOf("c" + (nextRecordIndex++));
+        FormInstance record = new FormInstance(recordId, schema.getId());
+
+        if(parentDistribution != null) {
+            record.setParentRecordId(parentDistribution.get());
+        }
+
+        for (Map.Entry<ResourceId, Supplier<FieldValue>> entry : generators.entrySet()) {
+            record.set(entry.getKey(), entry.getValue().get());
+        }
+        return record;
     }
 }

@@ -75,6 +75,7 @@ public class Survey implements TestForm {
     private final FormField pregnantField;
     private final FormField prenataleCareField;
     private final FormField calculatedField;
+    private final RecordGenerator recordGenerator;
 
 
     public Survey() {
@@ -147,6 +148,11 @@ public class Survey implements TestForm {
                         new EnumItem(MARRIED_ID, "Married"),
                         new EnumItem(SINGLE_ID, "Single")));
 
+        recordGenerator = new RecordGenerator(formClass)
+                .distribution(AGE_FIELD_ID, new IntegerGenerator(15, 99, 0.05, "years"))
+                .distribution(CHILDREN_FIELD_ID, new IntegerGenerator(0, 8, 0.20, "children"));
+
+
     }
 
     public static RecordRef getRecordRef(int index) {
@@ -163,14 +169,14 @@ public class Survey implements TestForm {
         return formClass;
     }
 
+    public RecordGenerator getGenerator() {
+        return recordGenerator;
+    }
 
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .distribution(AGE_FIELD_ID, new IntegerGenerator(15, 99, 0.05, "years"))
-                    .distribution(CHILDREN_FIELD_ID, new IntegerGenerator(0, 8, 0.20, "children"))
-                    .generate(ROW_COUNT);
+            this.records = recordGenerator.generate(ROW_COUNT);
         }
         return records;
     }

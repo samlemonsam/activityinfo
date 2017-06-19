@@ -6,6 +6,8 @@ package org.activityinfo.ui.client.store.http;
  */
 public interface HttpSubscription {
 
+    boolean isPending();
+
     void cancel();
 
 }

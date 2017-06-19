@@ -15,6 +15,9 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.store.query.impl.ColumnSetBuilder;
+import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
 import org.activityinfo.store.testing.TestingCatalog;
@@ -28,6 +31,10 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
 
     public AsyncClientStub() {
         this.catalog = new TestingCatalog();
+    }
+
+    public AsyncClientStub(TestingCatalog testingCatalog) {
+        this.catalog = testingCatalog;
     }
 
     public void setConnected(boolean connected) {
@@ -123,7 +130,15 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
-        return Promise.rejected(new UnsupportedOperationException());
+
+        if(!connected) {
+            return offlineResult();
+        }
+
+        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
+        ColumnSet columnSet = columnSetBuilder.build(query);
+
+        return Promise.resolved(columnSet);
     }
 
     @Override
@@ -132,7 +147,9 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return offlineResult();
         }
 
-        return Promise.rejected(new UnsupportedOperationException());
+        catalog.updateRecords(transactions);
+
+        return Promise.done();
     }
 
     @Override

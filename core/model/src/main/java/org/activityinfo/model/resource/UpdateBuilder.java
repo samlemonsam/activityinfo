@@ -10,7 +10,11 @@ import org.activityinfo.model.type.FieldValue;
 public class UpdateBuilder {
     
     private JsonObject update = new JsonObject();
-    
+
+    public ResourceId getFormId() {
+        return ResourceId.valueOf(update.get("@class").getAsString());
+    }
+
     public UpdateBuilder setRecordId(ResourceId id) {
         update.addProperty("@id", id.asString());
         return this;

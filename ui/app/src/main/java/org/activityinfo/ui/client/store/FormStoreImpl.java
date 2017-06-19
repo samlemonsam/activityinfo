@@ -12,7 +12,9 @@ import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.http.*;
+import org.activityinfo.ui.client.store.http.CatalogRequest;
+import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.RecordRequest;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
@@ -36,7 +38,7 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
-        Observable<FormMetadata> online = httpBus.get(new FormMetadataRequest(formId));
+        Observable<FormMetadata> online = httpBus.getFormMetadata(formId);
         Observable<FormMetadata> offline = offlineStore.getCachedMetadata(formId);
 
         return new Best<>(online, offline, (x, y) -> Long.compare(x.getVersion(), y.getVersion()));
@@ -54,7 +56,7 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
-        return httpBus.get(new QueryRequest(queryModel));
+        return httpBus.query(queryModel);
     }
 
     @Override

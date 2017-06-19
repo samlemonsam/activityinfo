@@ -26,6 +26,10 @@ public class TestingFormStorage implements VersionedFormStorage {
         this.testForm = testForm;
     }
 
+    public RecordGenerator getGenerator() {
+        return testForm.getGenerator();
+    }
+
     private List<FormInstance> records() {
         if(records == null) {
             return testForm.getRecords();

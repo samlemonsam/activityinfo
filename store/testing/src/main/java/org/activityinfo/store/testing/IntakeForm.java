@@ -41,6 +41,7 @@ public class IntakeForm implements TestForm {
     private final FormField dobField;
 
     private List<FormInstance> records;
+    private RecordGenerator generator;
 
     public IntakeForm() {
         formClass = new FormClass(FORM_ID)
@@ -81,7 +82,11 @@ public class IntakeForm implements TestForm {
                 .setLabel("Date of Birth")
                 .setType(LocalDateType.INSTANCE);
 
-
+        generator = new RecordGenerator(formClass)
+                .distribution(OPEN_DATE_FIELD_ID, new DateGenerator(openDateField, 2016, 2017))
+                .distribution(DOB_FIELD_ID, new DateGenerator(dobField, 1950, 1991))
+                .distribution(NATIONALITY_FIELD_ID, new MultiEnumGenerator(nationalityField, 0.85, 0.30, 0.15))
+                .distribution(PROBLEM_FIELD_ID, new MultiEnumGenerator(problemField, 0.65, 0.75));
     }
 
     @Override
@@ -97,13 +102,13 @@ public class IntakeForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .distribution(OPEN_DATE_FIELD_ID, new DateGenerator(openDateField, 2016, 2017))
-                    .distribution(DOB_FIELD_ID, new DateGenerator(dobField, 1950, 1991))
-                    .distribution(NATIONALITY_FIELD_ID, new MultiEnumGenerator(nationalityField, 0.85, 0.30, 0.15))
-                    .distribution(PROBLEM_FIELD_ID, new MultiEnumGenerator(problemField, 0.65, 0.75))
-                    .generate(ROW_COUNT);
+            this.records = generator.generate(ROW_COUNT);
         }
         return records;
+    }
+
+    @Override
+    public RecordGenerator getGenerator() {
+        return generator;
     }
 }

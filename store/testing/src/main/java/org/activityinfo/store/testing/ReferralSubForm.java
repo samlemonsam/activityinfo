@@ -22,6 +22,7 @@ public class ReferralSubForm implements TestForm {
     private final FormField organizationField;
 
     private List<FormInstance> records = null;
+    private RecordGenerator generator;
 
     public ReferralSubForm(IncidentForm parentForm) {
         this.parentForm = parentForm;
@@ -36,6 +37,8 @@ public class ReferralSubForm implements TestForm {
                 .setRequired(true)
                 .setVisible(true);
 
+        generator = new RecordGenerator(formClass)
+                .parentForm(parentForm);
     }
 
     @Override
@@ -52,10 +55,13 @@ public class ReferralSubForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .parentForm(parentForm)
-                    .generate(ROW_COUNT);
+            this.records = generator.generate(ROW_COUNT);
         }
         return records;
+    }
+
+    @Override
+    public RecordGenerator getGenerator() {
+        return generator;
     }
 }

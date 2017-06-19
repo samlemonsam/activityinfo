@@ -12,7 +12,11 @@ import java.util.List;
 public class TransactionBuilder {
     
     private List<UpdateBuilder> updates = new ArrayList<>();
-    
+
+    public Iterable<UpdateBuilder> getUpdates() {
+        return updates;
+    }
+
     public UpdateBuilder create(ResourceId formId, ResourceId resourceId)  {
         UpdateBuilder update = new UpdateBuilder();
         update.setRecordId(resourceId);

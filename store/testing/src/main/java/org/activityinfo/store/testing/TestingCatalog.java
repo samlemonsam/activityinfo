@@ -3,12 +3,15 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.UpdateBuilder;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
 import org.activityinfo.store.query.impl.NullFormSupervisor;
@@ -99,5 +102,21 @@ public class TestingCatalog implements FormCatalog {
     public void updateRecords(TransactionBuilder transaction) {
         Updater updater = new Updater(this, 1, new BlobAuthorizerStub(), serialNumberProvider);
         updater.execute(transaction.build());
+    }
+
+    public UpdateBuilder addNew(ResourceId formId) {
+        TestingFormStorage form = formMap.get(formId);
+        if(form == null) {
+            throw new RuntimeException("No such form: " + formId);
+        }
+        FormInstance newRecord = form.getGenerator().generate();
+        UpdateBuilder update = new UpdateBuilder();
+        update.setFormId(formId);
+        update.setRecordId(newRecord.getRef().getRecordId());
+        for (Map.Entry<ResourceId, FieldValue> entry : newRecord.getFieldValueMap().entrySet()) {
+            update.setProperty(entry.getKey(), entry.getValue());
+        }
+
+        return update;
     }
 }

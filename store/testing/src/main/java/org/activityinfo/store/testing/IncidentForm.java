@@ -37,6 +37,7 @@ public class IncidentForm implements TestForm {
     private final FormField referralField;
 
     private List<FormInstance> records = null;
+    private RecordGenerator generator;
 
     public IncidentForm(BioDataForm bioDataForm) {
         this.bioDataForm = bioDataForm;
@@ -61,6 +62,9 @@ public class IncidentForm implements TestForm {
                 .setLabel("Referrals")
                 .setType(new SubFormReferenceType(ReferralSubForm.FORM_ID));
 
+        generator = new RecordGenerator(formClass)
+                .distribution(PROTECTION_CODE_FIELD_ID, new RefGenerator(bioDataForm));
+
     }
 
     @Override
@@ -77,10 +81,15 @@ public class IncidentForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .distribution(PROTECTION_CODE_FIELD_ID, new RefGenerator(bioDataForm))
+
+            this.records = generator
                     .generate(ROW_COUNT);
         }
         return records;
+    }
+
+    @Override
+    public RecordGenerator getGenerator() {
+        return generator;
     }
 }

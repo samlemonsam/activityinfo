@@ -15,4 +15,6 @@ public interface TestForm {
 
     List<FormInstance> getRecords();
 
+    RecordGenerator getGenerator();
+
 }

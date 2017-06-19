@@ -5,9 +5,6 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.promise.Promise;
 
-/**
- * Created by alex on 27-1-17.
- */
 public class QueryRequest implements HttpRequest<ColumnSet> {
     private final QueryModel queryModel;
 
