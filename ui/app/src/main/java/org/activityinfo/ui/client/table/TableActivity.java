@@ -12,6 +12,7 @@ public class TableActivity extends AbstractActivity {
 
     private FormStore formStore;
     private TablePlace place;
+    private TableView view;
 
     public TableActivity(FormStore formStore, TablePlace place) {
         this.formStore = formStore;
@@ -26,7 +27,13 @@ public class TableActivity extends AbstractActivity {
                 .build();
 
         TableViewModel tableViewModel = new TableViewModel(formStore, tableModel);
-        TableView view = new TableView(formStore, tableViewModel);
+        view = new TableView(formStore, tableViewModel);
         panel.setWidget(view);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        view.stop();
     }
 }

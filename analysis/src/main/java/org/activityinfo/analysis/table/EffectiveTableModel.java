@@ -39,9 +39,10 @@ public class EffectiveTableModel {
         this.columnSet = new StatefulValue<>();
         this.columns = new ArrayList<>();
 
-
-        if(this.columns.isEmpty()) {
-            addDefaultColumns(formTree);
+        if(formTree.getRootState() == FormTree.State.VALID) {
+            if (this.columns.isEmpty()) {
+                addDefaultColumns(formTree);
+            }
         }
 
         this.columnSet = formSource.query(buildQuery(columns));

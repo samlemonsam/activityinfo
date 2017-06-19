@@ -1,11 +1,9 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -21,12 +19,16 @@ import org.activityinfo.ui.client.input.view.FormDialog;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.table.ColumnDialog;
 
+import java.util.logging.Logger;
+
 /**
  * Displays a Form as a Table
  */
 public class TableView implements IsWidget {
 
     public static final int MARGINS = 8;
+
+    private static final Logger LOGGER = Logger.getLogger(TableView.class.getName());
 
 
     private TableViewModel viewModel;
@@ -36,12 +38,14 @@ public class TableView implements IsWidget {
     private ToolBar toolBar;
     private TableGrid grid;
 
+    private IsWidget errorWidget;
+
     private VerticalLayoutContainer center;
 
     private Subscription subscription;
 
-    private Dialog forbiddenDialog;
     private FormStore formStore;
+    private final SidePanel sidePanel;
 
 
     public TableView(FormStore formStore, final TableViewModel viewModel) {
@@ -70,7 +74,7 @@ public class TableView implements IsWidget {
         this.container = new BorderLayoutContainer();
 
 
-        SidePanel sidePanel = new SidePanel(viewModel);
+        sidePanel = new SidePanel(viewModel);
         BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
         sidePaneLayout.setSplit(true);
         sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
@@ -89,12 +93,14 @@ public class TableView implements IsWidget {
             @Override
             protected void onAttach() {
                 super.onAttach();
+                LOGGER.info("TableView attaching...");
                 subscription = viewModel.getEffectiveTable().subscribe(observable -> effectiveModelChanged());
             }
 
             @Override
             protected void onDetach() {
                 super.onDetach();
+                LOGGER.info("TableView detaching...");
                 subscription.unsubscribe();
             }
         };
@@ -140,21 +146,20 @@ public class TableView implements IsWidget {
     }
 
     private void showErrorState(FormTree.State rootFormState) {
-        forbiddenDialog = new Dialog();
-        forbiddenDialog.setPixelSize(300, 250);
-        forbiddenDialog.setHeading("Forbidden");
-        forbiddenDialog.add(new Label("You do not have permission to view this form."));
-        forbiddenDialog.setModal(true);
-        forbiddenDialog.show();
+
+
+        errorWidget = new ForbiddenWidget();
+
+        panel.setWidget(errorWidget);
+        panel.setHeaderVisible(false);
+        panel.forceLayout();
     }
 
     private void updateGrid(EffectiveTableModel effectiveTableModel) {
 
-        if(forbiddenDialog != null) {
-            forbiddenDialog.hide();
-        }
+        panel.setHeading(effectiveTableModel.getFormLabel());
+        panel.setHeaderVisible(true);
 
-        this.panel.setHeading(effectiveTableModel.getFormLabel());
         if(grid == null) {
             grid = new TableGrid(effectiveTableModel);
             grid.addSelectionChangedHandler(event -> {
@@ -169,5 +174,17 @@ public class TableView implements IsWidget {
         } else {
             grid.update(viewModel.getEffectiveTable());
         }
+
+        // If we are transitioning from an error state, make the container with the
+        // grid and sidebars is set
+        if(!container.isAttached()) {
+            panel.setWidget(container);
+        }
+        panel.forceLayout();
+    }
+
+    public void stop() {
+
+
     }
 }
