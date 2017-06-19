@@ -24,6 +24,7 @@ public class TableViewModel {
     private final FormSource formStore;
     private ResourceId formId;
     private Observable<FormTree> formTree;
+    private TableModel tableModel;
     private Observable<EffectiveTableModel> effectiveTable;
 
     private Map<ResourceId, Observable<EffectiveTableModel>> effectiveSubTables = new HashMap<>();
@@ -35,6 +36,7 @@ public class TableViewModel {
         this.formId = tableModel.getFormId();
         this.formStore = formStore;
         this.formTree = formStore.getFormTree(formId);
+        this.tableModel = tableModel;
         this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(formStore, tree, tableModel));
         this.selectedRecord = selectedRecordRef.join(selection -> {
             if (!selection.isPresent()) {
@@ -48,6 +50,10 @@ public class TableViewModel {
                 }
             });
         });
+    }
+
+    public TableModel getTableModel() {
+        return tableModel;
     }
 
     public Observable<Optional<RecordRef>> getSelectedRecordRef() {

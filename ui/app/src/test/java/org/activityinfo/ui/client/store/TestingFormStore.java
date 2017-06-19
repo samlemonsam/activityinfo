@@ -4,6 +4,9 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.job.JobDescriptor;
+import org.activityinfo.model.job.JobResult;
+import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -133,6 +136,11 @@ public class TestingFormStore implements FormStore {
     public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
         testingCatalog.updateRecords(transactionBuilder);
         return Promise.done();
+    }
+
+    @Override
+    public <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>> startJob(T job) {
+        return Observable.loading();
     }
 
     private <T> Observable<T> maybeExecute(Supplier<T> task) {

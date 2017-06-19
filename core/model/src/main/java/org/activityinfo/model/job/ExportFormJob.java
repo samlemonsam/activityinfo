@@ -24,6 +24,11 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
         this.columns = columns;
     }
 
+    public ExportFormJob(TableModel tableModel) {
+        this.formId = tableModel.getFormId();
+        this.columns = new ArrayList<>();
+    }
+
     public ResourceId getFormId() {
         return formId;
     }

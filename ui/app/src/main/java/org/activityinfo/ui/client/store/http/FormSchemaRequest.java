@@ -4,6 +4,7 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.FormChange;
 
 public class FormSchemaRequest implements HttpRequest<FormClass> {
 
@@ -16,5 +17,15 @@ public class FormSchemaRequest implements HttpRequest<FormClass> {
     @Override
     public Promise<FormClass> execute(ActivityInfoClientAsync client) {
         return client.getFormSchema(formId.asString());
+    }
+
+    @Override
+    public boolean shouldRefresh(FormChange change) {
+        return false;
+    }
+
+    @Override
+    public int refreshInterval(FormClass result) {
+        return -1;
     }
 }

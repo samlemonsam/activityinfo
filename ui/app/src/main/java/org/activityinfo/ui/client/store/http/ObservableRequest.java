@@ -4,11 +4,8 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.FormChangeEventHandler;
-
-import java.util.function.Predicate;
 
 
 class ObservableRequest<T> extends Observable<T> {
@@ -16,25 +13,27 @@ class ObservableRequest<T> extends Observable<T> {
     private final EventBus eventBus;
     private final HttpBus bus;
     private final HttpRequest<T> request;
-    private final Predicate<FormChange> refetchPredicate;
+
+    private boolean connected = false;
 
     private HttpSubscription httpSubscription;
     private HandlerRegistration eventBusRegistration;
 
     private T result = null;
 
-    public ObservableRequest(EventBus eventBus, HttpBus bus, HttpRequest<T> request,
-                             Predicate<FormChange> refetchPredicate) {
+    public ObservableRequest(EventBus eventBus, HttpBus bus, HttpRequest<T> request) {
         super();
         this.eventBus = eventBus;
         this.bus = bus;
         this.request = request;
-        this.refetchPredicate = refetchPredicate;
     }
 
 
     @Override
     protected void onConnect() {
+
+        connected = true;
+
         if(result == null) {
             startFetch();
         }
@@ -42,13 +41,12 @@ class ObservableRequest<T> extends Observable<T> {
         eventBusRegistration = eventBus.addHandler(FormChangeEvent.TYPE, new FormChangeEventHandler() {
             @Override
             public void onFormChange(FormChangeEvent event) {
-                if (!pendingHttpRequest() && refetchPredicate.test(event.getPredicate())) {
+                if (!pendingHttpRequest() && request.shouldRefresh(event.getPredicate())) {
                     // Our current result has become outdated, we need to fetch a new version from
                     // the server
                     refetch();
                 }
             }
-
         });
     }
 
@@ -73,8 +71,25 @@ class ObservableRequest<T> extends Observable<T> {
                 ObservableRequest.this.result = result;
                 ObservableRequest.this.httpSubscription = null;
                 ObservableRequest.this.fireChange();
+                maybeSchedulePoll(result);
             }
         });
+    }
+
+    private void maybeSchedulePoll(T result) {
+
+        if(!connected) {
+            return;
+        }
+
+        int refreshInterval = request.refreshInterval(result);
+        if(refreshInterval > 0) {
+            com.google.gwt.core.client.Scheduler.get().scheduleFixedDelay(() -> {
+                refetch();
+                return false;
+            }, refreshInterval);
+        }
+
     }
 
     /**
@@ -82,14 +97,20 @@ class ObservableRequest<T> extends Observable<T> {
      * for example, when an update is submitted, then we have to refetch the result.
      */
     private void refetch() {
+        if(!connected) {
+            return;
+        }
+
         result = null;
         fireChange();
-
         startFetch();
     }
 
     @Override
     protected void onDisconnect() {
+
+        connected = false;
+
         if(httpSubscription != null) {
             httpSubscription.cancel();
             httpSubscription = null;

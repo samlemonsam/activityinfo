@@ -542,7 +542,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private void navigateToNewNewInterface() {
         Optional<Integer> activityId = getCurrentActivityId();
         if(activityId.isPresent()) {
-            com.google.gwt.user.client.Window.open("/?ui=3#table/" + CuidAdapter.activityFormClass(activityId.get()),
+            com.google.gwt.user.client.Window.open("/app?ui=3#table/" + CuidAdapter.activityFormClass(activityId.get()),
                 "_blank", null);
         }
     }

@@ -2,7 +2,6 @@ package org.activityinfo.ui.client.store.http;
 
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
@@ -12,9 +11,12 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.job.JobDescriptor;
+import org.activityinfo.model.job.JobResult;
+import org.activityinfo.model.job.JobState;
+import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.query.RowSource;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Observable;
@@ -42,6 +44,7 @@ public class HttpBus {
     private Scheduler scheduler;
 
     private EventBus eventBus = new SimpleEventBus();
+
 
 
     private class PendingRequest<T> implements HttpSubscription {
@@ -145,35 +148,42 @@ public class HttpBus {
     }
 
     private <T> Observable<T> get(HttpRequest<T> request, Predicate<FormChange> eventPredicate) {
-        return new ObservableRequest<T>(eventBus, this, request, eventPredicate);
+        return new ObservableRequest<T>(eventBus, this, request);
     }
 
     public <T> Observable<T> get(HttpRequest<T> request) {
-        return new ObservableRequest<T>(eventBus, this, request, change -> true);
+        return new ObservableRequest<T>(eventBus, this, request);
     }
+
+    public <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>> startJob(T job) {
+
+        Observable<JobStatus<T, R>> jobCreated = get(new StartJobRequest<>(job));
+
+        return jobCreated.join(initialStatus -> {
+            if(initialStatus.getState() == JobState.FAILED) {
+                return Observable.just(initialStatus);
+            } else {
+                return get(new JobStatusRequest<T, R>(initialStatus.getId()));
+            }
+        });
+
+    }
+
 
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
 
         // We consider the version range request to be immutable, as old versions
         // don't change, so refeching shouldn't be necessary
-        return get(new FormMetadataRequest(formId), Predicates.alwaysFalse());
+        return get(new FormMetadataRequest(formId));
     }
 
     public Observable<ColumnSet> query(QueryModel queryModel) {
-        return get(new QueryRequest(queryModel), change -> {
-            // TODO: we need to check for related tables as well...
-            for (RowSource rowSource : queryModel.getRowSources()) {
-                if(change.isFormChanged(rowSource.getRootFormId())) {
-                    return true;
-                }
-            }
-            return false;
-        });
+        return get(new QueryRequest(queryModel));
     }
 
 
     public Observable<FormRecordSet> getVersionRange(ResourceId formId, long localVersion, long version) {
-        return get(new VersionRangeRequest(formId, localVersion, version), change -> false);
+        return get(new VersionRangeRequest(formId, localVersion, version));
     }
 
     public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {

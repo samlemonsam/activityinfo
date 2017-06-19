@@ -12,8 +12,13 @@ import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.job.ExportFormJob;
+import org.activityinfo.model.job.ExportResult;
+import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.input.view.FormDialog;
 import org.activityinfo.ui.client.store.FormStore;
@@ -153,6 +158,13 @@ public class TableView implements IsWidget {
 
 
     private void onExportClicked(SelectEvent event) {
+        TableModel tableModel = viewModel.getTableModel();
+        ExportFormJob exportFormJob = new ExportFormJob(tableModel);
+
+        Observable<JobStatus<ExportFormJob, ExportResult>> jobStatus = formStore.startJob(exportFormJob);
+        ExportJobDialog dialog = new ExportJobDialog(jobStatus);
+        dialog.show();
+
 
     }
 

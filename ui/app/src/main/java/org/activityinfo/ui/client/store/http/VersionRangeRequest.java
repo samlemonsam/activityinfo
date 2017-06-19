@@ -4,6 +4,7 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.FormChange;
 
 /**
  * Requests a range of record versions for a given form.
@@ -23,5 +24,15 @@ public class VersionRangeRequest implements HttpRequest<FormRecordSet> {
     @Override
     public Promise<FormRecordSet> execute(ActivityInfoClientAsync client) {
         return client.getRecordVersionRange(formId.asString(), localVersion, version);
+    }
+
+    @Override
+    public boolean shouldRefresh(FormChange change) {
+        return false;
+    }
+
+    @Override
+    public int refreshInterval(FormRecordSet result) {
+        return -1;
     }
 }
