@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.testing.StubScheduler;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
@@ -12,6 +13,7 @@ import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.activityinfo.observable.ObservableTesting.connect;
@@ -20,6 +22,10 @@ import static org.junit.Assert.*;
 
 public class FormStoreTest {
 
+    @Before
+    public void setup() {
+        LocaleProxy.initialize();
+    }
 
     private final StubScheduler scheduler = new StubScheduler();
 

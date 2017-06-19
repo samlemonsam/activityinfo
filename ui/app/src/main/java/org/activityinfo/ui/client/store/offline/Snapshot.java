@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.http.HttpBus;
 
@@ -42,7 +43,9 @@ public class Snapshot {
             Set<ResourceId> set = new HashSet<>();
             for (FormTree tree : trees) {
                 for (FormClass form : tree.getFormClasses()) {
-                    set.add(form.getId());
+                    if(!isBuiltinForm(form.getId())) {
+                        set.add(form.getId());
+                    }
                 }
             }
             return set;
@@ -60,6 +63,14 @@ public class Snapshot {
 
             return Observable.flatten(recordSets).transform(x -> new Snapshot(forms, x));
         });
+    }
+
+    private static boolean isBuiltinForm(ResourceId formId) {
+        if(formId.equals(GeoPointType.INSTANCE.getFormClass().getId())) {
+            return true;
+        }
+
+        return false;
     }
 
 

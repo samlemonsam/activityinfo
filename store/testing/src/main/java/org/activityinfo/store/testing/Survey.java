@@ -9,6 +9,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -40,7 +41,9 @@ public class Survey implements TestForm {
 
     public static final ResourceId CALCULATED_FIELD_ID = ResourceId.valueOf("F9");
 
-    private static final ResourceId BAD_CALCULATED_FIELD_ID = ResourceId.valueOf("F10");
+    public static final ResourceId BAD_CALCULATED_FIELD_ID = ResourceId.valueOf("F10");
+
+    public static final ResourceId GEO_POINT_FIELD_ID = ResourceId.valueOf("F11");
 
 
     public static final ResourceId MALE_ID = ResourceId.valueOf("G1");
@@ -76,6 +79,7 @@ public class Survey implements TestForm {
     private final FormField prenataleCareField;
     private final FormField calculatedField;
     private final RecordGenerator recordGenerator;
+    private final FormField geoPointField;
 
 
     public Survey() {
@@ -101,6 +105,12 @@ public class Survey implements TestForm {
                 .setLabel("Respondent's Age")
                 .setType(new QuantityType("years"))
                 .setRequired(true);
+
+        geoPointField = formClass.addField(GEO_POINT_FIELD_ID)
+                .setCode("POINT")
+                .setLabel("Location of Interview")
+                .setType(GeoPointType.INSTANCE)
+                .setRequired(false);
 
 
         calculatedField = formClass.addField(CALCULATED_FIELD_ID)

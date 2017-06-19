@@ -56,7 +56,7 @@ public class SerialNumberType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement jsonElement) {
+    public SerialNumber parseJsonValue(JsonElement jsonElement) {
         if(jsonElement.isJsonPrimitive()) {
             JsonPrimitive value = jsonElement.getAsJsonPrimitive();
             if (value.isNumber()) {

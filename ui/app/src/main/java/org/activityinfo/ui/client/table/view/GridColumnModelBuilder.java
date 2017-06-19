@@ -1,25 +1,23 @@
 package org.activityinfo.ui.client.table.view;
 
+import com.google.gwt.cell.client.DateCell;
+import com.google.gwt.i18n.shared.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.filters.Filter;
-import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
-import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
-import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
-import org.activityinfo.analysis.table.EffectiveTableColumn;
-import org.activityinfo.model.type.NarrativeType;
-import org.activityinfo.model.type.barcode.BarcodeType;
+import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
+import com.sencha.gxt.widget.core.client.grid.filters.*;
+import org.activityinfo.analysis.table.*;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.time.LocalDateType;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,6 +27,7 @@ public class GridColumnModelBuilder {
 
     private final ColumnSetProxy proxy;
     private final List<ColumnConfig<Integer, ?>> columnConfigs = new ArrayList<>();
+    private final List<HeaderGroupConfig> headerGroupConfigs = new ArrayList<>();
     private final List<Filter<Integer, ?>> filters = new ArrayList<>();
 
     public GridColumnModelBuilder(ColumnSetProxy proxy) {
@@ -38,39 +37,61 @@ public class GridColumnModelBuilder {
     public void addAll(List<EffectiveTableColumn> columns) {
 
         for (EffectiveTableColumn tableColumn : columns) {
-            if(tableColumn.getType() instanceof TextType ||
-               tableColumn.getType() instanceof BarcodeType ||
-               tableColumn.getType() instanceof NarrativeType) {
-                addTextColumn(tableColumn);
 
-            } else if(tableColumn.getType() instanceof QuantityType) {
-                addQuantityType(tableColumn);
+            tableColumn.accept(new TableColumnVisitor<Void>() {
+                @Override
+                public Void visitTextColumn(EffectiveTableColumn columnModel, TextFormat textFormat) {
+                    addTextColumn(tableColumn, textFormat);
+                    return null;
+                }
 
-            } else if(tableColumn.getType() instanceof EnumType) {
+                @Override
+                public Void visitNumberColumn(EffectiveTableColumn columnModel, NumberFormat numberFormat) {
+                    addNumberColumn(tableColumn, numberFormat);
+                    return null;
+                }
 
-                addEnumType(tableColumn);
+                @Override
+                public Void visitErrorColumn(EffectiveTableColumn columnModel, ErrorFormat errorFormat) {
+                    return null;
+                }
 
-            } else if(tableColumn.getType() instanceof LocalDateType) {
-                addDateType(tableColumn);
-            }
+                @Override
+                public Void visitGeoPointColumn(EffectiveTableColumn columnModel, GeoPointFormat geoPointFormat) {
+                    addGeoPointColumn(columnModel, geoPointFormat);
+                    return null;
+                }
+
+                @Override
+                public Void visitMultiEnumColumn(EffectiveTableColumn columnModel, MultiEnumFormat multiEnumFormat) {
+                    addMultiEnumColumn(columnModel, multiEnumFormat);
+                    return null;
+                }
+
+                @Override
+                public Void visitBooleanColumn(EffectiveTableColumn columnModel, BooleanFormat booleanFormat) {
+                    return null;
+                }
+
+                @Override
+                public Void visitDateColumn(EffectiveTableColumn columnModel, DateFormat dateFormat) {
+                    addDateColumn(columnModel, dateFormat);
+                    return null;
+                }
+
+                @Override
+                public Void visitSingleEnumColumn(EffectiveTableColumn columnModel, SingleEnumFormat singleEnumFormat) {
+                    addEnumType(columnModel, singleEnumFormat);
+                    return null;
+                }
+            });
+
         }
     }
 
 
-    private void addQuantityType(EffectiveTableColumn tableColumn) {
-        ValueProvider<Integer, Double> valueProvider = proxy.doubleValueProvider(tableColumn.getId());
-
-        ColumnConfig<Integer, Double> config = new ColumnConfig<>(valueProvider);
-        config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        config.setHeader(tableColumn.getLabel());
-        columnConfigs.add(config);
-
-        NumericFilter<Integer, Double> filter = new NumericFilter<>(valueProvider, new NumberPropertyEditor.DoublePropertyEditor());
-        filters.add(filter);
-    }
-
-    private void addTextColumn(EffectiveTableColumn tableColumn) {
-        ValueProvider<Integer, String> valueProvider = proxy.stringValueProvider(tableColumn.getId());
+    private void addTextColumn(EffectiveTableColumn tableColumn, TextFormat textFormat) {
+        ValueProvider<Integer, String> valueProvider = proxy.getValueProvider(textFormat);
 
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
         config.setHeader(tableColumn.getLabel());
@@ -80,17 +101,34 @@ public class GridColumnModelBuilder {
         filters.add(filter);
     }
 
-    private void addEnumType(EffectiveTableColumn tableColumn) {
 
-        ValueProvider<Integer, String> valueProvider = proxy.stringValueProvider(tableColumn.getId());
+    private void addNumberColumn(EffectiveTableColumn tableColumn, NumberFormat numberFormat) {
+        ValueProvider<Integer, Double> valueProvider = proxy.getValueProvider(numberFormat);
+
+        ColumnConfig<Integer, Double> config = new ColumnConfig<>(valueProvider);
+        config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        config.setHeader(tableColumn.getLabel());
+        columnConfigs.add(config);
+
+        NumericFilter<Integer, Double> filter = new NumericFilter<>(valueProvider,
+                new NumberPropertyEditor.DoublePropertyEditor());
+        filters.add(filter);
+    }
+
+    private void addEnumType(EffectiveTableColumn tableColumn, SingleEnumFormat format) {
+
+        ValueProvider<Integer, String> valueProvider = proxy.getValueProvider(format);
 
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
+        addEnumFilter((EnumType) tableColumn.getType(), valueProvider);
+    }
+
+    private void addEnumFilter(EnumType enumType, ValueProvider<Integer, String> valueProvider) {
         ListStore<String> store = new ListStore<>(x -> x);
-        EnumType type = (EnumType) tableColumn.getType();
-        for (EnumItem enumItem : type.getValues()) {
+        for (EnumItem enumItem : enumType.getValues()) {
             store.add(enumItem.getLabel());
         }
 
@@ -98,13 +136,66 @@ public class GridColumnModelBuilder {
         filters.add(filter);
     }
 
+    private void addDateColumn(EffectiveTableColumn tableColumn, DateFormat dateFormat) {
+        ValueProvider<Integer, Date> valueProvider = proxy.getValueProvider(dateFormat);
 
-    private void addDateType(EffectiveTableColumn tableColumn) {
-        addTextColumn(tableColumn);
+        ColumnConfig<Integer, Date> config = new ColumnConfig<>(valueProvider);
+        config.setHeader(tableColumn.getLabel());
+        config.setCell(new DateCell(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)));
+        columnConfigs.add(config);
+
+        DateFilter<Integer> filter = new DateFilter<>(valueProvider);
+        filters.add(filter);
+
     }
 
+
+    private void addMultiEnumColumn(EffectiveTableColumn tableColumn, MultiEnumFormat multiEnumFormat) {
+        // Add a single, comma-delimited list for now
+        ValueProvider<Integer, String> valueProvider = proxy.getValueProvider(tableColumn.getId(), multiEnumFormat.createRenderer());
+
+        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
+        config.setHeader(tableColumn.getLabel());
+        columnConfigs.add(config);
+
+        addEnumFilter(multiEnumFormat.getEnumType(), valueProvider);
+
+    }
+
+    private void addGeoPointColumn(EffectiveTableColumn columnModel, GeoPointFormat format) {
+        // Add a single, comma-delimited list for now
+        ValueProvider<Integer, Double> latProvider =
+                proxy.getValueProvider(format.getLatitudeId(), format.createLatitudeRenderer());
+        ValueProvider<Integer, Double> lngProvider =
+                proxy.getValueProvider(format.getLongitudeId(), format.createLatitudeRenderer());
+
+        int latitudeColumnIndex = columnConfigs.size();
+
+        ColumnConfig<Integer, Double> latitudeConfig = new ColumnConfig<>(latProvider);
+        latitudeConfig.setHeader(I18N.CONSTANTS.latitude());
+        columnConfigs.add(latitudeConfig);
+
+        ColumnConfig<Integer, Double> longitudeConfig = new ColumnConfig<>(lngProvider);
+        longitudeConfig.setHeader(I18N.CONSTANTS.longitude());
+        columnConfigs.add(longitudeConfig);
+
+        HeaderGroupConfig groupConfig = new HeaderGroupConfig(SafeHtmlUtils.fromString(columnModel.getLabel()), 1, 2);
+        groupConfig.setRow(0);
+        groupConfig.setColumn(latitudeColumnIndex);
+
+        headerGroupConfigs.add(groupConfig);
+    }
+
+
+
     public ColumnModel<Integer> buildColumnModel() {
-        return new ColumnModel<>(columnConfigs);
+        ColumnModel<Integer> cm = new ColumnModel<>(columnConfigs);
+
+        for (HeaderGroupConfig headerGroupConfig : headerGroupConfigs) {
+            cm.addHeaderGroup(headerGroupConfig.getRow(), headerGroupConfig.getColumn(), headerGroupConfig);
+        }
+
+        return cm;
     }
 
     public List<Filter<Integer, ?>> getFilters() {

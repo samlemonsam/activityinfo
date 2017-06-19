@@ -94,7 +94,9 @@ public class ColumnModel {
         if(!object.get("id").isJsonNull()) {
             columnModel.setId(object.get("id").getAsString());
         }
-        columnModel.setExpression(object.get("expression").getAsString());
+        if(object.get("expression").isJsonPrimitive()) {
+            columnModel.setExpression(object.get("expression").getAsString());
+        }
         return columnModel;
     }
 

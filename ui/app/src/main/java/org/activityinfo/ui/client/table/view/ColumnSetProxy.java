@@ -6,7 +6,9 @@ import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
 import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoadResultBean;
+import org.activityinfo.analysis.table.ColumnRenderer;
 import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.SimpleColumnFormat;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer>> {
+
 
 
     private class PendingRequest {
@@ -43,12 +46,14 @@ class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer
         }
     }
 
-    private static abstract class ColumnValueProvider<T> implements ValueProvider<Integer, T> {
-        protected final String id;
-        protected ColumnView view;
+    private static class ValueProviderProxy<T> implements ValueProvider<Integer, T> {
 
-        public ColumnValueProvider(String id) {
+        private String id;
+        private ColumnRenderer<T> renderer;
+
+        public ValueProviderProxy(String id, ColumnRenderer<T> renderer) {
             this.id = id;
+            this.renderer = renderer;
         }
 
         @Override
@@ -57,41 +62,20 @@ class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer
         }
 
         @Override
+        public T getValue(Integer rowIndex) {
+            return renderer.render(rowIndex);
+        }
+
+        @Override
         public final void setValue(Integer object, T value) {
         }
     }
 
-    private static class StringValueProvider extends ColumnValueProvider<String> {
-
-        public StringValueProvider(String id) {
-            super(id);
-        }
-
-        @Override
-        public String getValue(Integer index) {
-            return view.getString(index);
-        }
-    }
-
-    private static class DoubleValueProvider extends ColumnValueProvider<Double> {
-        public DoubleValueProvider(String id) {
-            super(id);
-        }
-
-        @Override
-        public Double getValue(Integer index) {
-            double value = view.getDouble(index);
-            if(Double.isNaN(value)) {
-                return null;
-            }
-            return value;
-        }
-    }
 
     private ColumnSet columnSet;
     private PendingRequest pendingRequest;
 
-    private final List<ColumnValueProvider> valueProviders = new ArrayList<>();
+    private final List<ValueProviderProxy> valueProviders = new ArrayList<>();
 
     @Override
     public void load(PagingLoadConfig loadConfig, AsyncCallback<PagingLoadResult<Integer>> callback) {
@@ -113,8 +97,8 @@ class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer
     public boolean push(ColumnSet columnSet) {
         this.columnSet = columnSet;
 
-        for (ColumnValueProvider valueProvider : valueProviders) {
-            valueProvider.view = columnSet.getColumnView(valueProvider.id);
+        for (ValueProviderProxy valueProvider : valueProviders) {
+            valueProvider.renderer.updateColumnSet(columnSet);
         }
 
         if(pendingRequest != null) {
@@ -125,24 +109,22 @@ class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer
         return false;
     }
 
-    private <T> ColumnValueProvider<T> addProvider(ColumnValueProvider<T> provider) {
+    public <T> ValueProvider<Integer, T> getValueProvider(String id, ColumnRenderer<T> renderer) {
         if(columnSet != null) {
-            provider.view = columnSet.getColumnView(provider.id);
+            renderer.updateColumnSet(columnSet);
         }
+        ValueProviderProxy provider = new ValueProviderProxy(id, renderer);
         valueProviders.add(provider);
+
         return provider;
+    }
+
+    public <T> ValueProvider<Integer, T> getValueProvider(SimpleColumnFormat<T> format) {
+        return getValueProvider(format.getId(), format.createRenderer());
     }
 
     public boolean isLoaded() {
         return columnSet != null;
-    }
-
-    public ValueProvider<Integer, String> stringValueProvider(String columnId) {
-        return addProvider(new StringValueProvider(columnId));
-    }
-
-    public ValueProvider<Integer, Double> doubleValueProvider(String columnId) {
-        return addProvider(new DoubleValueProvider(columnId));
     }
 
     public ResourceId getRecordId(int rowIndex) {

@@ -6,11 +6,14 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.type.FieldType;
 
+import java.util.List;
+
 public class EffectiveTableColumn {
 
     private TableColumn model;
     private String label;
     private ParsedFormula formula;
+    private ColumnFormat format;
 
     public EffectiveTableColumn(FormTree formTree, TableColumn model) {
         this.model = model;
@@ -20,6 +23,7 @@ public class EffectiveTableColumn {
         } else {
             this.label = formula.getLabel();
         }
+        format = ColumnFormatFactory.create(model.getId(), formula);
     }
 
     public FieldType getType() {
@@ -34,11 +38,15 @@ public class EffectiveTableColumn {
         return label;
     }
 
-    public ColumnModel getQueryModel() {
-        return new ColumnModel().setId(getId()).setExpression(formula.getFormula());
+    public List<ColumnModel> getQueryModel() {
+        return format.getColumnModels();
     }
 
     public boolean isValid() {
         return formula.isValid();
+    }
+
+    public <T> T accept(TableColumnVisitor<T> visitor) {
+        return format.accept(this, visitor);
     }
 }

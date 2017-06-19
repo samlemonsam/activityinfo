@@ -153,6 +153,7 @@ public class HttpBus {
     }
 
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
+
         // We consider the version range request to be immutable, as old versions
         // don't change, so refeching shouldn't be necessary
         return get(new FormMetadataRequest(formId), Predicates.alwaysFalse());
