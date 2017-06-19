@@ -19,7 +19,7 @@ public class TextWidget implements FieldWidget {
     }
 
     private FieldInput input() {
-        String value = field.getValue();
+        String value = field.getText();
         if(Strings.isNullOrEmpty(value)) {
             return FieldInput.EMPTY;
         } else {

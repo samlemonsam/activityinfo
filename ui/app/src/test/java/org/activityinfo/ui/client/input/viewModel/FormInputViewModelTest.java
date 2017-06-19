@@ -117,7 +117,7 @@ public class FormInputViewModelTest {
     }
 
     @Test
-    public void testPersistance() {
+    public void testPersistence() {
 
         TestingFormStore store = new TestingFormStore();
 
@@ -137,7 +137,6 @@ public class FormInputViewModelTest {
         // Now build the update transaction and save!
         Promise<Void> completed = store.updateRecords(viewModel.buildTransaction());
         assertThat(completed.getState(), equalTo(Promise.State.FULFILLED));
-
     }
 
 
@@ -161,6 +160,4 @@ public class FormInputViewModelTest {
     private FormTree fetchTree(TestingFormStore store, ResourceId formId) {
         return ObservableTesting.connect(store.getFormTree(formId)).assertLoaded();
     }
-
-
 }
