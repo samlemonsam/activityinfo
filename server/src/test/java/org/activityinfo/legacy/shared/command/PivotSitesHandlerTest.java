@@ -68,7 +68,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     private List<Bucket> buckets;
     private Dimension partnerDim;
     private ValueType valueType = ValueType.INDICATOR;
-    private boolean pointsRequested;
 
     private static final int OWNER_USER_ID = 1;
     private static final int NB_BENEFICIARIES_ID = 1;
@@ -1034,7 +1033,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     }
 
     private void withPoints() {
-        pointsRequested = true;
     }
 
     private void withAttributeGroupDim() {
