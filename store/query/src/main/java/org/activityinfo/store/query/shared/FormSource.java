@@ -7,6 +7,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Maybe;
 
 /**
  * Source of form data and metadata for analysis components
@@ -15,7 +16,7 @@ public interface FormSource {
 
     Observable<FormTree> getFormTree(ResourceId formId);
 
-    Observable<FormRecord> getRecord(RecordRef recordRef);
+    Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef);
 
     Observable<ColumnSet> query(QueryModel queryModel);
 

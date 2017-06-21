@@ -5,6 +5,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -32,6 +33,7 @@ public class FormInputViewModelBuilder {
     private FormStore formStore;
     private final FormTree formTree;
     private final FormEvalContext evalContext;
+    private Optional<FormInstance> existingRecord;
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
@@ -42,11 +44,18 @@ public class FormInputViewModelBuilder {
      */
     private Map<ResourceId, ReferenceChoices> referenceChoices = new HashMap<>();
 
-
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
+        this(formStore, formTree, Optional.empty());
+    }
+    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, FormRecord existingRecord) {
+        this(formStore, formTree, Optional.of(existingRecord));
+    }
+
+    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, Optional<FormRecord> existingRecord) {
         this.formStore = formStore;
         this.formTree = formTree;
         this.evalContext = new FormEvalContext(formTree.getRootFormClass());
+        this.existingRecord = existingRecord.map(r -> FormInstance.toFormInstance(formTree.getRootFormClass(), r));
 
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.isSubForm()) {
@@ -106,6 +115,12 @@ public class FormInputViewModelBuilder {
             if(node.getType().isUpdatable()) {
                 FieldInput fieldInput = inputModel.get(node.getFieldId());
                 switch (fieldInput.getState()) {
+                    case UNTOUCHED:
+                        if(existingRecord.isPresent()) {
+                            record.set(node.getFieldId(), existingRecord.get().get(node.getFieldId()));
+                        }
+                        break;
+
                     case VALID:
                         record.set(node.getFieldId(), fieldInput.getValue());
                         break;

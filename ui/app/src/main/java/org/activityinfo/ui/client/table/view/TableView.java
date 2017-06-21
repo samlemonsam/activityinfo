@@ -4,25 +4,15 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.job.ExportFormJob;
-import org.activityinfo.model.job.ExportResult;
-import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
-import org.activityinfo.ui.client.input.view.FormDialog;
 import org.activityinfo.ui.client.store.FormStore;
-import org.activityinfo.ui.client.table.ColumnDialog;
 
 import java.util.logging.Logger;
 
@@ -40,7 +30,6 @@ public class TableView implements IsWidget {
     private ContentPanel panel;
     private final BorderLayoutContainer container;
 
-    private ToolBar toolBar;
     private TableGrid grid;
 
     private IsWidget errorWidget;
@@ -60,43 +49,12 @@ public class TableView implements IsWidget {
 
         this.viewModel = viewModel;
 
-        TextButton newButton = new TextButton(I18N.CONSTANTS.newText());
-        newButton.addSelectHandler(this::onNewRecordClicked);
-
-        TextButton removeButton = new TextButton(I18N.CONSTANTS.remove());
-        removeButton.addSelectHandler(this::onDeleteRecordClicked);
-
-        TextButton editButton = new TextButton(I18N.CONSTANTS.edit());
-        editButton.addSelectHandler(this::onEditRecordClicked);
-
-        TextButton printButton = new TextButton(I18N.CONSTANTS.printForm());
-        printButton.addSelectHandler(this::onPrintRecordClicked);
-
-        TextButton importButton = new TextButton(I18N.CONSTANTS.importText());
-        importButton.addSelectHandler(this::onImportClicked);
-
-        TextButton exportButton = new TextButton(I18N.CONSTANTS.export());
-        exportButton.addSelectHandler(this::onExportClicked);
-
-        TextButton columnsButton = new TextButton(I18N.CONSTANTS.chooseColumns());
-        columnsButton.addSelectHandler(this::onChooseColumnsSelected);
-
-        OfflineStatusButton offlineButton = new OfflineStatusButton(formStore, viewModel.getFormId());
-
-        this.toolBar = new ToolBar();
-        toolBar.add(newButton);
-        toolBar.add(editButton);
-        toolBar.add(removeButton);
-        toolBar.add(importButton);
-        toolBar.add(exportButton);
-        toolBar.add(columnsButton);
-        toolBar.add(offlineButton);
+        TableToolBar toolBar = new TableToolBar(formStore, viewModel);
 
         center = new VerticalLayoutContainer();
         center.add(toolBar, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
 
         this.container = new BorderLayoutContainer();
-
 
         sidePanel = new SidePanel(viewModel);
         BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
@@ -134,47 +92,6 @@ public class TableView implements IsWidget {
 
 
 
-    private void onNewRecordClicked(SelectEvent event) {
-        FormDialog dialog = new FormDialog(formStore, viewModel.getFormId());
-        dialog.show();
-    }
-
-    private void onEditRecordClicked(SelectEvent event) {
-
-    }
-
-    private void onPrintRecordClicked(SelectEvent event) {
-
-    }
-
-    private void onDeleteRecordClicked(SelectEvent event) {
-
-
-    }
-
-    private void onImportClicked(SelectEvent event) {
-
-    }
-
-
-    private void onExportClicked(SelectEvent event) {
-        TableModel tableModel = viewModel.getTableModel();
-        ExportFormJob exportFormJob = new ExportFormJob(tableModel);
-
-        Observable<JobStatus<ExportFormJob, ExportResult>> jobStatus = formStore.startJob(exportFormJob);
-        ExportJobDialog dialog = new ExportJobDialog(jobStatus);
-        dialog.show();
-
-
-    }
-
-
-    private void onChooseColumnsSelected(SelectEvent event) {
-        if(viewModel.getEffectiveTable().isLoaded()) {
-            ColumnDialog dialog = new ColumnDialog(viewModel.getEffectiveTable().get());
-            dialog.show();
-        }
-    }
 
     @Override
     public Widget asWidget() {
@@ -198,6 +115,7 @@ public class TableView implements IsWidget {
             }
         }
     }
+
 
     private void showErrorState(FormTree.State rootFormState) {
 

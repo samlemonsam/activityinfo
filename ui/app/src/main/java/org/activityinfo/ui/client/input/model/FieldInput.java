@@ -20,8 +20,25 @@ import org.activityinfo.model.type.FieldValue;
 public class FieldInput {
 
     public enum State {
+
+        /**
+         * The user has not entered any input for this field
+         */
+        UNTOUCHED,
+
+        /**
+         * The field has been set to empty by the user
+         */
         EMPTY,
+
+        /**
+         * The user has entered invalid input
+         */
         INVALID,
+
+        /**
+         * The user has entered a valid value
+         */
         VALID;
     }
 
@@ -39,6 +56,8 @@ public class FieldInput {
     public static final FieldInput INVALID_INPUT = new FieldInput(State.INVALID, null);
 
     public static final FieldInput EMPTY = new FieldInput(State.EMPTY, null);
+
+    public static final FieldInput UNTOUCHED = new FieldInput(State.UNTOUCHED, null);
 
     public FieldInput(FieldValue value) {
         if(value == null) {
@@ -60,6 +79,7 @@ public class FieldInput {
     }
 
     public FieldValue getValue() {
+        assert state == State.VALID;
         return fieldValue;
     }
 

@@ -17,6 +17,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
@@ -117,18 +118,18 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormRecord> getRecord(String formId, String recordId) {
+    public Promise<Maybe<FormRecord>> getRecord(String formId, String recordId) {
         try {
             FormCatalog catalog = newCatalog();
-            Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
-            if(!collection.isPresent()) {
-                throw new RuntimeException("No such form " + formId);
+            Optional<FormStorage> storage = catalog.getForm(ResourceId.valueOf(formId));
+            if(!storage.isPresent()) {
+                return Promise.resolved(Maybe.<FormRecord>notFound());
             }
-            Optional<FormRecord> record = collection.get().get(ResourceId.valueOf(recordId));
+            Optional<FormRecord> record = storage.get().get(ResourceId.valueOf(recordId));
             if(!record.isPresent()) {
-                throw new RuntimeException("No such recod " + recordId + " in form " + formId);
+                return Promise.resolved(Maybe.<FormRecord>notFound());
             }
-            return Promise.resolved(record.get());
+            return Promise.resolved(Maybe.of(record.get()));
 
         } catch (Exception e) {
             return Promise.rejected(e);

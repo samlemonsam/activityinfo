@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +102,10 @@ public class FormRecord {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public RecordRef getRef() {
+        return new RecordRef(ResourceId.valueOf(formId), ResourceId.valueOf(recordId));
     }
 
     public static class Builder {

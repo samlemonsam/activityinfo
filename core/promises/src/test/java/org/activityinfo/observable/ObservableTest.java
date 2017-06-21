@@ -3,6 +3,8 @@ package org.activityinfo.observable;
 import com.google.common.base.Function;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
@@ -116,7 +118,36 @@ public class ObservableTest {
         nameObserver.assertChangeFiredOnce();
         assertThat(name.get(), equalTo("name42"));
     }
-    
+
+    @Test
+    public void joined() {
+
+        StatefulValue<Integer> x = new StatefulValue<>(0);
+        Observable<Integer> abs = x.join(new Function<Integer, Observable<Integer>>() {
+            @Override
+            public Observable<Integer> apply(Integer integer) {
+                return Observable.just(Math.abs(integer));
+            }
+        });
+
+        Observable<Double> sqrt = abs.join(new Function<Integer, Observable<Double>>() {
+            @Nullable
+            @Override
+            public Observable<Double> apply(@Nullable Integer integer) {
+               return Observable.just(Math.sqrt(integer));
+            }
+        });
+
+        CountingObserver<Double> sqrtObserver = new CountingObserver<>();
+        sqrt.subscribe(sqrtObserver);
+
+        x.updateIfNotEqual(-16);
+
+        assertThat(sqrtObserver.countChanges(), equalTo(2));
+
+
+    }
+
     @Test
     public void chainedConnection() {
         final ObservableStub<Integer> id = new ObservableStub<>(1);

@@ -1,5 +1,7 @@
 package org.activityinfo.ui.client.input.viewModel;
 
+import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -14,13 +16,20 @@ import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.store.TestingFormStore;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class FormInputViewModelTest {
+
+    @Before
+    public void setup() {
+        LocaleProxy.initialize();
+    }
 
     @Test
     public void testSurveyRelevance() {
@@ -64,6 +73,25 @@ public class FormInputViewModelTest {
     }
 
     @Test
+    public void testSurveyEdit() {
+
+        TestingFormStore store = new TestingFormStore();
+
+        RecordRef recordRef = Survey.getRecordRef(5);
+
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store,
+                fetchTree(store, Survey.FORM_ID),
+                fetchRecord(store, recordRef));
+
+        FormInputModel inputModel = new FormInputModel(new RecordRef(Survey.FORM_ID, ResourceId.generateId()));
+
+        FormInputViewModel viewModel = builder.build(inputModel);
+
+        assertTrue(viewModel.isValid());
+
+    }
+
+    @Test
     public void testReferenceFields() {
 
         TestingFormStore store = new TestingFormStore();
@@ -79,7 +107,7 @@ public class FormInputViewModelTest {
         ReferenceChoiceSet choiceSet = choiceView.assertLoaded();
 
         assertThat(choiceSet.getCount(), equalTo(IntakeForm.ROW_COUNT));
-        assertThat(choiceSet.getLabel(0), equalTo("c0"));
+        assertThat(choiceSet.getLabel(0), equalTo("00001"));
     }
 
     @Test
@@ -160,4 +188,10 @@ public class FormInputViewModelTest {
     private FormTree fetchTree(TestingFormStore store, ResourceId formId) {
         return ObservableTesting.connect(store.getFormTree(formId)).assertLoaded();
     }
+
+
+    private FormRecord fetchRecord(TestingFormStore store, RecordRef recordRef) {
+        return ObservableTesting.connect(store.getRecord(recordRef)).assertLoaded().get();
+    }
+
 }

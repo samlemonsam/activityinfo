@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
@@ -14,7 +15,9 @@ import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.testing.TestingCatalog;
 
 import java.util.ArrayDeque;
@@ -58,6 +61,9 @@ public class TestingFormStore implements FormStore {
         testingCatalog = new TestingCatalog();
     }
 
+    public TestingCatalog getCatalog() {
+        return testingCatalog;
+    }
 
 
     public void delayLoading() {
@@ -118,8 +124,18 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Observable<FormRecord> getRecord(RecordRef recordRef) {
-        return maybeExecute(() -> testingCatalog.getForm(recordRef.getFormId()).get().get(recordRef.getRecordId()).get());
+    public Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef) {
+        return maybeExecute(() -> {
+            Optional<FormStorage> storage = testingCatalog.getForm(recordRef.getFormId());
+            if(!storage.isPresent()) {
+                return Maybe.notFound();
+            }
+            Optional<FormRecord> record = storage.get().get(recordRef.getRecordId());
+            if(!record.isPresent()) {
+                return Maybe.notFound();
+            }
+            return Maybe.of(record.get());
+        });
     }
 
     @Override

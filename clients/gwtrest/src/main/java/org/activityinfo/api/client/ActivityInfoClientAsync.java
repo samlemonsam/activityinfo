@@ -12,6 +12,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public interface ActivityInfoClientAsync {
      * @param formId Id of the Form
      * @param recordId Id of the record
      */
-    Promise<FormRecord> getRecord(String formId, String recordId);
+    Promise<Maybe<FormRecord>> getRecord(String formId, String recordId);
 
     /**
      * Update a Form Record

@@ -11,6 +11,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.FormScanCache;
 import org.activityinfo.store.query.impl.FormSupervisorAdapter;
@@ -78,7 +79,7 @@ public class FormSourceSyncImpl implements FormSource {
     }
 
     @Override
-    public Observable<FormRecord> getRecord(RecordRef recordRef) {
+    public Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef) {
         return Observable.loading();
     }
 

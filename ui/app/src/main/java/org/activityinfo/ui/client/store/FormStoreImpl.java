@@ -14,6 +14,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.CatalogRequest;
 import org.activityinfo.ui.client.store.http.HttpBus;
@@ -73,11 +74,14 @@ public class FormStoreImpl implements FormStore {
     }
 
     @Override
-    public Observable<FormRecord> getRecord(RecordRef recordRef) {
-        Observable<FormRecord> online = httpBus.get(new RecordRequest(recordRef));
-        Observable<FormRecord> offline = offlineStore.getCachedRecord(recordRef);
+    public Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef) {
+        Observable<Maybe<FormRecord>> online = httpBus.get(new RecordRequest(recordRef));
 
-        return new Best<>(online, offline, (x, y) -> 0);
+
+//        Observable<Maybe<FormRecord>> offline = offlineStore.getCachedRecord(recordRef);
+//        return new Best<>(online, offline, (x, y) -> 0);
+
+        return online;
     }
 
     @Override

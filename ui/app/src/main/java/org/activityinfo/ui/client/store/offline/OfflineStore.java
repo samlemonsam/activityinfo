@@ -10,6 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;
@@ -103,7 +104,7 @@ public class OfflineStore {
         });
     }
 
-    public Observable<FormRecord> getCachedRecord(RecordRef recordRef) {
+    public Observable<Maybe<FormRecord>> getCachedRecord(RecordRef recordRef) {
         return new CachedRecord(recordRef, executor);
     }
 

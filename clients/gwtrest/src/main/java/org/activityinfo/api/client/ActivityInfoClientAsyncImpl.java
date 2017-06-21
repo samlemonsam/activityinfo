@@ -22,6 +22,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
+
     private static final Logger LOGGER = Logger.getLogger(ActivityInfoClientAsync.class.getName());
 
     private static final JsonParser JSON_PARSER = new JsonParser();
@@ -71,17 +73,25 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param formId Id of the Form
      * @param recordId Id of the record
      */
-    public Promise<FormRecord> getRecord(String formId, String recordId) {
+    public Promise<Maybe<FormRecord>> getRecord(final String formId, final String recordId) {
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         urlBuilder.append("/form");
         urlBuilder.append("/").append(formId);
         urlBuilder.append("/record");
         urlBuilder.append("/").append(recordId);
 
-        return get(urlBuilder.toString(), new Function<JsonElement, FormRecord>() {
+        return getRaw(urlBuilder.toString(), new Function<Response, Maybe<FormRecord>>() {
             @Override
-            public FormRecord apply(JsonElement jsonElement) {
-                return FormRecord.fromJson(jsonElement);
+            public Maybe<FormRecord> apply(Response response) {
+                if(response.getStatusCode() == 200) {
+                    return Maybe.of(FormRecord.fromJson(JSON_PARSER.parse(response.getText())));
+                } else if(response.getStatusCode() == 401) {
+                    return Maybe.forbidden();
+                } else if(response.getStatusCode() == 404) {
+                    return Maybe.notFound();
+                } else {
+                    throw new ApiException(response.getStatusCode());
+                }
             }
         });
     }
@@ -289,23 +299,17 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
 
-    private <R> Promise<R> get(final String url, final Function<JsonElement, R> parser) {
+    private <R> Promise<R> getRaw(final String url, final Function<Response, R> parser) {
         final Promise<R> result = new Promise<>();
         RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, url);
         requestBuilder.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
-                if(response.getStatusCode() == 200) {
-                    try {
-                        JsonElement jsonResult = JSON_PARSER.parse(response.getText());
-                        result.resolve(parser.apply(jsonResult));
-                    } catch (Exception e) {
-                        result.reject(e);
-                    }
-                    return;
+                try {
+                    result.resolve(parser.apply(response));
+                } catch (Exception e) {
+                    result.reject(e);
                 }
-                LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getStatusText());
-                result.reject(new ApiException(response.getStatusCode()));
             }
 
             @Override
@@ -321,6 +325,20 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         }
         return result;
     }
+
+    private <R> Promise<R> get(final String url, final Function<JsonElement, R> parser) {
+        return getRaw(url, new Function<Response, R>() {
+            @Override
+            public R apply(Response response) {
+                if(response.getStatusCode() == 200) {
+                    return parser.apply(JSON_PARSER.parse(response.getText()));
+                } else {
+                    throw new ApiException(response.getStatusCode());
+                }
+            }
+        });
+    }
+
 
     private Promise<Void> post(RequestBuilder.Method method, final String url, String jsonRequest) {
         return post(method, url, jsonRequest, new Function<String, Void>() {

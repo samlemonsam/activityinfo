@@ -6,6 +6,7 @@ public class CountingObserver<T> implements Observer<T> {
 
     @Override
     public void onChange(Observable<T> observable) {
+        System.out.println("Changed.");
         changeCount++;
     }
 

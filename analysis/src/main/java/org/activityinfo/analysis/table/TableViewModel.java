@@ -10,9 +10,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormSource;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,11 +42,14 @@ public class TableViewModel {
             if (!selection.isPresent()) {
                 return Observable.just(Optional.absent());
             }
-            return formStore.getRecord(selection.get()).transform(new Function<FormRecord, Optional<FormRecord>>() {
-                @Nullable
+            return formStore.getRecord(selection.get()).transform(new Function<Maybe<FormRecord>, Optional<FormRecord>>() {
                 @Override
-                public Optional<FormRecord> apply(@Nullable FormRecord reference) {
-                    return Optional.of(reference);
+                public Optional<FormRecord> apply(Maybe<FormRecord> record) {
+                    if(record.isVisible()) {
+                        return Optional.of(record.get());
+                    } else {
+                        return Optional.absent();
+                    }
                 }
             });
         });
@@ -57,7 +60,15 @@ public class TableViewModel {
     }
 
     public Observable<Optional<RecordRef>> getSelectedRecordRef() {
-        return selectedRecordRef;
+        // Don't actually expose the internal selection state ...
+        // the *effective* selection is a product of our model state and the record status (deleted or not)
+        return getSelectedRecord().transform(record -> {
+            if(record.isPresent()) {
+                return Optional.of(record.get().getRef());
+            } else {
+                return Optional.absent();
+            }
+        });
     }
 
     public Observable<Optional<FormRecord>> getSelectedRecord() {
@@ -83,6 +94,7 @@ public class TableViewModel {
         }
         return effectiveSubTable;
     }
+
 
     public ResourceId getFormId() {
         return formId;

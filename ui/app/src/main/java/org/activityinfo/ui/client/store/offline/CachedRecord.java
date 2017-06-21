@@ -4,10 +4,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Maybe;
 
 import java.util.Optional;
 
-public class CachedRecord extends Observable<FormRecord> {
+public class CachedRecord extends Observable<Maybe<FormRecord>> {
 
     private final RecordRef recordRef;
     private final IDBExecutor executor;
@@ -49,8 +50,8 @@ public class CachedRecord extends Observable<FormRecord> {
     }
 
     @Override
-    public FormRecord get() {
+    public Maybe<FormRecord> get() {
         assert record != null : "not loaded";
-        return record;
+        return Maybe.of(record);
     }
 }

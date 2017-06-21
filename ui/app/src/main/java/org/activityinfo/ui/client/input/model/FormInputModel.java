@@ -37,7 +37,7 @@ public class FormInputModel {
     public FieldInput get(ResourceId fieldId) {
         FieldInput fieldInput = fieldInputs.get(fieldId);
         if(fieldInput == null) {
-            return FieldInput.EMPTY;
+            return FieldInput.UNTOUCHED;
         }
         return fieldInput;
     }

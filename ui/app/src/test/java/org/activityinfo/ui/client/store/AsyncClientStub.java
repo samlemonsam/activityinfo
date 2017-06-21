@@ -14,6 +14,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.NullFormScanCache;
@@ -47,8 +48,17 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormRecord> getRecord(String formId, String recordId) {
-        return Promise.rejected(new UnsupportedOperationException());
+    public Promise<Maybe<FormRecord>> getRecord(String formId, String recordId) {
+
+        if(!connected) {
+            return offlineResult();
+        }
+        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        if(!form.isPresent()) {
+            return Promise.resolved(Maybe.notFound());
+        }
+
+        return Promise.resolved(Maybe.fromOptional(form.get().get(ResourceId.valueOf(recordId))));
     }
 
     @Override
@@ -111,7 +121,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
 
         Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
         if(!form.isPresent()) {
-            metadata.setDeleted(false);
+            metadata.setDeleted(true);
         } else {
             metadata.setSchema(form.get().getFormClass());
         }

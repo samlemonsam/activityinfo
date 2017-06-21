@@ -104,6 +104,10 @@ public class TestingCatalog implements FormCatalog {
         updater.execute(transaction.build());
     }
 
+    public void deleteForm(ResourceId formId) {
+        formMap.remove(formId);
+    }
+
     public UpdateBuilder addNew(ResourceId formId) {
         TestingFormStorage form = formMap.get(formId);
         if(form == null) {

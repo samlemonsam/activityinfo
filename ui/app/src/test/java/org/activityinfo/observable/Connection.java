@@ -7,7 +7,7 @@ public class Connection<T> {
 
     private int changeCount;
 
-    Connection(Observable<T> observable) {
+    public Connection(Observable<T> observable) {
         this.observable = observable;
         this.subscription = observable.subscribe(this::onChanged);
     }

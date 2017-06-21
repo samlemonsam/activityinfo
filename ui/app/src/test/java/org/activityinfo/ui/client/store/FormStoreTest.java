@@ -8,6 +8,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Connection;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
@@ -106,7 +107,7 @@ public class FormStoreTest {
 
         // Should be able to view the form class and a record
         Connection<FormTree> schemaView = connect(formStore.getFormTree(Survey.FORM_ID));
-        Connection<FormRecord> recordView = connect(formStore.getRecord(Survey.getRecordRef(0)));
+        Connection<Maybe<FormRecord>> recordView = connect(formStore.getRecord(Survey.getRecordRef(0)));
 
         runScheduled();
 

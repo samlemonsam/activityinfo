@@ -43,8 +43,9 @@ public class FormInputView implements IsWidget, InputHandler {
         this.formStore = formStore;
 
         inputModel = new FormInputModel(new RecordRef(formId, ResourceId.generateSubmissionId(formId)));
-
         this.formTree = formStore.getFormTree(formId);
+
+
         this.formTree.subscribe(this::onTreeChanged);
 
         container = new VerticalLayoutContainer();
