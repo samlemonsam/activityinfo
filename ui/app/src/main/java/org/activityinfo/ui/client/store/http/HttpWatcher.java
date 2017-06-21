@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.store.http;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import org.activityinfo.ui.client.store.FormChangeEvent;
+import org.activityinfo.ui.client.store.tasks.Watcher;
 
 
 public class HttpWatcher implements Watcher {

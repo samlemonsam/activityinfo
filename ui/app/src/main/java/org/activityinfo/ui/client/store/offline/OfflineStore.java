@@ -12,8 +12,9 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.tasks.NullWatcher;
+import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,9 +71,12 @@ public class OfflineStore {
      * Try to load a cached FormSchema from the offline store.
      */
     public Observable<FormMetadata> getCachedMetadata(ResourceId formId) {
-        return new CachedMetdata(executor, formId);
+        return new ObservableTask<>(new MetadataQuery(executor, formId), NullWatcher.INSTANCE);
     }
 
+    public Observable<Maybe<FormRecord>> getCachedRecord(RecordRef recordRef) {
+        return new ObservableTask<>(new RecordQuery(executor, recordRef), NullWatcher.INSTANCE);
+    }
 
     /**
      * Updates whether a form should be available offline.
@@ -82,9 +86,8 @@ public class OfflineStore {
         .readwrite()
         .query(tx -> {
             return tx.values().getOfflineForms().then(new Function<Set<ResourceId>, Set<ResourceId>>() {
-                @Nullable
                 @Override
-                public Set<ResourceId> apply(@Nullable Set<ResourceId> current) {
+                public Set<ResourceId> apply(Set<ResourceId> current) {
                     Set<ResourceId> updated = new HashSet<>(current);
                     if (offline) {
                         updated.add(formId);
@@ -103,11 +106,6 @@ public class OfflineStore {
             }
         });
     }
-
-    public Observable<Maybe<FormRecord>> getCachedRecord(RecordRef recordRef) {
-        return new CachedRecord(recordRef, executor);
-    }
-
 
     /**
      * @return the set of forms that should be made available offline.

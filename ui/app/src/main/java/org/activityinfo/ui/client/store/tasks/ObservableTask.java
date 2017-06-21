@@ -1,14 +1,19 @@
-package org.activityinfo.ui.client.store.http;
+package org.activityinfo.ui.client.store.tasks;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.observable.Observable;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
  * Long running task whose result is observable.
  *
  */
-class ObservableTask<T> extends Observable<T> {
+public class ObservableTask<T> extends Observable<T> {
+
+    private static final Logger LOGGER = Logger.getLogger(ObservableTask.class.getName());
 
     private final Task<T> task;
     private final Watcher watcher;
@@ -57,7 +62,7 @@ class ObservableTask<T> extends Observable<T> {
         execution = task.start(new AsyncCallback<T>() {
             @Override
             public void onFailure(Throwable caught) {
-
+                LOGGER.log(Level.SEVERE, "Execution of task " + task + " failed" , caught);
             }
 
             @Override

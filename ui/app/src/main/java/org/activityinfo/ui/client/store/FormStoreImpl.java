@@ -41,20 +41,6 @@ public class FormStoreImpl implements FormStore {
     }
 
     @Override
-    public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
-        Observable<FormMetadata> online = httpBus.getFormMetadata(formId);
-        Observable<FormMetadata> offline = offlineStore.getCachedMetadata(formId);
-
-        return offlineStore.getCurrentSnapshot().join(snapshot -> {
-            if(snapshot.isFormCached(formId)) {
-                return offline;
-            } else {
-                return online;
-            }
-        });
-    }
-
-    @Override
     public Promise<Void> deleteForm(ResourceId formId) {
         throw new UnsupportedOperationException();
     }
@@ -79,15 +65,28 @@ public class FormStoreImpl implements FormStore {
         return httpBus.get(new CatalogRequest(parentId));
     }
 
+
+    @Override
+    public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
+        return offlineStore.getCurrentSnapshot().join(snapshot -> {
+            if(snapshot.isFormCached(formId)) {
+                return offlineStore.getCachedMetadata(formId);
+            } else {
+                return httpBus.getFormMetadata(formId);
+            }
+        });
+    }
+
+
     @Override
     public Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef) {
-        Observable<Maybe<FormRecord>> online = httpBus.get(new RecordRequest(recordRef));
-
-
-//        Observable<Maybe<FormRecord>> offline = offlineStore.getCachedRecord(recordRef);
-//        return new Best<>(online, offline, (x, y) -> 0);
-
-        return online;
+        return offlineStore.getCurrentSnapshot().join(snapshot -> {
+           if(snapshot.isFormCached(recordRef.getFormId())) {
+               return offlineStore.getCachedRecord(recordRef);
+           } else {
+               return httpBus.get(new RecordRequest(recordRef));
+           }
+        });
     }
 
     @Override

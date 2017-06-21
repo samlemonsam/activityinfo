@@ -25,6 +25,9 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.ObservableFormTree;
+import org.activityinfo.ui.client.store.tasks.ObservableTask;
+import org.activityinfo.ui.client.store.tasks.Task;
+import org.activityinfo.ui.client.store.tasks.TaskExecution;
 
 import java.util.ArrayList;
 import java.util.Iterator;
