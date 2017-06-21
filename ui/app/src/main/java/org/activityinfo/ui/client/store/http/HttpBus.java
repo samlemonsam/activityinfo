@@ -26,11 +26,9 @@ import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.ObservableFormTree;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 /**
@@ -46,8 +44,27 @@ public class HttpBus {
     private EventBus eventBus = new SimpleEventBus();
 
 
+    private class RequestTask<T> implements Task<T> {
 
-    private class PendingRequest<T> implements HttpSubscription {
+        private HttpRequest<T> request;
+
+        public RequestTask(HttpRequest<T> request) {
+            this.request = request;
+        }
+
+        @Override
+        public TaskExecution start(AsyncCallback<T> callback) {
+            return HttpBus.this.submit(request, callback);
+        }
+
+        @Override
+        public int refreshInterval(T result) {
+            return request.refreshInterval(result);
+        }
+    }
+
+
+    private class PendingRequest<T> implements TaskExecution {
         private int id = nextRequestId++;
         private final HttpRequest<T> request;
         private final AsyncCallback<T> callback;
@@ -93,7 +110,7 @@ public class HttpBus {
         }
 
         @Override
-        public boolean isPending() {
+        public boolean isRunning() {
             return !cancelled && result.getState() != Promise.State.FULFILLED;
         }
 
@@ -135,7 +152,7 @@ public class HttpBus {
      * @param <T>      the type of the result.
      * @return
      */
-    public <T> HttpSubscription submit(HttpRequest<T> request, AsyncCallback<T> callback) {
+    public <T> TaskExecution submit(HttpRequest<T> request, AsyncCallback<T> callback) {
 
         PendingRequest<T> pending = new PendingRequest<>(request, callback);
         pendingRequests.add(pending);
@@ -147,12 +164,8 @@ public class HttpBus {
         return pending;
     }
 
-    private <T> Observable<T> get(HttpRequest<T> request, Predicate<FormChange> eventPredicate) {
-        return new ObservableRequest<T>(eventBus, this, request);
-    }
-
     public <T> Observable<T> get(HttpRequest<T> request) {
-        return new ObservableRequest<T>(eventBus, this, request);
+        return new ObservableTask<T>(new RequestTask<T>(request), new HttpWatcher(eventBus, request));
     }
 
     public <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>> startJob(T job) {
@@ -188,9 +201,8 @@ public class HttpBus {
 
     public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
         return client.updateRecords(transactionBuilder).then(new Function<Void, Void>() {
-            @Nullable
             @Override
-            public Void apply(@Nullable Void aVoid) {
+            public Void apply(Void aVoid) {
                 eventBus.fireEvent(new FormChangeEvent(FormChange.from(transactionBuilder)));
                 return null;
             }

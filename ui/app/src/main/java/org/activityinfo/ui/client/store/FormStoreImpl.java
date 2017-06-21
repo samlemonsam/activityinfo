@@ -45,7 +45,13 @@ public class FormStoreImpl implements FormStore {
         Observable<FormMetadata> online = httpBus.getFormMetadata(formId);
         Observable<FormMetadata> offline = offlineStore.getCachedMetadata(formId);
 
-        return new Best<>(online, offline, (x, y) -> Long.compare(x.getVersion(), y.getVersion()));
+        return offlineStore.getCurrentSnapshot().join(snapshot -> {
+            if(snapshot.isFormCached(formId)) {
+                return offline;
+            } else {
+                return online;
+            }
+        });
     }
 
     @Override
