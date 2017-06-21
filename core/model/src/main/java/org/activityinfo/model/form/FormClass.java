@@ -235,13 +235,23 @@ public class FormClass implements FormElementContainer {
     }
 
     public FormField getField(ResourceId fieldId) {
+        Optional<FormField> field = getFieldIfPresent(fieldId);
+        if(field.isPresent()) {
+            return field.get();
+        } else {
+            throw new IllegalArgumentException("No such field: " + fieldId);
+        }
+    }
+
+    public Optional<FormField> getFieldIfPresent(ResourceId fieldId) {
         for (FormField field : getFields()) {
             if (field.getId().equals(fieldId)) {
-                return field;
+                return Optional.of(field);
             }
         }
-        throw new IllegalArgumentException("No such field: " + fieldId);
+        return Optional.absent();
     }
+
 
     @Override
     public FormClass addElement(FormElement element) {

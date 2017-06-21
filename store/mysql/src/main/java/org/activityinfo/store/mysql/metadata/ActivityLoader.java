@@ -4,6 +4,7 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.cloud.sql.jdbc.internal.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -372,12 +373,21 @@ public class ActivityLoader {
         // Some partner fields have been stored to the JSON as pointing to the wrong database,
         // either because there was a bug in the past or because the databaseId was manually updated
         // in the activity table without a corresponding change to the formClass field.
-        FormField partnerField = formClass.getField(CuidAdapter.partnerField(activity.getId()));
-        if(partnerField == null) {
-            LOGGER.severe("Form " + activity.getId() + " is missing partner field.");
-            throw new IllegalStateException("Activity Form is missing partner field");
+        ResourceId partnerFieldId = CuidAdapter.partnerField(activity.getId());
+        ReferenceType expectedPartnerType = ReferenceType.single(CuidAdapter.partnerFormId(activity.getDatabaseId()));
+
+        Optional<FormField> partnerField = formClass.getFieldIfPresent(partnerFieldId);
+        if(!partnerField.isPresent()) {
+            FormField newPartnerField = new FormField(partnerFieldId);
+            newPartnerField.setType(expectedPartnerType);
+            newPartnerField.setVisible(true);
+            newPartnerField.setRequired(true);
+            newPartnerField.setLabel("Partner");
+            formClass.addElement(newPartnerField);
+
+        } else {
+            partnerField.get().setType(expectedPartnerType);
         }
-        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormId(activity.getDatabaseId())));
 
         // The (classic) pivot table components rely on a fixed fields with date1 and date2
         ResourceId startDateId = CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD);
