@@ -415,6 +415,30 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
         assertThat().thereIsOneBucketWithValue(1);
     }
 
+
+    @Test
+    public void testPartnerDimOnMonthlySiteCounts() {
+        forTotalSiteCounts();
+        withPartnerAsDimension();
+        filter.addRestriction(DimensionType.Activity, 3);
+
+        execute();
+
+        assertThat().thereIsOneBucketWithValue(1).andItsPartnerLabelIs("NRC");
+    }
+
+
+    @Test
+    public void testPartnerDimOnMonthly() {
+        withPartnerAsDimension();
+        filter.addRestriction(DimensionType.Activity, 3);
+
+        execute();
+
+        assertThat().thereIsOneBucketWithValue(0.26666).andItsPartnerLabelIs("NRC");
+    }
+
+
     @Test
     public void projects() {
 

@@ -25,6 +25,15 @@ public class PartnerDimBinding extends DimBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
+
+        // Partner field is always located on the site form
+        // for monthly reports
+        if(formTree.getRootFormId().getDomain() == CuidAdapter.MONTHLY_REPORT_FORM_CLASS) {
+            int activityId = CuidAdapter.getLegacyIdFromCuid(formTree.getRootFormId());
+            ResourceId siteFormId = CuidAdapter.activityFormClass(activityId);
+            return getColumnQuery(siteFormId);
+        }
+
         return getColumnQuery(formTree.getRootFormId());
     }
 
