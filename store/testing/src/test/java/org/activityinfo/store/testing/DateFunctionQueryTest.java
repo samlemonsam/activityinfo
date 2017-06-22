@@ -3,9 +3,9 @@ package org.activityinfo.store.testing;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormScanCache;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormScanCache;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.junit.Test;
 
 /**

@@ -21,6 +21,7 @@ public class TestSetup {
     private final FormStore formStore;
     private final StubScheduler scheduler;
     private final TestingCatalog catalog;
+    private final RecordSynchronizer synchronizer;
 
     public TestSetup() {
         catalog = new TestingCatalog();
@@ -29,12 +30,16 @@ public class TestSetup {
         httpBus = new HttpBus(client, scheduler);
         offlineStore = new OfflineStore(new IDBExecutorStub());
         formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+        synchronizer = new RecordSynchronizer(httpBus, offlineStore);
     }
 
     public FormStore getFormStore() {
         return formStore;
     }
 
+    public OfflineStore getOfflineStore() {
+        return offlineStore;
+    }
 
     public void deleteForm(ResourceId formId) {
         catalog.deleteForm(formId);
@@ -46,6 +51,10 @@ public class TestSetup {
         }
     }
 
+    public void setConnected(boolean connected) {
+        client.setConnected(connected);
+    }
+
     public <T> Connection<T> connect(Observable<T> observable) {
 
         Connection<T> connection = new Connection<>(observable);
@@ -54,4 +63,5 @@ public class TestSetup {
 
         return connection;
     }
+
 }

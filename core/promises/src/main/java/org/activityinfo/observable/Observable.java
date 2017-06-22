@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Function3;
+import org.activityinfo.promise.Promise;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -238,5 +239,30 @@ public abstract class Observable<T> {
         }
         subscription.unsubscribe();
         return collector.get(0);
+    }
+
+    public final Promise<T> once() {
+        final Promise<T> result = new Promise<>();
+        final Promise<Subscription> pendingSubscription = new Promise<>();
+        final Subscription subscription = this.subscribe(new Observer<T>() {
+            @Override
+            public void onChange(Observable<T> observable) {
+                if(observable.isLoaded()) {
+                    result.resolve(observable.get());
+
+                    if (pendingSubscription.isSettled()) {
+                        pendingSubscription.get().unsubscribe();
+                    }
+                }
+            }
+        });
+
+        if(result.isSettled()) {
+            subscription.unsubscribe();
+        } else {
+            pendingSubscription.resolve(subscription);
+        }
+
+        return result;
     }
 }

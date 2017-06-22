@@ -50,10 +50,6 @@ public class FormStoreImpl implements FormStore {
         return new ObservableFormTree(rootFormId, this::getFormMetadata, scheduler);
     }
 
-    @Override
-    public Observable<ColumnSet> query(QueryModel queryModel) {
-        return httpBus.query(queryModel);
-    }
 
     @Override
     public Observable<List<CatalogEntry>> getCatalogRoots() {
@@ -64,7 +60,6 @@ public class FormStoreImpl implements FormStore {
     public Observable<List<CatalogEntry>> getCatalogChildren(ResourceId parentId) {
         return httpBus.get(new CatalogRequest(parentId));
     }
-
 
     @Override
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
@@ -88,6 +83,38 @@ public class FormStoreImpl implements FormStore {
            }
         });
     }
+
+    @Override
+    public Observable<ColumnSet> query(QueryModel queryModel) {
+        // No support for multiple row sources -- should this still
+        // be part of the model??
+
+        if(queryModel.getRowSources().size() != 1) {
+            return Observable.loading();
+        }
+
+        ResourceId rootFormId = queryModel.getRowSources().get(0).getRootFormId();
+
+        return offlineStore.getCurrentSnapshot().join(snapshot -> {
+
+            if(snapshot.isFormCached(rootFormId)) {
+                // Snapshots by definition must include all related forms, so
+                // if the root form is included in the offline set, we can safely
+                // serve from the cache.
+
+                // First grab the FormTree, needed for the query planning...
+
+                return getFormTree(rootFormId).join(formTree -> offlineStore.query(formTree, queryModel));
+
+            } else {
+
+                // Hit the server for the query.
+
+                return httpBus.query(queryModel);
+            }
+        });
+    }
+
 
     @Override
     public void setFormOffline(ResourceId formId, boolean offline) {

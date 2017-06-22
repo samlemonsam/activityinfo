@@ -12,8 +12,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.ConstantObservable;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.ResourceStore;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
 

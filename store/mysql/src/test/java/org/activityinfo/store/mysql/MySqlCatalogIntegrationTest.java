@@ -13,9 +13,9 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.store.mysql.metadata.Activity;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

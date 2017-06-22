@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -11,7 +12,7 @@ import org.activityinfo.store.spi.*;
 
 import java.util.*;
 
-
+@GwtIncompatible
 public class TestingFormStorage implements VersionedFormStorage {
 
     private TestForm testForm;

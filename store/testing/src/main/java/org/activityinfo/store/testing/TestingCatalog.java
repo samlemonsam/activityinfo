@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -12,10 +13,10 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.model.resource.UpdateBuilder;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormScanCache;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
-import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.server.Updater;
+import org.activityinfo.store.query.shared.NullFormScanCache;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
@@ -23,7 +24,7 @@ import org.activityinfo.store.spi.SerialNumberProvider;
 
 import java.util.*;
 
-
+@GwtIncompatible
 public class TestingCatalog implements FormCatalog {
 
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();

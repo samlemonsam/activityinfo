@@ -49,6 +49,24 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
         return result;
     }
 
+    /**
+     *  @param lowerBound the lower bound of the key range (inclusive)
+     * @param upperBound the upper bound of the key range (inclusive)
+     * @param callback
+     */
+    @Override
+    public final native void openKeyCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) /*-{
+        var request = this.openKeyCursor($wnd.IDBKeyRange.bound(lowerBound, upperBound));
+        request.onsuccess = function(event) {
+          var cursor = event.target.result;
+            if(cursor) {
+                callback.@IDBCursorCallback::onNext(*)(cursor);
+            } else {
+                callback.@IDBCursorCallback::onDone()();
+            }
+        };
+    }-*/;
+
     private JavaScriptObject createKey(String[] keys) {
         if(keys.length == 1) {
             return createKey(keys[0]);

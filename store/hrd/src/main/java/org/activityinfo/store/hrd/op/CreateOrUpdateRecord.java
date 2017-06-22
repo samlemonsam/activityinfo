@@ -7,7 +7,7 @@ import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
-import org.activityinfo.store.query.impl.InvalidUpdateException;
+import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.spi.RecordChangeType;
 import org.activityinfo.store.spi.RecordUpdate;
 

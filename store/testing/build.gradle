@@ -7,3 +7,9 @@ dependencies {
     compile libraries.gson
 }
 
+
+// Copy sources needed by GWT
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}

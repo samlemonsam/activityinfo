@@ -26,7 +26,7 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
-import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.RecordUpdate;

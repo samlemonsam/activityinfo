@@ -7,9 +7,9 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionBuilder;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormScanCache;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormScanCache;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.junit.Before;
 import org.junit.Test;
 

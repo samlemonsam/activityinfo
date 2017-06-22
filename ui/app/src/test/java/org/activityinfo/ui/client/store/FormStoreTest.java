@@ -119,6 +119,31 @@ public class FormStoreTest {
     }
 
     @Test
+    public void offlineColumnQuery() {
+
+        TestSetup setup = new TestSetup();
+        setup.getFormStore().setFormOffline(Survey.FORM_ID, true);
+        setup.runScheduled();
+        setup.setConnected(false);
+
+        Connection<SnapshotStatus> snapshot = setup.connect(setup.getOfflineStore().getCurrentSnapshot());
+        assertTrue(snapshot.assertLoaded().isFormCached(Survey.FORM_ID));
+
+        QueryModel queryModel = new QueryModel(Survey.FORM_ID);
+        queryModel.selectResourceId().as("id");
+        queryModel.selectField(Survey.NAME_FIELD_ID).as("name");
+        queryModel.selectField(Survey.AGE_FIELD_ID).as("age");
+
+        ColumnSet columnSet = setup.connect(setup.getFormStore().query(queryModel)).assertLoaded();
+
+        assertThat(columnSet.getNumRows(), equalTo(Survey.ROW_COUNT));
+        assertThat(columnSet.getColumnView("name").get(0), equalTo("Melanie"));
+        assertThat(columnSet.getColumnView("name").get(1), equalTo("Joe"));
+        assertThat(columnSet.getColumnView("name").get(2), equalTo("Matilda"));
+
+    }
+
+    @Test
     public void relatedFormsAreAlsoCached() {
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, scheduler);

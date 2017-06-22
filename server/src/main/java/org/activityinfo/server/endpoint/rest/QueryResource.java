@@ -6,9 +6,9 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.query.ColumnModelException;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.FormSupervisorAdapter;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.spi.FormCatalog;
 
 import javax.inject.Provider;

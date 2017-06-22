@@ -38,7 +38,11 @@ import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
-import org.activityinfo.store.query.impl.*;
+import org.activityinfo.store.query.server.AppEngineFormScanCache;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.server.FormSupervisorAdapter;
+import org.activityinfo.store.query.shared.FormScanBatch;
+import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 import org.activityinfo.store.spi.FormCatalog;
 
@@ -274,8 +278,6 @@ public class PivotAdapter {
             executeQueryBatch();
 
             PivotSites.PivotResult result = new PivotSites.PivotResult(createBuckets());
-
-            batch.waitForCachingToFinish();
 
             return result;
 
@@ -676,7 +678,7 @@ public class PivotAdapter {
         queryTime.start();
 
         try {
-            batch.execute();
+            builder.execute(batch);
         } catch (Exception e) {
             throw new RuntimeException("Failed to execute query batch", e);
         } finally {

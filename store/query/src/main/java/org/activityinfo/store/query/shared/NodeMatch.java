@@ -14,6 +14,8 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.store.query.shared.join.JoinNode;
+import org.activityinfo.store.query.shared.join.JoinType;
 
 import java.util.Iterator;
 import java.util.LinkedList;

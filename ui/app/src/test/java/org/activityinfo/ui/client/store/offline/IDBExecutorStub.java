@@ -5,10 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.activityinfo.promise.Promise;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class IDBExecutorStub implements IDBExecutor {
@@ -21,8 +18,6 @@ public class IDBExecutorStub implements IDBExecutor {
         storeMap.put(SchemaStore.NAME, new ObjectStore(SchemaStore.NAME, new String[] { "id" }));
         storeMap.put(RecordStore.NAME, new ObjectStore(RecordStore.NAME, new String[] { "formId", "recordId" }));
         storeMap.put(KeyValueStore.NAME, new ObjectStore(KeyValueStore.NAME));
-
-
     }
 
     @Override
@@ -78,23 +73,22 @@ public class IDBExecutorStub implements IDBExecutor {
         }
     }
 
+
     private class ObjectStore {
 
         private final String name;
-        private final String[] keys;
-        private Map<String, String> objectMap = new HashMap<>();
+        private final String[] keyPath;
+        private TreeMap<ObjectKey, String> objectMap = new TreeMap<>();
 
-        public ObjectStore(String name, String[] keys) {
+        public ObjectStore(String name, String[] keyPath) {
             this.name = name;
-            this.keys = keys;
+            this.keyPath = keyPath;
         }
 
         public ObjectStore(String name) {
             this.name = name;
-            this.keys = null;
+            this.keyPath = null;
         }
-
-
     }
 
     private class ObjectStoreInTx implements IDBObjectStore {
@@ -112,8 +106,8 @@ public class IDBExecutorStub implements IDBExecutor {
                 throw new IllegalStateException("The transaction is read-only.");
             }
             JsonObject object = JSON_PARSER.parse(json).getAsJsonObject();
-            String key = buildKey(object);
-            store.objectMap.put(key, json);
+
+            store.objectMap.put(buildKey(object), json);
         }
 
         @Override
@@ -121,39 +115,55 @@ public class IDBExecutorStub implements IDBExecutor {
             if(!readwrite) {
                 throw new IllegalStateException("The transaction is read-only.");
             }
-            store.objectMap.put(key, json);
+            store.objectMap.put(new ObjectKey(key), json);
         }
 
-        private String buildKey(JsonObject object) {
-            if(store.keys == null) {
+        private ObjectKey buildKey(JsonObject object) {
+            if(store.keyPath == null) {
                 throw new IllegalStateException("Object store " + store.name +
                         " has no key path defined, must use out-of-line key");
             }
 
-            StringBuilder keyString = new StringBuilder();
-            for (String  key : store.keys) {
-                JsonElement keyPart = object.get(key);
+            String[] key = new String[store.keyPath.length];
+            for (int i = 0; i < store.keyPath.length; i++) {
+                JsonElement keyPart = object.get(store.keyPath[i]);
                 if(keyPart == null) {
                     throw new IllegalStateException("Missing key '" + key + "' for object " + object);
                 }
-                keyString.append(keyPart.getAsString());
+                key[i] = keyPart.getAsString();
             }
-            return keyString.toString();
+
+            if(key.length == 1) {
+                return new ObjectKey(key[0]);
+            } else {
+                return new ObjectKey(key);
+            }
         }
 
         @Override
         public Promise<String> getJson(String key) {
-            return getJson(new String[] { key });
+            return getJson(new ObjectKey(key));
         }
 
         @Override
         public Promise<String> getJson(String[] keys) {
-            StringBuilder keyString = new StringBuilder();
-            for (String key : keys) {
-                keyString.append(key);
-            }
-            String object = store.objectMap.get(keyString.toString());
-            return Promise.resolved(object);
+            return getJson(new ObjectKey(keys));
+        }
+
+        private Promise<String> getJson(ObjectKey key) {
+            return Promise.resolved(store.objectMap.get(key));
+        }
+
+        @Override
+        public void openKeyCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) {
+
+            NavigableMap<ObjectKey, String> range = store.objectMap.subMap(
+                    new ObjectKey(lowerBound), true,
+                    new ObjectKey(upperBound), true);
+            Iterator<Map.Entry<ObjectKey, String>> it = range.entrySet().iterator();
+
+            Cursor cursor = new Cursor(it, callback);
+            cursor.run();
         }
     }
 

@@ -6,6 +6,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -76,6 +79,10 @@ public class OfflineStore {
 
     public Observable<Maybe<FormRecord>> getCachedRecord(RecordRef recordRef) {
         return new ObservableTask<>(new RecordQuery(executor, recordRef), NullWatcher.INSTANCE);
+    }
+
+    public Observable<ColumnSet> query(FormTree formTree, QueryModel queryModel) {
+        return new ObservableTask<>(new ColumnQuery(executor, formTree, queryModel), NullWatcher.INSTANCE);
     }
 
     /**
