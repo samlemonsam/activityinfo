@@ -20,6 +20,7 @@ import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -31,7 +32,7 @@ public class OfflineStore {
 
     private IDBExecutor executor;
 
-    private StatefulValue<Set<ResourceId>> offlineForms = new StatefulValue<>(ImmutableSet.of());
+    private StatefulValue<Set<ResourceId>> offlineForms = new StatefulValue<>();
     private StatefulValue<SnapshotStatus> currentSnapshot = new StatefulValue<>();
 
     public OfflineStore(IDBExecutor executor) {
@@ -46,7 +47,7 @@ public class OfflineStore {
                     @Override
                     public void onFailure(Throwable caught) {
 
-                        LOGGER.severe("Failed to load initial current snapshot");
+                        LOGGER.log(Level.SEVERE, "Failed to load initial current snapshot", caught);
 
                         currentSnapshot.updateIfNotEqual(SnapshotStatus.EMPTY);
                     }
@@ -54,7 +55,7 @@ public class OfflineStore {
                     @Override
                     public void onSuccess(SnapshotStatus result) {
 
-                        LOGGER.severe("Loaded initial snapshot status: " + result);
+                        LOGGER.info("Loaded initial snapshot status: " + result);
 
                         currentSnapshot.updateIfNotEqual(result);
                     }
