@@ -30,6 +30,7 @@ public class QueryRunner implements ColumnQueryBuilder {
         }
 
         public void onNext(FormRecord record) {
+
             JsonElement jsonValue = record.getFields().get(fieldName);
             if(jsonValue == null) {
                 observer.onNext(null);
@@ -80,11 +81,10 @@ public class QueryRunner implements ColumnQueryBuilder {
             public void onNext(RecordStore.RecordCursor cursor) {
                 ResourceId resourceId = cursor.getRecordId();
 
-                LOGGER.info("QueryRunner.onNext: " + resourceId);
-
                 for (CursorObserver<ResourceId> observer : idObservers) {
                     observer.onNext(resourceId);
                 }
+
                 FormRecord record = cursor.getValue();
                 for (FieldObserver fieldObserver : fieldObservers) {
                     fieldObserver.onNext(record);

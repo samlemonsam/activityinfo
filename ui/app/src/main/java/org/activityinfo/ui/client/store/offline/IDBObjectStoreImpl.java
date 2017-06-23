@@ -55,8 +55,8 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
      * @param callback
      */
     @Override
-    public final native void openKeyCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) /*-{
-        var request = this.openKeyCursor($wnd.IDBKeyRange.bound(lowerBound, upperBound));
+    public final native void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) /*-{
+        var request = this.openCursor($wnd.IDBKeyRange.bound(lowerBound, upperBound));
         request.onsuccess = function(event) {
           var cursor = event.target.result;
             if(cursor) {

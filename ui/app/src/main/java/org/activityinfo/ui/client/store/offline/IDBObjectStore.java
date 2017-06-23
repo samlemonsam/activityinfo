@@ -25,7 +25,7 @@ public interface IDBObjectStore {
 
 
     /**
-     * Opens a cursor over the keys in the range [lower, bound]
+     * Opens a cursor over the objects in the store with keys in the range [lower, bound]
      *
      * See {@linkplain https://w3c.github.io/IndexedDB/#key-construct} for the way in which keys are ordered.
      *
@@ -33,6 +33,6 @@ public interface IDBObjectStore {
      * @param upperBound the upper bound of the key, inclusive
      * @param callback
      */
-    void openKeyCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback);
+    void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback);
 
 }

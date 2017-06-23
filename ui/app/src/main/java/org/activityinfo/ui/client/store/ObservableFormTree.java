@@ -12,10 +12,7 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -116,7 +113,8 @@ public class ObservableFormTree extends Observable<FormTree> {
             crawl(rootFormId, reachable, missing, loading);
 
             // First clean up forms that are no longer reachable
-            for (ResourceId formId : forms.keySet()) {
+            List<ResourceId> connectedForms = new ArrayList<>(forms.keySet());
+            for (ResourceId formId : connectedForms) {
                 if (!reachable.contains(formId)) {
                     disconnectFrom(formId);
                 }

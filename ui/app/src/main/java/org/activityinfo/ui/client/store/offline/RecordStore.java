@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import com.google.gwt.core.client.GWT;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -67,7 +68,7 @@ public class RecordStore {
         String[] lowerBound = new String[] { formId.asString(), "" };
         String[] upperBound = new String[] { formId.asString(), "\uFFFF" };
 
-        impl.openKeyCursor(lowerBound, upperBound, new IDBCursorCallback() {
+        impl.openCursor(lowerBound, upperBound, new IDBCursorCallback() {
             @Override
             public void onNext(IDBCursor cursor) {
 
@@ -81,7 +82,7 @@ public class RecordStore {
 
                     @Override
                     public FormRecord getValue() {
-                        return FormRecord.fromJson(cursor.getValueAsJson());
+                        return formRecordFromCursor(cursor);
                     }
 
                     @Override
@@ -97,4 +98,19 @@ public class RecordStore {
             }
         });
     }
+
+
+    private static FormRecord formRecordFromCursor(IDBCursor cursor) {
+        String json;
+        if(GWT.isClient()) {
+            json = stringify(cursor.getValue());
+        } else {
+            json = cursor.getValueAsJson();
+        }
+        return FormRecord.fromJson(json);
+    }
+
+    private native static String stringify(Object value) /*-{
+        return JSON.stringify(value);
+    }-*/;
 }

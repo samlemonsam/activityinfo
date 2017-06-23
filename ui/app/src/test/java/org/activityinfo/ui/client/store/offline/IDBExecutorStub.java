@@ -155,7 +155,7 @@ public class IDBExecutorStub implements IDBExecutor {
         }
 
         @Override
-        public void openKeyCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) {
+        public void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) {
 
             NavigableMap<ObjectKey, String> range = store.objectMap.subMap(
                     new ObjectKey(lowerBound), true,

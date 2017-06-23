@@ -6,8 +6,14 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
-import static elemental2.core.Global.JSON;
-
+/**
+ * Cursor for traversing or iterating over multiple records in an IndexedDB database.
+ *
+ * <p>This interface only defines the methods and types required by ActivityInfo and is not
+ * a completed description of the IndexedDB API.</p>
+ *
+ * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor">IDBCursor API Reference</a>
+ */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
 public interface IDBCursor {
 
@@ -18,17 +24,28 @@ public interface IDBCursor {
     @JsMethod(name = "continue")
     void continue_();
 
+    /**
+     * Returns key for the record at the cursor's position as a String. If the cursor is outside its range,
+     * this is set to undefined.
+     */
     @JsProperty(name = "key")
     String getKeyString();
 
+    /**
+     * Returns key for the record at the cursor's position as an array of Strings. If the cursor is outside its range,
+     * this is set to undefined.
+     */
     @JsProperty(name = "key")
     String[] getKeyArray();
 
     @JsProperty(name = "value")
     Object getValue();
 
-    default String getValueAsJson() {
-        return JSON.stringify(getValue());
-    }
+    /**
+     * Hack to allow our unit tests to return JSON string. The Real IndexedDB getValue implementation
+     * returns an actual Javascript object.
+     */
+    String getValueAsJson();
+
 
 }
