@@ -8,6 +8,9 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.junit.Test;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+
 /**
  * Test queries involving date functions
  */
@@ -40,7 +43,23 @@ public class DateFunctionQueryTest {
         }
 
         System.out.println(age);
+    }
 
+
+    @Test
+    public void invalidArityTest() {
+        TestingCatalog catalog = new TestingCatalog();
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
+
+        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        queryModel.selectExpr("YEARFRAC(TODAY())").as("age");
+
+        ColumnSet columnSet = builder.build(queryModel);
+        ColumnView age = columnSet.getColumnView("age");
+
+        assertThat(age.numRows(), equalTo(IntakeForm.ROW_COUNT));
+
+        System.out.println(age);
     }
 
 }

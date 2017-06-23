@@ -8,10 +8,7 @@ import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.query.ColumnModel;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.*;
 import org.activityinfo.store.query.shared.columns.ColumnCombiner;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
 
@@ -234,7 +231,12 @@ public class QueryEvaluator {
                         }
                         arguments.add(view);
                     }
-                    return ((ColumnFunction) call.getFunction()).columnApply(arguments.get(0).numRows(), arguments);
+                    try {
+                        return ((ColumnFunction) call.getFunction()).columnApply(arguments.get(0).numRows(), arguments);
+                    } catch (ExprException e) {
+                        int numRows = arguments.get(0).numRows();
+                        return new EmptyColumnView(ColumnType.STRING, numRows);
+                    }
                 }
             };
         }
