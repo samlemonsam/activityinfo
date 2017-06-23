@@ -21,6 +21,7 @@ import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.spi.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.VersionedFormStorage;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
@@ -36,9 +37,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 
@@ -501,6 +500,25 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         FormStorage form = catalog.getForm(CuidAdapter.partnerFormId(1)).get();
         Optional<FormRecord> partnerRecord = form.get(CuidAdapter.partnerRecordId(1));
+
+    }
+
+    @Test
+    public void partnerVersionRange() {
+        ResourceId partnerFormId = CuidAdapter.partnerFormId(1);
+        VersionedFormStorage form = (VersionedFormStorage) catalog.getForm(partnerFormId).get();
+
+        System.out.println("version = " + form.cacheVersion());
+
+        assertThat(form.cacheVersion(), greaterThan(0L));
+
+        List<FormRecord> versionRange = form.getVersionRange(0, form.cacheVersion());
+        assertThat(versionRange, hasSize(3));
+
+        FormRecord version = versionRange.get(0);
+        assertThat(version.getFormId(), equalTo(partnerFormId.asString()));
+
+        System.out.println(versionRange);
 
     }
 

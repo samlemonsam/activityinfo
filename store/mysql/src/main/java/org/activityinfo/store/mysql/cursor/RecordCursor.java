@@ -87,7 +87,7 @@ public class RecordCursor {
             @Override
             public FormInstance next() {
 
-                FormInstance record = new FormInstance(formId, id.values.get(row));
+                FormInstance record = new FormInstance(id.values.get(row), formId);
                 for (FieldCollector field : fields) {
                     record.set(field.fieldId, field.values.get(row));
                 }

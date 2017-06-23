@@ -122,7 +122,7 @@
   <!-- Database: PEAR -->
 
   <userDatabase databaseId="1" name="PEAR" countryId="1"
-                ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+                ownerUserId="1" lastSchemaUpdate="2009-01-01" version="991"/>
 
 
   <!-- PEAR Activity 1 : NFI Distribution -->
@@ -199,13 +199,13 @@
   <!-- Database: PEAR PLUS -->
 
   <userDatabase databaseId="2" name="PEAR Plus" countryId="1"
-                ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+                ownerUserId="1" lastSchemaUpdate="2009-01-01" version="444"/>
 
   <userDatabase databaseId="3" name="Alpha" countryId="1"
-                ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+                ownerUserId="1" lastSchemaUpdate="2009-01-01" version="333"/>
 
   <userDatabase databaseId="4" name="Public" countryId="1"
-                ownerUserId="4" lastSchemaUpdate="2009-01-01"/>
+                ownerUserId="4" lastSchemaUpdate="2009-01-01" version="449"/>
 
 
 
