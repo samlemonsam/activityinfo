@@ -36,3 +36,5 @@ include 'ui:geoadmin'
 
 include 'tests:acceptance'
 include 'tests:api'
+
+include 'tools:json'
