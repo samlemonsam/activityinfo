@@ -20,12 +20,14 @@ import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Interface to *something* that can store stuff offline.
  */
 public class OfflineStore {
 
+    private static final Logger LOGGER = Logger.getLogger(OfflineStore.class.getName());
 
     private IDBExecutor executor;
 
@@ -43,11 +45,17 @@ public class OfflineStore {
                 .then(new AsyncCallback<SnapshotStatus>() {
                     @Override
                     public void onFailure(Throwable caught) {
+
+                        LOGGER.severe("Failed to load initial current snapshot");
+
                         currentSnapshot.updateIfNotEqual(SnapshotStatus.EMPTY);
                     }
 
                     @Override
                     public void onSuccess(SnapshotStatus result) {
+
+                        LOGGER.severe("Loaded initial snapshot status: " + result);
+
                         currentSnapshot.updateIfNotEqual(result);
                     }
                 });
@@ -132,6 +140,8 @@ public class OfflineStore {
     public Promise<Void> store(Snapshot snapshot) {
 
         final SnapshotStatus status = new SnapshotStatus(snapshot);
+
+        LOGGER.info("Updating offline snapshot: " + status);
 
         return executor.begin()
         .objectStore(SchemaStore.NAME)

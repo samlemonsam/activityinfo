@@ -64,7 +64,6 @@ public class FormStoreTest {
         view.assertLoaded();
     }
 
-
     @Test
     public void httpBus() {
         AsyncClientStub client = new AsyncClientStub();
@@ -140,7 +139,6 @@ public class FormStoreTest {
         assertThat(columnSet.getColumnView("name").get(0), equalTo("Melanie"));
         assertThat(columnSet.getColumnView("name").get(1), equalTo("Joe"));
         assertThat(columnSet.getColumnView("name").get(2), equalTo("Matilda"));
-
     }
 
     @Test
@@ -194,6 +192,30 @@ public class FormStoreTest {
         assertThat(tableView.assertLoaded().getNumRows(), equalTo(Survey.ROW_COUNT + 1));
     }
 
+    @Test
+    public void offlineStartup() {
+
+        IDBExecutorStub database = new IDBExecutorStub();
+
+        // In the first session, we go online and turn on synchronization
+        // for one of the forms.
+
+        TestSetup session1 = new TestSetup(database, true);
+        session1.getFormStore().setFormOffline(IntakeForm.FORM_ID, true);
+        session1.runScheduled();
+
+        Connection<OfflineStatus> offlineStatus1 = session1.connect(session1.getFormStore().getOfflineStatus(IntakeForm.FORM_ID));
+
+        assertTrue(offlineStatus1.assertLoaded().isCached());
+
+        // Close the browser, open a new session
+        TestSetup session2 = new TestSetup(database, false);
+
+        Connection<OfflineStatus> offlineStatus2 = session1.connect(session1.getFormStore().getOfflineStatus(IntakeForm.FORM_ID));
+        assertTrue(offlineStatus2.assertLoaded().isCached());
+
+
+    }
 
     private void runScheduled() {
         while(scheduler.executeScheduledCommands()) {

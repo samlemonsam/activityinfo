@@ -70,4 +70,12 @@ public class SnapshotStatus {
     public static SnapshotStatus fromJson(String json) {
         return fromJson(new JsonParser().parse(json).getAsJsonObject());
     }
+
+    @Override
+    public String toString() {
+        return "SnapshotStatus{" +
+                "time=" + time +
+                ", formVersions=" + formVersions +
+                '}';
+    }
 }

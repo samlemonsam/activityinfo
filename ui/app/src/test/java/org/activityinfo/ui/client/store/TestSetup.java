@@ -24,11 +24,17 @@ public class TestSetup {
     private final RecordSynchronizer synchronizer;
 
     public TestSetup() {
+        this(new IDBExecutorStub(), true);
+    }
+
+    public TestSetup(IDBExecutorStub database, boolean connected) {
         catalog = new TestingCatalog();
         client = new AsyncClientStub(catalog);
+        client.setConnected(connected);
+
         scheduler = new StubScheduler();
         httpBus = new HttpBus(client, scheduler);
-        offlineStore = new OfflineStore(new IDBExecutorStub());
+        offlineStore = new OfflineStore(database);
         formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
         synchronizer = new RecordSynchronizer(httpBus, offlineStore);
     }
