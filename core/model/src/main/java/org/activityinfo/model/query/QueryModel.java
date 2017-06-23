@@ -2,10 +2,7 @@ package org.activityinfo.model.query;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.*;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -15,6 +12,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
 
 import java.util.List;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Describes a Table to be constructed from a
@@ -173,21 +172,21 @@ public class QueryModel {
     public static QueryModel fromJson(String json) {
         QueryModel queryModel = new QueryModel();
 
-        JsonParser jsonParser = new JsonParser();
+        org.activityinfo.json.JsonParser jsonParser = new JsonParser();
         JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
 
-        JsonArray rowSources = jsonObject.getAsJsonArray("rowSources");
-        for (JsonElement rowSource : rowSources) {
+        JsonArray rowSources = jsonObject.get("rowSources").getAsJsonArray();
+        for (JsonValue rowSource : rowSources.values()) {
             queryModel.getRowSources().add(RowSource.fromJson(rowSource.getAsJsonObject()));
         }
 
-        for (JsonElement column : jsonObject.getAsJsonArray("columns")) {
+        for (JsonValue column : jsonObject.get("columns").getAsJsonArray().values()) {
             queryModel.getColumns().add(ColumnModel.fromJson(column.getAsJsonObject()));
         }
 
-        JsonElement filterValue = jsonObject.get("filter");
+        JsonValue filterValue = jsonObject.get("filter");
         if(filterValue != null && filterValue.isJsonPrimitive()) {
-            String filter = filterValue.getAsString();
+            String filter = filterValue.asString();
             if (!Strings.isNullOrEmpty(filter)) {
                 queryModel.setFilter(filter);
             }
@@ -197,22 +196,22 @@ public class QueryModel {
 
     public JsonObject toJsonElement() {
 
-        JsonArray sourcesArray = new JsonArray();
+        JsonArray sourcesArray = Json.createArray();
         for (RowSource rowSource : rowSources) {
             sourcesArray.add(rowSource.toJsonElement());
         }
 
-        JsonArray columnsArray = new JsonArray();
+        JsonArray columnsArray = Json.createArray();
         for (ColumnModel column : columns) {
             columnsArray.add(column.toJsonElement());
         }
 
-        JsonObject object = new JsonObject();
-        object.add("rowSources", sourcesArray);
-        object.add("columns", columnsArray);
+        JsonObject object = createObject();
+        object.put("rowSources", sourcesArray);
+        object.put("columns", columnsArray);
 
         if(filter != null) {
-            object.addProperty("filter", filter.asExpression());
+            object.put("filter", filter.asExpression());
         }
         return object;
     }

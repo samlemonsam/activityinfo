@@ -2,10 +2,10 @@ package org.activityinfo.server.csp;
 
 import com.google.common.base.Charsets;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
 import javax.servlet.ServletException;
@@ -52,7 +52,7 @@ public class ContentSecurityServlet extends HttpServlet {
         
         message.append("Content-Security Violation\n");
 
-        for (Map.Entry<String, JsonElement> entry : report.entrySet()) {
+        for (Map.Entry<String, JsonValue> entry : report.entrySet()) {
             message.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
         }
         

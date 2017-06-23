@@ -21,12 +21,13 @@ package org.activityinfo.model.type.subform;
 * #L%
 */
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * @author yuriyz on 12/03/2014.
@@ -50,8 +51,8 @@ public class SubFormReferenceType implements ParametrizedFieldType {
 
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
-            JsonElement formIdElement;
-            if(parametersObject.has("classReference")) {
+            JsonValue formIdElement;
+            if(parametersObject.hasKey("classReference")) {
                 formIdElement = parametersObject.get("classReference");
             } else {
                 formIdElement = parametersObject.get("formId");
@@ -60,7 +61,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
             if(formIdElement.isJsonNull()) {
                 formId = null;
             } else {
-                formId = ResourceId.valueOf(formIdElement.getAsString());
+                formId = ResourceId.valueOf(formIdElement.asString());
             }
             return new SubFormReferenceType(formId);
         }
@@ -98,7 +99,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
+    public FieldValue parseJsonValue(JsonValue value) {
         // Subforms don't have values in their parent.
         return null;
     }
@@ -114,9 +115,9 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
-        object.add("formId", classId == null ? JsonNull.INSTANCE : new JsonPrimitive(classId.asString()));
+    public org.activityinfo.json.JsonObject getParametersAsJson() {
+        JsonObject object = createObject();
+        object.put("formId", classId == null ? Json.createNull(): Json.create(classId.asString()));
         return object;
     }
 

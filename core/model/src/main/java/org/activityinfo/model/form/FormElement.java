@@ -1,6 +1,6 @@
 package org.activityinfo.model.form;
 
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 public abstract class FormElement {
@@ -9,5 +9,5 @@ public abstract class FormElement {
 
     public abstract String getLabel();
 
-    public abstract JsonElement toJsonObject();
+    public abstract JsonValue toJsonObject();
 }

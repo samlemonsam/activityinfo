@@ -3,12 +3,15 @@ package org.activityinfo.model.type;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.*;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * A type that represents a link or reference to another {@code Resource}
@@ -37,18 +40,18 @@ public class ReferenceType implements ParametrizedFieldType {
             
             List<ResourceId> range = new ArrayList<>();
             JsonArray rangeArray = parametersObject.get("range").getAsJsonArray();
-            for (JsonElement rangeElement : rangeArray) {
+            for (JsonValue rangeElement : rangeArray.values()) {
                 String formId;
                 if(rangeElement.isJsonPrimitive()) {
-                    formId = rangeElement.getAsString();                    
+                    formId = rangeElement.asString();
                 } else {
-                    formId = rangeElement.getAsJsonObject().get("formId").getAsString();
+                    formId = rangeElement.getAsJsonObject().get("formId").asString();
                 }
                 range.add(ResourceId.valueOf(formId));
             }
             
             ReferenceType type = new ReferenceType();
-            type.setCardinality(Cardinality.valueOf(parametersObject.get("cardinality")));    
+            type.setCardinality(Cardinality.valueOf(parametersObject.get("cardinality").asString()));
             type.setRange(range);
             return type;
         }
@@ -73,19 +76,19 @@ public class ReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
+    public FieldValue parseJsonValue(JsonValue value) {
 
         if(value.isJsonNull()) {
             return new ReferenceValue();
         } else if(value.isJsonArray()) {
             JsonArray array = (JsonArray) value;
             Set<RecordRef> refs = new HashSet<>();
-            for (JsonElement jsonElement : array) {
-                refs.add(parseRef(jsonElement.getAsString()));
+            for (JsonValue jsonElement : array.values()) {
+                refs.add(parseRef(jsonElement.asString()));
             }
             return new ReferenceValue(refs);
         } else {
-            return new ReferenceValue(parseRef(value.getAsString()));
+            return new ReferenceValue(parseRef(value.asString()));
         }
     }
 
@@ -139,17 +142,17 @@ public class ReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
-        object.addProperty("cardinality", cardinality.name().toLowerCase());
+    public org.activityinfo.json.JsonObject getParametersAsJson() {
+        JsonObject object = createObject();
+        object.put("cardinality", cardinality.name().toLowerCase());
         
-        JsonArray rangeArray = new JsonArray();
+        JsonArray rangeArray = Json.createArray();
         for (ResourceId formId : range) {
-            JsonObject rangeObject = new JsonObject();
-            rangeObject.addProperty("formId", formId.asString());
+            JsonObject rangeObject = createObject();
+            rangeObject.put("formId", formId.asString());
             rangeArray.add(rangeObject);
         }
-        object.add("range", rangeArray);
+        object.put("range", rangeArray);
         return object;
     }
 

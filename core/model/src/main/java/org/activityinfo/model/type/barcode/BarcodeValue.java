@@ -1,8 +1,8 @@
 package org.activityinfo.model.type.barcode;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -39,11 +39,11 @@ public class BarcodeValue implements FieldValue, HasStringValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        return new JsonPrimitive(code);
+    public JsonValue toJsonElement() {
+        return Json.createFromNullable(code);
     }
 
-    public static FieldValue valueOf(JsonElement element) {
+    public static FieldValue valueOf(JsonValue element) {
         return BarcodeValue.valueOf(JsonParsing.toNullableString(element));
     }
 }

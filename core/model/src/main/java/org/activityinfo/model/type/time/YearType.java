@@ -20,7 +20,7 @@ package org.activityinfo.model.type.time;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.*;
 
 /**
@@ -55,8 +55,8 @@ public class YearType implements FieldType, TemporalType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
-        return new YearValue(value.getAsInt());
+    public FieldValue parseJsonValue(JsonValue value) {
+        return new YearValue(value.asInt());
     }
 
     @Override

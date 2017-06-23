@@ -2,12 +2,14 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * A logical group of {@code FormElements}
@@ -56,19 +58,19 @@ public class FormSection extends FormElement implements FormElementContainer {
     }
 
     @Override
-    public JsonElement toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id.asString());
-        object.addProperty("label", label);
-        object.addProperty("type", "section");
-        object.add("elements", FormClass.toJsonArray(elements));
+    public JsonValue toJsonObject() {
+        JsonObject object = createObject();
+        object.put("id", id.asString());
+        object.put("label", label);
+        object.put("type", "section");
+        object.put("elements", FormClass.toJsonArray(elements));
         return object;
     }
 
     public static FormSection fromJson(JsonObject jsonObject) {
-        FormSection section = new FormSection(ResourceId.valueOf(jsonObject.get("id").getAsString()));
-        section.setLabel(jsonObject.get("label").getAsString());
-        if(jsonObject.has("elements")) {
+        FormSection section = new FormSection(ResourceId.valueOf(jsonObject.get("id").asString()));
+        section.setLabel(jsonObject.get("label").asString());
+        if(jsonObject.hasKey("elements")) {
             section.getElements().addAll(FormClass.fromJsonArray(jsonObject.get("elements").getAsJsonArray()));
         }
         return section;

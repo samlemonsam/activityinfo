@@ -1,10 +1,10 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
@@ -35,6 +35,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.Collections;
 import java.util.List;
+
+import static org.activityinfo.json.Json.createObject;
 
 public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
@@ -178,7 +180,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         FormCatalog catalog = newCatalog();
         Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
 
-        JsonArray recordArray = new JsonArray();
+        org.activityinfo.json.JsonArray recordArray = Json.createArray();
         
         if(collection.isPresent()) {
             if(collection.get() instanceof HrdFormStorage) {
@@ -189,9 +191,9 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
                 }
             }
         }
-        JsonObject object = new JsonObject();
-        object.addProperty("formId", formId);
-        object.add("records", recordArray);
+        JsonObject object = createObject();
+        object.put("formId", formId);
+        object.put("records", recordArray);
         
         return Promise.resolved(FormRecordSet.fromJson(object));
     }

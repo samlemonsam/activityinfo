@@ -1,11 +1,11 @@
 package org.activityinfo.ui.client.table.view;
 
-import com.google.gson.JsonElement;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -40,15 +40,15 @@ public class DetailsRenderer {
     private final static Templates TEMPLATES = GWT.create(Templates.class);
 
     private interface ValueRenderer {
-        void renderTo(JsonElement fieldValue, SafeHtmlBuilder html);
+        void renderTo(JsonValue fieldValue, SafeHtmlBuilder html);
     }
 
     private class TextValueRenderer implements ValueRenderer {
 
         @Override
-        public void renderTo(JsonElement value, SafeHtmlBuilder html) {
+        public void renderTo(JsonValue value, SafeHtmlBuilder html) {
             html.appendHtmlConstant("<p>");
-            html.appendEscaped(value.getAsString());
+            html.appendEscaped(value.asString());
             html.appendHtmlConstant("</p>");
         }
     }
@@ -62,7 +62,7 @@ public class DetailsRenderer {
         }
 
         @Override
-        public void renderTo(JsonElement fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
 
             SerialNumber serialNumber = fieldType.parseJsonValue(fieldValue);
             String serial = fieldType.format(serialNumber);
@@ -82,9 +82,9 @@ public class DetailsRenderer {
         }
 
         @Override
-        public void renderTo(JsonElement fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
             html.appendHtmlConstant("<p>");
-            html.append(fieldValue.getAsDouble());
+            html.append(fieldValue.asNumber());
             html.appendHtmlConstant(" ");
             html.appendEscaped(type.getUnits());
             html.appendHtmlConstant("</p>");
@@ -95,7 +95,7 @@ public class DetailsRenderer {
 
 
         @Override
-        public void renderTo(JsonElement fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
 
             LocalDate localDate = LocalDateType.INSTANCE.parseJsonValue(fieldValue);
 
@@ -107,7 +107,7 @@ public class DetailsRenderer {
 
     private class NullRenderer implements ValueRenderer {
         @Override
-        public void renderTo(JsonElement fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
 
         }
     }
@@ -120,7 +120,7 @@ public class DetailsRenderer {
         }
 
         @Override
-        public void renderTo(JsonElement fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
             EnumValue enumValue = type.parseJsonValue(fieldValue);
             html.appendHtmlConstant("<p>");
 
@@ -149,7 +149,7 @@ public class DetailsRenderer {
         }
 
         public void renderTo(FormRecord record, SafeHtmlBuilder html) {
-            JsonElement fieldValue = record.getFields().get(field.getName());
+            JsonValue fieldValue = record.getFields().get(field.getName());
             if(fieldValue != null) {
                 html.appendHtmlConstant("<h3>");
                 html.appendEscaped(field.getLabel());

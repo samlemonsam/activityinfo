@@ -6,10 +6,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.*;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -24,6 +21,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * The FormClass defines structure and semantics for {@code Resource}s.
@@ -327,25 +326,25 @@ public class FormClass implements FormElementContainer {
     }
 
     public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id.asString());
-        object.addProperty("schemaVersion", schemaVersion);
+        JsonObject object = createObject();
+        object.put("id", id.asString());
+        object.put("schemaVersion", schemaVersion);
         
         if(databaseId != null) {
-            object.addProperty("databaseId", databaseId.asString());
+            object.put("databaseId", databaseId.asString());
         }
-        object.addProperty("label", label);
+        object.put("label", label);
         
         
         if(!Strings.isNullOrEmpty(description)) {
-            object.addProperty("description", description);
+            object.put("description", description);
         }
         
         if(subFormKind != null) {
-            object.addProperty("parentFormId", parentFormId.asString());
-            object.addProperty("subFormKind", subFormKind.name().toLowerCase());
+            object.put("parentFormId", parentFormId.asString());
+            object.put("subFormKind", subFormKind.name().toLowerCase());
         }
-        object.add("elements",  toJsonArray(elements));
+        object.put("elements",  toJsonArray(elements));
         return object;
     }
 
@@ -354,7 +353,7 @@ public class FormClass implements FormElementContainer {
     }
 
     static JsonArray toJsonArray(Iterable<FormElement> elements) {
-        JsonArray elementsArray = new JsonArray();
+        JsonArray elementsArray = Json.createArray();
         for (FormElement element : elements) {
             elementsArray.add(element.toJsonObject());
         }
@@ -395,56 +394,56 @@ public class FormClass implements FormElementContainer {
         // Deal with previous encoding
 
         ResourceId id;
-        if(object.has("@id")) {
-            id = ResourceId.valueOf(object.get("@id").getAsString());
+        if(object.hasKey("@id")) {
+            id = ResourceId.valueOf(object.get("@id").asString());
         } else {
-            id = ResourceId.valueOf(object.get("id").getAsString());
+            id = ResourceId.valueOf(object.get("id").asString());
         }
         
         FormClass formClass = new FormClass(id);
 
-        if(object.has("schemaVersion")) {
-            formClass.setSchemaVersion(object.get("schemaVersion").getAsLong());
+        if(object.hasKey("schemaVersion")) {
+            formClass.setSchemaVersion(object.get("schemaVersion").asLong());
         }
 
-        if(object.has("databaseId")) {
-            formClass.setDatabaseId(ResourceId.valueOf(object.get("databaseId").getAsString()));
+        if(object.hasKey("databaseId")) {
+            formClass.setDatabaseId(ResourceId.valueOf(object.get("databaseId").asString()));
         }
         
-        if(object.has("_class_label")) {
+        if(object.hasKey("_class_label")) {
             formClass.setLabel(JsonParsing.toNullableString(object.get("_class_label")));
         } else {
             formClass.setLabel(JsonParsing.toNullableString(object.get("label")));
         }
         
-        if(object.has("subFormKind")) {
-            formClass.setSubFormKind(SubFormKind.valueOf(object.get("subFormKind").getAsString().toUpperCase()));
-            formClass.setParentFormId(ResourceId.valueOf(object.get("parentFormId").getAsString()));
+        if(object.hasKey("subFormKind")) {
+            formClass.setSubFormKind(SubFormKind.valueOf(object.get("subFormKind").asString().toUpperCase()));
+            formClass.setParentFormId(ResourceId.valueOf(object.get("parentFormId").asString()));
         }
         
-        if(object.has("elements")) {
-            JsonElement elements = object.get("elements");
+        if(object.hasKey("elements")) {
+            JsonValue elements = object.get("elements");
             if(elements.isJsonArray()) {
-                JsonArray elementsArray = elements.getAsJsonArray();
+                org.activityinfo.json.JsonArray elementsArray = elements.getAsJsonArray();
                 formClass.elements.addAll(fromJsonArray(elementsArray));
             }
         }
         return formClass;
     }
 
-    static List<FormElement> fromJsonArray(JsonArray elementsArray) {
+    static List<FormElement> fromJsonArray(org.activityinfo.json.JsonArray elementsArray) {
         List<FormElement> elements = new ArrayList<>();
-        for (int i = 0; i < elementsArray.size(); i++) {
+        for (int i = 0; i < elementsArray.length(); i++) {
             JsonObject elementObject = elementsArray.get(i).getAsJsonObject();
             elements.add(elementFromJson(elementObject));
         }
         return elements;
     }
 
-    private static FormElement elementFromJson(JsonObject elementObject) {
-        JsonElement typeElement = elementObject.get("type");
+    private static FormElement elementFromJson(org.activityinfo.json.JsonObject elementObject) {
+        JsonValue typeElement = elementObject.get("type");
         if(typeElement.isJsonPrimitive()) {
-            String type = typeElement.getAsString();
+            String type = typeElement.asString();
             if ("section".equals(type)) {
                 return FormSection.fromJson(elementObject);
             } else if ("label".equals(type)) {

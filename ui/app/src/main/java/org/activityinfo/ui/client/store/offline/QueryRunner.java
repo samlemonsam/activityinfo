@@ -1,6 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -31,7 +31,7 @@ public class QueryRunner implements ColumnQueryBuilder {
 
         public void onNext(FormRecord record) {
 
-            JsonElement jsonValue = record.getFields().get(fieldName);
+            JsonValue jsonValue = record.getFields().get(fieldName);
             if(jsonValue == null) {
                 observer.onNext(null);
             } else {

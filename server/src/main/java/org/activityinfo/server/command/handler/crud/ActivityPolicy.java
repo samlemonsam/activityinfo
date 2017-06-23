@@ -23,9 +23,9 @@ package org.activityinfo.server.command.handler.crud;
  */
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.inject.Inject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.server.command.handler.PermissionOracle;

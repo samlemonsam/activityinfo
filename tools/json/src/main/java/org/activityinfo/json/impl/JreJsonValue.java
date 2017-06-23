@@ -15,8 +15,7 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonValue;
+import org.activityinfo.json.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -38,5 +37,95 @@ public abstract class JreJsonValue implements JsonValue {
             throws ClassNotFoundException, IOException {
         String jsonString = (String) stream.readObject();
         return Json.instance().parse(jsonString);
+    }
+
+    @Override
+    public JsonObject getAsJsonObject() {
+        return ((JsonObject) this);
+    }
+
+    @Override
+    public JsonArray getAsJsonArray() {
+        return ((JsonArray) this);
+    }
+
+    @Override
+    public double asNumber() {
+        return asNumber();
+    }
+
+    @Override
+    public String asString() {
+        return asString();
+    }
+
+    @Override
+    public long asLong() {
+        return (long) asNumber();
+    }
+
+    @Override
+    public boolean isString() {
+        return getType() == JsonType.STRING;
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return asBoolean();
+    }
+
+    @Override
+    public boolean isBoolean() {
+        return getType() == JsonType.BOOLEAN;
+    }
+
+    @Override
+    public int asInt() {
+        return (int)asNumber();
+    }
+
+    @Override
+    public boolean isJsonNull() {
+        return getType() == JsonType.NULL;
+    }
+
+    @Override
+    public boolean isJsonArray() {
+        return getType() == JsonType.ARRAY;
+    }
+
+    @Override
+    public boolean isJsonString() {
+        return getType() == JsonType.STRING;
+    }
+
+    @Override
+    public boolean isJsonPrimitive() {
+        switch (getType()) {
+            case STRING:
+            case NUMBER:
+            case BOOLEAN:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public boolean isJsonObject() {
+        return getType() == JsonType.OBJECT;
+    }
+
+
+
+    @Override
+    public boolean isNumber() {
+        return getType() == JsonType.NUMBER;
+    }
+
+    @Override
+    public String toString() {
+        throw new UnsupportedOperationException("SHOULD NOT BE CALLED");
     }
 }

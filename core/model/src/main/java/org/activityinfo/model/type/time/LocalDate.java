@@ -1,10 +1,10 @@
 package org.activityinfo.model.type.time;
 
 import com.bedatadriven.rebar.time.CalendricalException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -110,8 +110,8 @@ public class LocalDate implements FieldValue, TemporalValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        return new JsonPrimitive(toString());
+    public JsonValue toJsonElement() {
+        return Json.create(toString());
     }
 
     /**

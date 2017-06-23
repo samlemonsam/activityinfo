@@ -1,12 +1,13 @@
 package org.activityinfo.model.type.number;
 
-import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
+
+import static com.google.common.base.Strings.nullToEmpty;
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * A value types that describes a real-valued quantity and its units.
@@ -69,12 +70,12 @@ public class QuantityType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
-        if(value instanceof JsonNull) {
-            return new Quantity(Double.NaN, units);
-        } else {
-            return new Quantity(value.getAsDouble(), units);
+    public FieldValue parseJsonValue(JsonValue value) {
+        double doubleValue = value.asNumber();
+        if(Double.isNaN(doubleValue)) {
+            throw new IllegalArgumentException();
         }
+        return new Quantity(doubleValue, units);
     }
 
     @Override
@@ -88,9 +89,9 @@ public class QuantityType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
-        object.addProperty("units", Strings.nullToEmpty(units));
+    public org.activityinfo.json.JsonObject getParametersAsJson() {
+        JsonObject object = createObject();
+        object.put("units", nullToEmpty(units));
         return object;
     }
 

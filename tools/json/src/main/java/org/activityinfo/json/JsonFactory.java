@@ -29,6 +29,14 @@ public interface JsonFactory {
     JsonString create(String string);
 
     /**
+     * Create a JsonValue from a Java String that may be null
+     *
+     * @param string a Java String
+     * @return either JsonNull or JsonString
+     */
+    JsonValue createFromNullable(String string);
+
+    /**
      * Create a JsonNumber from a Java double.
      *
      * @param number a Java double

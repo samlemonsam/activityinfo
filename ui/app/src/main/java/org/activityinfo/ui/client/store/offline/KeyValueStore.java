@@ -1,9 +1,8 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
@@ -37,9 +36,9 @@ public class KeyValueStore {
     }
 
     private String toJson(Set<ResourceId> offlineForms) {
-        JsonArray array = new JsonArray();
+        JsonArray array = Json.createArray();
         for (ResourceId offlineForm : offlineForms) {
-            array.add(new JsonPrimitive(offlineForm.asString()));
+            array.add(Json.create(offlineForm.asString()));
         }
         return array.toString();
     }
@@ -60,9 +59,9 @@ public class KeyValueStore {
                 return Collections.emptySet();
             } else {
                 Set<ResourceId> forms = new HashSet<>();
-                JsonArray array = new JsonParser().parse(json).getAsJsonArray();
-                for (JsonElement jsonElement : array) {
-                    forms.add(ResourceId.valueOf(jsonElement.getAsString()));
+                JsonArray array = Json.parse(json).getAsJsonArray();
+                for (JsonValue jsonElement : array.values()) {
+                    forms.add(ResourceId.valueOf(jsonElement.asString()));
                 }
                 return forms;
             }

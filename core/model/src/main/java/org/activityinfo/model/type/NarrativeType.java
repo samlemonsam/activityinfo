@@ -1,6 +1,6 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Value type that represents a FieldType containing paragraph-like text.
@@ -33,8 +33,8 @@ public class NarrativeType implements FieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
-        return NarrativeValue.valueOf(value.getAsString());
+    public FieldValue parseJsonValue(JsonValue value) {
+        return NarrativeValue.valueOf(value.asString());
     }
 
     @Override

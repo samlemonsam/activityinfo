@@ -42,7 +42,7 @@ public class JreJsonNull extends JreJsonValue implements JsonNull {
 
     @Override
     public String asString() {
-        return "null";
+        return null;
     }
 
     public Object getObject() {

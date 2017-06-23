@@ -2,9 +2,10 @@ package org.activityinfo.ui.client.component.table;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 
 import java.util.LinkedHashSet;
@@ -48,17 +49,17 @@ public class ColumnStatePersister {
         if (!Strings.isNullOrEmpty(json)) {
             JsonParser parser = new JsonParser();
             JsonObject record = parser.parse(json).getAsJsonObject();
-            for (Map.Entry<String, JsonElement> entry : record.entrySet()) {
+            for (Map.Entry<String, JsonValue> entry : record.entrySet()) {
                 columns.add(entry.getKey());
             }
         }
         return columns;
     }
 
-    private JsonObject asRecord(LinkedHashSet<String> columnNames) {
-        JsonObject record = new JsonObject();
+    private org.activityinfo.json.JsonObject asRecord(LinkedHashSet<String> columnNames) {
+        JsonObject record = Json.createObject();
         for (String columnName : columnNames) {
-            record.addProperty(columnName, columnName);
+            record.put(columnName, columnName);
         }
         return record;
     }

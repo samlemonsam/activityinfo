@@ -1,6 +1,6 @@
 package org.activityinfo.model.job;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
 
 /**
  * Describes the results of a successfully-completed job

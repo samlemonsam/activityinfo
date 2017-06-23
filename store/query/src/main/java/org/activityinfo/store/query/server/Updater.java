@@ -7,8 +7,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.*;
@@ -69,17 +69,17 @@ public class Updater {
      * @throws InvalidUpdateException if the given update
      * is not a validate update.
      */
-    public void execute(JsonObject updateObject) {
-        if(!updateObject.has("changes")) {
+    public void execute(org.activityinfo.json.JsonObject updateObject) {
+        if(!updateObject.hasKey("changes")) {
             throw new InvalidUpdateException("Root object must contain 'changes' property.");
         }
-        JsonElement changes = updateObject.get("changes");
+        JsonValue changes = updateObject.get("changes");
         if(!changes.isJsonArray()) {
             throw new InvalidUpdateException("Root object property 'changes' must be an array. " +
-                    "Found: " + changes.toString());
+                    "Found: " + changes.toJson());
         }
 
-        for (JsonElement change : changes.getAsJsonArray()) {
+        for (JsonValue change : changes.getAsJsonArray().values()) {
             if(!change.isJsonObject()) {
                 throw new InvalidUpdateException("Expected 'changes' property to be an array of json objects, " +
                         "but 'changes' array includes an element: " + change);
@@ -92,7 +92,7 @@ public class Updater {
         
         ResourceId recordId = parseId(changeObject, "@id");
 
-        if(!changeObject.has("@class")) {
+        if(!changeObject.hasKey("@class")) {
             throw new InvalidUpdateException(format(
                 "Resource with id '%s' does not exist and no '@class' attribute has been provided.", recordId));
         }
@@ -131,7 +131,7 @@ public class Updater {
         update.setRecordId(parseId(changeObject, "@id"));
         update.setDeleted(parseDeletedFlag(changeObject));
 
-        for(Map.Entry<String, JsonElement> change : changeObject.entrySet()) {
+        for(Map.Entry<String, JsonValue> change : changeObject.entrySet()) {
             if(!change.getKey().startsWith("@")) {
                 String fieldName = change.getKey();
 
@@ -169,24 +169,24 @@ public class Updater {
     }
 
     private static boolean parseDeletedFlag(JsonObject changeObject) {
-        if(changeObject.has("@deleted")) {
-            JsonElement jsonElement = changeObject.get("@deleted");
-            if(!jsonElement.isJsonPrimitive()) {
+        if(changeObject.hasKey("@deleted")) {
+            org.activityinfo.json.JsonValue JsonValue = changeObject.get("@deleted");
+            if(!JsonValue.isJsonPrimitive()) {
                 throw new InvalidUpdateException("The '@deleted' property must be a boolean.");
             }
-            return jsonElement.getAsBoolean();
+            return JsonValue.asBoolean();
         } else {
             return false;
         }
     }
 
     private static void validateExplicitClassAttribute(FormClass existingFormClass, JsonObject changeObject) {
-        if(changeObject.has("@class")) {
+        if(changeObject.hasKey("@class")) {
             ResourceId classId = parseId(changeObject, "@class");
             if(!classId.equals(existingFormClass.getId())) {
                 throw new InvalidUpdateException("Resource '%s' already exists but is a member of the class " +
                         "'%s' (%s). Cannot change to class %s.", 
-                        changeObject.get("@id").getAsString(),
+                        changeObject.get("@id").asString(),
                         existingFormClass.getLabel(),
                         existingFormClass.getId(),
                         classId);
@@ -195,19 +195,19 @@ public class Updater {
     }
 
     private static ResourceId parseId(JsonObject changeObject, String propertyName) {
-        if(!changeObject.has(propertyName)) {
+        if(!changeObject.hasKey(propertyName)) {
             throw new InvalidUpdateException(format("Missing '%s' property", propertyName));
         }
-        JsonElement jsonValue = changeObject.get(propertyName);
-        if(!jsonValue.isJsonPrimitive() || !jsonValue.getAsJsonPrimitive().isString()) {
+        JsonValue jsonValue = changeObject.get(propertyName);
+        if(!jsonValue.isJsonPrimitive() || !jsonValue.isString()) {
             throw new InvalidUpdateException(format("Property '%s' must contain a string, but found: %s", 
                     propertyName, jsonValue.toString()));
         }
         
-        return ResourceId.valueOf(jsonValue.getAsString());
+        return ResourceId.valueOf(jsonValue.asString());
     }
 
-    private static FieldValue parseFieldValue(FormField field, JsonElement jsonValue) {
+    private static FieldValue parseFieldValue(FormField field, JsonValue jsonValue) {
         if(jsonValue.isJsonNull()) {
             return null;
         } else if(field.getType() instanceof EnumType) {
@@ -217,15 +217,15 @@ public class Updater {
         }
     }
 
-    private static FieldValue parseEnumValue(EnumType type, JsonElement jsonElement) {
+    private static FieldValue parseEnumValue(EnumType type, JsonValue JsonValue) {
 
         Set<ResourceId> itemIds = new HashSet<>();
 
-        if(jsonElement.isJsonPrimitive()) {
-            itemIds.add(parseEnumId(type, jsonElement.getAsString()));
-        } else if(jsonElement.isJsonArray()) {
-            for (JsonElement element : jsonElement.getAsJsonArray()) {
-                itemIds.add(parseEnumId(type, element.getAsString()));
+        if(JsonValue.isJsonPrimitive()) {
+            itemIds.add(parseEnumId(type, JsonValue.asString()));
+        } else if(JsonValue.isJsonArray()) {
+            for (JsonValue element : JsonValue.getAsJsonArray().values()) {
+                itemIds.add(parseEnumId(type, element.asString()));
             }
         }
         if(type.getCardinality() == Cardinality.SINGLE && itemIds.size() > 1) {
@@ -464,7 +464,7 @@ public class Updater {
         // Identity the blob ids that are already associated with this record
         Set<String> existingBlobIds = new HashSet<>();
         if(existingResource.isPresent()) {
-            JsonElement existingFieldValue = existingResource.get().getFields().get(field.getId().asString());
+            JsonValue existingFieldValue = existingResource.get().getFields().get(field.getId().asString());
             if(existingFieldValue != null) {
                 AttachmentValue existingValue = fieldType.parseJsonValue(existingFieldValue);
                 for (Attachment attachment : existingValue.getValues()) {
@@ -506,7 +506,7 @@ public class Updater {
 
 
     public void create(ResourceId formId, JsonObject jsonObject) {
-        String id = jsonObject.get("id").getAsString();
+        String id = jsonObject.get("id").asString();
         createOrUpdate(formId, ResourceId.valueOf(id), jsonObject, true);
     }
 
@@ -524,20 +524,20 @@ public class Updater {
         update.setUserId(userId);
         update.setRecordId(recordId);
 
-        if(jsonObject.has("deleted") && !jsonObject.get("deleted").isJsonNull()) {
-            update.setDeleted(jsonObject.get("deleted").getAsBoolean());
+        if(jsonObject.hasKey("deleted") && !jsonObject.get("deleted").isJsonNull()) {
+            update.setDeleted(jsonObject.get("deleted").asBoolean());
         }
 
-        if (jsonObject.has("parentRecordId") && !jsonObject.get("parentRecordId").isJsonNull()) {
-            update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").getAsString()));
+        if (jsonObject.hasKey("parentRecordId") && !jsonObject.get("parentRecordId").isJsonNull()) {
+            update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").asString()));
         }
 
         FormClass formClass = collection.get().getFormClass();
-        JsonObject fieldValues = jsonObject.getAsJsonObject("fieldValues");
+        JsonObject fieldValues = jsonObject.get("fieldValues").getAsJsonObject();
         for (FormField formField : formClass.getFields()) {
             if(formField.getType().isUpdatable()) {
-                if (fieldValues.has(formField.getName())) {
-                    JsonElement updatedValueElement = fieldValues.get(formField.getName());
+                if (fieldValues.hasKey(formField.getName())) {
+                    JsonValue updatedValueElement = fieldValues.get(formField.getName());
                     FieldValue updatedValue;
                     if(updatedValueElement.isJsonNull()) {
                         updatedValue = null;

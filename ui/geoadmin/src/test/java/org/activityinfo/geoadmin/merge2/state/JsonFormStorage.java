@@ -5,10 +5,10 @@ import com.google.common.base.Optional;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.vividsolutions.jts.geom.Geometry;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
@@ -50,10 +50,10 @@ public class JsonFormStorage implements FormStorage {
         return FormClass.fromJson(json);
     }
 
-    private JsonArray loadInstances(String resourceName) throws IOException {
+    private org.activityinfo.json.JsonArray loadInstances(String resourceName) throws IOException {
         Gson gson = new Gson();
         try(Reader reader = getJson(resourceName + "/instances.json").openStream()) {
-            return gson.fromJson(reader, JsonArray.class);
+            return gson.fromJson(reader, org.activityinfo.json.JsonArray.class);
         } catch (Exception e) {
             throw new IOException("Exception loading instances for " + resourceName, e);
         }
@@ -161,7 +161,7 @@ public class JsonFormStorage implements FormStorage {
 
         @Override
         public void execute() {
-            for(int i=0;i<instances.size();++i) {
+            for(int i=0;i<instances.length();++i) {
                 JsonObject instance = instances.get(i).getAsJsonObject();
                 for (CursorObserver<JsonObject> binding : bindings) {
                     binding.onNext(instance);
@@ -182,7 +182,7 @@ public class JsonFormStorage implements FormStorage {
 
         @Override
         public void onNext(JsonObject instance) {
-            observer.onNext(ResourceId.valueOf(instance.get("id").getAsString()));
+            observer.onNext(ResourceId.valueOf(instance.get("id").asString()));
         }
 
         @Override
@@ -202,14 +202,14 @@ public class JsonFormStorage implements FormStorage {
 
         @Override
         public void onNext(JsonObject instance) {
-            if(instance.has(field)) {
+            if(instance.hasKey(field)) {
                 observer.onNext(convert(instance.get(field)));
             } else {
                 observer.onNext(null);
             }
         }
 
-        protected abstract FieldValue convert(JsonElement jsonElement);
+        protected abstract FieldValue convert(JsonValue jsonElement);
 
         @Override
         public void done() {
@@ -224,8 +224,8 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        protected FieldValue convert(JsonElement jsonElement) {
-            return TextValue.valueOf(jsonElement.getAsString());
+        protected FieldValue convert(JsonValue jsonElement) {
+            return TextValue.valueOf(jsonElement.asString());
         }
     }
     
@@ -236,13 +236,13 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        protected FieldValue convert(JsonElement jsonElement) {
+        protected FieldValue convert(JsonValue jsonElement) {
             JsonArray array = jsonElement.getAsJsonObject().get("extents").getAsJsonArray();
             Extents extents = Extents.create(
-                    array.get(0).getAsDouble(),
-                    array.get(1).getAsDouble(),
-                    array.get(2).getAsDouble(),
-                    array.get(3).getAsDouble());
+                    array.get(0).asNumber(),
+                    array.get(1).asNumber(),
+                    array.get(2).asNumber(),
+                    array.get(3).asNumber());
             
             return new GeoArea(extents);
         }
@@ -257,8 +257,8 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        protected FieldValue convert(JsonElement jsonElement) {
-            return new ReferenceValue(new RecordRef(formId, ResourceId.valueOf(jsonElement.getAsString())));
+        protected FieldValue convert(JsonValue jsonElement) {
+            return new ReferenceValue(new RecordRef(formId, ResourceId.valueOf(jsonElement.asString())));
         }
     }
     

@@ -60,7 +60,7 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
         StringBuilder toReturn = new StringBuilder();
         for (int i = 0; i < length(); i++) {
             if (i > 0) {
-                toReturn.append(", ");
+                toReturn.append(",");
             }
             toReturn.append(get(i).asString());
         }
@@ -69,6 +69,11 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
 
     public JsonValue get(int index) {
         return arrayValues.get(index);
+    }
+
+    @Override
+    public Iterable<JsonValue> values() {
+        return new JsonArrayIterable(this);
     }
 
     public JsonArray getArray(int index) {
@@ -134,6 +139,11 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
 
     public void set(int index, boolean bool) {
         set(index, factory.create(bool));
+    }
+
+    @Override
+    public void add(JsonValue value) {
+        arrayValues.add(value);
     }
 
     public String toJson() {

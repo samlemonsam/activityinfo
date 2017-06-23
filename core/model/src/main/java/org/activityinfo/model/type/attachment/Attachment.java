@@ -21,8 +21,10 @@ package org.activityinfo.model.type.attachment;
  * #L%
  */
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * @author yuriyz on 8/12/14.
@@ -85,24 +87,24 @@ public class Attachment {
         return blobId;
     }
 
-    public JsonElement toJsonElement() {
-        JsonObject object = new JsonObject();
-        object.addProperty("mimeType", mimeType);
-        object.addProperty("width", width);
-        object.addProperty("height", height);
-        object.addProperty("filename", filename);
-        object.addProperty("blobId", blobId);
+    public JsonValue toJsonElement() {
+        JsonObject object = createObject();
+        object.put("mimeType", mimeType);
+        object.put("width", width);
+        object.put("height", height);
+        object.put("filename", filename);
+        object.put("blobId", blobId);
         return object;
     }
 
 
-    public static Attachment fromJson(JsonObject object) {
+    public static Attachment fromJson(org.activityinfo.json.JsonObject object) {
         Attachment attachment = new Attachment(
-                object.get("mimeType").getAsString(),
-                object.get("filename").getAsString(),
-                object.get("blobId").getAsString());
-        attachment.setWidth(object.get("width").getAsInt());
-        attachment.setHeight(object.get("height").getAsInt());
+                object.get("mimeType").asString(),
+                object.get("filename").asString(),
+                object.get("blobId").asString());
+        attachment.setWidth(object.get("width").asInt());
+        attachment.setHeight(object.get("height").asInt());
         return attachment;
     }
     

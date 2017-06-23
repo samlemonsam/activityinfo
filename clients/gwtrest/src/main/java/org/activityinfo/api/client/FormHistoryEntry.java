@@ -1,8 +1,8 @@
 package org.activityinfo.api.client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 
 import java.util.ArrayList;
@@ -72,12 +72,12 @@ public class FormHistoryEntry {
     return values;
   }
 
-  public static FormHistoryEntry fromJson(JsonElement jsonElement) {
+  public static FormHistoryEntry fromJson(JsonValue jsonElement) {
     JsonObject jsonObject = jsonElement.getAsJsonObject();
     FormHistoryEntry model = new FormHistoryEntry();
     model.formId = JsonParsing.toNullableString(jsonObject.get("formId"));
     model.recordId = JsonParsing.toNullableString(jsonObject.get("recordId"));
-    model.time = jsonObject.get("time").getAsInt();
+    model.time = jsonObject.get("time").asInt();
     model.subFieldId = JsonParsing.toNullableString(jsonObject.get("subFieldId"));
     model.subFieldLabel = JsonParsing.toNullableString(jsonObject.get("subFieldLabel"));
     model.subRecordKey = JsonParsing.toNullableString(jsonObject.get("subRecordKey"));
@@ -90,7 +90,7 @@ public class FormHistoryEntry {
 
   public static List<FormHistoryEntry> fromJsonArray(JsonArray jsonArray) {
     List<FormHistoryEntry> list = new ArrayList<FormHistoryEntry>();
-    for(JsonElement element : jsonArray) {
+    for(JsonValue element : jsonArray.values()) {
       list.add(fromJson(element));
     }
     return list;

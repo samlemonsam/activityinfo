@@ -1,12 +1,14 @@
 package org.activityinfo.model.type.geo;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NullFieldValue;
 import org.activityinfo.model.type.RecordFieldValue;
 import org.activityinfo.model.type.number.Quantity;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * A Field Value containing a geographic point in the WGS84 geographic
@@ -36,10 +38,10 @@ public class GeoPoint implements GeoFieldValue, RecordFieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        JsonObject object = new JsonObject();
-        object.addProperty("latitude", latitude);
-        object.addProperty("longitude", longitude);
+    public JsonValue toJsonElement() {
+        JsonObject object = createObject();
+        object.put("latitude", latitude);
+        object.put("longitude", longitude);
         return object;
     }
 

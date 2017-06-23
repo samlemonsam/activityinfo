@@ -1,7 +1,6 @@
 package org.activityinfo.model.type.time;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldTypeVisitor;
@@ -49,11 +48,11 @@ public class LocalDateType implements FieldType {
     }
 
     @Override
-    public LocalDate parseJsonValue(JsonElement value) {
-        if(value instanceof JsonObject) {
-            value = ((JsonObject) value).getAsJsonPrimitive("value");
+    public LocalDate parseJsonValue(JsonValue value) {
+        if(value.isJsonObject()) {
+            value = value.getAsJsonObject().get("value");
         }
-        return LocalDate.parse(value.getAsString());
+        return LocalDate.parse(value.asString());
     }
 
     @Override

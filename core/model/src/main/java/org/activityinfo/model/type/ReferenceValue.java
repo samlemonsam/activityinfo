@@ -2,9 +2,9 @@ package org.activityinfo.model.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonValue;
 
 import java.util.Set;
 
@@ -44,16 +44,16 @@ public class ReferenceValue implements FieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
+    public JsonValue toJsonElement() {
 
         if(references.size() == 0) {
-            return JsonNull.INSTANCE;
+            return Json.createNull();
 
         } else if(references.size() == 1) {
             return references.iterator().next().toJsonElement();
 
         } else {
-            JsonArray array = new JsonArray();
+            JsonArray array = Json.createArray();
             for (RecordRef reference : references) {
                 array.add(reference.toJsonElement());
             }

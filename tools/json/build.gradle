@@ -3,13 +3,11 @@
 apply plugin: 'gwt-base'
 
 dependencies {
-    compile project(':core:model')
-    compile libraries.guava
     compile libraries.gwt.user
     compile libraries.gwt.dev
+    compile libraries.guava
 
-    gwt     libraries.gwt.guava
-
+    testCompile libraries.gson
 }
 
 test {
@@ -22,8 +20,6 @@ jar {
     from project.sourceSets.main.output
     from "$projectDir/src/super/java"
 }
-
-
 
 
 task testGwt(type: JavaExec) {
@@ -45,6 +41,6 @@ task testGwt(type: JavaExec) {
     main = 'junit.textui.TestRunner'
 
     jvmArgs "-Dgwt.args=-prod -style pretty -war ${buildDir}/testWar -workDir ${buildDir}/testGwtWork"
-    args 'org.activityinfo.json.JsonUtilGwtTest'
+    args 'org.activityinfo.js   on.JsonUtilGwtTest'
 
 }

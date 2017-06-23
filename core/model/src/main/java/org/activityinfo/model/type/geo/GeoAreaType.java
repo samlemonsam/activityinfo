@@ -1,7 +1,7 @@
 package org.activityinfo.model.type.geo;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.*;
 
 /**
@@ -35,9 +35,9 @@ public class GeoAreaType implements FieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
-        JsonObject object = value.getAsJsonObject();
-        JsonObject bbox = object.getAsJsonObject("bbox");
+    public FieldValue parseJsonValue(JsonValue value) {
+        org.activityinfo.json.JsonObject object = value.getAsJsonObject();
+        JsonObject bbox = object.getObject("bbox");
         return new GeoArea(Extents.fromJsonObject(bbox));
     }
 

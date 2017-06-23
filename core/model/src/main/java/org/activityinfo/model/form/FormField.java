@@ -2,10 +2,10 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * The smallest logical unit of data entry.
@@ -208,31 +209,31 @@ public class FormField extends FormElement {
 
     @Override
     public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id.asString());
-        object.addProperty("code", code);
-        object.addProperty("label", label);
-        object.addProperty("description", description);
-        object.addProperty("relevanceCondition", relevanceConditionExpression);
-        object.addProperty("visible", visible);
-        object.addProperty("required", required);
-        
-        object.addProperty("type", type.getTypeClass().getId());
+        JsonObject object = createObject();
+        object.put("id", id.asString());
+        object.put("code", code);
+        object.put("label", label);
+        object.put("description", description);
+        object.put("relevanceCondition", relevanceConditionExpression);
+        object.put("visible", visible);
+        object.put("required", required);
+
+        object.put("type", type.getTypeClass().getId());
 
         if(key) {
-            object.addProperty("key", true);
+            object.put("key", true);
         }
 
         if(!superProperties.isEmpty()) {
-            JsonArray superPropertiesArray = new JsonArray();
+            JsonArray superPropertiesArray = Json.createArray();
             for (ResourceId superProperty : superProperties) {
-                superPropertiesArray.add(new JsonPrimitive(superProperty.asString()));
+                superPropertiesArray.add(Json.createFromNullable(superProperty.asString()));
             }
-            object.add("superProperties", superPropertiesArray);
+            object.put("superProperties", superPropertiesArray);
         }
 
         if(type instanceof ParametrizedFieldType) {
-            object.add("typeParameters", ((ParametrizedFieldType) type).getParametersAsJson());
+            object.put("typeParameters", ((ParametrizedFieldType) type).getParametersAsJson());
         }
         
         return object;
@@ -240,45 +241,45 @@ public class FormField extends FormElement {
 
 
     public static FormField fromJson(JsonObject jsonObject) {
-        FormField field = new FormField(ResourceId.valueOf(jsonObject.get("id").getAsString()));
+        FormField field = new FormField(ResourceId.valueOf(jsonObject.get("id").asString()));
         field.setLabel(Strings.nullToEmpty(JsonParsing.toNullableString(jsonObject.get("label"))));
         field.setCode(JsonParsing.toNullableString(jsonObject.get("code")));
         field.setDescription(JsonParsing.toNullableString(jsonObject.get("description")));
 
-        if(jsonObject.has("relevanceCondition")) {
+        if(jsonObject.hasKey("relevanceCondition")) {
             field.setRelevanceConditionExpression(JsonParsing.toNullableString(jsonObject.get("relevanceCondition")));
-        } else if(jsonObject.has("relevanceConditionExpression")) {
+        } else if(jsonObject.hasKey("relevanceConditionExpression")) {
             field.setRelevanceConditionExpression(JsonParsing.toNullableString(jsonObject.get("relevanceConditionExpression")));
         }
         
-        if(jsonObject.has("visible")) {
-            field.setVisible(jsonObject.get("visible").getAsBoolean());
+        if(jsonObject.hasKey("visible")) {
+            field.setVisible(jsonObject.get("visible").asBoolean());
         }
-        if(jsonObject.has("required")) {
-            field.setRequired(jsonObject.get("required").getAsBoolean());
-        }
-
-        if(jsonObject.has("key")) {
-            field.setKey(jsonObject.get("key").getAsBoolean());
+        if(jsonObject.hasKey("required")) {
+            field.setRequired(jsonObject.get("required").asBoolean());
         }
 
-        if(jsonObject.has("superProperties")) {
+        if(jsonObject.hasKey("key")) {
+            field.setKey(jsonObject.get("key").asBoolean());
+        }
+
+        if(jsonObject.hasKey("superProperties")) {
             JsonArray superPropertiesArray = jsonObject.get("superProperties").getAsJsonArray();
-            for (JsonElement jsonElement : superPropertiesArray) {
-                field.addSuperProperty(ResourceId.valueOf(jsonElement.getAsString()));
+            for (JsonValue jsonElement : superPropertiesArray.values()) {
+                field.addSuperProperty(ResourceId.valueOf(jsonElement.asString()));
             }
         }
         
         String type;
-        JsonElement typeParameters ;
-        JsonElement typeElement = jsonObject.get("type");
+        JsonValue typeParameters ;
+        JsonValue typeElement = jsonObject.get("type");
         
         if(typeElement.isJsonPrimitive()) {
-            type = typeElement.getAsString();
+            type = typeElement.asString();
             typeParameters = jsonObject.get("typeParameters");
         } else {
             JsonObject typeObject = typeElement.getAsJsonObject();
-            type = typeObject.get("typeClass").getAsString();
+            type = typeObject.get("typeClass").asString();
             typeParameters = typeObject.get("parameters");
         }
         

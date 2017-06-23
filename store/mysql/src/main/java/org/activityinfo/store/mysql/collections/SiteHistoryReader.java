@@ -3,9 +3,9 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -78,7 +78,7 @@ public class SiteHistoryReader {
 
                 JsonObject jsonObject = (JsonObject) parser.parse(json);
                 
-                if(jsonObject.has("_DELETE")) {
+                if(jsonObject.hasKey("_DELETE")) {
                     change.setType(RecordChangeType.DELETED);
                 } else {
                     change.setType(initial ? RecordChangeType.CREATED : RecordChangeType.UPDATED);
@@ -109,7 +109,7 @@ public class SiteHistoryReader {
 
         Multimap<ResourceId, ResourceId> attributeValueMap = HashMultimap.create();
 
-        for (Map.Entry<String, JsonElement> jsonEntry : jsonObject.entrySet()) {
+        for (Map.Entry<String, JsonValue> jsonEntry : jsonObject.entrySet()) {
             String fieldName = jsonEntry.getKey();
             if(fieldName.equals("comments")) {
                 valueMap.put(fieldId(CuidAdapter.COMMENT_FIELD),
@@ -161,21 +161,21 @@ public class SiteHistoryReader {
         return valueMap;
     }
 
-    private boolean parseBoolean(JsonElement value) {
+    private boolean parseBoolean(JsonValue value) {
         if(value.isJsonObject()) {
             JsonObject object = value.getAsJsonObject();
-            if(object.has("value")) {
-                return object.get("value").getAsBoolean();
+            if(object.hasKey("value")) {
+                return object.get("value").asBoolean();
             }
         }
         return false;
     }
 
-    private FieldValue parseRef(JsonElement value, ResourceId formId, char domain) {
+    private FieldValue parseRef(JsonValue value, ResourceId formId, char domain) {
         if(value.isJsonObject()) {
             JsonObject object = value.getAsJsonObject();
-            if(object.get("type").getAsString().equals("Integer")) {
-                int id = object.get("value").getAsInt();
+            if(object.get("type").asString().equals("Integer")) {
+                int id = object.get("value").asInt();
                 ResourceId recordId = CuidAdapter.cuid(domain, id);
                 return new ReferenceValue(new RecordRef(formId, recordId));
             }
@@ -183,31 +183,31 @@ public class SiteHistoryReader {
         return null;
     }
 
-    private FieldValue parseDate(JsonElement value) {
+    private FieldValue parseDate(JsonValue value) {
         if(value.isJsonObject()) {
             JsonObject object = value.getAsJsonObject();
-            if(object.get("type").getAsString().equals("LocalDate")) {
-                return LocalDate.parse(object.get("value").getAsString());
+            if(object.get("type").asString().equals("LocalDate")) {
+                return LocalDate.parse(object.get("value").asString());
             }
         }
         return null;
     }
 
-    private FieldValue parseQuantity(JsonElement value) {
+    private FieldValue parseQuantity(JsonValue value) {
         if(value.isJsonObject()) {
             JsonObject object = value.getAsJsonObject();
-            if(object.get("type").getAsString().equals("Double")) {
-                return new Quantity(object.get("value").getAsDouble());
+            if(object.get("type").asString().equals("Double")) {
+                return new Quantity(object.get("value").asNumber());
             }
         }
         return null;
     }
 
-    private String parseString(JsonElement value) {
+    private String parseString(JsonValue value) {
         if(value.isJsonObject()) {
             JsonObject object = value.getAsJsonObject();
-            if(object.get("type").getAsString().equals("String")) {
-                return Strings.emptyToNull(object.get("value").getAsString().trim());
+            if(object.get("type").asString().equals("String")) {
+                return Strings.emptyToNull(object.get("value").asString().trim());
             }
         }
         return null;

@@ -96,6 +96,5 @@ buildscript {
     classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
     classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
     classpath 'me.tatarka:gradle-retrolambda:3.6.1'
-
   }
 }

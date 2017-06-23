@@ -18,6 +18,9 @@ package org.activityinfo.json.impl;
 import com.google.gwt.core.client.JsArrayString;
 import org.activityinfo.json.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Client-side implementation of JsonObject interface.
  */
@@ -61,6 +64,15 @@ final public class JsJsonObject extends JsJsonValue
         return key in this;
     }-*/;
 
+    @Override
+    public Iterable<Map.Entry<String, JsonValue>> entrySet() {
+        Map<String, JsonValue> map = new HashMap<>();
+        for (String key : keys()) {
+            map.put(key, get(key));
+        }
+        return map.entrySet();
+    }
+
     public String[] keys() {
         JsArrayString str = keys0();
         return reinterpretCast(str);
@@ -90,6 +102,11 @@ final public class JsJsonObject extends JsJsonValue
 
     public void put(String key, boolean value) {
         put(key, JsJsonBoolean.create(value));
+    }
+
+    @Override
+    public void add(String key, JsonValue value) {
+        put(key, value);
     }
 
     /**

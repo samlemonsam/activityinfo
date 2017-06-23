@@ -21,8 +21,8 @@ package org.activityinfo.model.type.time;
  * #L%
  */
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -60,8 +60,8 @@ public class YearValue implements FieldValue, TemporalValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        return new JsonPrimitive(year);
+    public JsonValue toJsonElement() {
+        return Json.create(year);
     }
 
     @Override

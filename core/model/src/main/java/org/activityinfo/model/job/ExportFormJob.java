@@ -1,13 +1,15 @@
 package org.activityinfo.model.job;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Exports a single form to a CSV table
@@ -43,7 +45,7 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     }
 
     @Override
-    public ExportResult parseResult(JsonObject resultObject) {
+    public ExportResult parseResult(org.activityinfo.json.JsonObject resultObject) {
         return ExportResult.fromJson(resultObject);
     }
 
@@ -52,21 +54,21 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     }
 
     @Override
-    public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("formId", formId.asString());
+    public org.activityinfo.json.JsonObject toJsonObject() {
+        JsonObject object = createObject();
+        object.put("formId", formId.asString());
         return object;
     }
 
-    public static ExportFormJob fromJson(JsonObject object) {
+    public static ExportFormJob fromJson(org.activityinfo.json.JsonObject object) {
 
         List<ExportColumn> columns = new ArrayList<>();
-        if(object.has("columns")) {
-            for (JsonElement jsonElement : object.getAsJsonArray("columns").getAsJsonArray()) {
+        if(object.hasKey("columns")) {
+            for (JsonValue jsonElement : object.get("columns").getAsJsonArray().values()) {
                 columns.add(ExportColumn.fromJson(jsonElement.getAsJsonObject()));
             }
         }
 
-        return new ExportFormJob(ResourceId.valueOf(object.get("formId").getAsString()), columns);
+        return new ExportFormJob(ResourceId.valueOf(object.get("formId").asString()), columns);
     }
 }

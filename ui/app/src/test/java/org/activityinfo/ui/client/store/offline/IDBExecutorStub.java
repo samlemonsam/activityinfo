@@ -1,8 +1,7 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.promise.Promise;
 
 import java.util.*;
@@ -10,7 +9,7 @@ import java.util.*;
 
 public class IDBExecutorStub implements IDBExecutor {
 
-    private static final JsonParser JSON_PARSER = new JsonParser();
+    private static final org.activityinfo.json.JsonParser JSON_PARSER = new org.activityinfo.json.JsonParser();
 
     private Map<String, ObjectStore> storeMap = new HashMap<>();
 
@@ -105,7 +104,7 @@ public class IDBExecutorStub implements IDBExecutor {
             if(!readwrite) {
                 throw new IllegalStateException("The transaction is read-only.");
             }
-            JsonObject object = JSON_PARSER.parse(json).getAsJsonObject();
+            org.activityinfo.json.JsonObject object = JSON_PARSER.parse(json).getAsJsonObject();
 
             store.objectMap.put(buildKey(object), json);
         }
@@ -126,11 +125,11 @@ public class IDBExecutorStub implements IDBExecutor {
 
             String[] key = new String[store.keyPath.length];
             for (int i = 0; i < store.keyPath.length; i++) {
-                JsonElement keyPart = object.get(store.keyPath[i]);
+                JsonValue keyPart = object.get(store.keyPath[i]);
                 if(keyPart == null) {
                     throw new IllegalStateException("Missing key '" + key + "' for object " + object);
                 }
-                key[i] = keyPart.getAsString();
+                key[i] = keyPart.asString();
             }
 
             if(key.length == 1) {

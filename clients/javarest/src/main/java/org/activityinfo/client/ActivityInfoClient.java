@@ -1,13 +1,14 @@
 package org.activityinfo.client;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
@@ -43,21 +44,21 @@ public class ActivityInfoClient {
 
     public ResourceId createDatabase(String databaseName) {
 
-        JsonObject properties = new JsonObject();
-        properties.addProperty("name", databaseName);
+        JsonObject properties = Json.createObject();
+        properties.put("name", databaseName);
 
-        JsonObject createEntity = new JsonObject();
-        createEntity.addProperty("entityName", "UserDatabase");
+        JsonObject createEntity = Json.createObject();
+        createEntity.put("entityName", "UserDatabase");
         createEntity.add("properties", properties);
 
-        JsonObject command = new JsonObject();
-        command.addProperty("type", "CreateEntity");
+        JsonObject command = Json.createObject();
+        command.put("type", "CreateEntity");
         command.add("command", createEntity);
 
         String result = client.resource(root).path("command").post(String.class, command.toString());
         JsonObject resultObject = (JsonObject) parser.parse(result);
 
-        int newId = resultObject.get("newId").getAsInt();
+        int newId = resultObject.get("newId").asInt();
 
         return CuidAdapter.databaseId(newId);
     }
@@ -122,15 +123,15 @@ public class ActivityInfoClient {
                 .post(String.class, queryModel.toJsonString());
 
         JsonObject object = (JsonObject) parser.parse(json);
-        int numRows = object.getAsJsonPrimitive("rows").getAsInt();
+        int numRows = object.get("rows").asInt();
 
         Map<String, ColumnView> columnMap = new HashMap<>();
-        for (Map.Entry<String, JsonElement> column : object.getAsJsonObject("columns").entrySet()) {
+        for (Map.Entry<String, JsonValue> column : object.get("columns").getAsJsonObject().entrySet()) {
             JsonObject columnValue = column.getValue().getAsJsonObject();
-            String storage = columnValue.getAsJsonPrimitive("storage").getAsString();
+            String storage = columnValue.get("storage").asString();
             switch (storage) {
                 case "array":
-                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.getAsJsonArray("values")));
+                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.get("values").getAsJsonArray()));
                     break;
                 case "empty":
                     columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
@@ -151,14 +152,14 @@ public class ActivityInfoClient {
         if(columnValue.get("value").isJsonNull()) {
             return parseEmpty(numRows, columnValue);
         }
-        String typeName = columnValue.get("type").getAsString();
+        String typeName = columnValue.get("type").asString();
         switch(typeName) {
             case "STRING":
-                return new ConstantColumnView(numRows, columnValue.get("value").getAsString());
+                return new ConstantColumnView(numRows, columnValue.get("value").asString());
             case "NUMBER":
-                return new ConstantColumnView(numRows, columnValue.get("value").getAsDouble());
+                return new ConstantColumnView(numRows, columnValue.get("value").asNumber());
             case "BOOLEAN":
-                return new ConstantColumnView(numRows, columnValue.get("value").getAsBoolean());
+                return new ConstantColumnView(numRows, columnValue.get("value").asBoolean());
             default:
                 throw new UnsupportedOperationException("type: " + typeName);
         }
@@ -166,7 +167,7 @@ public class ActivityInfoClient {
 
 
     private ColumnView parseEmpty(int numRows, JsonObject columnValue) {
-        String typeName = columnValue.get("type").getAsString();
+        String typeName = columnValue.get("type").asString();
         ColumnType type = ColumnType.valueOf(typeName);
         return new EmptyColumnView(type, numRows);
     }

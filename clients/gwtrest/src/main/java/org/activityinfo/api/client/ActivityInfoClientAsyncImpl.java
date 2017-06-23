@@ -1,12 +1,12 @@
 package org.activityinfo.api.client;
 
 import com.google.common.base.Function;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.UriUtils;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
@@ -59,9 +59,9 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         if(parent != null) {
             urlBuilder.append("?parent=").append(UriUtils.encode(parent));
         }
-        return get(urlBuilder.toString(), new Function<JsonElement, List<CatalogEntry>>() {
+        return get(urlBuilder.toString(), new Function<JsonValue, List<CatalogEntry>>() {
             @Override
-            public List<CatalogEntry> apply(JsonElement jsonElement) {
+            public List<CatalogEntry> apply(JsonValue jsonElement) {
                 return CatalogEntry.fromJsonArray(jsonElement.getAsJsonArray());
             }
         });
@@ -128,9 +128,9 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         urlBuilder.append("/").append(recordId);
         urlBuilder.append("/history");
 
-        return get(urlBuilder.toString(), new Function<JsonElement, List<FormHistoryEntry>>() {
+        return get(urlBuilder.toString(), new Function<JsonValue, List<FormHistoryEntry>>() {
             @Override
-            public List<FormHistoryEntry> apply(JsonElement jsonElement) {
+            public List<FormHistoryEntry> apply(JsonValue jsonElement) {
                 return FormHistoryEntry.fromJsonArray(jsonElement.getAsJsonArray());
             }
         });
@@ -168,9 +168,9 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
 
     private Promise<FormRecordSet> getRecords(final String url) {
-        return get(url, new Function<JsonElement, FormRecordSet>() {
+        return get(url, new Function<JsonValue, FormRecordSet>() {
             @Override
-            public FormRecordSet apply(JsonElement jsonElement) {
+            public FormRecordSet apply(JsonValue jsonElement) {
                 return FormRecordSet.fromJson(jsonElement);
             }
         });
@@ -197,9 +197,9 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param formId Id of the form
      */
     public Promise<FormClass> getFormSchema(String formId) {
-        return get(schemaUrl(formId), new Function<JsonElement, FormClass>() {
+        return get(schemaUrl(formId), new Function<JsonValue, FormClass>() {
             @Override
-            public FormClass apply(JsonElement jsonElement) {
+            public FormClass apply(JsonValue jsonElement) {
                 return FormClass.fromJson(jsonElement.getAsJsonObject());
             }
         });
@@ -207,9 +207,9 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormMetadata> getFormMetadata(String formId) {
-        return get(baseUrl + "/form/" + formId, new Function<JsonElement, FormMetadata>() {
+        return get(baseUrl + "/form/" + formId, new Function<JsonValue, FormMetadata>() {
             @Override
-            public FormMetadata apply(JsonElement jsonElement) {
+            public FormMetadata apply(JsonValue jsonElement) {
                 return FormMetadata.fromJson(jsonElement.getAsJsonObject());
             }
         });
@@ -217,13 +217,13 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormTree> getFormTree(final ResourceId formId) {
-        return get(baseUrl + "/form/" + formId.asString() + "/tree", new Function<JsonElement, FormTree>() {
+        return get(baseUrl + "/form/" + formId.asString() + "/tree", new Function<JsonValue, FormTree>() {
             @Override
-            public FormTree apply(JsonElement jsonElement) {
+            public FormTree apply(JsonValue jsonElement) {
                 JsonObject root = jsonElement.getAsJsonObject();
                 JsonObject forms = root.get("forms").getAsJsonObject();
                 final Map<ResourceId, FormClass> formMap = new HashMap<ResourceId, FormClass>();
-                for (Map.Entry<String, JsonElement> entry : forms.entrySet()) {
+                for (Map.Entry<String, JsonValue> entry : forms.entrySet()) {
                     FormClass formClass = FormClass.fromJson(entry.getValue().getAsJsonObject());
                     formMap.put(formClass.getId(), formClass);
                 }
@@ -290,9 +290,9 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
-        return get(baseUrl + "/jobs/" + jobId, new Function<JsonElement, JobStatus<?, ?>>() {
+        return get(baseUrl + "/jobs/" + jobId, new Function<JsonValue, JobStatus<?, ?>>() {
             @Override
-            public JobStatus<?, ?> apply(JsonElement jsonElement) {
+            public JobStatus<?, ?> apply(JsonValue jsonElement) {
                 return JobStatus.fromJson(jsonElement.getAsJsonObject());
             }
         });
@@ -326,7 +326,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return result;
     }
 
-    private <R> Promise<R> get(final String url, final Function<JsonElement, R> parser) {
+    private <R> Promise<R> get(final String url, final Function<JsonValue, R> parser) {
         return getRaw(url, new Function<Response, R>() {
             @Override
             public R apply(Response response) {

@@ -1,8 +1,10 @@
 package org.activityinfo.model.form;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Created by yuriyz on 4/15/2016.
@@ -47,20 +49,20 @@ public class FormLabel extends FormElement {
     }
 
     @Override
-    public JsonElement toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id.asString());
-        object.addProperty("label", label);
-        object.addProperty("type", "label");
-        object.addProperty("visible", visible);
+    public JsonValue toJsonObject() {
+        JsonObject object = createObject();
+        object.put("id", id.asString());
+        object.put("label", label);
+        object.put("type", "label");
+        object.put("visible", visible);
         return object;
     }
 
-    public static FormElement fromJson(JsonObject jsonObject) {
-        FormLabel label = new FormLabel(ResourceId.valueOf(jsonObject.get("id").getAsString()));
-        label.setLabel(jsonObject.get("label").getAsString());
-        if(jsonObject.has("visible")) {
-            label.setVisible(jsonObject.get("visible").getAsBoolean());
+    public static FormElement fromJson(org.activityinfo.json.JsonObject jsonObject) {
+        FormLabel label = new FormLabel(ResourceId.valueOf(jsonObject.get("id").asString()));
+        label.setLabel(jsonObject.get("label").asString());
+        if(jsonObject.hasKey("visible")) {
+            label.setVisible(jsonObject.get("visible").asBoolean());
         }
         return label;
     }

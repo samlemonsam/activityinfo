@@ -3,13 +3,18 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -326,7 +331,7 @@ public class FormResource {
         
         assertVisible(formId);
         
-        JsonElement jsonObject = new JsonParser().parse(body);
+        JsonValue jsonObject = new JsonParser().parse(body);
 
         Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
                 new HrdSerialNumberProvider());
@@ -348,7 +353,7 @@ public class FormResource {
 
         assertVisible(formId);
 
-        JsonElement jsonObject = new JsonParser().parse(body);
+        JsonValue jsonObject = new JsonParser().parse(body);
 
         try {
             Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,

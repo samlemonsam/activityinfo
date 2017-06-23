@@ -1,7 +1,6 @@
 package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -136,7 +135,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     private FormTree queryFormTree(ResourceId classId) {
         FormTreeBuilder builder = new FormTreeBuilder(catalog);
         FormTree formTree = builder.queryTree(classId);
-        JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
+        org.activityinfo.json.JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
         formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
         return formTree;
     }
@@ -219,7 +218,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         EnumValue kitContents = (EnumValue) site.get(CuidAdapter.attributeGroupField(2));
 
         assertThat(cause, nullValue());
-        assertThat(kitContents.getResourceIds(), Matchers.contains(CuidAdapter.attributeId(3), CuidAdapter.attributeField(4)));
+        assertThat(kitContents.getResourceIds(), contains(
+            CuidAdapter.attributeId(3),
+            CuidAdapter.attributeField(4)));
     }
 
     @Test

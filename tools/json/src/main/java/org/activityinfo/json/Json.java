@@ -23,6 +23,10 @@ import org.activityinfo.json.impl.JsonUtil;
  */
 public class Json {
 
+    public static JsonValue createFromNullable(String string) {
+        return instance().createFromNullable(string);
+    }
+
     public static JsonString create(String string) {
         return instance().create(string);
     }
@@ -51,7 +55,7 @@ public class Json {
         return new JreJsonFactory();
     }
 
-    public static JsonObject parse(String jsonString) {
+    public static JsonValue parse(String jsonString) {
         return instance().parse(jsonString);
     }
 

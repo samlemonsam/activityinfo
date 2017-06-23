@@ -1,10 +1,13 @@
 package org.activityinfo.model.resource;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  *  Constructs a set of updates to be applied atomically
@@ -54,14 +57,14 @@ public class TransactionBuilder {
         return update;
     }
     
-    public JsonObject build() {
-        JsonArray changes = new JsonArray();
+    public org.activityinfo.json.JsonObject build() {
+        JsonArray changes = Json.createArray();
         for (UpdateBuilder update : updates) {
             changes.add(update.build());
         }
-        
-        JsonObject object = new JsonObject();
-        object.add("changes", changes);
+
+        JsonObject object = createObject();
+        object.put("changes", changes);
 
         return object;
     }

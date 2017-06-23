@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.metadata;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;

@@ -1,14 +1,12 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonObject;
-
 /**
  * A {@code FieldType} with parameters that further specialize
  * the type class.
  */
 public interface ParametrizedFieldType extends FieldType {
 
-    JsonObject getParametersAsJson();
+    org.activityinfo.json.JsonObject getParametersAsJson();
     
     /**
      *

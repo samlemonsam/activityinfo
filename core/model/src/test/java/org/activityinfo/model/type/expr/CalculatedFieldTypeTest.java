@@ -1,7 +1,7 @@
 package org.activityinfo.model.type.expr;
 
-import com.google.gson.JsonObject;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.junit.BeforeClass;

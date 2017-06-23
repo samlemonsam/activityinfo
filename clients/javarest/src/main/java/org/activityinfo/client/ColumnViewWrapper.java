@@ -1,8 +1,8 @@
 package org.activityinfo.client;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
@@ -39,11 +39,11 @@ public class ColumnViewWrapper implements ColumnView {
 
     @Override
     public double getDouble(int row) {
-        JsonElement jsonElement = array.get(row);
+        JsonValue jsonElement = array.get(row);
         if(jsonElement.isJsonNull()) {
             return Double.NaN;
         } else {
-            return jsonElement.getAsDouble();
+            return jsonElement.asNumber();
         }
     }
 
@@ -51,11 +51,11 @@ public class ColumnViewWrapper implements ColumnView {
     public String getString(int row) {
         Preconditions.checkPositionIndex(row, numRows);
 
-        JsonElement jsonElement = array.get(row);
+        JsonValue jsonElement = array.get(row);
         if(jsonElement.isJsonNull()) {
             return null;
         } else {
-            return jsonElement.getAsString();
+            return jsonElement.asString();
         }
     }
 

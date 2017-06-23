@@ -1,14 +1,15 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Status information the current offline snapshot.
@@ -42,25 +43,25 @@ public class SnapshotStatus {
     }
 
     public JsonObject toJson() {
-        JsonObject versions = new JsonObject();
+        JsonObject versions = createObject();
         for (Map.Entry<ResourceId, Long> entry : formVersions.entrySet()) {
-            versions.addProperty(entry.getKey().asString(), Long.toString(entry.getValue()));
+            versions.put(entry.getKey().asString(), Long.toString(entry.getValue()));
         }
 
-        JsonObject object = new JsonObject();
-        object.addProperty("time", time.getTime());
-        object.add("versions", versions);
+        JsonObject object = createObject();
+        object.put("time", time.getTime());
+        object.put("versions", versions);
         return object;
     }
 
     public static SnapshotStatus fromJson(JsonObject object) {
         SnapshotStatus status = new SnapshotStatus();
-        status.time = new Date(object.get("time").getAsLong());
+        status.time = new Date(object.get("time").asLong());
 
-        JsonObject versions = object.getAsJsonObject("versions");
-        for (Map.Entry<String, JsonElement> entry : versions.entrySet()) {
+        JsonObject versions = object.getObject("versions");
+        for (Map.Entry<String, JsonValue> entry : versions.entrySet()) {
             ResourceId formId = ResourceId.valueOf(entry.getKey());
-            long version = entry.getValue().getAsLong();
+            long version = entry.getValue().asLong();
             status.formVersions.put(formId, version);
         }
 
@@ -68,7 +69,7 @@ public class SnapshotStatus {
     }
 
     public static SnapshotStatus fromJson(String json) {
-        return fromJson(new JsonParser().parse(json).getAsJsonObject());
+        return fromJson(new org.activityinfo.json.JsonParser().parse(json).getAsJsonObject());
     }
 
     @Override

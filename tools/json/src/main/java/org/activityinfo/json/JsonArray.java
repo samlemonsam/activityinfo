@@ -25,6 +25,8 @@ public interface JsonArray extends JsonValue {
      */
     <T extends JsonValue> T get(int index);
 
+    Iterable<JsonValue> values();
+
     /**
      * Return the ith element of the array (uncoerced) as a JsonArray. If the type is not an array,
      * this can result in runtime errors.
@@ -79,4 +81,7 @@ public interface JsonArray extends JsonValue {
      * Set the value at index to be a boolean value.
      */
     void set(int index, boolean bool);
+
+
+    void add(JsonValue value);
 }

@@ -22,8 +22,8 @@ package org.activityinfo.model.form;
  */
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -41,6 +41,8 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  *
@@ -79,7 +81,7 @@ public class FormInstance {
         }
 
         for (FormField field : formClass.getFields()) {
-            JsonElement fieldValue = record.getFields().get(field.getName());
+            JsonValue fieldValue = record.getFields().get(field.getName());
             if(fieldValue != null && !fieldValue.isJsonNull()) {
                 instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
             }
@@ -276,17 +278,17 @@ public class FormInstance {
         return id != null ? id.hashCode() : 0;
     }
 
-    public JsonObject toJsonObject() {
+    public org.activityinfo.json.JsonObject toJsonObject() {
 
-        JsonObject fields = new JsonObject();
+        JsonObject fields = createObject();
         for (Map.Entry<ResourceId, FieldValue> entry : fieldMap.entrySet()) {
-            fields.add(entry.getKey().asString(), entry.getValue().toJsonElement());
+            fields.put(entry.getKey().asString(), entry.getValue().toJsonElement());
         }
 
-        JsonObject object = new JsonObject();
-        object.addProperty("formId", getFormId().asString());
-        object.addProperty("recordId", getId().asString());
-        object.add("fieldValues", fields);
+        JsonObject object = createObject();
+        object.put("formId", getFormId().asString());
+        object.put("recordId", getId().asString());
+        object.put("fieldValues", fields);
 
         return object;
     }

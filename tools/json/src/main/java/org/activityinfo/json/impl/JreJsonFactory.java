@@ -28,6 +28,15 @@ public class JreJsonFactory implements JsonFactory {
         return new JreJsonString(string);
     }
 
+    @Override
+    public JsonValue createFromNullable(String string) {
+        if(string == null) {
+            return createNull();
+        } else {
+            return create(string);
+        }
+    }
+
     public JsonNumber create(double number) {
         return new JreJsonNumber(number);
     }

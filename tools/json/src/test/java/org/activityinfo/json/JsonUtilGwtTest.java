@@ -87,7 +87,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertEquals("false", boolFalse.asString());
     assertEquals("true", trueString.asString());
 
-    assertEquals("null", Json.createNull().asString());
+    assertTrue(Json.createNull().asString() == null);
     assertEquals("42", Json.create(42).asString());
 
     // [[42, 45], [52, 55]] -> "42, 45, 52, 55"
@@ -95,7 +95,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     inner2.set(0, 52);
     inner2.set(1, 55);
     outer.set(1, inner2);
-    assertEquals("42, 45, 52, 55", outer.asString());
+    assertEquals("42,45,52,55", outer.asString());
 
     // object -> [object Object]
     assertEquals("[object Object]", Json.createObject().asString());
@@ -128,11 +128,6 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertEquals(43.0, result.get("y").asNumber());
   }
 
-  public void testQuote() {
-    String badString = "\bThis\"is\ufeff\ta\\bad\nstring\u2029\u2029";
-    assertEquals("\"\\bThis\\\"is\\ufeff\\ta\\\\bad\\nstring"
-        + "\\u2029\\u2029\"", Json.stringify(Json.create(badString)));
-  }
 
   public void testStringify() {
     String json = "{\"a\":1,\"b\":\"hello\",\"c\":true,"
@@ -143,12 +138,12 @@ public class JsonUtilGwtTest extends GWTTestCase {
   public void testStringifyCycle() {
     String json = "{\"a\":1,\"b\":\"hello\",\"c\":true,"
         + "\"d\":null,\"e\":[1,2,3,4],\"f\":{\"x\":1}}";
-    JsonObject obj = Json.parse(json);
+    JsonObject obj = Json.parse(json).getAsJsonObject();
     obj.put("cycle", obj);
     try {
       Json.stringify(obj);
       fail("Expected JsonException for object cycle");
-    } catch (JsonException je) {
+    } catch (Exception je) {
     }
   }
 
@@ -156,8 +151,8 @@ public class JsonUtilGwtTest extends GWTTestCase {
   public void testStringifyNonCycle() {
     String json = "{\"a\":1,\"b\":\"hello\",\"c\":true,"
         + "\"d\":null,\"e\":[1,2,3,4],\"f\":{\"x\":1}}";
-    JsonObject obj = Json.parse(json);
-    JsonObject obj2 = Json.parse("{\"x\": 1, \"y\":2}");
+    JsonObject obj = Json.parse(json).getAsJsonObject();
+    JsonObject obj2 = Json.parse("{\"x\": 1, \"y\":2}").getAsJsonObject();
     obj.put("nocycle", obj2);
     obj.put("nocycle2", obj2);
     try {
@@ -213,5 +208,23 @@ public class JsonUtilGwtTest extends GWTTestCase {
     return o;
   }-*/;
 
+
+  public void testSetStringNull() {
+    JsonObject object = Json.createObject();
+    object.put("foo", (String)null);
+
+    assertTrue(object.get("foo").isJsonNull());
+  }
+
+  public void testObjectNullValues() {
+
+    JsonObject object = Json.createObject();
+    object.put("a", (String)null);
+    object.put("b", Json.createNull());
+
+    assertTrue(object.get("a").isJsonNull());
+    assertTrue(object.get("b").isJsonNull());
+    assertTrue(object.get("c") == null);
+  }
 
 }

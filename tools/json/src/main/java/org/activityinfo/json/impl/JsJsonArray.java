@@ -37,6 +37,11 @@ final public class JsJsonArray extends JsJsonValue
         return @com.google.gwt.core.client.GWT::isScript()() || value == null ? value : Object(value);
     }-*/;
 
+    @Override
+    public Iterable<JsonValue> values() {
+        return new JsonArrayIterable(this);
+    }
+
     public JsonArray getArray(int index) {
         return (JsonArray) get(index);
     }
@@ -64,6 +69,11 @@ final public class JsJsonArray extends JsJsonValue
 
     public native void set(int index, JsonValue value) /*-{
         this[index] = value;
+    }-*/;
+
+
+    public native void add(JsonValue value) /*-{
+        this.push(value);
     }-*/;
 
     public void set(int index, String string) {

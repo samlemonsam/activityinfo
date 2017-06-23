@@ -1,8 +1,10 @@
 package org.activityinfo.model.query;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
+
+import static org.activityinfo.json.Json.createObject;
 
 public class RowSource {
 
@@ -43,17 +45,17 @@ public class RowSource {
     }
 
 
-    public JsonElement toJsonElement() {
-        JsonObject object = new JsonObject();
-        object.addProperty("rootFormId", rootFormId.asString());
+    public JsonValue toJsonElement() {
+        JsonObject object = createObject();
+        object.put("rootFormId", rootFormId.asString());
 
         return object;
     }
 
 
-    public static RowSource fromJson(JsonObject object) {
+    public static RowSource fromJson(org.activityinfo.json.JsonObject object) {
         RowSource source = new RowSource();
-        source.setRootFormId(ResourceId.valueOf(object.get("rootFormId").getAsString()));
+        source.setRootFormId(ResourceId.valueOf(object.get("rootFormId").asString()));
         return source;
     }
 

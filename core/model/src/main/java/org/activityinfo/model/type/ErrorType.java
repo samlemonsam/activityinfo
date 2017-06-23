@@ -1,6 +1,6 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 
 public class ErrorType implements FieldType {
 
@@ -27,7 +27,7 @@ public class ErrorType implements FieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
+    public FieldValue parseJsonValue(JsonValue value) {
         throw new UnsupportedOperationException();
     }
 

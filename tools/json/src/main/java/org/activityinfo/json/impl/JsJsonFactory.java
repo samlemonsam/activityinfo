@@ -33,6 +33,11 @@ public class JsJsonFactory implements JsonFactory {
         return JsJsonString.create(string);
     }
 
+    @Override
+    public JsonValue createFromNullable(String string) {
+        return JsJsonString.create(string);
+    }
+
     public JsonNumber create(double number) {
         return JsJsonNumber.create(number);
     }

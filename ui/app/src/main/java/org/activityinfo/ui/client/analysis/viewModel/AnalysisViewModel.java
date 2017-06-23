@@ -1,6 +1,6 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
@@ -109,7 +109,7 @@ public class AnalysisViewModel {
         throw new UnsupportedOperationException();
     }
 
-    public void loadFromJson(JsonObject object) {
+    public void loadFromJson(org.activityinfo.json.JsonObject object) {
 
     }
 

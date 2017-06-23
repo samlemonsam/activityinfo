@@ -15,13 +15,17 @@
  */
 package org.activityinfo.json;
 
+import java.util.Map;
+
 /**
  * Represents a Json object.
  */
 public interface JsonObject extends JsonValue {
 
     /**
-     * Return the element (uncoerced) as a JsonValue.
+     * Return the element (uncoerced) as a JsonValue or {@code null} if
+     * this object has no value for the given key.
+     *
      */
     <T extends JsonValue> T get(String key);
 
@@ -49,6 +53,7 @@ public interface JsonObject extends JsonValue {
      */
     JsonObject getObject(String key);
 
+
     /**
      * Return the element (uncoerced) as a String. If the type is not a String, this
      * can result in runtime errors.
@@ -59,6 +64,9 @@ public interface JsonObject extends JsonValue {
      * All keys of the object.
      */
     String[] keys();
+
+    Iterable<Map.Entry<String, JsonValue>> entrySet();
+
 
     /**
      * Set a given key to the given value.
@@ -91,4 +99,6 @@ public interface JsonObject extends JsonValue {
      * @param key
      */
     void remove(String key);
+
+    void add(String key, JsonValue value);
 }

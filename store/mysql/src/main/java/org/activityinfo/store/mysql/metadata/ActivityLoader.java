@@ -9,8 +9,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.common.io.CharStreams;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -26,7 +27,10 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -344,18 +348,20 @@ public class ActivityLoader {
 
     private static FormClass tryDeserialize(Activity activity, String formClass, byte[] formClassGz) {
         try {
-            Reader reader;
+            JsonObject object;
             if (formClassGz != null) {
-                reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(formClassGz)), Charsets.UTF_8);
+                try(Reader reader = new InputStreamReader(
+                                new GZIPInputStream(new ByteArrayInputStream(formClassGz)), Charsets.UTF_8)) {
+                    object = Json.parse(CharStreams.toString(reader)).getAsJsonObject();
+                }
             } else if (!Strings.isNullOrEmpty(formClass)) {
-                reader = new StringReader(formClass);
+                object = Json.parse(formClass).getAsJsonObject();
             } else {
                 return null;
             }
 
-            Gson gson = new Gson();
-            JsonObject object = gson.fromJson(reader, JsonObject.class);
             return patchDeserializedFormClass(activity, FormClass.fromJson(object));
+
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }

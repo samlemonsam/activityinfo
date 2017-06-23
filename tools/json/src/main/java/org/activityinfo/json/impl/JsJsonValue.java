@@ -16,6 +16,8 @@
 package org.activityinfo.json.impl;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonType;
 import org.activityinfo.json.JsonValue;
 
@@ -53,9 +55,7 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
 
     @Override
     final public native boolean asBoolean() /*-{
-        return @com.google.gwt.core.client.GWT::isScript()() || this == null ?
-            !!@org.activityinfo.json.impl.JsJsonValue::debox(Lorg/activityinfo/json/JsonValue;)(this) :
-            (!!@org.activityinfo.json.impl.JsJsonValue::debox(Lorg/activityinfo/json/JsonValue;)(this)).valueOf();
+        return !!(this) && !!(this.valueOf());
     }-*/;
 
     @Override
@@ -94,6 +94,12 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
     }
 
     @Override
+    public final JsonObject getAsJsonObject() {
+        return (JsonObject)this;
+    }
+
+
+    @Override
     final public native boolean jsEquals(JsonValue value) /*-{
         return @org.activityinfo.json.impl.JsJsonValue::debox(Lorg/activityinfo/json/JsonValue;)(this)
             === @org.activityinfo.json.impl.JsJsonValue::debox(Lorg/activityinfo/json/JsonValue;)(value);
@@ -109,7 +115,70 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
         }, 0);
     }-*/;
 
+
+    @Override
+    public final int asInt() {
+        return (int) asNumber();
+    }
+
+    @Override
+    public final long asLong() {
+        return (long)asNumber();
+    }
+
+    @Override
+    public final boolean isString() {
+        return getType() == JsonType.STRING;
+    }
+
+    @Override
+    public final JsonArray getAsJsonArray() {
+        return (JsonArray)this;
+    }
+
+    @Override
+    public final boolean isJsonNull() {
+        return isNull(this);
+    }
+
+    @Override
+    public final boolean isJsonArray() {
+        return isArray(this);
+    }
+
+    @Override
+    public final boolean isJsonString() {
+        return getType() == JsonType.STRING;
+    }
+
+    @Override
+    public final boolean isJsonPrimitive() {
+        switch (getType()) {
+            case STRING:
+            case NUMBER:
+            case BOOLEAN:
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public final boolean isBoolean() {
+        return getType() == JsonType.BOOLEAN;
+    }
+
+    @Override
+    public final boolean isJsonObject() {
+        return getType() == JsonType.OBJECT;
+    }
+
+    @Override
+    public final boolean isNumber() {
+        return getType() == JsonType.NUMBER;
+    }
+
     final public native Object toNative() /*-{
         return @org.activityinfo.json.impl.JsJsonValue::debox(Lorg/activityinfo/json/JsonValue;)(this);
     }-*/;
+
 }

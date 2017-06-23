@@ -1,7 +1,7 @@
 package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;

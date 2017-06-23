@@ -2,7 +2,7 @@ package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Text;
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -198,7 +198,7 @@ public class FieldConverters {
 
             @Override
             public FieldValue toFieldValue(Object hrdValue) {
-                JsonElement element = FormConverter.fromPropertyValue(hrdValue);
+                JsonValue element = FormConverter.fromPropertyValue(hrdValue);
                 return type.parseJsonValue(element);
             }
         };

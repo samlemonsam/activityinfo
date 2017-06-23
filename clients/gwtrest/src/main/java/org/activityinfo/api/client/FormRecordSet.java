@@ -1,8 +1,8 @@
 package org.activityinfo.api.client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.JsonParsing;
 
@@ -29,7 +29,7 @@ public class FormRecordSet {
     return records;
   }
 
-  public static FormRecordSet fromJson(JsonElement jsonElement) {
+  public static FormRecordSet fromJson(JsonValue jsonElement) {
     JsonObject jsonObject = jsonElement.getAsJsonObject();
     FormRecordSet model = new FormRecordSet();
     model.formId = JsonParsing.toNullableString(jsonObject.get("formId"));
@@ -39,7 +39,7 @@ public class FormRecordSet {
 
   public static List<FormRecordSet> fromJsonArray(JsonArray jsonArray) {
     List<FormRecordSet> list = new ArrayList<FormRecordSet>();
-    for(JsonElement element : jsonArray) {
+    for(JsonValue element : jsonArray.values()) {
       list.add(fromJson(element));
     }
     return list;

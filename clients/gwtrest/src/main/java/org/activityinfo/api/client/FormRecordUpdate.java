@@ -1,8 +1,8 @@
 package org.activityinfo.api.client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,17 +23,17 @@ public class FormRecordUpdate {
     return fieldValues;
   }
 
-  public static FormRecordUpdate fromJson(JsonElement jsonElement) {
+  public static FormRecordUpdate fromJson(JsonValue jsonElement) {
     JsonObject jsonObject = jsonElement.getAsJsonObject();
     FormRecordUpdate model = new FormRecordUpdate();
-    model.deleted = jsonObject.get("deleted").getAsBoolean();
+    model.deleted = jsonObject.get("deleted").asBoolean();
     model.fieldValues = jsonObject.get("fieldValues").getAsJsonObject();
     return model;
   }
 
   public static List<FormRecordUpdate> fromJsonArray(JsonArray jsonArray) {
     List<FormRecordUpdate> list = new ArrayList<FormRecordUpdate>();
-    for(JsonElement element : jsonArray) {
+    for(JsonValue element : jsonArray.values()) {
       list.add(fromJson(element));
     }
     return list;

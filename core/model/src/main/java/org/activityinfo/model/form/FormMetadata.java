@@ -1,7 +1,9 @@
 package org.activityinfo.model.form;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Provides user-specific metadata for a given form, including permissions
@@ -94,42 +96,42 @@ public class FormMetadata {
     }
 
     public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id.asString());
+        JsonObject object = createObject();
+        object.put("id", id.asString());
         if(!visible) {
-            object.addProperty("visible", false);
+            object.put("visible", false);
         }
         if(deleted) {
-            object.addProperty("deleted", true);
+            object.put("deleted", true);
         }
         if(schema != null) {
-            object.add("schema", schema.toJsonObject());
+            object.put("schema", schema.toJsonObject());
         }
         if(visible) {
-            object.addProperty("version", version);
-            object.addProperty("schemaVersion", version);
+            object.put("version", version);
+            object.put("schemaVersion", version);
         }
         return object;
     }
 
     public static FormMetadata fromJson(JsonObject object) {
         FormMetadata metadata = new FormMetadata();
-        metadata.id = ResourceId.valueOf(object.getAsJsonPrimitive("id").getAsString());
+        metadata.id = ResourceId.valueOf(object.get("id").asString());
 
-        if(object.has("version")) {
-            metadata.version = object.get("version").getAsLong();
+        if(object.hasKey("version")) {
+            metadata.version = object.get("version").asLong();
         }
-        if(object.has("schemaVersion")) {
-            metadata.version = object.get("schemaVersion").getAsLong();
+        if(object.hasKey("schemaVersion")) {
+            metadata.version = object.get("schemaVersion").asLong();
         }
-        if(object.has("schema")) {
-            metadata.schema = FormClass.fromJson(object.getAsJsonObject("schema"));
+        if(object.hasKey("schema")) {
+            metadata.schema = FormClass.fromJson(object.getObject("schema"));
         }
-        if(object.has("visible")) {
-            metadata.visible = object.get("visible").getAsBoolean();
+        if(object.hasKey("visible")) {
+            metadata.visible = object.get("visible").asBoolean();
         }
-        if(object.has("deleted")) {
-            metadata.deleted = object.get("deleted").getAsBoolean();
+        if(object.hasKey("deleted")) {
+            metadata.deleted = object.get("deleted").asBoolean();
         }
         return metadata;
     }

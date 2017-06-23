@@ -29,11 +29,18 @@ public interface JsonValue extends Serializable {
 
     /**
      * Coerces the underlying value to a number according to the rules of Javascript coercion.
+     * If the value is a JsonNull or a JsonString that cannot be parsed as a number, then
+     * Double.NaN will be returned.
      */
     double asNumber();
 
+    int asInt();
+
+    long asLong();
+
+
     /**
-     * Coerces the underlying value to a String according to the rules of JavaScript coercion.
+     * Coerces the underlying value to a String, or {@code null} for Json null values.son
      */
     String asString();
 
@@ -42,10 +49,32 @@ public interface JsonValue extends Serializable {
      */
     JsonType getType();
 
+
+    JsonObject getAsJsonObject();
+
+    JsonArray getAsJsonArray();
+
+
+    boolean isJsonNull();
+
+    boolean isJsonArray();
+
+    boolean isJsonString();
+
+    boolean isJsonPrimitive();
+
+    boolean isJsonObject();
+
+    boolean isNumber();
+
+    boolean isString();
+
+    boolean isBoolean();
+
+
     /**
      * Returns a serialized JSON string representing this value.
      *
-     * @return
      */
     String toJson();
 
@@ -61,4 +90,7 @@ public interface JsonValue extends Serializable {
      * such as server-side use.
      */
     Object toNative();
+
+
+
 }

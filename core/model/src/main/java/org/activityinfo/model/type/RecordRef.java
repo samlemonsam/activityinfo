@@ -1,7 +1,7 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
@@ -51,8 +51,8 @@ public class RecordRef {
         return formId.asString() + SEPARATOR + recordId.asString();
     }
 
-    public JsonElement toJsonElement() {
-        return new JsonPrimitive(toQualifiedString());
+    public JsonValue toJsonElement() {
+        return Json.create(toQualifiedString());
     }
 
     public static RecordRef fromQualifiedString(@Nonnull  String string) {

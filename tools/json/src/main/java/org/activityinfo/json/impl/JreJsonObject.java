@@ -118,6 +118,11 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
         return map.keySet().toArray(new String[map.size()]);
     }
 
+    @Override
+    public Iterable<Map.Entry<String, JsonValue>> entrySet() {
+        return map.entrySet();
+    }
+
     public void put(String key, JsonValue value) {
         if (value == null) {
             value = factory.createNull();
@@ -126,7 +131,7 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
     }
 
     public void put(String key, String value) {
-        put(key, factory.create(value));
+        put(key, factory.createFromNullable(value));
     }
 
     public void put(String key, double value) {
@@ -140,6 +145,11 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
     @Override
     public void remove(String key) {
         map.remove(key);
+    }
+
+    @Override
+    public void add(String key, JsonValue value) {
+        put(key, value);
     }
 
     public void set(String key, JsonValue value) {

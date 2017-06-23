@@ -15,6 +15,8 @@
  */
 package org.activityinfo.json;
 
+import org.activityinfo.json.impl.JsonUtil;
+
 /**
  * Run {@link JsonUtilGwtTest} in the JVM
  */
@@ -28,5 +30,12 @@ public class JsonUtilJreTest extends JsonUtilGwtTest {
   @Override
   public void testNative() {
     // No native things to test in JRE
+  }
+
+
+  public void testQuote() {
+    String badString = "\bThis\"is\ufeff\ta\\bad\nstring\u2029\u2029";
+    assertEquals("\"\\bThis\\\"is\\ufeff\\ta\\\\bad\\nstring"
+        + "\\u2029\\u2029\"", JsonUtil.quote(badString));
   }
 }

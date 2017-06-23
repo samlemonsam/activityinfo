@@ -2,10 +2,10 @@ package org.activityinfo.server.job;
 
 import com.google.appengine.api.taskqueue.*;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobState;
