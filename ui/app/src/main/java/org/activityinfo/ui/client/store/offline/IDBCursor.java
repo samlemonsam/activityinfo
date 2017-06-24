@@ -5,6 +5,7 @@ import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Cursor for traversing or iterating over multiple records in an IndexedDB database.
@@ -39,13 +40,8 @@ public interface IDBCursor {
     String[] getKeyArray();
 
     @JsProperty(name = "value")
-    Object getValue();
+    JsonValue getValue();
 
-    /**
-     * Hack to allow our unit tests to return JSON string. The Real IndexedDB getValue implementation
-     * returns an actual Javascript object.
-     */
-    String getValueAsJson();
 
 
 }

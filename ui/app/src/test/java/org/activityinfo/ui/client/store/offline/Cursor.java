@@ -1,5 +1,7 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.json.JsonValue;
+
 import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,12 +9,12 @@ import java.util.Map;
 class Cursor implements IDBCursor {
 
     private IDBCursorCallback callback;
-    private Iterator<Map.Entry<ObjectKey, String>> iterator;
-    private Map.Entry<ObjectKey, String> current;
+    private Iterator<Map.Entry<ObjectKey, JsonValue>> iterator;
+    private Map.Entry<ObjectKey, JsonValue> current;
 
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
 
-    public Cursor(Iterator<Map.Entry<ObjectKey, String>> iterator, IDBCursorCallback callback) {
+    public Cursor(Iterator<Map.Entry<ObjectKey, JsonValue>> iterator, IDBCursorCallback callback) {
         this.iterator = iterator;
         this.callback = callback;
     }
@@ -38,12 +40,7 @@ class Cursor implements IDBCursor {
     }
 
     @Override
-    public Object getValue() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getValueAsJson() {
+    public JsonValue getValue() {
         return current.getValue();
     }
 

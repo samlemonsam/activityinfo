@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gwt.core.client.GWT;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -44,12 +43,12 @@ public class RecordStore {
     }
 
     public final void put(FormRecord record) {
-        impl.putJson(record.toJsonElement().toString());
+        impl.put(record.toJsonElement());
     }
 
     public final Promise<Optional<FormRecord>> get(RecordRef ref) {
         return impl
-        .getJson(key(ref))
+        .get(key(ref))
         .then(json -> {
             if(json == null) {
                 return Optional.empty();
@@ -82,7 +81,7 @@ public class RecordStore {
 
                     @Override
                     public FormRecord getValue() {
-                        return formRecordFromCursor(cursor);
+                        return FormRecord.fromJson(cursor.getValue());
                     }
 
                     @Override
@@ -100,17 +99,4 @@ public class RecordStore {
     }
 
 
-    private static FormRecord formRecordFromCursor(IDBCursor cursor) {
-        String json;
-        if(GWT.isClient()) {
-            json = stringify(cursor.getValue());
-        } else {
-            json = cursor.getValueAsJson();
-        }
-        return FormRecord.fromJson(json);
-    }
-
-    private native static String stringify(Object value) /*-{
-        return JSON.stringify(value);
-    }-*/;
 }

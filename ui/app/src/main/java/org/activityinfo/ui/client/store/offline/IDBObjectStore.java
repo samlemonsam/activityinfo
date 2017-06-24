@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.promise.Promise;
 
 /**
@@ -7,21 +8,21 @@ import org.activityinfo.promise.Promise;
  */
 public interface IDBObjectStore {
 
-    void putJson(String json);
+    void put(JsonValue object);
 
-    void putJson(String json, String key);
-
-    /**
-     * Retrieves the given object from the ObjectStore, encoded as a JSON string, or {@code null} if no
-     * such object exists.
-     */
-    Promise<String> getJson(String key);
+    void put(String key, JsonValue object);
 
     /**
      * Retrieves the given object from the ObjectStore, encoded as a JSON string, or {@code null} if no
      * such object exists.
      */
-    Promise<String> getJson(String[] keys);
+    Promise<JsonValue> get(String key);
+
+    /**
+     * Retrieves the given object from the ObjectStore, encoded as a JSON string, or {@code null} if no
+     * such object exists.
+     */
+    Promise<JsonValue> get(String[] keys);
 
 
     /**

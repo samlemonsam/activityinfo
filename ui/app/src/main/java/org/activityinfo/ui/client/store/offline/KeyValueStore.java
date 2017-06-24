@@ -28,23 +28,23 @@ public class KeyValueStore {
     }
 
     public final void put(SnapshotStatus status) {
-        impl.putJson(status.toJson().toString(), CURRENT_SNAPSHOT_KEY);
+        impl.put(CURRENT_SNAPSHOT_KEY, status.toJson());
     }
 
     public final void put(Set<ResourceId> offlineForms) {
-        impl.putJson(toJson(offlineForms), OFFLINE_FORMS);
+        impl.put(OFFLINE_FORMS, toJson(offlineForms));
     }
 
-    private String toJson(Set<ResourceId> offlineForms) {
+    private JsonArray toJson(Set<ResourceId> offlineForms) {
         JsonArray array = Json.createArray();
         for (ResourceId offlineForm : offlineForms) {
             array.add(Json.create(offlineForm.asString()));
         }
-        return array.toString();
+        return array;
     }
 
     public final Promise<SnapshotStatus> getCurrentSnapshot() {
-        return impl.getJson(CURRENT_SNAPSHOT_KEY).then(json -> {
+        return impl.get(CURRENT_SNAPSHOT_KEY).then(json -> {
             if(json == null) {
                 return SnapshotStatus.EMPTY;
             } else {
@@ -54,12 +54,12 @@ public class KeyValueStore {
     }
 
     public final Promise<Set<ResourceId>> getOfflineForms() {
-        return impl.getJson(OFFLINE_FORMS).then(json -> {
+        return impl.get(OFFLINE_FORMS).then(json -> {
             if(json == null) {
                 return Collections.emptySet();
             } else {
                 Set<ResourceId> forms = new HashSet<>();
-                JsonArray array = Json.parse(json).getAsJsonArray();
+                JsonArray array = json.getAsJsonArray();
                 for (JsonValue jsonElement : array.values()) {
                     forms.add(ResourceId.valueOf(jsonElement.asString()));
                 }

@@ -20,15 +20,15 @@ public class SchemaStore {
     }
 
     public final void put(FormClass formClass) {
-        impl.putJson(formClass.toJsonString());
+        impl.put(formClass.toJsonObject());
     }
 
     public final Promise<Optional<FormClass>> get(ResourceId formId) {
-        return impl.getJson(formId.asString()).then(json -> {
+        return impl.get(formId.asString()).then(json -> {
             if(json == null) {
                 return Optional.empty();
             } else {
-                return Optional.of(FormClass.fromJson(json));
+                return Optional.of(FormClass.fromJson(json.getAsJsonObject()));
             }
         });
     }

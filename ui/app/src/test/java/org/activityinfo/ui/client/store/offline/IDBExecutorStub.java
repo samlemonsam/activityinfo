@@ -77,7 +77,7 @@ public class IDBExecutorStub implements IDBExecutor {
 
         private final String name;
         private final String[] keyPath;
-        private TreeMap<ObjectKey, String> objectMap = new TreeMap<>();
+        private TreeMap<ObjectKey, JsonValue> objectMap = new TreeMap<>();
 
         public ObjectStore(String name, String[] keyPath) {
             this.name = name;
@@ -100,21 +100,19 @@ public class IDBExecutorStub implements IDBExecutor {
             this.readwrite = readwrite;
         }
         @Override
-        public void putJson(String json) {
+        public void put(JsonValue value) {
             if(!readwrite) {
                 throw new IllegalStateException("The transaction is read-only.");
             }
-            org.activityinfo.json.JsonObject object = JSON_PARSER.parse(json).getAsJsonObject();
-
-            store.objectMap.put(buildKey(object), json);
+            store.objectMap.put(buildKey(value.getAsJsonObject()), value);
         }
 
         @Override
-        public void putJson(String json, String key) {
+        public void put(String key, JsonValue value) {
             if(!readwrite) {
                 throw new IllegalStateException("The transaction is read-only.");
             }
-            store.objectMap.put(new ObjectKey(key), json);
+            store.objectMap.put(new ObjectKey(key), value);
         }
 
         private ObjectKey buildKey(JsonObject object) {
@@ -127,7 +125,7 @@ public class IDBExecutorStub implements IDBExecutor {
             for (int i = 0; i < store.keyPath.length; i++) {
                 JsonValue keyPart = object.get(store.keyPath[i]);
                 if(keyPart == null) {
-                    throw new IllegalStateException("Missing key '" + key + "' for object " + object);
+                    throw new IllegalStateException("Missing key '" + store.keyPath[i] + "' for object " + object);
                 }
                 key[i] = keyPart.asString();
             }
@@ -140,26 +138,26 @@ public class IDBExecutorStub implements IDBExecutor {
         }
 
         @Override
-        public Promise<String> getJson(String key) {
-            return getJson(new ObjectKey(key));
+        public Promise<JsonValue> get(String key) {
+            return get(new ObjectKey(key));
         }
 
         @Override
-        public Promise<String> getJson(String[] keys) {
-            return getJson(new ObjectKey(keys));
+        public Promise<JsonValue> get(String[] keys) {
+            return get(new ObjectKey(keys));
         }
 
-        private Promise<String> getJson(ObjectKey key) {
+        private Promise<JsonValue> get(ObjectKey key) {
             return Promise.resolved(store.objectMap.get(key));
         }
 
         @Override
         public void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) {
 
-            NavigableMap<ObjectKey, String> range = store.objectMap.subMap(
+            NavigableMap<ObjectKey, JsonValue> range = store.objectMap.subMap(
                     new ObjectKey(lowerBound), true,
                     new ObjectKey(upperBound), true);
-            Iterator<Map.Entry<ObjectKey, String>> it = range.entrySet().iterator();
+            Iterator<Map.Entry<ObjectKey, JsonValue>> it = range.entrySet().iterator();
 
             Cursor cursor = new Cursor(it, callback);
             cursor.run();

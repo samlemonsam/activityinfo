@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.store.offline;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.promise.Promise;
 
 /**
@@ -16,20 +17,20 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
     }
 
     @Override
-    public final native void putJson(String json) /*-{
-        this.put(JSON.parse(json));
+    public final native void put(JsonValue object) /*-{
+        this.put(object);
     }-*/;
 
     @Override
-    public final native void putJson(String json, String key) /*-{
-        this.put(JSON.parse(json), key);
+    public final native void put(String key, JsonValue object) /*-{
+        this.put(object, key);
     }-*/;
 
-    protected final native void getJson(JavaScriptObject key, AsyncCallback<String> callback) /*-{
+    protected final native void get(JavaScriptObject key, AsyncCallback<JsonValue> callback) /*-{
         var request = this.get(key);
         request.onsuccess = function(event) {
             var object = event.target.result;
-            callback.@AsyncCallback::onSuccess(*)(JSON.stringify(object));
+            callback.@AsyncCallback::onSuccess(*)(object);
         }
         request.onerror = function(event) {
             callback.@AsyncCallback::onFailure(*)(@RuntimeException::new()());
@@ -38,14 +39,14 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
 
 
     @Override
-    public final Promise<String> getJson(String key) {
-        return getJson(new String[] { key });
+    public final Promise<JsonValue> get(String key) {
+        return get(new String[] { key });
     }
 
     @Override
-    public final Promise<String> getJson(String[] keys) {
-        Promise<String> result = new Promise<>();
-        getJson(createKey(keys), result);
+    public final Promise<JsonValue> get(String[] keys) {
+        Promise<JsonValue> result = new Promise<>();
+        get(createKey(keys), result);
         return result;
     }
 

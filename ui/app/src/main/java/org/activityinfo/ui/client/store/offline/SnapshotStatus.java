@@ -68,8 +68,8 @@ public class SnapshotStatus {
         return status;
     }
 
-    public static SnapshotStatus fromJson(String json) {
-        return fromJson(new org.activityinfo.json.JsonParser().parse(json).getAsJsonObject());
+    public static SnapshotStatus fromJson(JsonValue json) {
+        return fromJson(json.getAsJsonObject());
     }
 
     @Override
