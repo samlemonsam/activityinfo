@@ -41,8 +41,9 @@ public class EnumType implements ParametrizedFieldType {
 
         @Override
         public EnumType deserializeType(org.activityinfo.json.JsonObject parametersObject) {
+            // Explicit type parameter required by GWT's compiler!
             Cardinality cardinality = Cardinality.valueOf(
-                    parametersObject.get("cardinality").asString().toUpperCase());
+                    parametersObject.<JsonValue>get("cardinality"));
 
             Presentation presentation = Presentation.AUTOMATIC;
             if(parametersObject.hasKey("presentation")) {

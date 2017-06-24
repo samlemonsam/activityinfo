@@ -52,7 +52,8 @@ public class AttachmentType implements ParametrizedFieldType {
 
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
-            Cardinality cardinality = Cardinality.valueOf(parametersObject.get("cardinality").asString());
+            // Explicit type parameter required by GWT's compiler
+            Cardinality cardinality = Cardinality.valueOf(parametersObject.<JsonValue>get("cardinality"));
             Kind kind = Kind.valueOf(JsonParsing.fromEnumValue(parametersObject.get("kind")));
             return new AttachmentType(cardinality, kind);
         }
