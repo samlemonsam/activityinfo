@@ -100,7 +100,14 @@ public class JsonUtilGwtTest extends GWTTestCase {
     // object -> [object Object]
     assertEquals("[object Object]", Json.createObject().asString());
   }
-  
+
+  public void testBooleanTypes() {
+    JsonValue booleanValue = Json.create(true);
+    assertEquals(JsonType.BOOLEAN, booleanValue.getType());
+
+    JsonValue doubleValue = Json.create(1.5);
+    assertEquals(JsonType.NUMBER, doubleValue.getType());
+  }
 
 
   public void testIllegalParse() {

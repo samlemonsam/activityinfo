@@ -41,6 +41,6 @@ task testGwt(type: JavaExec) {
     main = 'junit.textui.TestRunner'
 
     jvmArgs "-Dgwt.args=-prod -style pretty -war ${buildDir}/testWar -workDir ${buildDir}/testGwtWork"
-    args 'org.activityinfo.js   on.JsonUtilGwtTest'
+    args 'org.activityinfo.json.JsonUtilGwtTest'
 
 }

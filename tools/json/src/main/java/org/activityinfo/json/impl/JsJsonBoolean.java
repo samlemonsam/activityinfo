@@ -32,7 +32,7 @@ final public class JsJsonBoolean extends JsJsonValue
      * MAGIC: primitive boolean cast to object interface.
      */
     private static native JsJsonBoolean createProd(boolean bool) /*-{
-        return Object(bool);
+        return bool;
     }-*/;
 
     protected JsJsonBoolean() {

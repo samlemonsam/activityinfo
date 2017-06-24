@@ -55,7 +55,7 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
 
     @Override
     final public native boolean asBoolean() /*-{
-        return !!(this) && !!(this.valueOf());
+        return !!this;
     }-*/;
 
     @Override
