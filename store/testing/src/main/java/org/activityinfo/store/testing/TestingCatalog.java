@@ -38,21 +38,34 @@ public class TestingCatalog implements FormCatalog {
             return testingFormStorage.nextSerialNumber(fieldId, prefix);
         }
     };
+    private final Survey survey;
+    private final IntakeForm intake;
+    private final BioDataForm bioData;
+    private final IncidentForm incidentForm;
+    private final ReferralSubForm referralSubForm;
 
     public TestingCatalog() {
 
         // Survey Use case
-        add(new Survey());
+        survey = new Survey();
+        add(survey);
 
         // Case Tracking use case
-        IntakeForm intake = new IntakeForm();
-        BioDataForm bioData = new BioDataForm(intake);
-        IncidentForm incidentForm = new IncidentForm(bioData);
-        ReferralSubForm referralSubForm = new ReferralSubForm(incidentForm);
+        intake = new IntakeForm();
+        bioData = new BioDataForm(intake);
+        incidentForm = new IncidentForm(bioData);
+        referralSubForm = new ReferralSubForm(incidentForm);
         add(intake, bioData, incidentForm, referralSubForm);
 
     }
 
+    public Survey getSurvey() {
+        return survey;
+    }
+
+    public IntakeForm getIntakeForm() {
+        return intake;
+    }
 
     private void add(TestForm... testForms) {
         for (TestForm testForm : testForms) {
@@ -124,4 +137,5 @@ public class TestingCatalog implements FormCatalog {
 
         return update;
     }
+
 }

@@ -64,6 +64,10 @@ public class Json {
         return JsonUtil.stringify(jsonValue);
     }
 
+    public static String stringify(JsonValue jsonValue, int indent) {
+        return JsonUtil.stringify(jsonValue, indent);
+    }
+
     public static JsonValue toJson(Object value) {
         return JsonReflection.toJson(value);
     }

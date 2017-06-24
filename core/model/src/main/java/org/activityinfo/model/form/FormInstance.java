@@ -278,7 +278,7 @@ public class FormInstance {
         return id != null ? id.hashCode() : 0;
     }
 
-    public org.activityinfo.json.JsonObject toJsonObject() {
+    public JsonObject toJsonObject() {
 
         JsonObject fields = createObject();
         for (Map.Entry<ResourceId, FieldValue> entry : fieldMap.entrySet()) {

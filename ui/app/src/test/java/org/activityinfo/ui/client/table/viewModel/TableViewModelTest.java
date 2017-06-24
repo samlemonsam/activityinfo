@@ -35,7 +35,7 @@ public class TableViewModelTest {
     @Test
     public void test() {
         TableModel tableModel = ImmutableTableModel.builder()
-                .formId(Survey.FORM_ID)
+                .formId(setup.getSurveyForm().getFormId())
                 .build();
 
         TableViewModel model = new TableViewModel(setup.getFormStore(), tableModel);
@@ -52,7 +52,7 @@ public class TableViewModelTest {
     public void testDeletedSelection() {
 
         TableModel tableModel = ImmutableTableModel.builder()
-                .formId(Survey.FORM_ID)
+                .formId(setup.getSurveyForm().getFormId())
                 .build();
 
         TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
@@ -67,7 +67,7 @@ public class TableViewModelTest {
 
         selection.resetChangeCounter();
 
-        RecordRef selectedRef = Survey.getRecordRef(101);
+        RecordRef selectedRef = setup.getSurveyForm().getRecordRef(101);
 
         viewModel.select(selectedRef);
         selection.assertChanged();
@@ -96,10 +96,10 @@ public class TableViewModelTest {
     public void testDeletedForm() {
 
         TableModel tableModel = ImmutableTableModel.builder()
-                .formId(Survey.FORM_ID)
+                .formId(setup.getSurveyForm().getFormId())
                 .build();
 
-        setup.deleteForm(Survey.FORM_ID);
+        setup.deleteForm(setup.getSurveyForm().getFormId());
 
         TableViewModel model = new TableViewModel(setup.getFormStore(), tableModel);
 

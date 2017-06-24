@@ -37,12 +37,16 @@ public class AnalysisViewModelTest {
     private static final int COLUMN_LENGTH = 20;
     private static final String NA = null;
     private TestingFormStore formStore;
+    private Survey survey;
+    private IntakeForm intakeForm;
 
     @Before
     public void setup() {
         LocaleProxy.initialize();
 
         formStore = new TestingFormStore();
+        survey = formStore.getCatalog().getSurvey();
+        intakeForm = formStore.getCatalog().getIntakeForm();
     }
 
     @Test
@@ -74,7 +78,7 @@ public class AnalysisViewModelTest {
         List<Point> points = result.assertLoaded().getPoints();
 
         assertThat(points, hasSize(1));
-        assertThat(points.get(0).getValue(), equalTo((double)Survey.ROW_COUNT));
+        assertThat(points.get(0).getValue(), equalTo((double) survey.getRowCount()));
     }
 
     @Test
@@ -228,7 +232,7 @@ public class AnalysisViewModelTest {
     @Test
     public void twoDimensions() {
 
-        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+        dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
@@ -246,7 +250,7 @@ public class AnalysisViewModelTest {
     @Test
     public void twoDimensionsWithPercentages() {
 
-        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+        dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
@@ -270,7 +274,7 @@ public class AnalysisViewModelTest {
     @Test
     public void twoDimensionsWithTotals() {
 
-        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+        dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
@@ -345,7 +349,7 @@ public class AnalysisViewModelTest {
     @Test
     public void twoDimensionsWithBothTotals() {
 
-        dumpQuery(Survey.FORM_ID, "Gender", "Married", "Age");
+        dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(surveyCount())
@@ -558,10 +562,10 @@ public class AnalysisViewModelTest {
                 .build();
     }
 
-    public static ImmutableMeasureModel surveyCount() {
+    public ImmutableMeasureModel surveyCount() {
         return ImmutableMeasureModel.builder()
                 .label("Count")
-                .formId(Survey.FORM_ID)
+                .formId(survey.getFormId())
                 .formula("1")
                 .build();
     }
@@ -569,7 +573,7 @@ public class AnalysisViewModelTest {
     private MeasureModel intakeCaseCount() {
         return ImmutableMeasureModel.builder()
             .label("Count")
-            .formId(IntakeForm.FORM_ID)
+            .formId(intakeForm.getFormId())
             .formula("1")
             .build();
 
@@ -578,7 +582,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Year")
-                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
+                .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getOpenDateFieldId()))
                 .dateLevel(DateLevel.YEAR)
                 .build();
     }
@@ -588,7 +592,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Quarter")
-                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.OPEN_DATE_FIELD_ID))
+                .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getOpenDateFieldId()))
                 .dateLevel(DateLevel.QUARTER)
                 .build();
     }
@@ -598,7 +602,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Nationality")
-                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.NATIONALITY_FIELD_ID))
+                .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getNationalityFieldId()))
                 .build();
     }
 
@@ -606,15 +610,15 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Problem")
-                .addMappings(new DimensionMapping(IntakeForm.FORM_ID, IntakeForm.PROBLEM_FIELD_ID))
+                .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getProblemFieldId()))
                 .build();
     }
 
     private ImmutableMeasureModel medianAge() {
         return ImmutableMeasureModel.builder()
             .label("Age")
-            .formId(Survey.FORM_ID)
-            .formula(Survey.AGE_FIELD_ID.asString())
+            .formId(survey.getFormId())
+            .formula(survey.getAgeFieldId().asString())
             .addStatistics(Statistic.MEDIAN)
             .build();
     }
@@ -622,8 +626,8 @@ public class AnalysisViewModelTest {
     private ImmutableMeasureModel numChildren() {
         return ImmutableMeasureModel.builder()
                 .label("# Children")
-                .formId(Survey.FORM_ID)
-                .formula(Survey.CHILDREN_FIELD_ID.asString())
+                .formId(survey.getFormId())
+                .formula(survey.getChildrenFieldId().asString())
                 .build();
     }
 

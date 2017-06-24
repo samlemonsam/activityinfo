@@ -36,6 +36,8 @@ dependencies {
     
     compile project(':core:model')
     compile project(':i18n')
+    compile project(':store:testing')
+    compile project(':clients:javarest')
     compile libraries.gwt.i18nServer
 }
 

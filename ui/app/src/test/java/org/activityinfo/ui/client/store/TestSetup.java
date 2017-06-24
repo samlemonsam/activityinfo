@@ -4,6 +4,7 @@ import com.google.gwt.core.client.testing.StubScheduler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
@@ -70,4 +71,7 @@ public class TestSetup {
         return connection;
     }
 
+    public Survey getSurveyForm() {
+        return catalog.getSurvey();
+    }
 }

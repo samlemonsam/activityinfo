@@ -5,16 +5,14 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.googlecode.objectify.annotation.Stringify;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
-import org.activityinfo.json.JsonParser;
-import org.activityinfo.json.JsonValue;
+import org.activityinfo.json.*;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -63,6 +61,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
+import static org.activityinfo.json.impl.JsonUtil.stringify;
 
 public class FormResource {
     public static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
@@ -75,7 +74,6 @@ public class FormResource {
     private BlobAuthorizer blobAuthorizer;
 
     private final ResourceId formId;
-    private final Gson prettyPrintingGson;
 
     public FormResource(ResourceId formId,
                         Provider<FormCatalog> catalog,
@@ -87,7 +85,6 @@ public class FormResource {
         this.userProvider = userProvider;
         this.permissionOracle = permissionOracle;
         this.blobAuthorizer = blobAuthorizer;
-        this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
     }
 
     @GET
@@ -96,7 +93,7 @@ public class FormResource {
         FormMetadata metadata = getFormMetadata(localVersion);
 
         return Response.ok()
-                .entity(prettyPrintingGson.toJson(metadata.toJsonObject()))
+                .entity(stringify(metadata.toJsonObject()))
                 .type(JSON_CONTENT_TYPE).build();
     }
 
@@ -141,7 +138,7 @@ public class FormResource {
 
         JsonObject object = formClass.toJsonObject();
 
-        return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
+        return Response.ok(Json.stringify(object, 2)).type(JSON_CONTENT_TYPE).build();
     }
 
     @POST
@@ -403,7 +400,7 @@ public class FormResource {
         FormTree tree = fetchTree();
         JsonObject object = JsonFormTreeBuilder.toJson(tree);
 
-        return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
+        return Response.ok(Json.stringify(object, 2)).type(JSON_CONTENT_TYPE).build();
     }
 
     @GET

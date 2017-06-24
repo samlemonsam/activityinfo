@@ -91,6 +91,23 @@ public class ActivityInfoClient {
         }
     }
 
+
+    public FormClass getFormSchema(ResourceId formId) {
+        String json = client.resource(root)
+                .path("resources")
+                .path("form")
+                .path(formId.asString())
+                .path("schema")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(String.class);
+
+
+        JsonObject jsonObject = Json.parse(json).getAsJsonObject();
+        FormClass formClass = FormClass.fromJson(jsonObject);
+
+        return formClass;
+    }
+
     public FormRecord getRecord(ResourceId formId, ResourceId recordId) {
 
         String json = client.resource(root)

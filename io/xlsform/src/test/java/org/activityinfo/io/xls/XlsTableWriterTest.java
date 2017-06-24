@@ -26,23 +26,28 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class XlsTableWriterTest {
 
+    private FormSourceSyncImpl formSource;
+    private TestingCatalog catalog;
+
     @Before
     public void setup() {
         LocaleProxy.initialize();
+
+        catalog = new TestingCatalog();
+        formSource = new FormSourceSyncImpl(catalog, 1);
     }
 
     @Test
     public void surveyForm() throws IOException {
 
         TableModel tableModel = ImmutableTableModel.builder()
-                .formId(Survey.FORM_ID)
+                .formId(catalog.getSurvey().getFormId())
                 .build();
 
         assertThat(export(tableModel), sameWorkbook(getWorkBook("survey-expected.xls")));
     }
 
     private HSSFWorkbook export(TableModel tableModel) throws IOException {
-        FormSourceSyncImpl formSource = new FormSourceSyncImpl(new TestingCatalog(), 1);
 
         TableViewModel viewModel = new TableViewModel(formSource, tableModel);
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();

@@ -47,6 +47,10 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         return Promise.rejected(new UnsupportedOperationException());
     }
 
+    public TestingCatalog getCatalog() {
+        return catalog;
+    }
+
     @Override
     public Promise<Maybe<FormRecord>> getRecord(String formId, String recordId) {
 

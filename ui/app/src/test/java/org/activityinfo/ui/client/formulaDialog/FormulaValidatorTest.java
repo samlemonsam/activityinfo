@@ -67,7 +67,8 @@ public class FormulaValidatorTest {
     }
 
     private FormulaValidator validate(String formula) {
-        FormulaValidator validator = new FormulaValidator(catalog.getFormTree(Survey.FORM_ID));
+        Survey surveyForm = catalog.getSurvey();
+        FormulaValidator validator = new FormulaValidator(catalog.getFormTree(surveyForm.getFormId()));
         validator.validate(ExprParser.parse(formula));
 
         for (FormulaError error : validator.getErrors()) {

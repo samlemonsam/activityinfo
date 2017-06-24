@@ -35,40 +35,41 @@ public class FormInputViewModelTest {
     public void testSurveyRelevance() {
 
         TestingFormStore store = new TestingFormStore();
+        Survey survey = store.getCatalog().getSurvey();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, Survey.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, survey.getFormId()));
 
         // Start with no input
-        FormInputModel inputModel = new FormInputModel(new RecordRef(Survey.FORM_ID, ResourceId.generateId()));
+        FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
         // Is this valid?
         FormInputViewModel viewModel = builder.build(inputModel);
 
-        assertThat("pregnant is not yet relevant", viewModel.isRelevant(Survey.PREGNANT_FIELD_ID), equalTo(false));
-        assertThat("prenatale care is not relevant", viewModel.isRelevant(Survey.PRENATALE_CARE_FIELD_ID), equalTo(false));
+        assertThat("pregnant is not yet relevant", viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(false));
+        assertThat("prenatale care is not relevant", viewModel.isRelevant(survey.getPrenataleCareFieldId()), equalTo(false));
 
         assertThat("form is valid", viewModel.isValid(), equalTo(false));
 
         // Answer the gender
-        inputModel = inputModel.update(Survey.GENDER_FIELD_ID, new FieldInput(new EnumValue(Survey.FEMALE_ID)));
+        inputModel = inputModel.update(survey.getGenderFieldId(), new FieldInput(new EnumValue(survey.getFemaleId())));
         viewModel = builder.build(inputModel);
 
-        assertThat("pregnant is now relevant", viewModel.isRelevant(Survey.PREGNANT_FIELD_ID), equalTo(true));
-        assertThat("prenatale care is still not relevant", viewModel.isRelevant(Survey.PRENATALE_CARE_FIELD_ID), equalTo(false));
+        assertThat("pregnant is now relevant", viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(true));
+        assertThat("prenatale care is still not relevant", viewModel.isRelevant(survey.getPrenataleCareFieldId()), equalTo(false));
 
         // Answer pregnant = yes
-        inputModel = inputModel.update(Survey.PREGNANT_FIELD_ID, new FieldInput(new EnumValue(Survey.PREGNANT_ID)));
+        inputModel = inputModel.update(survey.getPregnantFieldId(), new FieldInput(new EnumValue(survey.getPregnantId())));
         viewModel = builder.build(inputModel);
 
-        assertThat("pregnant is still relevant", viewModel.isRelevant(Survey.PREGNANT_FIELD_ID), equalTo(true));
-        assertThat("prenatale is now relevant", viewModel.isRelevant(Survey.PRENATALE_CARE_FIELD_ID), equalTo(true));
+        assertThat("pregnant is still relevant", viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(true));
+        assertThat("prenatale is now relevant", viewModel.isRelevant(survey.getPrenataleCareFieldId()), equalTo(true));
 
         // Change gender = Male
-        inputModel = inputModel.update(Survey.GENDER_FIELD_ID, new FieldInput(new EnumValue(Survey.MALE_ID)));
+        inputModel = inputModel.update(survey.getGenderFieldId(), new FieldInput(new EnumValue(survey.getMaleId())));
         viewModel = builder.build(inputModel);
 
-        assertThat("pregnant is not relevant", viewModel.isRelevant(Survey.PREGNANT_FIELD_ID), equalTo(false));
-        assertThat("prenatale is not relevant", viewModel.isRelevant(Survey.PRENATALE_CARE_FIELD_ID), equalTo(false));
+        assertThat("pregnant is not relevant", viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(false));
+        assertThat("prenatale is not relevant", viewModel.isRelevant(survey.getPrenataleCareFieldId()), equalTo(false));
 
     }
 
@@ -76,14 +77,15 @@ public class FormInputViewModelTest {
     public void testSurveyEdit() {
 
         TestingFormStore store = new TestingFormStore();
+        Survey survey = store.getCatalog().getSurvey();
 
-        RecordRef recordRef = Survey.getRecordRef(5);
+        RecordRef recordRef = survey.getRecordRef(5);
 
         FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store,
-                fetchTree(store, Survey.FORM_ID),
+                fetchTree(store, survey.getFormId()),
                 fetchRecord(store, recordRef));
 
-        FormInputModel inputModel = new FormInputModel(new RecordRef(Survey.FORM_ID, ResourceId.generateId()));
+        FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
         FormInputViewModel viewModel = builder.build(inputModel);
 
@@ -95,6 +97,7 @@ public class FormInputViewModelTest {
     public void testReferenceFields() {
 
         TestingFormStore store = new TestingFormStore();
+        IntakeForm intakeForm = store.getCatalog().getIntakeForm();
 
         FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, BioDataForm.FORM_ID));
         FormInputModel inputModel = new FormInputModel(new RecordRef(BioDataForm.FORM_ID, ResourceId.generateId()));
@@ -106,7 +109,7 @@ public class FormInputViewModelTest {
 
         ReferenceChoiceSet choiceSet = choiceView.assertLoaded();
 
-        assertThat(choiceSet.getCount(), equalTo(IntakeForm.ROW_COUNT));
+        assertThat(choiceSet.getCount(), equalTo(intakeForm.getRowCount()));
         assertThat(choiceSet.getLabel(0), equalTo("00001"));
     }
 
@@ -148,15 +151,16 @@ public class FormInputViewModelTest {
     public void testPersistence() {
 
         TestingFormStore store = new TestingFormStore();
+        Survey survey = store.getCatalog().getSurvey();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, Survey.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, survey.getFormId()));
 
         // Start with no input
-        FormInputModel inputModel = new FormInputModel(new RecordRef(Survey.FORM_ID, ResourceId.generateId()))
-                .update(Survey.GENDER_FIELD_ID, new FieldInput(new EnumValue(Survey.MALE_ID)))
-                .update(Survey.NAME_FIELD_ID, new FieldInput(TextValue.valueOf("BOB")))
-                .update(Survey.DOB_FIELD_ID, new FieldInput(new LocalDate(1982,1,16)))
-                .update(Survey.AGE_FIELD_ID, new FieldInput(new Quantity(35, "years")));
+        FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()))
+                .update(survey.getGenderFieldId(), new FieldInput(new EnumValue(survey.getMaleId())))
+                .update(survey.getNameFieldId(), new FieldInput(TextValue.valueOf("BOB")))
+                .update(survey.getDobFieldId(), new FieldInput(new LocalDate(1982,1,16)))
+                .update(survey.getAgeFieldId(), new FieldInput(new Quantity(35, "years")));
 
         // Verify that it's valid
         FormInputViewModel viewModel = builder.build(inputModel);
@@ -171,12 +175,13 @@ public class FormInputViewModelTest {
     @Test
     public void testMultipleSelectPersistance() {
         TestingFormStore store = new TestingFormStore();
+        IntakeForm intakeForm = store.getCatalog().getIntakeForm();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, IntakeForm.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, intakeForm.getFormId()));
 
-        FormInputModel inputModel = new FormInputModel(new RecordRef(IntakeForm.FORM_ID, ResourceId.generateId()))
-                .update(IntakeForm.OPEN_DATE_FIELD_ID, new LocalDate(2017,1,1))
-                .update(IntakeForm.NATIONALITY_FIELD_ID, new EnumValue(IntakeForm.PALESTINIAN_ID, IntakeForm.JORDANIAN_ID));
+        FormInputModel inputModel = new FormInputModel(new RecordRef(intakeForm.getFormId(), ResourceId.generateId()))
+                .update(intakeForm.getOpenDateFieldId(), new LocalDate(2017,1,1))
+                .update(intakeForm.getNationalityFieldId(), new EnumValue(intakeForm.getPalestinianId(), intakeForm.getJordanianId()));
 
         FormInputViewModel viewModel = builder.build(inputModel);
         assertThat(viewModel.isValid(), equalTo(true));

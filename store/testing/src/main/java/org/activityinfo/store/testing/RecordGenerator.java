@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class RecordGenerator {
 
+    private Ids ids;
     private final FormClass schema;
     private Supplier<ResourceId> parentDistribution = null;
     private final Map<ResourceId, Supplier<FieldValue>> generators = new HashMap<>();
@@ -35,6 +36,11 @@ public class RecordGenerator {
     private int nextRecordIndex = 0;
 
     public RecordGenerator(FormClass schema) {
+        this(new UnitTestingIds(), schema);
+    }
+
+    public RecordGenerator(Ids ids, FormClass schema) {
+        this.ids = ids;
         this.schema = schema;
         for (FormField field : schema.getFields()) {
             fieldMap.put(field.getId(), field);
@@ -61,7 +67,7 @@ public class RecordGenerator {
         } else if(field.getType() instanceof EnumType) {
             EnumType enumType = (EnumType) field.getType();
             if(enumType.getCardinality() == Cardinality.SINGLE) {
-                return new EnumGenerator(field);
+                return new EnumGenerator(field, field.getId().hashCode());
             } else {
                 return new MultiEnumGenerator(field);
             }
@@ -83,6 +89,11 @@ public class RecordGenerator {
         return this;
     }
 
+    public RecordGenerator enumSeed(FormField field, int seed) {
+        assert field.getType() instanceof EnumType;
+        return distribution(field.getId(), new EnumGenerator(field, seed));
+    }
+
     public List<FormInstance> generate(int rowCount) {
         List<FormInstance> records = new ArrayList<>();
         for (int i = 0; i < rowCount; i++) {
@@ -92,7 +103,7 @@ public class RecordGenerator {
     }
 
     public FormInstance generate() {
-        ResourceId recordId = ResourceId.valueOf("c" + (nextRecordIndex++));
+        ResourceId recordId = ids.recordId(schema.getId(), nextRecordIndex++);
         FormInstance record = new FormInstance(recordId, schema.getId());
 
         if(parentDistribution != null) {

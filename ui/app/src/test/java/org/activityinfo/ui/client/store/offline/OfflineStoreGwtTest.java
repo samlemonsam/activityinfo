@@ -42,7 +42,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
         survey = new Survey();
 
         FormMetadata surveyMetadata = new FormMetadata();
-        surveyMetadata.setId(Survey.FORM_ID);
+        surveyMetadata.setId(survey.getFormId());
         surveyMetadata.setVersion(1);
         surveyMetadata.setSchemaVersion(1);
         surveyMetadata.setSchema(survey.getFormClass());
@@ -91,13 +91,13 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
     private Promise<Void> verifyWeCanReadFormSchemas() {
 
-        return formStore.getFormMetadata(Survey.FORM_ID).once().then(formMetadata -> {
+        return formStore.getFormMetadata(survey.getFormId()).once().then(formMetadata -> {
             FormClass result = formMetadata.getSchema();
-            TestCase.assertEquals(Survey.FORM_ID, result.getId());
+            TestCase.assertEquals(survey.getFormId(), result.getId());
             TestCase.assertEquals(survey.getFormClass().getLabel(), result.getLabel());
 
-            FormField expectedField = survey.getFormClass().getField(Survey.GENDER_FIELD_ID);
-            FormField field = result.getField(Survey.GENDER_FIELD_ID);
+            FormField expectedField = survey.getFormClass().getField(survey.getGenderFieldId());
+            FormField field = result.getField(survey.getGenderFieldId());
 
             TestCase.assertEquals(expectedField.getId(), field.getId());
             TestCase.assertEquals(expectedField.getLabel(), field.getLabel());
@@ -107,19 +107,19 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
     private Promise<Void> verifyWeCanQueryRecords(Void input) {
 
-        QueryModel queryModel = new QueryModel(Survey.FORM_ID);
+        QueryModel queryModel = new QueryModel(survey.getFormId());
         queryModel.selectResourceId().as("id");
-        queryModel.selectField(Survey.NAME_FIELD_ID).as("name");
-        queryModel.selectField(Survey.AGE_FIELD_ID).as("age");
+        queryModel.selectField(survey.getNameFieldId()).as("name");
+        queryModel.selectField(survey.getAgeFieldId()).as("age");
 
         return formStore.query(queryModel).once().then(columnSet -> {
 
-            assertEquals(Survey.ROW_COUNT, columnSet.getNumRows());
+            assertEquals(survey.getRowCount(), columnSet.getNumRows());
 
             ColumnView name = columnSet.getColumnView("name");
             ColumnView age = columnSet.getColumnView("age");
 
-            assertEquals(Survey.ROW_COUNT, columnSet.getNumRows());
+            assertEquals(survey.getRowCount(), columnSet.getNumRows());
             assertEquals("Melanie", name.get(0));
             assertEquals("Joe", name.get(1));
             assertEquals("Matilda", name.get(2));

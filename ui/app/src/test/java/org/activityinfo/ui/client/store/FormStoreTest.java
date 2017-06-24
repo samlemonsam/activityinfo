@@ -41,13 +41,16 @@ public class FormStoreTest {
         HttpBus httpBus = new HttpBus(client, scheduler);
         OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
 
+        Survey survey = client.getCatalog().getSurvey();
+
         // We start offline
         client.setConnected(false);
 
 
+
         // Now the view connects and should remain in loading state...
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
-        Connection<FormTree> view = connect(formStore.getFormTree(Survey.FORM_ID));
+        Connection<FormTree> view = connect(formStore.getFormTree(survey.getFormId()));
         view.assertLoading();
 
         // Start retries, but we're still offline
@@ -67,9 +70,11 @@ public class FormStoreTest {
     @Test
     public void httpBus() {
         AsyncClientStub client = new AsyncClientStub();
+        Survey survey = client.getCatalog().getSurvey();
+
         HttpBus httpBus = new HttpBus(client, scheduler);
 
-        Connection<FormTree> view = connect(httpBus.getFormTree(Survey.FORM_ID));
+        Connection<FormTree> view = connect(httpBus.getFormTree(survey.getFormId()));
 
         runScheduled();
 
@@ -84,14 +89,16 @@ public class FormStoreTest {
         OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
+        Survey survey = client.getCatalog().getSurvey();
+
         // Start online
-        Connection<OfflineStatus> offlineStatusView = connect(formStore.getOfflineStatus(Survey.FORM_ID));
+        Connection<OfflineStatus> offlineStatusView = connect(formStore.getOfflineStatus(survey.getFormId()));
 
         // Initially form should not be loaded
         assertFalse(offlineStatusView.assertLoaded().isEnabled());
 
         // and mark the survey form for offline usage
-        offlineStore.enableOffline(Survey.FORM_ID, true);
+        offlineStore.enableOffline(survey.getFormId(), true);
 
         assertTrue(offlineStatusView.assertLoaded().isEnabled());
         assertFalse(offlineStatusView.assertLoaded().isCached());
@@ -105,8 +112,8 @@ public class FormStoreTest {
         client.setConnected(false);
 
         // Should be able to view the form class and a record
-        Connection<FormTree> schemaView = connect(formStore.getFormTree(Survey.FORM_ID));
-        Connection<Maybe<FormRecord>> recordView = connect(formStore.getRecord(Survey.getRecordRef(0)));
+        Connection<FormTree> schemaView = connect(formStore.getFormTree(survey.getFormId()));
+        Connection<Maybe<FormRecord>> recordView = connect(formStore.getRecord(survey.getRecordRef(0)));
 
         runScheduled();
 
@@ -121,21 +128,24 @@ public class FormStoreTest {
     public void offlineColumnQuery() {
 
         TestSetup setup = new TestSetup();
-        setup.getFormStore().setFormOffline(Survey.FORM_ID, true);
+        Survey survey = setup.getSurveyForm();
+
+        setup.getFormStore().setFormOffline(survey.getFormId(), true);
         setup.runScheduled();
         setup.setConnected(false);
 
-        Connection<SnapshotStatus> snapshot = setup.connect(setup.getOfflineStore().getCurrentSnapshot());
-        assertTrue(snapshot.assertLoaded().isFormCached(Survey.FORM_ID));
 
-        QueryModel queryModel = new QueryModel(Survey.FORM_ID);
+        Connection<SnapshotStatus> snapshot = setup.connect(setup.getOfflineStore().getCurrentSnapshot());
+        assertTrue(snapshot.assertLoaded().isFormCached(survey.getFormId()));
+
+        QueryModel queryModel = new QueryModel(survey.getFormId());
         queryModel.selectResourceId().as("id");
-        queryModel.selectField(Survey.NAME_FIELD_ID).as("name");
-        queryModel.selectField(Survey.AGE_FIELD_ID).as("age");
+        queryModel.selectField(survey.getNameFieldId()).as("name");
+        queryModel.selectField(survey.getAgeFieldId()).as("age");
 
         ColumnSet columnSet = setup.connect(setup.getFormStore().query(queryModel)).assertLoaded();
 
-        assertThat(columnSet.getNumRows(), equalTo(Survey.ROW_COUNT));
+        assertThat(columnSet.getNumRows(), equalTo(survey.getRowCount()));
         assertThat(columnSet.getColumnView("name").get(0), equalTo("Melanie"));
         assertThat(columnSet.getColumnView("name").get(1), equalTo("Joe"));
         assertThat(columnSet.getColumnView("name").get(2), equalTo("Matilda"));
@@ -144,6 +154,8 @@ public class FormStoreTest {
     @Test
     public void relatedFormsAreAlsoCached() {
         AsyncClientStub client = new AsyncClientStub();
+        IntakeForm intakeForm = client.getCatalog().getIntakeForm();
+
         HttpBus httpBus = new HttpBus(client, scheduler);
         OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
@@ -161,12 +173,14 @@ public class FormStoreTest {
 
         assertTrue("incident form is cached", snapshot.isFormCached(IncidentForm.FORM_ID));
         assertTrue("sub form is cached", snapshot.isFormCached(ReferralSubForm.FORM_ID));
-        assertTrue("related form is cached", snapshot.isFormCached(IntakeForm.FORM_ID));
+        assertTrue("related form is cached", snapshot.isFormCached(intakeForm.getFormId()));
     }
 
     @Test
     public void newRecordHitsQuery() {
         TestingCatalog catalog = new TestingCatalog();
+        Survey survey = catalog.getSurvey();
+
         AsyncClientStub client = new AsyncClientStub(catalog);
         HttpBus httpBus = new HttpBus(client, scheduler);
         OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
@@ -174,7 +188,7 @@ public class FormStoreTest {
 
         // Open a query on a set of records
 
-        QueryModel queryModel = new QueryModel(Survey.FORM_ID);
+        QueryModel queryModel = new QueryModel(survey.getFormId());
         queryModel.selectResourceId().as("id");
 
         Connection<ColumnSet> tableView = connect(formStore.query(queryModel));
@@ -182,40 +196,16 @@ public class FormStoreTest {
 
         // Add an new record to Survey
         tableView.resetChangeCounter();
-        formStore.updateRecords(new TransactionBuilder().add(catalog.addNew(Survey.FORM_ID)));
+        formStore.updateRecords(new TransactionBuilder().add(catalog.addNew(survey.getFormId())));
 
 
         // Verify that the table view has been updated
         tableView.assertLoaded();
         tableView.assertChanged();
 
-        assertThat(tableView.assertLoaded().getNumRows(), equalTo(Survey.ROW_COUNT + 1));
+        assertThat(tableView.assertLoaded().getNumRows(), equalTo(survey.getRowCount() + 1));
     }
 
-    @Test
-    public void offlineStartup() {
-
-        IDBExecutorStub database = new IDBExecutorStub();
-
-        // In the first session, we go online and turn on synchronization
-        // for one of the forms.
-
-        TestSetup session1 = new TestSetup(database, true);
-        session1.getFormStore().setFormOffline(IntakeForm.FORM_ID, true);
-        session1.runScheduled();
-
-        Connection<OfflineStatus> offlineStatus1 = session1.connect(session1.getFormStore().getOfflineStatus(IntakeForm.FORM_ID));
-
-        assertTrue(offlineStatus1.assertLoaded().isCached());
-
-        // Close the browser, open a new session
-        TestSetup session2 = new TestSetup(database, false);
-
-        Connection<OfflineStatus> offlineStatus2 = session1.connect(session1.getFormStore().getOfflineStatus(IntakeForm.FORM_ID));
-        assertTrue(offlineStatus2.assertLoaded().isCached());
-
-
-    }
 
     private void runScheduled() {
         while(scheduler.executeScheduledCommands()) {

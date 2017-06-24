@@ -34,7 +34,7 @@ public class BioDataForm implements TestForm {
         codeField = formClass.addField(PROTECTION_CODE_FIELD_ID)
                 .setCode("PCODE")
                 .setLabel("Protection Code")
-                .setType(new ReferenceType(Cardinality.SINGLE, IntakeForm.FORM_ID))
+                .setType(new ReferenceType(Cardinality.SINGLE, intakeForm.getFormId()))
                 .setRequired(true)
                 .setKey(true)
                 .setVisible(true);
