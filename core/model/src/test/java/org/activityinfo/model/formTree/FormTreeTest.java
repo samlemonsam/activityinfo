@@ -1,7 +1,7 @@
 package org.activityinfo.model.formTree;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.impl.JsonUtil;
 import org.activityinfo.model.resource.ResourceId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -42,11 +42,9 @@ public class FormTreeTest {
 
         checkStudentTree(formTree);
 
-        org.activityinfo.json.JsonObject object = JsonFormTreeBuilder.toJson(formTree);
+        JsonObject object = JsonFormTreeBuilder.toJson(formTree);
         
-        Gson prettyPrintingJson = new GsonBuilder().setPrettyPrinting().create();
-        
-        System.out.println(prettyPrintingJson.toJson(object));
+        System.out.println(JsonUtil.stringify(object, 2));
         
         FormTree reTree = JsonFormTreeBuilder.fromJson(object);
         

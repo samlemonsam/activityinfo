@@ -1,8 +1,7 @@
 package org.activityinfo.api.tools;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
+import org.activityinfo.json.impl.JsonUtil;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -28,9 +27,9 @@ public class CurlExamplesGenerator {
 
     private static class Example {
         String commandLine;
-        JsonElement result;
+        JsonValue result;
 
-        public Example(String commandLine, JsonElement result) {
+        public Example(String commandLine, JsonValue result) {
             this.commandLine = commandLine;
             this.result = result;
         }
@@ -39,7 +38,7 @@ public class CurlExamplesGenerator {
             return commandLine;
         }
 
-        public JsonElement getResult() {
+        public JsonValue getResult() {
             return result;
         }
 
@@ -49,9 +48,7 @@ public class CurlExamplesGenerator {
             sb.append(commandLine);
             sb.append("\n");
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(result, sb);
-            return sb.toString();
+            return JsonUtil.stringify(result, 2);
         }
     }
 
