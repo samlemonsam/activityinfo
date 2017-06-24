@@ -26,6 +26,8 @@ task testGwt(type: JavaExec) {
 
     dependsOn compileTestJava
 
+    outputs.upToDateWhen { true }
+
     classpath configurations.gwtSdk
     classpath configurations.gwt
 
@@ -44,3 +46,5 @@ task testGwt(type: JavaExec) {
     args 'org.activityinfo.json.JsonUtilGwtTest'
 
 }
+
+test.dependsOn "testGwt"
