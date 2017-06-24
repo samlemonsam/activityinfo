@@ -19,7 +19,7 @@ public class IDBDatabaseImpl extends JavaScriptObject {
         api.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
         api.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 
-        var request = indexedDB.open("ActivityInfo", 4);
+        var request = indexedDB.open("AI0000", 4);
         request.onerror = function(event) {
             @org.activityinfo.ui.client.store.offline.IDBDatabaseImpl::fail(*)(callback, event);
         };
