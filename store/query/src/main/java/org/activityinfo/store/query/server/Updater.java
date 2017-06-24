@@ -201,7 +201,7 @@ public class Updater {
         JsonValue jsonValue = changeObject.get(propertyName);
         if(!jsonValue.isJsonPrimitive() || !jsonValue.isString()) {
             throw new InvalidUpdateException(format("Property '%s' must contain a string, but found: %s", 
-                    propertyName, jsonValue.toString()));
+                    propertyName, jsonValue.toJson()));
         }
         
         return ResourceId.valueOf(jsonValue.asString());

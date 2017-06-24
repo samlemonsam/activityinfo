@@ -166,7 +166,7 @@ public class QueryModel {
     }
     
     public String toJsonString() {
-        return toJsonElement().toString();
+        return toJsonElement().toJson();
     }
 
     public static QueryModel fromJson(String json) {

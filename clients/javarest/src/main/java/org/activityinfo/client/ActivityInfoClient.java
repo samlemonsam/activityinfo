@@ -55,7 +55,7 @@ public class ActivityInfoClient {
         command.put("type", "CreateEntity");
         command.add("command", createEntity);
 
-        String result = client.resource(root).path("command").post(String.class, command.toString());
+        String result = client.resource(root).path("command").post(String.class, command.toJson());
         JsonObject resultObject = (JsonObject) parser.parse(result);
 
         int newId = resultObject.get("newId").asInt();
@@ -82,7 +82,7 @@ public class ActivityInfoClient {
                 .path("record")
                 .path(record.getId().asString())
                 .type(MediaType.APPLICATION_JSON_TYPE)
-                .put(ClientResponse.class, record.toJsonObject().toString());
+                .put(ClientResponse.class, record.toJsonObject().toJson());
 
         if(response.getStatus() == 400) {
             throw new IllegalArgumentException(response.getEntity(String.class));

@@ -96,7 +96,7 @@ public class ActivityField implements Serializable {
         private FormField value;
 
         private void writeObject(ObjectOutputStream out) throws IOException {
-            out.writeUTF(value.toJsonObject().toString());
+            out.writeUTF(value.toJsonObject().toJson());
         }
         private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
             this.value = FormField.fromJson((JsonObject)new JsonParser().parse(in.readUTF()));

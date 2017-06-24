@@ -361,7 +361,7 @@ public class GeoAdminClient implements FormClassProvider {
         ClientResponse response = client.resource(root)
                 .path("update")
                 .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(builder.build().toString(), MediaType.APPLICATION_JSON_TYPE)
+                .entity(builder.build().toJson(), MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class);
         
         if(response.getStatus() != 200) {

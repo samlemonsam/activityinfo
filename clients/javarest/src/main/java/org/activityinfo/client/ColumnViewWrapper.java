@@ -77,6 +77,6 @@ public class ColumnViewWrapper implements ColumnView {
 
     @Override
     public String toString() {
-        return array.toString();
+        return array.toJson();
     }
 }

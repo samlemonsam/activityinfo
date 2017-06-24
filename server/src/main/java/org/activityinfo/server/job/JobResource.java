@@ -64,7 +64,7 @@ public class JobResource {
         // now create the job record in the datastore
         JobEntity record = new JobEntity(user.get().getUserId());
         record.setType(request.getDescriptor().getType());
-        record.setDescriptor(request.getDescriptor().toJsonObject().toString());
+        record.setDescriptor(request.getDescriptor().toJsonObject().toJson());
         record.setState(JobState.STARTED);
         record.setStartTime(new Date());
         record.setLocale(user.get().getUserLocale());
@@ -79,7 +79,7 @@ public class JobResource {
         LOGGER.info("Starting task " + request.getDescriptor().getType());
 
 
-        return Response.ok(Response.Status.CREATED).entity(buildStatus(record).toJsonObject().toString()).build();
+        return Response.ok(Response.Status.CREATED).entity(buildStatus(record).toJsonObject().toJson()).build();
     }
 
     /**
@@ -102,7 +102,7 @@ public class JobResource {
         }
 
         JobStatus status = buildStatus(job);
-        return Response.ok().entity(status.toJsonObject().toString()).build();
+        return Response.ok().entity(status.toJsonObject().toJson()).build();
     }
 
     private JobStatus buildStatus(JobEntity job) {

@@ -361,7 +361,7 @@ public class FormClass implements FormElementContainer {
     }
 
     public String toJsonString() {
-        return toJsonObject().toString();
+        return toJsonObject().toJson();
     }
 
     public ExprNode findLabelExpression() {

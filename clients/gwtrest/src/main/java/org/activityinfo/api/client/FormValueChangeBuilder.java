@@ -10,7 +10,7 @@ public class FormValueChangeBuilder {
   }
 
   public String toJsonString() {
-    return jsonObject.toString();
+    return jsonObject.toJson();
   }
 
   public JsonObject toJsonObject() {

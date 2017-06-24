@@ -272,7 +272,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Void> updateRecords(TransactionBuilder transaction) {
-        return post(RequestBuilder.POST, baseUrl + "/update", transaction.build().toString());
+        return post(RequestBuilder.POST, baseUrl + "/update", transaction.build().toJson());
     }
 
     @Override
@@ -280,7 +280,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
         JobRequest request = new JobRequest(job, LocaleInfo.getCurrentLocale().getLocaleName());
 
-        return post(RequestBuilder.POST, baseUrl + "/jobs", request.toJsonObject().toString(), new Function<String, JobStatus<T, R>>() {
+        return post(RequestBuilder.POST, baseUrl + "/jobs", request.toJsonObject().toJson(), new Function<String, JobStatus<T, R>>() {
             @Override
             public JobStatus<T, R> apply(String s) {
                 return JobStatus.fromJson(JSON_PARSER.parse(s).getAsJsonObject());

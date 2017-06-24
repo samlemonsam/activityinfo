@@ -18,11 +18,18 @@ public class FormRecord {
     private String recordId;
     private String formId;
     private String parentRecordId;
-    private org.activityinfo.json.JsonObject fields;
+    private JsonObject fields;
 
     private FormRecord() {
     }
-    
+
+    public FormRecord(RecordRef ref, String parentRecordId, JsonObject fields) {
+        this.formId = ref.getFormId().asString();
+        this.recordId = ref.getRecordId().asString();
+        this.parentRecordId = parentRecordId;
+        this.fields = fields;
+    }
+
     public String getRecordId() {
         return recordId;
     }
@@ -35,7 +42,7 @@ public class FormRecord {
         return parentRecordId;
     }
 
-    public org.activityinfo.json.JsonObject getFields() {
+    public JsonObject getFields() {
         return fields;
     }
 
@@ -46,7 +53,7 @@ public class FormRecord {
     }
     
     public static FormRecord fromJson(JsonValue element) {
-        org.activityinfo.json.JsonObject jsonObject = element.getAsJsonObject();
+        JsonObject jsonObject = element.getAsJsonObject();
 
         FormRecord formRecord = new FormRecord();
         formRecord.recordId = jsonObject.get("recordId").asString();

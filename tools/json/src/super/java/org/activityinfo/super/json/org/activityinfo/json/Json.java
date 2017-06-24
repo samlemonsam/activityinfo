@@ -66,4 +66,10 @@ public class Json {
   public static native String stringify(JsonValue jsonValue) /*-{
     return $wnd.JSON.stringify(jsonValue);
   }-*/;
+
+  public static native JsonValue toJson(Object value) /*-{
+    // value *must* be either JsonValue or a type annotated with @JsType or
+    // the result will be gibberish.
+    return value;
+  }-*/;
 }

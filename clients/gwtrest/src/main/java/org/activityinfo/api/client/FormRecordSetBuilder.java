@@ -15,7 +15,7 @@ public class FormRecordSetBuilder {
   }
 
   public String toJsonString() {
-    return jsonObject.toString();
+    return jsonObject.toJson();
   }
 
   public JsonObject toJsonObject() {

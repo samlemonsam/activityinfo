@@ -65,7 +65,7 @@ public class JobResourceTest {
                 JobRequest request = new JobRequest(exportForm, "en");
 
 
-                Response response = resource.start(request.toJsonObject().toString());
+                Response response = resource.start(request.toJsonObject().toJson());
 
                 JsonValue resultObject = parser.parse((String) response.getEntity());
 

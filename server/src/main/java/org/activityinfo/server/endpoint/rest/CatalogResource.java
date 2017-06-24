@@ -47,7 +47,7 @@ public class CatalogResource {
         for (CatalogEntry entry : entries) {
             array.add(entry.toJsonElement());
         }
-        return array.toString();
+        return array.toJson();
     }
 
 }

@@ -40,7 +40,7 @@ public class ColumnStatePersister {
             return;
         }
 
-        stateProvider.set(INSTANCE_TABLE_COLUMNS_STATE, asRecord(columnNames).toString());
+        stateProvider.set(INSTANCE_TABLE_COLUMNS_STATE, asRecord(columnNames).toJson());
     }
 
     public Set<String> getColumnNames() {

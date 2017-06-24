@@ -192,7 +192,7 @@ public class FormResource {
         }
 
         return Response.ok()
-                .entity(record.get().toJsonElement().toString())
+                .entity(record.get().toJsonElement().toJson())
                 .type(JSON_CONTENT_TYPE)
                 .build();
     }
@@ -290,7 +290,7 @@ public class FormResource {
         JsonArray array = builder.build(formId, ResourceId.valueOf(recordId));
 
         return Response.ok()
-                .entity(array.toString())
+                .entity(array.toJson())
                 .type(JSON_CONTENT_TYPE)
                 .build();
     }
