@@ -23,11 +23,11 @@ public class RecordQuery extends SimpleTask<Maybe<FormRecord>> {
         return executor
             .begin(RecordStore.NAME)
             .query(tx -> tx.records().get(recordRef))
-            .then(new Function<Optional<FormRecord>, Maybe<FormRecord>>() {
+            .then(new Function<Optional<RecordObject>, Maybe<FormRecord>>() {
                 @Override
-                public Maybe<FormRecord> apply(Optional<FormRecord> formRecord) {
+                public Maybe<FormRecord> apply(Optional<RecordObject> formRecord) {
                     if(formRecord.isPresent()) {
-                        return Maybe.of(formRecord.get());
+                        return Maybe.of(formRecord.get().toFormRecord(recordRef));
                     } else {
                         return Maybe.notFound();
                     }

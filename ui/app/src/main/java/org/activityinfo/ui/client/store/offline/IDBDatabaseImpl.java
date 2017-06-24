@@ -31,8 +31,7 @@ public class IDBDatabaseImpl extends JavaScriptObject {
 
                 var formStore = db.createObjectStore("forms", {keyPath: "formId"});
 
-                var recordStore = db.createObjectStore("records", {keyPath: ["formId", "recordId"]});
-                recordStore.createIndex("formId", "formId", {unique: false});
+                var recordStore = db.createObjectStore("records", {});
                 recordStore.createIndex("parentFormId", "parentFormId", {unique: false});
             }
             if (event.oldVersion < 4) {

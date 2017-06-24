@@ -92,5 +92,6 @@ public interface JsonValue extends Serializable {
     Object toNative();
 
 
+    String toString();
 
 }

@@ -13,10 +13,13 @@ import org.activityinfo.json.JsonValue;
  * <p>This interface only defines the methods and types required by ActivityInfo and is not
  * a completed description of the IndexedDB API.</p>
  *
+ * @param T the type of this cursor's value. Must be either a subclass of {@link JsonValue} or a type
+ *          annotated with {@link JsType}
+ *
  * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor">IDBCursor API Reference</a>
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
-public interface IDBCursor {
+public interface IDBCursor<T> {
 
     /**
      * Advances the cursor to the next position along its direction, to the
@@ -39,8 +42,9 @@ public interface IDBCursor {
     @JsProperty(name = "key")
     String[] getKeyArray();
 
+
     @JsProperty(name = "value")
-    JsonValue getValue();
+    T getValue();
 
 
 

@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -13,9 +14,9 @@ public class SchemaStore {
 
     public static final String NAME = "formSchemas";
 
-    private IDBObjectStore impl;
+    private IDBObjectStore<JsonValue> impl;
 
-    SchemaStore(IDBObjectStore impl) {
+    SchemaStore(IDBObjectStore<JsonValue> impl) {
         this.impl = impl;
     }
 

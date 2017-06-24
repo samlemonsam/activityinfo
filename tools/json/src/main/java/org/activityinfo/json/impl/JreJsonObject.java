@@ -97,7 +97,7 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
 
 
     public String getString(String key) {
-        return ((JsonString) get(key)).getString();
+        return get(key).asString();
     }
 
     public JsonType getType() {

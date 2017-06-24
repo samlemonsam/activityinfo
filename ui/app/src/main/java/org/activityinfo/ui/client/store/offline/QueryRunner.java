@@ -29,9 +29,9 @@ public class QueryRunner implements ColumnQueryBuilder {
             this.observer = observer;
         }
 
-        public void onNext(FormRecord record) {
+        public void onNext(RecordObject record) {
 
-            JsonValue jsonValue = record.getFields().get(fieldName);
+            JsonValue jsonValue = record.getField(fieldName);
             if(jsonValue == null) {
                 observer.onNext(null);
             } else {
@@ -76,16 +76,16 @@ public class QueryRunner implements ColumnQueryBuilder {
 
     @Override
     public void execute() {
-        tx.records().openCursor(formClass.getId(), new RecordStore.RecordCursorCallback() {
+        tx.records().openCursor(formClass.getId(), new IDBCursorCallback<RecordObject>() {
             @Override
-            public void onNext(RecordStore.RecordCursor cursor) {
-                ResourceId resourceId = cursor.getRecordId();
+            public void onNext(IDBCursor<RecordObject> cursor) {
+                ResourceId resourceId = RecordStore.recordIdOf(cursor);
 
                 for (CursorObserver<ResourceId> observer : idObservers) {
                     observer.onNext(resourceId);
                 }
 
-                FormRecord record = cursor.getValue();
+                RecordObject record = cursor.getValue();
                 for (FieldObserver fieldObserver : fieldObservers) {
                     fieldObserver.onNext(record);
                 }

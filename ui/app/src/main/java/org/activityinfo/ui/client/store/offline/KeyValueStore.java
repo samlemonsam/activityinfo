@@ -21,7 +21,7 @@ public class KeyValueStore {
 
     private static final String OFFLINE_FORMS = "offlineForms";
 
-    private final IDBObjectStore impl;
+    private final IDBObjectStore<JsonValue> impl;
 
     KeyValueStore(IDBObjectStore impl) {
         this.impl = impl;

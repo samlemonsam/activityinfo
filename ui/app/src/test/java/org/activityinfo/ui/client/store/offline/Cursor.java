@@ -6,15 +6,15 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Map;
 
-class Cursor implements IDBCursor {
+class Cursor<T> implements IDBCursor<T> {
 
     private IDBCursorCallback callback;
-    private Iterator<Map.Entry<ObjectKey, JsonValue>> iterator;
-    private Map.Entry<ObjectKey, JsonValue> current;
+    private Iterator<Map.Entry<ObjectKey, T>> iterator;
+    private Map.Entry<ObjectKey, T> current;
 
     private ArrayDeque<Runnable> queue = new ArrayDeque<>();
 
-    public Cursor(Iterator<Map.Entry<ObjectKey, JsonValue>> iterator, IDBCursorCallback callback) {
+    public Cursor(Iterator<Map.Entry<ObjectKey, T>> iterator, IDBCursorCallback callback) {
         this.iterator = iterator;
         this.callback = callback;
     }
@@ -40,7 +40,7 @@ class Cursor implements IDBCursor {
     }
 
     @Override
-    public JsonValue getValue() {
+    public T getValue() {
         return current.getValue();
     }
 

@@ -6,23 +6,25 @@ import org.activityinfo.promise.Promise;
 /**
  * Interface to an Indexed DB object store.
  */
-public interface IDBObjectStore {
+public interface IDBObjectStore<T> {
 
-    void put(JsonValue object);
+    void put(T object);
 
-    void put(String key, JsonValue object);
+    void put(String key, T object);
 
-    /**
-     * Retrieves the given object from the ObjectStore, encoded as a JSON string, or {@code null} if no
-     * such object exists.
-     */
-    Promise<JsonValue> get(String key);
+    void put(String[] key, T object);
 
     /**
      * Retrieves the given object from the ObjectStore, encoded as a JSON string, or {@code null} if no
      * such object exists.
      */
-    Promise<JsonValue> get(String[] keys);
+    Promise<T> get(String key);
+
+    /**
+     * Retrieves the given object from the ObjectStore, encoded as a JSON string, or {@code null} if no
+     * such object exists.
+     */
+    Promise<T> get(String[] keys);
 
 
     /**
@@ -34,6 +36,6 @@ public interface IDBObjectStore {
      * @param upperBound the upper bound of the key, inclusive
      * @param callback
      */
-    void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback);
+    void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback<T> callback);
 
 }

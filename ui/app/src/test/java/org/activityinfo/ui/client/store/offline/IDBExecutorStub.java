@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.promise.Promise;
@@ -14,9 +15,12 @@ public class IDBExecutorStub implements IDBExecutor {
     private Map<String, ObjectStore> storeMap = new HashMap<>();
 
     public IDBExecutorStub() {
-        storeMap.put(SchemaStore.NAME, new ObjectStore(SchemaStore.NAME, new String[] { "id" }));
-        storeMap.put(RecordStore.NAME, new ObjectStore(RecordStore.NAME, new String[] { "formId", "recordId" }));
-        storeMap.put(KeyValueStore.NAME, new ObjectStore(KeyValueStore.NAME));
+        storeMap.put(SchemaStore.NAME,
+            new ObjectStore<>(JsonValue.class, SchemaStore.NAME, new String[]{"id"}));
+        storeMap.put(RecordStore.NAME,
+            new ObjectStore<>(RecordObject.class, RecordStore.NAME));
+        storeMap.put(KeyValueStore.NAME,
+            new ObjectStore<>(JsonValue.class, KeyValueStore.NAME));
     }
 
     @Override
@@ -73,46 +77,62 @@ public class IDBExecutorStub implements IDBExecutor {
     }
 
 
-    private class ObjectStore {
+    private class ObjectStore<T> {
 
+        private final Class<T> valueType;
         private final String name;
         private final String[] keyPath;
-        private TreeMap<ObjectKey, JsonValue> objectMap = new TreeMap<>();
+        private TreeMap<ObjectKey, T> objectMap = new TreeMap<>();
 
-        public ObjectStore(String name, String[] keyPath) {
+        public ObjectStore(Class<T> valueType, String name, String[] keyPath) {
+            this.valueType = valueType;
             this.name = name;
             this.keyPath = keyPath;
         }
 
-        public ObjectStore(String name) {
+        public ObjectStore(Class<T> valueType, String name) {
+            this.valueType = valueType;
             this.name = name;
             this.keyPath = null;
         }
+
+        public T get(ObjectKey key) {
+            return objectMap.get(key);
+        }
     }
 
-    private class ObjectStoreInTx implements IDBObjectStore {
+    private class ObjectStoreInTx<T> implements IDBObjectStore<T> {
 
-        private ObjectStore store;
+        private ObjectStore<T> store;
         private boolean readwrite;
 
-        public ObjectStoreInTx(ObjectStore store, boolean readwrite) {
+        public ObjectStoreInTx(ObjectStore<T> store, boolean readwrite) {
             this.store = store;
             this.readwrite = readwrite;
         }
         @Override
-        public void put(JsonValue value) {
+        public void put(T value) {
             if(!readwrite) {
                 throw new IllegalStateException("The transaction is read-only.");
             }
-            store.objectMap.put(buildKey(value.getAsJsonObject()), value);
+            store.objectMap.put(buildKey(Json.toJson(value).getAsJsonObject()), value);
         }
 
         @Override
-        public void put(String key, JsonValue value) {
+        public void put(String key, T value) {
+          put(new ObjectKey(key), value);
+        }
+
+        @Override
+        public void put(String[] key, T object) {
+            put(new ObjectKey(key), object);
+        }
+
+        private void put(ObjectKey key, T value) {
             if(!readwrite) {
                 throw new IllegalStateException("The transaction is read-only.");
             }
-            store.objectMap.put(new ObjectKey(key), value);
+            store.objectMap.put(key, value);
         }
 
         private ObjectKey buildKey(JsonObject object) {
@@ -138,28 +158,28 @@ public class IDBExecutorStub implements IDBExecutor {
         }
 
         @Override
-        public Promise<JsonValue> get(String key) {
+        public Promise<T> get(String key) {
             return get(new ObjectKey(key));
         }
 
         @Override
-        public Promise<JsonValue> get(String[] keys) {
+        public Promise<T> get(String[] keys) {
             return get(new ObjectKey(keys));
         }
 
-        private Promise<JsonValue> get(ObjectKey key) {
-            return Promise.resolved(store.objectMap.get(key));
+        private Promise<T> get(ObjectKey key) {
+            return Promise.resolved(store.get(key));
         }
 
         @Override
         public void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) {
 
-            NavigableMap<ObjectKey, JsonValue> range = store.objectMap.subMap(
+            NavigableMap<ObjectKey, T> range = store.objectMap.subMap(
                     new ObjectKey(lowerBound), true,
                     new ObjectKey(upperBound), true);
-            Iterator<Map.Entry<ObjectKey, JsonValue>> it = range.entrySet().iterator();
+            Iterator<Map.Entry<ObjectKey, T>> it = range.entrySet().iterator();
 
-            Cursor cursor = new Cursor(it, callback);
+            Cursor<T> cursor = new Cursor<T>(it, callback);
             cursor.run();
         }
     }

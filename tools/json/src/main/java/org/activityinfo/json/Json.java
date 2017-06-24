@@ -16,6 +16,7 @@
 package org.activityinfo.json;
 
 import org.activityinfo.json.impl.JreJsonFactory;
+import org.activityinfo.json.impl.JsonReflection;
 import org.activityinfo.json.impl.JsonUtil;
 
 /**
@@ -61,5 +62,9 @@ public class Json {
 
     public static String stringify(JsonValue jsonValue) {
         return JsonUtil.stringify(jsonValue);
+    }
+
+    public static JsonValue toJson(Object value) {
+        return JsonReflection.toJson(value);
     }
 }

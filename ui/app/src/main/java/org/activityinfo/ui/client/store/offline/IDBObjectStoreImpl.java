@@ -12,21 +12,30 @@ import org.activityinfo.promise.Promise;
  * <p>A new subclass should be defined for each new IndexedDb with typed
  * get and put methods.</p>
  */
-public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectStore {
+public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObjectStore<T> {
     protected IDBObjectStoreImpl() {
     }
 
     @Override
-    public final native void put(JsonValue object) /*-{
+    public final native void put(T object) /*-{
         this.put(object);
     }-*/;
 
     @Override
-    public final native void put(String key, JsonValue object) /*-{
+    public final void put(String key, T object) {
+        put2(key, object);
+    }
+
+    @Override
+    public final void put(String[] key, T object) {
+        put2(key, object);
+    }
+
+    private final native void put2(Object key, T object) /*-{
         this.put(object, key);
     }-*/;
 
-    protected final native void get(JavaScriptObject key, AsyncCallback<JsonValue> callback) /*-{
+    protected final native void get(JavaScriptObject key, AsyncCallback<T> callback) /*-{
         var request = this.get(key);
         request.onsuccess = function(event) {
             var object = event.target.result;
@@ -39,13 +48,13 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
 
 
     @Override
-    public final Promise<JsonValue> get(String key) {
+    public final Promise<T> get(String key) {
         return get(new String[] { key });
     }
 
     @Override
-    public final Promise<JsonValue> get(String[] keys) {
-        Promise<JsonValue> result = new Promise<>();
+    public final Promise<T> get(String[] keys) {
+        Promise<T> result = new Promise<>();
         get(createKey(keys), result);
         return result;
     }
@@ -56,7 +65,7 @@ public class IDBObjectStoreImpl extends JavaScriptObject implements IDBObjectSto
      * @param callback
      */
     @Override
-    public final native void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) /*-{
+    public final native void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback<T> callback) /*-{
         var request = this.openCursor($wnd.IDBKeyRange.bound(lowerBound, upperBound));
         request.onsuccess = function(event) {
           var cursor = event.target.result;
