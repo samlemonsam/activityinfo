@@ -20,9 +20,10 @@ public class DateFunctionQueryTest {
     @Test
     public void testToday() {
         TestingCatalog catalog = new TestingCatalog();
+        IntakeForm intakeForm = catalog.getIntakeForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
-        QueryModel queryModel = new QueryModel(IntakeForm.getFormId());
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         queryModel.selectExpr("TODAY()").as("today");
         queryModel.selectExpr("YEARFRAC(TODAY(), DOB)").as("age");
         queryModel.selectExpr("DOB").as("dob");
@@ -49,15 +50,16 @@ public class DateFunctionQueryTest {
     @Test
     public void invalidArityTest() {
         TestingCatalog catalog = new TestingCatalog();
+        IntakeForm intakeForm = catalog.getIntakeForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
-        QueryModel queryModel = new QueryModel(IntakeForm.getFormId());
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         queryModel.selectExpr("YEARFRAC(TODAY())").as("age");
 
         ColumnSet columnSet = builder.build(queryModel);
         ColumnView age = columnSet.getColumnView("age");
 
-        assertThat(age.numRows(), equalTo(IntakeForm.getRowCount()));
+        assertThat(age.numRows(), equalTo(IntakeForm.ROW_COUNT));
 
         System.out.println(age);
     }

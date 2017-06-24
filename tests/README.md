@@ -1,5 +1,5 @@
 
-# Acceptance Test Suite
+# End to End Test Suites
 
 ## Introduction
 
@@ -62,9 +62,7 @@ Such requirements include for example:
 ### Scale Testing
 
 
-
 ### Capacity Testing
-
 
 
 ### API Testing

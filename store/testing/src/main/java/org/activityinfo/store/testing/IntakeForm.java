@@ -31,7 +31,7 @@ public class IntakeForm implements TestForm {
     private static final ResourceId DOCUMENTS_ID = ResourceId.valueOf("P1");
     private static final ResourceId SERVICES_ID = ResourceId.valueOf("P2");
 
-    private static final int ROW_COUNT = 1127;
+    public static final int ROW_COUNT = 1127;
 
     private final FormClass formClass;
     private final FormField codeField;
@@ -145,9 +145,6 @@ public class IntakeForm implements TestForm {
         return acccess.getId();
     }
 
-    public int getRowCount() {
-        return ROW_COUNT;
-    }
 
     @Override
     public ResourceId getFormId() {
