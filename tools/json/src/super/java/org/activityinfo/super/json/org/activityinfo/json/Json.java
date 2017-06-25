@@ -67,7 +67,7 @@ public class Json {
     return $wnd.JSON.stringify(jsonValue);
   }-*/;
 
-  public static String stringify(JsonValue jsonValue, int indent) /*-{
+  public static native String stringify(JsonValue jsonValue, int indent) /*-{
     return $wnd.JSON.stringify(jsonValue, indent);
   }-*/;
 
