@@ -68,14 +68,12 @@ public class RecordTransactionBuilder {
         return update;
     }
 
-
     public RecordTransaction build() {
         RecordTransaction tx = new RecordTransaction();
         tx.changes = this.updates.toArray(new RecordUpdate[this.updates.size()]);
         return tx;
     }
 
-    @JsOverlay
     public JsonObject toJsonObject() {
         return Json.toJson(build()).getAsJsonObject();
     }

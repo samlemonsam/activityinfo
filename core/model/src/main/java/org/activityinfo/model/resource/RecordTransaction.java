@@ -11,7 +11,7 @@ import java.util.Arrays;
  * Describes one or more changes to records.
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
-public class RecordTransaction {
+public final class RecordTransaction {
 
     String id;
 

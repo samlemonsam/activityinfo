@@ -14,13 +14,14 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
+import org.activityinfo.indexedb.IDBFactory;
+import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.ui.client.analysis.AnalysisPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.RecordSynchronizer;
 import org.activityinfo.ui.client.store.http.HttpBus;
-import org.activityinfo.ui.client.store.offline.IDBExecutorImpl;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 import java.util.logging.Logger;
@@ -43,7 +44,7 @@ public class AppEntryPoint implements EntryPoint {
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
-        OfflineStore offlineStore = new OfflineStore(new IDBExecutorImpl());
+        OfflineStore offlineStore = new OfflineStore(IDBFactoryImpl.create());
 
         ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
         HttpBus httpBus = new HttpBus(client);

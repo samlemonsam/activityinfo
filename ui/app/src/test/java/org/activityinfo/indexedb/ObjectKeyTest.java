@@ -1,5 +1,6 @@
-package org.activityinfo.ui.client.store.offline;
+package org.activityinfo.indexedb;
 
+import org.activityinfo.indexedb.ObjectKey;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

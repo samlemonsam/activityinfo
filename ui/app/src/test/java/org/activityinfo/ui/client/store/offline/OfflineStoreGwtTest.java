@@ -5,6 +5,8 @@ import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import junit.framework.TestCase;
 import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.indexedb.IDBFactory;
+import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -53,7 +55,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 Collections.singletonList(surveyMetadata),
                 Collections.singletonList(toFormRecordSet(survey)));
 
-        offlineStore = new OfflineStore(new IDBExecutorImpl());
+        offlineStore = new OfflineStore(IDBFactoryImpl.create());
         httpBus = new HttpBus(new OfflineClientStub());
         formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
 

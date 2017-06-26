@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.store.offline;
+package org.activityinfo.indexedb;
 
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
@@ -33,7 +33,31 @@ public final class ObjectStoreOptions {
     }
 
     @JsOverlay
+    public Object getKeyPath() {
+        return keyPath;
+    }
+
+    @JsOverlay
     public void setAutoIncrement(boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
+    }
+
+    @JsOverlay
+    public static ObjectStoreOptions withKey(String keyName) {
+        ObjectStoreOptions options = new ObjectStoreOptions();
+        options.keyPath = keyName;
+        return options;
+    }
+
+    @JsOverlay
+    public static ObjectStoreOptions withKeyPath(String... keyPath) {
+        ObjectStoreOptions options = new ObjectStoreOptions();
+        options.keyPath = keyPath;
+        return options;
+    }
+
+    @JsOverlay
+    public static ObjectStoreOptions withDefaults() {
+        return new ObjectStoreOptions();
     }
 }

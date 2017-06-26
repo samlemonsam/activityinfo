@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.indexedb.*;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -13,6 +14,26 @@ import java.util.logging.Logger;
  * IndexedDB object store for individual form records.
  */
 public class RecordStore {
+
+    public static final ObjectStoreDefinition<RecordStore> DEF = new ObjectStoreDefinition<RecordStore>() {
+        @Override
+        public String getName() {
+            return "records";
+        }
+
+        @Override
+        public void upgrade(IDBDatabaseUpgrade database, int oldVersion) {
+            if(oldVersion < 1) {
+                database.createObjectStore(NAME, ObjectStoreOptions.withDefaults());
+            }
+        }
+
+        @Override
+        public RecordStore wrap(IDBObjectStore store) {
+            return new RecordStore(store);
+        }
+    };
+
 
     private static final Logger LOGGER = Logger.getLogger(RecordStore.class.getName());
 

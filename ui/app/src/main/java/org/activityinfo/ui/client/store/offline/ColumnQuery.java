@@ -1,6 +1,9 @@
 package org.activityinfo.ui.client.store.offline;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.indexedb.IDBTransaction;
+import org.activityinfo.indexedb.OfflineDatabase;
+import org.activityinfo.indexedb.VoidWork;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
@@ -14,11 +17,11 @@ import org.activityinfo.ui.client.store.tasks.TaskExecution;
  */
 public class ColumnQuery implements Task<ColumnSet> {
 
-    private final IDBExecutor executor;
+    private final OfflineDatabase executor;
     private final FormTree formTree;
     private final QueryModel queryModel;
 
-    public ColumnQuery(IDBExecutor executor, FormTree formTree, QueryModel queryModel) {
+    public ColumnQuery(OfflineDatabase executor, FormTree formTree, QueryModel queryModel) {
         this.executor = executor;
         this.formTree = formTree;
         this.queryModel = queryModel;

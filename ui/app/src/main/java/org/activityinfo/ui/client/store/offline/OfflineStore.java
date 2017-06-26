@@ -4,6 +4,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.indexedb.IDBFactory;
+import org.activityinfo.indexedb.OfflineDatabase;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
@@ -30,19 +32,20 @@ public class OfflineStore {
 
     private static final Logger LOGGER = Logger.getLogger(OfflineStore.class.getName());
 
-    private IDBExecutor executor;
+    private OfflineDatabase executor;
 
     private StatefulValue<Set<ResourceId>> offlineForms = new StatefulValue<>();
     private StatefulValue<SnapshotStatus> currentSnapshot = new StatefulValue<>();
 
-    public OfflineStore(IDBExecutor executor) {
-        this.executor = executor;
+    public OfflineStore(IDBFactory indexedDbFactory) {
+        this.executor = new OfflineDatabase(indexedDbFactory, "AI0001",
+            SchemaStore.DEF, RecordStore.DEF, KeyValueStore.DEF);
 
         /*
          * Load current snapshot, if any present
          */
-        this.executor.begin(KeyValueStore.NAME)
-                .query(tx -> tx.values().getCurrentSnapshot())
+        this.executor.begin(KeyValueStore.DEF)
+                .query(tx -> tx.objectStore(KeyValueStore.DEF).getCurrentSnapshot())
                 .then(new AsyncCallback<SnapshotStatus>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -64,8 +67,8 @@ public class OfflineStore {
         /*
          * Load current set of offline enabled forms
          */
-        this.executor.begin(KeyValueStore.NAME)
-                .query(tx -> tx.values().getOfflineForms())
+        this.executor.begin(KeyValueStore.DEF)
+                .query(tx -> tx.objectStore(KeyValueStore.DEF).getOfflineForms())
                 .then(new AsyncCallback<Set<ResourceId>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -98,10 +101,10 @@ public class OfflineStore {
      * Updates whether a form should be available offline.
      */
     public void enableOffline(ResourceId formId, boolean offline) {
-        executor.begin(KeyValueStore.NAME)
+        executor.begin(KeyValueStore.DEF)
         .readwrite()
         .query(tx -> {
-            return tx.values().getOfflineForms().then(new Function<Set<ResourceId>, Set<ResourceId>>() {
+            return tx.objectStore(KeyValueStore.DEF).getOfflineForms().then(new Function<Set<ResourceId>, Set<ResourceId>>() {
                 @Override
                 public Set<ResourceId> apply(Set<ResourceId> current) {
                     Set<ResourceId> updated = new HashSet<>(current);
@@ -110,7 +113,7 @@ public class OfflineStore {
                     } else {
                         updated.remove(formId);
                     }
-                    tx.values().put(updated);
+                    tx.objectStore(KeyValueStore.DEF).put(updated);
                     return updated;
                 }
             });
@@ -145,23 +148,23 @@ public class OfflineStore {
         LOGGER.info("Updating offline snapshot: " + status);
 
         return executor.begin()
-        .objectStore(SchemaStore.NAME)
-        .objectStore(RecordStore.NAME)
-        .objectStore(KeyValueStore.NAME)
+        .objectStore(SchemaStore.DEF)
+        .objectStore(RecordStore.DEF)
+        .objectStore(KeyValueStore.DEF)
         .readwrite()
         .execute(tx -> {
-            SchemaStore schemaStore = tx.schemas();
+            SchemaStore schemaStore = tx.objectStore(SchemaStore.DEF);
             for (FormMetadata metadata : snapshot.getForms()) {
                 schemaStore.put(metadata.getSchema());
             }
-            RecordStore recordStore = tx.records();
+            RecordStore recordStore = tx.objectStore(RecordStore.DEF);
             for (FormRecordSet formRecordSet : snapshot.getRecordSets()) {
                 for (FormRecord record : formRecordSet.getRecords()) {
                     recordStore.put(record);
                 }
             }
             // Store our current status for future sessions
-            tx.values().put(status);
+            tx.objectStore(KeyValueStore.DEF).put(status);
         })
         .then(new Function<Void, Void>() {
             @Override

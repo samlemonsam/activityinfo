@@ -12,7 +12,7 @@ import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpBus;
-import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
+import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 import org.junit.Before;
@@ -40,7 +40,7 @@ public class FormStoreTest {
 
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
+        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
 
         Survey survey = client.getCatalog().getSurvey();
 
@@ -87,7 +87,7 @@ public class FormStoreTest {
     public void offlineRecordFetching() {
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
+        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         Survey survey = client.getCatalog().getSurvey();
@@ -158,7 +158,7 @@ public class FormStoreTest {
         IntakeForm intakeForm = client.getCatalog().getIntakeForm();
 
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
+        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // Start online, and enable offline mode for incidents
@@ -184,7 +184,7 @@ public class FormStoreTest {
 
         AsyncClientStub client = new AsyncClientStub(catalog);
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBExecutorStub());
+        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // Open a query on a set of records

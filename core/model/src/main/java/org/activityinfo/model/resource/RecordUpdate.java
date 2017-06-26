@@ -87,11 +87,13 @@ public final class RecordUpdate {
         return fields;
     }
 
-
-
     @JsOverlay
     public void setFieldValue(ResourceId fieldId, FieldValue value) {
-        setFieldValue(fieldId.asString(), value.toJsonElement());
+        if(value == null) {
+            setFieldValue(fieldId.asString(), Json.createNull());
+        } else {
+            setFieldValue(fieldId.asString(), value.toJsonElement());
+        }
     }
 
     @JsOverlay

@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.indexedb.*;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
@@ -12,11 +13,28 @@ import java.util.Optional;
  */
 public class SchemaStore {
 
-    public static final String NAME = "formSchemas";
+    public static final ObjectStoreDefinition<SchemaStore> DEF = new ObjectStoreDefinition<SchemaStore>() {
+        @Override
+        public String getName() {
+            return "schemas";
+        }
+
+        @Override
+        public void upgrade(IDBDatabaseUpgrade database, int oldVersion) {
+            if(oldVersion < 1) {
+                database.createObjectStore(getName(), ObjectStoreOptions.withKey("id"));
+            }
+        }
+
+        @Override
+        public SchemaStore wrap(IDBObjectStore store) {
+            return new SchemaStore(store);
+        }
+    };
 
     private IDBObjectStore<JsonValue> impl;
 
-    SchemaStore(IDBObjectStore<JsonValue> impl) {
+    private SchemaStore(IDBObjectStore<JsonValue> impl) {
         this.impl = impl;
     }
 

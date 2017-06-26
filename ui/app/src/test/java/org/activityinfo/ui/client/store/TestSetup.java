@@ -7,7 +7,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.activityinfo.ui.client.store.http.HttpBus;
-import org.activityinfo.ui.client.store.offline.IDBExecutorStub;
+import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 /**
@@ -25,10 +25,10 @@ public class TestSetup {
     private final RecordSynchronizer synchronizer;
 
     public TestSetup() {
-        this(new IDBExecutorStub(), true);
+        this(new IDBFactoryStub(), true);
     }
 
-    public TestSetup(IDBExecutorStub database, boolean connected) {
+    public TestSetup(IDBFactoryStub database, boolean connected) {
         catalog = new TestingCatalog();
         client = new AsyncClientStub(catalog);
         client.setConnected(connected);

@@ -1,6 +1,4 @@
-package org.activityinfo.ui.client.store.offline;
-
-import org.activityinfo.json.JsonValue;
+package org.activityinfo.indexedb;
 
 import java.util.ArrayDeque;
 import java.util.Iterator;

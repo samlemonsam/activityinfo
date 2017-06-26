@@ -1,9 +1,12 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.indexedb.IDBCursor;
+import org.activityinfo.indexedb.IDBCursorCallback;
+import org.activityinfo.indexedb.IDBTransaction;
+import org.activityinfo.indexedb.OfflineDatabase;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
@@ -76,7 +79,7 @@ public class QueryRunner implements ColumnQueryBuilder {
 
     @Override
     public void execute() {
-        tx.records().openCursor(formClass.getId(), new IDBCursorCallback<RecordObject>() {
+        tx.objectStore(RecordStore.DEF).openCursor(formClass.getId(), new IDBCursorCallback<RecordObject>() {
             @Override
             public void onNext(IDBCursor<RecordObject> cursor) {
                 ResourceId resourceId = RecordStore.recordIdOf(cursor);

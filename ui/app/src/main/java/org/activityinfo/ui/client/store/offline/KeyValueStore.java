@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.indexedb.*;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
@@ -15,7 +16,24 @@ import java.util.Set;
  */
 public class KeyValueStore {
 
-    public static final String NAME = "values";
+    public static final ObjectStoreDefinition<KeyValueStore> DEF = new ObjectStoreDefinition<KeyValueStore>() {
+        @Override
+        public String getName() {
+            return "values";
+        }
+
+        @Override
+        public void upgrade(IDBDatabaseUpgrade database, int oldVersion) {
+            if(oldVersion < 1) {
+                database.createObjectStore(getName(), ObjectStoreOptions.withDefaults());
+            }
+        }
+
+        @Override
+        public KeyValueStore wrap(IDBObjectStore store) {
+            return new KeyValueStore(store);
+        }
+    };
 
     private static final String CURRENT_SNAPSHOT_KEY = "snapshot";
 
@@ -23,7 +41,7 @@ public class KeyValueStore {
 
     private final IDBObjectStore<JsonValue> impl;
 
-    KeyValueStore(IDBObjectStore impl) {
+    private KeyValueStore(IDBObjectStore impl) {
         this.impl = impl;
     }
 

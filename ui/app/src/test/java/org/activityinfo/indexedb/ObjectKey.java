@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.store.offline;
+package org.activityinfo.indexedb;
 
 import com.google.common.annotations.VisibleForTesting;
 

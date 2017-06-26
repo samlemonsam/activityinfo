@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.store.offline;
+package org.activityinfo.indexedb;
 
 /**
  * Callback interface that handles events from {@link IDBCursor} events.

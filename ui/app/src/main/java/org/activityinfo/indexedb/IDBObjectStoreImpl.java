@@ -1,9 +1,8 @@
-package org.activityinfo.ui.client.store.offline;
+package org.activityinfo.indexedb;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.json.JsonValue;
 import org.activityinfo.promise.Promise;
 
 /**
@@ -12,7 +11,7 @@ import org.activityinfo.promise.Promise;
  * <p>A new subclass should be defined for each new IndexedDb with typed
  * get and put methods.</p>
  */
-public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObjectStore<T> {
+public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObjectStore<T>, IDBObjectStoreUpgrade {
     protected IDBObjectStoreImpl() {
     }
 
@@ -75,6 +74,11 @@ public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObject
                 callback.@IDBCursorCallback::onDone()();
             }
         };
+    }-*/;
+
+    @Override
+    public final native void createIndex(String indexName, String keyPath, IndexOptions indexOptions) /*-{
+        this.createIndex(indexName, keyPath, indexOptions);
     }-*/;
 
     private JavaScriptObject createKey(String[] keys) {
