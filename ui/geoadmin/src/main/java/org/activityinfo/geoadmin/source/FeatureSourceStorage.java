@@ -70,12 +70,12 @@ public class FeatureSourceStorage implements FormStorage {
     }
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 

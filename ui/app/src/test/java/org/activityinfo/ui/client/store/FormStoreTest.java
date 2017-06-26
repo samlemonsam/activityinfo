@@ -2,11 +2,12 @@ package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.testing.StubScheduler;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.*;
@@ -196,7 +197,7 @@ public class FormStoreTest {
 
         // Add an new record to Survey
         tableView.resetChangeCounter();
-        formStore.updateRecords(new TransactionBuilder().add(catalog.addNew(survey.getFormId())));
+        formStore.updateRecords(new RecordTransactionBuilder().add(catalog.addNew(survey.getFormId())));
 
 
         // Verify that the table view has been updated
@@ -206,6 +207,28 @@ public class FormStoreTest {
         assertThat(tableView.assertLoaded().getNumRows(), equalTo(survey.getRowCount() + 1));
     }
 
+    @Test
+    public void newRecordOffline() {
+        TestSetup setup = new TestSetup();
+        Survey survey = setup.getSurveyForm();
+
+        // Synchronize the survey form
+
+        setup.setConnected(true);
+        setup.getFormStore().setFormOffline(survey.getFormId(), true);
+        setup.runScheduled();
+
+        // Go offline...
+        setup.setConnected(false);
+
+        // Create a new survey record
+        FormInstance newRecordTyped = survey.getGenerator().get();
+        FormRecord newRecord = FormRecord.fromInstance(newRecordTyped);
+
+        RecordTransactionBuilder tx = new RecordTransactionBuilder();
+
+
+    }
 
     private void runScheduled() {
         while(scheduler.executeScheduledCommands()) {

@@ -48,7 +48,7 @@ public interface FormStorage {
      * @param update the properties of the new resource
      * @throws java.lang.IllegalStateException if a resource with the given {@code resourceId} already exists              
      */
-    void add(RecordUpdate update);
+    void add(TypedRecordUpdate update);
     
     /**
      * Updates an existing resource within the collection
@@ -56,7 +56,7 @@ public interface FormStorage {
      * @param update the changes to apply to the resource
      * @throws java.lang.IllegalStateException if the resource does not exist, or if the update               
      */
-    void update(RecordUpdate update);
+    void update(TypedRecordUpdate update);
 
     
 

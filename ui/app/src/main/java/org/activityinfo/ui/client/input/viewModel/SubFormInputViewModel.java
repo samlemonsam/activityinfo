@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.UpdateBuilder;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.type.RecordRef;
 
 import java.util.ArrayList;
@@ -53,8 +53,8 @@ public class SubFormInputViewModel {
         return Optional.absent();
     }
 
-    public List<UpdateBuilder> buildUpdates() {
-        List<UpdateBuilder> updates = new ArrayList<>();
+    public List<RecordUpdate> buildUpdates() {
+        List<RecordUpdate> updates = new ArrayList<>();
         for (SubRecordViewModel subRecord : subRecords) {
             if(!subRecord.isPlaceholder()) {
                 updates.add(subRecord.buildUpdate());

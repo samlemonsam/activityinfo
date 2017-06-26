@@ -282,7 +282,9 @@ public class FormInstance {
 
         JsonObject fields = createObject();
         for (Map.Entry<ResourceId, FieldValue> entry : fieldMap.entrySet()) {
-            fields.put(entry.getKey().asString(), entry.getValue().toJsonElement());
+            if(entry.getValue() != null) {
+                fields.put(entry.getKey().asString(), entry.getValue().toJsonElement());
+            }
         }
 
         JsonObject object = createObject();

@@ -62,6 +62,10 @@ public class Survey implements TestForm {
         formClass.setLabel("Household Survey");
         formClass.setDatabaseId(ids.databaseId());
 
+        for (FormField field : ids.builtinFields()) {
+            formClass.addElement(field);
+        }
+
         nameField = formClass.addField(ids.fieldId("F1"))
                 .setCode("NAME")
                 .setLabel("Respondent Name")
@@ -279,7 +283,7 @@ public class Survey implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = recordGenerator.generate(getRowCount());
+            this.records = recordGenerator.get(getRowCount());
         }
         return records;
     }

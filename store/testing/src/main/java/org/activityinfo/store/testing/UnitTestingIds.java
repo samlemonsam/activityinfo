@@ -1,7 +1,13 @@
 package org.activityinfo.store.testing;
 
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Creates friendly, human readable ids for unit tests.
@@ -35,6 +41,16 @@ public class UnitTestingIds implements Ids {
     @Override
     public EnumItem enumItem(String label) {
         return new EnumItem(ResourceId.valueOf(makeId(label)), label);
+    }
+
+    @Override
+    public List<FormField> builtinFields() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Map<ResourceId, FieldValue> builtinValues() {
+        return Collections.emptyMap();
     }
 
     private String makeId(String label) {

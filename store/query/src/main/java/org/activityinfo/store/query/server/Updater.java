@@ -7,11 +7,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.resource.RecordTransaction;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
@@ -39,9 +43,9 @@ import static java.lang.String.format;
  * <p>This class enforces all logical permissions related to the form. </p>
  */
 public class Updater {
-    
+
     private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
-    
+
     private final FormCatalog catalog;
     private int userId;
     private BlobAuthorizer blobAuthorizer;
@@ -65,57 +69,49 @@ public class Updater {
     /**
      * Validates and executes a {@code ResourceUpdate} encoded as a json object. The object
      * must have a changes property that takes the value of an array. 
-     * 
+     *
      * @throws InvalidUpdateException if the given update
      * is not a validate update.
      */
-    public void execute(org.activityinfo.json.JsonObject updateObject) {
-        if(!updateObject.hasKey("changes")) {
-            throw new InvalidUpdateException("Root object must contain 'changes' property.");
-        }
-        JsonValue changes = updateObject.get("changes");
-        if(!changes.isJsonArray()) {
-            throw new InvalidUpdateException("Root object property 'changes' must be an array. " +
-                    "Found: " + changes.toJson());
-        }
-
-        for (JsonValue change : changes.getAsJsonArray().values()) {
-            if(!change.isJsonObject()) {
-                throw new InvalidUpdateException("Expected 'changes' property to be an array of json objects, " +
-                        "but 'changes' array includes an element: " + change);
-            }
-            executeChange(change.getAsJsonObject());
+    public void execute(JsonObject transactionObject) {
+        try {
+            execute(Json.fromJson(RecordTransaction.class, transactionObject));
+        } catch (JsonMappingException e) {
+            throw new InvalidUpdateException(e);
         }
     }
-    
-    public void executeChange(JsonObject changeObject) {
-        
-        ResourceId recordId = parseId(changeObject, "@id");
 
-        if(!changeObject.hasKey("@class")) {
-            throw new InvalidUpdateException(format(
-                "Resource with id '%s' does not exist and no '@class' attribute has been provided.", recordId));
+    public void execute(RecordTransaction tx) {
+        for (RecordUpdate change : tx.getChanges()) {
+            executeChange(change);
         }
+    }
 
-        ResourceId formId = parseId(changeObject, "@class");
-        Optional<FormStorage> storage = catalog.getForm(formId);
+    public void executeChange(JsonObject changeObject) throws JsonMappingException {
+        executeChange(Json.fromJson(RecordUpdate.class, changeObject));
+    }
+
+    public void executeChange(RecordUpdate update) {
+
+        Optional<FormStorage> storage = catalog.getForm(update.getFormId());
 
         if(!storage.isPresent()) {
-            throw new InvalidUpdateException(format("@class '%s' does not exist.", formId));
+            throw new InvalidUpdateException(format("Form '%s' does not exist.", update.getFormId()));
         }
 
         FormClass formClass = storage.get().getFormClass();
-        RecordUpdate update = parseChange(formClass, changeObject, this.userId);
+        TypedRecordUpdate typedUpdate = parseChange(formClass, update, this.userId);
 
-        executeUpdate(storage.get(), update);
+        executeUpdate(storage.get(), typedUpdate);
     }
 
     @VisibleForTesting
-    static RecordUpdate parseChange(FormClass formClass, JsonObject changeObject, int userId) {
-        
-        // This resource exists, make sure the existing class matches the provided @class
-        // if given explicitly
-        validateExplicitClassAttribute(formClass, changeObject);
+    static TypedRecordUpdate parseChange(FormClass formClass, JsonObject changeObject, int userId) throws JsonMappingException {
+        return parseChange(formClass, Json.fromJson(RecordUpdate.class, changeObject), userId);
+    }
+
+    @VisibleForTesting
+    static TypedRecordUpdate parseChange(FormClass formClass, RecordUpdate changeObject, int userId) {
 
         // Build a lookup map to resolve the field name used in the JSON request.
         Map<String, FormField> idMap = new HashMap<>();
@@ -126,40 +122,40 @@ public class Updater {
             codeMap.put(formField.getCode(), formField);
         }
 
-        RecordUpdate update = new RecordUpdate();
+        TypedRecordUpdate update = new TypedRecordUpdate();
         update.setUserId(userId);
-        update.setRecordId(parseId(changeObject, "@id"));
-        update.setDeleted(parseDeletedFlag(changeObject));
+        update.setRecordId(changeObject.getRecordId());
+        update.setDeleted(changeObject.isDeleted());
 
-        for(Map.Entry<String, JsonValue> change : changeObject.entrySet()) {
-            if(!change.getKey().startsWith("@")) {
+        if(changeObject.getFields() != null) {
+            for (Map.Entry<String, JsonValue> change : changeObject.getFields().entrySet()) {
                 String fieldName = change.getKey();
 
                 // Resolve what might be a human readable field name to the FormField
                 // We accept FormField codes and ids
                 FormField field;
-                if(idMap.containsKey(fieldName)) {
+                if (idMap.containsKey(fieldName)) {
                     field = idMap.get(fieldName);
                 } else {
                     Collection<FormField> byCode = codeMap.get(fieldName);
-                    if(byCode.size() == 0) {
+                    if (byCode.size() == 0) {
                         throw new InvalidUpdateException("Unknown field '" + fieldName + "'.");
-                    } else if(byCode.size() > 1) {
+                    } else if (byCode.size() > 1) {
                         throw new InvalidUpdateException("Ambiguous field code '" + fieldName + "'");
                     }
                     field = Iterables.getOnlyElement(byCode);
                 }
-                
+
                 // Now use the type information to parse the JSON element
                 FieldValue fieldValue;
                 try {
-                    fieldValue = parseFieldValue(field, changeObject.get(fieldName));
+                    fieldValue = parseFieldValue(field, changeObject.getFields().get(fieldName));
                 } catch (Exception e) {
                     throw new InvalidUpdateException(format("Invalid value for field '%s' (id: %s, code: %s): %s",
-                            field.getLabel(),
-                            field.getId(),
-                            field.getCode(),
-                            e.getMessage()), e);
+                        field.getLabel(),
+                        field.getId(),
+                        field.getCode(),
+                        e.getMessage()), e);
                 }
 
                 update.set(field.getId(), validateType(field, fieldValue));
@@ -168,43 +164,20 @@ public class Updater {
         return update;
     }
 
-    private static boolean parseDeletedFlag(JsonObject changeObject) {
-        if(changeObject.hasKey("@deleted")) {
-            org.activityinfo.json.JsonValue JsonValue = changeObject.get("@deleted");
-            if(!JsonValue.isJsonPrimitive()) {
-                throw new InvalidUpdateException("The '@deleted' property must be a boolean.");
-            }
-            return JsonValue.asBoolean();
-        } else {
-            return false;
-        }
-    }
+    private static ResourceId parseId(JsonObject changeObject, String... propertyNames) {
 
-    private static void validateExplicitClassAttribute(FormClass existingFormClass, JsonObject changeObject) {
-        if(changeObject.hasKey("@class")) {
-            ResourceId classId = parseId(changeObject, "@class");
-            if(!classId.equals(existingFormClass.getId())) {
-                throw new InvalidUpdateException("Resource '%s' already exists but is a member of the class " +
-                        "'%s' (%s). Cannot change to class %s.", 
-                        changeObject.get("@id").asString(),
-                        existingFormClass.getLabel(),
-                        existingFormClass.getId(),
-                        classId);
+        for (String propertyName : propertyNames) {
+            if(changeObject.hasKey(propertyName)) {
+                JsonValue jsonValue = changeObject.get(propertyName);
+                if(!jsonValue.isString()) {
+                    throw new InvalidUpdateException(format("Property '%s' must contain a string, but found: %s",
+                        propertyName, jsonValue.toJson()));
+                }
+                return ResourceId.valueOf(jsonValue.asString());
             }
         }
-    }
 
-    private static ResourceId parseId(JsonObject changeObject, String propertyName) {
-        if(!changeObject.hasKey(propertyName)) {
-            throw new InvalidUpdateException(format("Missing '%s' property", propertyName));
-        }
-        JsonValue jsonValue = changeObject.get(propertyName);
-        if(!jsonValue.isJsonPrimitive() || !jsonValue.isString()) {
-            throw new InvalidUpdateException(format("Property '%s' must contain a string, but found: %s", 
-                    propertyName, jsonValue.toJson()));
-        }
-        
-        return ResourceId.valueOf(jsonValue.asString());
+        throw new InvalidUpdateException(format("Missing '%s' property", propertyNames[0]));
     }
 
     private static FieldValue parseFieldValue(FormField field, JsonValue jsonValue) {
@@ -249,11 +222,11 @@ public class Updater {
         }
 
         throw new InvalidUpdateException(format("Invalid enum value '%s', expected one of: %s",
-                item, Joiner.on(", ").join(type.getValues())));
+            item, Joiner.on(", ").join(type.getValues())));
     }
 
 
-    public void execute(RecordUpdate update) {
+    public void execute(TypedRecordUpdate update) {
         if(update.getFormId() == null) {
             throw new IllegalArgumentException("No formId provided.");
         }
@@ -265,8 +238,8 @@ public class Updater {
         executeUpdate(storage.get(), update);
     }
 
-    private void executeUpdate(FormStorage form, RecordUpdate update) {
-        
+    private void executeUpdate(FormStorage form, TypedRecordUpdate update) {
+
         FormClass formClass = form.getFormClass();
         Optional<FormRecord> existingResource = form.get(update.getRecordId());
 
@@ -288,7 +261,7 @@ public class Updater {
         }
     }
 
-    private void generateSerialNumbers(FormClass formClass, RecordUpdate update) {
+    private void generateSerialNumbers(FormClass formClass, TypedRecordUpdate update) {
         for (FormField formField : formClass.getFields()) {
             if(formField.getType() instanceof SerialNumberType) {
                 generateSerialNumber(formClass, formField, update);
@@ -297,7 +270,7 @@ public class Updater {
     }
 
     @VisibleForTesting
-    void generateSerialNumber(FormClass formClass, FormField formField, RecordUpdate update) {
+    void generateSerialNumber(FormClass formClass, FormField formField, TypedRecordUpdate update) {
 
         SerialNumberType type = (SerialNumberType) formField.getType();
         String prefix = computeSerialNumberPrefix(formClass, type, update);
@@ -307,7 +280,7 @@ public class Updater {
         update.set(formField.getId(), new SerialNumber(prefix, serialNumber));
     }
 
-    private String computeSerialNumberPrefix(FormClass formClass, SerialNumberType type, RecordUpdate update) {
+    private String computeSerialNumberPrefix(FormClass formClass, SerialNumberType type, TypedRecordUpdate update) {
 
         if(!type.hasPrefix()) {
             return null;
@@ -329,7 +302,7 @@ public class Updater {
                 return ((TextValue) prefixValue).asString();
             } else {
                 throw new IllegalStateException("Prefix " + type.getPrefixFormula() + " resolves to type " +
-                        prefixValue.getTypeClass().getId());
+                    prefixValue.getTypeClass().getId());
             }
 
         } catch (Exception e) {
@@ -339,7 +312,7 @@ public class Updater {
     }
 
 
-    public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, RecordUpdate update) {
+    public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
         LOGGER.info("Loaded existingResource " + existingResource);
 
         Map<ResourceId, FormField> fieldMap = new HashMap<>();
@@ -363,20 +336,20 @@ public class Updater {
     /**
      * Verify that all required fields are provided for new resources
      */
-    private static void validateRequiredFields(FormClass formClass, Optional<FormRecord> existingResource, RecordUpdate update) {
+    private static void validateRequiredFields(FormClass formClass, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
         if(!existingResource.isPresent()) {
             for (FormField formField : formClass.getFields()) {
                 if (formField.isRequired() &&
                     formField.isVisible() &&
                     formField.getType().isUpdatable() && !isProvided(formField, existingResource, update)) {
                     throw new InvalidUpdateException("Required field '%s' [%s] is missing from record with schema %s",
-                            formField.getCode(), formField.getId(), formClass.getId().asString());
+                        formField.getCode(), formField.getId(), formClass.getId().asString());
                 }
             }
         }
     }
 
-    private static boolean isProvided(FormField formField, Optional<FormRecord> existingResource, RecordUpdate update) {
+    private static boolean isProvided(FormField formField, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
 
         if(update.getChangedFieldValues().containsKey(formField.getId())) {
 
@@ -394,7 +367,7 @@ public class Updater {
         }
     }
 
-    private void authorizeUpdate(FormStorage form, Optional<FormRecord> existingResource, RecordUpdate update) {
+    private void authorizeUpdate(FormStorage form, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
 
 
         // Check form-level permissions
@@ -402,8 +375,8 @@ public class Updater {
             FormPermissions permissions = form.getPermissions(userId);
             if (!permissions.isEditAllowed()) {
                 throw new InvalidUpdateException("User '%d' does not have edit permissions for form '%s'",
-                        userId,
-                        form.getFormClass().getId().asString());
+                    userId,
+                    form.getFormClass().getId().asString());
             }
         }
 
@@ -419,23 +392,23 @@ public class Updater {
 
     private static FieldValue validateType(FormField field, FieldValue updatedValue) {
         Preconditions.checkNotNull(field);
-        
+
         if(updatedValue != null) {
             if ( !field.getType().isUpdatable()) {
                 throw new InvalidUpdateException(
-                        format("Field %s ('%s') is a field of type '%s' and its value cannot be set. Found %s",
-                                field.getId(),
-                                field.getLabel(),
-                                field.getType().getTypeClass().getId(),
-                                updatedValue));
+                    format("Field %s ('%s') is a field of type '%s' and its value cannot be set. Found %s",
+                        field.getId(),
+                        field.getLabel(),
+                        field.getType().getTypeClass().getId(),
+                        updatedValue));
             }
             if (!field.getType().getTypeClass().equals(updatedValue.getTypeClass())) {
                 throw new InvalidUpdateException(
-                        format("Updated value for field %s ('%s') has invalid type. Expected %s, found %s.",
-                                field.getId(),
-                                field.getLabel(),
-                                field.getType().getTypeClass().getId(),
-                                updatedValue.getTypeClass().getId()));
+                    format("Updated value for field %s ('%s') has invalid type. Expected %s, found %s.",
+                        field.getId(),
+                        field.getLabel(),
+                        field.getType().getTypeClass().getId(),
+                        updatedValue.getTypeClass().getId()));
             }
         }
 
@@ -455,9 +428,9 @@ public class Updater {
      * <p>For this reason, only users who originally uploaded the blob may assign the blob to a record's field value.</p>
      */
     private void checkBlobPermissions(
-            FormField field,
-            Optional<FormRecord> existingResource,
-            AttachmentValue updatedValue) {
+        FormField field,
+        Optional<FormRecord> existingResource,
+        AttachmentValue updatedValue) {
 
         AttachmentType fieldType = (AttachmentType) field.getType();
 
@@ -478,7 +451,7 @@ public class Updater {
             if(!existingBlobIds.contains(attachment.getBlobId())) {
                 if(!blobAuthorizer.isOwner(userId, attachment.getBlobId())) {
                     throw new InvalidUpdateException(String.format("User %d does not own blob %s",
-                            userId, attachment.getBlobId()));
+                        userId, attachment.getBlobId()));
                 }
             }
         }
@@ -492,7 +465,7 @@ public class Updater {
             throw new InvalidUpdateException("No such formId: " + formInstance.getFormId());
         }
 
-        RecordUpdate update = new RecordUpdate();
+        TypedRecordUpdate update = new TypedRecordUpdate();
         update.setUserId(userId);
         update.setRecordId(formInstance.getId());
 
@@ -520,7 +493,7 @@ public class Updater {
             throw new InvalidUpdateException("No such formId: " + formId);
         }
 
-        RecordUpdate update = new RecordUpdate();
+        TypedRecordUpdate update = new TypedRecordUpdate();
         update.setUserId(userId);
         update.setRecordId(recordId);
 

@@ -21,7 +21,7 @@ import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
@@ -271,8 +271,8 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(TransactionBuilder transaction) {
-        return post(RequestBuilder.POST, baseUrl + "/update", transaction.build().toJson());
+    public Promise<Void> updateRecords(RecordTransactionBuilder transaction) {
+        return post(RequestBuilder.POST, baseUrl + "/update", transaction.toJsonObject().toJson());
     }
 
     @Override

@@ -28,7 +28,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -357,11 +357,11 @@ public class GeoAdminClient implements FormClassProvider {
         return baos.toByteArray();
     }
 
-    public void executeTransaction(TransactionBuilder builder) {
+    public void executeTransaction(RecordTransactionBuilder builder) {
         ClientResponse response = client.resource(root)
                 .path("update")
                 .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(builder.build().toJson(), MediaType.APPLICATION_JSON_TYPE)
+                .entity(builder.toJsonObject().toJson(), MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class);
         
         if(response.getStatus() != 200) {

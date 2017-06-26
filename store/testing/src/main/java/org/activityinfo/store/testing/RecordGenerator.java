@@ -17,21 +17,19 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Generates random, but reproducible records for testing purposes.
  */
-public class RecordGenerator {
+public class RecordGenerator implements Supplier<FormInstance> {
 
     private Ids ids;
     private final FormClass schema;
     private Supplier<ResourceId> parentDistribution = null;
     private final Map<ResourceId, Supplier<FieldValue>> generators = new HashMap<>();
     private final Map<ResourceId, FormField> fieldMap = new HashMap<>();
+
 
     private int nextRecordIndex = 0;
 
@@ -42,10 +40,16 @@ public class RecordGenerator {
     public RecordGenerator(Ids ids, FormClass schema) {
         this.ids = ids;
         this.schema = schema;
+
+        for (Map.Entry<ResourceId, FieldValue> entry : ids.builtinValues().entrySet()) {
+            generators.put(entry.getKey(), Suppliers.ofInstance(entry.getValue()));
+        }
+
         for (FormField field : schema.getFields()) {
             fieldMap.put(field.getId(), field);
 
-            if(!(field.getType() instanceof CalculatedFieldType) &&
+            if(!generators.containsKey(field.getId()) &&
+                !(field.getType() instanceof CalculatedFieldType) &&
                 !(field.getType() instanceof SubFormReferenceType)) {
 
                 generators.put(field.getId(), generator(field));
@@ -94,17 +98,22 @@ public class RecordGenerator {
         return distribution(field.getId(), new EnumGenerator(field, seed));
     }
 
-    public List<FormInstance> generate(int rowCount) {
+    public List<FormInstance> get(int rowCount) {
         List<FormInstance> records = new ArrayList<>();
         for (int i = 0; i < rowCount; i++) {
-            records.add(generate());
+            records.add(get());
         }
         return records;
     }
 
-    public FormInstance generate() {
+    @Override
+    public FormInstance get() {
         ResourceId recordId = ids.recordId(schema.getId(), nextRecordIndex++);
         FormInstance record = new FormInstance(recordId, schema.getId());
+
+        for (Map.Entry<ResourceId, FieldValue> entry : ids.builtinValues().entrySet()) {
+            record.set(entry.getKey(), entry.getValue());
+        }
 
         if(parentDistribution != null) {
             record.setParentRecordId(parentDistribution.get());

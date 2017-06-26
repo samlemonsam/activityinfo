@@ -3,9 +3,6 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.googlecode.objectify.annotation.Stringify;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;

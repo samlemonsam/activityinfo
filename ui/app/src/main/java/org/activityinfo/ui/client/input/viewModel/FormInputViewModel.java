@@ -2,8 +2,8 @@ package org.activityinfo.ui.client.input.viewModel;
 
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
-import org.activityinfo.model.resource.UpdateBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -72,22 +72,22 @@ public class FormInputViewModel {
         return choices.get(fieldId);
     }
 
-    public UpdateBuilder buildUpdate() {
-        UpdateBuilder update = new UpdateBuilder();
+    public RecordUpdate buildUpdate() {
+        RecordUpdate update = new RecordUpdate();
         update.setRecordId(inputModel.getRecordRef().getRecordId());
         update.setFormId(inputModel.getRecordRef().getFormId());
 
         for (FormTree.Node node : formTree.getRootFields()) {
             FieldInput newInput = inputModel.get(node.getFieldId());
             if(newInput.getState() == FieldInput.State.VALID) {
-                update.setProperty(node.getFieldId(), newInput.getValue());
+                update.setFieldValue(node.getFieldId(), newInput.getValue());
             }
         }
         return update;
     }
 
-    public TransactionBuilder buildTransaction() {
-        TransactionBuilder tx = new TransactionBuilder();
+    public RecordTransactionBuilder buildTransaction() {
+        RecordTransactionBuilder tx = new RecordTransactionBuilder();
         tx.add(buildUpdate());
 
         for (SubFormInputViewModel subFormInputViewModel : subFormMap.values()) {

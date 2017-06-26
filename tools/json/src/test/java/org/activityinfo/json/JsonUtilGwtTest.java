@@ -15,7 +15,13 @@
  */
 package org.activityinfo.json;
 
+import com.google.gwt.dev.protobuf.DynamicMessage;
 import com.google.gwt.junit.client.GWTTestCase;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 public class JsonUtilGwtTest extends GWTTestCase {
 
@@ -233,5 +239,38 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertTrue(object.get("b").isJsonNull());
     assertTrue(object.get("c") == null);
   }
+
+// Will only work on GWT 2.8+
+//  public void testJsObjects() throws JsonMappingException {
+//
+//    DummyObject o = new DummyObject();
+//    o.d = 41;
+//    o.s = "Hello World";
+//    o.s0 = null;
+//    o.i = 99;
+//    o.object = Json.createObject();
+//    o.object.put("a", "Brave New World");
+//
+//    JsonObject jo = Json.toJson(o).getAsJsonObject();
+//
+//    assertEquals(41d, jo.getNumber("d"));
+//    assertEquals("Hello World", jo.getString("s"));
+//    assertNull(jo.getString("s0"));
+//    assertEquals(99d, jo.getNumber("i"));
+//    assertEquals(42d, jo.getNumber("privateField"));
+//
+//    JsonObject joo = jo.getObject("object");
+//    assertEquals("Brave New World", joo.getString("a"));
+//
+//    // Now back to a Java object
+//
+//    DummyObject o2 = Json.fromJson(DummyObject.class, jo);
+//
+//    assertEquals(o.d, o2.d);
+//    assertEquals(o.s, o2.s);
+//    assertEquals(o.s0, o2.s0);
+//    assertEquals(o.i, o2.i);
+//
+//  }
 
 }

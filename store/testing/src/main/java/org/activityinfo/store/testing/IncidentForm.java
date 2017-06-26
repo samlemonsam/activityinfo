@@ -83,7 +83,7 @@ public class IncidentForm implements TestForm {
         if(records == null) {
 
             this.records = generator
-                    .generate(ROW_COUNT);
+                    .get(ROW_COUNT);
         }
         return records;
     }

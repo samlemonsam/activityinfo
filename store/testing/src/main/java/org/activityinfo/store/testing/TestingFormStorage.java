@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
@@ -27,7 +28,7 @@ public class TestingFormStorage implements VersionedFormStorage {
         this.testForm = testForm;
     }
 
-    public RecordGenerator getGenerator() {
+    public Supplier<FormInstance> getGenerator() {
         return testForm.getGenerator();
     }
 
@@ -100,7 +101,7 @@ public class TestingFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
 
         FormInstance newRecord = new FormInstance(update.getRecordId(), update.getFormId());
         for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
@@ -114,7 +115,7 @@ public class TestingFormStorage implements VersionedFormStorage {
 
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         ensureWeHaveOwnCopy();
         if(update.isDeleted()) {
             FormInstance deleted = index.remove(update.getRecordId());

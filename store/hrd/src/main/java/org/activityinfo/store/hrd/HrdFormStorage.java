@@ -74,12 +74,12 @@ public class HrdFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         ofy().transact(new CreateOrUpdateRecord(formClass.getId(), update));
     }
 
     @Override
-    public void update(final RecordUpdate update) {
+    public void update(final TypedRecordUpdate update) {
         ofy().transact(new CreateOrUpdateRecord(formClass.getId(), update));
     }
     

@@ -14,6 +14,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.*;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.ws.rs.core.MediaType;
@@ -87,6 +88,19 @@ public class ActivityInfoClient {
         if(response.getStatus() == 400) {
             throw new IllegalArgumentException(response.getEntity(String.class));
         } else if(response.getStatus() != 200) {
+            throw new RuntimeException(response.getEntity(String.class));
+        }
+    }
+
+
+    public void update(RecordTransaction tx) {
+        ClientResponse response = client.resource(root)
+            .path("resources")
+            .path("update")
+            .type(MediaType.APPLICATION_JSON_TYPE)
+            .post(ClientResponse.class, Json.toJson(tx).toJson());
+
+        if(response.getStatus() != 200) {
             throw new RuntimeException(response.getEntity(String.class));
         }
     }

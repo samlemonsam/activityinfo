@@ -6,7 +6,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.store.testing.LegacyIds;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.store.testing.RecordGenerator;
 import org.activityinfo.store.testing.Survey;
 import org.junit.Before;
@@ -29,7 +29,7 @@ public class SurveyTest {
         TestDatabase database = harness.createDatabase();
         client = harness.client();
 
-        survey = new Survey(new LegacyIds(database.getId()));
+        survey = new Survey(new SiteIds(database));
 
         client.createForm(survey.getFormClass());
     }
@@ -50,7 +50,7 @@ public class SurveyTest {
         RecordGenerator generator = survey.getGenerator();
         int numRows = 20;
         for (int i = 0; i < numRows; i++) {
-            client.createRecord(generator.generate());
+            client.createRecord(generator.get());
         }
 
         // Now query a few records
@@ -69,6 +69,26 @@ public class SurveyTest {
 
         assertThat(age.numRows(), equalTo(numRows));
     }
+
+    @Test
+    public void updateTransaction() {
+
+        RecordTransactionBuilder tx = new RecordTransactionBuilder();
+        tx.create(survey.getGenerator().get());
+        tx.create(survey.getGenerator().get());
+
+        client.update(tx.build());
+
+        QueryModel queryModel = new QueryModel(survey.getFormId());
+        queryModel.selectField(survey.getGenderFieldId()).as("gender");
+
+        ColumnSet columnSet = client.queryTable(queryModel);
+
+        assertThat(columnSet.getNumRows(), equalTo(2));
+
+    }
+
+
 
 
 }

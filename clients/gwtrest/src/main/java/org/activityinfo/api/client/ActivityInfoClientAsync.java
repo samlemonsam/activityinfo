@@ -11,7 +11,7 @@ import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
@@ -115,7 +115,7 @@ public interface ActivityInfoClientAsync {
      */
     Promise<ColumnSet> queryTableColumns(QueryModel query);
 
-    Promise<Void> updateRecords(TransactionBuilder transactions);
+    Promise<Void> updateRecords(RecordTransactionBuilder transactions);
 
     <T extends JobDescriptor<R>, R extends JobResult> Promise<JobStatus<T, R>>  startJob(T job);
 

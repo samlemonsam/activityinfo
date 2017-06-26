@@ -187,7 +187,7 @@ public class LocationFormStorage implements FormStorage {
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         long newVersion = incrementVersion();
 
         int locationId = CuidAdapter.getLegacyIdFromCuid(update.getRecordId());
@@ -215,7 +215,7 @@ public class LocationFormStorage implements FormStorage {
 
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         long newVersion = incrementVersion();
 
         int locationId = CuidAdapter.getLegacyIdFromCuid(update.getRecordId());
@@ -310,7 +310,7 @@ public class LocationFormStorage implements FormStorage {
         insertAdminLinks(locationId, adminEntities);
     }
 
-    private String getName(RecordUpdate update) {
+    private String getName(TypedRecordUpdate update) {
         FieldValue fieldValue = update.getChangedFieldValues().get(nameFieldId);
         if (fieldValue == null) {
             return null;
@@ -319,7 +319,7 @@ public class LocationFormStorage implements FormStorage {
         }
     }
 
-    private String getAxe(RecordUpdate update) {
+    private String getAxe(TypedRecordUpdate update) {
         FieldValue fieldValue = update.getChangedFieldValues().get(axeFieldId);
         if (fieldValue == null) {
             return null;
@@ -328,11 +328,11 @@ public class LocationFormStorage implements FormStorage {
         }
     }
 
-    private GeoPoint getPoint(RecordUpdate update) {
+    private GeoPoint getPoint(TypedRecordUpdate update) {
         return (GeoPoint) update.getChangedFieldValues().get(pointFieldId);
     }
 
-    private Set<Integer> getAdminEntities(RecordUpdate update) {
+    private Set<Integer> getAdminEntities(TypedRecordUpdate update) {
         Set<Integer> set = Sets.newHashSet();
         ReferenceValue value = (ReferenceValue) update.getChangedFieldValues().get(adminFieldId);
         if(value != null) {

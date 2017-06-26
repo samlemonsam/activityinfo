@@ -31,4 +31,13 @@ public class ReflectionTest {
         assertThat(joo.getString("a"), equalTo("Brave New World"));
     }
 
+    @Test
+    public void testBooleanTrue() {
+        DummyObject o = new DummyObject();
+        o.b = true;
+
+        JsonObject jo = Json.toJson(o).getAsJsonObject();
+        assertThat(jo.getBoolean("b"), equalTo(true));
+    }
+
 }

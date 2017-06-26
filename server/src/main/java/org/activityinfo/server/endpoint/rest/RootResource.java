@@ -22,9 +22,9 @@ package org.activityinfo.server.endpoint.rest;
  * #L%
  */
 
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.GetCountries;
@@ -182,8 +182,7 @@ public class RootResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(String json) {
 
-        Gson gson = new Gson();
-        final JsonValue jsonElement = gson.fromJson(json, JsonValue.class);
+        final JsonValue jsonElement = Json.parse(json);
 
         Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(),
                 blobAuthorizer,

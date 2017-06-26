@@ -141,7 +141,7 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         ResourceId formClassId = getFormClass().getId();
         BaseTableInserter baseTable = new BaseTableInserter(baseMapping, update.getRecordId());
         baseTable.addValue("ActivityId", activity.getId());
@@ -185,7 +185,7 @@ public class SiteFormStorage implements VersionedFormStorage {
         dualWriteToHrd(RecordChangeType.CREATED, update, newVersion, update.getChangedFieldValues());
     }
 
-    private void dualWriteToHrd(final RecordChangeType changeType, final RecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
+    private void dualWriteToHrd(final RecordChangeType changeType, final TypedRecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
 
         ofy().transact(new VoidWork() {
             @Override
@@ -294,7 +294,7 @@ public class SiteFormStorage implements VersionedFormStorage {
 
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
 
         FormRecord formRecord = get(update.getRecordId()).get();
         FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);

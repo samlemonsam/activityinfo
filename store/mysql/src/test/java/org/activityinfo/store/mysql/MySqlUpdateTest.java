@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -14,6 +15,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
@@ -29,7 +31,7 @@ import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.RecordUpdate;
+import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,17 +55,17 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     public void setupDatabase() throws Throwable {
         resetDatabase("catalog-test.db.xml");
     }
-    
+
     @Test
-    public void createSite() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", "s0000000013");
-        changeObject.put("@class", activityFormClass(1).asString());
-        changeObject.put("partner", partnerRecordId(1).asString());
-        changeObject.put("date1", "2015-01-01");
-        changeObject.put("date2", "2015-01-01");
-        changeObject.put("BENE", 45000);
-        changeObject.put("location", locationInstanceId(3).asString());
+    public void createSite() throws JsonMappingException {
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId("s0000000013");
+        changeObject.setFormId(activityFormClass(1).asString());
+        changeObject.setFieldValue("partner", partnerRecordId(1).asString());
+        changeObject.setFieldValue("date1", "2015-01-01");
+        changeObject.setFieldValue("date2", "2015-01-01");
+        changeObject.setFieldValue("BENE", 45000);
+        changeObject.setFieldValue("location", locationInstanceId(3).asString());
 
         Updater updater = updater();
         updater.executeChange(changeObject);
@@ -76,11 +78,11 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     }
     
     @Test
-    public void updateSite() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", "s0000000001");
-        changeObject.put("@class", activityFormClass(1).asString());
-        changeObject.put("partner", partnerRecordId(2).asString());
+    public void updateSite() throws JsonMappingException {
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId("s0000000001");
+        changeObject.setFormId(activityFormClass(1).asString());
+        changeObject.setFieldValue("partner", partnerRecordId(2).asString());
 
         Updater updater = updater();
         updater.executeChange(changeObject);
@@ -93,12 +95,12 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     }
 
     @Test
-    public void updateSiteSetValueToBlank() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", "s0000000001");
-        changeObject.put("@class", activityFormClass(1).asString());
-        changeObject.put("BENE", Json.createNull());
-        changeObject.put("comments", Json.createNull());
+    public void updateSiteSetValueToBlank() throws JsonMappingException {
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId("s0000000001");
+        changeObject.setFormId(activityFormClass(1).asString());
+        changeObject.setFieldValue("BENE", Json.createNull());
+        changeObject.setFieldValue("comments", Json.createNull());
 
         Updater updater = updater();
         updater.executeChange(changeObject);
@@ -113,11 +115,11 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
 
     @Test
-    public void updateAdminEntity() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", entity(21).asString());
-        changeObject.put("@class", adminLevelFormClass(2).asString());
-        changeObject.put("name", "Nouveau Irumu");
+    public void updateAdminEntity() throws JsonMappingException {
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId(entity(21).asString());
+        changeObject.setFormId(adminLevelFormClass(2).asString());
+        changeObject.setFieldValue("name", "Nouveau Irumu");
 
         Updater updater = updater();
         updater.setEnforcePermissions(false);
@@ -131,10 +133,10 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     
     @Test
     public void deleteAdminEntity() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", entity(21).asString());
-        changeObject.put("@class", adminLevelFormClass(2).asString());
-        changeObject.put("@deleted", true);
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId(entity(21).asString());
+        changeObject.setFormId(adminLevelFormClass(2).asString());
+        changeObject.setDeleted(true);
 
         Updater updater = updater();
         updater.setEnforcePermissions(false);
@@ -148,10 +150,10 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
     @Test
     public void deleteSite() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", "s0000000001");
-        changeObject.put("@class", activityFormClass(1).asString());
-        changeObject.put("@deleted", true);
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId("s0000000001");
+        changeObject.setFormId(activityFormClass(1).asString());
+        changeObject.setDeleted(true);
 
         Updater updater = updater();
         updater.executeChange(changeObject);
@@ -170,10 +172,10 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         assertThat(column("site"), hasValues("s0000000009", "s0000000009", "s0000000009"));
 
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", "s0000000009");
-        changeObject.put("@class", activityFormClass(3).asString());
-        changeObject.put("@deleted", true);
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId("s0000000009");
+        changeObject.setFormId(activityFormClass(3).asString());
+        changeObject.setDeleted(true);
 
         newRequest();
 
@@ -189,13 +191,13 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
     @Test
     public void updateSiteWithMultipleProperties() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", "s0000000001");
-        changeObject.put("@class", activityFormClass(1).asString());
-        changeObject.put("partner", partnerRecordId(2).asString());
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId("s0000000001");
+        changeObject.setFormId(activityFormClass(1).asString());
+        changeObject.setFieldValue("partner", partnerRecordId(2).asString());
 
-        changeObject.put("BENE", 2100);
-        changeObject.put(attributeGroupField(1).asString(), "Deplacement");
+        changeObject.setFieldValue("BENE", 2100);
+        changeObject.setFieldValue(attributeGroupField(1).asString(), "Deplacement");
 
 
         Updater updater = updater();
@@ -211,11 +213,11 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
     @Test
     public void updateSiteWithMultiAttributes() {
-        JsonObject changeObject = createObject();
-        changeObject.put("@id", "s0000000001");
-        changeObject.put("@class", activityFormClass(1).asString());
-        changeObject.put(attributeGroupField(1).asString(), "Deplacement");
-        changeObject.put(attributeGroupField(2).asString(), "Casserole");
+        RecordUpdate changeObject = new RecordUpdate();
+        changeObject.setRecordId("s0000000001");
+        changeObject.setFormId(activityFormClass(1).asString());
+        changeObject.setFieldValue(attributeGroupField(1).asString(), "Deplacement");
+        changeObject.setFieldValue(attributeGroupField(2).asString(), "Casserole");
 
         Updater updater = updater();
         updater.executeChange(changeObject);
@@ -231,12 +233,12 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         int newId = new KeyGenerator().generateInt();
 
-        JsonObject change = createObject();
-        change.put("@id", cuid(SITE_DOMAIN, newId).asString());
-        change.put("@class", activityFormClass(ADVOCACY).asString());
-        change.put("partner", partnerRecordId(1).asString());
-        change.put("date1", "2015-01-01");
-        change.put("date2", "2015-01-31");
+        RecordUpdate change = new RecordUpdate();
+        change.setRecordId(cuid(SITE_DOMAIN, newId).asString());
+        change.setFormId(activityFormClass(ADVOCACY).asString());
+        change.setFieldValue("partner", partnerRecordId(1).asString());
+        change.setFieldValue("date1", "2015-01-01");
+        change.setFieldValue("date2", "2015-01-31");
 
         Updater updater = updater();
         updater.executeChange(change);
@@ -356,7 +358,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         int databaseId = 1;
         ResourceId formId = CuidAdapter.activityFormClass(1);
-        RecordUpdate update = new RecordUpdate();
+        TypedRecordUpdate update = new TypedRecordUpdate();
         update.setUserId(userId);
         update.setFormId(formId);
         update.setRecordId(cuid(SITE_DOMAIN, 1));

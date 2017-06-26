@@ -71,4 +71,8 @@ public class Json {
     public static JsonValue toJson(Object value) {
         return JsonReflection.toJson(value);
     }
+
+    public static <T> T fromJson(Class<T> clazz, JsonValue object) throws JsonMappingException {
+        return JsonReflection.fromJson(clazz, object);
+    }
 }

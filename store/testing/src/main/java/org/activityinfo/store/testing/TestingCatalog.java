@@ -10,8 +10,8 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
-import org.activityinfo.model.resource.UpdateBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
@@ -113,26 +113,26 @@ public class TestingCatalog implements FormCatalog {
         return builder.build(queryModel);
     }
 
-    public void updateRecords(TransactionBuilder transaction) {
+    public void updateRecords(RecordTransactionBuilder transaction) {
         Updater updater = new Updater(this, 1, new BlobAuthorizerStub(), serialNumberProvider);
-        updater.execute(transaction.build());
+        updater.execute(transaction.toJsonObject());
     }
 
     public void deleteForm(ResourceId formId) {
         formMap.remove(formId);
     }
 
-    public UpdateBuilder addNew(ResourceId formId) {
+    public RecordUpdate addNew(ResourceId formId) {
         TestingFormStorage form = formMap.get(formId);
         if(form == null) {
             throw new RuntimeException("No such form: " + formId);
         }
-        FormInstance newRecord = form.getGenerator().generate();
-        UpdateBuilder update = new UpdateBuilder();
+        FormInstance newRecord = form.getGenerator().get();
+        RecordUpdate update = new RecordUpdate();
         update.setFormId(formId);
         update.setRecordId(newRecord.getRef().getRecordId());
         for (Map.Entry<ResourceId, FieldValue> entry : newRecord.getFieldValueMap().entrySet()) {
-            update.setProperty(entry.getKey(), entry.getValue());
+            update.setFieldValue(entry.getKey(), entry.getValue());
         }
 
         return update;

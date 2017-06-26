@@ -77,4 +77,10 @@ public class Json {
     // the result will be gibberish.
     return value;
   }-*/;
+
+  public static native <T> T fromJson(Class<T> clazz, JsonValue object) throws JsonMappingException /*-{
+    // value *must* be either JsonValue or a type annotated with @JsType or
+    // the result will be gibberish.
+    return object;
+  }-*/;
 }

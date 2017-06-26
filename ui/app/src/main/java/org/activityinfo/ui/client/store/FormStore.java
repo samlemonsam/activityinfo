@@ -6,7 +6,7 @@ import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.query.shared.FormSource;
@@ -31,7 +31,7 @@ public interface FormStore extends FormSource {
     /**
      * Applies an update transactionally to the Form store.
      */
-    Promise<Void> updateRecords(TransactionBuilder transactionBuilder);
+    Promise<Void> updateRecords(RecordTransactionBuilder tx);
 
     <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>>  startJob(T job);
 }

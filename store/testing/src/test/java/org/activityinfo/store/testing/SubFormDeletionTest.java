@@ -6,7 +6,7 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
@@ -67,7 +67,7 @@ public class SubFormDeletionTest {
 
     private void delete(ResourceId formId, String recordId) {
 
-        TransactionBuilder tx = new TransactionBuilder();
+        RecordTransactionBuilder tx = new RecordTransactionBuilder();
         tx.delete(formId, ResourceId.valueOf(recordId));
 
         testingCatalog.updateRecords(tx);

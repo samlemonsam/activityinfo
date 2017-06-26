@@ -69,13 +69,13 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         BaseTableUpdater updater = new BaseTableUpdater(mapping, update.getRecordId());
         updater.update(executor, update);
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         BaseTableInserter inserter = new BaseTableInserter(mapping, update.getRecordId());
         inserter.insert(executor, update);
     }

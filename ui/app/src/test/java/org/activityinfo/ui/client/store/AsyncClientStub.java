@@ -13,7 +13,7 @@ import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
@@ -156,7 +156,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(TransactionBuilder transactions) {
+    public Promise<Void> updateRecords(RecordTransactionBuilder transactions) {
         if(!connected) {
             return offlineResult();
         }

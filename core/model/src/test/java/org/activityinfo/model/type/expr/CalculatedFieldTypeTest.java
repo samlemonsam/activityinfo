@@ -24,7 +24,7 @@ public class CalculatedFieldTypeTest {
         field.setType(new CalculatedFieldType("A+B"));
 
         JsonObject record = field.toJsonObject();
-        System.out.println(record);
+        System.out.println(record.toJson());
 
         FormField read = FormField.fromJson(record);
         assertThat(read.getType(), instanceOf(CalculatedFieldType.class));
@@ -41,7 +41,7 @@ public class CalculatedFieldTypeTest {
         field.setType(new CalculatedFieldType());
 
         JsonObject record = field.toJsonObject();
-        System.out.println(record);
+        System.out.println(record.toJson());
 
         FormField read = FormField.fromJson(record);
         assertThat(read.getType(), instanceOf(CalculatedFieldType.class));

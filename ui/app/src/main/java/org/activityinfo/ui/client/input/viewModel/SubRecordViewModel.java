@@ -1,6 +1,6 @@
 package org.activityinfo.ui.client.input.viewModel;
 
-import org.activityinfo.model.resource.UpdateBuilder;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.type.RecordRef;
 
 /**
@@ -37,7 +37,7 @@ public class SubRecordViewModel {
         return placeholder;
     }
 
-    public UpdateBuilder buildUpdate() {
+    public RecordUpdate buildUpdate() {
         return subFormViewModel.buildUpdate();
     }
 }

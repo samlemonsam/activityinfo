@@ -1,9 +1,11 @@
 package org.activityinfo.server.csp;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
@@ -36,10 +38,10 @@ public class ContentSecurityServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = new Gson();
-        JsonObject request = gson.fromJson(new InputStreamReader(req.getInputStream(), Charsets.UTF_8),
-                JsonObject.class);
 
+
+        String requestJson = CharStreams.toString(new InputStreamReader(req.getInputStream(), Charsets.UTF_8));
+        JsonObject request = Json.parse(requestJson).getAsJsonObject();
         JsonObject report = request.get("csp-report").getAsJsonObject();
 
         StringBuilder message = new StringBuilder();

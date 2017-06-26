@@ -11,7 +11,7 @@ import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
@@ -149,8 +149,8 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
-        testingCatalog.updateRecords(transactionBuilder);
+    public Promise<Void> updateRecords(RecordTransactionBuilder tx) {
+        testingCatalog.updateRecords(tx);
         return Promise.done();
     }
 

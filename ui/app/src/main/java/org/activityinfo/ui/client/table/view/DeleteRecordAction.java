@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.table.view;
 
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormStore;
@@ -56,7 +56,7 @@ public class DeleteRecordAction implements ConfirmDialog.Action {
     @Override
     public Promise<Void> execute() {
 
-        TransactionBuilder tx = new TransactionBuilder();
+        RecordTransactionBuilder tx = new RecordTransactionBuilder();
         for (RecordRef recordRef : selection) {
             tx.delete(recordRef.getFormId(), recordRef.getRecordId());
         }

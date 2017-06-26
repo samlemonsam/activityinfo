@@ -161,7 +161,7 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
     }
 
     public String toString() {
-        return toJson();
+        throw new UnsupportedOperationException("SHOULD NOT BE CALLED!!");
     }
 
     @Override

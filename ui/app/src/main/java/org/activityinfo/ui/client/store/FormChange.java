@@ -2,8 +2,8 @@ package org.activityinfo.ui.client.store;
 
 
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
-import org.activityinfo.model.resource.UpdateBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.type.RecordRef;
 
 import java.util.HashSet;
@@ -17,12 +17,12 @@ public interface FormChange {
 
     boolean isRecordChanged(RecordRef recordRef);
 
-    static FormChange from(TransactionBuilder transactionBuilder) {
+    static FormChange from(RecordTransactionBuilder tx) {
 
         Set<ResourceId> updatedForms = new HashSet<>();
 
-        for (UpdateBuilder updateBuilder : transactionBuilder.getUpdates()) {
-            updatedForms.add(updateBuilder.getFormId());
+        for (RecordUpdate recordUpdate : tx.getUpdates()) {
+            updatedForms.add(recordUpdate.getFormId());
         }
 
         return new FormChange() {

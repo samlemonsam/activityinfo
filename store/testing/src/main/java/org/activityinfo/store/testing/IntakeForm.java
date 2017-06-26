@@ -159,7 +159,7 @@ public class IntakeForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = generator.generate(ROW_COUNT);
+            this.records = generator.get(ROW_COUNT);
         }
         return records;
     }

@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Describes an update to a Resource
  */
-public class RecordUpdate {
+public class TypedRecordUpdate {
     
     private long userId;
     private ResourceId formId;
