@@ -109,7 +109,7 @@ public class FormInputViewModelTest {
 
         ReferenceChoiceSet choiceSet = choiceView.assertLoaded();
 
-        assertThat(choiceSet.getCount(), equalTo(intakeForm.getRowCount()));
+        assertThat(choiceSet.getCount(), equalTo(IntakeForm.ROW_COUNT));
         assertThat(choiceSet.getLabel(0), equalTo("00001"));
     }
 
