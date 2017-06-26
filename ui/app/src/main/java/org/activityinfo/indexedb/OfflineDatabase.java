@@ -1,5 +1,6 @@
 package org.activityinfo.indexedb;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.promise.Promise;
 
 import java.util.ArrayList;
@@ -89,7 +90,27 @@ public class OfflineDatabase {
                     database.transaction(objectStores.toArray(new String[0]), mode, new IDBTransactionCallback() {
                         @Override
                         public void execute(IDBTransaction transaction) {
-                            work.query(transaction).then(queryResult);
+                            Promise<T> localQueryResult;
+                            try {
+                                localQueryResult = work.query(transaction);
+                            } catch (Throwable caught) {
+                                queryResult.onFailure(caught);
+                                tx.onFailure(caught);
+                                return;
+                            }
+
+                            localQueryResult.then(new AsyncCallback<T>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    queryResult.onFailure(caught);
+                                    tx.onFailure(caught);
+                                }
+
+                                @Override
+                                public void onSuccess(T t) {
+                                    queryResult.onSuccess(t);
+                                }
+                            });
                         }
 
                         @Override

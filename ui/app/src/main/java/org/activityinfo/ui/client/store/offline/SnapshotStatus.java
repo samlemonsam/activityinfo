@@ -8,6 +8,7 @@ import org.activityinfo.model.resource.ResourceId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.activityinfo.json.Json.createObject;
 
@@ -78,5 +79,14 @@ public class SnapshotStatus {
                 "time=" + time +
                 ", formVersions=" + formVersions +
                 '}';
+    }
+
+    public boolean areAllCached(Set<ResourceId> formIds) {
+        for (ResourceId formId : formIds) {
+            if(!isFormCached(formId)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

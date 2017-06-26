@@ -17,6 +17,7 @@ import org.activityinfo.model.job.JobState;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.observable.Observable;
@@ -202,7 +203,7 @@ public class HttpBus {
         return get(new VersionRangeRequest(formId, localVersion, version));
     }
 
-    public Promise<Void> updateRecords(RecordTransactionBuilder tx) {
+    public Promise<Void> updateRecords(RecordTransaction tx) {
         return client.updateRecords(tx).then(new Function<Void, Void>() {
             @Override
             public Void apply(Void aVoid) {

@@ -337,6 +337,20 @@ public final class Promise<T> implements AsyncCallback<T> {
         return result;
     }
 
+    public static <T> Promise<List<T>> flatten(final List<Promise<T>> promises) {
+        return waitAll(promises).then(new Function<Void, List<T>>() {
+            @Nullable
+            @Override
+            public List<T> apply(@Nullable Void aVoid) {
+                List<T> items = new ArrayList<T>();
+                for (Promise<T> promise : promises) {
+                    items.add(promise.get());
+                }
+                return items;
+            }
+        });
+    }
+
 
     @Override
     public String toString() {

@@ -5,12 +5,18 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.indexedb.IDBFactory;
+import org.activityinfo.indexedb.IDBTransaction;
 import org.activityinfo.indexedb.OfflineDatabase;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -20,8 +26,8 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.tasks.NullWatcher;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
-import java.util.HashSet;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -174,5 +180,102 @@ public class OfflineStore {
                 return null;
             }
         });
+    }
+
+    /**
+     * Applies a record transaction to the local IndexedDB and queues the transaction for
+     * sending to the server
+     */
+    public Promise<Void> execute(RecordTransaction transaction) {
+
+        return executor.begin()
+        .objectStore(RecordStore.DEF)
+        .objectStore(PendingStore.DEF)
+        .readwrite()
+        .execute(tx -> {
+
+            List<Promise<RecordUpdate>> rollbacks = new ArrayList<>();
+
+            for (RecordUpdate update : transaction.getChanges()) {
+                rollbacks.add(applyUpdate(tx, update));
+            }
+
+            Promise.flatten(rollbacks).then(new Function<List<RecordUpdate>, Void>() {
+                @Override
+                public Void apply(List<RecordUpdate> rollbacks) {
+                    tx.objectStore(PendingStore.DEF).put(PendingTransaction.create(transaction, rollbacks));
+                    return null;
+                }
+            });
+        });
+    }
+
+
+    private Promise<RecordUpdate> applyUpdate(IDBTransaction tx, RecordUpdate update) {
+        RecordStore recordStore = tx.objectStore(RecordStore.DEF);
+        return recordStore.get(update.getRecordRef()).then(new Function<Optional<RecordObject>, RecordUpdate>() {
+            @Override
+            public RecordUpdate apply(Optional<RecordObject> existingRecord) {
+
+                // Queue the update to the record store
+                if(update.isDeleted()) {
+                    if(existingRecord.isPresent()) {
+                        recordStore.deleteRecord(update.getRecordRef());
+                    }
+                } else {
+                    recordStore.put(update.getRecordRef(), applyUpdate(existingRecord, update));
+                }
+
+                // Return the inverse so that we can rollback this change locally if the update
+                // is eventually rejected by the server.
+                return inverse(existingRecord, update);
+            }
+        });
+    }
+
+
+    private RecordObject applyUpdate(Optional<RecordObject> existingRecord, RecordUpdate update) {
+        RecordObject updatedRecord = new RecordObject();
+
+        // Combine old and new field values
+        if(existingRecord.isPresent()) {
+            updatedRecord.setParentFormId(existingRecord.get().getParentFormId());
+
+            JsonObject existingFields = existingRecord.get().getFields();
+            for (String fieldName : existingFields.keys()) {
+                updatedRecord.setField(fieldName, existingFields.<JsonValue>get(fieldName));
+            }
+        }
+        for (String fieldName : update.getFields().keys()) {
+            updatedRecord.setField(fieldName, update.getFields().<JsonValue>get(fieldName));
+        }
+
+        // Only update parent record if this is a new record
+        if(!existingRecord.isPresent()) {
+            updatedRecord.setParentFormId(update.getParentRecordId());
+        }
+        return updatedRecord;
+    }
+
+    private RecordUpdate inverse(Optional<RecordObject> existingRecord, RecordUpdate update) {
+        RecordUpdate inverse = new RecordUpdate();
+        inverse.setFormId(update.getFormId());
+        inverse.setRecordId(update.getRecordId());
+
+        if(existingRecord.isPresent()) {
+            if(update.isDeleted()) {
+                // Restore the old values
+                inverse.setFields(existingRecord.get().getFields());
+
+            } else {
+                // Remember only the changed the old values so we can roll them back
+                for (String updatedField : update.getFields().keys()) {
+                    inverse.setFieldValue(updatedField, existingRecord.get().getField(updatedField));
+                }
+            }
+        } else {
+            inverse.setDeleted(true);
+        }
+        return inverse;
     }
 }

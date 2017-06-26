@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -86,7 +87,7 @@ public class FormInputViewModel {
         return update;
     }
 
-    public RecordTransactionBuilder buildTransaction() {
+    public RecordTransaction buildTransaction() {
         RecordTransactionBuilder tx = new RecordTransactionBuilder();
         tx.add(buildUpdate());
 
@@ -94,6 +95,6 @@ public class FormInputViewModel {
             tx.add(subFormInputViewModel.buildUpdates());
         }
 
-        return tx;
+        return tx.build();
     }
 }

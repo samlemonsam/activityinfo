@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
@@ -10,6 +11,7 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
@@ -22,6 +24,7 @@ import org.activityinfo.ui.client.store.http.RecordRequest;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -130,8 +133,16 @@ public class FormStoreImpl implements FormStore {
     }
 
     @Override
-    public Promise<Void> updateRecords(RecordTransactionBuilder tx) {
-        return httpBus.updateRecords(tx);
+    public Promise<Void> updateRecords(RecordTransaction tx) {
+        Promise<SnapshotStatus> status = offlineStore.getCurrentSnapshot().once();
+
+        return status.join(snapshot -> {
+            if(snapshot.areAllCached(tx.getAffectedFormIds())) {
+                return offlineStore.execute(tx);
+            } else {
+                return httpBus.updateRecords(tx);
+            }
+        });
     }
 
     @Override

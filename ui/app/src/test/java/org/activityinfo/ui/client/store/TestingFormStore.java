@@ -10,6 +10,7 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
@@ -149,7 +150,7 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Promise<Void> updateRecords(RecordTransactionBuilder tx) {
+    public Promise<Void> updateRecords(RecordTransaction tx) {
         testingCatalog.updateRecords(tx);
         return Promise.done();
     }

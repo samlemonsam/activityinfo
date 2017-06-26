@@ -50,9 +50,7 @@ public class ObjectStoreStub<T> {
         }
         @Override
         public void put(T value) {
-            if(!readwrite) {
-                throw new IllegalStateException("The transaction is read-only.");
-            }
+            checkReadWrite();
             objectMap.put(keyPath.buildKey(Json.toJson(value).getAsJsonObject()), value);
         }
 
@@ -67,10 +65,14 @@ public class ObjectStoreStub<T> {
         }
 
         private void put(ObjectKey key, T value) {
+            checkReadWrite();
+            objectMap.put(key, value);
+        }
+
+        private void checkReadWrite() {
             if(!readwrite) {
                 throw new IllegalStateException("The transaction is read-only.");
             }
-            objectMap.put(key, value);
         }
 
         @Override
@@ -81,6 +83,12 @@ public class ObjectStoreStub<T> {
         @Override
         public Promise<T> get(String[] keys) {
             return get(new ObjectKey(keys));
+        }
+
+        @Override
+        public void delete(String[] key) {
+            checkReadWrite();
+            objectMap.remove(new ObjectKey(key));
         }
 
         private Promise<T> get(ObjectKey key) {

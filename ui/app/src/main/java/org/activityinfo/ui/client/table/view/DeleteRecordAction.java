@@ -61,7 +61,7 @@ public class DeleteRecordAction implements ConfirmDialog.Action {
             tx.delete(recordRef.getFormId(), recordRef.getRecordId());
         }
 
-        return formStore.updateRecords(tx);
+        return formStore.updateRecords(tx.build());
     }
 
     @Override

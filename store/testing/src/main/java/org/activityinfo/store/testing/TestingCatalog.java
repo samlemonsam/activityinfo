@@ -9,6 +9,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -113,9 +114,9 @@ public class TestingCatalog implements FormCatalog {
         return builder.build(queryModel);
     }
 
-    public void updateRecords(RecordTransactionBuilder transaction) {
+    public void updateRecords(RecordTransaction transaction) {
         Updater updater = new Updater(this, 1, new BlobAuthorizerStub(), serialNumberProvider);
-        updater.execute(transaction.toJsonObject());
+        updater.execute(transaction);
     }
 
     public void deleteForm(ResourceId formId) {

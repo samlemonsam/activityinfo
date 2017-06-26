@@ -77,6 +77,11 @@ public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObject
     }-*/;
 
     @Override
+    public final native void delete(String[] key) /*-{
+        this.delete(key);
+    }-*/;
+
+    @Override
     public final native void createIndex(String indexName, String keyPath, IndexOptions indexOptions) /*-{
         this.createIndex(indexName, keyPath, indexOptions);
     }-*/;

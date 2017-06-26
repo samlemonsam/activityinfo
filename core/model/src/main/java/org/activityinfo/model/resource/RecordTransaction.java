@@ -6,6 +6,8 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Describes one or more changes to records.
@@ -21,8 +23,31 @@ public final class RecordTransaction {
     public RecordTransaction() {
     }
 
+    public String getId() {
+        return id;
+    }
+
     @JsOverlay
     public Iterable<RecordUpdate> getChanges() {
         return Arrays.asList(changes);
+    }
+
+    @JsOverlay
+    public RecordUpdate[] getChangeArray() {
+        return changes;
+    }
+
+    @JsOverlay
+    public static RecordTransactionBuilder builder() {
+        return new RecordTransactionBuilder();
+    }
+
+    @JsOverlay
+    public Set<ResourceId> getAffectedFormIds() {
+        Set<ResourceId> forms = new HashSet<>();
+        for (RecordUpdate update : getChanges()) {
+            forms.add(update.getFormId());
+        }
+        return forms;
     }
 }

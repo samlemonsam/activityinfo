@@ -7,9 +7,11 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Maybe;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.indexedb.IDBFactoryStub;
@@ -197,7 +199,7 @@ public class FormStoreTest {
 
         // Add an new record to Survey
         tableView.resetChangeCounter();
-        formStore.updateRecords(new RecordTransactionBuilder().add(catalog.addNew(survey.getFormId())));
+        formStore.updateRecords(new RecordTransactionBuilder().add(catalog.addNew(survey.getFormId())).build());
 
 
         // Verify that the table view has been updated
@@ -223,10 +225,20 @@ public class FormStoreTest {
 
         // Create a new survey record
         FormInstance newRecordTyped = survey.getGenerator().get();
-        FormRecord newRecord = FormRecord.fromInstance(newRecordTyped);
+        RecordTransaction tx = RecordTransaction.builder()
+            .create(newRecordTyped)
+            .build();
 
-        RecordTransactionBuilder tx = new RecordTransactionBuilder();
+        // Update a record...
+        Promise<Void> updateResult = setup.getFormStore().updateRecords(tx);
+        assertThat(updateResult.getState(), equalTo(Promise.State.FULFILLED));
 
+        // Now query offline...
+        Connection<Maybe<FormRecord>> recordView = setup.connect(setup.getFormStore().getRecord(newRecordTyped.getRef()));
+
+        Maybe<FormRecord> record = recordView.assertLoaded();
+        assertThat(record.getState(), equalTo(Maybe.State.VISIBLE));
+        assertThat(record.get().getRecordId(), equalTo(newRecordTyped.getId().asString()));
 
     }
 

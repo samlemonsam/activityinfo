@@ -50,6 +50,10 @@ public class RecordStore {
         impl.put(key(record.getRef()), RecordObject.from(record));
     }
 
+    public final void put(RecordRef recordRef, RecordObject recordObject) {
+        impl.put(key(recordRef), recordObject);
+    }
+
     public final Promise<Optional<RecordObject>> get(RecordRef ref) {
         return impl.get(key(ref)).then(Optional::ofNullable);
     }
@@ -82,5 +86,10 @@ public class RecordStore {
 
     public static ResourceId recordIdOf(IDBCursor<RecordObject> cursor) {
         return ResourceId.valueOf(cursor.getKeyArray()[1]);
+    }
+
+
+    public void deleteRecord(RecordRef recordRef) {
+        impl.delete(key(recordRef));
     }
 }

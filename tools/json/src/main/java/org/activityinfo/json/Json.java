@@ -60,6 +60,10 @@ public class Json {
         return instance().parse(jsonString);
     }
 
+    public static String stringify(Object value) {
+        return JsonUtil.stringify(Json.toJson(value));
+    }
+
     public static String stringify(JsonValue jsonValue) {
         return JsonUtil.stringify(jsonValue);
     }

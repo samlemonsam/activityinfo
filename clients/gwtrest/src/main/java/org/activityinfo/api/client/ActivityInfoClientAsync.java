@@ -10,8 +10,8 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
@@ -115,7 +115,7 @@ public interface ActivityInfoClientAsync {
      */
     Promise<ColumnSet> queryTableColumns(QueryModel query);
 
-    Promise<Void> updateRecords(RecordTransactionBuilder transactions);
+    Promise<Void> updateRecords(RecordTransaction transactions);
 
     <T extends JobDescriptor<R>, R extends JobResult> Promise<JobStatus<T, R>>  startJob(T job);
 

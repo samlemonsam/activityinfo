@@ -37,6 +37,5 @@ public interface IDBObjectStore<T> {
      */
     void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback<T> callback);
 
-
-
+    void delete(String[] key);
 }

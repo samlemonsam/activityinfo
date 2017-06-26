@@ -28,15 +28,6 @@ public class IDBDatabaseStub implements IDBDatabase {
 
     @Override
     public void transaction(String[] objectStores, String mode, IDBTransactionCallback callback) {
-        Map<String, ObjectStoreStub> map = new HashMap<>();
-        for (String name : objectStores) {
-            ObjectStoreStub store = storeMap.get(name);
-            if(store == null) {
-                throw new IllegalStateException("No such object store: " + name);
-            }
-            map.put(name, store);
-        }
-
         new Transaction(new HashSet<>(Arrays.asList(objectStores)), mode, callback).run();
     }
 

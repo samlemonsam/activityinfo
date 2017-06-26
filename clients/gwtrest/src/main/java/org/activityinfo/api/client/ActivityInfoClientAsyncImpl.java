@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.UriUtils;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
@@ -20,8 +21,8 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
@@ -271,8 +272,8 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(RecordTransactionBuilder transaction) {
-        return post(RequestBuilder.POST, baseUrl + "/update", transaction.toJsonObject().toJson());
+    public Promise<Void> updateRecords(RecordTransaction transaction) {
+        return post(RequestBuilder.POST, baseUrl + "/update", Json.stringify(transaction));
     }
 
     @Override

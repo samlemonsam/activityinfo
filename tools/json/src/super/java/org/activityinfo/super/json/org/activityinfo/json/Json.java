@@ -63,6 +63,11 @@ public class Json {
     return instance().parse(jsonString);
   }
 
+  public static native String stringify(Object value) /*-{
+    return $wnd.JSON.stringify(value);
+  }-*/;
+
+
   public static native String stringify(JsonValue jsonValue) /*-{
     return $wnd.JSON.stringify(jsonValue);
   }-*/;

@@ -70,7 +70,7 @@ public class SubFormDeletionTest {
         RecordTransactionBuilder tx = new RecordTransactionBuilder();
         tx.delete(formId, ResourceId.valueOf(recordId));
 
-        testingCatalog.updateRecords(tx);
+        testingCatalog.updateRecords(tx.build());
     }
 
 }

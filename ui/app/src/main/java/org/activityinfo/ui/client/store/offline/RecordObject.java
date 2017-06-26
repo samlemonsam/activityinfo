@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.store.offline;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormRecord;
@@ -46,6 +47,14 @@ public final class RecordObject {
     @JsOverlay
     public void setFields(JsonObject fields) {
         this.fields = fields;
+    }
+
+    @JsOverlay
+    public void setField(String fieldName, JsonValue value) {
+        if(fields == null) {
+            fields = Json.createObject();
+        }
+        fields.put(fieldName, value);
     }
 
     @JsOverlay

@@ -8,6 +8,7 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 
 import javax.annotation.Nonnull;
 
@@ -22,6 +23,8 @@ public final class RecordUpdate {
 
     @JsonProperty(required = true)
     private String recordId;
+
+    private String parentRecordId;
 
     private boolean deleted;
 
@@ -59,7 +62,6 @@ public final class RecordUpdate {
     }
 
 
-
     @JsOverlay
     public boolean isDeleted() {
         return deleted;
@@ -69,6 +71,16 @@ public final class RecordUpdate {
     @JsOverlay
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @JsOverlay
+    public String getParentRecordId() {
+        return parentRecordId;
+    }
+
+    @JsOverlay
+    public void setParentRecordId(String parentRecordId) {
+        this.parentRecordId = parentRecordId;
     }
 
     @JsOverlay
@@ -116,5 +128,10 @@ public final class RecordUpdate {
         } else {
             fields.put(fieldId, value);
         }
+    }
+
+    @JsOverlay
+    public RecordRef getRecordRef() {
+        return new RecordRef(ResourceId.valueOf(formId), ResourceId.valueOf(recordId));
     }
 }
