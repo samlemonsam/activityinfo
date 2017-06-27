@@ -26,10 +26,6 @@ public class VersionRangeRequest implements HttpRequest<FormRecordSet> {
         return client.getRecordVersionRange(formId.asString(), localVersion, version);
     }
 
-    @Override
-    public boolean shouldRefresh(FormChange change) {
-        return false;
-    }
 
     @Override
     public int refreshInterval(FormRecordSet result) {

@@ -29,10 +29,6 @@ public class CatalogRequest implements HttpRequest<List<CatalogEntry>> {
         return client.getFormCatalog(parentId);
     }
 
-    @Override
-    public boolean shouldRefresh(FormChange change) {
-        return false;
-    }
 
     @Override
     public int refreshInterval(List<CatalogEntry> result) {

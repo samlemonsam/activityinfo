@@ -21,10 +21,6 @@ public class JobStatusRequest<T extends JobDescriptor<R>, R extends JobResult> i
         return (Promise)async.getJobStatus(jobId);
     }
 
-    @Override
-    public boolean shouldRefresh(FormChange change) {
-        return false;
-    }
 
     @Override
     public int refreshInterval(JobStatus<T, R> result) {

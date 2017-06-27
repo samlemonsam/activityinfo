@@ -20,11 +20,6 @@ public class FormSchemaRequest implements HttpRequest<FormClass> {
     }
 
     @Override
-    public boolean shouldRefresh(FormChange change) {
-        return false;
-    }
-
-    @Override
     public int refreshInterval(FormClass result) {
         return -1;
     }

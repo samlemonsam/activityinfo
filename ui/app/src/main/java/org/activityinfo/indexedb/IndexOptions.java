@@ -1,5 +1,6 @@
 package org.activityinfo.indexedb;
 
+import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
@@ -9,6 +10,7 @@ public class IndexOptions {
     public boolean unique;
 
 
+    @JsOverlay
     public static IndexOptions nonUnique() {
         IndexOptions options = new IndexOptions();
         options.unique = false;

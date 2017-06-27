@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -16,9 +17,12 @@ import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.HttpBus;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Tests the compiled Javascript offline store against a real browser.
@@ -29,6 +33,7 @@ import java.util.List;
  */
 public class OfflineStoreGwtTest extends GWTTestCase {
 
+    private static final Logger LOGGER = Logger.getLogger(OfflineStoreGwtTest.class.getName());
 
     private OfflineStore offlineStore;
     private HttpBus httpBus;
@@ -75,9 +80,11 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 verifyWeCanReadFormSchemas()
                         .join(OfflineStoreGwtTest.this::verifyWeCanQueryRecords)
                         .join(OfflineStoreGwtTest.this::verifyWeCanMakeChangesOffline)
+                        .join(OfflineStoreGwtTest.this::verifyWeCanLoadCurrentSnapshot)
                         .then(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        LOGGER.log(Level.SEVERE, "Operation failed", caught);
                         fail();
                     }
 
@@ -141,6 +148,22 @@ public class OfflineStoreGwtTest extends GWTTestCase {
             .build();
 
         return formStore.updateRecords(transaction);
+    }
+
+    private Promise<Void> verifyWeCanLoadCurrentSnapshot(Void input) {
+        return offlineStore.getDatabase().begin(KeyValueStore.DEF)
+            .query(tx -> tx.objectStore(KeyValueStore.DEF).getCurrentSnapshot())
+            .then(new Function<SnapshotStatus, Void>() {
+                @Nullable
+                @Override
+                public Void apply(@Nullable SnapshotStatus status) {
+
+                    assertNotNull(status);
+
+                    return null;
+                }
+            });
+
     }
 
     private FormRecordSet toFormRecordSet(Survey survey) {

@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
+import com.google.common.base.Function;
 import org.activityinfo.indexedb.*;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonArray;
@@ -7,8 +8,10 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -78,8 +81,8 @@ public class KeyValueStore {
             } else {
                 Set<ResourceId> forms = new HashSet<>();
                 JsonArray array = json.getAsJsonArray();
-                for (JsonValue jsonElement : array.values()) {
-                    forms.add(ResourceId.valueOf(jsonElement.asString()));
+                for (int i = 0; i < array.length(); i++) {
+                    forms.add(ResourceId.valueOf(array.getString(i)));
                 }
                 return forms;
             }

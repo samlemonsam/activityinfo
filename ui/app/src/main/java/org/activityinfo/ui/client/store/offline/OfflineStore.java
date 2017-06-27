@@ -1,13 +1,15 @@
 package org.activityinfo.ui.client.store.offline;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.indexedb.IDBFactory;
 import org.activityinfo.indexedb.IDBTransaction;
 import org.activityinfo.indexedb.OfflineDatabase;
-import org.activityinfo.indexedb.Work;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
@@ -24,10 +26,12 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.FormChange;
+import org.activityinfo.ui.client.store.FormChangeEvent;
+import org.activityinfo.ui.client.store.http.FormChangeWatcher;
 import org.activityinfo.ui.client.store.tasks.NullWatcher;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,13 +43,15 @@ public class OfflineStore {
 
     private static final Logger LOGGER = Logger.getLogger(OfflineStore.class.getName());
 
-    private OfflineDatabase executor;
+    private OfflineDatabase database;
+
+    private final EventBus eventBus = new SimpleEventBus();
 
     private StatefulValue<Set<ResourceId>> offlineForms = new StatefulValue<>();
     private StatefulValue<SnapshotStatus> currentSnapshot = new StatefulValue<>();
 
     public OfflineStore(IDBFactory indexedDbFactory) {
-        this.executor = new OfflineDatabase(indexedDbFactory, "AI0001",
+        this.database = new OfflineDatabase(indexedDbFactory, "AI0001",
             SchemaStore.DEF,
             RecordStore.DEF,
             KeyValueStore.DEF,
@@ -54,7 +60,7 @@ public class OfflineStore {
         /*
          * Load current snapshot, if any present
          */
-        this.executor.begin(KeyValueStore.DEF)
+        this.database.begin(KeyValueStore.DEF)
                 .query(tx -> tx.objectStore(KeyValueStore.DEF).getCurrentSnapshot())
                 .then(new AsyncCallback<SnapshotStatus>() {
                     @Override
@@ -77,7 +83,7 @@ public class OfflineStore {
         /*
          * Load current set of offline enabled forms
          */
-        this.executor.begin(KeyValueStore.DEF)
+        this.database.begin(KeyValueStore.DEF)
                 .query(tx -> tx.objectStore(KeyValueStore.DEF).getOfflineForms())
                 .then(new AsyncCallback<Set<ResourceId>>() {
                     @Override
@@ -92,26 +98,34 @@ public class OfflineStore {
                 });
     }
 
+    @VisibleForTesting
+    OfflineDatabase getDatabase() {
+        return database;
+    }
+
     /**
      * Try to load a cached FormSchema from the offline store.
      */
     public Observable<FormMetadata> getCachedMetadata(ResourceId formId) {
-        return new ObservableTask<>(new MetadataQuery(executor, formId), NullWatcher.INSTANCE);
+        return new ObservableTask<>(new MetadataQuery(database, formId),
+            new FormChangeWatcher(eventBus, change -> change.isFormChanged(formId)));
     }
 
     public Observable<Maybe<FormRecord>> getCachedRecord(RecordRef recordRef) {
-        return new ObservableTask<>(new RecordQuery(executor, recordRef), NullWatcher.INSTANCE);
+        return new ObservableTask<>(new RecordQuery(database, recordRef),
+            new FormChangeWatcher(eventBus, change -> change.isRecordChanged(recordRef)));
     }
 
     public Observable<ColumnSet> query(FormTree formTree, QueryModel queryModel) {
-        return new ObservableTask<>(new ColumnQuery(executor, formTree, queryModel), NullWatcher.INSTANCE);
+        return new ObservableTask<>(new ColumnQuery(database, formTree, queryModel),
+            new FormChangeWatcher(eventBus, change -> true));
     }
 
     /**
      * Updates whether a form should be available offline.
      */
     public void enableOffline(ResourceId formId, boolean offline) {
-        executor.begin(KeyValueStore.DEF)
+        database.begin(KeyValueStore.DEF)
         .readwrite()
         .query(tx -> {
             return tx.objectStore(KeyValueStore.DEF).getOfflineForms().then(new Function<Set<ResourceId>, Set<ResourceId>>() {
@@ -157,7 +171,7 @@ public class OfflineStore {
 
         LOGGER.info("Updating offline snapshot: " + status);
 
-        return executor.begin()
+        return database.begin()
         .objectStore(SchemaStore.DEF)
         .objectStore(RecordStore.DEF)
         .objectStore(KeyValueStore.DEF)
@@ -192,7 +206,7 @@ public class OfflineStore {
      */
     public Promise<Void> execute(RecordTransaction transaction) {
 
-        return executor.begin()
+        return database.begin()
         .objectStore(RecordStore.DEF)
         .objectStore(PendingStore.DEF)
         .readwrite()
@@ -215,7 +229,15 @@ public class OfflineStore {
                     return null;
                 }
             });
-        });
+        }).then(new Function<Void, Void>() {
+                @Override
+                public Void apply(Void aVoid) {
+
+                    eventBus.fireEvent(new FormChangeEvent(FormChange.from(transaction)));
+
+                    return null;
+                }
+            });
     }
 
 

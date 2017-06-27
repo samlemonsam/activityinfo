@@ -10,11 +10,6 @@ public interface HttpRequest<T> {
     Promise<T> execute(ActivityInfoClientAsync async);
 
     /**
-     * Returns {@code true} if this request should be refetched from the server after the given
-     */
-    boolean shouldRefresh(FormChange change);
-
-    /**
      * Given the successful result {@code result}, returns the delay in milliseconds before the request
      * should be re-issued to check for updates.
      */

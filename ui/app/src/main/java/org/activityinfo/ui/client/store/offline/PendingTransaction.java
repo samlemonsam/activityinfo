@@ -14,7 +14,7 @@ import java.util.List;
  * roll it back locally
  *
  */
-@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Global")
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public final class PendingTransaction {
 
     private String id;

@@ -24,11 +24,6 @@ public class HistoryRequest implements HttpRequest<List<FormHistoryEntry>> {
     }
 
     @Override
-    public boolean shouldRefresh(FormChange change) {
-        return false;
-    }
-
-    @Override
     public int refreshInterval(List<FormHistoryEntry> result) {
         return -1;
     }

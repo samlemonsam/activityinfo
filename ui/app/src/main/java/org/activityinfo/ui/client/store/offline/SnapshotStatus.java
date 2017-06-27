@@ -60,9 +60,12 @@ public class SnapshotStatus {
         status.time = new Date(object.get("time").asLong());
 
         JsonObject versions = object.getObject("versions");
-        for (Map.Entry<String, JsonValue> entry : versions.entrySet()) {
-            ResourceId formId = ResourceId.valueOf(entry.getKey());
-            long version = entry.getValue().asLong();
+        String[] forms = versions.keys();
+
+        for (String form : forms) {
+            ResourceId formId = ResourceId.valueOf(form);
+            long version = Long.parseLong(versions.getString(form));
+
             status.formVersions.put(formId, version);
         }
 

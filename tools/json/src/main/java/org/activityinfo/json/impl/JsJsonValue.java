@@ -123,7 +123,7 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
 
     @Override
     public final long asLong() {
-        return (long)asNumber();
+        return Long.parseLong(asString());
     }
 
     @Override

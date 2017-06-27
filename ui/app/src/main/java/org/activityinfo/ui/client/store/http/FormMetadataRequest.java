@@ -19,10 +19,6 @@ public class FormMetadataRequest implements HttpRequest<FormMetadata> {
         return async.getFormMetadata(formId.asString());
     }
 
-    @Override
-    public boolean shouldRefresh(FormChange change) {
-        return false;
-    }
 
     @Override
     public int refreshInterval(FormMetadata result) {

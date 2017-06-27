@@ -21,10 +21,6 @@ public class StartJobRequest<T extends JobDescriptor<R>, R extends JobResult> im
         return async.startJob(job);
     }
 
-    @Override
-    public boolean shouldRefresh(FormChange change) {
-        return false;
-    }
 
     @Override
     public int refreshInterval(JobStatus<T, R> result) {

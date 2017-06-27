@@ -82,7 +82,7 @@ public class FormStoreImpl implements FormStore {
            if(snapshot.isFormCached(recordRef.getFormId())) {
                return offlineStore.getCachedRecord(recordRef);
            } else {
-               return httpBus.get(new RecordRequest(recordRef));
+               return httpBus.getRecord(recordRef);
            }
         });
     }

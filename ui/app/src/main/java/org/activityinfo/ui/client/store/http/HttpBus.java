@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
@@ -19,16 +20,15 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.ObservableFormTree;
-import org.activityinfo.ui.client.store.tasks.ObservableTask;
-import org.activityinfo.ui.client.store.tasks.Task;
-import org.activityinfo.ui.client.store.tasks.TaskExecution;
+import org.activityinfo.ui.client.store.tasks.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,6 +46,7 @@ public class HttpBus {
     private Scheduler scheduler;
 
     private EventBus eventBus = new SimpleEventBus();
+
 
 
     private class RequestTask<T> implements Task<T> {
@@ -169,7 +170,11 @@ public class HttpBus {
     }
 
     public <T> Observable<T> get(HttpRequest<T> request) {
-        return new ObservableTask<T>(new RequestTask<T>(request), new HttpWatcher(eventBus, request));
+        return get(request, NullWatcher.INSTANCE);
+    }
+
+    private <T> Observable<T> get(HttpRequest<T> request, Watcher watcher) {
+        return new ObservableTask<T>(new RequestTask<T>(request), watcher);
     }
 
     public <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>> startJob(T job) {
@@ -195,12 +200,16 @@ public class HttpBus {
     }
 
     public Observable<ColumnSet> query(QueryModel queryModel) {
-        return get(new QueryRequest(queryModel));
+        return get(new QueryRequest(queryModel), new FormChangeWatcher(eventBus, change -> true));
     }
 
 
     public Observable<FormRecordSet> getVersionRange(ResourceId formId, long localVersion, long version) {
         return get(new VersionRangeRequest(formId, localVersion, version));
+    }
+
+    public Observable<Maybe<FormRecord>> getRecord(RecordRef ref) {
+        return get(new RecordRequest(ref), new FormChangeWatcher(eventBus, change -> change.isRecordChanged(ref)));
     }
 
     public Promise<Void> updateRecords(RecordTransaction tx) {

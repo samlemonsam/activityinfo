@@ -21,11 +21,6 @@ public class RecordRequest implements HttpRequest<Maybe<FormRecord>> {
     }
 
     @Override
-    public boolean shouldRefresh(FormChange change) {
-        return change.isRecordChanged(recordRef);
-    }
-
-    @Override
     public int refreshInterval(Maybe<FormRecord> result) {
         return -1;
     }

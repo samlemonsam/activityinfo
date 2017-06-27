@@ -240,6 +240,38 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertTrue(object.get("c") == null);
   }
 
+  public void testArrayParse() {
+
+    JsonValue jsonValue = Json.parse("[1,2,3,4]");
+    JsonArray jsonArray = jsonValue.getAsJsonArray();
+
+    int count = 0;
+    double sum = 0;
+    for (JsonValue value : jsonArray.values()) {
+      count++;
+      sum += value.asNumber();
+    }
+    assertEquals(4, count);
+    assertEquals(1d+2d+3d+4d, sum);
+  }
+
+
+  public void testStringArrayParse() {
+
+    JsonValue jsonValue = Json.parse("[\"a\", \"b\"]");
+    JsonArray jsonArray = jsonValue.getAsJsonArray();
+
+    String concat = "";
+    for (JsonValue value : jsonArray.values()) {
+      concat += value.asString();
+    }
+    assertEquals("ab", concat);
+  }
+
+
+
+
+
 // Will only work on GWT 2.8+
 //  public void testJsObjects() throws JsonMappingException {
 //

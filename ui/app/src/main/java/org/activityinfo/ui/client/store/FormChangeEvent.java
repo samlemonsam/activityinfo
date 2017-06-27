@@ -12,14 +12,14 @@ public class FormChangeEvent extends GwtEvent<FormChangeEventHandler> {
         return TYPE;
     }
 
-    private final FormChange predicate;
+    private final FormChange change;
 
-    public FormChangeEvent(FormChange predicate) {
-        this.predicate = predicate;
+    public FormChangeEvent(FormChange change) {
+        this.change = change;
     }
 
-    public FormChange getPredicate() {
-        return predicate;
+    public FormChange getChange() {
+        return change;
     }
 
     protected void dispatch(FormChangeEventHandler handler) {
