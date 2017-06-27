@@ -72,6 +72,7 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public void then(AsyncCallback<? super T> callback) {
+        assert callback != null : "callback is null";
         switch (state) {
             case PENDING:
                 if (callbacks == null) {
@@ -195,6 +196,8 @@ public final class Promise<T> implements AsyncCallback<T> {
 
     
     public <R> Promise<R> then(final Function<? super T, R> function) {
+        assert function != null : "function is null";
+
         final Promise<R> chained = new Promise<>();
         then(new AsyncCallback<T>() {
 
@@ -216,6 +219,7 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public <R> Promise<R> then(final Supplier<R> function) {
+        assert function != null : "function is null";
         return then(Functions.forSupplier(function));
     }
 

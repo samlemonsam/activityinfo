@@ -51,6 +51,10 @@ public class OfflineDatabase {
         }
     }
 
+    public Promise<Void> delete() {
+        return factory.deleteDatabase(database);
+    }
+
     public class TransactionBuilder {
 
         private List<String> objectStores = new ArrayList<>();

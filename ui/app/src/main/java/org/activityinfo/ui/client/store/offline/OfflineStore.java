@@ -33,6 +33,7 @@ import org.activityinfo.ui.client.store.http.FormChangeWatcher;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -336,4 +337,16 @@ public class OfflineStore {
         return inverse;
     }
 
+    public Promise<Void> clear() {
+        return database.delete().then(new Function<Void, Void>() {
+            @Override
+            public Void apply(Void aVoid) {
+
+                offlineForms.updateValue(Collections.emptySet());
+                currentSnapshot.updateIfNotEqual(SnapshotStatus.EMPTY);
+                eventBus.fireEvent(new PendingStatusEvent());
+                return null;
+            }
+        });
+    }
 }

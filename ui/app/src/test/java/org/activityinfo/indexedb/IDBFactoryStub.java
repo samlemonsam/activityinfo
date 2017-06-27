@@ -32,4 +32,9 @@ public class IDBFactoryStub implements IDBFactory {
         callback.onSuccess(db);
     }
 
+    @Override
+    public Promise<Void> deleteDatabase(String name) {
+        throw new UnsupportedOperationException();
+    }
+
 }

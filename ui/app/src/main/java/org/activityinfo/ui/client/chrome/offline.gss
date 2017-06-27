@@ -18,7 +18,7 @@
 /** When there are pending changes *!*/
 
 .pending .sync-circle {
-    color: #ff0000;
+    fill: #ff0000;
 }
 
 .pending .pending-icon {

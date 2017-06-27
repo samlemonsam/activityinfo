@@ -1,6 +1,7 @@
 package org.activityinfo.indexedb;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import org.activityinfo.promise.Promise;
 
 
 public final class IDBFactoryImpl extends JavaScriptObject implements IDBFactory {
@@ -28,6 +29,18 @@ public final class IDBFactoryImpl extends JavaScriptObject implements IDBFactory
             var db = @IDBFactoryImpl::wrap(*)(request.result);
             callback.@IDBOpenDatabaseCallback::onSuccess(*)(db);
         };
+    }-*/;
+
+    @Override
+    public native Promise<Void> deleteDatabase(String name) /*-{
+        var promise = @Promise::new()();
+        var request = this.deleteDatabase(name);
+        request.onsuccess = function(event) {
+            promise.@Promise::onSuccess(*)(null);
+        }
+        request.onerror = function(event) {
+            promise.@Promise::onFailure(*)(@RuntimeException::new()());
+        }
     }-*/;
 
     private static IDBDatabaseImpl wrap(JavaScriptObject db) {

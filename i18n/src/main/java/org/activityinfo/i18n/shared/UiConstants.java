@@ -1736,4 +1736,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Sync automatically")
     String syncAutomatically();
 
+    @DefaultStringValue("Clear all offline data")
+    String clearOfflineMode();
+
+    @DefaultStringValue("Are you sure you want to remove all offline data? Any pending changes will be lost!")
+    String confirmClearOfflineMode();
 }
