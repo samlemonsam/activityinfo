@@ -15,7 +15,7 @@ import java.util.List;
  *
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Global")
-public class PendingTransaction {
+public final class PendingTransaction {
 
     private String id;
     private Date time;
@@ -25,6 +25,7 @@ public class PendingTransaction {
     public PendingTransaction() {
     }
 
+    @JsOverlay
     public static PendingTransaction create(RecordTransaction transaction, List<RecordUpdate> rollbacks) {
         PendingTransaction p = new PendingTransaction();
         p.id = transaction.getId();

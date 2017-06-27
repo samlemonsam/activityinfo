@@ -23,6 +23,7 @@ public final class RecordTransaction {
     public RecordTransaction() {
     }
 
+    @JsOverlay
     public String getId() {
         return id;
     }
