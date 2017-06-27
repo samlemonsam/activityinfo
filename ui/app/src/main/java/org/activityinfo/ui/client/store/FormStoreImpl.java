@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.store;
 
-import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
@@ -13,18 +12,15 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.CatalogRequest;
-import org.activityinfo.ui.client.store.http.HttpBus;
-import org.activityinfo.ui.client.store.http.RecordRequest;
+import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -33,12 +29,12 @@ public class FormStoreImpl implements FormStore {
 
     private static final Logger LOGGER = Logger.getLogger(FormStoreImpl.class.getName());
 
-    private final HttpBus httpBus;
+    private final HttpStore httpStore;
     private final OfflineStore offlineStore;
     private final Scheduler scheduler;
 
-    public FormStoreImpl(HttpBus httpBus, OfflineStore offlineStore, Scheduler scheduler) {
-        this.httpBus = httpBus;
+    public FormStoreImpl(HttpStore httpStore, OfflineStore offlineStore, Scheduler scheduler) {
+        this.httpStore = httpStore;
         this.offlineStore = offlineStore;
         this.scheduler = scheduler;
     }
@@ -56,12 +52,12 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<List<CatalogEntry>> getCatalogRoots() {
-        return httpBus.get(new CatalogRequest());
+        return httpStore.get(new CatalogRequest());
     }
 
     @Override
     public Observable<List<CatalogEntry>> getCatalogChildren(ResourceId parentId) {
-        return httpBus.get(new CatalogRequest(parentId));
+        return httpStore.get(new CatalogRequest(parentId));
     }
 
     @Override
@@ -70,7 +66,7 @@ public class FormStoreImpl implements FormStore {
             if(snapshot.isFormCached(formId)) {
                 return offlineStore.getCachedMetadata(formId);
             } else {
-                return httpBus.getFormMetadata(formId);
+                return httpStore.getFormMetadata(formId);
             }
         });
     }
@@ -82,7 +78,7 @@ public class FormStoreImpl implements FormStore {
            if(snapshot.isFormCached(recordRef.getFormId())) {
                return offlineStore.getCachedRecord(recordRef);
            } else {
-               return httpBus.getRecord(recordRef);
+               return httpStore.getRecord(recordRef);
            }
         });
     }
@@ -113,7 +109,7 @@ public class FormStoreImpl implements FormStore {
 
                 // Hit the server for the query.
 
-                return httpBus.query(queryModel);
+                return httpStore.query(queryModel);
             }
         });
     }
@@ -140,14 +136,14 @@ public class FormStoreImpl implements FormStore {
             if(snapshot.areAllCached(tx.getAffectedFormIds())) {
                 return offlineStore.execute(tx);
             } else {
-                return httpBus.updateRecords(tx);
+                return httpStore.updateRecords(tx);
             }
         });
     }
 
     @Override
     public <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>> startJob(T job) {
-        return httpBus.startJob(job);
+        return httpStore.startJob(job);
     }
 
 }

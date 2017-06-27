@@ -13,7 +13,7 @@ import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.PendingStatus;
@@ -43,8 +43,8 @@ public class FormStoreTest {
     public void formSchemaFetchesAreRetried() {
 
         AsyncClientStub client = new AsyncClientStub();
-        HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
+        HttpStore httpStore = new HttpStore(client, scheduler);
+        OfflineStore offlineStore = new OfflineStore(httpStore, new IDBFactoryStub());
 
         Survey survey = client.getCatalog().getSurvey();
 
@@ -54,7 +54,7 @@ public class FormStoreTest {
 
 
         // Now the view connects and should remain in loading state...
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+        FormStoreImpl formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
         Connection<FormTree> view = connect(formStore.getFormTree(survey.getFormId()));
         view.assertLoading();
 
@@ -77,9 +77,9 @@ public class FormStoreTest {
         AsyncClientStub client = new AsyncClientStub();
         Survey survey = client.getCatalog().getSurvey();
 
-        HttpBus httpBus = new HttpBus(client, scheduler);
+        HttpStore httpStore = new HttpStore(client, scheduler);
 
-        Connection<FormTree> view = connect(httpBus.getFormTree(survey.getFormId()));
+        Connection<FormTree> view = connect(httpStore.getFormTree(survey.getFormId()));
 
         runScheduled();
 
@@ -90,9 +90,9 @@ public class FormStoreTest {
     @Test
     public void offlineRecordFetching() {
         AsyncClientStub client = new AsyncClientStub();
-        HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+        HttpStore httpStore = new HttpStore(client, scheduler);
+        OfflineStore offlineStore = new OfflineStore(httpStore, new IDBFactoryStub());
+        FormStoreImpl formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
 
         Survey survey = client.getCatalog().getSurvey();
 
@@ -109,7 +109,7 @@ public class FormStoreTest {
         assertFalse(offlineStatusView.assertLoaded().isCached());
 
         // Now synchronize...
-        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpStore, offlineStore);
 
         runScheduled();
 
@@ -161,15 +161,15 @@ public class FormStoreTest {
         AsyncClientStub client = new AsyncClientStub();
         IntakeForm intakeForm = client.getCatalog().getIntakeForm();
 
-        HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+        HttpStore httpStore = new HttpStore(client, scheduler);
+        OfflineStore offlineStore = new OfflineStore(httpStore, new IDBFactoryStub());
+        FormStoreImpl formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
 
         // Start online, and enable offline mode for incidents
         formStore.setFormOffline(IncidentForm.FORM_ID, true);
 
         // Now synchronize...
-        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpStore, offlineStore);
 
         runScheduled();
 
@@ -187,9 +187,9 @@ public class FormStoreTest {
         Survey survey = catalog.getSurvey();
 
         AsyncClientStub client = new AsyncClientStub(catalog);
-        HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
-        FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
+        HttpStore httpStore = new HttpStore(client, scheduler);
+        OfflineStore offlineStore = new OfflineStore(httpStore, new IDBFactoryStub());
+        FormStoreImpl formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
 
         // Open a query on a set of records
 

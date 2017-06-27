@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.indexedb.OfflineDatabase;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 
 import java.util.Optional;
 import java.util.logging.Level;
@@ -17,15 +17,15 @@ public class UpdateSynchronizer {
     private static final Logger LOGGER = Logger.getLogger(UpdateSynchronizer.class.getName());
 
     private OfflineDatabase database;
-    private HttpBus httpBus;
+    private HttpStore httpStore;
     private EventBus eventBus;
 
     private StatefulValue<Boolean> running = new StatefulValue<>(false);
 
 
-    public UpdateSynchronizer(OfflineDatabase database, HttpBus httpBus, EventBus eventBus) {
+    public UpdateSynchronizer(OfflineDatabase database, HttpStore httpStore, EventBus eventBus) {
         this.database = database;
-        this.httpBus = httpBus;
+        this.httpStore = httpStore;
         this.eventBus = eventBus;
     }
 
@@ -73,7 +73,7 @@ public class UpdateSynchronizer {
     }
 
     private void sendUpdate(PendingEntry entry) {
-        httpBus.updateRecords(entry.getTransaction().getTransaction()).then(new AsyncCallback<Void>() {
+        httpStore.updateRecords(entry.getTransaction().getTransaction()).then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable throwable) {
 

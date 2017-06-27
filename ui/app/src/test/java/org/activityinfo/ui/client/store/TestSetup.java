@@ -6,7 +6,7 @@ import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
@@ -18,7 +18,7 @@ import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 public class TestSetup {
 
     private final AsyncClientStub client;
-    private final HttpBus httpBus;
+    private final HttpStore httpStore;
     private final OfflineStore offlineStore;
     private final FormStore formStore;
     private final StubScheduler scheduler;
@@ -35,10 +35,10 @@ public class TestSetup {
         client.setConnected(connected);
 
         scheduler = new StubScheduler();
-        httpBus = new HttpBus(client, scheduler);
-        offlineStore = new OfflineStore(httpBus, database);
-        formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
-        synchronizer = new RecordSynchronizer(httpBus, offlineStore);
+        httpStore = new HttpStore(client, scheduler);
+        offlineStore = new OfflineStore(httpStore, database);
+        formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
+        synchronizer = new RecordSynchronizer(httpStore, offlineStore);
     }
 
     public FormStore getFormStore() {

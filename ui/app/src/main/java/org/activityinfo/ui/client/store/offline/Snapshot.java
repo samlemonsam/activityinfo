@@ -7,7 +7,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,14 +28,14 @@ public class Snapshot {
         this.recordSets = recordSets;
     }
 
-    public static Observable<Snapshot> compute(Observable<Set<ResourceId>> offlineForms, HttpBus httpBus) {
+    public static Observable<Snapshot> compute(Observable<Set<ResourceId>> offlineForms, HttpStore httpStore) {
 
         // We start with the "offlineForm" set which contains the set
         // of forms the user has explicitly asked to cache.
 
         // In order to find the related forms, we need the complete form trees of each of the
         // selected forms.
-        Observable<List<FormTree>> formTrees = flatMap(offlineForms, httpBus::getFormTree);
+        Observable<List<FormTree>> formTrees = flatMap(offlineForms, httpStore::getFormTree);
 
         // Together, all the related forms constitute the set of forms we need for
         // a complete offline snapshot
@@ -52,13 +52,13 @@ public class Snapshot {
         });
 
         // Now need fetch the latest version numbers of each of these forms
-        Observable<List<FormMetadata>> metadata =  flatMap(completeSet, httpBus::getFormMetadata);
+        Observable<List<FormMetadata>> metadata =  flatMap(completeSet, httpStore::getFormMetadata);
 
         // And finally fetch any difference between our current snapshot and the latest version of the new snapshot
         return metadata.join(forms -> {
             List<Observable<FormRecordSet>> recordSets = new ArrayList<>();
             for (FormMetadata form : forms) {
-                recordSets.add(httpBus.getVersionRange(form.getId(), 0, form.getVersion()));
+                recordSets.add(httpStore.getVersionRange(form.getId(), 0, form.getVersion()));
             }
 
             return Observable.flatten(recordSets).transform(x -> new Snapshot(forms, x));

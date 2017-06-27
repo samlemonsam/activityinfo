@@ -29,7 +29,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.http.FormChangeWatcher;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
 import java.util.*;
@@ -54,14 +54,14 @@ public class OfflineStore {
 
     private UpdateSynchronizer updateSynchronizer;
 
-    public OfflineStore(HttpBus httpBus, IDBFactory indexedDbFactory) {
+    public OfflineStore(HttpStore httpStore, IDBFactory indexedDbFactory) {
         this.database = new OfflineDatabase(indexedDbFactory, "AI0001",
             SchemaStore.DEF,
             RecordStore.DEF,
             KeyValueStore.DEF,
             PendingStore.DEF);
 
-        this.updateSynchronizer = new UpdateSynchronizer(database, httpBus, eventBus);
+        this.updateSynchronizer = new UpdateSynchronizer(database, httpStore, eventBus);
         this.pendingStatus = new ObservableTask<>(
             new PendingStatusQuery(database),
             PendingStatusEvent.watchFor(eventBus));

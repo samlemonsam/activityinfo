@@ -4,7 +4,7 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.store.FormStoreImpl;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 
 import java.util.logging.Logger;
 
@@ -24,9 +24,9 @@ public class RecordSynchronizer {
     private OfflineStore offlineStore;
 
 
-    public RecordSynchronizer(HttpBus httpBus, OfflineStore offlineStore) {
+    public RecordSynchronizer(HttpStore httpStore, OfflineStore offlineStore) {
         this.offlineStore = offlineStore;
-        this.snapshot = Snapshot.compute(offlineStore.getOfflineForms(), httpBus);
+        this.snapshot = Snapshot.compute(offlineStore.getOfflineForms(), httpStore);
         this.subscription = snapshot.subscribe(this::onSnapshotUpdated);
     }
 

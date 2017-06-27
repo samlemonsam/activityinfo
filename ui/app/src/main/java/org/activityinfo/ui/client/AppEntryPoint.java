@@ -21,7 +21,7 @@ import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.ConnectionListener;
 import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 import java.util.logging.Logger;
@@ -48,14 +48,14 @@ public class AppEntryPoint implements EntryPoint {
         connectionListener.start();
 
         ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
-        HttpBus httpBus = new HttpBus(connectionListener.getOnline(), client);
+        HttpStore httpStore = new HttpStore(connectionListener.getOnline(), client, Scheduler.get());
 
-        OfflineStore offlineStore = new OfflineStore(httpBus, IDBFactoryImpl.create());
+        OfflineStore offlineStore = new OfflineStore(httpStore, IDBFactoryImpl.create());
 
-        FormStore formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
+        FormStore formStore = new FormStoreImpl(httpStore, offlineStore, Scheduler.get());
 
         Viewport viewport = new Viewport();
-        AppFrame appFrame = new AppFrame(httpBus);
+        AppFrame appFrame = new AppFrame(httpStore);
 
         ActivityMapper activityMapper = new AppActivityMapper(formStore);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
@@ -66,7 +66,7 @@ public class AppEntryPoint implements EntryPoint {
         historyHandler.register(placeController, eventBus, DEFAULT_PLACE);
 
         // Start synchronizer...
-        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpStore, offlineStore);
 
         viewport.add(appFrame);
 

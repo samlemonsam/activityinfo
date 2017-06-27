@@ -6,7 +6,6 @@ import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import junit.framework.TestCase;
 import org.activityinfo.api.client.FormRecordSet;
-import org.activityinfo.indexedb.IDBFactory;
 import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.query.ColumnView;
@@ -15,7 +14,7 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.FormStoreImpl;
-import org.activityinfo.ui.client.store.http.HttpBus;
+import org.activityinfo.ui.client.store.http.HttpStore;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
     private static final Logger LOGGER = Logger.getLogger(OfflineStoreGwtTest.class.getName());
 
     private OfflineStore offlineStore;
-    private HttpBus httpBus;
+    private HttpStore httpStore;
     private FormStoreImpl formStore;
     private Survey survey;
 
@@ -61,9 +60,9 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 Collections.singletonList(surveyMetadata),
                 Collections.singletonList(toFormRecordSet(survey)));
 
-        offlineStore = new OfflineStore(httpBus, IDBFactoryImpl.create());
-        httpBus = new HttpBus(new OfflineClientStub());
-        formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
+        offlineStore = new OfflineStore(httpStore, IDBFactoryImpl.create());
+        httpStore = new HttpStore(new OfflineClientStub());
+        formStore = new FormStoreImpl(httpStore, offlineStore, Scheduler.get());
 
         offlineStore.store(snapshot).then(new AsyncCallback<Void>() {
             @Override

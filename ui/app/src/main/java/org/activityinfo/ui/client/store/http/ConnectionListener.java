@@ -4,15 +4,24 @@ import com.google.gwt.user.client.Window;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Listen for changes in the browser's online/offline status
  */
 public class ConnectionListener {
 
+    private static final Logger LOGGER = Logger.getLogger(ConnectionListener.class.getName());
+
     private final StatefulValue<Boolean> online = new StatefulValue<>(true);
 
     public void start() {
-        start(online);
+        try {
+            start(online);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Could not start connection listener", e);
+        }
     }
 
 
