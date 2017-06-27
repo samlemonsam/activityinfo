@@ -4,8 +4,6 @@ import org.activityinfo.indexedb.IDBDatabaseUpgrade;
 import org.activityinfo.indexedb.IDBObjectStore;
 import org.activityinfo.indexedb.ObjectStoreDefinition;
 import org.activityinfo.indexedb.ObjectStoreOptions;
-import org.activityinfo.model.resource.RecordTransaction;
-import org.activityinfo.store.query.shared.PendingSlot;
 
 /**
  * IndexedDB store that records pending Record transactions offline
@@ -21,7 +19,7 @@ public class PendingStore {
         @Override
         public void upgrade(IDBDatabaseUpgrade database, int oldVersion) {
             if(oldVersion < 1) {
-                database.createObjectStore(getName(), ObjectStoreOptions.withDefaults());
+                database.createObjectStore(getName(), ObjectStoreOptions.withAutoIncrement());
             }
         }
 
@@ -37,6 +35,6 @@ public class PendingStore {
     }
 
     public void put(PendingTransaction pendingTransaction) {
-        this.store.put(pendingTransaction.getId(), pendingTransaction);
+        this.store.put(pendingTransaction);
     }
 }

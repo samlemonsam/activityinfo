@@ -13,10 +13,6 @@ public final class IDBTransactionImpl extends JavaScriptObject implements IDBTra
         return this.objectStore(name);
     }-*/;
 
-    @Override
-    public <T> T objectStore(ObjectStoreDefinition<T> definition) {
-        return definition.wrap(objectStore(definition.getName()));
-    }
 
 }
 

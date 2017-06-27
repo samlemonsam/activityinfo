@@ -28,6 +28,21 @@ public class IDBDatabaseStub implements IDBDatabase {
 
     @Override
     public void transaction(String[] objectStores, String mode, IDBTransactionCallback callback) {
+
+        // Verify that the object stores specified are present
+        Set<String> missingStores = new HashSet<>();
+        for (String objectStore : objectStores) {
+            if(!storeMap.containsKey(objectStore)) {
+                missingStores.add(objectStore);
+            }
+        }
+
+        if(!missingStores.isEmpty()) {
+            LOGGER.severe("Missing object stores: " + missingStores);
+            callback.onError(null);
+        }
+
+
         new Transaction(new HashSet<>(Arrays.asList(objectStores)), mode, callback).run();
     }
 
@@ -70,11 +85,6 @@ public class IDBDatabaseStub implements IDBDatabase {
                 throw new IllegalStateException("The object store '" + name + "' does not exist");
             }
             return storeMap.get(name).transaction(mode);
-        }
-
-        @Override
-        public <T> T objectStore(ObjectStoreDefinition<T> definition) {
-            return definition.wrap(objectStore(definition.getName()));
         }
 
         public void run() {

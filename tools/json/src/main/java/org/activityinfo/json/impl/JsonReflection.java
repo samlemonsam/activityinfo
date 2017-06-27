@@ -7,6 +7,7 @@ import org.activityinfo.json.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -122,6 +123,10 @@ public class JsonReflection {
         }
         if(o instanceof Boolean) {
             return Json.create(((Boolean) o));
+        }
+
+        if(o instanceof Date) {
+            return Json.create(o.toString());
         }
 
         // Arrays...

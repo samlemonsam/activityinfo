@@ -28,8 +28,12 @@ public final class IDBDatabaseImpl extends JavaScriptObject implements IDBDataba
             callback.@IDBTransactionCallback::onComplete(*)(event);
         }
 
-        callback.@IDBTransactionCallback::execute(*)(tx);
+        callback.@IDBTransactionCallback::execute(*)(@IDBDatabaseImpl::wrap(*)(tx));
     }-*/;
+
+    private static IDBTransactionImpl wrap(JavaScriptObject jso) {
+        return jso.cast();
+    }
 
     @Override
     public final native void close() /*-{

@@ -21,6 +21,8 @@ public class ObjectKey implements Comparable<ObjectKey> {
                 return STRING;
             } else if(isArray(key)) {
                 return ARRAY;
+            } else if(key instanceof Number) {
+                return NUMBER;
             } else {
                 throw new UnsupportedOperationException("TODO: " + key.getClass());
             }
@@ -82,6 +84,8 @@ public class ObjectKey implements Comparable<ObjectKey> {
 
         switch (ta) {
             case NUMBER:
+                return compareNumberKeys((Number) va, (Number)vb);
+
             case DATE:
                 throw new UnsupportedOperationException("TODO");
 
@@ -97,6 +101,10 @@ public class ObjectKey implements Comparable<ObjectKey> {
             default:
                 throw new UnsupportedOperationException("type: " + ta);
         }
+    }
+
+    private static int compareNumberKeys(Number va, Number vb) {
+        return Double.compare(va.doubleValue(), vb.doubleValue());
     }
 
     @VisibleForTesting

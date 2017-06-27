@@ -1,5 +1,6 @@
 package org.activityinfo.indexedb;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
@@ -59,5 +60,17 @@ public final class ObjectStoreOptions {
     @JsOverlay
     public static ObjectStoreOptions withDefaults() {
         return new ObjectStoreOptions();
+    }
+
+    @JsOverlay
+    public static ObjectStoreOptions withAutoIncrement() {
+        ObjectStoreOptions options = new ObjectStoreOptions();
+        options.setAutoIncrement(true);
+        return options;
+    }
+
+    @JsOverlay
+    public boolean isAutoIncrement() {
+        return autoIncrement;
     }
 }

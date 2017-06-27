@@ -7,6 +7,7 @@ import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.indexedb.IDBFactory;
 import org.activityinfo.indexedb.IDBTransaction;
 import org.activityinfo.indexedb.OfflineDatabase;
+import org.activityinfo.indexedb.Work;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
@@ -45,7 +46,10 @@ public class OfflineStore {
 
     public OfflineStore(IDBFactory indexedDbFactory) {
         this.executor = new OfflineDatabase(indexedDbFactory, "AI0001",
-            SchemaStore.DEF, RecordStore.DEF, KeyValueStore.DEF);
+            SchemaStore.DEF,
+            RecordStore.DEF,
+            KeyValueStore.DEF,
+            PendingStore.DEF);
 
         /*
          * Load current snapshot, if any present
@@ -192,7 +196,7 @@ public class OfflineStore {
         .objectStore(RecordStore.DEF)
         .objectStore(PendingStore.DEF)
         .readwrite()
-        .execute(tx -> {
+        .query(tx -> {
 
             List<Promise<RecordUpdate>> rollbacks = new ArrayList<>();
 
@@ -200,10 +204,14 @@ public class OfflineStore {
                 rollbacks.add(applyUpdate(tx, update));
             }
 
-            Promise.flatten(rollbacks).then(new Function<List<RecordUpdate>, Void>() {
+            return Promise.flatten(rollbacks).then(new Function<List<RecordUpdate>, Void>() {
                 @Override
                 public Void apply(List<RecordUpdate> rollbacks) {
-                    tx.objectStore(PendingStore.DEF).put(PendingTransaction.create(transaction, rollbacks));
+                    PendingTransaction pending = PendingTransaction.create(transaction, rollbacks);
+
+                    LOGGER.info("Adding pending transaction: " + Json.stringify(pending));
+
+                    tx.objectStore(PendingStore.DEF).put(pending);
                     return null;
                 }
             });
@@ -213,23 +221,20 @@ public class OfflineStore {
 
     private Promise<RecordUpdate> applyUpdate(IDBTransaction tx, RecordUpdate update) {
         RecordStore recordStore = tx.objectStore(RecordStore.DEF);
-        return recordStore.get(update.getRecordRef()).then(new Function<Optional<RecordObject>, RecordUpdate>() {
-            @Override
-            public RecordUpdate apply(Optional<RecordObject> existingRecord) {
+        return recordStore.get(update.getRecordRef()).then(existingRecord -> {
 
-                // Queue the update to the record store
-                if(update.isDeleted()) {
-                    if(existingRecord.isPresent()) {
-                        recordStore.deleteRecord(update.getRecordRef());
-                    }
-                } else {
-                    recordStore.put(update.getRecordRef(), applyUpdate(existingRecord, update));
+            // Queue the update to the record store
+            if(update.isDeleted()) {
+                if(existingRecord.isPresent()) {
+                    recordStore.deleteRecord(update.getRecordRef());
                 }
-
-                // Return the inverse so that we can rollback this change locally if the update
-                // is eventually rejected by the server.
-                return inverse(existingRecord, update);
+            } else {
+                recordStore.put(update.getRecordRef(), applyUpdate(existingRecord, update));
             }
+
+            // Return the inverse so that we can rollback this change locally if the update
+            // is eventually rejected by the server.
+            return inverse(existingRecord, update);
         });
     }
 

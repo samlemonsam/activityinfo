@@ -10,6 +10,7 @@ import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.FormStoreImpl;
@@ -73,6 +74,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
                 verifyWeCanReadFormSchemas()
                         .join(OfflineStoreGwtTest.this::verifyWeCanQueryRecords)
+                        .join(OfflineStoreGwtTest.this::verifyWeCanMakeChangesOffline)
                         .then(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -129,6 +131,16 @@ public class OfflineStoreGwtTest extends GWTTestCase {
             return null;
         });
 
+    }
+
+    private Promise<Void> verifyWeCanMakeChangesOffline(Void input) {
+
+        RecordTransaction transaction = RecordTransaction.builder()
+            .create(survey.getGenerator().get())
+            .create(survey.getGenerator().get())
+            .build();
+
+        return formStore.updateRecords(transaction);
     }
 
     private FormRecordSet toFormRecordSet(Survey survey) {

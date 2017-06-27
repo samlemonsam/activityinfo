@@ -51,6 +51,7 @@ public final class RecordUpdate {
         return ResourceId.valueOf(recordId);
     }
 
+    @JsOverlay
     public void setFormId(String id) {
         this.formId = id;
     }

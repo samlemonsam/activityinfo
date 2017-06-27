@@ -1,8 +1,6 @@
 package org.activityinfo.indexedb;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
-import org.activityinfo.json.JsonValue;
 import org.activityinfo.promise.Promise;
 
 import java.util.Iterator;
@@ -16,6 +14,9 @@ public class ObjectStoreStub<T> {
     private final String name;
     private final ObjectStoreOptions options;
     private final KeyPath keyPath;
+    private final boolean autoIncrement;
+
+    private int nextId = 1;
 
     private TreeMap<ObjectKey, T> objectMap = new TreeMap<>();
 
@@ -23,6 +24,7 @@ public class ObjectStoreStub<T> {
         this.name = name;
         this.options = options;
         this.keyPath = KeyPath.from(options);
+        this.autoIncrement = options.isAutoIncrement();
     }
 
     Upgrade upgrade() {
@@ -51,7 +53,13 @@ public class ObjectStoreStub<T> {
         @Override
         public void put(T value) {
             checkReadWrite();
-            objectMap.put(keyPath.buildKey(Json.toJson(value).getAsJsonObject()), value);
+            ObjectKey key;
+            if(autoIncrement) {
+                key = new ObjectKey(nextId++);
+            } else {
+                key = keyPath.buildKey(Json.toJson(value).getAsJsonObject());
+            }
+            objectMap.put(key, value);
         }
 
         @Override
@@ -66,6 +74,11 @@ public class ObjectStoreStub<T> {
 
         private void put(ObjectKey key, T value) {
             checkReadWrite();
+
+            if(autoIncrement) {
+                throw new IllegalStateException("Cannot add object with key when object store is autoIncrement");
+            }
+
             objectMap.put(key, value);
         }
 

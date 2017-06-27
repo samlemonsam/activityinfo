@@ -78,7 +78,7 @@ public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObject
 
     @Override
     public final native void delete(String[] key) /*-{
-        this.delete(key);
+        this['delete'](key);
     }-*/;
 
     @Override

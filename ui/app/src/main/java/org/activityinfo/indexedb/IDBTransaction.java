@@ -7,6 +7,8 @@ public interface IDBTransaction {
 
     IDBObjectStore objectStore(String name);
 
-    <T> T objectStore(ObjectStoreDefinition<T> definition);
+    default  <T> T objectStore(ObjectStoreDefinition<T> definition) {
+        return definition.wrap(objectStore(definition.getName()));
+    }
 
 }
