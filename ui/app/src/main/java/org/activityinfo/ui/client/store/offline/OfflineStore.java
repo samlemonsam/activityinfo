@@ -24,6 +24,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormChange;
@@ -110,6 +111,15 @@ public class OfflineStore {
     @VisibleForTesting
     OfflineDatabase getDatabase() {
         return database;
+    }
+
+    public Observable<OfflineStatus> getStatus() {
+        return Observable.transform(pendingStatus, currentSnapshot, new Function2<PendingStatus, SnapshotStatus, OfflineStatus>() {
+            @Override
+            public OfflineStatus apply(PendingStatus pendingStatus, SnapshotStatus snapshot) {
+                return new OfflineStatus(snapshot, pendingStatus);
+            }
+        });
     }
 
     public Observable<PendingStatus> getPendingStatus() {

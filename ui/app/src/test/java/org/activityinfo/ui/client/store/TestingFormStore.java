@@ -12,7 +12,6 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
@@ -20,6 +19,7 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -145,8 +145,8 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
-        return Observable.just(new OfflineStatus(false, false));
+    public Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId) {
+        return Observable.just(new FormOfflineStatus(false, false));
     }
 
     @Override

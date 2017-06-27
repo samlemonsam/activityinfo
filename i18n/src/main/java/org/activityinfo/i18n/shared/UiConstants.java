@@ -1732,4 +1732,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Key")
     String keyField();
+
+    @DefaultStringValue("Sync automatically")
+    String syncAutomatically();
+
 }

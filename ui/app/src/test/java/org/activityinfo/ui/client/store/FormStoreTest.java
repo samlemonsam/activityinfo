@@ -15,10 +15,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.indexedb.IDBFactoryStub;
-import org.activityinfo.ui.client.store.offline.OfflineStore;
-import org.activityinfo.ui.client.store.offline.PendingStatus;
-import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
-import org.activityinfo.ui.client.store.offline.SnapshotStatus;
+import org.activityinfo.ui.client.store.offline.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -97,7 +94,7 @@ public class FormStoreTest {
         Survey survey = client.getCatalog().getSurvey();
 
         // Start online
-        Connection<OfflineStatus> offlineStatusView = connect(formStore.getOfflineStatus(survey.getFormId()));
+        Connection<FormOfflineStatus> offlineStatusView = connect(formStore.getOfflineStatus(survey.getFormId()));
 
         // Initially form should not be loaded
         assertFalse(offlineStatusView.assertLoaded().isEnabled());

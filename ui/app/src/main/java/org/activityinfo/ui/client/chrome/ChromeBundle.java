@@ -15,26 +15,42 @@ public interface ChromeBundle extends ClientBundle {
     @Source("cloud.svg")
     TextResource cloudIcon();
 
+    @Source("offline.svg")
+    TextResource offlineIcon();
+
     @Source("logo.html")
     TextResource logoLink();
 
-    @Source("cloud.gss")
-    CloudStyle cloudStyle();
+    @Source({ "body.gss", "cloud.gss", "locale.gss", "offline.gss"})
+    Style style();
 
-    interface CloudStyle extends CssResource {
-        String syncing();
+    interface Style extends CssResource {
         String online();
         String offline();
-        String loading();
+        String fetching();
 
         @ClassName("offline-bar")
         String offlineBar();
 
-        @ClassName("sync-circle")
-        String syncCircle();
-
         @ClassName("cloud-bg")
         String cloudBg();
+
+        String localeIcon();
+
+        @ClassName("fetching-icon")
+        String fetchingIcon();
+
+        String pending();
+
+        @ClassName("pending-icon")
+        String pendingIcon();
+
+        String appBarButton();
+
+        String synced();
+
+        @ClassName("sync-check")
+        String syncCheck();
 
         @ClassName("sync-icon")
         String syncIcon();

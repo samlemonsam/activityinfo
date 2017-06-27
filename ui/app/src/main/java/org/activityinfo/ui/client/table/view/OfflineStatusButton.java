@@ -8,13 +8,13 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
-import org.activityinfo.ui.client.store.OfflineStatus;
+import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 
 
 public class OfflineStatusButton implements IsWidget {
 
     private TextButton button;
-    private final Observable<OfflineStatus> status;
+    private final Observable<FormOfflineStatus> status;
     private FormStore formStore;
     private ResourceId formId;
 
@@ -38,7 +38,7 @@ public class OfflineStatusButton implements IsWidget {
         }
     }
 
-    private void statusChanged(Observable<OfflineStatus> status) {
+    private void statusChanged(Observable<FormOfflineStatus> status) {
         if(status.isLoading()) {
             button.setEnabled(false);
             button.setText(I18N.CONSTANTS.loading());

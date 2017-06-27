@@ -55,7 +55,7 @@ public class AppEntryPoint implements EntryPoint {
         FormStore formStore = new FormStoreImpl(httpStore, offlineStore, Scheduler.get());
 
         Viewport viewport = new Viewport();
-        AppFrame appFrame = new AppFrame(httpStore);
+        AppFrame appFrame = new AppFrame(httpStore, offlineStore);
 
         ActivityMapper activityMapper = new AppActivityMapper(formStore);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);

@@ -1,39 +1,51 @@
 package org.activityinfo.ui.client.chrome;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import org.activityinfo.i18n.shared.ApplicationLocale;
 
 
-public class LanguageSelector implements IsWidget {
+public class LocaleSelector implements IsWidget {
 
-    private TextButton button;
+    private HTML icon;
 
-    public LanguageSelector() {
+    public LocaleSelector() {
 
-        Menu localeMenu = new Menu();
+
+        Menu menu = new Menu();
         for (final ApplicationLocale applicationLocale : ApplicationLocale.values()) {
             CheckMenuItem menuItem = new CheckMenuItem(applicationLocale.getLocalizedName());
             menuItem.setChecked(isCurrent(applicationLocale));
             menuItem.setGroup("lang");
             menuItem.addSelectionHandler(selectionEvent -> switchLocale(applicationLocale));
-            localeMenu.add(menuItem);
+            menu.add(menuItem);
         }
 
         String currentLocaleCode = LocaleInfo.getCurrentLocale().getLocaleName().toUpperCase();
 
-        button = new TextButton(currentLocaleCode);
-        button.setMenu(localeMenu);
+        icon = new HTML();
+        icon.addStyleName(ChromeBundle.BUNDLE.style().localeIcon());
+        icon.addStyleName(ChromeBundle.BUNDLE.style().appBarButton());
+        icon.setText(currentLocaleCode);
+        icon.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                 menu.show(icon.getElement(), new Style.AnchorAlignment(Style.Anchor.TOP, Style.Anchor.BOTTOM));
+            }
+        });
     }
 
     @Override
     public Widget asWidget() {
-        return button;
+        return icon;
     }
 
 

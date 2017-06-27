@@ -257,4 +257,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Count of {0}")
     String countMeasure(String formLabel);
 
+    @DefaultMessage("{0} pending changes")
+    @AlternateMessage({ "one", "One pending change" })
+    String pendingChanges(@PluralCount  int count);
 }

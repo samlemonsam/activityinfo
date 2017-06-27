@@ -5,26 +5,27 @@ import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.toolbar.FillToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.ui.client.store.http.HttpStore;
+import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 /**
  * The outer application frame that houses the login menu, connection indicator, etc.
  */
 public class AppFrame implements IsWidget {
 
-
     private BorderLayoutContainer container;
-    private ConnectionIndicator connectionIndicator;
+    private OfflineMenu offlineMenu;
 
-    public AppFrame(HttpStore httpStore) {
+    public AppFrame(HttpStore httpStore, OfflineStore offlineStore) {
+        ChromeBundle.BUNDLE.style().ensureInjected();
 
         HTML logoLink = new HTML(ChromeBundle.BUNDLE.logoLink().getText());
-        ConnectionIndicator connectionIndicator = new ConnectionIndicator(httpStore.getHttpBus());
 
         ToolBar appBar = new ToolBar();
         appBar.add(logoLink);
         appBar.add(new FillToolItem());
-        appBar.add(connectionIndicator);
-        appBar.add(new LanguageSelector());
+        appBar.add(new ConnectionIcon(httpStore.getHttpBus()));
+        appBar.add(new OfflineMenu(httpStore.getHttpBus(), offlineStore));
+        appBar.add(new LocaleSelector());
 
         container = new BorderLayoutContainer();
         container.setNorthWidget(appBar, new BorderLayoutContainer.BorderLayoutData(50));

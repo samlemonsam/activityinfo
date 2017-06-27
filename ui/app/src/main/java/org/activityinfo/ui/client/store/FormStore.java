@@ -7,10 +7,10 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.query.shared.FormSource;
+import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public interface FormStore extends FormSource {
 
     void setFormOffline(ResourceId formId, boolean offline);
 
-    Observable<OfflineStatus> getOfflineStatus(ResourceId formId);
+    Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId);
 
     /**
      * Applies an update transactionally to the Form store.

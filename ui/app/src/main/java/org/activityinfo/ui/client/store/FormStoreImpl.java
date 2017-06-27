@@ -18,6 +18,7 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.CatalogRequest;
 import org.activityinfo.ui.client.store.http.HttpStore;
+import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
@@ -121,11 +122,11 @@ public class FormStoreImpl implements FormStore {
     }
 
     @Override
-    public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
+    public Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId) {
         Observable<Boolean> enabled = offlineStore.getOfflineForms().transform(set -> set.contains(formId));
         Observable<SnapshotStatus> snapshot = offlineStore.getCurrentSnapshot();
 
-        return Observable.transform(enabled, snapshot, (e, s) -> new OfflineStatus(e, s.isFormCached(formId)));
+        return Observable.transform(enabled, snapshot, (e, s) -> new FormOfflineStatus(e, s.isFormCached(formId)));
     }
 
     @Override
