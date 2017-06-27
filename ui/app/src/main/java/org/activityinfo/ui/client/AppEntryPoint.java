@@ -14,13 +14,13 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
-import org.activityinfo.indexedb.IDBFactory;
 import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.ui.client.analysis.AnalysisPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
-import org.activityinfo.ui.client.store.RecordSynchronizer;
+import org.activityinfo.ui.client.store.http.ConnectionListener;
+import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 
@@ -44,10 +44,14 @@ public class AppEntryPoint implements EntryPoint {
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
-        OfflineStore offlineStore = new OfflineStore(IDBFactoryImpl.create());
+        ConnectionListener connectionListener = new ConnectionListener();
+        connectionListener.start();
 
         ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
-        HttpBus httpBus = new HttpBus(client);
+        HttpBus httpBus = new HttpBus(connectionListener.getOnline(), client);
+
+        OfflineStore offlineStore = new OfflineStore(httpBus, IDBFactoryImpl.create());
+
         FormStore formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
 
         Viewport viewport = new Viewport();

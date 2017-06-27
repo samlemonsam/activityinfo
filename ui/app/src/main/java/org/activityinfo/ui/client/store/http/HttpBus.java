@@ -127,6 +127,7 @@ public class HttpBus {
     }
 
 
+    private Observable<Boolean> online;
     private final ActivityInfoClientAsync client;
     private final List<PendingRequest<?>> pendingRequests = new ArrayList<>();
     private final StatefulValue<HttpStatus> status = new StatefulValue<>();
@@ -134,6 +135,11 @@ public class HttpBus {
     private RetryTask retryTask = new RetryTask();
 
     public HttpBus(ActivityInfoClientAsync client) {
+        this(Observable.just(true), client);
+    }
+
+    public HttpBus(Observable<Boolean> online, ActivityInfoClientAsync client) {
+        this.online = online;
         this.client = client;
         scheduler = Scheduler.get();
     }
@@ -141,6 +147,10 @@ public class HttpBus {
     public HttpBus(ActivityInfoClientAsync client, Scheduler scheduler) {
         this.client = client;
         this.scheduler = scheduler;
+    }
+
+    public Observable<Boolean> isOnline() {
+        return online;
     }
 
     public Observable<HttpStatus> getStatus() {

@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.store.tasks;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.ui.client.store.offline.PendingStatusQuery;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +28,10 @@ public class ObservableTask<T> extends Observable<T> {
         super();
         this.task = task;
         this.watcher = watcher;
+    }
+
+    public ObservableTask(Task<T> task) {
+        this(task, NullWatcher.INSTANCE);
     }
 
     @Override
@@ -97,6 +102,10 @@ public class ObservableTask<T> extends Observable<T> {
             }, refreshInterval);
         }
 
+    }
+
+    public void refresh() {
+        start();
     }
 
     /**

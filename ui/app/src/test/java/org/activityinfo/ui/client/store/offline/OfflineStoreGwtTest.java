@@ -61,7 +61,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 Collections.singletonList(surveyMetadata),
                 Collections.singletonList(toFormRecordSet(survey)));
 
-        offlineStore = new OfflineStore(IDBFactoryImpl.create());
+        offlineStore = new OfflineStore(httpBus, IDBFactoryImpl.create());
         httpBus = new HttpBus(new OfflineClientStub());
         formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
 

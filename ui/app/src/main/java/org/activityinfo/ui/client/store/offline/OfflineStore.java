@@ -29,7 +29,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.http.FormChangeWatcher;
-import org.activityinfo.ui.client.store.tasks.NullWatcher;
+import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
 import java.util.*;
@@ -50,12 +50,21 @@ public class OfflineStore {
     private StatefulValue<Set<ResourceId>> offlineForms = new StatefulValue<>();
     private StatefulValue<SnapshotStatus> currentSnapshot = new StatefulValue<>();
 
-    public OfflineStore(IDBFactory indexedDbFactory) {
+    private Observable<PendingStatus> pendingStatus;
+
+    private UpdateSynchronizer updateSynchronizer;
+
+    public OfflineStore(HttpBus httpBus, IDBFactory indexedDbFactory) {
         this.database = new OfflineDatabase(indexedDbFactory, "AI0001",
             SchemaStore.DEF,
             RecordStore.DEF,
             KeyValueStore.DEF,
             PendingStore.DEF);
+
+        this.updateSynchronizer = new UpdateSynchronizer(database, httpBus, eventBus);
+        this.pendingStatus = new ObservableTask<>(
+            new PendingStatusQuery(database),
+            PendingStatusEvent.watchFor(eventBus));
 
         /*
          * Load current snapshot, if any present
@@ -101,6 +110,10 @@ public class OfflineStore {
     @VisibleForTesting
     OfflineDatabase getDatabase() {
         return database;
+    }
+
+    public Observable<PendingStatus> getPendingStatus() {
+        return pendingStatus;
     }
 
     /**
@@ -161,6 +174,10 @@ public class OfflineStore {
         return currentSnapshot;
     }
 
+
+    public void syncChanges() {
+        updateSynchronizer.start();
+    }
 
     /**
      * Stores a new snapshot to the remote store
@@ -233,8 +250,11 @@ public class OfflineStore {
                 @Override
                 public Void apply(Void aVoid) {
 
-                    eventBus.fireEvent(new FormChangeEvent(FormChange.from(transaction)));
+                    // Changes have been applied and the update added to the pending queue --
+                    // let everyone know!
 
+                    eventBus.fireEvent(new FormChangeEvent(FormChange.from(transaction)));
+                    eventBus.fireEvent(new PendingStatusEvent());
                     return null;
                 }
             });
@@ -305,4 +325,5 @@ public class OfflineStore {
         }
         return inverse;
     }
+
 }

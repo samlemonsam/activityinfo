@@ -3,10 +3,10 @@ package org.activityinfo.ui.client.chrome;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
+import com.sencha.gxt.widget.core.client.toolbar.FillToolItem;
+import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.ui.client.store.http.HttpBus;
 
 /**
@@ -14,22 +14,25 @@ import org.activityinfo.ui.client.store.http.HttpBus;
  */
 public class AppFrame implements IsWidget {
 
-    interface AppFrameUiBinder extends UiBinder<BorderLayoutContainer, AppFrame> {
-    }
 
-    private static AppFrameUiBinder ourUiBinder = GWT.create(AppFrameUiBinder.class);
-
-
-    BorderLayoutContainer container;
-
-
-    @UiField
-    ConnectionIndicator connectionIndicator;
+    private BorderLayoutContainer container;
+    private ConnectionIndicator connectionIndicator;
 
     public AppFrame(HttpBus bus) {
-        container = ourUiBinder.createAndBindUi(this);
-        connectionIndicator.setStatus(bus.getStatus());
-    }
+
+        HTML logoLink = new HTML(ChromeBundle.BUNDLE.logoLink().getText());
+        ConnectionIndicator connectionIndicator = new ConnectionIndicator(bus);
+
+        ToolBar appBar = new ToolBar();
+        appBar.add(logoLink);
+        appBar.add(new FillToolItem());
+        appBar.add(connectionIndicator);
+        appBar.add(new LanguageSelector());
+
+        container = new BorderLayoutContainer();
+        container.setNorthWidget(appBar, new BorderLayoutContainer.BorderLayoutData(50));
+
+     }
 
     @Override
     public Widget asWidget() {

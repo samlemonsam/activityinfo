@@ -1,11 +1,10 @@
-package org.activityinfo.ui.client.store;
+package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.HttpBus;
-import org.activityinfo.ui.client.store.offline.OfflineStore;
-import org.activityinfo.ui.client.store.offline.Snapshot;
 
 import java.util.logging.Logger;
 

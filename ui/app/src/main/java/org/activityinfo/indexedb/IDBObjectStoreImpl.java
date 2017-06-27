@@ -11,13 +11,18 @@ import org.activityinfo.promise.Promise;
  * <p>A new subclass should be defined for each new IndexedDb with typed
  * get and put methods.</p>
  */
-public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObjectStore<T>, IDBObjectStoreUpgrade {
+public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObjectStore<T>, IDBObjectStoreUpgrade {
     protected IDBObjectStoreImpl() {
     }
 
     @Override
     public final native void put(T object) /*-{
         this.put(object);
+    }-*/;
+
+    @Override
+    public final native void put(int key, T object) /*-{
+       this.put(key, object);
     }-*/;
 
     @Override
@@ -34,7 +39,7 @@ public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObject
         this.put(object, key);
     }-*/;
 
-    protected final native void get(JavaScriptObject key, AsyncCallback<T> callback) /*-{
+    protected final native void get(Object key, AsyncCallback<T> callback) /*-{
         var request = this.get(key);
         request.onsuccess = function(event) {
             var object = event.target.result;
@@ -45,17 +50,26 @@ public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObject
         }
     }-*/;
 
+    private Promise<T> get0(Object key) {
+        Promise<T> result = new Promise<>();
+        get(key, result);
+        return result;
+    }
+
 
     @Override
     public final Promise<T> get(String key) {
-        return get(new String[] { key });
+        return get0(key);
     }
 
     @Override
     public final Promise<T> get(String[] keys) {
-        Promise<T> result = new Promise<>();
-        get(createKey(keys), result);
-        return result;
+        return get0(keys);
+    }
+
+    @Override
+    public final Promise<T> get(int key) {
+        return get0(key);
     }
 
     /**
@@ -77,7 +91,25 @@ public class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDBObject
     }-*/;
 
     @Override
+    public final native void openCursor(IDBCursorCallback<T> callback) /*-{
+        var request = this.openCursor();
+        request.onsuccess = function(event) {
+            var cursor = event.target.result;
+            if(cursor) {
+                callback.@IDBCursorCallback::onNext(*)(cursor);
+            } else {
+                callback.@IDBCursorCallback::onDone()();
+            }
+        };
+    }-*/;
+
+    @Override
     public final native void delete(String[] key) /*-{
+        this['delete'](key);
+    }-*/;
+
+    @Override
+    public final native void delete(int key) /*-{
         this['delete'](key);
     }-*/;
 

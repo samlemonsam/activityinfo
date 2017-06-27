@@ -48,6 +48,11 @@ public class ObjectKey implements Comparable<ObjectKey> {
         return (String[]) key;
     }
 
+
+    public int toKeyNumber() {
+        return ((Number) key).intValue();
+    }
+
     @Override
     public int compareTo(ObjectKey o) {
         return compareKeys(this.key, o.key);

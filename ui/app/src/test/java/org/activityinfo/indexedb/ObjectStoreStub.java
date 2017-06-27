@@ -43,7 +43,7 @@ public class ObjectStoreStub<T> {
         }
     }
 
-    private class Transaction implements IDBObjectStore<T> {
+    class Transaction implements IDBObjectStore<T> {
 
         private boolean readwrite;
 
@@ -63,6 +63,11 @@ public class ObjectStoreStub<T> {
         }
 
         @Override
+        public void put(int key, T object) {
+            put(new ObjectKey(key), object);
+        }
+
+        @Override
         public void put(String key, T value) {
             put(new ObjectKey(key), value);
         }
@@ -72,13 +77,8 @@ public class ObjectStoreStub<T> {
             put(new ObjectKey(key), object);
         }
 
-        private void put(ObjectKey key, T value) {
+        void put(ObjectKey key, T value) {
             checkReadWrite();
-
-            if(autoIncrement) {
-                throw new IllegalStateException("Cannot add object with key when object store is autoIncrement");
-            }
-
             objectMap.put(key, value);
         }
 
@@ -99,13 +99,35 @@ public class ObjectStoreStub<T> {
         }
 
         @Override
+        public Promise<T> get(int key) {
+            return get(new ObjectKey(key));
+        }
+
+
+        @Override
         public void delete(String[] key) {
+            delete(new ObjectKey(key));
+        }
+
+        private void delete(ObjectKey key) {
             checkReadWrite();
-            objectMap.remove(new ObjectKey(key));
+            objectMap.remove(key);
+        }
+
+        @Override
+        public void delete(int key) {
+            delete(new ObjectKey(key));
         }
 
         private Promise<T> get(ObjectKey key) {
             return Promise.resolved(objectMap.get(key));
+        }
+
+
+        @Override
+        public void openCursor(IDBCursorCallback<T> callback) {
+            Cursor<T> cursor = new Cursor<T>(this, objectMap.entrySet().iterator(), callback);
+            cursor.run();
         }
 
         @Override
@@ -116,7 +138,7 @@ public class ObjectStoreStub<T> {
                 new ObjectKey(upperBound), true);
             Iterator<Map.Entry<ObjectKey, T>> it = range.entrySet().iterator();
 
-            Cursor<T> cursor = new Cursor<T>(it, callback);
+            Cursor<T> cursor = new Cursor<T>(this, it, callback);
             cursor.run();
         }
     }

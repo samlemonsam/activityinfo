@@ -9,6 +9,7 @@ import org.activityinfo.store.testing.TestingCatalog;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 
 /**
  * Wires together a FormStoreImpl along with stubbed or mocked out components
@@ -35,7 +36,7 @@ public class TestSetup {
 
         scheduler = new StubScheduler();
         httpBus = new HttpBus(client, scheduler);
-        offlineStore = new OfflineStore(database);
+        offlineStore = new OfflineStore(httpBus, database);
         formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
         synchronizer = new RecordSynchronizer(httpBus, offlineStore);
     }

@@ -9,6 +9,8 @@ public interface IDBObjectStore<T> {
 
     void put(T object);
 
+    void put(int key, T object);
+
     void put(String key, T object);
 
     void put(String[] key, T object);
@@ -26,6 +28,8 @@ public interface IDBObjectStore<T> {
     Promise<T> get(String[] keys);
 
 
+    Promise<T> get(int key);
+
     /**
      * Opens a cursor over the objects in the store with keys in the range [lower, bound]
      *
@@ -37,5 +41,9 @@ public interface IDBObjectStore<T> {
      */
     void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback<T> callback);
 
+    void openCursor(IDBCursorCallback<T> callback);
+
     void delete(String[] key);
+
+    void delete(int key);
 }

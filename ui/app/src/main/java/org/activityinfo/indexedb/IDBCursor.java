@@ -6,6 +6,7 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.ui.client.store.offline.PendingTransaction;
 
 /**
  * Cursor for traversing or iterating over multiple records in an IndexedDB database.
@@ -42,10 +43,18 @@ public interface IDBCursor<T> {
     @JsProperty(name = "key")
     String[] getKeyArray();
 
+    @JsProperty(name = "key")
+    int getKeyNumber();
 
     @JsProperty(name = "value")
     T getValue();
 
 
-
+    /**
+     * in a separate thread, updates the value at the current position of the cursor in the object store.
+     * If the cursor points to a record that has just been deleted, a new record is created.
+     *
+     * @param value the updated value
+     */
+    void update(T value);
 }

@@ -16,6 +16,8 @@ import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.PendingStatus;
+import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +44,7 @@ public class FormStoreTest {
 
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
+        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
 
         Survey survey = client.getCatalog().getSurvey();
 
@@ -89,7 +91,7 @@ public class FormStoreTest {
     public void offlineRecordFetching() {
         AsyncClientStub client = new AsyncClientStub();
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
+        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         Survey survey = client.getCatalog().getSurvey();
@@ -160,7 +162,7 @@ public class FormStoreTest {
         IntakeForm intakeForm = client.getCatalog().getIntakeForm();
 
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
+        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // Start online, and enable offline mode for incidents
@@ -186,7 +188,7 @@ public class FormStoreTest {
 
         AsyncClientStub client = new AsyncClientStub(catalog);
         HttpBus httpBus = new HttpBus(client, scheduler);
-        OfflineStore offlineStore = new OfflineStore(new IDBFactoryStub());
+        OfflineStore offlineStore = new OfflineStore(httpBus, new IDBFactoryStub());
         FormStoreImpl formStore = new FormStoreImpl(httpBus, offlineStore, scheduler);
 
         // Open a query on a set of records
@@ -223,6 +225,11 @@ public class FormStoreTest {
         // Go offline...
         setup.setConnected(false);
 
+        // Monitor the pending queue status
+        Connection<PendingStatus> pendingStatus = setup.connect(setup.getOfflineStore().getPendingStatus());
+
+        assertThat(pendingStatus.assertLoaded().isEmpty(), equalTo(true));
+
         // Create a new survey record
         FormInstance newRecordTyped = survey.getGenerator().get();
         RecordTransaction tx = RecordTransaction.builder()
@@ -236,9 +243,19 @@ public class FormStoreTest {
         // Now query offline...
         Connection<Maybe<FormRecord>> recordView = setup.connect(setup.getFormStore().getRecord(newRecordTyped.getRef()));
 
+        // It should be listed as a pending change...
+        assertThat(pendingStatus.assertLoaded().getCount(), equalTo(1));
+
         Maybe<FormRecord> record = recordView.assertLoaded();
         assertThat(record.getState(), equalTo(Maybe.State.VISIBLE));
         assertThat(record.get().getRecordId(), equalTo(newRecordTyped.getId().asString()));
+
+        // Finally go online and ensure that results are sent to the server
+        setup.setConnected(true);
+        setup.getOfflineStore().syncChanges();
+
+        // Our queue should be empty again
+        assertThat(pendingStatus.assertLoaded().isEmpty(), equalTo(true));
 
     }
 

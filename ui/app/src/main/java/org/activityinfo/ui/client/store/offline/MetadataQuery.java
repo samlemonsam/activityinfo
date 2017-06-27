@@ -1,15 +1,11 @@
 package org.activityinfo.ui.client.store.offline;
 
-import org.activityinfo.indexedb.IDBTransaction;
 import org.activityinfo.indexedb.OfflineDatabase;
-import org.activityinfo.indexedb.Work;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.tasks.SimpleTask;
 
-import java.util.Optional;
 import java.util.logging.Logger;
 
 

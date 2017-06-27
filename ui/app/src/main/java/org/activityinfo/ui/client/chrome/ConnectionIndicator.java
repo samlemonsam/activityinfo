@@ -1,10 +1,10 @@
 package org.activityinfo.ui.client.chrome;
 
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
+import org.activityinfo.ui.client.store.http.HttpBus;
 import org.activityinfo.ui.client.store.http.HttpStatus;
 
 /**
@@ -12,7 +12,15 @@ import org.activityinfo.ui.client.store.http.HttpStatus;
  */
 public class ConnectionIndicator implements IsWidget {
 
-    private HTML html = new HTML();
+    private InlineHTML html;
+
+    public ConnectionIndicator(HttpBus bus) {
+        html = new InlineHTML(ChromeBundle.BUNDLE.cloudIcon().getText());
+        ChromeBundle.BUNDLE.cloudStyle().ensureInjected();
+
+        bus.isOnline().subscribe(this::onOnlineStatusChanged);
+        bus.getStatus().subscribe(this::onLoadingStatusChanged);
+    }
 
 
     @Override
@@ -20,24 +28,34 @@ public class ConnectionIndicator implements IsWidget {
         return html;
     }
 
-    public void setStatus(Observable<HttpStatus> status) {
-        status.subscribe(new Observer<HttpStatus>() {
-            @Override
-            public void onChange(Observable<HttpStatus> observable) {
-                if (!observable.isLoading()) {
-                    switch (observable.get()) {
-                        case IDLE:
-                            html.setText("Idle.");
-                            break;
-                        case FETCHING:
-                            html.setText("Fetching...");
-                            break;
-                        case BROKEN:
-                            html.setText("Connection problem.");
-                            break;
-                    }
-                }
+
+    private void onOnlineStatusChanged(Observable<Boolean> observable) {
+        boolean connected = observable.isLoaded() && observable.get();
+
+        toggleClass(!connected, ChromeBundle.BUNDLE.cloudStyle().offline());
+    }
+
+
+    private void onLoadingStatusChanged(Observable<HttpStatus> observable) {
+        if (!observable.isLoading()) {
+            switch (observable.get()) {
+                case IDLE:
+                    toggleClass(true, ChromeBundle.BUNDLE.cloudStyle().loading());
+                    break;
+                case FETCHING:
+                case BROKEN:
+                    toggleClass(false, ChromeBundle.BUNDLE.cloudStyle().loading());
+                    break;
             }
-        });
+        }
+    }
+
+
+    private void toggleClass(boolean add, String offline) {
+        if(add) {
+            html.getElement().addClassName(offline);
+        } else {
+            html.getElement().removeClassName(offline);
+        }
     }
 }

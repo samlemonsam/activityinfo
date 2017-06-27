@@ -1,0 +1,59 @@
+
+@external cloud-bg, sync-status, sync-icon, offline-bar;
+
+/** Default */
+
+.cloud-bg {
+    fill: white;
+}
+
+.offline-bar {
+    visibility: hidden;
+}
+
+.sync-status {
+    visibility: hidden;
+}
+
+/** When OFFLINE */
+
+.offline .offline-bar {
+    visibility: visible;
+}
+
+/* When ONLINE */
+
+.online .offline-bar {
+    display: none;
+}
+
+.online .cloud-bg {
+    fill: white;
+}
+
+/** When loading over the network **/
+
+.loading .cloud-bg {
+    animation-name: colorchange;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes colorchange
+{
+    0%   {fill: white;}
+    25%  {fill: yellow;}
+    50%  {fill: blue;}
+    100% {fill: white; }
+}
+
+/** When syncing (or trying to sync) **/
+
+.syncing .sync-circle {
+    fill: blue;
+}
+
+.syncing .sync-icon path {
+    fill: white;
+}
+
