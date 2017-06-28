@@ -100,7 +100,9 @@ public final class Promise<T> implements AsyncCallback<T> {
             @Override
             public void onSuccess(T t) {
                 try {
-                    function.apply(t).then(chained);
+                    Promise<R> result = function.apply(t);
+                    assert result != null : "function " + function + " returned null!!";
+                    result.then(chained);
                 } catch(Throwable caught) {
                     chained.onFailure(caught);
                 }

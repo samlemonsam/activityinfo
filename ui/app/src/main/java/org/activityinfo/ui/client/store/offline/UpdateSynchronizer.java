@@ -44,15 +44,20 @@ public class UpdateSynchronizer {
     }
 
     private void next() {
-        take().join(new Function<Optional<PendingEntry>, Promise<Void>>() {
+        take().then(new AsyncCallback<Optional<PendingEntry>>() {
             @Override
-            public Promise<Void> apply(Optional<PendingEntry> pendingTransaction) {
+            public void onFailure(Throwable caught) {
+                LOGGER.log(Level.SEVERE, "Failed to retrieve next pending item.");
+                onQueueFailed();
+            }
+
+            @Override
+            public void onSuccess(Optional<PendingEntry> pendingTransaction) {
                 if(pendingTransaction.isPresent()) {
                     sendUpdate(pendingTransaction.get());
                 } else {
                     onQueueFinished();
                 }
-                return null;
             }
         });
     }
