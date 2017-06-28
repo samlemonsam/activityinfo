@@ -116,7 +116,7 @@ public class TestingFormStore implements FormStore {
 
     @Override
     public Observable<FormTree> getFormTree(ResourceId formId) {
-        return new ObservableFormTree(formId, id -> getFormMetadata(id), new ImmediateScheduler());
+        return new ObservableTree<>(new FormTreeLoader(formId, id -> getFormMetadata(id)), new ImmediateScheduler());
     }
 
     @Override

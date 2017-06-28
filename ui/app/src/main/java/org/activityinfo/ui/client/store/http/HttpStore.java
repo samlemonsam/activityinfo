@@ -24,7 +24,8 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
-import org.activityinfo.ui.client.store.ObservableFormTree;
+import org.activityinfo.ui.client.store.FormTreeLoader;
+import org.activityinfo.ui.client.store.ObservableTree;
 import org.activityinfo.ui.client.store.tasks.NullWatcher;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 import org.activityinfo.ui.client.store.tasks.Watcher;
@@ -121,7 +122,7 @@ public class HttpStore {
     }
 
     public Observable<FormTree> getFormTree(ResourceId rootFormId) {
-        return new ObservableFormTree(rootFormId, this::getFormMetadata, scheduler);
+        return new ObservableTree<>(new FormTreeLoader(rootFormId, this::getFormMetadata), scheduler);
     }
 
 }

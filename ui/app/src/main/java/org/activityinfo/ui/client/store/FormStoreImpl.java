@@ -47,7 +47,7 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<FormTree> getFormTree(ResourceId rootFormId) {
-        return new ObservableFormTree(rootFormId, this::getFormMetadata, scheduler);
+        return new ObservableTree<>(new FormTreeLoader(rootFormId, this::getFormMetadata), scheduler);
     }
 
 
