@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 /**
  * An observable that is a function of a tree of other observables.
  *
- * <p>To use this class, you must provide a {@link TreLoader} implementation.</p>
+ * <p>To use this class, you must provide a {@link TreeLoader} implementation.</p>
  *
  * @param <KeyT> the type of a key that uniquely identifies tree nodes
  * @param <NodeT> the type of the tree nodes.
@@ -18,8 +18,6 @@ import java.util.logging.Logger;
 public final class ObservableTree<KeyT, NodeT, TreeT> extends Observable<TreeT> {
 
     private static final Logger LOGGER = Logger.getLogger(ObservableTree.class.getName());
-
-
 
     public interface TreeLoader<KeyT, NodeT, TreeT> {
 
@@ -208,7 +206,10 @@ public final class ObservableTree<KeyT, NodeT, TreeT> extends Observable<TreeT> 
      */
     private void rebuildTree() {
 
+        LOGGER.info("Tree " + loader + " complete!");
+
         try {
+
             this.value = loader.build(nodes);
 
             fireChange();

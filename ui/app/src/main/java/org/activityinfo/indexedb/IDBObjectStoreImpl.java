@@ -39,7 +39,7 @@ public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDB
         this.put(object, key);
     }-*/;
 
-    protected final native void get(Object key, AsyncCallback<T> callback) /*-{
+    protected final native void get(JavaScriptObject key, AsyncCallback<T> callback) /*-{
         var request = this.get(key);
         request.onsuccess = function(event) {
             var object = event.target.result;
@@ -50,7 +50,7 @@ public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDB
         }
     }-*/;
 
-    private Promise<T> get0(Object key) {
+    private Promise<T> get0(JavaScriptObject key) {
         Promise<T> result = new Promise<>();
         get(key, result);
         return result;
@@ -59,18 +59,22 @@ public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDB
 
     @Override
     public final Promise<T> get(String key) {
-        return get0(key);
+        return get0(createStringKey(key));
     }
 
     @Override
     public final Promise<T> get(String[] keys) {
-        return get0(keys);
+        return get0(createStringArrayKey(keys));
     }
 
     @Override
     public final Promise<T> get(int key) {
-        return get0(key);
+        return get0(createIntKey(key));
     }
+
+    private static native JavaScriptObject createIntKey(int key) /*-{ return key; }-*/;
+    private static native JavaScriptObject createStringKey(String key) /*-{ return key; }-*/;
+    private static native JavaScriptObject createStringArrayKey(String[] key) /*-{ return key; }-*/;
 
     /**
      *  @param lowerBound the lower bound of the key range (inclusive)
