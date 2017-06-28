@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.LookupKey;
+import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -127,6 +129,6 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitSerialNumber(SerialNumberType serialNumberType) {
-        return new SerialNumberWidget();
+        return new SerialNumberWidget(serialNumberType);
     }
 }

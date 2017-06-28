@@ -3,6 +3,8 @@ package org.activityinfo.ui.client.input.view.field;
 import com.google.common.base.Strings;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
@@ -30,6 +32,11 @@ public class TextWidget implements FieldWidget {
     @Override
     public Widget asWidget() {
         return field;
+    }
+
+    @Override
+    public void init(FieldValue value) {
+        field.setText(((TextValue) value).asString());
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.input.view.field;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.io.match.coord.CoordinateAxis;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
@@ -42,6 +43,11 @@ public class GeoPointWidget implements FieldWidget {
         return FieldInput.INVALID_INPUT;
     }
 
+
+    @Override
+    public void init(FieldValue value) {
+
+    }
 
     @Override
     public void setRelevant(boolean relevant) {

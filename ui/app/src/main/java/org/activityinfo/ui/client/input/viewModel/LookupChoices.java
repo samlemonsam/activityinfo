@@ -11,13 +11,14 @@ import java.util.List;
 /**
  * A set of choices for a reference field.
  */
-public class ReferenceChoiceSet {
+public class LookupChoices {
 
     private ResourceId formId;
     private ColumnView id;
     private ColumnView label;
 
-    public ReferenceChoiceSet(ResourceId formId, ColumnSet columnSet) {
+
+    public LookupChoices(ResourceId formId, ColumnSet columnSet) {
         this.formId = formId;
         this.id = columnSet.getColumnView("id");
         this.label = columnSet.getColumnView("label");

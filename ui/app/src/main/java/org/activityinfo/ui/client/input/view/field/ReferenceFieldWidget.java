@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -81,6 +82,11 @@ public class ReferenceFieldWidget implements FieldWidget {
         this.choices = choices;
     }
 
+
+    @Override
+    public void init(FieldValue value) {
+
+    }
 
     @Override
     public void setRelevant(boolean relevant) {

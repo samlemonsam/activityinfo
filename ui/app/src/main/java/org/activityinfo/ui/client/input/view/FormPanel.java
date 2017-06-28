@@ -57,6 +57,18 @@ public class FormPanel implements IsWidget {
         return recordRef;
     }
 
+
+    public void init(FormInputViewModel viewModel) {
+
+        for (FieldView fieldView : fieldViews) {
+            fieldView.init(viewModel);
+        }
+
+        for (RepeatingSubFormPanel subFormView : subFormViews) {
+            subFormView.init(viewModel.getSubFormField(subFormView.getFieldId()));
+        }
+    }
+
     public void update(FormInputViewModel viewModel) {
         // Update Field Views
         for (FieldView fieldView : fieldViews) {

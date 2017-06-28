@@ -29,7 +29,6 @@ public class UpdateSynchronizer {
         this.eventBus = eventBus;
     }
 
-
     public void start() {
         // Do not start if all ready running.
         if(isRunning().get()) {

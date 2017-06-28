@@ -84,6 +84,7 @@ public class FormInputView implements IsWidget, InputHandler {
         container.forceLayout();
 
         viewModel = viewModelBuilder.build(inputModel);
+        formPanel.init(viewModel);
         formPanel.update(viewModel);
     }
 

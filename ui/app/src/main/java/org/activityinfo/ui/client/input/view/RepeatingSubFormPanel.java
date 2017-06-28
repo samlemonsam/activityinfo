@@ -51,6 +51,11 @@ public class RepeatingSubFormPanel implements IsWidget {
         return fieldId;
     }
 
+    public void init(SubFormInputViewModel subFormField) {
+
+
+    }
+
     public void update(SubFormInputViewModel viewModel) {
 
         this.viewModel = viewModel;

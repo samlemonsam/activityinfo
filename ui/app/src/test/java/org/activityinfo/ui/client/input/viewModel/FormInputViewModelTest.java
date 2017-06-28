@@ -101,9 +101,9 @@ public class FormInputViewModelTest {
         FormInputViewModel viewModel = builder.build(inputModel);
 
         ReferenceChoices choices = viewModel.getChoices(BioDataForm.PROTECTION_CODE_FIELD_ID);
-        Connection<ReferenceChoiceSet> choiceView = ObservableTesting.connect(choices.getChoices());
+        Connection<LookupChoices> choiceView = ObservableTesting.connect(choices.getChoices());
 
-        ReferenceChoiceSet choiceSet = choiceView.assertLoaded();
+        LookupChoices choiceSet = choiceView.assertLoaded();
 
         assertThat(choiceSet.getCount(), equalTo(IntakeForm.ROW_COUNT));
         assertThat(choiceSet.getLabel(0), equalTo("00001"));

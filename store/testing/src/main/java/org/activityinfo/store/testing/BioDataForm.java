@@ -72,4 +72,8 @@ public class BioDataForm implements TestForm {
     public RecordRef getRecordRef(int i) {
         return getRecords().get(i).getRef();
     }
+
+    public FormField getCodeField() {
+        return codeField;
+    }
 }

@@ -42,8 +42,6 @@ public class FormInputViewModel {
         this.fieldValueMap = fieldValueMap;
         this.subFormMap = subFormMap;
         this.relevant = relevant;
-
-
         this.missing = missing;
         this.choices = choices;
         this.valid = valid;
@@ -67,6 +65,10 @@ public class FormInputViewModel {
 
     public boolean isMissing(ResourceId fieldId) {
         return missing.contains(fieldId);
+    }
+
+    public FieldValue getField(ResourceId fieldId) {
+        return fieldValueMap.get(fieldId);
     }
 
     public ReferenceChoices getChoices(ResourceId fieldId) {

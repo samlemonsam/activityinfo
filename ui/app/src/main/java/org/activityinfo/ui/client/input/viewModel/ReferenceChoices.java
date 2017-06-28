@@ -17,7 +17,7 @@ import org.activityinfo.ui.client.store.FormStore;
  */
 public class ReferenceChoices {
 
-    private final Observable<ReferenceChoiceSet> choices;
+    private final Observable<LookupChoices> choices;
 
     public ReferenceChoices(FormStore formStore, FormTree formTree, ReferenceType referenceType) {
         ResourceId formId = Iterables.getOnlyElement(referenceType.getRange());
@@ -28,10 +28,10 @@ public class ReferenceChoices {
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr(labelExpr).as("label");
 
-        this.choices = formStore.query(queryModel).transform(columnSet -> new ReferenceChoiceSet(formId, columnSet));
+        this.choices = formStore.query(queryModel).transform(columnSet -> new LookupChoices(formId, columnSet));
     }
 
-    public Observable<ReferenceChoiceSet> getChoices() {
+    public Observable<LookupChoices> getChoices() {
         return choices;
     }
 }

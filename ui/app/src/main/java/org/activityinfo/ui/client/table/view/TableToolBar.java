@@ -100,10 +100,13 @@ public class TableToolBar extends ToolBar {
     }
 
     private void onEditRecord(SelectEvent event) {
-        ResourceId newRecordId = ResourceId.generateSubmissionId(viewModel.getFormId());
-        RecordRef newRecordRef = new RecordRef(viewModel.getFormId(), newRecordId);
 
-        FormDialog dialog = new FormDialog(formStore, newRecordRef);
+        Optional<RecordRef> selected = viewModel.getSelectedRecordRef().get();
+        if(!selected.isPresent()) {
+            return;
+        }
+
+        FormDialog dialog = new FormDialog(formStore, selected.get());
         dialog.show();
     }
 

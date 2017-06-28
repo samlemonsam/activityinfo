@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.form.TextArea;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
@@ -19,6 +20,11 @@ public class NarrativeWidget implements FieldWidget {
 
     private FieldInput input() {
         return new FieldInput(NarrativeValue.valueOf(textArea.getText()));
+    }
+
+    @Override
+    public void init(FieldValue value) {
+        textArea.setText(((NarrativeValue) value).asString());
     }
 
     @Override

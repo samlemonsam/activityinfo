@@ -45,6 +45,12 @@ public class TestingCatalog implements FormCatalog {
     private final IncidentForm incidentForm;
     private final ReferralSubForm referralSubForm;
 
+    private final AdminLevelForm province;
+    private final AdminLevelForm territory;
+    private final VillageForm villageForm;
+    private final NfiForm nfiForm;
+
+
     public TestingCatalog() {
 
         // Survey Use case
@@ -58,6 +64,12 @@ public class TestingCatalog implements FormCatalog {
         referralSubForm = new ReferralSubForm(incidentForm);
         add(intake, bioData, incidentForm, referralSubForm);
 
+        // Classic NFI use case
+        province = new AdminLevelForm(new UnitTestingIds(), "Province", 16, Optional.<AdminLevelForm>absent());
+        territory = new AdminLevelForm(new UnitTestingIds(), "Territory", 140, Optional.of(province));
+        villageForm = new VillageForm(new UnitTestingIds(), 140*10, territory);
+        nfiForm = new NfiForm(new UnitTestingIds(), villageForm);
+        add(province, territory, villageForm, nfiForm);
     }
 
     public Survey getSurvey() {
@@ -141,5 +153,21 @@ public class TestingCatalog implements FormCatalog {
 
     public BioDataForm getBioDataForm() {
         return bioData;
+    }
+
+    public AdminLevelForm getProvince() {
+        return province;
+    }
+
+    public AdminLevelForm getTerritory() {
+        return territory;
+    }
+
+    public VillageForm getVillageForm() {
+        return villageForm;
+    }
+
+    public NfiForm getNfiForm() {
+        return nfiForm;
     }
 }

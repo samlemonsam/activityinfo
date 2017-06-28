@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.testing.StubScheduler;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
@@ -79,5 +81,14 @@ public class TestSetup {
 
     public BioDataForm getBioDataForm() {
         return catalog.getBioDataForm();
+    }
+
+    public FormTree getFormTree(ResourceId formId) {
+        FormTreeBuilder builder = new FormTreeBuilder(catalog);
+        return builder.queryTree(formId);
+    }
+
+    public TestingCatalog getCatalog() {
+        return catalog;
     }
 }

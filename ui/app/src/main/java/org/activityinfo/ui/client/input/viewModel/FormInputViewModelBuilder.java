@@ -150,6 +150,7 @@ public class FormInputViewModelBuilder {
 
         LOGGER.info("Valid = " + valid);
 
+        LOGGER.info("fieldValues = " + record.getFieldValueMap());
 
         return new FormInputViewModel(formTree, inputModel,
                 record.getFieldValueMap(),

@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 
 public class FieldView {
@@ -29,6 +30,13 @@ public class FieldView {
 
         if(widget instanceof ReferenceFieldWidget) {
             ((ReferenceFieldWidget) widget).setChoices(viewModel.getChoices(fieldId));
+        }
+    }
+
+    public void init(FormInputViewModel viewModel) {
+        FieldValue fieldValue = viewModel.getField(fieldId);
+        if(fieldValue != null) {
+            widget.init(fieldValue);
         }
     }
 }

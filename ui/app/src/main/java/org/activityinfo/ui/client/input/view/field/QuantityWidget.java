@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.form.DoubleField;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -49,6 +50,11 @@ public class QuantityWidget implements FieldWidget {
                 return FieldInput.INVALID_INPUT;
             }
         }
+    }
+
+    @Override
+    public void init(FieldValue value) {
+        this.field.setValue(((Quantity) value).getValue());
     }
 
     @Override
