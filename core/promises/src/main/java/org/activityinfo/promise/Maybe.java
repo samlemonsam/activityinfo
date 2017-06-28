@@ -1,5 +1,6 @@
 package org.activityinfo.promise;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
 /**
@@ -55,6 +56,15 @@ public class Maybe<T> {
     public T get() {
         assert state == State.VISIBLE;
         return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> Maybe<R> transform(Function<T, R> function) {
+        if(isVisible()) {
+            return Maybe.of(function.apply(value));
+        } else {
+            return (Maybe<R>) this;
+        }
     }
 
     public static <T> Maybe<T> fromOptional(Optional<T> optional) {

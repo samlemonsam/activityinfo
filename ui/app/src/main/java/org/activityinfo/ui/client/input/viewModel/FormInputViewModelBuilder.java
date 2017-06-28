@@ -5,13 +5,13 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.store.FormStore;
@@ -30,10 +30,10 @@ public class FormInputViewModelBuilder {
 
     private final Logger LOGGER = Logger.getLogger(FormInputViewModelBuilder.class.getName());
 
-    private FormStore formStore;
+    private final FormStore formStore;
     private final FormTree formTree;
     private final FormEvalContext evalContext;
-    private Optional<FormInstance> existingRecord;
+    private final Maybe<FormInstance> existingRecord;
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
@@ -45,24 +45,21 @@ public class FormInputViewModelBuilder {
     private Map<ResourceId, ReferenceChoices> referenceChoices = new HashMap<>();
 
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
-        this(formStore, formTree, Optional.empty());
-    }
-    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, FormRecord existingRecord) {
-        this(formStore, formTree, Optional.of(existingRecord));
+        this(formStore, new FormStructure(formTree));
     }
 
-    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, Optional<FormRecord> existingRecord) {
+    public FormInputViewModelBuilder(FormStore formStore, FormStructure structure) {
         this.formStore = formStore;
-        this.formTree = formTree;
+        this.formTree = structure.getFormTree();
         this.evalContext = new FormEvalContext(formTree.getRootFormClass());
-        this.existingRecord = existingRecord.map(r -> FormInstance.toFormInstance(formTree.getRootFormClass(), r));
+        this.existingRecord = structure.getExistingRecord();
 
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.isSubForm()) {
                 subBuilders.add(buildSubBuilder(node));
             }
             if(node.getType() instanceof ReferenceType) {
-                referenceChoices.put(node.getFieldId(), choices(formStore, node));
+                referenceChoices.put(node.getFieldId(), choices(this.formStore, node));
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
@@ -116,7 +113,7 @@ public class FormInputViewModelBuilder {
                 FieldInput fieldInput = inputModel.get(node.getFieldId());
                 switch (fieldInput.getState()) {
                     case UNTOUCHED:
-                        if(existingRecord.isPresent()) {
+                        if(existingRecord.isVisible()) {
                             record.set(node.getFieldId(), existingRecord.get().get(node.getFieldId()));
                         }
                         break;

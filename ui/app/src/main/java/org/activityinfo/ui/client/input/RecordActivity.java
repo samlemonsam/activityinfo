@@ -19,7 +19,7 @@ public class RecordActivity extends AbstractActivity {
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        FormInputView formInputView = new FormInputView(formStore, place.getFormId());
+        FormInputView formInputView = new FormInputView(formStore, place.getRecordRef());
 
         ContentPanel contentPanel = new ContentPanel();
         contentPanel.setHeading("Record");

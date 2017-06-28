@@ -7,14 +7,15 @@ import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
+import org.activityinfo.ui.client.input.viewModel.FormStructure;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.logging.Logger;
@@ -26,7 +27,14 @@ public class FormInputView implements IsWidget, InputHandler {
 
     private static final Logger LOGGER = Logger.getLogger(FormInputView.class.getName());
 
-    private final Observable<FormTree> formTree;
+    private final Observable<FormStructure> formStructure;
+
+    /**
+     * True if we've finished the initial load of the form structure and
+     * existing record. If either changes after the initial load, we alter the
+     * user but do not immediately screw with the form.
+     */
+    private boolean initialLoad = false;
 
     private FormPanel formPanel = null;
 
@@ -38,38 +46,45 @@ public class FormInputView implements IsWidget, InputHandler {
 
     private VerticalLayoutContainer container;
 
+    private Subscription structureSubscription;
 
-    public FormInputView(FormStore formStore, ResourceId formId) {
+
+    public FormInputView(FormStore formStore, RecordRef recordRef) {
         this.formStore = formStore;
+        this.formStructure = FormStructure.fetch(formStore, recordRef);
+        this.inputModel = new FormInputModel(recordRef);
 
-        inputModel = new FormInputModel(new RecordRef(formId, ResourceId.generateSubmissionId(formId)));
-        this.formTree = formStore.getFormTree(formId);
-
-
-        this.formTree.subscribe(this::onTreeChanged);
-
-        container = new VerticalLayoutContainer();
+        this.container = new VerticalLayoutContainer();
+        this.container.mask();
+        this.container.addAttachHandler(event -> {
+            if(event.isAttached()) {
+                structureSubscription = this.formStructure.subscribe(this::onStructureChanged);
+            } else {
+                structureSubscription.unsubscribe();
+                structureSubscription = null;
+            }
+        });
     }
 
-    private void onTreeChanged(Observable<FormTree> formTree) {
-        if(formTree.isLoading()) {
-            //  container.mask(I18N.CONSTANTS.loading());
-            return;
-        }
-
-        if(formPanel == null) {
-            viewModelBuilder = new FormInputViewModelBuilder(formStore, formTree.get());
-            formPanel = new FormPanel(formTree.get(), inputModel.getRecordRef(), this);
-            container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
-            container.forceLayout();
-
-            viewModel = viewModelBuilder.build(inputModel);
-            formPanel.update(viewModel);
-
-
+    private void onStructureChanged(Observable<FormStructure> observable) {
+        if(!initialLoad && observable.isLoaded()) {
+            onInitialLoad(observable.get());
         } else {
-            // Alert the user that the schema has been updated.
+            // TODO: alert the user and prompt to update the form layout
         }
+    }
+
+    private void onInitialLoad(FormStructure formStructure) {
+        initialLoad = true;
+        container.unmask();
+
+        viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure);
+        formPanel = new FormPanel(formStructure.getFormTree(), inputModel.getRecordRef(), this);
+        container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+        container.forceLayout();
+
+        viewModel = viewModelBuilder.build(inputModel);
+        formPanel.update(viewModel);
     }
 
 

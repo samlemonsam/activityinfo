@@ -1,8 +1,6 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -37,7 +35,7 @@ public class FormInputViewModelTest {
         TestingFormStore store = new TestingFormStore();
         Survey survey = store.getCatalog().getSurvey();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, survey.getFormId()));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, survey.getFormId()));
 
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
@@ -81,16 +79,14 @@ public class FormInputViewModelTest {
 
         RecordRef recordRef = survey.getRecordRef(5);
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store,
-                fetchTree(store, survey.getFormId()),
-                fetchRecord(store, recordRef));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(
+            store, fetchStructure(store, recordRef));
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
         FormInputViewModel viewModel = builder.build(inputModel);
 
         assertTrue(viewModel.isValid());
-
     }
 
     @Test
@@ -99,7 +95,7 @@ public class FormInputViewModelTest {
         TestingFormStore store = new TestingFormStore();
         IntakeForm intakeForm = store.getCatalog().getIntakeForm();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, BioDataForm.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, BioDataForm.FORM_ID));
         FormInputModel inputModel = new FormInputModel(new RecordRef(BioDataForm.FORM_ID, ResourceId.generateId()));
 
         FormInputViewModel viewModel = builder.build(inputModel);
@@ -118,7 +114,7 @@ public class FormInputViewModelTest {
 
         TestingFormStore store = new TestingFormStore();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, IncidentForm.FORM_ID));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, IncidentForm.FORM_ID));
 
         // Start with empty input
         FormInputModel inputModel = new FormInputModel(new RecordRef(IncidentForm.FORM_ID, ResourceId.generateId()));
@@ -153,7 +149,7 @@ public class FormInputViewModelTest {
         TestingFormStore store = new TestingFormStore();
         Survey survey = store.getCatalog().getSurvey();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, survey.getFormId()));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, survey.getFormId()));
 
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()))
@@ -177,7 +173,7 @@ public class FormInputViewModelTest {
         TestingFormStore store = new TestingFormStore();
         IntakeForm intakeForm = store.getCatalog().getIntakeForm();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchTree(store, intakeForm.getFormId()));
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, intakeForm.getFormId()));
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(intakeForm.getFormId(), ResourceId.generateId()))
                 .update(intakeForm.getOpenDateFieldId(), new LocalDate(2017,1,1))
@@ -190,13 +186,16 @@ public class FormInputViewModelTest {
         assertThat(completed.getState(), equalTo(Promise.State.FULFILLED));
     }
 
-    private FormTree fetchTree(TestingFormStore store, ResourceId formId) {
-        return ObservableTesting.connect(store.getFormTree(formId)).assertLoaded();
+    private FormStructure fetchStructure(TestingFormStore store, RecordRef ref) {
+        return ObservableTesting.connect(FormStructure.fetch(store, ref)).assertLoaded();
     }
 
 
-    private FormRecord fetchRecord(TestingFormStore store, RecordRef recordRef) {
-        return ObservableTesting.connect(store.getRecord(recordRef)).assertLoaded().get();
+    private FormStructure fetchStructure(TestingFormStore store, ResourceId formId) {
+        ResourceId newRecordId = ResourceId.generateSubmissionId(formId);
+        RecordRef newRecordRef = new RecordRef(formId, newRecordId);
+
+        return fetchStructure(store, newRecordRef);
     }
 
 }

@@ -56,10 +56,9 @@ public final class ResourceId implements Serializable {
                 return CuidAdapter.generateSiteCuid();
             case CuidAdapter.LOCATION_TYPE_DOMAIN:
                 return CuidAdapter.generateLocationCuid();
-            case GENERATED_ID_DOMAIN:
+            default:
                 return ResourceId.valueOf(generateCuid());
         }
-        throw new IllegalArgumentException("Unsupported domain type: " + collectionId);
     }
 
     public static ResourceId generateSubmissionId(FormClass formClass) {

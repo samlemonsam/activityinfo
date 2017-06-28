@@ -123,7 +123,7 @@ public class Survey implements TestForm {
         pregnantField = formClass.addField(ids.fieldId("F9"))
                 .setLabel("Are you currently pregnant?")
                 .setCode("PREGNANT")
-                .setRelevanceConditionExpression("GENDER==G2")
+                .setRelevanceConditionExpression("GENDER==" + genderFemale.getId().asString())
                 .setType(new EnumType(Cardinality.SINGLE,
                     pregnantYes,
                     pregnantNo));
@@ -132,7 +132,7 @@ public class Survey implements TestForm {
         prenataleNo = ids.enumItem("No");
         prenataleCareField = formClass.addField(ids.fieldId("F10"))
                 .setLabel("Have you received pre-natale care?")
-                .setRelevanceConditionExpression("PREGNANT==PY")
+                .setRelevanceConditionExpression("PREGNANT==" + pregnantYes.getId().asString())
                 .setType(new EnumType(Cardinality.SINGLE,
                     prenataleYes,
                     prenataleNo));

@@ -24,10 +24,10 @@ class SubFormInputViewModelBuilder {
 
     private ResourceId placeholderRecordId;
 
-    SubFormInputViewModelBuilder(FormStore store, FormTree.Node node, FormTree subTree) {
+    SubFormInputViewModelBuilder(FormStore formStore, FormTree.Node node, FormTree subTree) {
         this.fieldId = node.getFieldId();
         this.subFormId = subTree.getRootFormId();
-        this.formBuilder = new FormInputViewModelBuilder(store, subTree);
+        this.formBuilder = new FormInputViewModelBuilder(formStore, subTree);
         this.placeholderRecordId = ResourceId.generateId();
     }
 

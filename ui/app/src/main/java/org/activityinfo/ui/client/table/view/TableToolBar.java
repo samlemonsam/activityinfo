@@ -11,6 +11,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.job.JobStatus;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
@@ -90,12 +91,20 @@ public class TableToolBar extends ToolBar {
     }
 
     private void onNewRecord(SelectEvent event) {
-        FormDialog dialog = new FormDialog(formStore, viewModel.getFormId());
+
+        ResourceId newRecordId = ResourceId.generateSubmissionId(viewModel.getFormId());
+        RecordRef newRecordRef = new RecordRef(viewModel.getFormId(), newRecordId);
+
+        FormDialog dialog = new FormDialog(formStore, newRecordRef);
         dialog.show();
     }
 
     private void onEditRecord(SelectEvent event) {
+        ResourceId newRecordId = ResourceId.generateSubmissionId(viewModel.getFormId());
+        RecordRef newRecordRef = new RecordRef(viewModel.getFormId(), newRecordId);
 
+        FormDialog dialog = new FormDialog(formStore, newRecordRef);
+        dialog.show();
     }
 
     private void onPrintRecord(SelectEvent event) {
