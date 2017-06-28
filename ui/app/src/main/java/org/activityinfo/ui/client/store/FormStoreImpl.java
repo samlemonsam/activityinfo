@@ -5,6 +5,7 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
@@ -14,6 +15,7 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.CatalogRequest;
@@ -22,7 +24,9 @@ import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 
@@ -33,6 +37,8 @@ public class FormStoreImpl implements FormStore {
     private final HttpStore httpStore;
     private final OfflineStore offlineStore;
     private final Scheduler scheduler;
+
+    private final Map<ResourceId, Observable<FormTree>> formTreeCache = new HashMap<>();
 
     public FormStoreImpl(HttpStore httpStore, OfflineStore offlineStore, Scheduler scheduler) {
         this.httpStore = httpStore;
@@ -47,9 +53,13 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<FormTree> getFormTree(ResourceId rootFormId) {
-        return new ObservableTree<>(new FormTreeLoader(rootFormId, this::getFormMetadata), scheduler);
+        Observable<FormTree> tree = formTreeCache.get(rootFormId);
+        if(tree == null) {
+            tree = new ObservableTree<>(new FormTreeLoader(rootFormId, this::getFormMetadata), scheduler);
+            formTreeCache.put(rootFormId, tree);
+        }
+        return tree;
     }
-
 
     @Override
     public Observable<List<CatalogEntry>> getCatalogRoots() {
@@ -70,6 +80,14 @@ public class FormStoreImpl implements FormStore {
                 return httpStore.getFormMetadata(formId);
             }
         });
+    }
+
+    @Override
+    public Observable<RecordTree> getRecordTree(RecordRef rootRecordRef) {
+        return getFormTree(rootRecordRef.getFormId()).join(formTree ->
+            new ObservableTree<>(
+                new RecordTreeLoader(FormStoreImpl.this, formTree, rootRecordRef),
+                scheduler));
     }
 
 

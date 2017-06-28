@@ -1,32 +1,52 @@
-package org.activityinfo.ui.client.store;
+package org.activityinfo.observable;
 
 import com.google.gwt.core.client.Scheduler;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Subscription;
 
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * FormTree that
+ * An observable that is a function of a tree of other observables.
+ *
+ * <p>To use this class, you must provide a {@link TreLoader} implementation.</p>
+ *
+ * @param <KeyT> the type of a key that uniquely identifies tree nodes
+ * @param <NodeT> the type of the tree nodes.
+ * @param <TreeT> the type of the final tree constructed from the nodes.
  */
-public class ObservableTree<KeyT, NodeT, TreeT> extends Observable<TreeT> {
+public final class ObservableTree<KeyT, NodeT, TreeT> extends Observable<TreeT> {
 
     private static final Logger LOGGER = Logger.getLogger(ObservableTree.class.getName());
 
 
+
     public interface TreeLoader<KeyT, NodeT, TreeT> {
 
+        /**
+         *
+         * @return the key of this tree's root node.
+         */
         KeyT getRootKey();
 
+        /**
+         * @return the value of the node identified by {@code nodeKey}
+         */
         Observable<NodeT> get(KeyT nodeKey);
 
-        Iterable<KeyT> getChildren(NodeT nodeT);
+        /**
+         *
+         * @return the keys of the given {@code node}'s children.
+         */
+        Iterable<KeyT> getChildren(NodeT node);
 
+        /**
+         * Construct a tree from the set of loaded nodes.
+         * @param nodes the nodes discovered in this tree. All nodes will be loaded when this method is called.
+         * @return a new tree structure.
+         */
         TreeT build(Map<KeyT, Observable<NodeT>> nodes);
     }
-
 
     private final TreeLoader<KeyT, NodeT, TreeT> loader;
     private final Scheduler scheduler;
@@ -74,7 +94,12 @@ public class ObservableTree<KeyT, NodeT, TreeT> extends Observable<TreeT> {
         if(!nodes.containsKey(nodeKey)) {
 
             Observable<NodeT> metadata = loader.get(nodeKey);
-            Subscription subscription = metadata.subscribe(this::onNodeChanged);
+            Subscription subscription = metadata.subscribe(new Observer<NodeT>() {
+                @Override
+                public void onChange(Observable<NodeT> formClass) {
+                    ObservableTree.this.onNodeChanged(formClass);
+                }
+            });
 
             nodes.put(nodeKey, metadata);
             subscriptions.put(nodeKey, subscription);
@@ -139,7 +164,12 @@ public class ObservableTree<KeyT, NodeT, TreeT> extends Observable<TreeT> {
                 rebuildTree();
 
             } else if(crawlPending) {
-                scheduler.scheduleDeferred(this::recrawl);
+                scheduler.scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        ObservableTree.this.recrawl();
+                    }
+                });
                 crawlPending = false;
             }
 

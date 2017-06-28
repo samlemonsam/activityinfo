@@ -8,7 +8,9 @@ import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.ui.client.store.RecordTreeLoader;
 
 
 public class DetailsPane implements IsWidget {
@@ -21,7 +23,7 @@ public class DetailsPane implements IsWidget {
         this.panel.addStyleName(TableBundle.INSTANCE.style().detailPane());
 
         Observable<DetailsRenderer> renderer = viewModel.getFormTree().transform(DetailsRenderer::new);
-        Observable<Optional<FormRecord>> selection = viewModel.getSelectedRecord();
+        Observable<Optional<RecordTree>> selection = viewModel.getSelectedRecordTree();
         Observable<SafeHtml> html = Observable.transform(renderer, selection, (detailsRenderer, selected) -> {
             if(selected.isPresent()) {
                 return detailsRenderer.render(selected.get());

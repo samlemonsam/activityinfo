@@ -2,7 +2,9 @@ package org.activityinfo.model.type;
 
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Maybe;
 
 import javax.annotation.Nonnull;
 

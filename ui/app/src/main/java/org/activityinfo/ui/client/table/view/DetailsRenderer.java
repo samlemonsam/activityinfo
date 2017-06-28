@@ -5,11 +5,12 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.LookupKey;
+import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -19,11 +20,14 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
+import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
+import org.activityinfo.promise.Maybe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +44,15 @@ public class DetailsRenderer {
     private final static Templates TEMPLATES = GWT.create(Templates.class);
 
     private interface ValueRenderer {
-        void renderTo(JsonValue fieldValue, SafeHtmlBuilder html);
+        void renderTo(FieldValue fieldValue, SafeHtmlBuilder html);
     }
 
     private class TextValueRenderer implements ValueRenderer {
 
         @Override
-        public void renderTo(JsonValue value, SafeHtmlBuilder html) {
+        public void renderTo(FieldValue value, SafeHtmlBuilder html) {
             html.appendHtmlConstant("<p>");
-            html.appendEscaped(value.asString());
+            html.appendEscaped(((HasStringValue) value).asString());
             html.appendHtmlConstant("</p>");
         }
     }
@@ -62,9 +66,9 @@ public class DetailsRenderer {
         }
 
         @Override
-        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
 
-            SerialNumber serialNumber = fieldType.parseJsonValue(fieldValue);
+            SerialNumber serialNumber = ((SerialNumber) fieldValue);
             String serial = fieldType.format(serialNumber);
 
             html.appendHtmlConstant("<p>");
@@ -82,9 +86,9 @@ public class DetailsRenderer {
         }
 
         @Override
-        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
             html.appendHtmlConstant("<p>");
-            html.append(fieldValue.asNumber());
+            html.append(((Quantity) fieldValue).getValue());
             html.appendHtmlConstant(" ");
             html.appendEscaped(type.getUnits());
             html.appendHtmlConstant("</p>");
@@ -95,20 +99,13 @@ public class DetailsRenderer {
 
 
         @Override
-        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
 
-            LocalDate localDate = LocalDateType.INSTANCE.parseJsonValue(fieldValue);
+            LocalDate localDate = (LocalDate) fieldValue;
 
             html.appendHtmlConstant("<p>");
             html.appendEscaped(localDate.toString());
             html.appendHtmlConstant("</p>");
-        }
-    }
-
-    private class NullRenderer implements ValueRenderer {
-        @Override
-        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
-
         }
     }
 
@@ -120,8 +117,8 @@ public class DetailsRenderer {
         }
 
         @Override
-        public void renderTo(JsonValue fieldValue, SafeHtmlBuilder html) {
-            EnumValue enumValue = type.parseJsonValue(fieldValue);
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
+            EnumValue enumValue = (EnumValue) fieldValue;
             html.appendHtmlConstant("<p>");
 
             boolean needsComma = false;
@@ -139,22 +136,66 @@ public class DetailsRenderer {
         }
     }
 
-    private class FieldRenderer {
+    private abstract class FieldRenderer {
+
+        public abstract void renderTo(RecordTree recordTree, SafeHtmlBuilder html);
+    }
+
+
+    private class NullRenderer extends FieldRenderer {
+
+        @Override
+        public void renderTo(RecordTree recordTree, SafeHtmlBuilder html) {
+
+        }
+    }
+
+
+    private class SimpleFieldRenderer extends FieldRenderer {
         private FormField field;
         private ValueRenderer valueRenderer;
 
-        public FieldRenderer(FormField field, ValueRenderer renderer) {
+        public SimpleFieldRenderer(FormField field, ValueRenderer renderer) {
             this.field = field;
             this.valueRenderer = renderer;
         }
 
-        public void renderTo(FormRecord record, SafeHtmlBuilder html) {
-            JsonValue fieldValue = record.getFields().get(field.getName());
+        @Override
+        public void renderTo(RecordTree recordTree, SafeHtmlBuilder html) {
+            FieldValue fieldValue = recordTree.getRoot().get(field.getId());
             if(fieldValue != null) {
                 html.appendHtmlConstant("<h3>");
                 html.appendEscaped(field.getLabel());
                 html.appendHtmlConstant("</h3>");
                 valueRenderer.renderTo(fieldValue, html);
+            }
+        }
+    }
+
+    private class ReferenceFieldRenderer extends FieldRenderer {
+        private final FormField field;
+        private final LookupKeySet keySet;
+
+        public ReferenceFieldRenderer(FormTree formTree, FormField field) {
+            this.field = field;
+            this.keySet = new LookupKeySet(formTree, field);
+        }
+
+
+        @Override
+        public void renderTo(RecordTree recordTree, SafeHtmlBuilder html) {
+            ReferenceValue fieldValue = (ReferenceValue) recordTree.getRoot().get(field.getId());
+            if(fieldValue != null) {
+                html.appendHtmlConstant("<h3>");
+                html.appendEscaped(field.getLabel());
+                html.appendHtmlConstant("</h3>");
+
+                for (RecordRef recordRef : fieldValue.getReferences()) {
+                    Maybe<String> label = keySet.label(recordTree, recordRef);
+                    if(label.isVisible()) {
+                        html.appendEscaped(label.get());
+                    }
+                }
             }
         }
     }
@@ -166,105 +207,105 @@ public class DetailsRenderer {
         if(tree.getRootState() == FormTree.State.VALID) {
             FormClass formClass = tree.getRootFormClass();
             for (FormField field : formClass.getFields()) {
-                renderers.add(new FieldRenderer(field, buildRenderer(field.getType())));
+                renderers.add(buildRenderer(tree, field));
             }
         }
     }
 
-    private ValueRenderer buildRenderer(FieldType type) {
-        return type.accept(new FieldTypeVisitor<ValueRenderer>() {
+    private FieldRenderer buildRenderer(FormTree formTree, FormField field) {
+        return field.getType().accept(new FieldTypeVisitor<FieldRenderer>() {
             @Override
-            public ValueRenderer visitAttachment(AttachmentType attachmentType) {
+            public FieldRenderer visitAttachment(AttachmentType attachmentType) {
                 // TODO
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitCalculated(CalculatedFieldType calculatedFieldType) {
+            public FieldRenderer visitCalculated(CalculatedFieldType calculatedFieldType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitReference(ReferenceType referenceType) {
+            public FieldRenderer visitReference(ReferenceType referenceType) {
+                return new ReferenceFieldRenderer(formTree, field);
+            }
+
+            @Override
+            public FieldRenderer visitNarrative(NarrativeType narrativeType) {
+                return new SimpleFieldRenderer(field, new TextValueRenderer());
+            }
+
+            @Override
+            public FieldRenderer visitBoolean(BooleanType booleanType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitNarrative(NarrativeType narrativeType) {
-                return new TextValueRenderer();
+            public FieldRenderer visitQuantity(QuantityType type) {
+                return new SimpleFieldRenderer(field, new QuantityRenderer(type));
             }
 
             @Override
-            public ValueRenderer visitBoolean(BooleanType booleanType) {
+            public FieldRenderer visitGeoPoint(GeoPointType geoPointType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitQuantity(QuantityType type) {
-            return new QuantityRenderer(type);
-            }
-
-            @Override
-            public ValueRenderer visitGeoPoint(GeoPointType geoPointType) {
+            public FieldRenderer visitGeoArea(GeoAreaType geoAreaType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitGeoArea(GeoAreaType geoAreaType) {
+            public FieldRenderer visitEnum(EnumType enumType) {
+                return new SimpleFieldRenderer(field, new EnumRenderer(enumType));
+            }
+
+            @Override
+            public FieldRenderer visitBarcode(BarcodeType barcodeType) {
+                return new SimpleFieldRenderer(field, new TextValueRenderer());
+            }
+
+            @Override
+            public FieldRenderer visitSubForm(SubFormReferenceType subFormReferenceType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitEnum(EnumType enumType) {
-                return new EnumRenderer((EnumType) type);
+            public FieldRenderer visitLocalDate(LocalDateType localDateType) {
+                return new SimpleFieldRenderer(field, new DateRenderer());
             }
 
             @Override
-            public ValueRenderer visitBarcode(BarcodeType barcodeType) {
-                return new TextValueRenderer();
-            }
-
-            @Override
-            public ValueRenderer visitSubForm(SubFormReferenceType subFormReferenceType) {
+            public FieldRenderer visitMonth(MonthType monthType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitLocalDate(LocalDateType localDateType) {
-                return new DateRenderer();
-            }
-
-            @Override
-            public ValueRenderer visitMonth(MonthType monthType) {
+            public FieldRenderer visitYear(YearType yearType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitYear(YearType yearType) {
+            public FieldRenderer visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
                 return new NullRenderer();
             }
 
             @Override
-            public ValueRenderer visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
-                return new NullRenderer();
+            public FieldRenderer visitText(TextType textType) {
+                return new SimpleFieldRenderer(field, new TextValueRenderer());
             }
 
             @Override
-            public ValueRenderer visitText(TextType textType) {
-                return new TextValueRenderer();
-            }
-
-            @Override
-            public ValueRenderer visitSerialNumber(SerialNumberType serialNumberType) {
-                return new SerialNumberRenderer(serialNumberType);
+            public FieldRenderer visitSerialNumber(SerialNumberType serialNumberType) {
+                return new SimpleFieldRenderer(field, new SerialNumberRenderer(serialNumberType));
             }
         });
     }
 
-    public SafeHtml render(FormRecord formRecord) {
+    public SafeHtml render(RecordTree record) {
         SafeHtmlBuilder html = new SafeHtmlBuilder();
         for (FieldRenderer renderer : renderers) {
-            renderer.renderTo(formRecord, html);
+            renderer.renderTo(record, html);
         }
         return html.toSafeHtml();
     }

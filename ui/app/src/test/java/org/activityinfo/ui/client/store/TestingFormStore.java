@@ -5,6 +5,7 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
@@ -14,6 +15,7 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
@@ -81,6 +83,11 @@ public class TestingFormStore implements FormStore {
     @Override
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
         return maybeExecute(() -> fetchFormMetadata(formId));
+    }
+
+    @Override
+    public Observable<RecordTree> getRecordTree(RecordRef rootRecordId) {
+        throw new UnsupportedOperationException("TODO");
     }
 
     private FormMetadata fetchFormMetadata(ResourceId formId) {

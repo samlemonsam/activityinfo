@@ -2,11 +2,13 @@ package org.activityinfo.ui.client.store;
 
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.query.shared.FormSource;
@@ -16,8 +18,9 @@ import java.util.List;
 
 public interface FormStore extends FormSource {
 
-
     Observable<FormMetadata> getFormMetadata(ResourceId formId);
+
+    Observable<RecordTree> getRecordTree(RecordRef rootRecordId);
 
     Promise<Void> deleteForm(ResourceId formId);
 

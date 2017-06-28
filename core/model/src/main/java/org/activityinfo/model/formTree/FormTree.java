@@ -91,6 +91,7 @@ public class FormTree implements FormClassProvider {
             return childNode;
         }
 
+
         /**
          *
          * @return the fields that are defined on the classes in this Field's range.
@@ -318,18 +319,14 @@ public class FormTree implements FormClassProvider {
         return rootFields;
     }
 
+
+
     public List<ColumnNode> getColumnNodes() {
         List<ColumnNode> columns = Lists.newArrayList();
         Map<ResourceId, ColumnNode> columnMap = Maps.newHashMap();
 
-        enumerateParentColumns(getRootFormClass());
         enumerateColumns(getRootFields(), columns, columnMap);
         return columns;
-    }
-
-    private void enumerateParentColumns(FormClass rootFormClass) {
-        if(rootFormClass.isSubForm()) {
-        }
     }
 
     private void enumerateColumns(List<FormTree.Node> fields, List<ColumnNode> columns, Map<ResourceId, ColumnNode> columnMap) {

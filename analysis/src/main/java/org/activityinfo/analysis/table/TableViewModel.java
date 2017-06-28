@@ -6,6 +6,7 @@ import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -13,6 +14,7 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormSource;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,6 +75,19 @@ public class TableViewModel {
 
     public Observable<Optional<FormRecord>> getSelectedRecord() {
         return selectedRecord;
+    }
+
+    public Observable<Optional<RecordTree>> getSelectedRecordTree() {
+        return getSelectedRecord().join(new Function<Optional<FormRecord>, Observable<Optional<RecordTree>>>() {
+            @Override
+            public Observable<Optional<RecordTree>> apply(@Nullable Optional<FormRecord> selection) {
+                if(selection.isPresent()) {
+                    return formStore.getRecordTree(selection.get().getRef()).transform(tree -> Optional.of(tree));
+                } else {
+                    return Observable.just(Optional.absent());
+                }
+            }
+        });
     }
 
     public Observable<EffectiveTableModel> getEffectiveTable() {

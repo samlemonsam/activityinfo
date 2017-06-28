@@ -139,4 +139,7 @@ public class TestingCatalog implements FormCatalog {
         return update;
     }
 
+    public BioDataForm getBioDataForm() {
+        return bioData;
+    }
 }

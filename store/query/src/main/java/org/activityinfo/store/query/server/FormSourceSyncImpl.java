@@ -6,6 +6,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -74,6 +75,11 @@ public class FormSourceSyncImpl implements FormSource {
             }
         });
         return Observable.just(builder.queryTree(formId));
+    }
+
+    @Override
+    public Observable<RecordTree> getRecordTree(RecordRef recordRef) {
+        throw new UnsupportedOperationException("TODO");
     }
 
     @Override

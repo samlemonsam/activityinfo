@@ -9,6 +9,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservableTree;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class FormTreeLoader implements ObservableTree.TreeLoader<ResourceId, For
         FormTreeBuilder builder = new FormTreeBuilder(new FormMetadataProvider() {
             @Override
             public FormMetadata getFormMetadata(ResourceId formId) {
-                Observable<FormMetadata> metadata = nodes.get(formId);
+                Observable<? extends FormMetadata> metadata = nodes.get(formId);
                 assert metadata != null : "Form " + formId + " is missing!";
                 assert !metadata.isLoading() : "Form " + formId + " is still loading!";
 

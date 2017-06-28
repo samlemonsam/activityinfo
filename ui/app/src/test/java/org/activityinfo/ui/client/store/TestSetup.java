@@ -4,6 +4,7 @@ import com.google.gwt.core.client.testing.StubScheduler;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.store.testing.BioDataForm;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.activityinfo.ui.client.store.http.HttpStore;
@@ -74,5 +75,9 @@ public class TestSetup {
 
     public Survey getSurveyForm() {
         return catalog.getSurvey();
+    }
+
+    public BioDataForm getBioDataForm() {
+        return catalog.getBioDataForm();
     }
 }

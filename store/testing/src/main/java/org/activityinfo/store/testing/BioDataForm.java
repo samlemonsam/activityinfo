@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 
 import java.util.List;
@@ -66,5 +67,9 @@ public class BioDataForm implements TestForm {
     @Override
     public RecordGenerator getGenerator() {
         return generator;
+    }
+
+    public RecordRef getRecordRef(int i) {
+        return getRecords().get(i).getRef();
     }
 }
