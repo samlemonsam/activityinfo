@@ -170,4 +170,8 @@ public class TestingCatalog implements FormCatalog {
     public NfiForm getNfiForm() {
         return nfiForm;
     }
+
+    public IncidentForm getIncidentForm() {
+        return incidentForm;
+    }
 }

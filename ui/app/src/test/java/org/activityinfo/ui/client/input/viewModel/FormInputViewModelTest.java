@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.input.viewModel;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -13,6 +14,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
+import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,18 +26,20 @@ import static org.junit.Assert.assertTrue;
 
 public class FormInputViewModelTest {
 
+    private TestSetup setup = new TestSetup();
+
     @Before
     public void setup() {
         LocaleProxy.initialize();
     }
 
+
     @Test
     public void testSurveyRelevance() {
 
-        TestingFormStore store = new TestingFormStore();
-        Survey survey = store.getCatalog().getSurvey();
+        Survey survey = setup.getCatalog().getSurvey();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, survey.getFormId()));
+        FormInputViewModelBuilder builder = builderFor(survey);
 
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
@@ -70,7 +74,6 @@ public class FormInputViewModelTest {
         assertThat("prenatale is not relevant", viewModel.isRelevant(survey.getPrenataleCareFieldId()), equalTo(false));
 
     }
-
     @Test
     public void testSurveyEdit() {
 
@@ -80,7 +83,7 @@ public class FormInputViewModelTest {
         RecordRef recordRef = survey.getRecordRef(5);
 
         FormInputViewModelBuilder builder = new FormInputViewModelBuilder(
-            store, fetchStructure(store, recordRef));
+            store, fetchStructure(recordRef));
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
@@ -92,10 +95,9 @@ public class FormInputViewModelTest {
     @Test
     public void testReferenceFields() {
 
-        TestingFormStore store = new TestingFormStore();
-        IntakeForm intakeForm = store.getCatalog().getIntakeForm();
+        IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, BioDataForm.FORM_ID));
+        FormInputViewModelBuilder builder = builderFor(setup.getCatalog().getBioDataForm());
         FormInputModel inputModel = new FormInputModel(new RecordRef(BioDataForm.FORM_ID, ResourceId.generateId()));
 
         FormInputViewModel viewModel = builder.build(inputModel);
@@ -112,10 +114,7 @@ public class FormInputViewModelTest {
     @Test
     public void testSubFormInput() {
 
-        TestingFormStore store = new TestingFormStore();
-
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, IncidentForm.FORM_ID));
-
+        FormInputViewModelBuilder builder =  builderFor(setup.getCatalog().getIncidentForm());
         // Start with empty input
         FormInputModel inputModel = new FormInputModel(new RecordRef(IncidentForm.FORM_ID, ResourceId.generateId()));
 
@@ -146,10 +145,9 @@ public class FormInputViewModelTest {
     @Test
     public void testPersistence() {
 
-        TestingFormStore store = new TestingFormStore();
-        Survey survey = store.getCatalog().getSurvey();
+        Survey survey = setup.getCatalog().getSurvey();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, survey.getFormId()));
+        FormInputViewModelBuilder builder = builderFor(survey);
 
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()))
@@ -163,17 +161,31 @@ public class FormInputViewModelTest {
         assertThat(viewModel.isValid(), equalTo(true));
 
         // Now build the update transaction and save!
-        Promise<Void> completed = store.updateRecords(viewModel.buildTransaction());
+        Promise<Void> completed = setup.getFormStore().updateRecords(viewModel.buildTransaction());
         assertThat(completed.getState(), equalTo(Promise.State.FULFILLED));
+    }
+
+    @Test
+    public void testSerialNumberEdit() {
+        IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
+
+        RecordRef ref = intakeForm.getRecords().get(0).getRef();
+
+        FormInputViewModelBuilder builder = builderFor(ref);
+        FormInputModel model = new FormInputModel(ref);
+
+        FormInputViewModel viewModel = builder.build(model);
+
+        assertThat(viewModel.getField(intakeForm.getProtectionCodeFieldId()), equalTo(new SerialNumber(1)));
     }
 
 
     @Test
     public void testMultipleSelectPersistance() {
-        TestingFormStore store = new TestingFormStore();
-        IntakeForm intakeForm = store.getCatalog().getIntakeForm();
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, fetchStructure(store, intakeForm.getFormId()));
+        IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
+
+        FormInputViewModelBuilder builder = builderFor(intakeForm);
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(intakeForm.getFormId(), ResourceId.generateId()))
                 .update(intakeForm.getOpenDateFieldId(), new LocalDate(2017,1,1))
@@ -182,20 +194,32 @@ public class FormInputViewModelTest {
         FormInputViewModel viewModel = builder.build(inputModel);
         assertThat(viewModel.isValid(), equalTo(true));
 
-        Promise<Void> completed = store.updateRecords(viewModel.buildTransaction());
+        Promise<Void> completed = setup.getFormStore().updateRecords(viewModel.buildTransaction());
         assertThat(completed.getState(), equalTo(Promise.State.FULFILLED));
     }
 
-    private FormStructure fetchStructure(TestingFormStore store, RecordRef ref) {
-        return ObservableTesting.connect(FormStructure.fetch(store, ref)).assertLoaded();
+
+
+    private FormInputViewModelBuilder builderFor(TestForm survey) {
+        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(survey.getFormId()));
+    }
+
+    private FormInputViewModelBuilder builderFor(RecordRef ref) {
+        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(ref));
     }
 
 
-    private FormStructure fetchStructure(TestingFormStore store, ResourceId formId) {
+    private FormStructure fetchStructure(ResourceId formId) {
         ResourceId newRecordId = ResourceId.generateSubmissionId(formId);
         RecordRef newRecordRef = new RecordRef(formId, newRecordId);
 
-        return fetchStructure(store, newRecordRef);
+        return fetchStructure(newRecordRef);
     }
+
+    private FormStructure fetchStructure(RecordRef ref) {
+        return setup.connect(FormStructure.fetch(setup.getFormStore(), ref)).assertLoaded();
+    }
+
+
 
 }

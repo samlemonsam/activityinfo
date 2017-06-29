@@ -107,25 +107,25 @@ public class FormInputViewModelBuilder {
         // Keep track if this form is valid and ready to submit
         boolean valid = true;
 
-        // First build up the values as input
-        for (FormTree.Node node : formTree.getRootFields()) {
-            if(node.getType().isUpdatable()) {
-                FieldInput fieldInput = inputModel.get(node.getFieldId());
-                switch (fieldInput.getState()) {
-                    case UNTOUCHED:
-                        if(existingRecord.isVisible()) {
-                            record.set(node.getFieldId(), existingRecord.get().get(node.getFieldId()));
-                        }
-                        break;
+        // We inherit all the existing values...
+        if(existingRecord.isVisible()) {
+            record.setAll(existingRecord.get().getFieldValueMap());
+        }
 
-                    case VALID:
-                        record.set(node.getFieldId(), fieldInput.getValue());
-                        break;
-                    case INVALID:
-                        LOGGER.info("Field with invalid input = " + node.getFieldId());
-                        valid = false;
-                        break;
-                }
+        // Now apply changes...
+        for (FormTree.Node node : formTree.getRootFields()) {
+            FieldInput fieldInput = inputModel.get(node.getFieldId());
+            switch (fieldInput.getState()) {
+                case EMPTY:
+                    record.set(node.getFieldId(), (FieldValue)null);
+                    break;
+                case VALID:
+                    record.set(node.getFieldId(), fieldInput.getValue());
+                    break;
+                case INVALID:
+                    LOGGER.info("Field with invalid input = " + node.getFieldId());
+                    valid = false;
+                    break;
             }
         }
 
