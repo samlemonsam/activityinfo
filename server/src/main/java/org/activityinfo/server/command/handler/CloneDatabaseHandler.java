@@ -31,7 +31,6 @@ import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
@@ -55,8 +54,8 @@ import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.model.type.time.MonthType;
 import org.activityinfo.model.type.time.YearType;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.spi.FormCatalog;
 
 import javax.inject.Provider;
@@ -81,7 +80,6 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
     // Mappings old id (source db) -> new id (target/newly created db)
     private final Map<Integer, Activity> activityMapping = Maps.newHashMap();
-    private final Map<FormElement, FormElement> sourceIdToTargetFormElementMapping = Maps.newHashMap();
     private final Map<ResourceId, ResourceId> typeIdMapping = Maps.newHashMap();
 
     private CloneDatabase command;
@@ -165,34 +163,42 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             copyActivity(activity);
         }
 
-        final List<Promise<VoidResult>> copyPromises = new ArrayList<>();
         for (Activity activity : sourceDb.getActivities()) {
             final ResourceId sourceFormId = activityFormClass(activity.getId());
             final ResourceId targetFormId = activityFormClass(activityMapping.get(activity.getId()).getId());
 
-            copyFormClass(sourceFormId, targetFormId);
+            FormClass targetFormClass = copyFormClass(sourceFormId, targetFormId);
+            formCatalog.get().getForm(targetFormId).get().updateFormClass(targetFormClass);
+
         }
     }
 
-    private void copyFormClass(final ResourceId sourceFormId,
-                               final ResourceId targetFormId) {
+    private FormClass copyFormClass(final ResourceId sourceFormId,
+                                    final ResourceId targetFormId) {
 
         FormClass sourceFormClass = formCatalog.get().getFormClass(sourceFormId);
         FormClass targetFormClass = new FormClass(targetFormId);
-        
+
+        if(sourceFormClass.isSubForm()) {
+            targetFormClass.setSubFormKind(sourceFormClass.getSubFormKind());
+            ResourceId targetParentFormId = this.typeIdMapping.get(sourceFormClass.getParentFormId().get());
+            targetFormClass.setParentFormId(targetParentFormId);
+        }
+
         targetFormClass.setLabel(sourceFormClass.getLabel());
         targetFormClass.setDescription(sourceFormClass.getDescription());
         targetFormClass.setDatabaseId(CuidAdapter.databaseId(targetDb.getId()));
 
-        sourceIdToTargetFormElementMapping.clear();
-        copyFormElements(sourceFormClass, targetFormClass, sourceFormClass.getId(), targetFormClass.getId());
-        correctRelevanceConditions(targetFormClass);
-        
-        formCatalog.get().getForm(targetFormId).get().updateFormClass(targetFormClass);
+        Map<FormElement, FormElement> sourceIdToTargetFormElementMapping = Maps.newHashMap();
+        copyFormElements(sourceFormClass, targetFormClass, sourceFormClass.getId(), targetFormClass.getId(),
+            sourceIdToTargetFormElementMapping);
+        correctRelevanceConditions(targetFormClass, sourceIdToTargetFormElementMapping);
+
+        return targetFormClass;
     }
 
-    private void copyFormElements(FormElementContainer sourceContainer, FormElementContainer targetContainer, 
-                                  ResourceId sourceFormId, ResourceId targetFormId) {
+    private void copyFormElements(FormElementContainer sourceContainer, FormElementContainer targetContainer,
+                                  ResourceId sourceFormId, ResourceId targetFormId, Map<FormElement, FormElement> sourceIdToTargetFormElementMapping) {
         for (FormElement element : sourceContainer.getElements()) {
             if (element instanceof FormSection) {
                 FormSection sourceSection = (FormSection) element;
@@ -202,7 +208,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
                 targetContainer.addElement(targetSection);
                 sourceIdToTargetFormElementMapping.put(sourceSection, targetSection);
 
-                copyFormElements(sourceSection, targetSection, sourceFormId, targetFormId);
+                copyFormElements(sourceSection, targetSection, sourceFormId, targetFormId, sourceIdToTargetFormElementMapping);
             } else if (element instanceof FormField) {
                 FormField sourceField = (FormField) element;
                 FormField targetField = new FormField(targetFieldId(sourceField, sourceFormId, targetFormId));
@@ -225,13 +231,15 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         }
     }
 
-    private void correctRelevanceConditions(FormClass targetFormClass) {
+    private void correctRelevanceConditions(FormClass targetFormClass, Map<FormElement, FormElement> sourceIdToTargetFormElementMapping) {
         for (FormField field : targetFormClass.getFields()) {
-            field.setRelevanceConditionExpression(replaceSourceIdsToTargetIds(field.getRelevanceConditionExpression()));
+            field.setRelevanceConditionExpression(
+                replaceSourceIdsToTargetIds(field.getRelevanceConditionExpression(),
+                    sourceIdToTargetFormElementMapping));
         }
     }
 
-    private String replaceSourceIdsToTargetIds(String expression) {
+    private String replaceSourceIdsToTargetIds(String expression, Map<FormElement, FormElement> sourceIdToTargetFormElementMapping) {
         if (!Strings.isNullOrEmpty(expression)) {
 
             // replace element ids
@@ -307,7 +315,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
             @Override
             public FieldType visitSubForm(SubFormReferenceType subFormReferenceType) {
-                return subFormReferenceType;
+                return copySubForm(subFormReferenceType);
             }
 
             @Override
@@ -341,6 +349,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             }
         });
     }
+
 
     /**
      * Copies a reference type, updating any references to forms within the source
@@ -427,6 +436,22 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         return CuidAdapter.cuid(sourceField.getId().getDomain(), generator.generateInt());
     }
 
+
+    private FieldType copySubForm(SubFormReferenceType subFormType) {
+
+        ResourceId oldSubFormId = subFormType.getClassId();
+        ResourceId newSubFormId = ResourceId.generateId();
+
+        typeIdMapping.put(oldSubFormId, newSubFormId);
+
+        FormClass targetFormClass = copyFormClass(oldSubFormId, newSubFormId);
+
+        MySqlCatalog formCatalog = (MySqlCatalog) this.formCatalog.get();
+        formCatalog.createOrUpdateFormSchema(targetFormClass);
+
+        return new SubFormReferenceType(newSubFormId);
+    }
+
     private Activity copyActivity(Activity sourceActivity) {
         Activity newActivity = new Activity(sourceActivity); // copy simple values : like name, category (but not Indicators, Attributes)
         newActivity.getAttributeGroups().clear();
@@ -440,6 +465,9 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         em.persist(newActivity); // persist to get id of new activity
         activityMapping.put(sourceActivity.getId(), newActivity);
+        typeIdMapping.put(
+            CuidAdapter.activityFormClass(sourceActivity.getId()),
+            CuidAdapter.activityFormClass(newActivity.getId()));
 
         return newActivity;
     }
