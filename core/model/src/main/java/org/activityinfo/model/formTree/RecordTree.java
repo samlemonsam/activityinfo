@@ -1,12 +1,14 @@
 package org.activityinfo.model.formTree;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Multimap;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Maybe;
 
-import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,18 +16,47 @@ import java.util.Map;
  */
 public class RecordTree {
 
+    public static class ParentKey {
+        private final RecordRef parentRef;
+        private final ResourceId subFormId;
+
+        public ParentKey(RecordRef parentRef, ResourceId subFormId) {
+            this.parentRef = parentRef;
+            this.subFormId = subFormId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ParentKey parentKey = (ParentKey) o;
+
+            if (!parentRef.equals(parentKey.parentRef)) return false;
+            return subFormId.equals(parentKey.subFormId);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = parentRef.hashCode();
+            result = 31 * result + subFormId.hashCode();
+            return result;
+        }
+    }
+
     private final FormTree formTree;
-    private final RecordRef rootRecordRef;
-    private FormInstance root;
+    private final FormInstance root;
 
     private final Map<RecordRef, Maybe<FormInstance>> relatedRecords;
+    private final Multimap<ParentKey, FormInstance> subRecords;
 
     public RecordTree(FormTree formTree,
                       RecordRef rootRecordRef,
-                      Map<RecordRef, Maybe<FormInstance>> records) {
+                      Map<RecordRef, Maybe<FormInstance>> records, Multimap<ParentKey, FormInstance> subRecords) {
         this.formTree = formTree;
-        this.rootRecordRef = rootRecordRef;
         this.relatedRecords = records;
+        this.subRecords = subRecords;
         this.root = records.get(rootRecordRef).get();
     }
 
@@ -41,19 +72,11 @@ public class RecordTree {
         return record;
     }
 
-    public Maybe<String> composeLabel(RecordRef recordRef) {
-        return getRecord(recordRef).transform(new Function<FormInstance, String>() {
-            @Override
-            public String apply(FormInstance record) {
-                FormClass formClass = formTree.getFormClass(record.getFormId());
-
-
-                return null;
-            }
-        });
-    }
-
     public FormTree getFormTree() {
         return formTree;
+    }
+
+    public Iterable<FormInstance> getSubRecords(RecordRef parentRef, ResourceId formId) {
+        return subRecords.get(new ParentKey(parentRef, formId));
     }
 }

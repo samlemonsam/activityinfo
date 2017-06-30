@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.type.FieldValue;
@@ -10,6 +11,8 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.testing.BioDataForm;
+import org.activityinfo.store.testing.IncidentForm;
+import org.activityinfo.store.testing.ReferralSubForm;
 import org.activityinfo.store.testing.Survey;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,6 +65,20 @@ public class RecordTreeLoaderTest {
         RecordRef ref = referenceValue.getOnlyReference();
 
         assertThat(lookupKeySet.label(tree, ref), equalTo("00667"));
+
+    }
+
+    @Test
+    public void subforms() {
+
+        IncidentForm incidentForm = setup.getCatalog().getIncidentForm();
+
+        Observable<RecordTree> recordTree = setup.getFormStore().getRecordTree(incidentForm.getRecordRef(0));
+        Connection<RecordTree> recordTreeView = setup.connect(recordTree);
+
+        Iterable<FormInstance> subRecords = recordTreeView.assertLoaded().getSubRecords(incidentForm.getRecordRef(0), ReferralSubForm.FORM_ID);
+
+        System.out.println(subRecords);
 
     }
 

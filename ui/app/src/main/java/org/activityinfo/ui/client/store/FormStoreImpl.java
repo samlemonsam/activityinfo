@@ -20,6 +20,7 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.CatalogRequest;
 import org.activityinfo.ui.client.store.http.HttpStore;
+import org.activityinfo.ui.client.store.http.SubRecordsRequest;
 import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
@@ -69,6 +70,11 @@ public class FormStoreImpl implements FormStore {
     @Override
     public Observable<List<CatalogEntry>> getCatalogChildren(ResourceId parentId) {
         return httpStore.get(new CatalogRequest(parentId));
+    }
+
+    @Override
+    public Observable<List<FormRecord>> getSubRecords(ResourceId formId, RecordRef parent) {
+        return httpStore.get(new SubRecordsRequest(formId, parent));
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.store;
 
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
@@ -27,6 +28,8 @@ public interface FormStore extends FormSource {
     Observable<List<CatalogEntry>> getCatalogRoots();
 
     Observable<List<CatalogEntry>> getCatalogChildren(ResourceId parentId);
+
+    Observable<List<FormRecord>> getSubRecords(ResourceId formId, RecordRef parent);
 
     void setFormOffline(ResourceId formId, boolean offline);
 

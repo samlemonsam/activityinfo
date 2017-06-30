@@ -122,6 +122,11 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
+    public Observable<List<FormRecord>> getSubRecords(ResourceId formId, RecordRef parent) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
     public Observable<FormTree> getFormTree(ResourceId formId) {
         return new ObservableTree<>(new FormTreeLoader(formId, id -> getFormMetadata(id)), new ImmediateScheduler());
     }

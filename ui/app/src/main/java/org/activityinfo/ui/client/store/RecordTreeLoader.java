@@ -1,20 +1,22 @@
 package org.activityinfo.ui.client.store;
 
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.promise.Maybe;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RecordTreeLoader implements ObservableTree.TreeLoader<
     RecordTreeLoader.NodeKey,
@@ -41,7 +43,6 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
             RecordKey recordKey = (RecordKey) o;
 
             return ref.equals(recordKey.ref);
-
         }
 
         @Override
@@ -74,7 +75,9 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
 
         @Override
         public Observable<Node> get(FormStore formStore) {
-            throw new UnsupportedOperationException();
+            return formStore
+                .getSubRecords(formId, parentRecordId)
+                .transform(list -> new SubFormNode(parentRecordId, formId, list));
         }
 
         @Override
@@ -95,66 +98,95 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
             result = 31 * result + formId.hashCode();
             return result;
         }
+
+        @Override
+        public String toString() {
+            return "SubFormKey{" +
+                "parent=" + parentRecordId +
+                ", formId=" + formId +
+                '}';
+        }
     }
 
     public abstract class Node {
 
         protected abstract Iterable<NodeKey> getChildren();
 
-        protected abstract void addTo(Map<RecordRef, Maybe<FormInstance>> records);
+        protected abstract void addTo(Map<RecordRef, Maybe<FormInstance>> records, Multimap<RecordTree.ParentKey, FormInstance> subRecords);
     }
 
     private class RecordNode extends Node {
         private final RecordRef ref;
+        private final FormClass formClass;
         private final Maybe<FormInstance> record;
 
         public RecordNode(RecordRef ref, Maybe<FormRecord> record) {
             this.ref = ref;
-            this.record = record.transform(r -> {
-                FormClass formClass = formTree.getFormClass(ResourceId.valueOf(r.getFormId()));
-                return FormInstance.toFormInstance(formClass, r);
-            });
+            this.formClass = formTree.getFormClass(ref.getFormId());
+            this.record = record.transform(r -> FormInstance.toFormInstance(formClass, r));
         }
 
         @Override
         public Iterable<NodeKey> getChildren() {
-            if(record.isVisible()) {
-                return getChildren(record.get());
-            } else {
-                return Collections.emptyList();
-            }
-        }
-
-        @Override
-        protected void addTo(Map<RecordRef, Maybe<FormInstance>> records) {
-            records.put(ref, record);
-        }
-
-        private Iterable<NodeKey> getChildren(FormInstance record) {
             Set<NodeKey> children = new HashSet<>();
-
-            for (FieldValue value : record.getFieldValueMap().values()) {
-                if(value instanceof ReferenceValue) {
-                    for (RecordRef recordRef : ((ReferenceValue) value).getReferences()) {
-                        children.add(new RecordKey(recordRef));
-                    }
-                }
+            if(record.isVisible()) {
+                findChildren(children, formClass, record.get());
             }
             return children;
         }
+
+        @Override
+        protected void addTo(Map<RecordRef, Maybe<FormInstance>> records, Multimap<RecordTree.ParentKey, FormInstance> subRecords) {
+            records.put(ref, record);
+        }
+
     }
 
     private class SubFormNode extends Node {
-        private List<FormInstance> records;
+        private final RecordTree.ParentKey parentKey;
+        private final FormClass formClass;
+        private final List<FormInstance> records;
 
-        @Override
-        public Iterable<NodeKey> getChildren() {
-            throw new UnsupportedOperationException();
+        public SubFormNode(RecordRef parentRef, ResourceId formId, List<FormRecord> records) {
+            this.parentKey = new RecordTree.ParentKey(parentRef, formId);
+            formClass = formTree.getFormClass(formId);
+            this.records = records
+                .stream()
+                .map(record -> FormInstance.toFormInstance(formClass, record))
+                .collect(Collectors.toList());
         }
 
         @Override
-        protected void addTo(Map<RecordRef, Maybe<FormInstance>> records) {
-            throw new UnsupportedOperationException();
+        public Iterable<NodeKey> getChildren() {
+            Set<NodeKey> children = new HashSet<>();
+            for (FormInstance record : records) {
+                findChildren(children, formClass, record);
+            }
+            return children;
+        }
+
+        @Override
+        protected void addTo(Map<RecordRef, Maybe<FormInstance>> records, Multimap<RecordTree.ParentKey, FormInstance> subRecords) {
+            subRecords.putAll(parentKey, this.records);
+        }
+    }
+
+
+    private void findChildren(Set<NodeKey> children, FormClass schema, FormInstance record) {
+        // Add referenced records
+        for (FieldValue value : record.getFieldValueMap().values()) {
+            if (value instanceof ReferenceValue) {
+                for (RecordRef recordRef : ((ReferenceValue) value).getReferences()) {
+                    children.add(new RecordKey(recordRef));
+                }
+            }
+        }
+        // Add sub forms
+        for (FormField formField : schema.getFields()) {
+            if (formField.getType() instanceof SubFormReferenceType) {
+                SubFormReferenceType subFormType = (SubFormReferenceType) formField.getType();
+                children.add(new SubFormKey(record.getRef(), subFormType.getClassId()));
+            }
         }
     }
 
@@ -188,11 +220,12 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
     public RecordTree build(Map<NodeKey, Observable<Node>> nodes) {
 
         Map<RecordRef, Maybe<FormInstance>> records = new HashMap<>();
+        Multimap<RecordTree.ParentKey, FormInstance> subRecords = HashMultimap.create();
 
         for (Observable<Node> node : nodes.values()) {
-            node.get().addTo(records);
+            node.get().addTo(records, subRecords);
         }
-        return new RecordTree(formTree, rootRecordRef, records);
+        return new RecordTree(formTree, rootRecordRef, records, subRecords);
     }
 
     @Override
