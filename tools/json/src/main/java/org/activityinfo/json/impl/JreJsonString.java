@@ -72,6 +72,16 @@ public class JreJsonString extends JreJsonValue implements JsonString {
     }
 
     @Override
+    public boolean isJsonNull() {
+        return false;
+    }
+
+    @Override
+    public boolean isJsonPrimitive() {
+        return true;
+    }
+
+    @Override
     public boolean jsEquals(JsonValue value) {
         return getObject().equals(((JreJsonValue) value).getObject());
     }
@@ -83,6 +93,12 @@ public class JreJsonString extends JreJsonValue implements JsonString {
 
     public String toJson() throws IllegalStateException {
         return JsonUtil.quote(getString());
+    }
+
+
+    @Override
+    public boolean isJsonObject() {
+        return false;
     }
 
     @com.google.gwt.core.shared.GwtIncompatible

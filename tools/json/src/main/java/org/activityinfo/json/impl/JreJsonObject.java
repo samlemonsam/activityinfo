@@ -179,6 +179,16 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
         visitor.endVisit(this, ctx);
     }
 
+    @Override
+    public JsonObject getAsJsonObject() {
+        return this;
+    }
+
+    @Override
+    public boolean isJsonPrimitive() {
+        return false;
+    }
+
     @com.google.gwt.core.shared.GwtIncompatible
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {

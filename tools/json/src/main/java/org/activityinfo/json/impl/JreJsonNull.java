@@ -63,6 +63,11 @@ public class JreJsonNull extends JreJsonValue implements JsonNull {
         visitor.visitNull(ctx);
     }
 
+    @Override
+    public boolean isJsonNull() {
+        return true;
+    }
+
     public String toJson() {
         return null;
     }

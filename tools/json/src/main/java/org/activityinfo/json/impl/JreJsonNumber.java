@@ -84,6 +84,11 @@ public class JreJsonNumber extends JreJsonValue implements JsonNumber {
         return toReturn;
     }
 
+    @Override
+    public long asLong() {
+        return Long.parseLong(asString());
+    }
+
     @com.google.gwt.core.shared.GwtIncompatible
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
