@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.input.viewModel;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.type.RecordRef;
 
@@ -37,7 +38,7 @@ public class SubRecordViewModel {
         return placeholder;
     }
 
-    public RecordUpdate buildUpdate() {
-        return subFormViewModel.buildUpdate();
+    public RecordUpdate buildUpdate(RecordRef parentRef) {
+        return subFormViewModel.buildUpdate(Optional.of(parentRef));
     }
 }

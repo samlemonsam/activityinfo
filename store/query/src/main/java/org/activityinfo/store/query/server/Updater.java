@@ -126,6 +126,9 @@ public class Updater {
         update.setUserId(userId);
         update.setRecordId(changeObject.getRecordId());
         update.setDeleted(changeObject.isDeleted());
+        if(changeObject.getParentRecordId() != null) {
+            update.setParentId(ResourceId.valueOf(changeObject.getParentRecordId()));
+        }
 
         if(changeObject.getFields() != null) {
             for (Map.Entry<String, JsonValue> change : changeObject.getFields().entrySet()) {

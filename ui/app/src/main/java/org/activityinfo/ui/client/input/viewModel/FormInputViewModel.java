@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.input.viewModel;
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
@@ -75,10 +76,14 @@ public class FormInputViewModel {
         return choices.get(fieldId);
     }
 
-    public RecordUpdate buildUpdate() {
+    public RecordUpdate buildUpdate(Optional<RecordRef> parentRef) {
         RecordUpdate update = new RecordUpdate();
         update.setRecordId(inputModel.getRecordRef().getRecordId());
         update.setFormId(inputModel.getRecordRef().getFormId());
+
+        if(parentRef.isPresent()) {
+            update.setParentRecordId(parentRef.get().getRecordId().asString());
+        }
 
         for (FormTree.Node node : formTree.getRootFields()) {
             FieldInput newInput = inputModel.get(node.getFieldId());
@@ -91,12 +96,13 @@ public class FormInputViewModel {
 
     public RecordTransaction buildTransaction() {
         RecordTransactionBuilder tx = new RecordTransactionBuilder();
-        tx.add(buildUpdate());
+        tx.add(buildUpdate(Optional.absent()));
 
         for (SubFormInputViewModel subFormInputViewModel : subFormMap.values()) {
-            tx.add(subFormInputViewModel.buildUpdates());
+            tx.add(subFormInputViewModel.buildUpdates(inputModel.getRecordRef()));
         }
 
         return tx.build();
     }
+
 }

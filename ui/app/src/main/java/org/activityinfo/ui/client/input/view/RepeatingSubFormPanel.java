@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.form.FieldSet;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
@@ -25,6 +26,7 @@ public class RepeatingSubFormPanel implements IsWidget {
     private InputHandler inputHandler;
     private final FormTree subTree;
 
+    private final FieldSet fieldSet;
     private final FlowLayoutContainer container;
     private final FlowLayoutContainer recordContainer;
     private final Map<RecordRef, FormPanel> panelMap = new HashMap<>();
@@ -44,6 +46,16 @@ public class RepeatingSubFormPanel implements IsWidget {
         container = new FlowLayoutContainer();
         container.add(recordContainer);
         container.add(addButton);
+
+        fieldSet = new FieldSet();
+        fieldSet.setHeading(subTree.getRootFormClass().getLabel());
+        fieldSet.setCollapsible(true);
+        fieldSet.setWidget(container);
+    }
+
+    @Override
+    public Widget asWidget() {
+        return fieldSet;
     }
 
 
@@ -94,11 +106,6 @@ public class RepeatingSubFormPanel implements IsWidget {
         ResourceId newSubRecordId = ResourceId.generateId();
 
         inputHandler.addSubRecord(new RecordRef(subFormId, newSubRecordId));
-    }
-
-    @Override
-    public Widget asWidget() {
-        return container;
     }
 
 }

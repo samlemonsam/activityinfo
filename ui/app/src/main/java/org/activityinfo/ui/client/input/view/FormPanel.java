@@ -38,6 +38,10 @@ public class FormPanel implements IsWidget {
         panel = new FlowPanel();
         panel.addStyleName(InputResources.INSTANCE.style().form());
 
+        if(formTree.getRootFormClass().isSubForm()) {
+            panel.addStyleName(InputResources.INSTANCE.style().subform());
+        }
+
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.isSubForm()) {
                 addSubForm(formTree, node);

@@ -7,6 +7,8 @@ import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.json.Json;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -131,7 +133,11 @@ public class FormInputView implements IsWidget, InputHandler {
         }
 
         // Good to go...
-        formStore.updateRecords(viewModel.buildTransaction()).then(new AsyncCallback<Void>() {
+        RecordTransaction tx = viewModel.buildTransaction();
+
+        LOGGER.info("Submitting transaction: " + Json.stringify(tx));
+
+        formStore.updateRecords(tx).then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 MessageBox box = new MessageBox(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorOnServer());

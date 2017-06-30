@@ -21,5 +21,7 @@ public interface InputResources extends ClientBundle {
         String fieldLabel();
 
         String form();
+
+        String subform();
     }
 }

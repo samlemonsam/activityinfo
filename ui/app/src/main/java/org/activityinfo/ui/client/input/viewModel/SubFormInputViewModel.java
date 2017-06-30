@@ -53,11 +53,11 @@ public class SubFormInputViewModel {
         return Optional.absent();
     }
 
-    public List<RecordUpdate> buildUpdates() {
+    public List<RecordUpdate> buildUpdates(RecordRef parentRef) {
         List<RecordUpdate> updates = new ArrayList<>();
         for (SubRecordViewModel subRecord : subRecords) {
             if(!subRecord.isPlaceholder()) {
-                updates.add(subRecord.buildUpdate());
+                updates.add(subRecord.buildUpdate(parentRef));
             }
         }
         return updates;

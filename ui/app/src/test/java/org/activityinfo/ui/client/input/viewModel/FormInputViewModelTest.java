@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.resource.RecordTransaction;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.SerialNumber;
@@ -140,6 +142,17 @@ public class FormInputViewModelTest {
         referralSubForm = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
 
         assertThat(referralSubForm.getSubRecords(), hasSize(2));
+
+        // Verify that the transaction is built is correctly
+        RecordTransaction tx = viewModel.buildTransaction();
+        RecordUpdate[] changes = tx.getChangeArray();
+        assertThat(changes.length, equalTo(3));
+
+        RecordUpdate parentChange = changes[0];
+        RecordUpdate subFormChange = changes[1];
+
+        assertThat(parentChange.getRecordRef(), equalTo(inputModel.getRecordRef()));
+        assertThat(subFormChange.getParentRecordId(), equalTo(parentChange.getRecordId().asString()));
     }
 
     @Test
