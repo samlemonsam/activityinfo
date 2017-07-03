@@ -1751,4 +1751,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Not Found")
     String notFound();
 
+    @DefaultStringValue("Please use our new and much improved data entry interface for adding or updating this form's records.")
+    String pleaseUseNewDataEntry();
+
 }

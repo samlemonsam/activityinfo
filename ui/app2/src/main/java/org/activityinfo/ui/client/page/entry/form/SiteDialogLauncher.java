@@ -22,6 +22,8 @@ package org.activityinfo.ui.client.page.entry.form;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
@@ -35,6 +37,7 @@ import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.form.FormDialog;
 import org.activityinfo.ui.client.component.form.FormDialogCallback;
@@ -76,6 +79,12 @@ public class SiteDialogLauncher {
                 @Override
                 public void onSuccess(SchemaDTO schema) {
                     ActivityDTO activity = schema.getActivityById(activityId);
+
+                    if(!activity.getClassicView()) {
+                        promptUseNewEntry(activity);
+                        return;
+                    }
+
                     Log.trace("adding site for activity " + activity + ", locationType = " + activity.getLocationType());
 
                     if(activity.getDatabase().getPartners().isEmpty()) {
@@ -112,6 +121,17 @@ public class SiteDialogLauncher {
                         }
                     });
 
+                }
+
+                private void promptUseNewEntry(final ActivityDTO dto) {
+                    MessageBox.alert(dto.getName(), I18N.CONSTANTS.pleaseUseNewDataEntry(), new Listener<MessageBoxEvent>() {
+                        @Override
+                        public void handleEvent(MessageBoxEvent messageBoxEvent) {
+                            if(messageBoxEvent.getButtonClicked().getItemId().equals(MessageBox.OK)) {
+                                App3.openNewTable(dto.getFormClassId());
+                            }
+                        }
+                    });
                 }
             });
         }

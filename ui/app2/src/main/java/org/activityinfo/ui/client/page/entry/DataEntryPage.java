@@ -46,6 +46,7 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
@@ -542,8 +543,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private void navigateToNewNewInterface() {
         Optional<Integer> activityId = getCurrentActivityId();
         if(activityId.isPresent()) {
-            com.google.gwt.user.client.Window.open("/app?ui=3#table/" + CuidAdapter.activityFormClass(activityId.get()),
-                "_blank", null);
+            App3.openNewTable(activityId.get());
         }
     }
 
