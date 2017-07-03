@@ -151,8 +151,8 @@ public class EnumType implements ParametrizedFieldType {
         } else if(value.isJsonArray()) {
             Set<ResourceId> ids = new HashSet<>();
             JsonArray array = value.getAsJsonArray();
-            for (JsonValue jsonElement : array.values()) {
-                ResourceId id = ResourceId.valueOf(jsonElement.asString());
+            for (int i = 0; i < array.length(); i++) {
+                ResourceId id = ResourceId.valueOf(array.get(i).asString());
                 ids.add(id);
             }
             return new EnumValue(ids);
