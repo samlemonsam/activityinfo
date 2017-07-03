@@ -103,7 +103,7 @@ public class TableViewModel {
 
             effectiveSubTable = formTree
                     .transform(tree -> tree.subTree(subFormId))
-                    .transform(subTree -> new EffectiveTableModel(formStore, subTree, subModel));
+                    .transform(subTree -> new EffectiveTableModel(formStore, subTree, subModel, Optional.of(getSelectedRecordRef())));
 
             effectiveSubTables.put(subFormId, effectiveSubTable);
         }

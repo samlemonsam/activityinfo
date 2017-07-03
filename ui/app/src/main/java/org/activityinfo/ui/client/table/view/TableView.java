@@ -11,7 +11,9 @@ import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.logging.Logger;
@@ -36,10 +38,11 @@ public class TableView implements IsWidget {
 
     private VerticalLayoutContainer center;
 
-    private Subscription subscription;
+    private SubscriptionSet subscriptions = new SubscriptionSet();
 
     private FormStore formStore;
     private final SidePanel sidePanel;
+    private SubFormPane subFormPane;
 
 
     public TableView(FormStore formStore, final TableViewModel viewModel) {
@@ -61,13 +64,8 @@ public class TableView implements IsWidget {
         sidePaneLayout.setSplit(true);
         sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
-//        SubFormPane subFormPane = new SubFormPane(viewModel);
-//        BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
-//        subFormPaneLayout.setSplit(true);
-//        subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
         this.container.setEastWidget(sidePanel, sidePaneLayout);
-//        this.container.setSouthWidget(subFormPane, subFormPaneLayout);
         this.container.setCenterWidget(center);
 
         this.panel = new ContentPanel() {
@@ -76,20 +74,20 @@ public class TableView implements IsWidget {
             protected void onAttach() {
                 super.onAttach();
                 LOGGER.info("TableView attaching...");
-                subscription = viewModel.getEffectiveTable().subscribe(observable -> effectiveModelChanged());
+                subscriptions.add(viewModel.getEffectiveTable().subscribe(observable -> effectiveModelChanged()));
+                subscriptions.add(viewModel.getFormTree().subscribe(tree -> formTreeChanged(tree)));
             }
 
             @Override
             protected void onDetach() {
                 super.onDetach();
                 LOGGER.info("TableView detaching...");
-                subscription.unsubscribe();
+                subscriptions.unsubscribeAll();
             }
         };
         this.panel.setHeading(I18N.CONSTANTS.loading());
         this.panel.add(container);
     }
-
 
 
 
@@ -104,6 +102,7 @@ public class TableView implements IsWidget {
         } else {
             this.panel.unmask();
 
+
             switch (viewModel.getEffectiveTable().get().getRootFormState()) {
                 case FORBIDDEN:
                 case DELETED:
@@ -116,10 +115,28 @@ public class TableView implements IsWidget {
         }
     }
 
+    private void formTreeChanged(Observable<FormTree> tree) {
+        if(tree.isLoaded()) {
+            if (tree.get().hasSubForms()) {
+                if(subFormPane == null) {
+                    subFormPane = new SubFormPane(viewModel);
+                    BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
+                    subFormPaneLayout.setSplit(true);
+                    subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
+                    this.container.setSouthWidget(subFormPane, subFormPaneLayout);
+                    this.container.forceLayout();
+                }
+            } else {
+                if(subFormPane != null) {
+                    this.container.remove(subFormPane);
+                    this.container.forceLayout();
+                    subFormPane = null;
+                }
+            }
+        }
+    }
 
     private void showErrorState(FormTree.State rootFormState) {
-
-
         errorWidget = new ForbiddenWidget();
 
         panel.setWidget(errorWidget);

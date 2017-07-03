@@ -39,6 +39,7 @@ public class IncidentForm implements TestForm {
 
     private List<FormInstance> records = null;
     private RecordGenerator generator;
+    private final FormField urgencyField;
 
     public IncidentForm(BioDataForm bioDataForm) {
         this.bioDataForm = bioDataForm;
@@ -52,12 +53,12 @@ public class IncidentForm implements TestForm {
                 .setRequired(true)
                 .setVisible(true);
 
-        formClass.addField(URGENCY)
-                .setLabel("Urgency of the case")
-                .setType(new EnumType(Cardinality.SINGLE,
-                        new EnumItem(HIGH, "High"),
-                        new EnumItem(MEDIUM, "Medium"),
-                        new EnumItem(LOW, "Low")));
+        urgencyField = formClass.addField(URGENCY)
+            .setLabel("Urgency of the case")
+            .setType(new EnumType(Cardinality.SINGLE,
+                new EnumItem(HIGH, "High"),
+                new EnumItem(MEDIUM, "Medium"),
+                new EnumItem(LOW, "Low")));
 
         referralField = formClass.addField(REFERRAL_FIELD_ID)
                 .setLabel("Referrals")
@@ -94,7 +95,13 @@ public class IncidentForm implements TestForm {
         return generator;
     }
 
+
+
     public RecordRef getRecordRef(int i) {
         return getRecords().get(i).getRef();
+    }
+
+    public FormField getUrgencyField() {
+        return urgencyField;
     }
 }

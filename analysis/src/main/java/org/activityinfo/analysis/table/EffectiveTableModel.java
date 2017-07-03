@@ -1,12 +1,17 @@
 package org.activityinfo.analysis.table;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -20,8 +25,11 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.query.shared.FormSource;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The effective description of a table
@@ -32,11 +40,18 @@ public class EffectiveTableModel {
     public static final String ID_COLUMN_ID = "$$id";
 
     private FormTree formTree;
+    private Optional<Observable<Optional<RecordRef>>> selectedParentRef;
     private List<EffectiveTableColumn> columns;
     private Observable<ColumnSet> columnSet;
 
     public EffectiveTableModel(FormSource formSource, FormTree formTree, TableModel tableModel) {
+        this(formSource, formTree, tableModel, Optional.absent());
+    }
+
+    public EffectiveTableModel(FormSource formSource, FormTree formTree, TableModel tableModel,
+                               Optional<Observable<Optional<RecordRef>>> selectedParentRef) {
         this.formTree = formTree;
+        this.selectedParentRef = selectedParentRef;
         this.columnSet = new StatefulValue<>();
         this.columns = new ArrayList<>();
 
@@ -46,11 +61,23 @@ public class EffectiveTableModel {
             }
         }
 
-        this.columnSet = formSource.query(buildQuery(columns));
+        if(selectedParentRef.isPresent()) {
+            // For sub form views, the columnset depends on the selection
+            this.columnSet = selectedParentRef.get().join(parentRecord -> {
+                if(parentRecord.isPresent()) {
+                    return formSource.query(buildQuery(columns, parentRecord.get()));
+                } else {
+                    return Observable.just(emptyColumnSet(columns));
+                }
+            });
+        } else {
+            this.columnSet = formSource.query(buildQuery(columns));
+        }
     }
 
+
     private void addDefaultColumns(FormTree formTree) {
-        if(formTree.getRootFormClass().isSubForm()) {
+        if(!isSubTable() && formTree.getRootFormClass().isSubForm()) {
             addDefaultColumns(formTree.parentTree());
         }
         for (FormTree.Node node : formTree.getRootFields()) {
@@ -106,6 +133,24 @@ public class EffectiveTableModel {
         }
     }
 
+    /**
+     * Returns true if this is a sub table view that is linked to a parent view.
+     */
+    public boolean isSubTable() {
+        return selectedParentRef.isPresent();
+    }
+
+    private boolean shouldIncludeReference(FormTree.Node childNode) {
+        if(childNode.isParentReference()) {
+            if(isSubTable()) {
+                // Do not include parent fields when the sub form is displayed
+                // as a sub table linked to its parent.
+                return false;
+            }
+        }
+        return true;
+    }
+
     public ResourceId getFormId() {
         return formTree.getRootFormId();
     }
@@ -117,6 +162,25 @@ public class EffectiveTableModel {
             queryModel.addColumns(column.getQueryModel());
         }
         return queryModel;
+    }
+
+    private QueryModel buildQuery(List<EffectiveTableColumn> columns, RecordRef recordRef) {
+        QueryModel queryModel = buildQuery(columns);
+        queryModel.setFilter(Exprs.equals(new SymbolExpr("@parent"), new ConstantExpr(recordRef.getRecordId().asString())));
+
+        return queryModel;
+    }
+
+    private ColumnSet emptyColumnSet(List<EffectiveTableColumn> columns) {
+
+        Map<String, ColumnView> columnMap = new HashMap<>();
+        for (EffectiveTableColumn column : columns) {
+            for (ColumnModel columnModel : column.getQueryModel()) {
+                columnMap.put(columnModel.getId(), new EmptyColumnView(ColumnType.STRING, 0));
+            }
+        }
+
+        return new ColumnSet(0, columnMap);
     }
 
     public FormTree getFormTree() {

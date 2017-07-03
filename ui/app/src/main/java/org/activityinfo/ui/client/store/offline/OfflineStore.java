@@ -33,7 +33,6 @@ import org.activityinfo.ui.client.store.http.FormChangeWatcher;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -297,7 +296,7 @@ public class OfflineStore {
 
         // Combine old and new field values
         if(existingRecord.isPresent()) {
-            updatedRecord.setParentFormId(existingRecord.get().getParentFormId());
+            updatedRecord.setParentRecordId(existingRecord.get().getParentRecordId());
 
             JsonObject existingFields = existingRecord.get().getFields();
             for (String fieldName : existingFields.keys()) {
@@ -310,7 +309,7 @@ public class OfflineStore {
 
         // Only update parent record if this is a new record
         if(!existingRecord.isPresent()) {
-            updatedRecord.setParentFormId(update.getParentRecordId());
+            updatedRecord.setParentRecordId(update.getParentRecordId());
         }
         return updatedRecord;
     }

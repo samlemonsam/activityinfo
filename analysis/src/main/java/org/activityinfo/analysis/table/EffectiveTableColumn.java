@@ -49,4 +49,9 @@ public class EffectiveTableColumn {
     public <T> T accept(TableColumnVisitor<T> visitor) {
         return format.accept(this, visitor);
     }
+
+    @Override
+    public String toString() {
+        return "EffectiveTableColumn{" + label + "}";
+    }
 }

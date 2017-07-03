@@ -28,6 +28,8 @@ public class FormTree implements FormClassProvider {
 
     private ResourceId rootFormId;
 
+
+
     public enum State {
         VALID,
         DELETED,
@@ -320,6 +322,14 @@ public class FormTree implements FormClassProvider {
     }
 
 
+    public boolean hasSubForms() {
+        for (Node node : getRootFields()) {
+            if(node.isSubForm()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public List<ColumnNode> getColumnNodes() {
         List<ColumnNode> columns = Lists.newArrayList();

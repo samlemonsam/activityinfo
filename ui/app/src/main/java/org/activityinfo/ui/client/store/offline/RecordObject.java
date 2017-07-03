@@ -17,26 +17,26 @@ import org.activityinfo.model.type.RecordRef;
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public final class RecordObject {
 
-    private String parentFormId;
+    private String parentRecordId;
     private JsonObject fields;
 
 
     @JsOverlay
     public static RecordObject from(FormRecord record) {
         RecordObject object = new RecordObject();
-        object.parentFormId = record.getParentRecordId();
+        object.parentRecordId = record.getParentRecordId();
         object.fields = record.getFields();
         return object;
     }
 
     @JsOverlay
-    public String getParentFormId() {
-        return parentFormId;
+    public String getParentRecordId() {
+        return parentRecordId;
     }
 
     @JsOverlay
-    public void setParentFormId(String parentFormId) {
-        this.parentFormId = parentFormId;
+    public void setParentRecordId(String parentRecordId) {
+        this.parentRecordId = parentRecordId;
     }
 
     @JsOverlay
@@ -64,6 +64,6 @@ public final class RecordObject {
 
     @JsOverlay
     public FormRecord toFormRecord(RecordRef recordRef) {
-        return new FormRecord(recordRef, parentFormId, fields);
+        return new FormRecord(recordRef, parentRecordId, fields);
     }
 }

@@ -45,6 +45,10 @@ public class FormTreeLoader implements ObservableTree.TreeLoader<ResourceId, For
 
             assert node.getSchema() != null : "Missing schema " + node.getId();
 
+            if(node.getSchema().isSubForm()) {
+                children.add(node.getSchema().getParentFormId().get());
+            }
+
             for (FormField field : node.getSchema().getFields()) {
                 if (field.getType() instanceof ReferenceType) {
                     ReferenceType type = (ReferenceType) field.getType();
