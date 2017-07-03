@@ -25,6 +25,8 @@ package org.activityinfo.ui.client.page.entry.form;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
@@ -122,17 +124,6 @@ public class SiteDialogLauncher {
                     });
 
                 }
-
-                private void promptUseNewEntry(final ActivityDTO dto) {
-                    MessageBox.alert(dto.getName(), I18N.CONSTANTS.pleaseUseNewDataEntry(), new Listener<MessageBoxEvent>() {
-                        @Override
-                        public void handleEvent(MessageBoxEvent messageBoxEvent) {
-                            if(messageBoxEvent.getButtonClicked().getItemId().equals(MessageBox.OK)) {
-                                App3.openNewTable(dto.getFormClassId());
-                            }
-                        }
-                    });
-                }
             });
         }
     }
@@ -171,6 +162,11 @@ public class SiteDialogLauncher {
             @Override
             public void onSuccess(SchemaDTO schema) {
                 final ActivityDTO activity = schema.getActivityById(site.getActivityId());
+
+                if(!activity.getClassicView()) {
+                    promptUseNewEntry(activity);
+                    return;
+                }
 
                 // check whether the site has been locked
                 // (this only applies to Once-reported activities because
@@ -250,5 +246,23 @@ public class SiteDialogLauncher {
 
         SiteDialog dialog = new SiteDialog(dispatcher, activity, eventBus);
         dialog.showNew(newSite, location, true, callback);
+    }
+
+
+
+    private static void promptUseNewEntry(final ActivityDTO dto) {
+        MessageBox box = new MessageBox();
+        box.setTitle(dto.getName());
+        box.setMessage(SafeHtmlUtils.fromString(I18N.CONSTANTS.pleaseUseNewDataEntry()));
+        box.setButtons(MessageBox.OKCANCEL);
+        box.addCallback(new Listener<MessageBoxEvent>() {
+            @Override
+            public void handleEvent(MessageBoxEvent messageBoxEvent) {
+                if(messageBoxEvent.getButtonClicked().getItemId().equals(MessageBox.OK)) {
+                    App3.openNewTable(dto.getFormClassId());
+                }
+            }
+        });
+        box.show();
     }
 }

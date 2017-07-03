@@ -202,7 +202,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         betaLink.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                if(clickEvent.isControlKeyDown()) {
+                if(!clickEvent.isControlKeyDown()) {
                     navigateToNewNewInterface();
                 } else {
                     navigateToNewInterface();
