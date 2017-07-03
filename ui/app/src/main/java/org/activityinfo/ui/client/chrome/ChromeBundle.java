@@ -54,6 +54,13 @@ public interface ChromeBundle extends ClientBundle {
 
         @ClassName("sync-icon")
         String syncIcon();
+
+        String appTitle();
+
+        @ClassName("sync-circle")
+        String syncCircle();
+
+        String appBar();
     }
 
 }

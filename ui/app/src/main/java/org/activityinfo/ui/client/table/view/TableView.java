@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.table.view;
 
+import com.google.common.base.Function;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
@@ -14,14 +15,16 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.observable.SubscriptionSet;
+import org.activityinfo.ui.client.chrome.HasTitle;
 import org.activityinfo.ui.client.store.FormStore;
 
+import javax.annotation.Nullable;
 import java.util.logging.Logger;
 
 /**
  * Displays a Form as a Table
  */
-public class TableView implements IsWidget {
+public class TableView implements IsWidget, HasTitle {
 
     public static final int MARGINS = 8;
 
@@ -60,7 +63,7 @@ public class TableView implements IsWidget {
         this.container = new BorderLayoutContainer();
 
         sidePanel = new SidePanel(viewModel);
-        BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
+        BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(.3);
         sidePaneLayout.setSplit(true);
         sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
@@ -86,6 +89,7 @@ public class TableView implements IsWidget {
             }
         };
         this.panel.setHeading(I18N.CONSTANTS.loading());
+        this.panel.setHeaderVisible(false);
         this.panel.add(container);
     }
 
@@ -120,9 +124,10 @@ public class TableView implements IsWidget {
             if (tree.get().hasSubForms()) {
                 if(subFormPane == null) {
                     subFormPane = new SubFormPane(viewModel);
-                    BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(150);
+                    BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(0.3);
                     subFormPaneLayout.setSplit(true);
                     subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
+
                     this.container.setSouthWidget(subFormPane, subFormPaneLayout);
                     this.container.forceLayout();
                 }
@@ -140,14 +145,12 @@ public class TableView implements IsWidget {
         errorWidget = new ForbiddenWidget();
 
         panel.setWidget(errorWidget);
-        panel.setHeaderVisible(false);
         panel.forceLayout();
     }
 
     private void updateGrid(EffectiveTableModel effectiveTableModel) {
 
         panel.setHeading(effectiveTableModel.getFormLabel());
-        panel.setHeaderVisible(true);
 
         if(grid == null) {
             grid = new TableGrid(effectiveTableModel);
@@ -175,5 +178,20 @@ public class TableView implements IsWidget {
     public void stop() {
 
 
+    }
+
+    @Override
+    public Observable<String> getTitle() {
+        return viewModel.getFormTree().transform(formTree -> {
+            switch (formTree.getRootState()) {
+                case VALID:
+                    return formTree.getRootFormClass().getLabel();
+                case DELETED:
+                    return I18N.CONSTANTS.deletedForm();
+                case FORBIDDEN:
+                    return I18N.CONSTANTS.forbiddenForm();
+            }
+            return I18N.CONSTANTS.notFound();
+        });
     }
 }

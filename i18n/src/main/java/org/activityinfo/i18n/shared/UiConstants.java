@@ -1741,4 +1741,14 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Are you sure you want to remove all offline data? Any pending changes will be lost!")
     String confirmClearOfflineMode();
+
+    @DefaultStringValue("Deleted Form")
+    String deletedForm();
+
+    @DefaultStringValue("Forbidden Form")
+    String forbiddenForm();
+
+    @DefaultStringValue("Not Found")
+    String notFound();
+
 }

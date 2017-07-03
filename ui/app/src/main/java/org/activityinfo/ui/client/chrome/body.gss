@@ -14,3 +14,12 @@ body {
 .appBarButton:hover {
     border: 1px solid #DDD;
 }
+
+.appBar {
+    background-color: white;
+}
+
+.appTitle {
+    font-size: 2em;
+
+}
