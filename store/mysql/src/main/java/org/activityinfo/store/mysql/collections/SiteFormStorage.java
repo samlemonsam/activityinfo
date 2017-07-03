@@ -104,6 +104,11 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
 
         List<RecordVersion> versions = new ArrayList<>();

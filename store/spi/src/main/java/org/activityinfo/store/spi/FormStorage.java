@@ -25,6 +25,9 @@ public interface FormStorage {
      */
     Optional<FormRecord> get(ResourceId resourceId);
 
+    List<FormRecord> getSubRecords(ResourceId resourceId);
+
+
     /**
      * Retrieves a list of versions of this record.
      */
@@ -73,5 +76,7 @@ public interface FormStorage {
      * Update the geometry associated with a specific record and field.
      */
     void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value);
+
+
 
 }

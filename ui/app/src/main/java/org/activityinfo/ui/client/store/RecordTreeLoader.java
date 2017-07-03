@@ -168,6 +168,9 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
         @Override
         protected void addTo(Map<RecordRef, Maybe<FormInstance>> records, Multimap<RecordTree.ParentKey, FormInstance> subRecords) {
             subRecords.putAll(parentKey, this.records);
+            for (FormInstance record : this.records) {
+                records.put(record.getRef(), Maybe.of(record));
+            }
         }
     }
 

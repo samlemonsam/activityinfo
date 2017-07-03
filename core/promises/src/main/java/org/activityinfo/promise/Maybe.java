@@ -3,6 +3,8 @@ package org.activityinfo.promise;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
+import java.util.List;
+
 /**
  * Holds either a value, or is empty because it is FORBIDDEN, DELETED, OR NOT_FOUND.
  */
@@ -58,12 +60,29 @@ public class Maybe<T> {
         return value;
     }
 
+    public Optional<T> getIfVisible() {
+        if(isVisible()) {
+            return Optional.of(get());
+        } else {
+            return Optional.absent();
+        }
+    }
+
+
     @SuppressWarnings("unchecked")
     public <R> Maybe<R> transform(Function<T, R> function) {
         if(isVisible()) {
             return Maybe.of(function.apply(value));
         } else {
             return (Maybe<R>) this;
+        }
+    }
+
+    public T or(T defaultValue) {
+        if(isVisible()) {
+            return get();
+        } else {
+            return defaultValue;
         }
     }
 
@@ -74,7 +93,6 @@ public class Maybe<T> {
             return Maybe.notFound();
         }
     }
-
 
     @Override
     public int hashCode() {

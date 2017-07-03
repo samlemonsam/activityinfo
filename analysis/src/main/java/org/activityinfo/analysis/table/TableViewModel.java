@@ -82,7 +82,7 @@ public class TableViewModel {
             @Override
             public Observable<Optional<RecordTree>> apply(@Nullable Optional<FormRecord> selection) {
                 if(selection.isPresent()) {
-                    return formStore.getRecordTree(selection.get().getRef()).transform(tree -> Optional.of(tree));
+                    return formStore.getRecordTree(selection.get().getRef()).transform(tree -> tree.getIfVisible());
                 } else {
                     return Observable.just(Optional.absent());
                 }

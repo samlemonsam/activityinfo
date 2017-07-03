@@ -65,6 +65,11 @@ public class MockFormCatalog implements FormCatalog {
         }
 
         @Override
+        public List<FormRecord> getSubRecords(ResourceId resourceId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public List<RecordVersion> getVersions(ResourceId recordId) {
             return Collections.emptyList();
         }

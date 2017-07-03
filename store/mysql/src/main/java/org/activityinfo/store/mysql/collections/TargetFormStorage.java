@@ -11,6 +11,7 @@ import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 import org.activityinfo.store.spi.*;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -34,6 +35,11 @@ public class TargetFormStorage implements FormStorage {
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
         return RecordFetcher.fetch(this, resourceId);
+    }
+
+    @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        return Collections.emptyList();
     }
 
     @Override

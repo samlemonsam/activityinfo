@@ -14,6 +14,7 @@ public class SubRecordViewModel {
     private boolean placeholder;
 
     public SubRecordViewModel(RecordRef recordRef, FormInputViewModel subFormViewModel, boolean placeholder) {
+        assert recordRef != null : "missing recordRef";
         this.recordRef = recordRef;
         this.subFormViewModel = subFormViewModel;
         this.placeholder = placeholder;

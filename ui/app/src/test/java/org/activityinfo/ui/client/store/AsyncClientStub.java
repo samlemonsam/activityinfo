@@ -77,7 +77,15 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormRecordSet> getRecords(String formId, String parentId) {
-        return Promise.rejected(new UnsupportedOperationException());
+        if(!connected) {
+            return offlineResult();
+        }
+        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        if(!form.isPresent()) {
+            return Promise.rejected(new RuntimeException("No such form"));
+        }
+        FormStorage formStorage = form.get();
+        return Promise.resolved(new FormRecordSet(formStorage.getSubRecords(ResourceId.valueOf(parentId))));
     }
 
     @Override

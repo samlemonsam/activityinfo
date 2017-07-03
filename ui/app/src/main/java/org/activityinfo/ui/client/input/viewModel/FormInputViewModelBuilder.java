@@ -6,11 +6,11 @@ import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.SerialNumberType;
-import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -33,7 +33,6 @@ public class FormInputViewModelBuilder {
     private final FormStore formStore;
     private final FormTree formTree;
     private final FormEvalContext evalContext;
-    private final Maybe<FormInstance> existingRecord;
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
@@ -44,17 +43,13 @@ public class FormInputViewModelBuilder {
      */
     private Map<ResourceId, ReferenceChoices> referenceChoices = new HashMap<>();
 
+
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
-        this(formStore, new FormStructure(formTree));
-    }
-
-    public FormInputViewModelBuilder(FormStore formStore, FormStructure structure) {
         this.formStore = formStore;
-        this.formTree = structure.getFormTree();
-        this.evalContext = new FormEvalContext(formTree.getRootFormClass());
-        this.existingRecord = structure.getExistingRecord();
+        this.formTree = formTree;
+        this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
-        for (FormTree.Node node : formTree.getRootFields()) {
+        for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm()) {
                 subBuilders.add(buildSubBuilder(node));
             }
@@ -72,9 +67,7 @@ public class FormInputViewModelBuilder {
     }
 
     private SubFormInputViewModelBuilder buildSubBuilder(FormTree.Node node) {
-        SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
-        FormTree subTree = formTree.subTree(subFormType.getClassId());
-        return new SubFormInputViewModelBuilder(formStore, node, subTree);
+        return new SubFormInputViewModelBuilder(formStore, formTree, node);
     }
 
     private void buildRelevanceCalculator(FormTree.Node node) {
@@ -101,6 +94,10 @@ public class FormInputViewModelBuilder {
     }
 
     public FormInputViewModel build(FormInputModel inputModel) {
+        return build(inputModel, Maybe.notFound());
+    }
+
+    public FormInputViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingRecord) {
 
         FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormId());
 
@@ -109,7 +106,7 @@ public class FormInputViewModelBuilder {
 
         // We inherit all the existing values...
         if(existingRecord.isVisible()) {
-            record.setAll(existingRecord.get().getFieldValueMap());
+            record.setAll(existingRecord.get().getRoot().getFieldValueMap());
         }
 
         // Now apply changes...
@@ -145,7 +142,7 @@ public class FormInputViewModelBuilder {
         // Build subform view models
         Map<ResourceId, SubFormInputViewModel> subFormMap = new HashMap<>();
         for (SubFormInputViewModelBuilder subBuilder : subBuilders) {
-            subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel));
+            subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel, existingRecord));
         }
 
         LOGGER.info("Valid = " + valid);

@@ -5,10 +5,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The state of the user's input into the form as well any sub forms.
@@ -103,5 +100,11 @@ public class FormInputModel {
     public Collection<FormInputModel> getSubRecords() {
         return subRecords.values();
     }
+
+    public Optional<FormInputModel> getSubRecord(RecordRef recordRef) {
+        return Optional.ofNullable(subRecords.get(recordRef));
+    }
+
+
 
 }

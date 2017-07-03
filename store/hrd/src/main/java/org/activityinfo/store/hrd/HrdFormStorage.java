@@ -99,7 +99,8 @@ public class HrdFormStorage implements VersionedFormStorage {
         throw new UnsupportedOperationException();
     }
 
-    public Iterable<FormRecord> getSubRecords(ResourceId parentId) {
+    @Override
+    public List<FormRecord> getSubRecords(ResourceId parentId) {
         return ofy().transact(new QuerySubRecords(formClass, parentId));
     }
 

@@ -30,6 +30,9 @@ public class FormPanel implements IsWidget {
     private RecordRef recordRef;
 
     public FormPanel(FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
+
+        assert recordRef != null;
+
         InputResources.INSTANCE.style().ensureInjected();
 
         this.recordRef = recordRef;

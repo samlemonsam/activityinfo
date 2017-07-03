@@ -85,6 +85,11 @@ public class JsonFormStorage implements FormStorage {
     }
 
     @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }

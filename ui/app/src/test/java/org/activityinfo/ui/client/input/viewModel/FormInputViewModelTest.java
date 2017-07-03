@@ -84,12 +84,12 @@ public class FormInputViewModelTest {
 
         RecordRef recordRef = survey.getRecordRef(5);
 
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(
-            store, fetchStructure(recordRef));
+        FormStructure stucture = fetchStructure(recordRef);
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, stucture.getFormTree());
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
-        FormInputViewModel viewModel = builder.build(inputModel);
+        FormInputViewModel viewModel = builder.build(inputModel, stucture.getExistingRecord());
 
         assertTrue(viewModel.isValid());
     }
@@ -183,11 +183,12 @@ public class FormInputViewModelTest {
         IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
 
         RecordRef ref = intakeForm.getRecords().get(0).getRef();
+        FormStructure structure = fetchStructure(ref);
 
-        FormInputViewModelBuilder builder = builderFor(ref);
+        FormInputViewModelBuilder builder = builderFor(structure);
         FormInputModel model = new FormInputModel(ref);
 
-        FormInputViewModel viewModel = builder.build(model);
+        FormInputViewModel viewModel = builder.build(model, structure.getExistingRecord());
 
         assertThat(viewModel.getField(intakeForm.getProtectionCodeFieldId()), equalTo(new SerialNumber(1)));
     }
@@ -212,15 +213,33 @@ public class FormInputViewModelTest {
     }
 
 
+    @Test
+    public void editRecordWithSubRecords() {
+
+        IncidentForm incidentForm = setup.getCatalog().getIncidentForm();
+
+        RecordRef rootRecordRef = incidentForm.getRecordRef(0);
+        FormStructure structure = fetchStructure(rootRecordRef);
+
+        FormInputViewModelBuilder builder = builderFor(structure);
+
+        FormInputModel inputModel = new FormInputModel(rootRecordRef);
+
+        FormInputViewModel viewModel = builder.build(inputModel, structure.getExistingRecord());
+
+        SubFormInputViewModel subFormField = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
+        assertThat(subFormField.getSubRecords(), hasSize(4));
+
+    }
+
 
     private FormInputViewModelBuilder builderFor(TestForm survey) {
-        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(survey.getFormId()));
+        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(survey.getFormId()).getFormTree());
     }
 
-    private FormInputViewModelBuilder builderFor(RecordRef ref) {
-        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(ref));
+    private FormInputViewModelBuilder builderFor(FormStructure structure) {
+        return new FormInputViewModelBuilder(setup.getFormStore(), structure.getFormTree());
     }
-
 
     private FormStructure fetchStructure(ResourceId formId) {
         ResourceId newRecordId = ResourceId.generateSubmissionId(formId);

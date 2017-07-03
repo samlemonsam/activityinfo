@@ -86,7 +86,7 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Observable<RecordTree> getRecordTree(RecordRef rootRecordId) {
+    public Observable<Maybe<RecordTree>> getRecordTree(RecordRef rootRecordId) {
         throw new UnsupportedOperationException("TODO");
     }
 

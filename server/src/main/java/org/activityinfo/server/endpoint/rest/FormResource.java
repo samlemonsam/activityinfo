@@ -303,7 +303,7 @@ public class FormResource {
         }
 
         HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
-        Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
+        Iterable<FormRecord> records = collection.get().getSubRecords(ResourceId.valueOf(parentId));
 
         return Response.ok(encode(records), JSON_CONTENT_TYPE).build();
     }

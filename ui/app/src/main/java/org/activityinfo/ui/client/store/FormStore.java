@@ -11,6 +11,7 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
@@ -21,7 +22,7 @@ public interface FormStore extends FormSource {
 
     Observable<FormMetadata> getFormMetadata(ResourceId formId);
 
-    Observable<RecordTree> getRecordTree(RecordRef rootRecordId);
+    Observable<Maybe<RecordTree>> getRecordTree(RecordRef rootRecordId);
 
     Promise<Void> deleteForm(ResourceId formId);
 

@@ -78,7 +78,7 @@ public class FormSourceSyncImpl implements FormSource {
     }
 
     @Override
-    public Observable<RecordTree> getRecordTree(RecordRef recordRef) {
+    public Observable<Maybe<RecordTree>> getRecordTree(RecordRef recordRef) {
         throw new UnsupportedOperationException("TODO");
     }
 

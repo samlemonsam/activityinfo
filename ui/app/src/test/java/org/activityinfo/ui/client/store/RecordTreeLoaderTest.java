@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.LookupKeySet;
@@ -10,6 +11,7 @@ import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.BioDataForm;
 import org.activityinfo.store.testing.IncidentForm;
 import org.activityinfo.store.testing.ReferralSubForm;
@@ -35,11 +37,11 @@ public class RecordTreeLoaderTest {
 
         Survey survey = setup.getSurveyForm();
 
-        Observable<RecordTree> recordTree = setup.getFormStore().getRecordTree(survey.getRecordRef(0));
+        Observable<Maybe<RecordTree>> recordTree = setup.getFormStore().getRecordTree(survey.getRecordRef(0));
 
-        Connection<RecordTree> recordTreeView = setup.connect(recordTree);
+        Connection<Maybe<RecordTree>> recordTreeView = setup.connect(recordTree);
 
-        RecordTree tree = recordTreeView.assertLoaded();
+        RecordTree tree = recordTreeView.assertLoaded().get();
 
         assertThat(tree.getRoot().get(survey.getNameFieldId()), equalTo(TextValue.valueOf("Melanie")));
     }
@@ -49,11 +51,11 @@ public class RecordTreeLoaderTest {
         BioDataForm bioDataForm = setup.getBioDataForm();
 
 
-        Observable<RecordTree> recordTree = setup.getFormStore().getRecordTree(bioDataForm.getRecordRef(0));
+        Observable<Maybe<RecordTree>> recordTree = setup.getFormStore().getRecordTree(bioDataForm.getRecordRef(0));
 
-        Connection<RecordTree> recordTreeView = setup.connect(recordTree);
+        Connection<Maybe<RecordTree>> recordTreeView = setup.connect(recordTree);
 
-        RecordTree tree = recordTreeView.assertLoaded();
+        RecordTree tree = recordTreeView.assertLoaded().get();
 
         LookupKeySet lookupKeySet = new LookupKeySet(
             tree.getFormTree(),
@@ -73,12 +75,14 @@ public class RecordTreeLoaderTest {
 
         IncidentForm incidentForm = setup.getCatalog().getIncidentForm();
 
-        Observable<RecordTree> recordTree = setup.getFormStore().getRecordTree(incidentForm.getRecordRef(0));
-        Connection<RecordTree> recordTreeView = setup.connect(recordTree);
+        RecordRef rootRecordRef = incidentForm.getRecordRef(0);
 
-        Iterable<FormInstance> subRecords = recordTreeView.assertLoaded().getSubRecords(incidentForm.getRecordRef(0), ReferralSubForm.FORM_ID);
+        Observable<Maybe<RecordTree>> recordTree = setup.getFormStore().getRecordTree(rootRecordRef);
+        Connection<Maybe<RecordTree>> recordTreeView = setup.connect(recordTree);
 
-        System.out.println(subRecords);
+        Iterable<FormInstance> subRecords = recordTreeView.assertLoaded().get().getSubRecords(rootRecordRef, ReferralSubForm.FORM_ID);
+
+        assertThat(Iterables.size(subRecords), equalTo(4));
 
     }
 

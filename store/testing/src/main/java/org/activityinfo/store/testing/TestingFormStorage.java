@@ -70,6 +70,18 @@ public class TestingFormStorage implements VersionedFormStorage {
     }
 
     @Override
+    public List<FormRecord> getSubRecords(ResourceId parentId) {
+
+        List<FormRecord> result = new ArrayList<>();
+        for (FormInstance record : records()) {
+            if(parentId.equals(record.getParentRecordId())) {
+                result.add(FormRecord.fromInstance(record));
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
         return Collections.emptyList();
     }

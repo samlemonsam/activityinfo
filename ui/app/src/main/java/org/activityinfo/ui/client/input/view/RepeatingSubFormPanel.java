@@ -63,9 +63,7 @@ public class RepeatingSubFormPanel implements IsWidget {
         return fieldId;
     }
 
-    public void init(SubFormInputViewModel subFormField) {
-
-
+    public void init(SubFormInputViewModel viewModel) {
     }
 
     public void update(SubFormInputViewModel viewModel) {
@@ -77,6 +75,8 @@ public class RepeatingSubFormPanel implements IsWidget {
             FormPanel subPanel = panelMap.get(subRecord.getRecordRef());
             if(subPanel == null) {
                 subPanel = new FormPanel(subTree, subRecord.getRecordRef(), inputHandler);
+                subPanel.init(subRecord.getSubFormViewModel());
+
                 recordContainer.add(subPanel);
                 panelMap.put(subRecord.getRecordRef(), subPanel);
             }

@@ -8,11 +8,13 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.json.Json;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
@@ -41,6 +43,7 @@ public class FormInputView implements IsWidget, InputHandler {
     private FormPanel formPanel = null;
 
     private FormStore formStore;
+    private Maybe<RecordTree> existingRecord;
     private FormInputModel inputModel;
     private FormInputViewModelBuilder viewModelBuilder = null;
 
@@ -80,12 +83,14 @@ public class FormInputView implements IsWidget, InputHandler {
         initialLoad = true;
         container.unmask();
 
-        viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure);
+        viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure.getFormTree());
+        existingRecord = formStructure.getExistingRecord();
+
         formPanel = new FormPanel(formStructure.getFormTree(), inputModel.getRecordRef(), this);
         container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
         container.forceLayout();
 
-        viewModel = viewModelBuilder.build(inputModel);
+        viewModel = viewModelBuilder.build(inputModel, existingRecord);
         formPanel.init(viewModel);
         formPanel.update(viewModel);
     }
@@ -108,7 +113,7 @@ public class FormInputView implements IsWidget, InputHandler {
 
     private void update(FormInputModel updatedModel) {
         this.inputModel = updatedModel;
-        this.viewModel = viewModelBuilder.build(inputModel);
+        this.viewModel = viewModelBuilder.build(inputModel, existingRecord);
         formPanel.update(viewModel);
     }
 

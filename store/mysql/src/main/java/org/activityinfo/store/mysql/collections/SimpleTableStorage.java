@@ -49,6 +49,11 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }

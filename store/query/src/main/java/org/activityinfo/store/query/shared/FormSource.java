@@ -18,7 +18,7 @@ public interface FormSource {
 
     Observable<FormTree> getFormTree(ResourceId formId);
 
-    Observable<RecordTree> getRecordTree(RecordRef recordRef);
+    Observable<Maybe<RecordTree>> getRecordTree(RecordRef recordRef);
 
     Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef);
 

@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
@@ -16,6 +17,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTree;
+import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.CatalogRequest;
@@ -25,6 +27,7 @@ import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,11 +92,31 @@ public class FormStoreImpl implements FormStore {
     }
 
     @Override
-    public Observable<RecordTree> getRecordTree(RecordRef rootRecordRef) {
-        return getFormTree(rootRecordRef.getFormId()).join(formTree ->
-            new ObservableTree<>(
-                new RecordTreeLoader(FormStoreImpl.this, formTree, rootRecordRef),
-                scheduler));
+    public Observable<Maybe<RecordTree>> getRecordTree(RecordRef rootRecordRef) {
+
+        Observable<FormTree> formTree = getFormTree(rootRecordRef.getFormId());
+        Observable<Maybe<FormRecord>> rootRecord = getRecord(rootRecordRef);
+
+        return Observable.join(formTree, rootRecord, new Function2<FormTree, Maybe<FormRecord>, Observable<Maybe<RecordTree>>>() {
+            @Override
+            public Observable<Maybe<RecordTree>> apply(FormTree formTree, Maybe<FormRecord> formRecordMaybe) {
+
+                if(!formRecordMaybe.isVisible()) {
+                    return Observable.just(Maybe.notFound());
+                }
+
+                Observable<RecordTree> recordTree = new ObservableTree<>(
+                    new RecordTreeLoader(FormStoreImpl.this, formTree, rootRecordRef),
+                    scheduler);
+
+                return recordTree.transform(new Function<RecordTree, Maybe<RecordTree>>() {
+                    @Override
+                    public Maybe<RecordTree> apply(RecordTree recordTree) {
+                        return Maybe.of(recordTree);
+                    }
+                });
+            }
+        });
     }
 
 
