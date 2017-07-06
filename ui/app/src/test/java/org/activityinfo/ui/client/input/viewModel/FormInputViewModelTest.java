@@ -46,8 +46,14 @@ public class FormInputViewModelTest {
         // Start with no input
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
+
+
         // Is this valid?
         FormInputViewModel viewModel = builder.build(inputModel);
+
+        // Fields with invalid relevance are considered relevant
+        assertTrue("field with bad relevance is relevant", viewModel.isRelevant(survey.getAgeFieldId()));
+
 
         assertThat("pregnant is not yet relevant", viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(false));
         assertThat("prenatale care is not relevant", viewModel.isRelevant(survey.getPrenataleCareFieldId()), equalTo(false));

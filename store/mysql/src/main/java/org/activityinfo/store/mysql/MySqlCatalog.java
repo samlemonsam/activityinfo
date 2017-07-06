@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public class MySqlCatalog implements FormCatalog {
 
     private static Logger LOGGER = Logger.getLogger(MySqlCatalog.class.getName());
-    
+
     private List<FormProvider> providers = new ArrayList<>();
     private final QueryExecutor executor;
     private LoadingCache<ResourceId, Optional<FormStorage>> sessionCache;
@@ -38,6 +38,7 @@ public class MySqlCatalog implements FormCatalog {
     
     private GeodbFolder geodbFolder;
     private DatabasesFolder databasesFolder;
+    private final FormFolder formFolder;
 
     public MySqlCatalog(final QueryExecutor executor) {
 
@@ -56,6 +57,7 @@ public class MySqlCatalog implements FormCatalog {
 
         geodbFolder = new GeodbFolder(executor);
         databasesFolder = new DatabasesFolder(executor);
+        formFolder = new FormFolder(this);
         
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<FormStorage>>() {
@@ -158,6 +160,7 @@ public class MySqlCatalog implements FormCatalog {
             List<CatalogEntry> entries = new ArrayList<>();
             entries.addAll(geodbFolder.getChildren(parentId));
             entries.addAll(databasesFolder.getChildren(parentId, userId));
+            entries.addAll(formFolder.getChildren(ResourceId.valueOf(parentId)));
 
             return entries;
             

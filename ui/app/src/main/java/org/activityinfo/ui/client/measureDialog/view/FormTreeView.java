@@ -100,7 +100,7 @@ public class FormTreeView implements IsWidget {
 
         @Override
         public boolean hasChildren(CatalogEntry parent) {
-            return parent.getType() == CatalogEntryType.FOLDER;
+            return !parent.isLeaf();
         }
     }
 

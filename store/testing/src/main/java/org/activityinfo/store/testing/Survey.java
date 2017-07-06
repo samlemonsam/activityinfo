@@ -84,6 +84,7 @@ public class Survey implements TestForm {
                 .setCode("AGE")
                 .setLabel("Respondent's Age")
                 .setType(new QuantityType("years"))
+                .setRelevanceConditionExpression("FOO != BAR(3)")  // Invalid expression
                 .setRequired(true);
 
         geoPointField = formClass.addField(ids.fieldId("F4"))

@@ -17,6 +17,7 @@ public class CatalogEntry {
     String id;
     String label;
     CatalogEntryType type;
+    boolean leaf;
 
     private CatalogEntry() {
     }
@@ -25,6 +26,15 @@ public class CatalogEntry {
         this.id = id;
         this.label = label;
         this.type = type;
+        this.leaf = (type != CatalogEntryType.FOLDER);
+    }
+
+    public boolean isLeaf() {
+        return leaf;
+    }
+
+    public void setLeaf(boolean leaf) {
+        this.leaf = leaf;
     }
 
     public String getId() {
@@ -44,6 +54,7 @@ public class CatalogEntry {
         jsonObject.put("id", id);
         jsonObject.put("type", type.name().toLowerCase());
         jsonObject.put("label", label);
+        jsonObject.put("leaf", leaf);
         return jsonObject;
     }
 
@@ -53,6 +64,7 @@ public class CatalogEntry {
         model.id = jsonObject.get("id").asString();
         model.type = CatalogEntryType.valueOf(jsonObject.get("type").asString().toUpperCase());
         model.label = jsonObject.get("label").asString();
+        model.leaf = jsonObject.getBoolean("leaf");
         return model;
     }
 
