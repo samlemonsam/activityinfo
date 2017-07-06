@@ -30,6 +30,7 @@ import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.EffectiveDimension;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -195,7 +196,17 @@ public class DimensionPane implements IsWidget {
         remove.setText(I18N.CONSTANTS.remove());
         remove.addSelectionHandler(event -> removeDimension(dim.getId()));
 
-        // Special handling for "Statistics' dimension
+        // Special handling for "Measures" and "Statistics" dimension
+
+        if(dim.getId().equals(DimensionModel.MEASURE_ID)) {
+            totalsItem.setEnabled(false);
+            remove.setEnabled(false);
+            percentagesItem.setEnabled(false);
+            if(viewModel.getModel().getMeasures().size() > 1) {
+                totalsLabel.setEnabled(false);
+            }
+        }
+
         if(dim.getId().equals(DimensionModel.STATISTIC_ID)) {
             totalsItem.setEnabled(false);
             if(viewModel.getModel().isMeasureDefinedWithMultipleStatistics()) {

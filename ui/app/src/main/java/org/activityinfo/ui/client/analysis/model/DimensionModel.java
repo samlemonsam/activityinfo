@@ -14,6 +14,8 @@ public abstract class DimensionModel {
 
     public static final String STATISTIC_ID = "statistic";
 
+    public static final String MEASURE_ID = "measure";
+
     public abstract String getId();
     public abstract String getLabel();
     public abstract List<DimensionMapping> getMappings();

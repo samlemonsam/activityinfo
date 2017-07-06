@@ -370,6 +370,18 @@ public class AnalysisViewModelTest {
     }
 
     @Test
+    public void multipleMeasures() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+            .addMeasures(intakeCaseCount().withLabel("Cases"))
+            .addMeasures(numChildren().withLabel("Children"))
+            .build();
+
+        assertThat(points(model), containsInAnyOrder(
+            point(1127,   "Cases"),
+            point(1525,   "Children")));
+    }
+
+    @Test
     public void dateDimension() {
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(intakeCaseCount())
@@ -570,7 +582,7 @@ public class AnalysisViewModelTest {
                 .build();
     }
 
-    private MeasureModel intakeCaseCount() {
+    private ImmutableMeasureModel intakeCaseCount() {
         return ImmutableMeasureModel.builder()
             .label("Count")
             .formId(intakeForm.getFormId())

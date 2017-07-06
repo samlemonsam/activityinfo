@@ -34,8 +34,6 @@ public class GroupMap {
 
     private Function<Integer, String> keyBuilder;
 
-    private int statisticDimensionIndex = -1;
-
     public GroupMap(ColumnSet columnSet, List<EffectiveMapping> dims) {
         this.dimensions = dims;
         this.readers = new DimensionReader[dims.size()];

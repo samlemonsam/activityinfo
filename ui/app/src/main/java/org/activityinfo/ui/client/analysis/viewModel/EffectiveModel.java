@@ -4,6 +4,7 @@ package org.activityinfo.ui.client.analysis.viewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.*;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,16 @@ public class EffectiveModel {
         this.model = model;
 
         List<DimensionModel> dimensions = new ArrayList<>(model.getDimensions());
+
+        // If we have multiple measures, than they MUST be labled with a measure dimension
+        if(model.getMeasures().size() > 1 &&
+            !isDefined(dimensions, DimensionModel.MEASURE_ID)) {
+            dimensions.add(
+                ImmutableDimensionModel.builder()
+                    .id(DimensionModel.MEASURE_ID)
+                    .label(I18N.CONSTANTS.measures())
+                    .build());
+        }
 
         // Include a Statistics dimension if required but not added by
         // the user to the model.
@@ -49,7 +60,7 @@ public class EffectiveModel {
             for (EffectiveMeasure effectiveMeasure : measures) {
                 effectiveMappings.add(effectiveMeasure.getDimension(index));
             }
-            this.dimensions.add(new EffectiveDimension(index, dimensionModel, effectiveMappings));
+            this.dimensions.add(new EffectiveDimension(index, model, dimensionModel, effectiveMappings));
         }
     }
 

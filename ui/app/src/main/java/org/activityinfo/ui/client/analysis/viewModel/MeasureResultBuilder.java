@@ -39,6 +39,8 @@ public class MeasureResultBuilder {
 
     private MultiDimSet multiDimSet;
 
+    private final int measureDimensionIndex;
+
 
     /**
      * The index of the "statistic" dimension, or -1 if not requested.
@@ -61,6 +63,7 @@ public class MeasureResultBuilder {
         this.columns = columns;
         this.numRows = columns.getNumRows();
         this.numDims = measure.getDimensionSet().getCount();
+        this.measureDimensionIndex = measure.getDimensionSet().getIndexByDimensionId(DimensionModel.MEASURE_ID);
         this.statisticDimensionIndex = measure.getDimensionSet().getIndexByDimensionId(DimensionModel.STATISTIC_ID);
         this.totalsRequired = whichDimensionsRequireTotals();
 
@@ -209,7 +212,7 @@ public class MeasureResultBuilder {
             for (int i = 0; i < totals.length; i++) {
                 points.add(new Point(totals[i],
                         format(totals[i]),
-                        withStatistic(newGroups.get(i), Statistic.SUM)));
+                        withFixedDimensions(newGroups.get(i), Statistic.SUM)));
             }
         }
 
@@ -222,13 +225,13 @@ public class MeasureResultBuilder {
 
                 points.add(new Point(conditionalProbability,
                         formatPercentage(conditionalProbability),
-                        withStatistic(regrouping.getOldGroup(oldGroup), percentageLabel)));
+                        withFixedDimensions(regrouping.getOldGroup(oldGroup), percentageLabel)));
             }
         }
 
         if(includeTotals && includePercentages) {
             for (String[] newGroup : regrouping.getNewGroups()) {
-                points.add(new Point(1.0, formatPercentage(1.0), withStatistic(newGroup, percentageLabel)));
+                points.add(new Point(1.0, formatPercentage(1.0), withFixedDimensions(newGroup, percentageLabel)));
             }
         }
     }
@@ -249,7 +252,7 @@ public class MeasureResultBuilder {
 
     public boolean isGrandTotal(Regrouping regrouping) {
         for (EffectiveMapping dim : measure.getDimensions()) {
-            if(!dim.getId().equals(DimensionModel.STATISTIC_ID)) {
+            if(!dim.getId().equals(DimensionModel.STATISTIC_ID) && !dim.getId().equals(DimensionModel.MEASURE_ID)) {
                 if(!regrouping.isDimensionTotaled(dim.getIndex())) {
                     return false;
                 }
@@ -286,17 +289,22 @@ public class MeasureResultBuilder {
         return true;
     }
 
-    private String[] withStatistic(String[] group, Statistic statistic) {
-        return withStatistic(group, statistic.getLabel());
+    private String[] withFixedDimensions(String[] group, Statistic statistic) {
+        return withFixedDimensions(group, statistic.getLabel());
     }
 
-    private String[] withStatistic(String[] group, String statistic) {
-        if(statisticDimensionIndex == -1) {
+    private String[] withFixedDimensions(String[] group, String statistic) {
+        if(statisticDimensionIndex == -1 && measureDimensionIndex == -1) {
             return group;
         } else {
-            String[] groupWithStat = Arrays.copyOf(group, group.length);
-            groupWithStat[statisticDimensionIndex] = statistic;
-            return groupWithStat;
+            String[] groupWithFixed = Arrays.copyOf(group, group.length);
+            if(measureDimensionIndex != -1) {
+                groupWithFixed[measureDimensionIndex] = measure.getModel().getLabel();
+            }
+            if(statisticDimensionIndex != -1) {
+                groupWithFixed[statisticDimensionIndex] = statistic;
+            }
+            return groupWithFixed;
         }
     }
 
@@ -356,7 +364,7 @@ public class MeasureResultBuilder {
             for (int i = 0; i < totals.length; i++) {
                 String[] group =  category.group(groupMap.getGroup(i));
 
-                points.add(new Point(totals[i], format(totals[i]), withStatistic(group, Statistic.SUM)));
+                points.add(new Point(totals[i], format(totals[i]), withFixedDimensions(group, Statistic.SUM)));
             }
         }
     }
@@ -373,7 +381,7 @@ public class MeasureResultBuilder {
                 groups.size());
 
         for (int i = 0; i < groups.size(); i++) {
-            points.add(new Point(aggregatedValues[i], format(aggregatedValues[i]), withStatistic(groups.get(i), statistic)));
+            points.add(new Point(aggregatedValues[i], format(aggregatedValues[i]), withFixedDimensions(groups.get(i), statistic)));
         }
 
         return aggregatedValues;

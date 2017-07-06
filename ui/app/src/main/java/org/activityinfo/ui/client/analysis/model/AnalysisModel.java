@@ -81,4 +81,5 @@ public abstract class AnalysisModel {
         }
         return false;
     }
+
 }
