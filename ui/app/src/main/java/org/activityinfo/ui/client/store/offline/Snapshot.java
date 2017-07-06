@@ -1,6 +1,6 @@
 package org.activityinfo.ui.client.store.offline;
 
-import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
@@ -20,10 +20,10 @@ import static org.activityinfo.observable.Observable.flatMap;
 public class Snapshot {
 
     private List<FormMetadata> forms;
-    private List<FormRecordSet> recordSets;
+    private List<FormSyncSet> recordSets;
 
 
-    public Snapshot(List<FormMetadata> forms, List<FormRecordSet> recordSets) {
+    public Snapshot(List<FormMetadata> forms, List<FormSyncSet> recordSets) {
         this.forms = forms;
         this.recordSets = recordSets;
     }
@@ -56,7 +56,7 @@ public class Snapshot {
 
         // And finally fetch any difference between our current snapshot and the latest version of the new snapshot
         return metadata.join(forms -> {
-            List<Observable<FormRecordSet>> recordSets = new ArrayList<>();
+            List<Observable<FormSyncSet>> recordSets = new ArrayList<>();
             for (FormMetadata form : forms) {
                 recordSets.add(httpStore.getVersionRange(form.getId(), 0, form.getVersion()));
             }
@@ -78,7 +78,7 @@ public class Snapshot {
         return forms;
     }
 
-    public List<FormRecordSet> getRecordSets() {
+    public List<FormSyncSet> getRecordSets() {
         return recordSets;
     }
 }

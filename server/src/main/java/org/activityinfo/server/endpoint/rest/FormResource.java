@@ -11,10 +11,7 @@ import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.json.*;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -196,14 +193,14 @@ public class FormResource {
     public Response getVersionRange(@QueryParam("localVersion") long localVersion, @QueryParam("version") long version) {
         FormStorage collection = assertVisible(formId);
 
-        List<FormRecord> versionRange;
+        FormSyncSet syncSet;
         if(collection instanceof VersionedFormStorage) {
-            versionRange = ((VersionedFormStorage) collection).getVersionRange(localVersion, version);
+            syncSet = ((VersionedFormStorage) collection).getVersionRange(localVersion, version);
         } else {
-            versionRange = Collections.emptyList();
+            syncSet = FormSyncSet.emptySet(formId);
         }
         return Response.ok()
-                .entity(encode(versionRange))
+                .entity(Json.toJson(syncSet).toJson())
                 .type(JSON_CONTENT_TYPE)
                 .build();
     }

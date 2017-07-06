@@ -10,6 +10,7 @@ import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -327,7 +328,7 @@ public class HrdCatalogTest {
         // and the version range (0, 1] should be empty.
         assertThat(formStorage.cacheVersion(), equalTo(1L));
 
-        List<FormRecord> updatedRecords = formStorage.getVersionRange(0, 1L);
+        FormSyncSet updatedRecords = formStorage.getVersionRange(0, 1L);
 
         assertTrue(updatedRecords.isEmpty());
 
@@ -344,8 +345,8 @@ public class HrdCatalogTest {
 
         assertThat(formStorage.cacheVersion(), equalTo(2L));
 
-        List<FormRecord> updated = formStorage.getVersionRange(0, 2L);
-        assertThat(updated, hasSize(1));
+        FormSyncSet updated = formStorage.getVersionRange(0, 2L);
+        assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
         // Update the first record and add a new one
         TypedRecordUpdate secondUpdate = new TypedRecordUpdate();
@@ -360,7 +361,7 @@ public class HrdCatalogTest {
         assertThat(formStorage.cacheVersion(), equalTo(3L));
 
         updated = formStorage.getVersionRange(2L, 3L);
-        assertThat(updated, hasSize(1));
+        assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
     }
 

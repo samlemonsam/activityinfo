@@ -10,8 +10,10 @@ import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.SyncSetBuilder;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordCursor;
@@ -91,12 +93,14 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
-    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion) {
         if(localVersion == mapping.getVersion()) {
-            return Collections.emptyList();
+            return FormSyncSet.emptySet(getFormClass().getId());
         }
 
         // Otherwise send the whole shebang...
+
+
         RecordCursor cursor = new RecordCursor(mapping, executor);
         Iterator<FormInstance> it = cursor.execute();
 
@@ -105,7 +109,7 @@ public class SimpleTableStorage implements VersionedFormStorage {
             records.add(FormRecord.fromInstance(it.next()));
         }
 
-        return records;
+        return FormSyncSet.create(getFormClass().getId(), records);
     }
 
     @Override

@@ -4,10 +4,7 @@ import com.google.common.base.Function;
 import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.UriUtils;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
-import org.activityinfo.json.JsonParser;
-import org.activityinfo.json.JsonValue;
+import org.activityinfo.json.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
@@ -21,6 +18,7 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
@@ -156,15 +154,24 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, final long toVersion) {
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         urlBuilder.append("/form");
         urlBuilder.append("/").append(formId);
         urlBuilder.append("/records/versionRange");
-        urlBuilder.append("?localVersion=" + localVersion);
-        urlBuilder.append("&version=" + toVersion);
+        urlBuilder.append("?localVersion=").append(localVersion);
+        urlBuilder.append("&version=").append(toVersion);
 
-        return getRecords(urlBuilder.toString());
+        return get(urlBuilder.toString(), new Function<JsonValue, FormSyncSet>() {
+            @Override
+            public FormSyncSet apply(JsonValue value) {
+                try {
+                    return Json.fromJson(FormSyncSet.class, value.getAsJsonObject());
+                } catch (JsonMappingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
 

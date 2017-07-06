@@ -6,7 +6,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
@@ -103,7 +103,7 @@ public class HttpStore {
     }
 
 
-    public Observable<FormRecordSet> getVersionRange(ResourceId formId, long localVersion, long version) {
+    public Observable<FormSyncSet> getVersionRange(ResourceId formId, long localVersion, long version) {
         return get(new VersionRangeRequest(formId, localVersion, version));
     }
 

@@ -7,6 +7,8 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.UpdatedRecord;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 
 /**
@@ -23,6 +25,14 @@ public final class RecordObject {
 
     @JsOverlay
     public static RecordObject from(FormRecord record) {
+        RecordObject object = new RecordObject();
+        object.parentRecordId = record.getParentRecordId();
+        object.fields = record.getFields();
+        return object;
+    }
+
+    @JsOverlay
+    public static RecordObject from(UpdatedRecord record) {
         RecordObject object = new RecordObject();
         object.parentRecordId = record.getParentRecordId();
         object.fields = record.getFields();
@@ -66,4 +76,5 @@ public final class RecordObject {
     public FormRecord toFormRecord(RecordRef recordRef) {
         return new FormRecord(recordRef, parentRecordId, fields);
     }
+
 }

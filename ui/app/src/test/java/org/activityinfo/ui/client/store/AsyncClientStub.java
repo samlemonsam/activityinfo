@@ -12,6 +12,7 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
@@ -89,7 +90,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
         if(!connected) {
             return offlineResult();
         }
@@ -98,7 +99,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return Promise.rejected(new RuntimeException("No such form"));
         }
         VersionedFormStorage formStorage = (VersionedFormStorage) form.get();
-        return Promise.resolved(new FormRecordSet(formStorage.getVersionRange(localVersion, toVersion)));
+        return Promise.resolved(formStorage.getVersionRange(localVersion, toVersion));
     }
 
     @Override

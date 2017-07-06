@@ -49,7 +49,6 @@ public class FormStoreTest {
         client.setConnected(false);
 
 
-
         // Now the view connects and should remain in loading state...
         FormStoreImpl formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
         Connection<FormTree> view = connect(formStore.getFormTree(survey.getFormId()));

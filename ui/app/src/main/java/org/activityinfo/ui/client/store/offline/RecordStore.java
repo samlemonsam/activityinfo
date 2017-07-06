@@ -2,9 +2,11 @@ package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.indexedb.*;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.UpdatedRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.store.query.server.Updater;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -46,8 +48,9 @@ public class RecordStore {
         this.impl = impl;
     }
 
-    public final void put(FormRecord record) {
-        impl.put(key(record.getRef()), RecordObject.from(record));
+    public final void put(ResourceId formId, UpdatedRecord record) {
+        RecordRef ref = new RecordRef(formId, ResourceId.valueOf(record.getRecordId()));
+        impl.put(key(ref), RecordObject.from(record));
     }
 
     public final void put(RecordRef recordRef, RecordObject recordObject) {

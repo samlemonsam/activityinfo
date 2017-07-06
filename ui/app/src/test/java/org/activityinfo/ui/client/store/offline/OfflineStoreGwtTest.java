@@ -5,7 +5,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import junit.framework.TestCase;
-import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.query.ColumnView;
@@ -17,7 +17,7 @@ import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.HttpStore;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -165,13 +165,15 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
     }
 
-    private FormRecordSet toFormRecordSet(Survey survey) {
+    private FormSyncSet toFormRecordSet(Survey survey) {
 
-        List<FormRecord> records = new ArrayList<>();
-        for (FormInstance instance : survey.getRecords()) {
-            records.add(FormRecord.fromInstance(instance));
+        List<FormInstance> records = survey.getRecords();
+        FormRecord array[] = new FormRecord[records.size()];
+
+        for (int i = 0; i < records.size(); i++) {
+            array[i] = FormRecord.fromInstance(records.get(i));
         }
 
-        return new FormRecordSet(records);
+        return FormSyncSet.create(survey.getFormId().asString(), new String[0], Arrays.asList(array));
     }
 }

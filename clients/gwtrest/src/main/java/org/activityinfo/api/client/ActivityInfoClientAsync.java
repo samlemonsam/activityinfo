@@ -10,6 +10,7 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
@@ -70,7 +71,7 @@ public interface ActivityInfoClientAsync {
      * @param toVersion the desired version update
      * @return
      */
-    Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion);
+    Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion);
 
     /**
      * Create a New Record

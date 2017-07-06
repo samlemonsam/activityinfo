@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.indexedb.IDBFactory;
 import org.activityinfo.indexedb.IDBTransaction;
 import org.activityinfo.indexedb.OfflineDatabase;
@@ -15,6 +15,7 @@ import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.UpdatedRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -209,9 +210,10 @@ public class OfflineStore {
                 schemaStore.put(metadata.getSchema());
             }
             RecordStore recordStore = tx.objectStore(RecordStore.DEF);
-            for (FormRecordSet formRecordSet : snapshot.getRecordSets()) {
-                for (FormRecord record : formRecordSet.getRecords()) {
-                    recordStore.put(record);
+            for (FormSyncSet formRecordSet : snapshot.getRecordSets()) {
+                ResourceId formId = ResourceId.valueOf(formRecordSet.getFormId());
+                for (UpdatedRecord record : formRecordSet.getUpdatedRecords()) {
+                    recordStore.put(formId, record);
                 }
             }
             // Store our current status for future sessions

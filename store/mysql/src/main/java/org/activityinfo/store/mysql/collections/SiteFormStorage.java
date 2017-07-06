@@ -10,6 +10,7 @@ import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -377,7 +378,7 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion) {
         HrdFormStorage delegate = new HrdFormStorage(getFormClass());
         return delegate.getVersionRange(localVersion, toVersion);
     }
