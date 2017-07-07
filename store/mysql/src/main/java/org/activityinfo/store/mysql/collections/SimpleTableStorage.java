@@ -1,6 +1,7 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -13,7 +14,6 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.hrd.SyncSetBuilder;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordCursor;
@@ -93,7 +93,7 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
         if(localVersion == mapping.getVersion()) {
             return FormSyncSet.emptySet(getFormClass().getId());
         }

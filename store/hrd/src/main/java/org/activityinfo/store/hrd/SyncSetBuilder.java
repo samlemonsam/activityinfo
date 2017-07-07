@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd;
 
 
+import com.google.common.base.Predicate;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.FormSyncSet;
@@ -14,23 +15,28 @@ public class SyncSetBuilder {
 
     private final FormClass formClass;
     private long localVersion;
+    private Predicate<ResourceId> visibilityPredicate;
 
     private Set<String> deleted = new HashSet<>();
     private Map<ResourceId, FormRecordSnapshotEntity> snapshots = new HashMap<>();
 
-    SyncSetBuilder(FormClass formClass, long localVersion) {
+    SyncSetBuilder(FormClass formClass, long localVersion, Predicate<ResourceId> visibilityPredicate) {
         this.formClass = formClass;
         this.localVersion = localVersion;
+        this.visibilityPredicate = visibilityPredicate;
     }
 
+
+
     public void add(FormRecordSnapshotEntity snapshot) {
+        if(visibilityPredicate.apply(snapshot.getRecord().getRecordId())) {
+            if (snapshot.getType() == RecordChangeType.DELETED) {
+                deleted.add(snapshot.getRecordId().asString());
+                snapshots.remove(snapshot.getRecordId());
 
-        if(snapshot.getType() == RecordChangeType.DELETED) {
-            deleted.add(snapshot.getRecordId().asString());
-            snapshots.remove(snapshot.getRecordId());
-
-        } else {
-            snapshots.put(snapshot.getRecordId(), snapshot);
+            } else {
+                snapshots.put(snapshot.getRecordId(), snapshot);
+            }
         }
     }
 

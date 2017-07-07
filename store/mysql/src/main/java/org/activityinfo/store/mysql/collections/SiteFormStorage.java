@@ -1,6 +1,8 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.expr.ConstantExpr;
@@ -378,8 +380,8 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
         HrdFormStorage delegate = new HrdFormStorage(getFormClass());
-        return delegate.getVersionRange(localVersion, toVersion);
+        return delegate.getVersionRange(localVersion, toVersion, visibilityPredicate);
     }
 }

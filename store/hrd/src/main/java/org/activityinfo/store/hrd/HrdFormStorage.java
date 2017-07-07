@@ -2,6 +2,7 @@ package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.googlecode.objectify.cmd.Query;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
@@ -17,7 +18,6 @@ import org.activityinfo.store.hrd.op.QuerySubRecords;
 import org.activityinfo.store.hrd.op.QueryVersions;
 import org.activityinfo.store.spi.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.activityinfo.store.hrd.Hrd.ofy;
@@ -106,7 +106,7 @@ public class HrdFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
 
         Query<FormRecordSnapshotEntity> query = ofy().load().type(FormRecordSnapshotEntity.class)
                 .ancestor(FormEntity.key(formClass));
@@ -115,7 +115,7 @@ public class HrdFormStorage implements VersionedFormStorage {
             query = query.filter("version >", localVersion);
         }
 
-        SyncSetBuilder builder = new SyncSetBuilder(getFormClass(), localVersion);
+        SyncSetBuilder builder = new SyncSetBuilder(getFormClass(), localVersion, visibilityPredicate);
 
         QueryResultIterator<FormRecordSnapshotEntity> it = query.iterator();
         while(it.hasNext()) {

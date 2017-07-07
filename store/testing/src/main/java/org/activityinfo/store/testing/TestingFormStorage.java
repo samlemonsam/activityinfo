@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.vividsolutions.jts.geom.Geometry;
@@ -93,7 +94,7 @@ public class TestingFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
         List<FormRecord> records = new ArrayList<>();
         if(localVersion < 1) {
             for (FormInstance record : records()) {

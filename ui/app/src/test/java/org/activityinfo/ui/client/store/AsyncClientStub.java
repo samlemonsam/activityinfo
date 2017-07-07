@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import org.activityinfo.api.client.*;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
@@ -99,7 +100,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return Promise.rejected(new RuntimeException("No such form"));
         }
         VersionedFormStorage formStorage = (VersionedFormStorage) form.get();
-        return Promise.resolved(formStorage.getVersionRange(localVersion, toVersion));
+        return Promise.resolved(formStorage.getVersionRange(localVersion, toVersion, Predicates.alwaysTrue()));
     }
 
     @Override

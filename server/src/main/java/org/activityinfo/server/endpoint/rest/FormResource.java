@@ -3,6 +3,8 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
@@ -17,6 +19,7 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
@@ -49,8 +52,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,6 +71,7 @@ public class FormResource {
     private BlobAuthorizer blobAuthorizer;
 
     private final ResourceId formId;
+    private FormSupervisorAdapter supervisor;
 
     public FormResource(ResourceId formId,
                         Provider<FormCatalog> catalog,
@@ -79,6 +83,7 @@ public class FormResource {
         this.userProvider = userProvider;
         this.permissionOracle = permissionOracle;
         this.blobAuthorizer = blobAuthorizer;
+        this.supervisor = new FormSupervisorAdapter(catalog.get(), userProvider.get().getId());
     }
 
     @GET
@@ -193,9 +198,14 @@ public class FormResource {
     public Response getVersionRange(@QueryParam("localVersion") long localVersion, @QueryParam("version") long version) {
         FormStorage collection = assertVisible(formId);
 
+        // Compute a predicate that will tell us whether a given
+        // record should be visible to the user, based on their *current* permissions.
+
+        Predicate<ResourceId> visibilityPredicate = computeVisibilityPredicate();
+
         FormSyncSet syncSet;
         if(collection instanceof VersionedFormStorage) {
-            syncSet = ((VersionedFormStorage) collection).getVersionRange(localVersion, version);
+            syncSet = ((VersionedFormStorage) collection).getVersionRange(localVersion, version, visibilityPredicate);
         } else {
             syncSet = FormSyncSet.emptySet(formId);
         }
@@ -203,6 +213,32 @@ public class FormResource {
                 .entity(Json.toJson(syncSet).toJson())
                 .type(JSON_CONTENT_TYPE)
                 .build();
+    }
+
+    /**
+     * Computes a record-level visibility predicate.
+     */
+    private Predicate<ResourceId> computeVisibilityPredicate() {
+        FormPermissions formPermissions = supervisor.getFormPermissions(formId);
+        if (!formPermissions.hasVisiblityFilter()) {
+            return Predicates.alwaysTrue();
+        }
+
+        QueryModel queryModel = new QueryModel(formId);
+        queryModel.selectResourceId().as("id");
+
+        ColumnSet columnSet = executeQuery(queryModel);
+        ColumnView id = columnSet.getColumnView("id");
+        final Set<String> idSet = new HashSet<>();
+        for (int i = 0; i < id.numRows(); i++) {
+            idSet.add(id.getString(i));
+        }
+        return new Predicate<ResourceId>() {
+            @Override
+            public boolean apply(ResourceId resourceId) {
+                return idSet.contains(resourceId.asString());
+            }
+        };
     }
 
     @POST
@@ -300,7 +336,7 @@ public class FormResource {
         }
 
         HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
-        Iterable<FormRecord> records = collection.get().getSubRecords(ResourceId.valueOf(parentId));
+        Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
 
         return Response.ok(encode(records), JSON_CONTENT_TYPE).build();
     }
@@ -479,9 +515,11 @@ public class FormResource {
             }
         }
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(
-                catalog.get(),
-                new FormSupervisorAdapter(catalog.get(), userProvider.get().getId()));
+        return executeQuery(queryModel);
+    }
+
+    private ColumnSet executeQuery(QueryModel queryModel) {
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), supervisor);
 
         return builder.build(queryModel);
     }
