@@ -511,6 +511,7 @@ public class Updater {
 
         TypedRecordUpdate update = new TypedRecordUpdate();
         update.setUserId(userId);
+        update.setFormId(formId);
         update.setRecordId(recordId);
 
         if(jsonObject.hasKey("deleted") && !jsonObject.get("deleted").isJsonNull()) {
