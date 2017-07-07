@@ -78,7 +78,7 @@ public class Snapshot {
         return forms;
     }
 
-    public List<FormSyncSet> getRecordSets() {
+    public List<FormSyncSet> getSyncSets() {
         return recordSets;
     }
 }

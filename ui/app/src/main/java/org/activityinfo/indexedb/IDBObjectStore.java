@@ -45,5 +45,7 @@ public interface IDBObjectStore<T> {
 
     void delete(String[] key);
 
+    void delete(String[] lowerBound, String[] upperBound);
+
     void delete(int key);
 }

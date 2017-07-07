@@ -99,8 +99,6 @@ public class SimpleTableStorage implements VersionedFormStorage {
         }
 
         // Otherwise send the whole shebang...
-
-
         RecordCursor cursor = new RecordCursor(mapping, executor);
         Iterator<FormInstance> it = cursor.execute();
 
@@ -109,7 +107,7 @@ public class SimpleTableStorage implements VersionedFormStorage {
             records.add(FormRecord.fromInstance(it.next()));
         }
 
-        return FormSyncSet.create(getFormClass().getId(), records);
+        return FormSyncSet.complete(getFormClass().getId(), records);
     }
 
     @Override

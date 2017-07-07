@@ -26,8 +26,6 @@ public class SyncSetBuilder {
         this.visibilityPredicate = visibilityPredicate;
     }
 
-
-
     public void add(FormRecordSnapshotEntity snapshot) {
         if(visibilityPredicate.apply(snapshot.getRecord().getRecordId())) {
             if (snapshot.getType() == RecordChangeType.DELETED) {
@@ -55,7 +53,11 @@ public class SyncSetBuilder {
     }
 
     public FormSyncSet build() {
-        return FormSyncSet.create(formClass.getId().asString(), buildDeletedArray(), buildUpdateArrays());
+        if(localVersion == 0) {
+            return FormSyncSet.complete(formClass.getId(), buildUpdateArrays());
+        } else {
+            return FormSyncSet.incremental(formClass.getId().asString(), buildDeletedArray(), buildUpdateArrays());
+        }
     }
 
 }

@@ -38,10 +38,7 @@ import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
-import org.activityinfo.store.query.server.ColumnSetBuilder;
-import org.activityinfo.store.query.server.FormSupervisorAdapter;
-import org.activityinfo.store.query.server.InvalidUpdateException;
-import org.activityinfo.store.query.server.Updater;
+import org.activityinfo.store.query.server.*;
 import org.activityinfo.store.spi.*;
 
 import javax.inject.Provider;
@@ -184,6 +181,14 @@ public class FormResource {
             return Response
                     .status(Response.Status.NOT_FOUND)
                     .entity("Record " + recordId + " does not exist.")
+                    .build();
+        }
+
+        PermissionsEnforcer enforcer = new PermissionsEnforcer(catalog.get(), userProvider.get().getId());
+        if(!enforcer.canView(record.get())){
+            return Response
+                    .status(Response.Status.FORBIDDEN)
+                    .entity("Not authorized")
                     .build();
         }
 

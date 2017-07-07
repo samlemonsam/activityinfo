@@ -113,6 +113,11 @@ public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDB
     }-*/;
 
     @Override
+    public native void delete(String[] lowerBound, String[] upperBound) /*-{
+        this['delete']($wnd.IDBKeyRange.bound(lowerBound, upperBound));
+    }-*/;
+
+    @Override
     public final native void delete(int key) /*-{
         this['delete'](key);
     }-*/;

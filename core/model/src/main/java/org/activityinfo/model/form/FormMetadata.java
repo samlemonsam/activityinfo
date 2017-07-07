@@ -37,6 +37,17 @@ public class FormMetadata {
     private boolean deleted = false;
 
 
+    /**
+     * A boolean-valued formula that determines whether a record is
+     * visible to the current user
+     */
+    private String viewFilter;
+
+    /**
+     * A boolean-valued formula that determines whether a record is
+     */
+    private String editFilter;
+
     private FormClass schema;
 
 

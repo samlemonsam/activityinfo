@@ -15,6 +15,7 @@ import java.util.List;
 public final class FormSyncSet {
 
     private String formId;
+    private boolean reset;
     private String[] deleted;
     private UpdatedRecord[] updatedRecords;
 
@@ -22,10 +23,24 @@ public final class FormSyncSet {
     }
 
     @JsOverlay
-    public static FormSyncSet create(String formId, String[] deleted, List<FormRecord> records) {
+    public static FormSyncSet incremental(String formId, String[] deleted, List<FormRecord> records) {
         FormSyncSet syncSet = new FormSyncSet();
         syncSet.formId = formId;
+        syncSet.reset = false;
         syncSet.deleted = deleted;
+        syncSet.updatedRecords = new UpdatedRecord[records.size()];
+        for (int i = 0; i < syncSet.updatedRecords.length; i++) {
+            syncSet.updatedRecords[i] = UpdatedRecord.create(records.get(i));
+        }
+        return syncSet;
+    }
+
+    @JsOverlay
+    public static FormSyncSet complete(ResourceId formId, List<FormRecord> records) {
+        FormSyncSet syncSet = new FormSyncSet();
+        syncSet.formId = formId.asString();
+        syncSet.reset = true;
+        syncSet.deleted = new String[0];
         syncSet.updatedRecords = new UpdatedRecord[records.size()];
         for (int i = 0; i < syncSet.updatedRecords.length; i++) {
             syncSet.updatedRecords[i] = UpdatedRecord.create(records.get(i));
@@ -43,18 +58,13 @@ public final class FormSyncSet {
     }
 
     @JsOverlay
-    public static FormSyncSet create(ResourceId id, List<FormRecord> records) {
-        return create(id.asString(), new String[0], records);
-    }
-
-    @JsOverlay
     public String getFormId() {
         return formId;
     }
 
     @JsOverlay
-    public String[] getDeleted() {
-        return deleted;
+    public Iterable<String> getDeleted() {
+        return Arrays.asList(deleted);
     }
 
     @JsOverlay
@@ -76,4 +86,10 @@ public final class FormSyncSet {
     public UpdatedRecord getUpdatedRecord(int i) {
         return updatedRecords[i];
     }
+
+    @JsOverlay
+    public boolean isReset() {
+        return reset;
+    }
+
 }

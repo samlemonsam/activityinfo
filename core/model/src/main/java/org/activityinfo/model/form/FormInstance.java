@@ -66,7 +66,8 @@ public class FormInstance {
      * @param classId the id of this form's class
      */
     public FormInstance(@Nonnull ResourceId id, @Nonnull ResourceId classId) {
-        Preconditions.checkNotNull(id, classId);
+        Preconditions.checkNotNull(id);
+        Preconditions.checkNotNull(classId);
         this.id = id;
         this.classId = classId;
         this.parentRecordId = classId;

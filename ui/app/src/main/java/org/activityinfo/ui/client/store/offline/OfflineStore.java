@@ -210,12 +210,7 @@ public class OfflineStore {
                 schemaStore.put(metadata.getSchema());
             }
             RecordStore recordStore = tx.objectStore(RecordStore.DEF);
-            for (FormSyncSet formRecordSet : snapshot.getRecordSets()) {
-                ResourceId formId = ResourceId.valueOf(formRecordSet.getFormId());
-                for (UpdatedRecord record : formRecordSet.getUpdatedRecords()) {
-                    recordStore.put(formId, record);
-                }
-            }
+            applyRemoteUpdates(snapshot, recordStore);
             // Store our current status for future sessions
             tx.objectStore(KeyValueStore.DEF).put(status);
         })
@@ -227,6 +222,28 @@ public class OfflineStore {
                 return null;
             }
         });
+    }
+
+    private void applyRemoteUpdates(Snapshot snapshot, RecordStore recordStore) {
+        for (FormSyncSet syncSet : snapshot.getSyncSets()) {
+            applyRemoteUpdates(recordStore, syncSet);
+        }
+    }
+
+    private void applyRemoteUpdates(RecordStore recordStore, FormSyncSet syncSet) {
+        ResourceId formId = ResourceId.valueOf(syncSet.getFormId());
+
+        if(syncSet.isReset()) {
+            recordStore.deleteAllRecords(formId);
+        } else {
+            for (String recordId : syncSet.getDeleted()) {
+                recordStore.deleteRecord(new RecordRef(formId, ResourceId.valueOf(recordId)));
+            }
+        }
+
+        for (UpdatedRecord record : syncSet.getUpdatedRecords()) {
+            recordStore.put(formId, record);
+        }
     }
 
     /**
@@ -244,7 +261,7 @@ public class OfflineStore {
             List<Promise<RecordUpdate>> rollbacks = new ArrayList<>();
 
             for (RecordUpdate update : transaction.getChanges()) {
-                rollbacks.add(applyUpdate(tx, update));
+                rollbacks.add(applyLocalUpdate(tx, update));
             }
 
             return Promise.flatten(rollbacks).then(new Function<List<RecordUpdate>, Void>() {
@@ -273,7 +290,7 @@ public class OfflineStore {
     }
 
 
-    private Promise<RecordUpdate> applyUpdate(IDBTransaction tx, RecordUpdate update) {
+    private Promise<RecordUpdate> applyLocalUpdate(IDBTransaction tx, RecordUpdate update) {
         RecordStore recordStore = tx.objectStore(RecordStore.DEF);
         return recordStore.get(update.getRecordRef()).then(existingRecord -> {
 
@@ -283,7 +300,7 @@ public class OfflineStore {
                     recordStore.deleteRecord(update.getRecordRef());
                 }
             } else {
-                recordStore.put(update.getRecordRef(), applyUpdate(existingRecord, update));
+                recordStore.put(update.getRecordRef(), applyLocalUpdate(existingRecord, update));
             }
 
             // Return the inverse so that we can rollback this change locally if the update
@@ -293,7 +310,7 @@ public class OfflineStore {
     }
 
 
-    private RecordObject applyUpdate(Optional<RecordObject> existingRecord, RecordUpdate update) {
+    private RecordObject applyLocalUpdate(Optional<RecordObject> existingRecord, RecordUpdate update) {
         RecordObject updatedRecord = new RecordObject();
 
         // Combine old and new field values
@@ -343,8 +360,16 @@ public class OfflineStore {
             @Override
             public Void apply(Void aVoid) {
 
+                LOGGER.info("Database deleted");
+
                 offlineForms.updateValue(Collections.emptySet());
+
+                LOGGER.info("Offline form set updated");
+
                 currentSnapshot.updateIfNotEqual(SnapshotStatus.EMPTY);
+
+                LOGGER.info("Updated snapshot");
+
                 eventBus.fireEvent(new PendingStatusEvent());
                 return null;
             }

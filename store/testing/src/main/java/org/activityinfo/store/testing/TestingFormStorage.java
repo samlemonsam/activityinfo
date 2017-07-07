@@ -101,7 +101,7 @@ public class TestingFormStorage implements VersionedFormStorage {
                 records.add(FormRecord.fromInstance(record));
             }
         }
-        return FormSyncSet.create(testForm.getFormId().asString(), new String[0], records);
+        return FormSyncSet.incremental(testForm.getFormId().asString(), new String[0], records);
     }
 
     @Override

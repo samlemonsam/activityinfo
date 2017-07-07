@@ -67,8 +67,8 @@ public class RecordStore {
 
     public void openCursor(ResourceId formId, IDBCursorCallback<RecordObject> callback) {
 
-        String[] lowerBound = new String[] { formId.asString(), "" };
-        String[] upperBound = new String[] { formId.asString(), "\uFFFF" };
+        String[] lowerBound = formLower(formId);
+        String[] upperBound = formUpper(formId);
 
         impl.openCursor(lowerBound, upperBound, new IDBCursorCallback<RecordObject>() {
             @Override
@@ -86,13 +86,23 @@ public class RecordStore {
         });
     }
 
+    private String[] formUpper(ResourceId formId) {
+        return new String[] { formId.asString(), "\uFFFF" };
+    }
+
+    private String[] formLower(ResourceId formId) {
+        return new String[] { formId.asString(), "" };
+    }
 
     public static ResourceId recordIdOf(IDBCursor<RecordObject> cursor) {
         return ResourceId.valueOf(cursor.getKeyArray()[1]);
     }
 
-
     public void deleteRecord(RecordRef recordRef) {
         impl.delete(key(recordRef));
+    }
+
+    public void deleteAllRecords(ResourceId formId) {
+        impl.delete(formLower(formId), formUpper(formId));
     }
 }

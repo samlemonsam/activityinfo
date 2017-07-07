@@ -84,7 +84,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
             public Maybe<FormRecord> apply(Response response) {
                 if(response.getStatusCode() == 200) {
                     return Maybe.of(FormRecord.fromJson(JSON_PARSER.parse(response.getText())));
-                } else if(response.getStatusCode() == 401) {
+                } else if(response.getStatusCode() == 403) {
                     return Maybe.forbidden();
                 } else if(response.getStatusCode() == 404) {
                     return Maybe.notFound();

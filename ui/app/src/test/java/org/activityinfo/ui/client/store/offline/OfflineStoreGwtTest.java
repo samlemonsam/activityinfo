@@ -174,6 +174,6 @@ public class OfflineStoreGwtTest extends GWTTestCase {
             array[i] = FormRecord.fromInstance(records.get(i));
         }
 
-        return FormSyncSet.create(survey.getFormId().asString(), new String[0], Arrays.asList(array));
+        return FormSyncSet.incremental(survey.getFormId().asString(), new String[0], Arrays.asList(array));
     }
 }

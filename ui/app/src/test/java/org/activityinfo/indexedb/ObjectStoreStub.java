@@ -3,10 +3,7 @@ package org.activityinfo.indexedb;
 import org.activityinfo.json.Json;
 import org.activityinfo.promise.Promise;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.*;
 
 
 public class ObjectStoreStub<T> {
@@ -107,6 +104,25 @@ public class ObjectStoreStub<T> {
         @Override
         public void delete(String[] key) {
             delete(new ObjectKey(key));
+        }
+
+        @Override
+        public void delete(String[] lowerBound, String[] upperBound) {
+            ObjectKey lowerKey = new ObjectKey(lowerBound);
+            ObjectKey upperKey = new ObjectKey(upperBound);
+
+            Set<ObjectKey> toDelete = new HashSet<>();
+
+            for (ObjectKey objectKey : objectMap.keySet()) {
+                if(lowerKey.compareTo(objectKey) <= 0 ||
+                   objectKey.compareTo(upperKey) <= 0) {
+                    toDelete.add(objectKey);
+                }
+            }
+
+            for (ObjectKey objectKey : toDelete) {
+                objectMap.remove(objectKey);
+            }
         }
 
         private void delete(ObjectKey key) {

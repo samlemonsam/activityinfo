@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -29,6 +30,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.spi.*;
+import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -87,10 +89,6 @@ public class Updater {
         }
     }
 
-    public void executeChange(JsonObject changeObject) throws JsonMappingException {
-        executeChange(Json.fromJson(RecordUpdate.class, changeObject));
-    }
-
     public void executeChange(RecordUpdate update) {
 
         Optional<FormStorage> storage = catalog.getForm(update.getFormId());
@@ -124,6 +122,7 @@ public class Updater {
 
         TypedRecordUpdate update = new TypedRecordUpdate();
         update.setUserId(userId);
+        update.setFormId(formClass.getId());
         update.setRecordId(changeObject.getRecordId());
         update.setDeleted(changeObject.isDeleted());
         if(changeObject.getParentRecordId() != null) {
@@ -165,22 +164,6 @@ public class Updater {
             }
         }
         return update;
-    }
-
-    private static ResourceId parseId(JsonObject changeObject, String... propertyNames) {
-
-        for (String propertyName : propertyNames) {
-            if(changeObject.hasKey(propertyName)) {
-                JsonValue jsonValue = changeObject.get(propertyName);
-                if(!jsonValue.isString()) {
-                    throw new InvalidUpdateException(format("Property '%s' must contain a string, but found: %s",
-                        propertyName, jsonValue.toJson()));
-                }
-                return ResourceId.valueOf(jsonValue.asString());
-            }
-        }
-
-        throw new InvalidUpdateException(format("Missing '%s' property", propertyNames[0]));
     }
 
     private static FieldValue parseFieldValue(FormField field, JsonValue jsonValue) {
@@ -242,6 +225,8 @@ public class Updater {
     }
 
     private void executeUpdate(FormStorage form, TypedRecordUpdate update) {
+
+        Preconditions.checkNotNull(update.getFormId());
 
         FormClass formClass = form.getFormClass();
         Optional<FormRecord> existingResource = form.get(update.getRecordId());
@@ -370,16 +355,31 @@ public class Updater {
         }
     }
 
-    private void authorizeUpdate(FormStorage form, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
+    private void authorizeUpdate(final FormStorage form, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
 
+        Preconditions.checkNotNull(update.getFormId());
 
         // Check form-level permissions
         if(enforcePermissions) {
-            FormPermissions permissions = form.getPermissions(userId);
-            if (!permissions.isEditAllowed()) {
-                throw new InvalidUpdateException("User '%d' does not have edit permissions for form '%s'",
-                    userId,
-                    form.getFormClass().getId().asString());
+
+            PermissionsEnforcer enforcer = new PermissionsEnforcer(new FormSupervisorAdapter(catalog, userId), catalog);
+
+            // Verify that the user has the right to modify the *existing* record
+
+            Optional<FormInstance> existingTypedRecord = existingResource.transform(new Function<FormRecord, FormInstance>() {
+                @Override
+                public FormInstance apply(FormRecord record) {
+                    return FormInstance.toFormInstance(form.getFormClass(), record);
+                }
+            });
+
+            if (existingTypedRecord.isPresent()) {
+                if (!enforcer.canEdit(existingTypedRecord.get())) {
+                    throw new InvalidUpdateException("Unauthorized update");
+                }
+            }
+            if (!enforcer.canEdit(applyUpdates(existingTypedRecord, update))) {
+                throw new InvalidUpdateException("Unauthorized update");
             }
         }
 
@@ -392,6 +392,19 @@ public class Updater {
             }
         }
     }
+
+    private FormInstance applyUpdates(Optional<FormInstance> existingRecord, TypedRecordUpdate update) {
+        FormInstance updated = new FormInstance(update.getRecordId(), update.getFormId());
+
+        if(existingRecord.isPresent()) {
+            updated.setAll(existingRecord.get().getFieldValueMap());
+        }
+
+        updated.setAll(update.getChangedFieldValues());
+
+        return updated;
+    }
+
 
     private static FieldValue validateType(FormField field, FieldValue updatedValue) {
         Preconditions.checkNotNull(field);
