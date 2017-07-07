@@ -382,6 +382,19 @@ public class AnalysisViewModelTest {
     }
 
     @Test
+    public void multipleMeasuresAndDimensions() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+            .addMeasures(intakeCaseCount().withLabel("Cases"))
+            .addMeasures(numChildren().withLabel("Children"))
+            .addDimensions(this.caseYear())
+            .build();
+
+        assertThat(points(model), containsInAnyOrder(
+            point(557,       "2016",   "Cases"),
+            point(570,       "2017",   "Cases")));
+    }
+
+    @Test
     public void dateDimension() {
         AnalysisModel model = ImmutableAnalysisModel.builder()
                 .addMeasures(intakeCaseCount())

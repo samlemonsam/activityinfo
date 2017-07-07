@@ -60,12 +60,25 @@ public class EffectiveMapping {
         return index;
     }
 
+    /**
+     *
+     * @return true if this is a "fixed" dimension like Measure or Statistic that is independent of
+     * the fields aggregated.
+     */
+    public boolean isFixed() {
+        return model.getId().equals(DimensionModel.MEASURE_ID) ||
+               model.getId().equals(DimensionModel.STATISTIC_ID);
+    }
+
     public boolean isMultiValued() {
         return multiValued;
     }
 
+    /**
+     * @return true if this dimension has a single value for each row.
+     */
     public boolean isSingleValued() {
-        return formula != null && formula.isValid() && !multiValued;
+        return !isFixed() && !multiValued;
     }
 
     public DimensionMapping getMapping() {
@@ -121,7 +134,7 @@ public class EffectiveMapping {
     public DimensionReader createReader(ColumnSet columnSet) {
         ColumnView columnView = columnSet.getColumnView(getColumnId());
         if(columnView == null) {
-            return null;
+            return row -> null;
         }
 
         Function<String, String> map = createMap();
