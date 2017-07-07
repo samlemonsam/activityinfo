@@ -16,6 +16,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.RecordTransaction;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -475,22 +476,11 @@ public class Updater {
 
 
     public void execute(FormInstance formInstance) {
+        RecordTransaction tx = new RecordTransactionBuilder()
+            .create(formInstance)
+            .build();
 
-        Optional<FormStorage> collection = catalog.getForm(formInstance.getFormId());
-        if(!collection.isPresent()) {
-            throw new InvalidUpdateException("No such formId: " + formInstance.getFormId());
-        }
-
-        TypedRecordUpdate update = new TypedRecordUpdate();
-        update.setUserId(userId);
-        update.setRecordId(formInstance.getId());
-
-        for (Map.Entry<ResourceId, FieldValue> entry : formInstance.getFieldValueMap().entrySet()) {
-            if(!entry.getKey().asString().equals("classId")) {
-                update.set(entry.getKey(), entry.getValue());
-            }
-        }
-        executeUpdate(collection.get(), update);
+        execute(tx);
     }
 
 
