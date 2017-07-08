@@ -102,12 +102,7 @@ public class ObjectStoreStub<T> {
 
 
         @Override
-        public void delete(String[] key) {
-            delete(new ObjectKey(key));
-        }
-
-        @Override
-        public void delete(String[] lowerBound, String[] upperBound) {
+        public void delete(String lowerBound, String upperBound) {
             ObjectKey lowerKey = new ObjectKey(lowerBound);
             ObjectKey upperKey = new ObjectKey(upperBound);
 
@@ -147,7 +142,12 @@ public class ObjectStoreStub<T> {
         }
 
         @Override
-        public void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback callback) {
+        public void delete(String key) {
+            delete(new ObjectKey(key));
+        }
+
+        @Override
+        public void openCursor(String lowerBound, String upperBound, IDBCursorCallback callback) {
 
             NavigableMap<ObjectKey, T> range = objectMap.subMap(
                 new ObjectKey(lowerBound), true,

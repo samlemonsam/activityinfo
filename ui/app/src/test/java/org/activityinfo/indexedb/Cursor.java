@@ -40,10 +40,6 @@ class Cursor<T> implements IDBCursor<T> {
         return current.getKey().toKeyString();
     }
 
-    @Override
-    public String[] getKeyArray() {
-        return current.getKey().toKeyArray();
-    }
 
     @Override
     public int getKeyNumber() {

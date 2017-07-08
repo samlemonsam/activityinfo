@@ -36,12 +36,6 @@ public interface IDBCursor<T> {
     @JsProperty(name = "key")
     String getKeyString();
 
-    /**
-     * Returns key for the record at the cursor's position as an array of Strings. If the cursor is outside its range,
-     * this is set to undefined.
-     */
-    @JsProperty(name = "key")
-    String[] getKeyArray();
 
     @JsProperty(name = "key")
     int getKeyNumber();

@@ -77,12 +77,12 @@ public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDB
     private static native JavaScriptObject createStringArrayKey(String[] key) /*-{ return key; }-*/;
 
     /**
-     *  @param lowerBound the lower bound of the key range (inclusive)
+     * @param lowerBound the lower bound of the key range (inclusive)
      * @param upperBound the upper bound of the key range (inclusive)
      * @param callback
      */
     @Override
-    public final native void openCursor(String[] lowerBound, String[] upperBound, IDBCursorCallback<T> callback) /*-{
+    public final native void openCursor(String lowerBound, String upperBound, IDBCursorCallback<T> callback) /*-{
         var request = this.openCursor($wnd.IDBKeyRange.bound(lowerBound, upperBound));
         request.onsuccess = function(event) {
           var cursor = event.target.result;
@@ -108,12 +108,12 @@ public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDB
     }-*/;
 
     @Override
-    public final native void delete(String[] key) /*-{
+    public final native void delete(String key) /*-{
         this['delete'](key);
     }-*/;
 
     @Override
-    public native void delete(String[] lowerBound, String[] upperBound) /*-{
+    public native void delete(String lowerBound, String upperBound) /*-{
         this['delete']($wnd.IDBKeyRange.bound(lowerBound, upperBound));
     }-*/;
 

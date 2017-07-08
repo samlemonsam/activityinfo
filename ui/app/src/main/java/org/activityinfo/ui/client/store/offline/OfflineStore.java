@@ -57,7 +57,7 @@ public class OfflineStore {
     private UpdateSynchronizer updateSynchronizer;
 
     public OfflineStore(HttpStore httpStore, IDBFactory indexedDbFactory) {
-        this.database = new OfflineDatabase(indexedDbFactory, "AI0001",
+        this.database = new OfflineDatabase(indexedDbFactory, "AI0002",
             SchemaStore.DEF,
             RecordStore.DEF,
             KeyValueStore.DEF,

@@ -1,14 +1,11 @@
 package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.indexedb.*;
-import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.UpdatedRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.store.query.server.Updater;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -42,6 +39,8 @@ public class RecordStore {
 
     public static final String NAME = "records";
 
+    private static final String KEY_SEPARATOR = Character.toString(RecordRef.SEPARATOR);
+
     private IDBObjectStore<RecordObject> impl;
 
     RecordStore(IDBObjectStore impl) {
@@ -61,20 +60,20 @@ public class RecordStore {
         return impl.get(key(ref)).then(Optional::ofNullable);
     }
 
-    private String[] key(RecordRef ref) {
-        return new String[] { ref.getFormId().asString(), ref.getRecordId().asString() };
+    static String key(RecordRef ref) {
+        return ref.toQualifiedString();
     }
 
     public void openCursor(ResourceId formId, IDBCursorCallback<RecordObject> callback) {
 
-        String[] lowerBound = formLower(formId);
-        String[] upperBound = formUpper(formId);
+        String lowerBound = formLower(formId);
+        String upperBound = formUpper(formId);
 
         impl.openCursor(lowerBound, upperBound, new IDBCursorCallback<RecordObject>() {
             @Override
             public void onNext(IDBCursor<RecordObject> cursor) {
 
-                LOGGER.info("RecordStore.onNext: " + Arrays.toString(cursor.getKeyArray()));
+                LOGGER.info("RecordStore.onNext: " + cursor.getKeyString());
 
                 callback.onNext(cursor);
             }
@@ -86,16 +85,16 @@ public class RecordStore {
         });
     }
 
-    private String[] formUpper(ResourceId formId) {
-        return new String[] { formId.asString(), "\uFFFF" };
+    static String formUpper(ResourceId formId) {
+        return formId.asString() + KEY_SEPARATOR + "\uFFFF";
     }
 
-    private String[] formLower(ResourceId formId) {
-        return new String[] { formId.asString(), "" };
+    static String formLower(ResourceId formId) {
+        return formId.asString() + KEY_SEPARATOR;
     }
 
     public static ResourceId recordIdOf(IDBCursor<RecordObject> cursor) {
-        return ResourceId.valueOf(cursor.getKeyArray()[1]);
+        return RecordRef.fromQualifiedString(cursor.getKeyString()).getRecordId();
     }
 
     public void deleteRecord(RecordRef recordRef) {
@@ -105,4 +104,7 @@ public class RecordStore {
     public void deleteAllRecords(ResourceId formId) {
         impl.delete(formLower(formId), formUpper(formId));
     }
+
+
+
 }

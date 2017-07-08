@@ -79,7 +79,7 @@ public class ObjectKey implements Comparable<ObjectKey> {
     }
 
     @VisibleForTesting
-    static int compareKeys(Object va, Object vb) {
+    public static int compareKeys(Object va, Object vb) {
         KeyType ta = KeyType.of(va);
         KeyType tb = KeyType.of(vb);
 
