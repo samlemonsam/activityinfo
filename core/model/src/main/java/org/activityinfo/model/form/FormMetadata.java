@@ -139,7 +139,7 @@ public class FormMetadata {
             metadata.version = object.get("version").asLong();
         }
         if(object.hasKey("schemaVersion")) {
-            metadata.version = object.get("schemaVersion").asLong();
+            metadata.schemaVersion = object.get("schemaVersion").asLong();
         }
         if(object.hasKey("schema")) {
             metadata.schema = FormClass.fromJson(object.getObject("schema"));

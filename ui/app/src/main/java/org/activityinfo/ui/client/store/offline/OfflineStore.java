@@ -6,16 +6,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.form.FormSyncSet;
+import org.activityinfo.model.form.*;
 import org.activityinfo.indexedb.IDBFactory;
 import org.activityinfo.indexedb.IDBTransaction;
 import org.activityinfo.indexedb.OfflineDatabase;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.form.UpdatedRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -57,7 +54,8 @@ public class OfflineStore {
     private UpdateSynchronizer updateSynchronizer;
 
     public OfflineStore(HttpStore httpStore, IDBFactory indexedDbFactory) {
-        this.database = new OfflineDatabase(indexedDbFactory, "AI0002",
+        this.database = new OfflineDatabase(indexedDbFactory, "AI0003",
+            FormMetadataStore.DEF,
             SchemaStore.DEF,
             RecordStore.DEF,
             KeyValueStore.DEF,
@@ -131,8 +129,13 @@ public class OfflineStore {
      * Try to load a cached FormSchema from the offline store.
      */
     public Observable<FormMetadata> getCachedMetadata(ResourceId formId) {
-        return new ObservableTask<>(new MetadataQuery(database, formId),
+        Observable<FormClass> schema = new ObservableTask<>(new SchemaQuery(database, formId),
             new FormChangeWatcher(eventBus, change -> change.isFormChanged(formId)));
+        Observable<FormMetadataObject> metadata = new ObservableTask<>(new MetadataQuery(database, formId),
+            new FormChangeWatcher(eventBus, change -> change.isFormChanged(formId)));
+
+        return Observable.transform(schema, metadata,
+            (s, m) -> FormMetadata.of(m.getVersion(), s, m.getPermissions()));
     }
 
     public Observable<Maybe<FormRecord>> getCachedRecord(RecordRef recordRef) {
@@ -200,13 +203,17 @@ public class OfflineStore {
         LOGGER.info("Updating offline snapshot: " + status);
 
         return database.begin()
+        .objectStore(FormMetadataStore.DEF)
         .objectStore(SchemaStore.DEF)
         .objectStore(RecordStore.DEF)
         .objectStore(KeyValueStore.DEF)
         .readwrite()
         .execute(tx -> {
             SchemaStore schemaStore = tx.objectStore(SchemaStore.DEF);
+            FormMetadataStore metadataStore = tx.objectStore(FormMetadataStore.DEF);
+
             for (FormMetadata metadata : snapshot.getForms()) {
+                metadataStore.put(metadata);
                 schemaStore.put(metadata.getSchema());
             }
             RecordStore recordStore = tx.objectStore(RecordStore.DEF);
