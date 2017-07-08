@@ -97,8 +97,6 @@ public class DimensionPane implements IsWidget {
         });
     }
 
-
-
     @Override
     public Widget asWidget() {
         return contentPanel;
@@ -172,24 +170,27 @@ public class DimensionPane implements IsWidget {
             contextMenu.add(new SeparatorMenuItem());
         }
 
+        boolean canTotal = canTotal(dim);
+
         // Choose to include totals or not.
         CheckMenuItem totalsItem = new CheckMenuItem("Include Totals");
         totalsItem.setChecked(dim.getModel().getTotals());
         totalsItem.addCheckChangeHandler(event -> updateTotals(dim, event.getChecked()));
+        totalsItem.setEnabled(canTotal);
         contextMenu.add(totalsItem);
 
         CheckMenuItem percentagesItem = new CheckMenuItem("Include Percentages");
         percentagesItem.setChecked(dim.getModel().getPercentage());
         percentagesItem.addCheckChangeHandler(event -> updatePercentages(dim, event.getChecked()));
+        percentagesItem.setEnabled(canTotal);
         contextMenu.add(percentagesItem);
-
 
         MenuItem totalsLabel = new MenuItem("Total Label...");
         totalsLabel.addSelectionHandler(event -> editTotalLabel(dim));
+        totalsLabel.setEnabled(canTotal);
         contextMenu.add(totalsLabel);
 
         contextMenu.add(new SeparatorMenuItem());
-
 
         // Remove the dimension
         MenuItem remove = new MenuItem();
@@ -197,18 +198,13 @@ public class DimensionPane implements IsWidget {
         remove.addSelectionHandler(event -> removeDimension(dim.getId()));
 
         // Special handling for "Measures" and "Statistics" dimension
-
         if(dim.getId().equals(DimensionModel.MEASURE_ID)) {
-            totalsItem.setEnabled(false);
-            remove.setEnabled(false);
-            percentagesItem.setEnabled(false);
             if(viewModel.getModel().getMeasures().size() > 1) {
-                totalsLabel.setEnabled(false);
+                remove.setEnabled(false);
             }
         }
 
         if(dim.getId().equals(DimensionModel.STATISTIC_ID)) {
-            totalsItem.setEnabled(false);
             if(viewModel.getModel().isMeasureDefinedWithMultipleStatistics()) {
                 remove.setEnabled(false);
             }
@@ -219,7 +215,15 @@ public class DimensionPane implements IsWidget {
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
     }
 
-
+    private boolean canTotal(EffectiveDimension dim) {
+        switch (dim.getId()) {
+            case DimensionModel.MEASURE_ID:
+            case DimensionModel.STATISTIC_ID:
+                return false;
+            default:
+                return true;
+        }
+    }
 
 
     private void editLabel(DimensionModel dim) {
