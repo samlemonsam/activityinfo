@@ -66,7 +66,7 @@ public class InstanceScoreTest extends AbstractImporterTest {
     public void adminEntityScoring() throws IOException {
         setUser(3);
 
-        FormTree formTree = assertResolves(formTreeBuilder.apply(ImportWithMultiClassRangeTest.SCHOOL_FORM_CLASS));
+        FormTree formTree = assertResolves(locator.getFormTree(ImportWithMultiClassRangeTest.SCHOOL_FORM_CLASS));
         FormTreePrettyPrinter.print(formTree);
 
         importModel = new ImportModel(formTree);

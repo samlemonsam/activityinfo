@@ -42,7 +42,7 @@ public class Snapshot {
         Observable<Set<ResourceId>> completeSet = formTrees.transform(trees -> {
             Set<ResourceId> set = new HashSet<>();
             for (FormTree tree : trees) {
-                for (FormClass form : tree.getFormClasses()) {
+                for (FormMetadata form : tree.getForms()) {
                     if(!isBuiltinForm(form.getId())) {
                         set.add(form.getId());
                     }
@@ -69,7 +69,6 @@ public class Snapshot {
         if(formId.equals(GeoPointType.INSTANCE.getFormClass().getId())) {
             return true;
         }
-
         return false;
     }
 

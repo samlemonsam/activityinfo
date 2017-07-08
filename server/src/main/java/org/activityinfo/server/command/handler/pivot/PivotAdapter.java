@@ -21,6 +21,7 @@ import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.functions.GreaterOrEqualFunction;
 import org.activityinfo.model.expr.functions.LessOrEqualFunction;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -796,9 +797,9 @@ public class PivotAdapter {
 
     private List<ExprNode> findAdminIdExprs(FormTree formTree) {
         List<ExprNode> expressions = Lists.newArrayList();
-        for (FormClass formClass : formTree.getFormClasses()) {
-            if(formClass.getId().getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
-                expressions.add(new CompoundExpr(formClass.getId(), ColumnModel.ID_SYMBOL));
+        for (FormMetadata form : formTree.getForms()) {
+            if(form.getId().getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
+                expressions.add(new CompoundExpr(form.getId(), ColumnModel.ID_SYMBOL));
             }
         }
         return expressions;

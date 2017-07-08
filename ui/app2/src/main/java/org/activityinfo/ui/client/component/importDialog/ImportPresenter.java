@@ -12,7 +12,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -249,8 +248,7 @@ public class ImportPresenter {
     }
 
     public static Promise<ImportPresenter> showPresenter(ResourceId activityId, final ResourceLocator resourceLocator) {
-        AsyncFormTreeBuilder treeBuilder = new AsyncFormTreeBuilder(resourceLocator);
-        return treeBuilder.apply(activityId).then(new Function<FormTree, ImportPresenter>() {
+        return resourceLocator.getFormTree(activityId).then(new Function<FormTree, ImportPresenter>() {
             @Override
             public ImportPresenter apply(FormTree input) {
                 return new ImportPresenter(resourceLocator, input);

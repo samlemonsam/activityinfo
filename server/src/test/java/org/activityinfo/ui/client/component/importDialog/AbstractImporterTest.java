@@ -7,7 +7,6 @@ import com.google.gwt.core.client.testing.StubScheduler;
 import com.google.gwt.junit.GWTMockUtilities;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.ui.client.component.importDialog.model.ColumnAction;
@@ -33,7 +32,6 @@ public class AbstractImporterTest extends CommandTestCase2 {
     public static final int COLUMN_WIDTH = 30;
     
     
-    protected AsyncFormTreeBuilder formTreeBuilder;
     protected ImportModel importModel;
     protected StubScheduler scheduler;
     protected List<ImportTarget> targets;
@@ -46,7 +44,6 @@ public class AbstractImporterTest extends CommandTestCase2 {
     public void setupAdapters() {
         System.out.println("Database url: " + databaseUrl());
 
-        formTreeBuilder = new AsyncFormTreeBuilder(locator);
         scheduler = new StubScheduler();
 
         // disable GWT.create so that references in static initializers

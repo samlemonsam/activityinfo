@@ -38,7 +38,7 @@ public class ImportGeoTest extends AbstractImporterTest {
     @Test
     public void test() throws IOException {
 
-        FormTree formTree = assertResolves(formTreeBuilder.apply(CuidAdapter.locationFormClass(1451)));
+        FormTree formTree = assertResolves(locator.getFormTree(CuidAdapter.locationFormClass(1451)));
         FormTreePrettyPrinter.print(formTree);
 
         importModel = new ImportModel(formTree);

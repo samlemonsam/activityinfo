@@ -5,7 +5,6 @@ import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.AsyncFormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -19,7 +18,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
-public interface ResourceLocator extends AsyncFormClassProvider {
+public interface ResourceLocator {
 
     /**
      * Fetches the schema of a user's forms. 

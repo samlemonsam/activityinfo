@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -32,8 +31,7 @@ public class OptionSetProvider {
 
     public Promise<OptionSet> queryOptionSet(ReferenceType referenceType) {
         final ResourceId formId = Iterables.getOnlyElement(referenceType.getRange());
-        AsyncFormTreeBuilder treeBuilder = new AsyncFormTreeBuilder(resourceLocator);
-        return treeBuilder.apply(formId).join(new Function<FormTree, Promise<OptionSet>>() {
+        return resourceLocator.getFormTree(formId).join(new Function<FormTree, Promise<OptionSet>>() {
             @Override
             public Promise<OptionSet> apply(FormTree formTree) {
 

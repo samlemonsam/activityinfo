@@ -28,14 +28,6 @@ public class FormTreeTest {
     }
 
     @Test
-    public void asyncBuilder() {
-        AsyncFormTreeBuilder builder = new AsyncFormTreeBuilder(forms.async());
-        FormTree formTree = builder.apply(forms.student.getId()).get();
-
-        checkStudentTree(formTree);
-    }
-    
-    @Test
     public void toJson() {
         FormTreeBuilder builder = new FormTreeBuilder(forms);
         FormTree formTree = builder.queryTree(forms.student.getId());
