@@ -47,7 +47,7 @@ public class PermissionsEnforcer {
     }
 
     public boolean canView(FormInstance record) {
-        FormPermissions formPermissions = supervisor.getFormPermissions(record.getId());
+        FormPermissions formPermissions = supervisor.getFormPermissions(record.getFormId());
         if(!formPermissions.isVisible()) {
             return false;
         }
