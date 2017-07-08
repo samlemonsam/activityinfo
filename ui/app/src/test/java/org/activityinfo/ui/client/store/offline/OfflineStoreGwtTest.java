@@ -48,11 +48,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
         survey = new Survey();
 
-        FormMetadata surveyMetadata = new FormMetadata();
-        surveyMetadata.setId(survey.getFormId());
-        surveyMetadata.setVersion(1);
-        surveyMetadata.setSchemaVersion(1);
-        surveyMetadata.setSchema(survey.getFormClass());
+        FormMetadata surveyMetadata = FormMetadata.of(1L, survey.getFormClass(), FormPermissions.full());
 
         // First put the schema to the store
 

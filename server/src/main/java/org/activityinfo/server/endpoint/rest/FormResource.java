@@ -21,9 +21,6 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.RecordTransaction;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
-import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
@@ -97,29 +94,19 @@ public class FormResource {
     }
 
     private FormMetadata getFormMetadata(Long localVersion) {
-        FormMetadata metadata = new FormMetadata();
-        metadata.setId(formId);
         Optional<FormStorage> collection = this.catalog.get().getForm(formId);
         if(!collection.isPresent()) {
-            metadata.setDeleted(true);
-            return metadata;
+            return FormMetadata.notFound(formId);
         }
         FormPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
         if(!permissions.isVisible()) {
-            metadata.setVisible(false);
-            return metadata;
+            return FormMetadata.forbidden(formId);
+        } else {
+            return FormMetadata.of(
+                collection.get().cacheVersion(),
+                collection.get().getFormClass(),
+                permissions);
         }
-
-        FormClass schema = collection.get().getFormClass();
-
-        metadata.setVersion(collection.get().cacheVersion());
-        metadata.setSchemaVersion(schema.getSchemaVersion());
-
-        if(localVersion == null || localVersion < schema.getSchemaVersion()) {
-            metadata.setSchema(schema);
-        }
-
-        return metadata;
     }
 
     /**
@@ -228,7 +215,7 @@ public class FormResource {
      */
     private Predicate<ResourceId> computeVisibilityPredicate() {
         FormPermissions formPermissions = supervisor.getFormPermissions(formId);
-        if (!formPermissions.hasVisiblityFilter()) {
+        if (!formPermissions.hasVisibilityFilter()) {
             return Predicates.alwaysTrue();
         }
 

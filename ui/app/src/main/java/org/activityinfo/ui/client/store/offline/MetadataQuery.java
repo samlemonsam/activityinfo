@@ -1,7 +1,9 @@
 package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.indexedb.OfflineDatabase;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.tasks.SimpleTask;
@@ -27,11 +29,8 @@ public class MetadataQuery extends SimpleTask<FormMetadata> {
         .query(tx -> tx.objectStore(SchemaStore.DEF).get(formId))
         .then(formClass -> {
             if (formClass.isPresent()) {
-                FormMetadata metadata = new FormMetadata();
-                metadata.setId(formId);
-                metadata.setVersion(formClass.get().getSchemaVersion());
-                metadata.setSchema(formClass.get());
-                return metadata;
+                FormClass schema = formClass.get();
+                return FormMetadata.of(schema.getSchemaVersion(), schema, FormPermissions.full());
             } else {
                 throw new IllegalStateException("FormSchema entry is missing for " + formId);
             }

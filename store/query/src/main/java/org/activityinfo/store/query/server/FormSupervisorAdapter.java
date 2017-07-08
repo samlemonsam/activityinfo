@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.FormCatalog;
-import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.util.logging.Logger;

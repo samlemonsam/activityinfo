@@ -20,7 +20,7 @@ import org.activityinfo.store.query.shared.columns.FilteredRowCountSlot;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
 import org.activityinfo.store.query.shared.columns.PrimaryKeySlot;
 import org.activityinfo.store.query.shared.join.*;
-import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.model.form.FormPermissions;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -295,7 +295,7 @@ public class FormScanBatch {
             return new PendingSlot<>(TableFilter.NONE_SELECTED);
         }
 
-        if(!permissions.hasVisiblityFilter()) {
+        if(!permissions.hasVisibilityFilter()) {
             return new PendingSlot<>(TableFilter.ALL_SELECTED);
         }
 
@@ -304,7 +304,7 @@ public class FormScanBatch {
             FormTreeBuilder formTreeBuilder = new FormTreeBuilder(formClassProvider);
             FormTree formTree = formTreeBuilder.queryTree(formId);
 
-            ExprNode formula = ExprParser.parse(permissions.getVisibilityFilter());
+            ExprNode formula = ExprParser.parse(permissions.getViewFilter());
             QueryEvaluator evaluator = new QueryEvaluator(FilterLevel.NONE, formTree, this);
             Slot<ColumnView> filterView = evaluator.evaluateExpression(formula);
             return new MemoizedSlot<>(filterView, new Function<ColumnView, TableFilter>() {
@@ -316,7 +316,7 @@ public class FormScanBatch {
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to parse visibility filter", e);
-            LOGGER.severe("Error parsing visibility filter '" + permissions.getVisibilityFilter() +
+            LOGGER.severe("Error parsing visibility filter '" + permissions.getViewFilter() +
                     " in form " + formId + ": " + e.getMessage() + ". " +
                     "For security reasons, no results will be shown");
 

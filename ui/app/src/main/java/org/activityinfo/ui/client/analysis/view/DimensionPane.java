@@ -30,7 +30,6 @@ import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.EffectiveDimension;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;

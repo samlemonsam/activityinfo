@@ -30,7 +30,6 @@ public class FormTree implements FormClassProvider {
     private ResourceId rootFormId;
 
 
-
     public enum State {
         VALID,
         DELETED,
@@ -45,7 +44,7 @@ public class FormTree implements FormClassProvider {
         private FieldPath path;
         private FormMetadata form;
         private List<Node> children = Lists.newArrayList();
-        
+
         private int depth;
 
         public boolean isRoot() {
@@ -87,7 +86,7 @@ public class FormTree implements FormClassProvider {
             children.add(childNode);
             nodeMap.put(childNode.path, childNode);
             formMap.put(declaringClass.getId(), declaringClass);
-            
+
             if (childNode.parent != null) {
                 childNode.depth = childNode.parent.depth + 1;
             }
@@ -147,12 +146,12 @@ public class FormTree implements FormClassProvider {
         public Collection<ResourceId> getRange() {
             if(field.getType() instanceof ReferenceType) {
                 return ((ReferenceType) field.getType()).getRange();
-                
+
             } else if(field.getType() instanceof SubFormReferenceType) {
                 SubFormReferenceType subFormType = (SubFormReferenceType) field.getType();
                 ResourceId subFormClassId = subFormType.getClassId();
                 return Collections.singleton(subFormClassId);
-                
+
             } else if(field.getType() instanceof RecordFieldType) {
                 return Collections.singleton(((RecordFieldType) field.getType()).getFormClass().getId());
             } else {
@@ -263,9 +262,9 @@ public class FormTree implements FormClassProvider {
 
         public Iterator<Node> selfAndAncestors() {
             return new UnmodifiableIterator<Node>() {
-                
+
                 private Node next = Node.this;
-                
+
                 @Override
                 public boolean hasNext() {
                     return next != null;
@@ -382,6 +381,10 @@ public class FormTree implements FormClassProvider {
     }
 
 
+    public FormMetadata getRootMetadata() {
+        return formMap.get(rootFormId);
+    }
+
     public FormClass getFormClass(ResourceId formClassId) {
         Optional<FormClass> formClass = getFormClassIfPresent(formClassId);
         if(!formClass.isPresent()) {
@@ -389,7 +392,16 @@ public class FormTree implements FormClassProvider {
         }
         return formClass.get();
     }
-    
+
+
+    public FormMetadata getFormMetadata(ResourceId formId) {
+        FormMetadata metadata = formMap.get(formId);
+        if(metadata == null) {
+            throw new IllegalStateException("No such Form: " + formId);
+        }
+        return metadata;
+    }
+
     public Collection<FormMetadata> getForms() {
         return formMap.values();
     }
@@ -439,7 +451,7 @@ public class FormTree implements FormClassProvider {
         search(paths, parent.getChildren(), order, Predicates.alwaysTrue(), Predicates.alwaysTrue());
         return paths;
     }
-    
+
     private void search(List<FieldPath> paths,
                         Iterable<Node> childNodes,
                         SearchOrder searchOrder,

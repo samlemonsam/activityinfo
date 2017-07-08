@@ -16,7 +16,7 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
-import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
 import org.hamcrest.CoreMatchers;
@@ -305,7 +305,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
     }
 
     @Test
@@ -317,7 +317,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
 
     }
 
@@ -330,7 +330,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
     }
 
     @Test
@@ -354,8 +354,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
-        assertThat(permissions.getEditFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
+        assertThat(permissions.getViewFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
+        assertThat(permissions.getUpdateFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
     }
 
     @Test
@@ -411,8 +411,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
-        assertThat(permissions.getEditFilter(),  nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
+        assertThat(permissions.getUpdateFilter(),  nullValue());
     }
 
     @Test
@@ -423,7 +423,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
     }
 
     @Test
@@ -433,7 +433,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
                 catalog.getForm(publicFormClassId).get().getPermissions(999);
 
         assertThat(permissions.isVisible(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
         assertThat(permissions.isEditAllowed(), equalTo(false));
     }
 

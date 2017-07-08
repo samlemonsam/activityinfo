@@ -32,7 +32,7 @@ public class TableViewModel {
     private Map<ResourceId, Observable<EffectiveTableModel>> effectiveSubTables = new HashMap<>();
 
     private StatefulValue<Optional<RecordRef>> selectedRecordRef = new StatefulValue<>(Optional.absent());
-    private final Observable<Optional<FormRecord>> selectedRecord;
+    private final Observable<Optional<SelectionViewModel>> selectionViewModel;
 
     public TableViewModel(final FormSource formStore, final TableModel tableModel) {
         this.formId = tableModel.getFormId();
@@ -40,21 +40,7 @@ public class TableViewModel {
         this.formTree = formStore.getFormTree(formId);
         this.tableModel = tableModel;
         this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(formStore, tree, tableModel));
-        this.selectedRecord = selectedRecordRef.join(selection -> {
-            if (!selection.isPresent()) {
-                return Observable.just(Optional.absent());
-            }
-            return formStore.getRecord(selection.get()).transform(new Function<Maybe<FormRecord>, Optional<FormRecord>>() {
-                @Override
-                public Optional<FormRecord> apply(Maybe<FormRecord> record) {
-                    if(record.isVisible()) {
-                        return Optional.of(record.get());
-                    } else {
-                        return Optional.absent();
-                    }
-                }
-            });
-        });
+        this.selectionViewModel = SelectionViewModel.compute(formStore, selectedRecordRef);
     }
 
     public TableModel getTableModel() {
@@ -64,7 +50,7 @@ public class TableViewModel {
     public Observable<Optional<RecordRef>> getSelectedRecordRef() {
         // Don't actually expose the internal selection state ...
         // the *effective* selection is a product of our model state and the record status (deleted or not)
-        return getSelectedRecord().transform(record -> {
+        return getSelectionViewModel().transform(record -> {
             if(record.isPresent()) {
                 return Optional.of(record.get().getRef());
             } else {
@@ -73,14 +59,14 @@ public class TableViewModel {
         });
     }
 
-    public Observable<Optional<FormRecord>> getSelectedRecord() {
-        return selectedRecord;
+    public Observable<Optional<SelectionViewModel>> getSelectionViewModel() {
+        return selectionViewModel;
     }
 
     public Observable<Optional<RecordTree>> getSelectedRecordTree() {
-        return getSelectedRecord().join(new Function<Optional<FormRecord>, Observable<Optional<RecordTree>>>() {
+        return getSelectionViewModel().join(new Function<Optional<SelectionViewModel>, Observable<Optional<RecordTree>>>() {
             @Override
-            public Observable<Optional<RecordTree>> apply(@Nullable Optional<FormRecord> selection) {
+            public Observable<Optional<RecordTree>> apply(@Nullable Optional<SelectionViewModel> selection) {
                 if(selection.isPresent()) {
                     return formStore.getRecordTree(selection.get().getRef()).transform(tree -> tree.getIfVisible());
                 } else {

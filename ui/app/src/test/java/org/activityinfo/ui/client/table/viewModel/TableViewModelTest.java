@@ -1,26 +1,21 @@
 package org.activityinfo.ui.client.table.viewModel;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.SelectionViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Connection;
-import org.activityinfo.observable.Observable;
-import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.IncidentForm;
 import org.activityinfo.store.testing.ReferralSubForm;
-import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.table.view.DeleteRecordAction;
 import org.junit.Before;
@@ -65,7 +60,7 @@ public class TableViewModelTest {
 
         TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
 
-        Connection<Optional<FormRecord>> selection = connect(viewModel.getSelectedRecord());
+        Connection<Optional<SelectionViewModel>> selection = connect(viewModel.getSelectionViewModel());
 
         // Initially, we don't expect a selection
         assertThat(selection.assertLoaded().isPresent(), equalTo(false));
@@ -79,6 +74,11 @@ public class TableViewModelTest {
 
         viewModel.select(selectedRef);
         selection.assertChanged();
+        setup.runScheduled();
+        assertThat(selection.assertLoaded().isPresent(), equalTo(true));
+        assertThat(selection.assertLoaded().get().isEditAllowed(), equalTo(true));
+        assertThat(selection.assertLoaded().get().isDeleteAllowed(), equalTo(true));
+
 
         // Now delete the selected record...
 

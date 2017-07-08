@@ -17,7 +17,7 @@ import org.activityinfo.store.mysql.metadata.DatabaseCacheImpl;
 import org.activityinfo.store.mysql.update.ActivityUpdater;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormNotFoundException;
-import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.sql.SQLException;

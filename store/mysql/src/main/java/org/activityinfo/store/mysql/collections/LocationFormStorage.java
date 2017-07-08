@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -140,10 +141,7 @@ public class LocationFormStorage implements FormStorage {
         if(databaseId != null) {
             UserPermission permission = permissionsCache.getPermission(userId, databaseId);
             if (permission.isDesign()) {
-                FormPermissions formPermissions = new FormPermissions();
-                formPermissions.setVisible(true);
-                formPermissions.setEditAllowed(true);
-                return formPermissions;
+                return FormPermissions.builder().allowEdit().build();
             }
         }
         return FormPermissions.readonly();

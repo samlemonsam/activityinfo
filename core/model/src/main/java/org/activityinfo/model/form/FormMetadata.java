@@ -1,7 +1,10 @@
 package org.activityinfo.model.form;
 
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
+import org.codehaus.jackson.FormatSchema;
 
 import static org.activityinfo.json.Json.createObject;
 
@@ -27,36 +30,50 @@ public class FormMetadata {
     private long schemaVersion;
 
     /**
-     * True if the user has permission to see this form at all
-     */
-    private boolean visible = true;
-
-    /**
      * True if this form has been deleted.
      */
     private boolean deleted = false;
 
-
     /**
-     * A boolean-valued formula that determines whether a record is
-     * visible to the current user
+     * The permissions for the current user.
      */
-    private String viewFilter;
-
-    /**
-     * A boolean-valued formula that determines whether a record is
-     */
-    private String editFilter;
+    private FormPermissions permissions;
 
     private FormClass schema;
 
+    private boolean visible = true;
+
+
+    public static FormMetadata notFound(ResourceId formId) {
+        FormMetadata metadata = new FormMetadata();
+        metadata.id = formId;
+        metadata.visible = false;
+        metadata.deleted = true;
+        metadata.permissions = FormPermissions.none();
+        return metadata;
+    }
+
+    public static FormMetadata forbidden(ResourceId formId) {
+        FormMetadata metadata = new FormMetadata();
+        metadata.id = formId;
+        metadata.visible = false;
+        metadata.permissions = FormPermissions.none();
+        return metadata;
+    }
+
+    public static FormMetadata of(long version, FormClass schema, FormPermissions permissions) {
+        FormMetadata metadata = new FormMetadata();
+        metadata.id = schema.getId();
+        metadata.version = version;
+        metadata.visible = true;
+        metadata.permissions = permissions;
+        metadata.schema = schema;
+        metadata.schemaVersion = schema.getSchemaVersion();
+        return metadata;
+    }
 
     public ResourceId getId() {
         return id;
-    }
-
-    public void setId(ResourceId id) {
-        this.id = id;
     }
 
     public long getVersion() {
@@ -67,28 +84,16 @@ public class FormMetadata {
         return schemaVersion;
     }
 
-    public void setVersion(long version) {
-        this.version = version;
-    }
-
-    public void setSchemaVersion(long schemaVersion) {
-        this.schemaVersion = schemaVersion;
+    public FormPermissions getPermissions() {
+        return permissions;
     }
 
     public boolean isVisible() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
     public boolean isDeleted() {
         return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 
     public boolean isAccessible() {
@@ -120,7 +125,8 @@ public class FormMetadata {
         }
         if(visible) {
             object.put("version", version);
-            object.put("schemaVersion", version);
+            object.put("schemaVersion", schemaVersion);
+            object.put("permissions", permissions.toJson());
         }
         return object;
     }
@@ -137,6 +143,9 @@ public class FormMetadata {
         }
         if(object.hasKey("schema")) {
             metadata.schema = FormClass.fromJson(object.getObject("schema"));
+        }
+        if(object.hasKey("permissions")) {
+            metadata.permissions = FormPermissions.fromJson(object.getObject("permissions"));
         }
         if(object.hasKey("visible")) {
             metadata.visible = object.get("visible").asBoolean();

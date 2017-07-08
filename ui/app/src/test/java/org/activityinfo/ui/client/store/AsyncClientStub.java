@@ -3,17 +3,13 @@ package org.activityinfo.ui.client.store;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import org.activityinfo.api.client.*;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
@@ -128,18 +124,15 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return offlineResult();
         }
 
-        FormMetadata metadata = new FormMetadata();
-        metadata.setId(ResourceId.valueOf(formId));
-        metadata.setVersion(1);
-        metadata.setSchemaVersion(1);
-
         Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
         if(!form.isPresent()) {
-            metadata.setDeleted(true);
+            return Promise.resolved(FormMetadata.notFound(ResourceId.valueOf(formId)));
         } else {
-            metadata.setSchema(form.get().getFormClass());
+            return Promise.resolved(FormMetadata.of(
+                form.get().cacheVersion(),
+                form.get().getFormClass(),
+                FormPermissions.full()));
         }
-        return Promise.resolved(metadata);
     }
 
     @Override

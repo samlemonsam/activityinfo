@@ -6,6 +6,7 @@ import com.google.common.base.Predicate;
 import com.googlecode.objectify.cmd.Query;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.ResourceId;

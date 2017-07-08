@@ -17,7 +17,7 @@ import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.spi.FormCatalog;
-import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
 /**
@@ -44,25 +44,17 @@ public class FormSourceSyncImpl implements FormSource {
     public FormMetadata getFormMetadata(ResourceId formId) {
         Optional<FormStorage> storage = formCatalog.getForm(formId);
         if(!storage.isPresent()) {
-            FormMetadata formMetadata = new FormMetadata();
-            formMetadata.setId(formId);
-            formMetadata.setVisible(false);
-            return formMetadata;
+            return FormMetadata.notFound(formId);
         }
         FormPermissions permissions = storage.get().getPermissions(userId);
         if(!permissions.isVisible()) {
-            FormMetadata formMetadata = new FormMetadata();
-            formMetadata.setId(formId);
-            formMetadata.setVisible(false);
-            return formMetadata;
+            return FormMetadata.forbidden(formId);
         }
 
-        FormMetadata metadata = new FormMetadata();
-        metadata.setId(formId);
-        metadata.setVisible(true);
-        metadata.setVersion(storage.get().cacheVersion());
-        metadata.setSchema(storage.get().getFormClass());
-        return metadata;
+        return FormMetadata.of(
+            storage.get().cacheVersion(),
+            storage.get().getFormClass(),
+            permissions);
     }
 
 

@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
 
@@ -21,20 +22,13 @@ public class FormTreeBuilder {
     private final FormMetadataProvider metadataProvider;
 
     public FormTreeBuilder(final FormClassProvider schemaProvider) {
-       metadataProvider = new FormMetadataProvider() {
-           @Override
-           public FormMetadata getFormMetadata(ResourceId formId) {
-               FormClass formClass = schemaProvider.getFormClass(formId);
-
-               FormMetadata metadata = new FormMetadata();
-               metadata.setId(formId);
-               metadata.setSchema(formClass);
-               metadata.setSchemaVersion(formClass.getSchemaVersion());
-               metadata.setVersion(formClass.getSchemaVersion());
-
-               return metadata;
-           }
-       };
+        metadataProvider = new FormMetadataProvider() {
+            @Override
+            public FormMetadata getFormMetadata(ResourceId formId) {
+                FormClass formClass = schemaProvider.getFormClass(formId);
+                return FormMetadata.of(1L, formClass, FormPermissions.readonly());
+            }
+        };
     }
 
     public FormTreeBuilder(FormMetadataProvider metadataProvider) {
@@ -46,13 +40,13 @@ public class FormTreeBuilder {
         FormTree tree = new FormTree(rootFormId);
         FormMetadata root = metadataProvider.getFormMetadata(rootFormId);
 
-        if(!root.isVisible()) {
-            tree.setRootState(FormTree.State.FORBIDDEN);
+        if(root.isDeleted()) {
+            tree.setRootState(FormTree.State.DELETED);
             return tree;
         }
 
-        if(root.isDeleted()) {
-            tree.setRootState(FormTree.State.DELETED);
+        if(!root.isVisible()) {
+            tree.setRootState(FormTree.State.FORBIDDEN);
             return tree;
         }
 
@@ -67,7 +61,7 @@ public class FormTreeBuilder {
                 fetchChildren(stack, node, rootSchema.getParentFormId().asSet());
             }
         }
-        
+
         // Add fields defined by this FormClass
         for(FormField field : rootSchema.getFields()) {
             FormTree.Node node = tree.addRootField(root, field);
@@ -115,12 +109,9 @@ public class FormTreeBuilder {
 
     private FormMetadata embeddedForm(FormTree.Node childNode) {
         FormClass embeddedFormSchema = ((RecordFieldType) childNode.getType()).getFormClass();
-        FormMetadata embeddedForm = new FormMetadata();
-        embeddedForm.setId(embeddedFormSchema.getId());
-        embeddedForm.setVersion(1L);
-        embeddedForm.setSchemaVersion(1);
-        embeddedForm.setSchema(embeddedFormSchema);
-        return embeddedForm;
+        long formVersion = 1L;
+
+        return FormMetadata.of(formVersion, embeddedFormSchema, FormPermissions.readonly());
     }
 
 }

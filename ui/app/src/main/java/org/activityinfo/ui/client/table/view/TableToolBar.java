@@ -4,9 +4,11 @@ import com.google.common.base.Optional;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
+import org.activityinfo.analysis.table.SelectionViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
@@ -15,6 +17,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.ui.client.input.view.FormDialog;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.table.ColumnDialog;
@@ -28,7 +31,8 @@ public class TableToolBar extends ToolBar {
     private final TextButton removeButton;
     private final TextButton newButton;
     private final TextButton printButton;
-    private Subscription subscription;
+
+    private final SubscriptionSet subscriptions = new SubscriptionSet();
 
 
     public TableToolBar(FormStore formStore, TableViewModel viewModel) {
@@ -73,21 +77,57 @@ public class TableToolBar extends ToolBar {
     protected void onAttach() {
         super.onAttach();
 
-        subscription = viewModel.getSelectedRecordRef().subscribe(this::onSelectedRecordChanged);
+        subscriptions.add(viewModel.getFormTree().subscribe(this::onFormTreeChanged));
+        subscriptions.add(viewModel.getSelectionViewModel().subscribe(this::onSelectedRecordChanged));
+    }
+
+    private void onFormTreeChanged(Observable<FormTree> tree) {
+        newButton.setEnabled(isNewAllowed(tree));
+    }
+
+    private boolean isNewAllowed(Observable<FormTree> tree) {
+        if(tree.isLoading()) {
+            return false;
+        }
+        FormMetadata rootForm = tree.get().getRootMetadata();
+        return rootForm.getPermissions().isCreateAllowed();
     }
 
     @Override
     protected void onDetach() {
         super.onDetach();
 
-        subscription.unsubscribe();
+        subscriptions.unsubscribeAll();
     }
 
-    private void onSelectedRecordChanged(Observable<Optional<RecordRef>> selection) {
-        boolean haveSelection = selection.isLoaded() && selection.get().isPresent();
+    private void onSelectedRecordChanged(Observable<Optional<SelectionViewModel>> selection) {
+        boolean hasSelection = false;
+        boolean canEdit = false;
+        boolean canDelete = false;
 
-        editButton.setEnabled(haveSelection);
-        removeButton.setEnabled(haveSelection);
+        if(selection.isLoaded() && selection.get().isPresent()) {
+            hasSelection = true;
+            SelectionViewModel viewModel = selection.get().get();
+            canEdit = viewModel.isEditAllowed();
+            canDelete = viewModel.isDeleteAllowed();
+        }
+
+        editButton.setEnabled(hasSelection && canEdit);
+        removeButton.setEnabled(hasSelection && canDelete);
+
+        if(hasSelection && !canEdit) {
+            editButton.setToolTip("You do not have permission to edit the selection");
+        } else {
+            editButton.removeToolTip();
+        }
+
+        if(hasSelection && !canDelete) {
+            removeButton.setToolTip("You do not have permission to delete the selection");
+        } else {
+            removeButton.removeToolTip();
+        }
+
+
     }
 
     private void onNewRecord(SelectEvent event) {

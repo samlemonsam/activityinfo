@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.store;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
@@ -91,18 +92,12 @@ public class TestingFormStore implements FormStore {
     }
 
     private FormMetadata fetchFormMetadata(ResourceId formId) {
-        FormMetadata metadata = new FormMetadata();
-        metadata.setId(formId);
-        metadata.setVersion(1);
-
         if(deleted.contains(formId)) {
-            metadata.setDeleted(true);
-            metadata.setVersion(2);
+            return FormMetadata.forbidden(formId);
 
         } else {
-            metadata.setSchema(testingCatalog.getFormClass(formId));
+            return FormMetadata.of(1L, testingCatalog.getFormClass(formId), FormPermissions.full());
         }
-        return metadata;
     }
 
     @Override
