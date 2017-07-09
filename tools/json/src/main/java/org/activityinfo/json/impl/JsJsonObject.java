@@ -45,19 +45,19 @@ final public class JsJsonObject extends JsJsonValue
     }
 
     public boolean getBoolean(String key) {
-        return ((JsonBoolean) get(key)).getBoolean();
+        return get(key).asBoolean();
     }
 
     public double getNumber(String key) {
-        return ((JsonNumber) get(key)).getNumber();
+        return get(key).asNumber();
     }
 
     public JsonObject getObject(String key) {
-        return ((JsJsonValue) get(key)).cast();
+        return get(key).getAsJsonObject();
     }
 
     public String getString(String key) {
-        return ((JsonString) get(key)).getString();
+        return get(key).asString();
     }
 
     public native boolean hasKey(String key) /*-{

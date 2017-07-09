@@ -94,9 +94,9 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
     }
 
     @Override
-    public final JsonObject getAsJsonObject() {
-        return this.cast();
-    }
+    public final native JsonObject getAsJsonObject() /*-{
+        return this;
+    }-*/;
 
 
     @Override
@@ -132,9 +132,9 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
     }
 
     @Override
-    public final JsonArray getAsJsonArray() {
-        return this.cast();
-    }
+    public final native JsonArray getAsJsonArray() /*-{
+        return this;
+    }-*/;
 
     @Override
     public final boolean isJsonNull() {
