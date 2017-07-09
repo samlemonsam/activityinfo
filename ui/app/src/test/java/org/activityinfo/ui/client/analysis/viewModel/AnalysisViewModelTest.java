@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.analysis.viewModel;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -327,7 +328,8 @@ public class AnalysisViewModelTest {
 
     private String pivot(AnalysisModel model) {
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
-        viewModel.updateModel(model);
+        viewModel.updateModel(serializeAndDeserialize(model));
+
         AnalysisResult analysisResult = assertLoads(viewModel.getResultTable());
         PivotTable table = new PivotTable(analysisResult);
 
@@ -336,6 +338,14 @@ public class AnalysisViewModelTest {
         System.out.println(text);
 
         return text;
+    }
+
+    private AnalysisModel serializeAndDeserialize(AnalysisModel model) {
+        JsonObject json = model.toJson();
+        System.out.println(json.toJson());
+        AnalysisModel deserialized = AnalysisModel.fromJson(json);
+        System.out.println(deserialized.toJson().toJson());
+        return deserialized;
     }
 
     private String table(String... rows) {
@@ -398,7 +408,7 @@ public class AnalysisViewModelTest {
         AnalysisModel model = ImmutableAnalysisModel.builder()
             .addMeasures(intakeCaseCount().withLabel("Cases"))
             .addMeasures(numChildren().withLabel("Children"))
-            .addDimensions(this.caseYear().withShowMissing(true))
+            .addDimensions(this.caseYear().withMissingIncluded(true))
             .build();
 
         assertThat(points(model), containsInAnyOrder(
@@ -581,7 +591,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Gender")
-                .showMissing(false)
+                .missingIncluded(false)
                 .addMappings(new DimensionMapping(new SymbolExpr("Gender")))
                 .build();
     }
@@ -598,7 +608,7 @@ public class AnalysisViewModelTest {
                 .id(ResourceId.generateCuid())
                 .label("Married")
                 .addMappings(new DimensionMapping(new SymbolExpr("MARRIED")))
-                .showMissing(false)
+                .missingIncluded(false)
                 .build();
     }
 
@@ -622,7 +632,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Year")
-                .showMissing(false)
+                .missingIncluded(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getOpenDateFieldId()))
                 .dateLevel(DateLevel.YEAR)
                 .build();
@@ -633,7 +643,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Quarter")
-                .showMissing(false)
+                .missingIncluded(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getOpenDateFieldId()))
                 .dateLevel(DateLevel.QUARTER)
                 .build();
@@ -644,7 +654,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Nationality")
-                .showMissing(false)
+                .missingIncluded(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getNationalityFieldId()))
                 .build();
     }
@@ -653,7 +663,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Problem")
-                .showMissing(false)
+                .missingIncluded(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getProblemFieldId()))
                 .build();
     }

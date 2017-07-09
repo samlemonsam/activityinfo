@@ -1,6 +1,9 @@
 package org.activityinfo.ui.client.analysis.model;
 
 import com.google.common.collect.ImmutableSet;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArray;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
@@ -82,4 +85,34 @@ public abstract class AnalysisModel {
         return false;
     }
 
+    public JsonObject toJson() {
+
+        JsonArray measures = Json.createArray();
+        for (MeasureModel measureModel : getMeasures()) {
+            measures.add(measureModel.toJson());
+        }
+        JsonArray dimensions = Json.createArray();
+        for (DimensionModel dimensionModel : getDimensions()) {
+            dimensions.add(dimensionModel.toJson());
+        }
+
+        JsonObject object = Json.createObject();
+        object.put("measures", measures);
+        object.put("dimensions", dimensions);
+        return object;
+    }
+
+    public static AnalysisModel fromJson(JsonObject object) {
+        ImmutableAnalysisModel.Builder model = ImmutableAnalysisModel.builder();
+        JsonArray measures = object.getArray("measures");
+        for (int i = 0; i < measures.length(); i++) {
+            model.addMeasures(MeasureModel.fromJson(measures.getObject(i)));
+        }
+        JsonArray dimensions = object.getArray("dimensions");
+        for (int i = 0; i < dimensions.length(); i++) {
+            model.addDimensions(DimensionModel.fromJson(dimensions.getObject(i)));
+        }
+
+        return model.build();
+    }
 }

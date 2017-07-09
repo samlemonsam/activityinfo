@@ -179,7 +179,7 @@ public class DimensionPane implements IsWidget {
         contextMenu.add(totalsItem);
 
         CheckMenuItem missingItem = new CheckMenuItem("Include Missing");
-        missingItem.setChecked(dim.getModel().getShowMissing());
+        missingItem.setChecked(dim.getModel().getMissingIncluded());
         missingItem.addCheckChangeHandler(event -> updateMissing(dim, event.getChecked()));
         missingItem.setEnabled(canTotal);
         contextMenu.add(missingItem);
@@ -288,7 +288,7 @@ public class DimensionPane implements IsWidget {
                 viewModel.getModel().withDimension(
                         ImmutableDimensionModel.builder()
                                 .from(dim.getModel())
-                                .showMissing(checked == Tree.CheckState.CHECKED)
+                                .missingIncluded(checked == Tree.CheckState.CHECKED)
                                 .build()));
     }
 

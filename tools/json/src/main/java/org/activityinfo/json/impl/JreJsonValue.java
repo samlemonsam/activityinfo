@@ -126,6 +126,6 @@ public abstract class JreJsonValue implements JsonValue {
 
     @Override
     public String toString() {
-        throw new UnsupportedOperationException("SHOULD NOT BE CALLED");
+        return toJson();
     }
 }

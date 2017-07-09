@@ -154,7 +154,7 @@ public class EffectiveMapping {
     }
 
     private String computeMissingCategory() {
-        if(model.getShowMissing()) {
+        if(model.getMissingIncluded()) {
             return model.getMissingLabel().orElse(I18N.CONSTANTS.none());
         } else {
             // Observations with a missing category will be excluded from the analysis
