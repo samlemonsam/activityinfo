@@ -29,9 +29,15 @@ public abstract class DimensionModel {
     public boolean getTotals() {
         return false;
     }
+
+    @org.immutables.value.Value.Default
+    public boolean getShowMissing() { return true; }
+
     public abstract Optional<DateLevel> getDateLevel();
 
     public abstract Optional<String> getTotalLabel();
+
+    public abstract Optional<String> getMissingLabel();
 
     @org.immutables.value.Value.Default
     public boolean getPercentage() {

@@ -265,8 +265,8 @@ public class FormField extends FormElement {
 
         if(jsonObject.hasKey("superProperties")) {
             JsonArray superPropertiesArray = jsonObject.get("superProperties").getAsJsonArray();
-            for (JsonValue jsonElement : superPropertiesArray.values()) {
-                field.addSuperProperty(ResourceId.valueOf(jsonElement.asString()));
+            for (int i = 0; i < superPropertiesArray.length(); i++) {
+                field.addSuperProperty(ResourceId.valueOf(superPropertiesArray.getString(i)));
             }
         }
         

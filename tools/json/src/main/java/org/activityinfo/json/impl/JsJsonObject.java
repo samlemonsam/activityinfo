@@ -41,7 +41,7 @@ final public class JsJsonObject extends JsJsonValue
     }-*/;
 
     public JsonArray getArray(String key) {
-        return (JsonArray) get(key);
+        return get(key).getAsJsonArray();
     }
 
     public boolean getBoolean(String key) {
@@ -53,7 +53,7 @@ final public class JsJsonObject extends JsJsonValue
     }
 
     public JsonObject getObject(String key) {
-        return (JsonObject) get(key);
+        return ((JsJsonValue) get(key)).cast();
     }
 
     public String getString(String key) {

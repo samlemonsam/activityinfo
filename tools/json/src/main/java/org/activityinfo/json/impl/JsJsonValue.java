@@ -95,7 +95,7 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
 
     @Override
     public final JsonObject getAsJsonObject() {
-        return (JsonObject)this;
+        return this.cast();
     }
 
 
@@ -133,7 +133,7 @@ public class JsJsonValue extends JavaScriptObject implements JsonValue {
 
     @Override
     public final JsonArray getAsJsonArray() {
-        return (JsonArray)this;
+        return this.cast();
     }
 
     @Override

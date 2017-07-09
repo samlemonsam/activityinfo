@@ -33,6 +33,7 @@ public class TableToolBar extends ToolBar {
     private final TextButton printButton;
 
     private final SubscriptionSet subscriptions = new SubscriptionSet();
+    private final TextButton importButton;
 
 
     public TableToolBar(FormStore formStore, TableViewModel viewModel) {
@@ -53,7 +54,7 @@ public class TableToolBar extends ToolBar {
         printButton = new TextButton(I18N.CONSTANTS.printForm());
         printButton.addSelectHandler(this::onPrintRecord);
 
-        TextButton importButton = new TextButton(I18N.CONSTANTS.importText());
+        importButton = new TextButton(I18N.CONSTANTS.importText());
         importButton.addSelectHandler(this::onImport);
 
         TextButton exportButton = new TextButton(I18N.CONSTANTS.export());
@@ -82,7 +83,9 @@ public class TableToolBar extends ToolBar {
     }
 
     private void onFormTreeChanged(Observable<FormTree> tree) {
-        newButton.setEnabled(isNewAllowed(tree));
+        boolean canCreate = isNewAllowed(tree);
+        newButton.setEnabled(canCreate);
+        importButton.setEnabled(canCreate);
     }
 
     private boolean isNewAllowed(Observable<FormTree> tree) {

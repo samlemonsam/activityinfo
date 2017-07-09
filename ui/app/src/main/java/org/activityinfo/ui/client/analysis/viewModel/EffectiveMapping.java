@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.Ordering;
 import org.activityinfo.analysis.ParsedFormula;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.expr.functions.date.MonthFunction;
@@ -132,20 +133,33 @@ public class EffectiveMapping {
     }
 
     public DimensionReader createReader(ColumnSet columnSet) {
+
+        String missingCategory = computeMissingCategory();
+
         ColumnView columnView = columnSet.getColumnView(getColumnId());
         if(columnView == null) {
-            return row -> null;
+            return row -> missingCategory;
         }
 
         Function<String, String> map = createMap();
 
+
         return row -> {
             String category = columnView.getString(row);
             if(category == null) {
-                return null;
+                return missingCategory;
             }
             return map.apply(category);
         };
+    }
+
+    private String computeMissingCategory() {
+        if(model.getShowMissing()) {
+            return model.getMissingLabel().orElse(I18N.CONSTANTS.none());
+        } else {
+            // Observations with a missing category will be excluded from the analysis
+            return null;
+        }
     }
 
     private Function<String, String> createMap() {

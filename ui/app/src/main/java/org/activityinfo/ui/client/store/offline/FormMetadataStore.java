@@ -1,17 +1,12 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.common.base.Function;
 import org.activityinfo.indexedb.IDBDatabaseUpgrade;
 import org.activityinfo.indexedb.IDBObjectStore;
 import org.activityinfo.indexedb.ObjectStoreDefinition;
 import org.activityinfo.indexedb.ObjectStoreOptions;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
-
-import javax.annotation.Nullable;
 
 /**
  * Stores the latest version and permissions of forms

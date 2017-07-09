@@ -142,7 +142,7 @@ public class FormMetadata {
             metadata.schemaVersion = object.get("schemaVersion").asLong();
         }
         if(object.hasKey("schema")) {
-            metadata.schema = FormClass.fromJson(object.getObject("schema"));
+            metadata.schema = FormClass.fromJson(object.get("schema").getAsJsonObject());
         }
         if(object.hasKey("permissions")) {
             metadata.permissions = FormPermissions.fromJson(object.getObject("permissions"));

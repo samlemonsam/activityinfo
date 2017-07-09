@@ -178,6 +178,12 @@ public class DimensionPane implements IsWidget {
         totalsItem.setEnabled(canTotal);
         contextMenu.add(totalsItem);
 
+        CheckMenuItem missingItem = new CheckMenuItem("Include Missing");
+        missingItem.setChecked(dim.getModel().getShowMissing());
+        missingItem.addCheckChangeHandler(event -> updateMissing(dim, event.getChecked()));
+        missingItem.setEnabled(canTotal);
+        contextMenu.add(missingItem);
+
         CheckMenuItem percentagesItem = new CheckMenuItem("Include Percentages");
         percentagesItem.setChecked(dim.getModel().getPercentage());
         percentagesItem.addCheckChangeHandler(event -> updatePercentages(dim, event.getChecked()));
@@ -213,6 +219,7 @@ public class DimensionPane implements IsWidget {
 
         contextMenu.show(element, new Style.AnchorAlignment(Style.Anchor.BOTTOM, Style.Anchor.BOTTOM, true));
     }
+
 
     private boolean canTotal(EffectiveDimension dim) {
         switch (dim.getId()) {
@@ -273,6 +280,15 @@ public class DimensionPane implements IsWidget {
                         ImmutableDimensionModel.builder()
                                 .from(dim.getModel())
                                 .totals(checkState == Tree.CheckState.CHECKED)
+                                .build()));
+    }
+
+    private void updateMissing(EffectiveDimension dim, Tree.CheckState checked) {
+        viewModel.updateModel(
+                viewModel.getModel().withDimension(
+                        ImmutableDimensionModel.builder()
+                                .from(dim.getModel())
+                                .showMissing(checked == Tree.CheckState.CHECKED)
                                 .build()));
     }
 

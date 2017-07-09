@@ -393,6 +393,20 @@ public class AnalysisViewModelTest {
             point(557,       "2016",   "Cases"),
             point(570,       "2017",   "Cases")));
     }
+    @Test
+    public void multipleMeasuresAndDimensionsIncludeMissing() {
+        AnalysisModel model = ImmutableAnalysisModel.builder()
+            .addMeasures(intakeCaseCount().withLabel("Cases"))
+            .addMeasures(numChildren().withLabel("Children"))
+            .addDimensions(this.caseYear().withShowMissing(true))
+            .build();
+
+        assertThat(points(model), containsInAnyOrder(
+            point(557,       "2016",   "Cases"),
+            point(570,       "2017",   "Cases"),
+            point(1525,       "None",   "Children")));
+    }
+
 
     @Test
     public void dateDimension() {
@@ -567,6 +581,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Gender")
+                .showMissing(false)
                 .addMappings(new DimensionMapping(new SymbolExpr("Gender")))
                 .build();
     }
@@ -578,12 +593,12 @@ public class AnalysisViewModelTest {
                 .build();
     }
 
-
     private ImmutableDimensionModel marriedDimension() {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Married")
                 .addMappings(new DimensionMapping(new SymbolExpr("MARRIED")))
+                .showMissing(false)
                 .build();
     }
 
@@ -607,6 +622,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Year")
+                .showMissing(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getOpenDateFieldId()))
                 .dateLevel(DateLevel.YEAR)
                 .build();
@@ -617,6 +633,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Quarter")
+                .showMissing(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getOpenDateFieldId()))
                 .dateLevel(DateLevel.QUARTER)
                 .build();
@@ -627,6 +644,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Nationality")
+                .showMissing(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getNationalityFieldId()))
                 .build();
     }
@@ -635,6 +653,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Problem")
+                .showMissing(false)
                 .addMappings(new DimensionMapping(intakeForm.getFormId(), intakeForm.getProblemFieldId()))
                 .build();
     }

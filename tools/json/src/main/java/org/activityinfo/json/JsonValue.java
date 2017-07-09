@@ -54,7 +54,6 @@ public interface JsonValue extends Serializable {
 
     JsonArray getAsJsonArray();
 
-
     boolean isJsonNull();
 
     boolean isJsonArray();
