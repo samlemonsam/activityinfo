@@ -49,7 +49,7 @@ public abstract class DimensionModel {
         return false;
     }
 
-    @Value.Derived
+    @Value.Lazy
     public JsonObject toJson() {
         JsonObject object = Json.createObject();
         object.put("id", getId());

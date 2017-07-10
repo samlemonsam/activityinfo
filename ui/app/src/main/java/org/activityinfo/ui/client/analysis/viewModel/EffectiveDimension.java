@@ -2,7 +2,7 @@ package org.activityinfo.ui.client.analysis.viewModel;
 
 import com.google.common.base.Function;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.analysis.model.AnalysisModel;
+import org.activityinfo.ui.client.analysis.model.PivotModel;
 import org.activityinfo.ui.client.analysis.model.Axis;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.Statistic;
@@ -10,21 +10,20 @@ import org.activityinfo.ui.client.analysis.model.Statistic;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 public class EffectiveDimension {
 
     private final int index;
-    private final AnalysisModel analysisModel;
+    private final PivotModel pivotModel;
     private final DimensionModel dimensionModel;
     private final List<EffectiveMapping> effectiveMappings;
     private final String totalLabel;
 
-    public EffectiveDimension(int index, AnalysisModel model, DimensionModel dimensionModel, List<EffectiveMapping> effectiveMappings) {
+    public EffectiveDimension(int index, PivotModel model, DimensionModel dimensionModel, List<EffectiveMapping> effectiveMappings) {
         this.index = index;
-        this.analysisModel = model;
+        this.pivotModel = model;
         this.dimensionModel = dimensionModel;
         this.effectiveMappings = effectiveMappings;
         this.totalLabel = dimensionModel.getTotalLabel().orElse(I18N.CONSTANTS.tableTotal());
@@ -72,7 +71,7 @@ public class EffectiveDimension {
     public Comparator<String> getCategoryComparator() {
         switch (dimensionModel.getId()) {
             case DimensionModel.MEASURE_ID:
-                return new CategoryComparator(analysisModel.getMeasures().stream().map(m -> m.getLabel()).collect(toList()));
+                return new CategoryComparator(pivotModel.getMeasures().stream().map(m -> m.getLabel()).collect(toList()));
             case DimensionModel.STATISTIC_ID:
                 return new CategoryComparator(Statistic.labels());
             default:

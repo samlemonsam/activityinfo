@@ -29,10 +29,14 @@ public class AnalysisEntity {
     @Unindex
     private String model;
 
+    @Index
+    private String label;
+
     /**
      * The version of the entity
      */
     private long version;
+
 
 
     public String getId() {
@@ -41,6 +45,14 @@ public class AnalysisEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public String getParentId() {

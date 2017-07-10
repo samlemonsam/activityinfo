@@ -105,4 +105,25 @@ public class DimensionMapping {
         String formula = object.getString("formula");
         return new DimensionMapping(formId, formula);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DimensionMapping mapping = (DimensionMapping) o;
+
+        if (formId != null ? !formId.equals(mapping.formId) : mapping.formId != null) return false;
+        if (formula != null ? !formula.equals(mapping.formula) : mapping.formula != null) return false;
+        return type == mapping.type;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = formId != null ? formId.hashCode() : 0;
+        result = 31 * result + (formula != null ? formula.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
+    }
 }

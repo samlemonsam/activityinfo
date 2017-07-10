@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.store;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import org.activityinfo.api.client.*;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
@@ -168,6 +169,11 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         catalog.updateRecords(transactions);
 
         return Promise.done();
+    }
+
+    @Override
+    public Promise<Maybe<Analysis>> getAnalysis(String id) {
+        return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override

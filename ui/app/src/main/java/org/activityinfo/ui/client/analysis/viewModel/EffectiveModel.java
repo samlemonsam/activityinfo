@@ -4,19 +4,18 @@ package org.activityinfo.ui.client.analysis.viewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.model.*;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EffectiveModel {
 
     private final DimensionSet dimensionSet;
-    private final AnalysisModel model;
+    private final PivotModel model;
 
     private final List<EffectiveMeasure> measures = new ArrayList<>();
     private final List<EffectiveDimension> dimensions = new ArrayList<>();
 
-    public EffectiveModel(AnalysisModel model, FormForest formForest) {
+    public EffectiveModel(PivotModel model, FormForest formForest) {
         this.model = model;
 
         List<DimensionModel> dimensions = new ArrayList<>(model.getDimensions());
@@ -64,7 +63,7 @@ public class EffectiveModel {
         }
     }
 
-    public AnalysisModel getModel() {
+    public PivotModel getModel() {
         return model;
     }
 

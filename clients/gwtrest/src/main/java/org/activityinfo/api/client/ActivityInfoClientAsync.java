@@ -1,5 +1,6 @@
 package org.activityinfo.api.client;
 
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
@@ -118,6 +119,8 @@ public interface ActivityInfoClientAsync {
     Promise<ColumnSet> queryTableColumns(QueryModel query);
 
     Promise<Void> updateRecords(RecordTransaction transactions);
+
+    Promise<Maybe<Analysis>> getAnalysis(String id);
 
     Promise<Void> updateAnalysis(AnalysisUpdate analysis);
 

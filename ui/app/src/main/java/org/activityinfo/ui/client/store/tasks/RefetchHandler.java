@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.store.http;
+package org.activityinfo.ui.client.store.tasks;
 
 public interface RefetchHandler {
 

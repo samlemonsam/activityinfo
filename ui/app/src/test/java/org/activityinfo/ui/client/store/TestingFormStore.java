@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
@@ -130,6 +131,11 @@ public class TestingFormStore implements FormStore {
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
         return maybeExecute(() -> testingCatalog.query(queryModel));
+    }
+
+    @Override
+    public Observable<Maybe<Analysis>> getAnalysis(String id) {
+        return Observable.just(Maybe.notFound());
     }
 
     @Override

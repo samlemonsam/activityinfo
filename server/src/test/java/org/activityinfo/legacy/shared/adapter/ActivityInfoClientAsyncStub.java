@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.activityinfo.api.client.*;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonObject;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
@@ -223,6 +224,11 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<Void> updateRecords(RecordTransaction transactions) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public Promise<Maybe<Analysis>> getAnalysis(String id) {
+        return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override

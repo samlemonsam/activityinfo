@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
@@ -28,7 +29,6 @@ import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -161,6 +161,11 @@ public class FormStoreImpl implements FormStore {
                 return httpStore.query(queryModel);
             }
         });
+    }
+
+    @Override
+    public Observable<Maybe<Analysis>> getAnalysis(String id) {
+        return httpStore.getAnalysis(id);
     }
 
 

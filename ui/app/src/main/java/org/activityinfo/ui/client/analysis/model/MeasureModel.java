@@ -4,6 +4,7 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
+import org.immutables.value.Value;
 
 import java.util.Collections;
 import java.util.Set;
@@ -39,6 +40,7 @@ public abstract class MeasureModel {
         return Collections.singleton(Statistic.SUM);
     }
 
+    @Value.Lazy
     public JsonObject toJson() {
         JsonObject object = Json.createObject();
         object.put("id", getId());

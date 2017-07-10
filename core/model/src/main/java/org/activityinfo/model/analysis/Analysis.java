@@ -6,13 +6,26 @@ import jsinterop.annotations.JsType;
 import org.activityinfo.json.JsonObject;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
-public final class AnalysisUpdate {
-
+public final class Analysis {
     private String id;
     private String parentId;
-    private String type;
     private String label;
+    private String modelType;
     private JsonObject model;
+
+    public Analysis() {
+    }
+
+    @JsOverlay
+    public static Analysis of(TypedAnalysis<?> model) {
+        Analysis analysis = new Analysis();
+        analysis.id = model.getId();
+        analysis.parentId = model.getParentId();
+        analysis.label = model.getLabel();
+        analysis.modelType = model.getModel().getTypeId();
+        analysis.model = model.getModel().toJson();
+        return analysis;
+    }
 
     @JsOverlay
     public String getId() {
@@ -35,13 +48,13 @@ public final class AnalysisUpdate {
     }
 
     @JsOverlay
-    public String getType() {
-        return type;
+    public String getLabel() {
+        return label;
     }
 
     @JsOverlay
-    public void setType(String type) {
-        this.type = type;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     @JsOverlay
@@ -55,12 +68,12 @@ public final class AnalysisUpdate {
     }
 
     @JsOverlay
-    public String getLabel() {
-        return label;
+    public String getModelType() {
+        return modelType;
     }
 
     @JsOverlay
-    public void setLabel(String title) {
-        this.label = title;
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
     }
 }

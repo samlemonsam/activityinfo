@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.api.client.*;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
@@ -93,8 +94,13 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
+    public Promise<Maybe<Analysis>> getAnalysis(String id) {
+        return offline();
+    }
+
+    @Override
     public Promise<Void> updateAnalysis(AnalysisUpdate analysis) {
-        return Promise.rejected(new UnsupportedOperationException());
+        return offline();
     }
 
     @Override

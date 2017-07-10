@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormMetadataProvider;
@@ -84,5 +85,10 @@ public class FormSourceSyncImpl implements FormSource {
         ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, formScanCache,
                 new FormSupervisorAdapter(formCatalog, userId));
         return Observable.just(builder.build(queryModel));
+    }
+
+    @Override
+    public Observable<Maybe<Analysis>> getAnalysis(String id) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -30,7 +30,9 @@ public class FolderDialog {
         treeView = new CatalogTreeView(formStore, Optional.absent(), new Predicate<CatalogEntry>() {
             @Override
             public boolean apply(@Nullable CatalogEntry entry) {
-                return !entry.getId().equals("geodb") && entry.getType() == CatalogEntryType.FOLDER;
+                return !entry.getId().equals("geodb") &&
+                    entry.getType() == CatalogEntryType.FOLDER &&
+                    entry.getId().startsWith("d");
             }
         });
         dialog.setWidget(treeView);

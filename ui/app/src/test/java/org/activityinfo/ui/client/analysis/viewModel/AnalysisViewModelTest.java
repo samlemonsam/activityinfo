@@ -64,7 +64,7 @@ public class AnalysisViewModelTest {
 
         formStore.delayLoading();
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .build();
 
@@ -86,7 +86,7 @@ public class AnalysisViewModelTest {
     public void dimensionsWithMissing() {
 
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
             .addMeasures(surveyCount())
             .addDimensions(genderDimension())
             .build();
@@ -101,7 +101,7 @@ public class AnalysisViewModelTest {
     public void dimensionsWithSeveralStatistics() {
 
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX, Statistic.MEDIAN))
                 .addDimensions(genderDimension())
                 .build();
@@ -117,7 +117,7 @@ public class AnalysisViewModelTest {
 
     @Test
     public void pivotDimensionsWithSeveralStatistics() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX))
                 .addDimensions(genderDimension())
                 .build();
@@ -132,7 +132,7 @@ public class AnalysisViewModelTest {
 
     @Test
     public void pivotDimensionsWithSeveralStatisticsExplicitStatDim() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX))
                 .addDimensions(genderDimension())
                 .addDimensions(statDimension().withAxis(Axis.COLUMN))
@@ -147,7 +147,7 @@ public class AnalysisViewModelTest {
 
     @Test
     public void pivotWithCustomTotalLabel() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(medianAge().withStatistics(Statistic.MIN))
                 .addDimensions(genderDimension().withTotals(true).withTotalLabel("ALL"))
                 .build();
@@ -162,7 +162,7 @@ public class AnalysisViewModelTest {
     @Test
     public void dimensionsWithTotal() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension().withTotals(true))
                 .build();
@@ -176,7 +176,7 @@ public class AnalysisViewModelTest {
     @Test
     public void dimensionWithPercentages() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension().withPercentage(true))
                 .build();
@@ -191,7 +191,7 @@ public class AnalysisViewModelTest {
     @Test
     public void dimensionWithPercentagesWithTotals() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension().withPercentage(true).withTotals(true))
                 .addDimensions(statDimension().withAxis(Axis.COLUMN))
@@ -210,7 +210,7 @@ public class AnalysisViewModelTest {
 
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         viewModel.updateModel(
-                ImmutableAnalysisModel.builder()
+                ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .build());
 
@@ -235,7 +235,7 @@ public class AnalysisViewModelTest {
 
         dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension())
                 .addDimensions(marriedDimension())
@@ -253,7 +253,7 @@ public class AnalysisViewModelTest {
 
         dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension()
                         .withPercentage(true)
@@ -277,7 +277,7 @@ public class AnalysisViewModelTest {
 
         dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension().withTotals(true))
                 .addDimensions(marriedDimension())
@@ -296,7 +296,7 @@ public class AnalysisViewModelTest {
     public void twoDimensionsPivotedInRows() {
 
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension())
                 .addDimensions(marriedDimension())
@@ -312,7 +312,7 @@ public class AnalysisViewModelTest {
 
     @Test
     public void twoDimensionsPivoted() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension())
                 .addDimensions(marriedDimension().withAxis(Axis.COLUMN))
@@ -326,7 +326,7 @@ public class AnalysisViewModelTest {
 
     }
 
-    private String pivot(AnalysisModel model) {
+    private String pivot(PivotModel model) {
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         viewModel.updateModel(serializeAndDeserialize(model));
 
@@ -340,11 +340,10 @@ public class AnalysisViewModelTest {
         return text;
     }
 
-    private AnalysisModel serializeAndDeserialize(AnalysisModel model) {
+    private PivotModel serializeAndDeserialize(PivotModel model) {
         JsonObject json = model.toJson();
-        System.out.println(json.toJson());
-        AnalysisModel deserialized = AnalysisModel.fromJson(json);
-        System.out.println(deserialized.toJson().toJson());
+        PivotModel deserialized = PivotModel.fromJson(json);
+        assertThat(deserialized, equalTo(model));
         return deserialized;
     }
 
@@ -361,7 +360,7 @@ public class AnalysisViewModelTest {
 
         dumpQuery(survey.getFormId(), "Gender", "Married", "Age");
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(surveyCount())
                 .addDimensions(genderDimension().withTotals(true))
                 .addDimensions(marriedDimension().withTotals(true))
@@ -381,7 +380,7 @@ public class AnalysisViewModelTest {
 
     @Test
     public void multipleMeasures() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
             .addMeasures(intakeCaseCount().withLabel("Cases"))
             .addMeasures(numChildren().withLabel("Children"))
             .build();
@@ -393,7 +392,7 @@ public class AnalysisViewModelTest {
 
     @Test
     public void multipleMeasuresAndDimensions() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
             .addMeasures(intakeCaseCount().withLabel("Cases"))
             .addMeasures(numChildren().withLabel("Children"))
             .addDimensions(this.caseYear())
@@ -405,7 +404,7 @@ public class AnalysisViewModelTest {
     }
     @Test
     public void multipleMeasuresAndDimensionsIncludeMissing() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
             .addMeasures(intakeCaseCount().withLabel("Cases"))
             .addMeasures(numChildren().withLabel("Children"))
             .addDimensions(this.caseYear().withMissingIncluded(true))
@@ -420,7 +419,7 @@ public class AnalysisViewModelTest {
 
     @Test
     public void dateDimension() {
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(intakeCaseCount())
                 .addDimensions(caseYear())
                 .addDimensions(caseQuarter().withTotals(true))
@@ -442,7 +441,7 @@ public class AnalysisViewModelTest {
     @Test
     public void multiDimensions() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(intakeCaseCount())
                 .addDimensions(caseYear())
                 .addDimensions(nationality())
@@ -460,7 +459,7 @@ public class AnalysisViewModelTest {
     @Test
     public void severalMultiDimensions() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(intakeCaseCount())
                 .addDimensions(caseYear())
                 .addDimensions(nationality())
@@ -487,7 +486,7 @@ public class AnalysisViewModelTest {
     @Test
     public void severalMultiDimensionsWithTotals() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(intakeCaseCount())
                 .addDimensions(caseYear().withTotals(true))
                 .addDimensions(nationality())
@@ -541,7 +540,7 @@ public class AnalysisViewModelTest {
     @Test
     public void twoDimensionsWithMediansAndTotals() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(medianAge())
                 .addDimensions(genderDimension().withTotals(true))
                 .addDimensions(marriedDimension().withTotals(true))
@@ -564,7 +563,7 @@ public class AnalysisViewModelTest {
 
         //dumpQuery(Survey.FORM_ID, "Gender", "age");
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(medianAge())
                 .addDimensions(genderDimension())
                 .build();
@@ -577,7 +576,7 @@ public class AnalysisViewModelTest {
     @Test
     public void medianWithMissing() {
 
-        AnalysisModel model = ImmutableAnalysisModel.builder()
+        PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(numChildren().withStatistics(Statistic.MEDIAN))
                 .addDimensions(genderDimension())
                 .build();
@@ -718,7 +717,7 @@ public class AnalysisViewModelTest {
     /**
      * Computes the result of the analysis and returns the array of points.
      */
-    private List<Point> points(AnalysisModel model) {
+    private List<Point> points(PivotModel model) {
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         viewModel.updateModel(model);
 

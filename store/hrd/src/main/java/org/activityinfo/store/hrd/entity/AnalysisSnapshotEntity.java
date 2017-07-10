@@ -23,6 +23,9 @@ public class AnalysisSnapshotEntity {
     @Index
     private String type;
 
+    @Index
+    private String label;
+
     /**
      * The analysis model serialized as JSON
      */
@@ -78,5 +81,13 @@ public class AnalysisSnapshotEntity {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

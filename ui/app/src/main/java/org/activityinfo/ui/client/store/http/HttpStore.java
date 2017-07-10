@@ -6,6 +6,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.form.FormMetadata;
@@ -23,6 +24,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.AnalysisChangeEvent;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.FormTreeLoader;
@@ -104,7 +106,6 @@ public class HttpStore {
         return get(new QueryRequest(queryModel), new FormChangeWatcher(eventBus, change -> true));
     }
 
-
     public Observable<FormSyncSet> getVersionRange(ResourceId formId, long localVersion, long version) {
         return get(new VersionRangeRequest(formId, localVersion, version));
     }
@@ -132,9 +133,14 @@ public class HttpStore {
             @Nullable
             @Override
             public Void apply(@Nullable Void aVoid) {
+                eventBus.fireEvent(new AnalysisChangeEvent(update.getId()));
                 return null;
             }
         });
+    }
+
+    public Observable<Maybe<Analysis>> getAnalysis(String id) {
+        return get(new AnalysisRequest(id), AnalysisChangeEvent.watchFor(eventBus, id));
     }
 }
 

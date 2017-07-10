@@ -2,7 +2,7 @@ package org.activityinfo.ui.client.store.offline;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
-import org.activityinfo.ui.client.store.http.RefetchHandler;
+import org.activityinfo.ui.client.store.tasks.RefetchHandler;
 import org.activityinfo.ui.client.store.tasks.Watcher;
 
 /**
