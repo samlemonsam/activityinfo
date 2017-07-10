@@ -1,5 +1,6 @@
 package org.activityinfo.api.client;
 
+import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
@@ -117,6 +118,8 @@ public interface ActivityInfoClientAsync {
     Promise<ColumnSet> queryTableColumns(QueryModel query);
 
     Promise<Void> updateRecords(RecordTransaction transactions);
+
+    Promise<Void> updateAnalysis(AnalysisUpdate analysis);
 
     <T extends JobDescriptor<R>, R extends JobResult> Promise<JobStatus<T, R>>  startJob(T job);
 

@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
@@ -40,6 +41,8 @@ public interface FormStore extends FormSource {
      * Applies an update transactionally to the Form store.
      */
     Promise<Void> updateRecords(RecordTransaction tx);
+
+    Promise<Void> updateAnalysis(AnalysisUpdate update);
 
     <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>>  startJob(T job);
 }

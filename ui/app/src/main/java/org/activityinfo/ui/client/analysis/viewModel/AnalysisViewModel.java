@@ -25,17 +25,24 @@ public class AnalysisViewModel {
     private static final Logger LOGGER = Logger.getLogger(AnalysisViewModel.class.getName());
 
     private final FormStore formStore;
+
     private final StatefulValue<ImmutableAnalysisModel> model;
+
+
     private final Observable<FormForest> formForest;
+    private String id;
     private final Observable<EffectiveModel> effectiveModel;
     private final Observable<AnalysisResult> resultTable;
     private final Observable<List<EffectiveDimension>> dimensions;
     private final Observable<PivotTable> pivotTable;
 
     public AnalysisViewModel(FormStore formStore) {
-        this.formStore = formStore;
-        this.model = new StatefulValue<>(ImmutableAnalysisModel.builder().build());
+        this(formStore, ResourceId.generateCuid());
+    }
 
+    public AnalysisViewModel(FormStore formStore, String modelId) {
+        this.formStore = formStore;
+        this.model = new StatefulValue<>(ImmutableAnalysisModel.builder().id(modelId).build());
 
 
         // Before anything else, we need to fetch/compute the metadata required to even
@@ -50,6 +57,7 @@ public class AnalysisViewModel {
             // Combine into a FormForest
             return Observable.flatten(trees).transform(t -> new FormForest(t));
         });
+        this.id = modelId;
 
         effectiveModel = Observable.transform(formForest, model, (ff, m) -> new EffectiveModel(m, ff));
 
@@ -58,7 +66,11 @@ public class AnalysisViewModel {
         pivotTable = resultTable.transform(t -> new PivotTable(t));
     }
 
-    public AnalysisModel getModel() {
+    public String getId() {
+        return id;
+    }
+
+    public AnalysisModel getWorkingModel() {
         return model.get();
     }
 
@@ -66,8 +78,9 @@ public class AnalysisViewModel {
         return effectiveModel;
     }
 
-    public void updateModel(AnalysisModel model) {
+    public AnalysisModel updateModel(AnalysisModel model) {
         this.model.updateValue(ImmutableAnalysisModel.copyOf(model));
+        return model;
     }
 
     public ObservableList<DimensionModel> getDimensions() {
@@ -113,4 +126,19 @@ public class AnalysisViewModel {
 
     }
 
+    public AnalysisModel updateTitle(String title) {
+        return updateModel(ImmutableAnalysisModel
+            .builder()
+            .from (effectiveModel.get().getModel())
+            .title(title)
+            .build());
+    }
+
+    public AnalysisModel updateFolderId(String folderId) {
+        return updateModel(ImmutableAnalysisModel
+            .builder()
+            .from (effectiveModel.get().getModel())
+            .folderId(folderId)
+            .build());
+    }
 }

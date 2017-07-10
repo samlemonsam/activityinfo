@@ -1,13 +1,20 @@
 package org.activityinfo.ui.client.measureDialog.view;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.data.shared.IconProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.loader.ChildTreeStoreBinding;
@@ -23,6 +30,7 @@ import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.icons.IconBundle;
 import org.activityinfo.ui.client.store.FormStore;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -30,18 +38,21 @@ import java.util.logging.Logger;
 /**
  * Presents the user with a selection of Form
  */
-public class FormTreeView implements IsWidget {
+public class CatalogTreeView implements IsWidget {
 
-    private static final Logger LOGGER = Logger.getLogger(FormTreeView.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CatalogTreeView.class.getName());
 
     private final FormStore formStore;
     private final Tree<CatalogEntry, String> tree;
     private final TreeStore<CatalogEntry> store;
     private final CatalogLoader loader;
+    private final Optional<String> rootId;
+    private final Predicate<CatalogEntry> filter;
 
     private List<Subscription> subscriptions = new ArrayList<>();
 
     private final StatefulValue<Optional<ResourceId>> selectedForm = new StatefulValue<>(Optional.<ResourceId>absent());
+    private final StatefulValue<Optional<CatalogEntry>> selectedEntry = new StatefulValue<>(Optional.<CatalogEntry>absent());
 
 
     private static class EntryValueProvider implements ValueProvider<CatalogEntry, String> {
@@ -82,6 +93,14 @@ public class FormTreeView implements IsWidget {
             } else {
                 entries = formStore.getCatalogChildren(ResourceId.valueOf(parent.getId()));
             }
+
+            entries = entries.transform(new Function<List<CatalogEntry>, List<CatalogEntry>>() {
+                @Override
+                public List<CatalogEntry> apply(List<CatalogEntry> catalogEntries) {
+                    return Lists.newArrayList(Iterables.filter(catalogEntries, filter));
+                }
+            });
+
             Subscription subscription = entries.subscribe(observable -> {
                 if (!observable.isLoading()) {
                     callback.onSuccess(observable.get());
@@ -104,8 +123,14 @@ public class FormTreeView implements IsWidget {
         }
     }
 
-    public FormTreeView(FormStore formStore) {
+    public CatalogTreeView(FormStore formStore) {
+        this(formStore, Optional.absent(), Predicates.alwaysTrue());
+    }
+
+    public CatalogTreeView(FormStore formStore, Optional<String> rootId, Predicate<CatalogEntry> filter) {
         this.formStore = formStore;
+        this.rootId = rootId;
+        this.filter = filter;
 
         loader = new CatalogLoader();
 
@@ -129,8 +154,21 @@ public class FormTreeView implements IsWidget {
         tree.getStyle().setLeafIcon(IconBundle.INSTANCE.form());
         tree.getStyle().setNodeOpenIcon(IconBundle.INSTANCE.databaseOpen());
         tree.getStyle().setNodeCloseIcon(IconBundle.INSTANCE.databaseClosed());
+        tree.setIconProvider(new IconProvider<CatalogEntry>() {
+            @Override
+            public ImageResource getIcon(CatalogEntry model) {
+                switch (model.getType()) {
+                    case FOLDER:
+                        return IconBundle.INSTANCE.databaseClosed();
+                    default:
+                    case FORM:
+                        return IconBundle.INSTANCE.form();
+                }
+            }
+        });
 
         tree.getSelectionModel().addSelectionHandler(event -> {
+            selectedEntry.updateIfNotEqual(Optional.of(event.getSelectedItem()));
             if (event.getSelectedItem().getType() == CatalogEntryType.FORM) {
                 selectedForm.updateValue(Optional.of(ResourceId.valueOf(event.getSelectedItem().getId())));
             } else {
@@ -139,6 +177,9 @@ public class FormTreeView implements IsWidget {
         });
     }
 
+    public StatefulValue<Optional<CatalogEntry>> getSelectedEntry() {
+        return selectedEntry;
+    }
 
     @Override
     public Widget asWidget() {

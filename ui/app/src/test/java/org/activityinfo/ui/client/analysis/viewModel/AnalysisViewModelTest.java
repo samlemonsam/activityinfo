@@ -217,15 +217,15 @@ public class AnalysisViewModelTest {
         ImmutableDimensionModel genderDimension = genderDimension();
 
         // Add a new dimension
-        viewModel.updateModel(viewModel.getModel().withDimension(genderDimension));
+        viewModel.updateModel(viewModel.getWorkingModel().withDimension(genderDimension));
         assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(1));
 
         // Delete a non-existant dimension
-        viewModel.updateModel(viewModel.getModel().withoutDimension("FOOOO"));
+        viewModel.updateModel(viewModel.getWorkingModel().withoutDimension("FOOOO"));
         assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(1));
 
         // Delete the gender dimension
-        viewModel.updateModel(viewModel.getModel().withoutDimension(genderDimension.getId()));
+        viewModel.updateModel(viewModel.getWorkingModel().withoutDimension(genderDimension.getId()));
         assertThat(assertLoads(viewModel.getDimensionListItems()), hasSize(0));
     }
 

@@ -6,6 +6,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
@@ -30,6 +31,7 @@ import org.activityinfo.ui.client.store.tasks.NullWatcher;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 import org.activityinfo.ui.client.store.tasks.Watcher;
 
+import javax.annotation.Nullable;
 import java.util.logging.Logger;
 
 /**
@@ -125,5 +127,14 @@ public class HttpStore {
         return new ObservableTree<>(new FormTreeLoader(rootFormId, this::getFormMetadata), scheduler);
     }
 
+    public Promise<Void> updateAnalysis(AnalysisUpdate update) {
+        return client.updateAnalysis(update).then(new Function<Void, Void>() {
+            @Nullable
+            @Override
+            public Void apply(@Nullable Void aVoid) {
+                return null;
+            }
+        });
+    }
 }
 

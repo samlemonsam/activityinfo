@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormPermissions;
@@ -160,6 +161,11 @@ public class TestingFormStore implements FormStore {
     public Promise<Void> updateRecords(RecordTransaction tx) {
         testingCatalog.updateRecords(tx);
         return Promise.done();
+    }
+
+    @Override
+    public Promise<Void> updateAnalysis(AnalysisUpdate update) {
+        return Promise.rejected(new UnsupportedOperationException());
     }
 
     @Override

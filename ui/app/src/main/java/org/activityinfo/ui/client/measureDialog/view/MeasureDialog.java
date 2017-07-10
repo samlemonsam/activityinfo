@@ -28,7 +28,7 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
     private final Dialog dialog;
 
 
-    FormTreeView formTree;
+    CatalogTreeView formTree;
     FieldTreeView fieldTree;
 
     private SimpleEventBus eventBus = new SimpleEventBus();
@@ -39,7 +39,7 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
 
         // Step 1: Select the form to add
         TabItemConfig formTreeTab = new TabItemConfig("Choose Form");
-        formTree = new FormTreeView(model.getFormStore());
+        formTree = new CatalogTreeView(model.getFormStore());
         formTree.addSelectionHandler(event -> model.selectForm(event.getSelectedItem()));
 
         // Step 2: Select fields to add

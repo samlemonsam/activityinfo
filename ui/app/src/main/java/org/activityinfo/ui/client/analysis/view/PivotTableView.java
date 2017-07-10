@@ -6,7 +6,10 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.grid.*;
+import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.EffectiveDimension;
@@ -25,16 +28,28 @@ public class PivotTableView implements IsWidget {
     private ListStore<PivotRow> store;
     private ContentPanel panel;
     private Grid<PivotRow> grid;
+    private final TextButton saveButton;
 
     public PivotTableView(AnalysisViewModel model) {
         this.model = model;
         this.store = new ListStore<>(point -> point.toString());
+
+        saveButton = new TextButton(I18N.CONSTANTS.save());
+
+        ToolBar toolbar = new ToolBar();
+        toolbar.add(saveButton);
+
         this.grid = new Grid<>(store, buildColumnModel(new PivotTable()));
         this.grid.getView().setSortingEnabled(false);
         this.grid.setSelectionModel(new CellSelectionModel<>());
+
+        VerticalLayoutContainer container = new VerticalLayoutContainer();
+        container.add(toolbar, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
+        container.add(grid, new VerticalLayoutContainer.VerticalLayoutData(-1, -1));
+
         this.panel = new ContentPanel();
         this.panel.setHeading("Results");
-        this.panel.add(grid);
+        this.panel.add(container);
 
         model.getPivotTable().subscribe(observable -> {
             if (observable.isLoaded()) {
@@ -43,6 +58,10 @@ public class PivotTableView implements IsWidget {
                 store.clear();
             }
         });
+    }
+
+    public TextButton getSaveButton() {
+        return saveButton;
     }
 
     private void update(PivotTable pivotTable) {

@@ -64,6 +64,10 @@ public class EffectiveModel {
         }
     }
 
+    public AnalysisModel getModel() {
+        return model;
+    }
+
     private boolean isDefined(List<DimensionModel> dimensions, String dimensionId) {
         for (DimensionModel dimension : dimensions) {
             if(dimension.getId().equals(dimensionId)) {

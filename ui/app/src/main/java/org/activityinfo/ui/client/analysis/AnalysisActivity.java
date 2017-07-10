@@ -10,15 +10,17 @@ import org.activityinfo.ui.client.store.FormStore;
 
 public class AnalysisActivity extends AbstractActivity {
     private FormStore formStore;
+    private AnalysisPlace place;
 
-    public AnalysisActivity(FormStore formStore) {
+    public AnalysisActivity(FormStore formStore, AnalysisPlace place) {
         this.formStore = formStore;
+        this.place = place;
     }
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
 
-        AnalysisViewModel model = new AnalysisViewModel(formStore);
+        AnalysisViewModel model = new AnalysisViewModel(formStore, place.getId());
 
         AnalysisView view = new AnalysisView(model);
         panel.setWidget(view);

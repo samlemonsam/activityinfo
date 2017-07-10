@@ -218,4 +218,9 @@ public class RootResource {
         return new CatalogResource(catalog, userProvider);
     }
 
+    @Path("/analysis")
+    public AnalysesResource getAnalysis() {
+        return new AnalysesResource(permissionOracle, userProvider);
+    }
+
 }

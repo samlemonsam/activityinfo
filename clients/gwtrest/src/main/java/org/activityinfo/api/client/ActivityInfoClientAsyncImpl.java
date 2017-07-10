@@ -5,6 +5,7 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.UriUtils;
 import org.activityinfo.json.*;
+import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
@@ -281,6 +282,11 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     @Override
     public Promise<Void> updateRecords(RecordTransaction transaction) {
         return post(RequestBuilder.POST, baseUrl + "/update", Json.stringify(transaction));
+    }
+
+    @Override
+    public Promise<Void> updateAnalysis(AnalysisUpdate analysis) {
+        return post(RequestBuilder.POST, baseUrl + "/analysis", Json.stringify(analysis));
     }
 
     @Override

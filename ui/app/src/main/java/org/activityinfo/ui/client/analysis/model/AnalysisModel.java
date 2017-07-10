@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.analysis.model;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonArray;
@@ -16,6 +17,11 @@ import java.util.Set;
 @org.immutables.value.Value.Immutable
 public abstract class AnalysisModel {
 
+    public static final String TYPE = "pivot";
+
+    public abstract String getId();
+    public abstract Optional<String> getTitle();
+    public abstract Optional<String> getFolderId();
     public abstract List<MeasureModel> getMeasures();
     public abstract List<DimensionModel> getDimensions();
 
