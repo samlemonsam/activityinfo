@@ -34,7 +34,11 @@ public class MySqlQueryExecutor implements QueryExecutor, AutoCloseable {
 
         if(SystemProperty.Environment.environment.value() == SystemProperty.Environment.Value.Production) {
             String appName = SystemProperty.applicationId.get();
-            connectionUrl = "jdbc:google:mysql://" + appName + ":activityinfo/activityinfo";
+            if(appName.equals("activityinfoeu")) {
+                connectionUrl = "jdbc:google:mysql://bedatadriven.com:activityinfo:production2/activityinfo";
+            } else {
+                connectionUrl = "jdbc:google:mysql://" + appName + ":activityinfo/activityinfo";
+            }
             properties.setProperty("user", "root");
 
         } else {

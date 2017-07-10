@@ -24,6 +24,19 @@
         <url-pattern>/_ah/pipeline/*</url-pattern>
     </servlet-mapping>
 
+    <!-- Fix subform servlet -->
+    <servlet>
+        <servlet-name>fixsubform</servlet-name>
+        <servlet-class>
+            org.activityinfo.store.migrate.FixSubForm
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>fixsubform</servlet-name>
+        <url-pattern>/fix</url-pattern>
+    </servlet-mapping>
+
+
     <!-- Servlet to start maprduce jobs -->
 
     <servlet>
