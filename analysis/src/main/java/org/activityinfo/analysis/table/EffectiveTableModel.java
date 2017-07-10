@@ -127,7 +127,7 @@ public class EffectiveTableModel {
 
         // Now any non-reference key fields
         for (FormTree.Node childNode : node.getChildren()) {
-            if(childNode.getField().isKey() && !childNode.isReference()) {
+            if(childNode.getField().isKey() && !childNode.isReference() && childNode.getField().isVisible()) {
                 columns.add(new EffectiveTableColumn(formTree, columnModel(childNode)));
             }
         }
