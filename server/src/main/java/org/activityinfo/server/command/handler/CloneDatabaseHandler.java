@@ -182,6 +182,12 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         if(sourceFormClass.isSubForm()) {
             targetFormClass.setSubFormKind(sourceFormClass.getSubFormKind());
             ResourceId targetParentFormId = this.typeIdMapping.get(sourceFormClass.getParentFormId().get());
+            if(targetParentFormId == null) {
+                LOGGER.severe(String.format("Parent (%s) of subform (%s) was not copied",
+                    sourceFormClass.getParentFormId(),
+                    sourceFormId));
+                throw new IllegalStateException("Parent form has not been copied!");
+            }
             targetFormClass.setParentFormId(targetParentFormId);
         }
 
