@@ -155,11 +155,15 @@ public class EffectiveMapping {
 
     private String computeMissingCategory() {
         if(model.getMissingIncluded()) {
-            return model.getMissingLabel().orElse(I18N.CONSTANTS.none());
+            return getMissingLabel();
         } else {
             // Observations with a missing category will be excluded from the analysis
             return null;
         }
+    }
+
+    private String getMissingLabel() {
+        return model.getMissingLabel().orElse(I18N.CONSTANTS.none());
     }
 
     private Function<String, String> createMap() {
@@ -195,13 +199,27 @@ public class EffectiveMapping {
     public MultiDim createMultiDimSet(ColumnSet columnSet) {
         EnumType enumType = (EnumType) this.formula.getResultType();
 
-        String[] labels = new String[enumType.getValues().size()];
-        BitSet[] bitSets = new BitSet[enumType.getValues().size()];
+        int numItems = enumType.getValues().size();
+        int numCategories;
+
+        if(model.getMissingIncluded()) {
+            // If we are included cases with no values set, then consider it
+            // a category on its own
+            numCategories = numItems + 1;
+        } else {
+            numCategories = numItems;
+        }
+
+        String[] labels = new String[numCategories];
+        BitSet[] bitSets = new BitSet[numCategories];
         List<EnumItem> values = enumType.getValues();
-        for (int j = 0; j < values.size(); j++) {
-            EnumItem enumItem = values.get(j);
+
+        for (int j = 0; j < numItems; j++) {
+
             BitSet bitSet = new BitSet();
+            EnumItem enumItem = values.get(j);
             ColumnView columnView = columnSet.getColumnView(getColumnId(enumItem));
+
             assert columnView != null;
             assert columnView.getType() == ColumnType.BOOLEAN;
 
@@ -214,7 +232,35 @@ public class EffectiveMapping {
             bitSets[j] = bitSet;
         }
 
+        if(model.getMissingIncluded()) {
+            labels[numCategories - 1] = getMissingLabel();
+            bitSets[numCategories - 1] = computeMissingBitSet(columnSet.getNumRows(), numItems, bitSets);
+        }
+
         return new MultiDim(this.index, labels, bitSets);
+    }
+
+    /**
+     * Computes the bitSet of cases that have NO values sent in any of the
+     * {@code numItems}
+     *
+     * @param numRows the number of rows.
+     * @param numItems the number of enum items
+     * @param bitSets an array of bitSets, one for each enum item.
+     * @return a bitSet where a bit is set to true for each row that has NO categories set to true.
+     */
+    private BitSet computeMissingBitSet(int numRows, int numItems, BitSet[] bitSets) {
+
+        // Initialize missing bitSet to 1 for all rows
+        BitSet missing = new BitSet(numRows);
+        missing.set(0, numRows);
+
+        // Now set missing=false when a category is set.
+        for (int i = 0; i < numItems; i++) {
+            missing.andNot(bitSets[i]);
+        }
+
+        return missing;
     }
 
 

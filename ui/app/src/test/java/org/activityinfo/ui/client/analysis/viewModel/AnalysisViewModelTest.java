@@ -99,8 +99,6 @@ public class AnalysisViewModelTest {
 
     @Test
     public void dimensionsWithSeveralStatistics() {
-
-
         PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(medianAge().withStatistics(Statistic.MIN, Statistic.MAX, Statistic.MEDIAN))
                 .addDimensions(genderDimension())
@@ -441,6 +439,8 @@ public class AnalysisViewModelTest {
     @Test
     public void multiDimensions() {
 
+        dumpQuery(intakeForm.getFormId(), intakeForm.getNationalityFieldId().asString());
+
         PivotModel model = ImmutablePivotModel.builder()
                 .addMeasures(intakeCaseCount())
                 .addDimensions(caseYear())
@@ -454,6 +454,21 @@ public class AnalysisViewModelTest {
                 point(144,   "2017",   "Jordanian"),
                 point(71,    "2016",   "Syrian"),
                 point(84,    "2017",   "Syrian")));
+    }
+
+    @Test
+    public void multiDimensionsWithMissing() {
+
+        PivotModel model = ImmutablePivotModel.builder()
+            .addMeasures(intakeCaseCount())
+            .addDimensions(nationality().withMissingIncluded(true))
+            .build();
+
+        assertThat(points(model), containsInAnyOrder(
+            point(833,   "Palestinian"),
+            point(282,   "Jordanian"),
+            point(155,   "Syrian"),
+            point(219,   "None")));
     }
 
     @Test
