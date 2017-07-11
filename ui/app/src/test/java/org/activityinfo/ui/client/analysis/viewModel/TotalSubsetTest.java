@@ -10,7 +10,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
-public class MeasureResultBuilderTest {
+public class TotalSubsetTest {
 
     @Test
     public void totalSets() {
@@ -19,7 +19,7 @@ public class MeasureResultBuilderTest {
 
 
         List<boolean[]> subsets = new ArrayList<>();
-        while(MeasureResultBuilder.nextSubset(totals, totalsRequired)) {
+        while(TotalSubset.nextSubset(totals, totalsRequired)) {
             System.out.println(Arrays.toString(totals));
             subsets.add(Arrays.copyOf(totals, totals.length));
         }

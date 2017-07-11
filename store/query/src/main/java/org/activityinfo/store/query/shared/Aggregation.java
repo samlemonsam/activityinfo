@@ -12,6 +12,10 @@ public final class Aggregation {
     private Aggregation() {}
 
     /**
+     * Sorts the {@code group} and {@code values} array in tandem and calculates the statistic per group.
+     *
+     * <p>Note: the {@code group} and {@code values} array are sorted in place!</p>
+     *
      * @param statistic the statistic to apply
      * @param groupId an array of at least length {@code numValues} containing group ids
      * @param values an array of at least length {@code numValues} containing the values to be aggregated
@@ -19,8 +23,8 @@ public final class Aggregation {
      * @param numGroups number of groups present. The maximum value in the groupId values should be {@code numGroups-1}
      * @return an array of length {@code numGroups} containing the aggregated values.
      */
-    public static double[] aggregate(StatFunction statistic, int[] groupId, double[] values,
-                                     int numValues, int numGroups) {
+    public static double[] sortAndAggregate(StatFunction statistic, int[] groupId, double[] values,
+                                            int numValues, int numGroups) {
 
 
         if(numValues == 0) {
