@@ -11,8 +11,11 @@ import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.ui.client.analysis.model.Statistic;
 import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 import org.activityinfo.ui.client.measureDialog.model.MeasureSelectionModel;
 import org.activityinfo.ui.client.store.FormStore;
@@ -77,19 +80,38 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
         dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(this::onOK);
     }
 
-    private void onCalculate(SelectEvent event) {
-        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), model.getSelectedForms().getList().get(0));
-        dialog.show(null, expr -> {});
-    }
+
 
 
     public void onOK(SelectEvent event) {
         Observable<Optional<MeasureModel>> measure = model.getSelectedMeasure();
         if(measure.isLoaded() && measure.get().isPresent()) {
-            SelectionEvent.fire(this, measure.get().get());
-            dialog.hide();
+            select(measure.get().get());
         }
     }
+
+    private void onCalculate(SelectEvent event) {
+        ResourceId selectedFormId = model.getSelectedForms().getList().get(0);
+        FormulaDialog dialog = new FormulaDialog(model.getFormStore(), selectedFormId);
+        dialog.show(null, expr -> {
+            ImmutableMeasureModel measure = ImmutableMeasureModel.builder()
+                .formId(selectedFormId)
+                .formula(expr.getFormula())
+                .label(expr.getFormula())
+                .addStatistics(Statistic.SUM)
+                .build();
+
+            select(measure);
+
+        });
+    }
+
+
+    private void select(MeasureModel measure) {
+        SelectionEvent.fire(this, measure);
+        dialog.hide();
+    }
+
 
     public void show() {
         model.reset();
