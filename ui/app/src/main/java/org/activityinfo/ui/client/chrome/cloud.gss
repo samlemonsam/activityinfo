@@ -9,18 +9,18 @@
 }
 
 .offline-bar {
-    visibility: hidden;
+    display: none;
 }
 
 .fetching-icon {
-    visibility: hidden;
+    display: none;
 }
 
 
 /** When OFFLINE */
 
 .offline .offline-bar {
-    visibility: visible;
+    display: inherit;
 }
 
 /* When ONLINE */
@@ -36,5 +36,5 @@
 /** When loading over the network **/
 
 .fetching .fetching-icon {
-    visibility: visible;
+    display: inherit;
 }
