@@ -2,9 +2,11 @@ package org.activityinfo.ui.client.input.view.field;
 
 import com.google.common.base.Strings;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.form.TextInputCell;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.HasStringValue;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
@@ -15,9 +17,13 @@ public class TextWidget implements FieldWidget {
 
     private final TextField field;
 
-    public TextWidget(FieldUpdater updater) {
-        field = new TextField();
+    public TextWidget(TextType textType, FieldUpdater updater) {
+        field = new TextField(new TextInputCell());
         field.addKeyUpHandler(event -> updater.update(input()));
+
+        if(textType.hasInputMask()) {
+            field.setEmptyText(textType.getInputMask());
+        }
     }
 
     private FieldInput input() {

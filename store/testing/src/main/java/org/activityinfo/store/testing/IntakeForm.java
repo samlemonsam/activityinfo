@@ -8,6 +8,7 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 
 import java.util.List;
@@ -43,11 +44,12 @@ public class IntakeForm implements TestForm {
     private final EnumItem jordanian;
     private final EnumItem syrian;
     private final EnumItem documents;
-    private final EnumItem acccess;
+    private final EnumItem access;
 
 
     private List<FormInstance> records;
     private RecordGenerator generator;
+    private FormField regNumberField;
 
     public IntakeForm() {
         this(new UnitTestingIds());
@@ -82,7 +84,7 @@ public class IntakeForm implements TestForm {
                     syrian));
 
         documents = ids.enumItem("Documents");
-        acccess = ids.enumItem("Access to Services");
+        access = ids.enumItem("Access to Services");
 
         problemField = formClass.addField(ids.fieldId("F4"))
                 .setCode("PROBLEM")
@@ -90,13 +92,17 @@ public class IntakeForm implements TestForm {
                 .setRequired(false)
                 .setType(new EnumType(Cardinality.MULTIPLE,
                     documents,
-                    acccess));
+                    access));
 
 
         dobField = formClass.addField(ids.fieldId("F5"))
                 .setCode("DOB")
                 .setLabel("Date of Birth")
                 .setType(LocalDateType.INSTANCE);
+
+        regNumberField = formClass.addField(ids.fieldId("F6"))
+                .setLabel("Registration Number")
+                .setType(TextType.SIMPLE.withInputMask("000"));
 
         generator = new RecordGenerator(ids, formClass)
                 .distribution(OPEN_DATE_FIELD_ID, new DateGenerator(openDateField, 2016, 2017))
@@ -142,7 +148,7 @@ public class IntakeForm implements TestForm {
     }
 
     public ResourceId getServicesId() {
-        return acccess.getId();
+        return access.getId();
     }
 
 
@@ -167,5 +173,10 @@ public class IntakeForm implements TestForm {
     @Override
     public RecordGenerator getGenerator() {
         return generator;
+    }
+
+
+    public ResourceId getRegNumberFieldId() {
+        return regNumberField.getId();
     }
 }

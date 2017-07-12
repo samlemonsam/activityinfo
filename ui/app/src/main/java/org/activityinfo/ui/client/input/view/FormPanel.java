@@ -98,17 +98,17 @@ public class FormPanel implements IsWidget {
         Label fieldLabel = new Label(node.getField().getLabel());
         fieldLabel.addStyleName(InputResources.INSTANCE.style().fieldLabel());
 
-        HTML missingMessage = missingMessage();
-        missingMessage.setVisible(false);
+        HTML validationMessage = new HTML();
+        validationMessage.setVisible(false);
 
         FlowPanel fieldPanel = new FlowPanel();
         fieldPanel.setStyleName(InputResources.INSTANCE.style().field());
         fieldPanel.add(fieldLabel);
         fieldPanel.add(fieldWidget);
-        fieldPanel.add(missingMessage);
+        fieldPanel.add(validationMessage);
         panel.add(fieldPanel);
 
-        fieldViews.add(new FieldView(node.getFieldId(), fieldWidget, missingMessage));
+        fieldViews.add(new FieldView(node.getFieldId(), fieldWidget, validationMessage));
     }
 
     private void addSubForm(FormTree formTree, FormTree.Node node) {
@@ -119,10 +119,6 @@ public class FormPanel implements IsWidget {
 
         panel.add(subPanel);
         subFormViews.add(subPanel);
-    }
-
-    private HTML missingMessage() {
-        return new HTML(SafeHtmlUtils.fromString(I18N.CONSTANTS.requiredFieldMessage()));
     }
 
 

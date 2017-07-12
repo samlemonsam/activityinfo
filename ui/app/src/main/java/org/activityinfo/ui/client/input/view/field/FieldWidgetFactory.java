@@ -124,7 +124,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitText(TextType textType) {
-        return new TextWidget(updater);
+        return new TextWidget(textType, updater);
     }
 
     @Override

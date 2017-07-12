@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Multimap;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
@@ -11,6 +12,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +31,7 @@ public class FormInputViewModel {
     private final Set<ResourceId> relevant;
     private final Set<ResourceId> missing;
     private final Map<ResourceId, ReferenceChoices> choices;
+    private final Multimap<ResourceId, String> validationErrors;
     private final boolean valid;
 
     FormInputViewModel(FormTree formTree,
@@ -37,7 +40,7 @@ public class FormInputViewModel {
                        Map<ResourceId, SubFormInputViewModel> subFormMap,
                        Set<ResourceId> relevant,
                        Set<ResourceId> missing,
-                       Map<ResourceId, ReferenceChoices> choices, boolean valid) {
+                       Map<ResourceId, ReferenceChoices> choices, Multimap<ResourceId, String> validationErrors, boolean valid) {
         this.formTree = formTree;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
@@ -45,6 +48,7 @@ public class FormInputViewModel {
         this.relevant = relevant;
         this.missing = missing;
         this.choices = choices;
+        this.validationErrors = validationErrors;
         this.valid = valid;
     }
 
@@ -92,6 +96,10 @@ public class FormInputViewModel {
             }
         }
         return update;
+    }
+
+    public Collection<String> getValidationErrors(ResourceId fieldId) {
+        return validationErrors.get(fieldId);
     }
 
     public RecordTransaction buildTransaction() {

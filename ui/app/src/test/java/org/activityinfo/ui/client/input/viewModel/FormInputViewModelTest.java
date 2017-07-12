@@ -22,6 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -201,7 +203,7 @@ public class FormInputViewModelTest {
 
 
     @Test
-    public void testMultipleSelectPersistance() {
+    public void testMultipleSelectPersistence() {
 
         IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
 
@@ -235,6 +237,28 @@ public class FormInputViewModelTest {
 
         SubFormInputViewModel subFormField = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
         assertThat(subFormField.getSubRecords(), hasSize(4));
+
+    }
+
+    @Test
+    public void inputMask() {
+        IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
+        FormInputViewModelBuilder builder = builderFor(intakeForm);
+
+        FormInputModel inputModel = new FormInputModel(new RecordRef(intakeForm.getFormId(), ResourceId.generateId()));
+
+        // Fill in required fields
+        inputModel = inputModel
+            .update(intakeForm.getOpenDateFieldId(), new LocalDate(2017, 1, 1));
+
+        // Does not match input mask "000"
+        inputModel = inputModel.update(intakeForm.getRegNumberFieldId(), new FieldInput(TextValue.valueOf("FOOOOO")));
+
+        FormInputViewModel viewModel = builder.build(inputModel);
+
+        assertThat(viewModel.isValid(), equalTo(false));
+        assertThat(viewModel.getValidationErrors(intakeForm.getRegNumberFieldId()), not(empty()));
+
 
     }
 

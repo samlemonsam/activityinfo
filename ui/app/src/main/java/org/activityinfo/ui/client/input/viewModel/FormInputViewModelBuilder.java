@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormEvalContext;
@@ -11,6 +13,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.SerialNumberType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -36,12 +39,15 @@ public class FormInputViewModelBuilder {
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
+    private List<FieldValidator> validators = new ArrayList<>();
+
     private List<SubFormInputViewModelBuilder> subBuilders = new ArrayList<>();
 
     /**
      * Maps reference fields to their choices.
      */
     private Map<ResourceId, ReferenceChoices> referenceChoices = new HashMap<>();
+
 
 
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
@@ -58,6 +64,13 @@ public class FormInputViewModelBuilder {
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
+            }
+            if(node.getType() instanceof TextType) {
+                TextType textType = (TextType) node.getType();
+                if(textType.hasInputMask()) {
+                    validators.add(new FieldValidator(node.getFieldId(),
+                        new InputMaskValidator(textType.getInputMask())));
+                }
             }
         }
     }
@@ -139,7 +152,16 @@ public class FormInputViewModelBuilder {
             valid = false;
         }
 
-        // Build subform view models
+        // Run individual field validators
+        Multimap<ResourceId, String> validationErrors = HashMultimap.create();
+        for (FieldValidator validator : validators) {
+            validator.run(record, validationErrors);
+        }
+        if(!validationErrors.isEmpty()) {
+            valid = false;
+        }
+
+        // Build sub form view models
         Map<ResourceId, SubFormInputViewModel> subFormMap = new HashMap<>();
         for (SubFormInputViewModelBuilder subBuilder : subBuilders) {
             subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel, existingRecord));
@@ -153,7 +175,7 @@ public class FormInputViewModelBuilder {
                 record.getFieldValueMap(),
                 subFormMap,
                 relevantSet,
-                missing, referenceChoices, valid);
+                missing, referenceChoices, validationErrors, valid);
     }
 
     private Set<ResourceId> computeRelevance(FormInstance record) {
