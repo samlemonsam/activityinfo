@@ -33,15 +33,17 @@ import java.util.logging.Logger;
  */
 public class AppEntryPoint implements EntryPoint {
 
-    //public static final TablePlace DEFAULT_PLACE = new TablePlace(CuidAdapter.activityFormClass(33));
     public static final Place DEFAULT_PLACE = new CatalogPlace(Optional.absent());
 
-    private static final Logger logger = Logger.getLogger(AppEntryPoint.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AppEntryPoint.class.getName());
 
 
     @Override
     public void onModuleLoad() {
 
+        LOGGER.info("user.agent = " + System.getProperty("user.agent"));
+        LOGGER.info("gxt.user.agent = " + System.getProperty("gxt.user.agent"));
+        LOGGER.info("gxt.device = " + System.getProperty("gxt.device"));
 
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);

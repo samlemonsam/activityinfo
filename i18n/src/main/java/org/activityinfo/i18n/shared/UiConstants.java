@@ -238,7 +238,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Enter the coordinates in any format, or drag the marker on the map")
     String coordinateToolTip();
 
-    @DefaultStringValue("copy")
+    @DefaultStringValue("Copy")
     String copy();
 
     @DefaultStringValue("Country")
@@ -1754,4 +1754,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Please use our new and much improved data entry interface for adding or updating this form's records.")
     String pleaseUseNewDataEntry();
 
+    @DefaultStringValue("Copied")
+    String copied();
+
+    @DefaultStringValue("Copied to Clipboard!")
+    String copiedToClipboard();
 }

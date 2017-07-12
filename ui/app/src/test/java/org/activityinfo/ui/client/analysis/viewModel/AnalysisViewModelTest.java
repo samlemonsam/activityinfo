@@ -21,14 +21,10 @@ import org.activityinfo.ui.client.store.TestingFormStore;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -338,7 +334,7 @@ public class AnalysisViewModelTest {
         AnalysisResult analysisResult = assertLoads(viewModel.getResultTable());
         PivotTable table = new PivotTable(analysisResult);
 
-        String text = PivotTableRenderer.render(table);
+        String text = PivotTableRenderer.renderPlainText(table);
 
         System.out.println(text);
 
