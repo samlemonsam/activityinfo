@@ -3,7 +3,11 @@ package org.activityinfo.ui.client.input.view;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.core.client.dom.ScrollSupport;
+import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
+import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import org.activityinfo.i18n.shared.I18N;
@@ -61,6 +65,7 @@ public class FormInputView implements IsWidget, InputHandler {
 
         this.container = new VerticalLayoutContainer();
         this.container.mask();
+        this.container.setScrollMode(ScrollSupport.ScrollMode.AUTOY);
         this.container.addAttachHandler(event -> {
             if(event.isAttached()) {
                 structureSubscription = this.formStructure.subscribe(this::onStructureChanged);
@@ -87,7 +92,7 @@ public class FormInputView implements IsWidget, InputHandler {
         existingRecord = formStructure.getExistingRecord();
 
         formPanel = new FormPanel(formStructure.getFormTree(), inputModel.getRecordRef(), this);
-        container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+        container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, -1, new Margins(15, 25, 10, 15)));
         container.forceLayout();
 
         viewModel = viewModelBuilder.build(inputModel, existingRecord);

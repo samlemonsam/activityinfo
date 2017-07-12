@@ -22,7 +22,7 @@ public class FormDialog {
         dialog.setHeading("Form");
         dialog.setPixelSize(640, 480);
         dialog.setModal(true);
-        dialog.add(panel);
+        dialog.setWidget(panel);
         dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(new SelectEvent.SelectHandler() {
             @Override
             public void onSelect(SelectEvent event) {

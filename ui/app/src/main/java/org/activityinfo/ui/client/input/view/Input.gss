@@ -3,8 +3,6 @@
 .form {
     font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
     font-size: 13px;
-    padding: 10px;
-    overflow-y: auto;
 }
 
 .subform {
@@ -13,11 +11,9 @@
 }
 
 .field {
-    margin-top: 20px;
 }
 
 .fieldLabel {
     font-weight: bold;
-    margin-bottom: 5px;
 }
 

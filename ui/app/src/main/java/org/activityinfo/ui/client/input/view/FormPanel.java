@@ -2,6 +2,9 @@ package org.activityinfo.ui.client.input.view;
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.*;
+import com.sencha.gxt.core.client.dom.ScrollSupport;
+import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
@@ -21,7 +24,7 @@ import static org.activityinfo.ui.client.input.view.field.FieldWidgetFactory.cre
  */
 public class FormPanel implements IsWidget {
 
-    private final FlowPanel panel;
+    private final CssFloatLayoutContainer panel;
 
     private final List<FieldView> fieldViews = new ArrayList<>();
     private final List<RepeatingSubFormPanel> subFormViews = new ArrayList<>();
@@ -38,7 +41,7 @@ public class FormPanel implements IsWidget {
         this.recordRef = recordRef;
         this.inputHandler = inputHandler;
 
-        panel = new FlowPanel();
+        panel = new CssFloatLayoutContainer();
         panel.addStyleName(InputResources.INSTANCE.style().form());
 
         if(formTree.getRootFormClass().isSubForm()) {
@@ -101,12 +104,12 @@ public class FormPanel implements IsWidget {
         HTML validationMessage = new HTML();
         validationMessage.setVisible(false);
 
-        FlowPanel fieldPanel = new FlowPanel();
+        CssFloatLayoutContainer fieldPanel = new CssFloatLayoutContainer();
         fieldPanel.setStyleName(InputResources.INSTANCE.style().field());
-        fieldPanel.add(fieldLabel);
-        fieldPanel.add(fieldWidget);
-        fieldPanel.add(validationMessage);
-        panel.add(fieldPanel);
+        fieldPanel.add(fieldLabel, new CssFloatLayoutContainer.CssFloatData(1));
+        fieldPanel.add(fieldWidget, new CssFloatLayoutContainer.CssFloatData(1, new Margins(5, 0, 5, 0)));
+        fieldPanel.add(validationMessage, new CssFloatLayoutContainer.CssFloatData(1));
+        panel.add(fieldPanel, new CssFloatLayoutContainer.CssFloatData(1, new Margins(10, 0, 10, 0)));
 
         fieldViews.add(new FieldView(node.getFieldId(), fieldWidget, validationMessage));
     }
@@ -117,7 +120,7 @@ public class FormPanel implements IsWidget {
 
         RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(node, subTree, inputHandler);
 
-        panel.add(subPanel);
+        panel.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
         subFormViews.add(subPanel);
     }
 
