@@ -91,7 +91,7 @@ public class PivotTable {
     }
 
     public boolean isEmpty() {
-        return rootRow.isLeaf() && rootColumn.isLeaf();
+        return rootRow.isEmpty() && rootColumn.isEmpty();
     }
 
     public Node getRootRow() {
@@ -316,6 +316,10 @@ public class PivotTable {
                 }
             }
             return maxChildDepth;
+        }
+
+        public boolean isEmpty() {
+            return cells.isEmpty() && children.isEmpty();
         }
     }
 

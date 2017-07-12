@@ -31,6 +31,7 @@ import java.util.List;
 
 import static org.activityinfo.ui.client.analysis.viewModel.Point.TOTAL;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -59,6 +60,9 @@ public class AnalysisViewModelTest {
         AnalysisViewModel model = new AnalysisViewModel(formStore);
 
         AnalysisResult result = assertLoads(model.getResultTable());
+
+        PivotTable pivotTable = assertLoads(model.getPivotTable());
+        assertTrue(pivotTable.isEmpty());
     }
 
 
@@ -83,6 +87,29 @@ public class AnalysisViewModelTest {
 
         assertThat(points, hasSize(1));
         assertThat(points.get(0).getValue(), equalTo((double) survey.getRowCount()));
+
+        PivotTable pivotTable = assertLoads(viewModel.getPivotTable());
+        assertFalse(pivotTable.isEmpty());
+
+    }
+
+
+    @Test
+    public void testSimpleCSV() {
+
+        PivotModel model = ImmutablePivotModel.builder()
+            .addMeasures(surveyCount())
+            .build();
+
+        AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
+        viewModel.updateModel(model);
+
+        Connection<PivotTable> result = ObservableTesting.connect(viewModel.getPivotTable());
+
+        String csv = PivotTableRenderer.renderDelimited(result.assertLoaded(), ",");
+
+        System.out.println(csv);
+
     }
 
     @Test

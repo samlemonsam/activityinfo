@@ -50,12 +50,10 @@ public class PivotTableView implements IsWidget {
         exportButton = new TextButton(I18N.CONSTANTS.export());
         exportButton.addSelectHandler(this::exportTable);
 
-
         ToolBar toolbar = new ToolBar();
         toolbar.add(saveButton);
         toolbar.add(copyButton);
         toolbar.add(exportButton);
-
 
         this.grid = new Grid<>(store, buildColumnModel(new PivotTable()));
         this.grid.getView().setSortingEnabled(false);
@@ -69,12 +67,13 @@ public class PivotTableView implements IsWidget {
         this.panel.setHeading("Results");
         this.panel.add(container);
 
-        model.getPivotTable().subscribe(observable -> {
-            copyButton.setEnabled(observable.isLoaded());
-            exportButton.setEnabled(observable.isLoaded());
+        model.getPivotTable().subscribe(pivotTable -> {
+            boolean ready = pivotTable.isLoaded() && !pivotTable.get().isEmpty();
+            copyButton.setEnabled(ready);
+            exportButton.setEnabled(ready);
 
-            if (observable.isLoaded()) {
-                update(observable.get());
+            if (pivotTable.isLoaded()) {
+                update(pivotTable.get());
             } else {
                 store.clear();
             }

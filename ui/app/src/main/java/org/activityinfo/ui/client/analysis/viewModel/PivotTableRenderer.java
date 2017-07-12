@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
 import com.google.common.base.Strings;
+import org.activityinfo.i18n.shared.I18N;
 
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +88,9 @@ public class PivotTableRenderer {
 
 
     private int addRowHeaders(PivotTable.Node parent, int row, int col) {
-        addCell(row, col, parent.getDimension().getLabel());
+        if(parent.getDimension() != null) {
+            addCell(row, col, parent.getDimension().getLabel());
+        }
         for (PivotTable.Node child : parent.getChildren()) {
             addCell(row, col+1, child.getCategoryLabel());
             if(child.isLeaf()) {
