@@ -6,7 +6,9 @@ import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.SelectionViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
+import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
@@ -20,6 +22,8 @@ import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.table.view.DeleteRecordAction;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.activityinfo.observable.ObservableTesting.connect;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -41,14 +45,36 @@ public class TableViewModelTest {
                 .formId(setup.getSurveyForm().getFormId())
                 .build();
 
-        TableViewModel model = new TableViewModel(setup.getFormStore(), tableModel);
+        TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
 
-        Connection<EffectiveTableModel> view = setup.connect(model.getEffectiveTable());
+        Connection<EffectiveTableModel> view = setup.connect(viewModel.getEffectiveTable());
 
         EffectiveTableModel effectiveTableModel = view.assertLoaded();
 
         EffectiveTableColumn nameColumn = effectiveTableModel.getColumns().get(0);
         assertThat(nameColumn.getLabel(), equalTo("Respondent Name"));
+
+        // Now verify that we can update the column label
+
+        view.resetChangeCounter();
+
+        TableColumn updatedColumn = ImmutableTableColumn.builder()
+            .from(nameColumn.getModel())
+            .label("MY column")
+            .build();
+
+        viewModel.update(ImmutableTableModel.builder()
+            .from(tableModel)
+            .columns(Arrays.asList(updatedColumn))
+            .build());
+
+        setup.runScheduled();
+
+
+        // Should receive a change event...
+        view.assertChanged();
+        EffectiveTableModel updatedModel = view.assertLoaded();
+        assertThat(updatedModel.getColumns().get(0).getLabel(), equalTo("MY column"));
     }
 
     @Test

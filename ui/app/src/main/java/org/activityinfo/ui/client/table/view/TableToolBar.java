@@ -16,13 +16,16 @@ import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Subscription;
 import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.ui.client.input.view.FormDialog;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.table.ColumnDialog;
 
+import java.util.logging.Logger;
+
 public class TableToolBar extends ToolBar {
+
+    private static final Logger LOGGER = Logger.getLogger(TableToolBar.class.getName());
 
     private FormStore formStore;
     private TableViewModel viewModel;
@@ -129,8 +132,6 @@ public class TableToolBar extends ToolBar {
         } else {
             removeButton.removeToolTip();
         }
-
-
     }
 
     private void onNewRecord(SelectEvent event) {
@@ -190,7 +191,9 @@ public class TableToolBar extends ToolBar {
     private void onChooseColumnsSelected(SelectEvent event) {
         if(viewModel.getEffectiveTable().isLoaded()) {
             ColumnDialog dialog = new ColumnDialog(viewModel.getEffectiveTable().get());
-            dialog.show();
+            dialog.show(updatedModel -> {
+                viewModel.update(updatedModel);
+            });
         }
     }
 }

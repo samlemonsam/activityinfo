@@ -17,16 +17,19 @@ import org.activityinfo.store.query.shared.FormSource;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Model's the user's selection of columns
  */
 public class TableViewModel {
 
+    private static final Logger LOGGER = Logger.getLogger(TableViewModel.class.getName());
+
     private final FormSource formStore;
     private ResourceId formId;
     private Observable<FormTree> formTree;
-    private TableModel tableModel;
+    private StatefulValue<TableModel> tableModel;
     private Observable<EffectiveTableModel> effectiveTable;
 
     private Map<ResourceId, Observable<EffectiveTableModel>> effectiveSubTables = new HashMap<>();
@@ -38,13 +41,16 @@ public class TableViewModel {
         this.formId = tableModel.getFormId();
         this.formStore = formStore;
         this.formTree = formStore.getFormTree(formId);
-        this.tableModel = tableModel;
-        this.effectiveTable = formTree.transform(tree -> new EffectiveTableModel(formStore, tree, tableModel));
+        this.tableModel = new StatefulValue<>(tableModel);
+        this.effectiveTable = this.tableModel.join(tm -> {
+            return formTree.transform(tree -> new EffectiveTableModel(formStore, tree, tm));
+        });
+
         this.selectionViewModel = SelectionViewModel.compute(formStore, selectedRecordRef);
     }
 
     public TableModel getTableModel() {
-        return tableModel;
+        return tableModel.get();
     }
 
     public Observable<Optional<RecordRef>> getSelectedRecordRef() {
@@ -109,4 +115,10 @@ public class TableViewModel {
         selectedRecordRef.updateIfNotEqual(Optional.of(ref));
     }
 
+    public void update(TableModel updatedModel) {
+
+        LOGGER.info("TableModel updated: " + updatedModel.toJson().toJson());
+
+        tableModel.updateIfNotEqual(updatedModel);
+    }
 }

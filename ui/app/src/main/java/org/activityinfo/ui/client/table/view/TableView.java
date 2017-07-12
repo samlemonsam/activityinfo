@@ -152,20 +152,20 @@ public class TableView implements IsWidget, HasTitle {
 
         panel.setHeading(effectiveTableModel.getFormLabel());
 
-        if(grid == null) {
-            grid = new TableGrid(effectiveTableModel);
-            grid.addSelectionChangedHandler(event -> {
-                if(!event.getSelection().isEmpty()) {
-                    RecordRef ref = event.getSelection().get(0);
-                    viewModel.select(ref);
-                }
-            });
-            center.add(grid, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
-            center.forceLayout();
-
-        } else {
-            grid.update(viewModel.getEffectiveTable());
+        if(grid != null) {
+            center.remove(grid);
         }
+
+        grid = new TableGrid(effectiveTableModel);
+        grid.addSelectionChangedHandler(event -> {
+            if(!event.getSelection().isEmpty()) {
+                RecordRef ref = event.getSelection().get(0);
+                viewModel.select(ref);
+            }
+        });
+        center.add(grid, new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+        center.forceLayout();
+
 
         // If we are transitioning from an error state, make the container with the
         // grid and sidebars is set

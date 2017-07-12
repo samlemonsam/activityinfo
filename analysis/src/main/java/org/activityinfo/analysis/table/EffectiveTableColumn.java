@@ -38,6 +38,10 @@ public class EffectiveTableColumn {
         return label;
     }
 
+    public TableColumn getModel() {
+        return model;
+    }
+
     public List<ColumnModel> getQueryModel() {
         return format.getColumnModels();
     }

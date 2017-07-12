@@ -14,6 +14,7 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.type.RecordRef;
@@ -107,13 +108,12 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         }
     }
 
-    public void update(Observable<EffectiveTableModel> effectiveTable) {
-
-    }
 
     @Override
     public HandlerRegistration addSelectionChangedHandler(SelectionChangedEvent.SelectionChangedHandler<RecordRef> handler) {
         return eventBus.addHandler(SelectionChangedEvent.getType(), handler);
 
     }
+
+
 }

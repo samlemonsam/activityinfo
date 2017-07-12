@@ -3,6 +3,7 @@ package org.activityinfo.analysis.table;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
+import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.expr.Exprs;
@@ -40,6 +41,7 @@ public class EffectiveTableModel {
     public static final String ID_COLUMN_ID = "$$id";
 
     private FormTree formTree;
+    private TableModel tableModel;
     private Optional<Observable<Optional<RecordRef>>> selectedParentRef;
     private List<EffectiveTableColumn> columns;
     private Observable<ColumnSet> columnSet;
@@ -51,13 +53,18 @@ public class EffectiveTableModel {
     public EffectiveTableModel(FormSource formSource, FormTree formTree, TableModel tableModel,
                                Optional<Observable<Optional<RecordRef>>> selectedParentRef) {
         this.formTree = formTree;
+        this.tableModel = tableModel;
         this.selectedParentRef = selectedParentRef;
         this.columnSet = new StatefulValue<>();
         this.columns = new ArrayList<>();
 
         if(formTree.getRootState() == FormTree.State.VALID) {
-            if (this.columns.isEmpty()) {
+            if (tableModel.getColumns().isEmpty()) {
                 addDefaultColumns(formTree);
+            } else {
+                for (TableColumn tableColumn : tableModel.getColumns()) {
+                    columns.add(new EffectiveTableColumn(formTree, tableColumn));
+                }
             }
         }
 
@@ -75,17 +82,22 @@ public class EffectiveTableModel {
         }
     }
 
+    public TableModel getModel() {
+        return tableModel;
+    }
 
     private void addDefaultColumns(FormTree formTree) {
         if(!isSubTable() && formTree.getRootFormClass().isSubForm()) {
             addDefaultColumns(formTree.parentTree());
         }
         for (FormTree.Node node : formTree.getRootFields()) {
-            if (isSimple(node.getType())) {
-                columns.add(new EffectiveTableColumn(formTree, columnModel(node)));
+            if(node.getField().isVisible()) {
+                if (isSimple(node.getType())) {
+                    columns.add(new EffectiveTableColumn(formTree, columnModel(node)));
 
-            } else if (node.getType() instanceof ReferenceType) {
-                addKeyColumns(columns,  node);
+                } else if (node.getType() instanceof ReferenceType) {
+                    addKeyColumns(columns, node);
+                }
             }
         }
     }
@@ -127,7 +139,7 @@ public class EffectiveTableModel {
 
         // Now any non-reference key fields
         for (FormTree.Node childNode : node.getChildren()) {
-            if(childNode.getField().isKey() && !childNode.isReference() && childNode.getField().isVisible()) {
+            if (childNode.getField().isKey() && !childNode.isReference()) {
                 columns.add(new EffectiveTableColumn(formTree, columnModel(childNode)));
             }
         }

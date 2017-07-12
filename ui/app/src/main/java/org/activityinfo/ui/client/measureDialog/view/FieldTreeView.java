@@ -109,4 +109,13 @@ public class FieldTreeView implements IsWidget {
     }
 
 
+    public void selectNext(MeasureTreeNode node) {
+        MeasureTreeNode newSelection = treeStore.getNextSibling(node);
+        if(newSelection == null) {
+            newSelection = treeStore.getNextSibling(treeStore.getParent(node));
+        }
+        if(newSelection != null) {
+            getSelectionModel().select(newSelection, false);
+        }
+    }
 }
