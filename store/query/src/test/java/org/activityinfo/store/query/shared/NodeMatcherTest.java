@@ -53,6 +53,7 @@ public class NodeMatcherTest {
         assertThat(resolve("[phone number]"), contains("B"));
 
     }
+
     
     @Test(expected = AmbiguousSymbolException.class)
     public void ambiguousRootField() {
@@ -124,9 +125,16 @@ public class NodeMatcherTest {
         
         assertThat(resolve("Name"), contains("SN"));
         assertThat(resolve("Province.Name"), Matchers.containsInAnyOrder("SL>TP>PN", "SL>PN"));
-        
     }
-    
+
+    @Test
+    public void selfFormClass() {
+        givenRootForm("Province", field("PN", "Name"));
+
+        assertThat(resolve("Province.Name"), contains("PN"));
+    }
+
+
     @Test
     public void embeddedField() {
        givenRootForm("village", field("VN", "name"), pointField("P", "location"));
@@ -155,6 +163,7 @@ public class NodeMatcherTest {
         }
         
         rootFormClass = new FormClass(ResourceId.valueOf(label));
+        rootFormClass.setLabel(label);
         rootFormClass.getElements().addAll(Arrays.asList(fields));
     }
     

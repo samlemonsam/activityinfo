@@ -108,6 +108,9 @@ public class AnalysisViewModel {
     }
 
     public PivotModel updateModel(PivotModel model) {
+
+        LOGGER.info("model: " + model.toJson().toJson());
+
         this.draftModel.updateValue(Optional.of(ImmutablePivotModel.copyOf(model)));
         return model;
     }

@@ -46,7 +46,15 @@ public class NodeMatcher {
      * @throws AmbiguousSymbolException if the expression could match multiple nodes in the tree
      */
     public Collection<NodeMatch> resolveCompoundExpr(CompoundExpr expr) {
-        return matchNodes(new QueryPath(expr), tree.getRootFields());
+        QueryPath queryPath = new QueryPath(expr);
+
+        // Given an expression like Province.Name, see if we can match the
+        // the first symbol against the root form's id or label
+        if(queryPath.matches(tree.getRootFormClass())) {
+            return matchNodes(queryPath.next(), tree.getRootFields());
+        }
+
+        return matchNodes(queryPath, tree.getRootFields());
     }
 
     private Collection<NodeMatch> matchNodes(QueryPath queryPath, Iterable<FormTree.Node> fields) {

@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import com.google.gwt.resources.client.ImageResource;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.analysis.model.DimensionMapping;
@@ -33,7 +34,7 @@ public class RootFieldNode extends DimensionNode {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label(field.getLabel())
-                .addMappings(new DimensionMapping(formId, field.getId()))
+                .addMappings(new DimensionMapping(new CompoundExpr(formId, field.getName())))
                 .build();
     }
 

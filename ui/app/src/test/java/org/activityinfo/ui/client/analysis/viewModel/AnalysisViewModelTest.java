@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.json.JsonObject;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -692,7 +693,7 @@ public class AnalysisViewModelTest {
                 .id(ResourceId.generateCuid())
                 .label("Gender")
                 .missingIncluded(false)
-                .addMappings(new DimensionMapping(new SymbolExpr("Gender")))
+                .addMappings(new DimensionMapping(new CompoundExpr(survey.getFormId(), "Gender")))
                 .build();
     }
 
