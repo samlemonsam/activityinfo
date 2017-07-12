@@ -1,7 +1,11 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.appengine.api.datastore.Query;
 import com.google.gwt.core.client.testing.StubScheduler;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
@@ -21,6 +25,9 @@ import org.junit.Test;
 
 import static org.activityinfo.observable.ObservableTesting.connect;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
 public class FormStoreTest {
@@ -252,8 +259,55 @@ public class FormStoreTest {
 
         // Our queue should be empty again
         assertThat(pendingStatus.assertLoaded().isEmpty(), equalTo(true));
+    }
+
+    @Test
+    public void serialNumberOffline() {
+        TestSetup setup = new TestSetup();
+        IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
+
+        // Synchronize the intake form
+
+        setup.setConnected(true);
+        setup.getFormStore().setFormOffline(intakeForm.getFormId(), true);
+        setup.runScheduled();
+
+        // Go offline
+        setup.setConnected(false);
+
+        // Create a new intake record
+        FormInstance newRecord = intakeForm.getGenerator().get();
+        assertThat(newRecord.get(intakeForm.getProtectionCodeFieldId()), is(nullValue()));
+
+        Promise<Void> update = setup.getFormStore().updateRecords(new RecordTransactionBuilder().create(newRecord).build());
+        assertThat(update.getState(), equalTo(Promise.State.FULFILLED));
+
+        // Verify that we can read the new record offline
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
+        queryModel.selectResourceId().as("id");
+        queryModel.selectField(intakeForm.getProtectionCodeFieldId()).as("serial");
+        queryModel.setFilter(Exprs.equals(
+            new SymbolExpr("_id"),
+            new ConstantExpr(newRecord.getId().asString())));
+
+        Connection<ColumnSet> view = setup.connect(setup.getFormStore().query(queryModel));
+
+        assertThat(view.assertLoaded().getNumRows(), equalTo(1));
+        assertThat(view.assertLoaded().getColumnView("serial").getString(0), nullValue());
+
+        // Now go online...
+        setup.setConnected(true);
+        setup.getOfflineStore().syncChanges();;
+        setup.runScheduled();
+
+        // Check that the serial number has been updated with the value from the server
+        assertThat(view.assertLoaded().getColumnView("serial").getString(0), not(nullValue()));
+
+
 
     }
+
+
 
     private void runScheduled() {
         while(scheduler.executeScheduledCommands()) {

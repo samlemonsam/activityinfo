@@ -4,6 +4,9 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent;
 import org.activityinfo.ui.client.store.tasks.Watcher;
 
+/**
+ * Signals that the status of pending updates has changed.
+ */
 public class PendingStatusEvent extends GwtEvent<PendingEventHandler> {
     public static Type<PendingEventHandler> TYPE = new Type<PendingEventHandler>();
 

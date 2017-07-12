@@ -99,7 +99,10 @@ public class HttpStore {
 
         // We consider the version range request to be immutable, as old versions
         // don't change, so refeching shouldn't be necessary
-        return get(new FormMetadataRequest(formId));
+        return get(new FormMetadataRequest(formId),
+            new FormChangeWatcher(eventBus, change -> {
+                return change.isFormChanged(formId);
+            }));
     }
 
     public Observable<ColumnSet> query(QueryModel queryModel) {

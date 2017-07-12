@@ -15,6 +15,8 @@ import java.util.*;
 @GwtIncompatible
 public class TestingFormStorage implements VersionedFormStorage {
 
+    private long version = 1;
+
     private TestForm testForm;
 
     private Map<String, Integer> serialNumbers = new HashMap<>();
@@ -93,12 +95,12 @@ public class TestingFormStorage implements VersionedFormStorage {
     @Override
     public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
         List<FormRecord> records = new ArrayList<>();
-        if(localVersion < 1) {
+        if(localVersion < version) {
             for (FormInstance record : records()) {
                 records.add(FormRecord.fromInstance(record));
             }
         }
-        return FormSyncSet.incremental(testForm.getFormId().asString(), new String[0], records);
+        return FormSyncSet.complete(testForm.getFormId(), records);
     }
 
     @Override
@@ -131,9 +133,18 @@ public class TestingFormStorage implements VersionedFormStorage {
         if(update.isDeleted()) {
             FormInstance deleted = index.remove(update.getRecordId());
             records.remove(deleted);
+        } else if(!index.containsKey(update.getRecordId())) {
+            // Create
+            FormInstance newRecord = new FormInstance(update.getFormId(), update.getFormId());
+            newRecord.setParentRecordId(update.getParentId());
+            newRecord.setAll(update.getChangedFieldValues());
+            records.add(newRecord);
+
         } else {
+            // Update
             throw new UnsupportedOperationException();
         }
+        version++;
     }
 
     @Override
@@ -143,7 +154,7 @@ public class TestingFormStorage implements VersionedFormStorage {
 
     @Override
     public long cacheVersion() {
-        return 1;
+        return version;
     }
 
     @Override

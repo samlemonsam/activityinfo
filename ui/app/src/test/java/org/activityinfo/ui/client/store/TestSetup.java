@@ -13,6 +13,7 @@ import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
+import org.activityinfo.ui.client.store.offline.UpdateSynchronizer;
 
 /**
  * Wires together a FormStoreImpl along with stubbed or mocked out components

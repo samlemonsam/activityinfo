@@ -80,7 +80,8 @@ public class RecordGenerator implements Supplier<FormInstance> {
         } else if(field.getType() instanceof LocalDateType) {
             return new DateGenerator(field);
         } else if(field.getType() instanceof SerialNumberType) {
-            return new SerialNumberGenerator();
+            return Suppliers.ofInstance(null);
+
         } else if(field.getType() instanceof GeoPointType) {
             return new GeoPointGenerator(field);
         } else {

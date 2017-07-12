@@ -72,9 +72,6 @@ public class RecordStore {
         impl.openCursor(lowerBound, upperBound, new IDBCursorCallback<RecordObject>() {
             @Override
             public void onNext(IDBCursor<RecordObject> cursor) {
-
-                LOGGER.info("RecordStore.onNext: " + cursor.getKeyString());
-
                 callback.onNext(cursor);
             }
 
