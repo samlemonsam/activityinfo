@@ -62,7 +62,7 @@ public class SingleClassImporter implements FieldImporter {
         QueryModel queryModel = new QueryModel(rangeFormId);
         queryModel.selectResourceId().as("_id");
         for (FieldPath fieldPath : referenceFields.keySet()) {
-            queryModel.selectField(fieldPath);
+            queryModel.selectField(fieldPath).as(fieldPath.toString());
         }
 
         return locator.queryTable(queryModel).then(new Function<ColumnSet, Void>() {
