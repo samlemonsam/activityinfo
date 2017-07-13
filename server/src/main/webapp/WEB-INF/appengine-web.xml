@@ -33,7 +33,7 @@
     <service>warmup</service>
   </inbound-services>
 
-  <instance-class>F2</instance-class>
+  <instance-class>F4</instance-class>
   <automatic-scaling>
     <min-idle-instances>1</min-idle-instances>
     <max-idle-instances>1</max-idle-instances>
