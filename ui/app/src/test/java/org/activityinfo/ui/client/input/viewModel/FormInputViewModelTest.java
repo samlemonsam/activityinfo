@@ -5,6 +5,7 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -25,6 +26,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -258,6 +260,44 @@ public class FormInputViewModelTest {
 
         assertThat(viewModel.isValid(), equalTo(false));
         assertThat(viewModel.getValidationErrors(intakeForm.getRegNumberFieldId()), not(empty()));
+    }
+
+
+    @Test
+    public void requiredSubFormFields() {
+        BioDataForm bioDataForm = setup.getCatalog().getBioDataForm();
+        IncidentForm incidentForm = setup.getCatalog().getIncidentForm();
+        ReferralSubForm referralSubForm = setup.getCatalog().getReferralSubForm();
+
+        FormInputViewModelBuilder builder = builderFor(incidentForm);
+
+        FormInputModel inputModel = new FormInputModel(new RecordRef(incidentForm.getFormId(), ResourceId.generateId()));
+
+        // Fill in required fields
+        inputModel = inputModel
+            .update(IncidentForm.PROTECTION_CODE_FIELD_ID, new ReferenceValue(bioDataForm.getRecordRef(0)));
+
+        // Should be valid as we have only a placeholder sub form...
+        FormInputViewModel viewModel = builder.build(inputModel);
+
+
+        SubRecordViewModel referralRecord = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID).getSubRecords().get(0);
+        assertTrue(referralRecord.isPlaceholder());
+
+        assertThat(viewModel.isValid(), equalTo(true));
+
+        // Now add a new referral sub form
+        // Without completing all required fields, and make sure the form is invalid
+
+        inputModel = inputModel.update(referralRecord.getRecordRef(), referralSubForm.getContactNumber().getId(), FieldInput.EMPTY);
+        viewModel = builder.build(inputModel);
+
+        referralRecord = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID).getSubRecords().get(0);
+
+        assertFalse("subform is invalid", referralRecord.getSubFormViewModel().isValid());
+        assertFalse("parent is invalid", viewModel.isValid());
+
+
 
 
     }

@@ -164,7 +164,11 @@ public class FormInputViewModelBuilder {
         // Build sub form view models
         Map<ResourceId, SubFormInputViewModel> subFormMap = new HashMap<>();
         for (SubFormInputViewModelBuilder subBuilder : subBuilders) {
-            subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel, existingRecord));
+            SubFormInputViewModel subViewModel = subBuilder.build(inputModel, existingRecord);
+            if(!subViewModel.isValid()) {
+                valid = false;
+            }
+            subFormMap.put(subBuilder.getFieldId(), subViewModel);
         }
 
         LOGGER.info("Valid = " + valid);

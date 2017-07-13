@@ -19,11 +19,16 @@ public class SubFormInputViewModel {
     private ResourceId fieldId;
     private List<SubRecordViewModel> subRecords;
     private Set<RecordRef> subRecordRefs = new HashSet<>();
+    private boolean valid;
 
     SubFormInputViewModel(ResourceId fieldId, List<SubRecordViewModel> subRecords) {
         this.fieldId = fieldId;
         this.subRecords = subRecords;
+        this.valid = true;
         for (SubRecordViewModel subRecord : subRecords) {
+            if(!subRecord.isPlaceholder() && !subRecord.getSubFormViewModel().isValid()) {
+                valid = false;
+            }
             subRecordRefs.add(subRecord.getRecordRef());
         }
     }
@@ -61,5 +66,13 @@ public class SubFormInputViewModel {
             }
         }
         return updates;
+    }
+
+    /**
+     *
+     * @return true if all non-placeholder subforms are valid.
+     */
+    public boolean isValid() {
+        return valid;
     }
 }

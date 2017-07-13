@@ -15,11 +15,14 @@ public class ReferralSubForm implements TestForm {
 
     public static final ResourceId ORGANIZATION_FIELD_ID = ResourceId.valueOf("F1");
 
+    public static final ResourceId PHONE_FIELD_ID = ResourceId.valueOf("F1");
+
     public static final int ROW_COUNT = 2503;
 
     private final IncidentForm parentForm;
     private final FormClass formClass;
     private final FormField organizationField;
+    private final FormField contactNumber;
 
     private List<FormInstance> records = null;
     private RecordGenerator generator;
@@ -33,6 +36,12 @@ public class ReferralSubForm implements TestForm {
 
         organizationField = formClass.addField(ORGANIZATION_FIELD_ID)
                 .setLabel("2.2 Name of organization/department receiving the referral")
+                .setType(TextType.SIMPLE)
+                .setRequired(true)
+                .setVisible(true);
+
+        contactNumber = formClass.addField(PHONE_FIELD_ID)
+                .setLabel("Contact phone number")
                 .setType(TextType.SIMPLE)
                 .setRequired(true)
                 .setVisible(true);
@@ -51,6 +60,9 @@ public class ReferralSubForm implements TestForm {
         return formClass;
     }
 
+    public FormField getContactNumber() {
+        return contactNumber;
+    }
 
     @Override
     public List<FormInstance> getRecords() {

@@ -174,4 +174,8 @@ public class TestingCatalog implements FormCatalog {
     public IncidentForm getIncidentForm() {
         return incidentForm;
     }
+
+    public ReferralSubForm getReferralSubForm() {
+        return referralSubForm;
+    }
 }
