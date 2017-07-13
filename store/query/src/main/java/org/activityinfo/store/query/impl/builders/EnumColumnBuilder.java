@@ -1,5 +1,6 @@
 package org.activityinfo.store.query.impl.builders;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.query.ColumnView;
@@ -10,6 +11,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.store.query.impl.PendingSlot;
 import org.activityinfo.store.query.impl.views.DiscreteStringColumnView;
+import org.activityinfo.store.query.impl.views.DiscreteStringColumnView8;
 import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.List;
@@ -35,10 +37,18 @@ public class EnumColumnBuilder implements CursorObserver<FieldValue> {
         }
     }
 
-    private int[] createIndexArray() {
+    private int[] createIndexArray32() {
         int indexes[] = new int[values.size()];
         for (int i = 0; i != indexes.length; ++i) {
             indexes[i] = values.get(i);
+        }
+        return indexes;
+    }
+
+    private byte[] createIndexArray8() {
+        byte indexes[] = new byte[values.size()];
+        for (int i = 0; i != indexes.length; ++i) {
+            indexes[i] = values.get(i).byteValue();
         }
         return indexes;
     }
@@ -63,6 +73,26 @@ public class EnumColumnBuilder implements CursorObserver<FieldValue> {
 
     @Override
     public void done() {
-        result.set(new DiscreteStringColumnView(labels, createIndexArray()));
+        result.set(build());
     }
+
+    @VisibleForTesting
+    ColumnView build() {
+        if(labels.length < DiscreteStringColumnView8.MAX_COUNT) {
+            return build8();
+        } else {
+            return build32();
+        }
+    }
+
+    @VisibleForTesting
+    ColumnView build8() {
+        return new DiscreteStringColumnView8(labels, createIndexArray8());
+    }
+
+    @VisibleForTesting
+    ColumnView build32() {
+        return new DiscreteStringColumnView(labels, createIndexArray32());
+    }
+
 }
