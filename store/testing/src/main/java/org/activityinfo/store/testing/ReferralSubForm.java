@@ -15,7 +15,7 @@ public class ReferralSubForm implements TestForm {
 
     public static final ResourceId ORGANIZATION_FIELD_ID = ResourceId.valueOf("F1");
 
-    public static final ResourceId PHONE_FIELD_ID = ResourceId.valueOf("F1");
+    public static final ResourceId PHONE_FIELD_ID = ResourceId.valueOf("F2");
 
     public static final int ROW_COUNT = 2503;
 
