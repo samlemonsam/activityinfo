@@ -275,6 +275,8 @@ public class PivotAdapter {
 
             PivotSites.PivotResult result = new PivotSites.PivotResult(createBuckets());
 
+            LOGGER.info("Bucket count: " + result.getBuckets());
+
             batch.waitForCachingToFinish();
 
             return result;
