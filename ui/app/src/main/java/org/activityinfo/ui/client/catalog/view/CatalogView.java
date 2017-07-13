@@ -34,7 +34,10 @@ public class CatalogView implements IsWidget, HasTitle {
         bar.add(openTable);
         bar.add(newReport);
 
-        treeView = new CatalogTreeView(formStore, parentId, entry -> !entry.getId().equals("geodb"));
+        treeView = new CatalogTreeView(formStore, parentId,
+            entry -> !entry.getId().equals("geodb"));
+
+        treeView.setIncludeSubForms(false);
 
         container = new VerticalLayoutContainer();
         container.add(bar, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
@@ -45,10 +48,15 @@ public class CatalogView implements IsWidget, HasTitle {
     }
 
     private void openTable(SelectEvent event) {
-        if(treeView.getSelectedFormId().isLoaded() && treeView.getSelectedFormId().get().isPresent()) {
-            ResourceId formId = treeView.getSelectedFormId().get().get();
-            String url = Window.Location.createUrlBuilder().setHash("table/" + formId.asString()).buildString();
-            Window.open(url, null, null);
+        if(treeView.getSelectedEntry().isLoaded() && treeView.getSelectedEntry().get().isPresent()) {
+            CatalogEntry catalogEntry = treeView.getSelectedEntry().get().get();
+            if(catalogEntry.getType() == CatalogEntryType.FORM) {
+                String url = Window.Location.createUrlBuilder().setHash("table/" + catalogEntry.getId()).buildString();
+                Window.open(url, null, null);
+            } else if(catalogEntry.getType() == CatalogEntryType.ANALYSIS) {
+                String url = Window.Location.createUrlBuilder().setHash("analysis/" + catalogEntry.getId()).buildString();
+                Window.open(url, null, null);
+            }
         }
     }
 
@@ -61,7 +69,8 @@ public class CatalogView implements IsWidget, HasTitle {
             catalogEntry = selection.get().get();
         }
 
-        openTable.setEnabled(hasSelection && catalogEntry.getType() == CatalogEntryType.FORM);
+        openTable.setEnabled(hasSelection &&
+            (catalogEntry.getType() == CatalogEntryType.FORM || catalogEntry.getType() == CatalogEntryType.ANALYSIS));
         newReport.setEnabled(hasSelection && catalogEntry.getType() == CatalogEntryType.FOLDER);
     }
 

@@ -32,6 +32,7 @@ import org.activityinfo.ui.client.store.FormStore;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -48,6 +49,8 @@ public class CatalogTreeView implements IsWidget {
     private final CatalogLoader loader;
     private final Optional<String> rootId;
     private final Predicate<CatalogEntry> filter;
+
+    private boolean includeSubForms = true;
 
     private List<Subscription> subscriptions = new ArrayList<>();
 
@@ -91,7 +94,11 @@ public class CatalogTreeView implements IsWidget {
             if(parent == null) {
                 entries = formStore.getCatalogRoots();
             } else {
-                entries = formStore.getCatalogChildren(ResourceId.valueOf(parent.getId()));
+                if(parent.getType() == CatalogEntryType.FORM && ! includeSubForms) {
+                    entries = Observable.just(Collections.emptyList());
+                } else {
+                    entries = formStore.getCatalogChildren(ResourceId.valueOf(parent.getId()));
+                }
             }
 
             entries = entries.transform(new Function<List<CatalogEntry>, List<CatalogEntry>>() {
@@ -119,6 +126,9 @@ public class CatalogTreeView implements IsWidget {
 
         @Override
         public boolean hasChildren(CatalogEntry parent) {
+            if(parent.getType() == CatalogEntryType.FORM && !includeSubForms) {
+                return false;
+            }
             return !parent.isLeaf();
         }
     }
@@ -160,6 +170,8 @@ public class CatalogTreeView implements IsWidget {
                 switch (model.getType()) {
                     case FOLDER:
                         return IconBundle.INSTANCE.databaseClosed();
+                    case ANALYSIS:
+                        return IconBundle.INSTANCE.report();
                     default:
                     case FORM:
                         return IconBundle.INSTANCE.form();
@@ -194,4 +206,7 @@ public class CatalogTreeView implements IsWidget {
         tree.getSelectionModel().addSelectionHandler(handler);
     }
 
+    public void setIncludeSubForms(boolean includeSubForms) {
+        this.includeSubForms = includeSubForms;
+    }
 }

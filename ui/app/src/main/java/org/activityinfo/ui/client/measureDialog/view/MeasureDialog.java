@@ -11,6 +11,7 @@ import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
@@ -42,7 +43,9 @@ public class MeasureDialog implements HasSelectionHandlers<MeasureModel> {
 
         // Step 1: Select the form to add
         TabItemConfig formTreeTab = new TabItemConfig("Choose Form");
-        formTree = new CatalogTreeView(model.getFormStore());
+        formTree = new CatalogTreeView(model.getFormStore(), Optional.absent(),
+            entry -> entry.getType() != CatalogEntryType.ANALYSIS);
+
         formTree.addSelectionHandler(event -> model.selectForm(event.getSelectedItem()));
 
         // Step 2: Select fields to add

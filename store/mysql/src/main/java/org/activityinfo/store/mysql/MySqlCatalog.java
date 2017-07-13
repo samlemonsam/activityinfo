@@ -5,6 +5,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Iterables;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -157,11 +158,14 @@ public class MySqlCatalog implements FormCatalog {
     public List<CatalogEntry> getChildren(String parentId, int userId) {
         
         try {
+            // Start async queries
+            Iterable<CatalogEntry> analyses = ReportFolder.queryReports(parentId);
+
             List<CatalogEntry> entries = new ArrayList<>();
             entries.addAll(geodbFolder.getChildren(parentId));
             entries.addAll(databasesFolder.getChildren(parentId, userId));
             entries.addAll(formFolder.getChildren(ResourceId.valueOf(parentId)));
-
+            Iterables.addAll(entries, analyses);
             return entries;
             
         } catch (SQLException e) {
