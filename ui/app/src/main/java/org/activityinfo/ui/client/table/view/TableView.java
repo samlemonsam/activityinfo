@@ -123,7 +123,7 @@ public class TableView implements IsWidget, HasTitle {
         if(tree.isLoaded()) {
             if (tree.get().hasSubForms()) {
                 if(subFormPane == null) {
-                    subFormPane = new SubFormPane(viewModel);
+                    subFormPane = new SubFormPane(viewModel, tree.get());
                     BorderLayoutContainer.BorderLayoutData subFormPaneLayout = new BorderLayoutContainer.BorderLayoutData(0.3);
                     subFormPaneLayout.setSplit(true);
                     subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));

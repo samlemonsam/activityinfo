@@ -23,8 +23,9 @@ public class SubFormPane extends TabPanel {
 
     private final Map<ResourceId, TabItemConfig> tabs = new HashMap<>();
 
-    public SubFormPane(TableViewModel viewModel) {
+    public SubFormPane(TableViewModel viewModel, FormTree formTree) {
         this.viewModel = viewModel;
+        updateTabs(formTree);
     }
 
     @Override
@@ -41,10 +42,14 @@ public class SubFormPane extends TabPanel {
 
     private void onFormTreeChanged(Observable<FormTree> formTree) {
         if(formTree.isLoaded()) {
-            for (FormTree.Node node : formTree.get().getRootFields()) {
-                if(node.isSubForm()) {
-                    addOrUpdateTab(formTree.get(), node);
-                }
+            updateTabs(formTree.get());
+        }
+    }
+
+    private void updateTabs(FormTree formTree) {
+        for (FormTree.Node node : formTree.getRootFields()) {
+            if(node.isSubForm()) {
+                addOrUpdateTab(formTree, node);
             }
         }
     }
