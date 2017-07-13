@@ -183,8 +183,12 @@ public class PrintDataEntryForm extends Window {
 
     private static native void doPrint(IFrameElement frame) /*-{
       var contentWindow = frame.contentWindow;
-      contentWindow.focus();
-      contentWindow.print();
+      if (contentWindow.document.queryCommandSupported('print')) {
+          contentWindow.document.execCommand('print', false, null);
+      } else {
+          contentWindow.focus();
+          contentWindow.print();
+      }
     }-*/;
 
 
