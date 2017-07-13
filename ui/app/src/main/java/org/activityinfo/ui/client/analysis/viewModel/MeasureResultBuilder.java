@@ -3,7 +3,6 @@ package org.activityinfo.ui.client.analysis.viewModel;
 
 import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.shared.Aggregation;
 import org.activityinfo.store.query.shared.HeapsortTandem;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
@@ -61,7 +60,7 @@ public class MeasureResultBuilder {
          * The value column contains the numerical values that we will be aggregating
          * by dimension.
          */
-        ColumnView value = columns.getColumnView("value");
+        MeasureVector values = new MeasureVector(columns.getColumnView("value"));
 
 
         /*
@@ -101,11 +100,6 @@ public class MeasureResultBuilder {
             return;
         }
 
-        double valueArray[] = new double[numRows];
-        for (int i = 0; i < numRows; i++) {
-            valueArray[i] = value.getDouble(i);
-        }
-
 
         MultiDimSet multiDimSet = buildMultiDimSet();
 
@@ -129,7 +123,7 @@ public class MeasureResultBuilder {
             /*
              * Do the aggregation!
              */
-            aggregate(subset, singleValuedDims, multiValuedDims, valueArray);
+            aggregate(subset, singleValuedDims, multiValuedDims, values);
         }
 
     }
@@ -149,7 +143,7 @@ public class MeasureResultBuilder {
         TotalSubset totalSubset,
         GroupMap singleValuedDims,
         MultiDimSet multiValuedDims,
-        double[] valueArray) {
+        MeasureVector values) {
 
 
         /*
@@ -164,7 +158,7 @@ public class MeasureResultBuilder {
              * Exclude the values that do not belong to this multiDimCategory
              * by marking them as NaN.
              */
-            double[] filteredValues = multiDimCategory.filter(valueArray);
+            double[] filteredValues = multiDimCategory.filter(values.getDoubleArray());
 
             /*
              * Sort the group and value arrays in tandem
@@ -190,16 +184,9 @@ public class MeasureResultBuilder {
                                int[] sortedGroupArray,
                                double[] sortedValueArray) {
 
-        StatFunction stat = aggregationFunction(statistic);
-
         int numSingleValuedGroups = singleValuedDims.getGroupCount();
 
-        double aggregatedValues[] = Aggregation.aggregateSorted(
-            stat,
-            sortedGroupArray,
-            sortedValueArray,
-            sortedValueArray.length,
-            numSingleValuedGroups);
+        double[] aggregatedValues = computeStatistic(statistic, sortedGroupArray, sortedValueArray, numSingleValuedGroups);
 
         boolean includeTotals = totalSubset.includeTotals();
         boolean includePercentages = statistic == Statistic.SUM && totalSubset.includePercentages();
@@ -218,6 +205,17 @@ public class MeasureResultBuilder {
             }
         }
         return aggregatedValues;
+    }
+
+    private double[] computeStatistic(Statistic statistic, int[] sortedGroupArray, double[] sortedValueArray, int numSingleValuedGroups) {
+        StatFunction stat = aggregationFunction(statistic);
+
+        return Aggregation.aggregateSorted(
+            stat,
+            sortedGroupArray,
+            sortedValueArray,
+            sortedValueArray.length,
+            numSingleValuedGroups);
     }
 
     private void addPercentage(String[] group, double denominator) {
@@ -311,6 +309,8 @@ public class MeasureResultBuilder {
         switch (statistic) {
             case COUNT:
                 return CountFunction.INSTANCE;
+            case COUNT_DISTINCT:
+                return CountDistinctFunction.INSTANCE;
             case SUM:
                 return SumFunction.INSTANCE;
             case AVERAGE:

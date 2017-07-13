@@ -8,6 +8,7 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
 
@@ -105,10 +106,11 @@ public class IntakeForm implements TestForm {
                 .setType(TextType.SIMPLE.withInputMask("000"));
 
         generator = new RecordGenerator(ids, formClass)
-                .distribution(OPEN_DATE_FIELD_ID, new DateGenerator(openDateField, 2016, 2017))
-                .distribution(DOB_FIELD_ID, new DateGenerator(dobField, 1950, 1991))
-                .distribution(NATIONALITY_FIELD_ID, new MultiEnumGenerator(nationalityField, 0.85, 0.30, 0.15))
-                .distribution(PROBLEM_FIELD_ID, new MultiEnumGenerator(problemField, 0.65, 0.75));
+                .distribution(openDateField.getId(), new DateGenerator(openDateField, 2016, 2017))
+                .distribution(dobField.getId(), new DateGenerator(dobField, 1950, 1991))
+                .distribution(nationalityField.getId(), new MultiEnumGenerator(nationalityField, 0.85, 0.30, 0.15))
+                .distribution(problemField.getId(), new MultiEnumGenerator(problemField, 0.65, 0.75))
+                .distribution(regNumberField.getId(), new InputMaskGenerator(new InputMask("000"), 0.15, 0.30));
     }
 
     public ResourceId getProtectionCodeFieldId() {

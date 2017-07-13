@@ -13,6 +13,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -76,7 +77,12 @@ public class RecordGenerator implements Supplier<FormInstance> {
                 return new MultiEnumGenerator(field);
             }
         } else if(field.getType() instanceof TextType) {
-            return new DiscreteTextGenerator(field.isRequired() ? 0 : 0.25, DiscreteTextGenerator.NAMES);
+            TextType type = (TextType) field.getType();
+            if(type.hasInputMask()) {
+                return new InputMaskGenerator(new InputMask(type.getInputMask()), field.isRequired() ? 0 : 0.25, 0.10);
+            } else {
+                return new DiscreteTextGenerator(field.isRequired() ? 0 : 0.25, DiscreteTextGenerator.NAMES);
+            }
         } else if(field.getType() instanceof LocalDateType) {
             return new DateGenerator(field);
         } else if(field.getType() instanceof SerialNumberType) {

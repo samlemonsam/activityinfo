@@ -1759,4 +1759,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Copied to Clipboard!")
     String copiedToClipboard();
+
+    @DefaultStringValue("Count Distinct")
+    String countDistinct();
+
 }

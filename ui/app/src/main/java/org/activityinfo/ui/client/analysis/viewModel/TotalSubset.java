@@ -132,12 +132,7 @@ public final class TotalSubset {
 
     public static Iterable<TotalSubset> set(DimensionSet dimensionSet) {
 
-        return new Iterable<TotalSubset>() {
-            @Override
-            public Iterator<TotalSubset> iterator() {
-                return new It(dimensionSet);
-            }
-        };
+        return () -> new It(dimensionSet);
 
     }
 

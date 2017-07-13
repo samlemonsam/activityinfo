@@ -581,6 +581,16 @@ public class AnalysisViewModelTest {
     }
 
     @Test
+    public void countDistinct() {
+
+        PivotModel model = ImmutablePivotModel.builder()
+            .addMeasures(distinctRegNumbers())
+            .build();
+
+        assertThat(points(model), contains(point(496)));
+    }
+
+    @Test
     public void severalMultiDimensions() {
 
         PivotModel model = ImmutablePivotModel.builder()
@@ -752,6 +762,17 @@ public class AnalysisViewModelTest {
             .build();
 
     }
+
+    private ImmutableMeasureModel distinctRegNumbers() {
+        return ImmutableMeasureModel.builder()
+            .label("Registered Individuals")
+            .addStatistics(Statistic.COUNT_DISTINCT)
+            .formId(intakeForm.getFormId())
+            .formula(intakeForm.getRegNumberFieldId().asString())
+            .build();
+
+    }
+
     private ImmutableDimensionModel caseYear() {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
