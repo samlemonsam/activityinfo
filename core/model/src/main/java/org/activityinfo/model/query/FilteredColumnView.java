@@ -5,16 +5,18 @@ public class FilteredColumnView implements ColumnView {
     private ColumnView view;
     private int[] filteredIndices;
 
+
     public FilteredColumnView(ColumnView view, int[] filteredIndices) {
         this.view = view;
         this.filteredIndices = filteredIndices;
         assert indicesInBounds();
     }
 
+
     private boolean indicesInBounds() {
         for (int i = 0; i < filteredIndices.length; i++) {
             int filteredIndex = filteredIndices[i];
-            if(filteredIndex < 0 || filteredIndex >= view.numRows()) {
+            if(filteredIndex >= view.numRows()) {
                 return false;
             }
         }

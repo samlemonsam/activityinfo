@@ -188,7 +188,8 @@ public class ActivityTableMappingBuilder {
         siteField.setRequired(true);
         
         formClass.addElement(siteField);
-        mappings.add(new FieldMapping(siteField, "siteId", new ReferenceConverter(activity.getSiteFormClassId(), SITE_DOMAIN)));
+        mappings.add(new FieldMapping(siteField, "siteId",
+            new ReferenceConverter(activity.getSiteFormClassId(), SITE_DOMAIN)));
     }
     
     public void addLocationField() {
@@ -204,7 +205,8 @@ public class ActivityTableMappingBuilder {
     }
 
     public void addLocationField(FormField locationField) {
-        mappings.add(new FieldMapping(locationField, "locationId", new ReferenceConverter(activity.getLocationFormClassId(), LOCATION_DOMAIN)));
+        mappings.add(new FieldMapping(locationField, "locationId",
+            new ReferenceConverter(activity.getLocationFormClassId(), LOCATION_DOMAIN)));
     }
 
     public void addPartnerField() {

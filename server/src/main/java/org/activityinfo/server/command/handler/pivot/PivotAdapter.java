@@ -747,7 +747,7 @@ public class PivotAdapter {
 
         if(conditions.size() > 0) {
             ExprNode filterExpr = Exprs.allTrue(conditions);
-            LOGGER.info("Filter: " + filterExpr);
+            LOGGER.fine("Filter: " + filterExpr);
 
             return filterExpr;
 
@@ -769,7 +769,7 @@ public class PivotAdapter {
         }
 
         ExprNode filterExpr = Exprs.allTrue(conditions);
-        LOGGER.info("Filter: " + filterExpr);
+        LOGGER.fine("Filter: " + filterExpr);
 
         return filterExpr;
     }

@@ -10,13 +10,13 @@ public class JoinNode {
     private JoinType type;
     private ResourceId leftFormId;
     private ExprNode referenceField;
-    private ResourceId formClassId;
+    private ResourceId rightFormId;
 
     public JoinNode(JoinType type, ResourceId leftFormId, ExprNode referenceField, ResourceId rightFormId) {
         this.type = type;
         this.leftFormId = leftFormId;
         this.referenceField = referenceField;
-        this.formClassId = rightFormId;
+        this.rightFormId = rightFormId;
     }
 
     public JoinType getType() {
@@ -31,13 +31,13 @@ public class JoinNode {
         return referenceField;
     }
 
-    public ResourceId getFormClassId() {
-        return formClassId;
+    public ResourceId getRightFormId() {
+        return rightFormId;
     }
 
     @Override
     public String toString() {
-        return referenceField + "->" + formClassId;
+        return referenceField + "->" + rightFormId;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class JoinNode {
         if (leftFormId != null ? !leftFormId.equals(joinNode.leftFormId) : joinNode.leftFormId != null) return false;
         if (referenceField != null ? !referenceField.equals(joinNode.referenceField) : joinNode.referenceField != null)
             return false;
-        return formClassId != null ? formClassId.equals(joinNode.formClassId) : joinNode.formClassId == null;
+        return rightFormId != null ? rightFormId.equals(joinNode.rightFormId) : joinNode.rightFormId == null;
 
     }
 
@@ -58,7 +58,7 @@ public class JoinNode {
     public int hashCode() {
         int result = leftFormId != null ? leftFormId.hashCode() : 0;
         result = 31 * result + (referenceField != null ? referenceField.hashCode() : 0);
-        result = 31 * result + (formClassId != null ? formClassId.hashCode() : 0);
+        result = 31 * result + (rightFormId != null ? rightFormId.hashCode() : 0);
         return result;
     }
 }

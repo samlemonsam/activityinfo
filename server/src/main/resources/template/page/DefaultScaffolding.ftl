@@ -68,7 +68,7 @@
                 <ul>
                     <li><a href="/about/features.html">Features</a></li>
                     <li><a href="/about/benefits.html">Benefits</a></li>
-                    <li><a href="/about/pricing.html">Plans</a></li>
+                    <li><a href="/about/pricing.html">Pricing</a></li>
                     <li><a href="http://status.activityinfo.org">Status</a></li>
                     <li><a href="/about/releases.html">Releases</a></li>
                 </ul>
@@ -78,11 +78,12 @@
                 <h2>Resources</h2>
 
                 <ul>
-                    <li><a href="/documentation.html">User Manual</a></li>
+                    <li><a href="http://help.activityinfo.org">User Manual</a></li>
                     <li><a href="/apidocs/index.html">API Guide</a></li>
                     <li><a href="https://github.com/bedatadriven/activityinfo/blob/production/CONTRIBUTING.md">Contributor’s Guide</a></li>
                     <li><a href="/about/faq.html">FAQ</a></li>
                     <li><a href="/blog/index.html">Blog</a></li>
+                    <li><a href="/video/index.html">Videos</a></li>
                 </ul>
             </li>
 
@@ -93,7 +94,7 @@
                 <ul>
                     <li><a href="/about/index.html">About Us</a></li>
                     <li><a href="/about/privacy-policy.html">Privacy Policy</a></li>
-                    <li><a href="/about/terms.html">Terms of Use</a></li>
+                    <li><a href="/about/terms.html">Terms of Service</a></li>
                     <li><a href="/about/contact.html">Contact</a></li>
                     <li>
                         <a href="https://twitter.com/activityinfo"><img src="/about/assets/images/twitter.svg" class="social-icon" alt="Twitter"></a>

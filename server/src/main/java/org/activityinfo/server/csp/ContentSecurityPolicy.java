@@ -21,8 +21,6 @@ public class ContentSecurityPolicy {
 
     private static final String TYPOTHEQUE = "https://fonts.typotheque.com";
 
-    private static final String TYPOTHEQUE_FONTS = "https://s3-eu-west-1.amazonaws.com";
-
     private static final String HTTPS_ONLY = "https:";
     
     private static final String MAPBOX_TILES = "*.tiles.mapbox.com";
@@ -51,9 +49,11 @@ public class ContentSecurityPolicy {
         );
 
         append(sb, "font-src", SELF,
+
+            // Typotheque fonts are served from unpredictable
+            // hosts, so we have to be pretty open in what we accept.
             SELF,
-            TYPOTHEQUE,
-            TYPOTHEQUE_FONTS,
+            HTTPS_ONLY,
             DATA
         );
         

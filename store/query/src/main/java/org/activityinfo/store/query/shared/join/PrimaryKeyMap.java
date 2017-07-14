@@ -1,21 +1,22 @@
 package org.activityinfo.store.query.shared.join;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Mapping from ResourceId -> row index
  */
 public class PrimaryKeyMap implements Serializable {
 
-    private final Map<String, Integer> map = new HashMap<>();
+    private final Object2IntOpenHashMap<String> map;
 
     public PrimaryKeyMap(ColumnView id) {
+        map = new Object2IntOpenHashMap<>(id.numRows());
+        map.defaultReturnValue(-1);
         for (int i = 0; i < id.numRows(); i++) {
             map.put(id.getString(i), i);
         }
@@ -34,8 +35,8 @@ public class PrimaryKeyMap implements Serializable {
     public int getUniqueRowIndex(Collection<ResourceId> foreignKeys) {
         int matchingRowIndex = -1;
         for(ResourceId foreignKey : foreignKeys) {
-            Integer rowIndex = map.get(foreignKey.asString());
-            if(rowIndex != null) {
+            int rowIndex = map.getInt(foreignKey.asString());
+            if(rowIndex != -1) {
                 if(matchingRowIndex == -1) {
                     matchingRowIndex = rowIndex;
                 } else {
@@ -48,8 +49,8 @@ public class PrimaryKeyMap implements Serializable {
     }
     
     public int getRowIndex(String id) {
-        Integer rowIndex = map.get(id);
-        if(rowIndex == null) {
+        Integer rowIndex = map.getInt(id);
+        if(rowIndex == -1) {
             return -1;
         } else {
             return rowIndex;

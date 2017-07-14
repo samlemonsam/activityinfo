@@ -68,7 +68,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     private List<Bucket> buckets;
     private Dimension partnerDim;
     private ValueType valueType = ValueType.INDICATOR;
-    private boolean pointsRequested;
 
     private static final int OWNER_USER_ID = 1;
     private static final int NB_BENEFICIARIES_ID = 1;
@@ -415,6 +414,30 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
 
         assertThat().thereIsOneBucketWithValue(1);
     }
+
+
+    @Test
+    public void testPartnerDimOnMonthlySiteCounts() {
+        forTotalSiteCounts();
+        withPartnerAsDimension();
+        filter.addRestriction(DimensionType.Activity, 3);
+
+        execute();
+
+        assertThat().thereIsOneBucketWithValue(1).andItsPartnerLabelIs("NRC");
+    }
+
+
+    @Test
+    public void testPartnerDimOnMonthly() {
+        withPartnerAsDimension();
+        filter.addRestriction(DimensionType.Activity, 3);
+
+        execute();
+
+        assertThat().thereIsOneBucketWithValue(0.26666).andItsPartnerLabelIs("NRC");
+    }
+
 
     @Test
     public void projects() {
@@ -1034,7 +1057,6 @@ public class PivotSitesHandlerTest extends CommandTestCase2 {
     }
 
     private void withPoints() {
-        pointsRequested = true;
     }
 
     private void withAttributeGroupDim() {

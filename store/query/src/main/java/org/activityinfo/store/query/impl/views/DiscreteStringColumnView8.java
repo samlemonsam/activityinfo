@@ -1,19 +1,25 @@
-package org.activityinfo.store.query.shared.columns;
+package org.activityinfo.store.query.impl.views;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 
 import java.io.Serializable;
 
-public class DiscreteStringColumnView implements ColumnView, Serializable {
+/**
+ * Compact storage for discrete string vectors with fewer than 128 values.
+ */
+public class DiscreteStringColumnView8 implements ColumnView, Serializable {
+
+    public static final int MAX_COUNT = Byte.MAX_VALUE;
 
     private String[] labels;
-    private int[] values;
+    private byte[] values;
 
-    public DiscreteStringColumnView() {
+    public DiscreteStringColumnView8() {
     }
 
-    public DiscreteStringColumnView(String[] labels, int[] values) {
+    public DiscreteStringColumnView8(String[] labels, byte[] values) {
+        assert labels.length <= MAX_COUNT;
         this.labels = labels;
         this.values = values;
     }
@@ -60,7 +66,7 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        int filteredValues[] = new int[selectedRows.length];
+        byte filteredValues[] = new byte[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
             if(selectedRow < 0) {
@@ -69,7 +75,7 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
                 filteredValues[i] = values[selectedRow];
             }
         }
-        return new DiscreteStringColumnView(labels, filteredValues);
+        return new DiscreteStringColumnView8(labels, filteredValues);
     }
 
     @Override

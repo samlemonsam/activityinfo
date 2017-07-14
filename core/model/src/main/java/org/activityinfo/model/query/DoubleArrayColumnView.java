@@ -4,12 +4,18 @@ import java.io.Serializable;
 
 public class DoubleArrayColumnView implements ColumnView, Serializable {
     private double[] values;
+    private int numRows;
 
     protected DoubleArrayColumnView() {
     }
 
     public DoubleArrayColumnView(double[] values) {
+        this(values, values.length);
+    }
+
+    public DoubleArrayColumnView(double[] values, int numRows) {
         this.values = values;
+        this.numRows = numRows;
     }
 
     @Override
@@ -19,7 +25,7 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public int numRows() {
-        return values.length;
+        return numRows;
     }
 
     @Override

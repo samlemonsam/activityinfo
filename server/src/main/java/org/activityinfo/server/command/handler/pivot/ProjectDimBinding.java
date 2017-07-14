@@ -6,6 +6,7 @@ import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
@@ -24,21 +25,24 @@ public class ProjectDimBinding extends DimBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        return getColumnQuery();
+        return getColumnQuery(formTree.getRootFormId());
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        return getColumnQuery();
+        return getColumnQuery(targetFormId);
     }
 
-    private List<ColumnModel> getColumnQuery() {
+    private List<ColumnModel> getColumnQuery(ResourceId formId) {
+
+        SymbolExpr projectField = new SymbolExpr(CuidAdapter.field(formId, CuidAdapter.PROJECT_FIELD));
+
         ColumnModel projectId = new ColumnModel();
-        projectId.setExpression(new SymbolExpr("project"));
+        projectId.setExpression(projectField);
         projectId.setId(PROJECT_ID_COLUMN);
 
         ColumnModel projectLabel = new ColumnModel();
-        projectLabel.setExpression(new CompoundExpr(new SymbolExpr("project"), new SymbolExpr("label")));
+        projectLabel.setExpression(new CompoundExpr(projectField, new SymbolExpr("label")));
         projectLabel.setId(PROJECT_LABEL_COLUMN);
 
         return Arrays.asList(projectId, projectLabel);
