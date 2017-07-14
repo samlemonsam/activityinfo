@@ -2,7 +2,8 @@ package org.activityinfo.store.query.impl;
 
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.store.query.impl.join.ForeignKeyMap;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.query.impl.join.ForeignKey;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,9 +16,9 @@ public interface FormScan {
 
     Slot<ColumnView> addField(ExprNode fieldExpr);
 
-    Slot<ForeignKeyMap> addForeignKey(String fieldName);
+    Slot<ForeignKey> addForeignKey(String fieldName, ResourceId rightFormId);
 
-    Slot<ForeignKeyMap> addForeignKey(ExprNode referenceField);
+    Slot<ForeignKey> addForeignKey(ExprNode referenceField, ResourceId rightFormId);
 
     Set<String> getCacheKeys();
 

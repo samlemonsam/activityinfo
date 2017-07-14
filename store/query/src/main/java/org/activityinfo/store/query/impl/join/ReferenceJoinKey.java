@@ -9,10 +9,10 @@ import org.activityinfo.store.query.impl.Slot;
 public class ReferenceJoinKey {
 
   private final FilterLevel filterLevel;
-  private final Slot<ForeignKeyMap> foreignKey;
+  private final Slot<ForeignKey> foreignKey;
   private final Slot<PrimaryKeyMap> primaryKeyMap;
 
-  public ReferenceJoinKey(FilterLevel filterLevel, Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap) {
+  public ReferenceJoinKey(FilterLevel filterLevel, Slot<ForeignKey> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap) {
     this.filterLevel = filterLevel;
     this.foreignKey = foreignKey;
     this.primaryKeyMap = primaryKeyMap;

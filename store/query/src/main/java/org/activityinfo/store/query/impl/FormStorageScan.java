@@ -11,7 +11,8 @@ import org.activityinfo.store.query.impl.builders.IdColumnBuilder;
 import org.activityinfo.store.query.impl.builders.PrimaryKeySlot;
 import org.activityinfo.store.query.impl.builders.RowCountBuilder;
 import org.activityinfo.store.query.impl.join.ForeignKeyBuilder;
-import org.activityinfo.store.query.impl.join.ForeignKeyMap;
+import org.activityinfo.store.query.impl.join.ForeignKey;
+import org.activityinfo.store.query.impl.join.ForeignKeyId;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
@@ -28,7 +29,7 @@ public class FormStorageScan implements FormScan {
      * This can be changed to ensure that new versions do not use results cached by earlier versions
      * of ActivityInfo.
      */
-    private static final String CACHE_KEY_VERSION = "4:";
+    private static final String CACHE_KEY_VERSION = "5:";
 
     private static final Logger LOGGER = Logger.getLogger(FormStorageScan.class.getName());
 
@@ -40,7 +41,7 @@ public class FormStorageScan implements FormScan {
     private final long cacheVersion;
 
     private Map<ExprNode, PendingSlot<ColumnView>> columnMap = Maps.newHashMap();
-    private Map<String, PendingSlot<ForeignKeyMap>> foreignKeyMap = Maps.newHashMap();
+    private Map<ForeignKeyId, PendingSlot<ForeignKey>> foreignKeyMap = Maps.newHashMap();
 
     private PrimaryKeySlot primaryKeySlot = null;
     private PendingSlot<Integer> rowCount = null;
@@ -106,21 +107,22 @@ public class FormStorageScan implements FormScan {
      * @return a slot where the value can be found after the query completes
      */
     @Override
-    public Slot<ForeignKeyMap> addForeignKey(String fieldName) {
+    public Slot<ForeignKey> addForeignKey(String fieldName, ResourceId rightFormId) {
         // create the key builder if it doesn't exist
-        PendingSlot<ForeignKeyMap> builder = foreignKeyMap.get(fieldName);
+        ForeignKeyId fkId = new ForeignKeyId(fieldName, rightFormId);
+        PendingSlot<ForeignKey> builder = foreignKeyMap.get(fkId);
         if(builder == null) {
             builder = new PendingSlot<>();
-            foreignKeyMap.put(fieldName, builder);
+            foreignKeyMap.put(fkId, builder);
         }
         return builder;
     }
 
 
     @Override
-    public Slot<ForeignKeyMap> addForeignKey(ExprNode referenceField) {
+    public Slot<ForeignKey> addForeignKey(ExprNode referenceField, ResourceId rightFormId) {
         if(referenceField instanceof SymbolExpr) {
-            return addForeignKey(((SymbolExpr) referenceField).getName());
+            return addForeignKey(((SymbolExpr) referenceField).getName(), rightFormId);
         } else {
             throw new UnsupportedOperationException("TODO: " + referenceField);
         }
@@ -153,8 +155,8 @@ public class FormStorageScan implements FormScan {
         for (ExprNode fieldId : columnMap.keySet()) {
             toFetch.add(fieldCacheKey(fieldId));
         }
-        for (String fieldId : foreignKeyMap.keySet()) {
-            toFetch.add(fkCacheKey(fieldId));
+        for (ForeignKeyId fk : foreignKeyMap.keySet()) {
+            toFetch.add(fkCacheKey(fk));
         }
 
         if (rowCount != null) {
@@ -186,11 +188,11 @@ public class FormStorageScan implements FormScan {
         }
 
         // And which foreign keys...
-        for (String fieldId : Lists.newArrayList(foreignKeyMap.keySet())) {
-            ForeignKeyMap map = (ForeignKeyMap) cached.get(fkCacheKey(fieldId));
+        for (ForeignKeyId keyId : Lists.newArrayList(foreignKeyMap.keySet())) {
+            ForeignKey map = (ForeignKey) cached.get(fkCacheKey(keyId));
             if (map != null) {
-                foreignKeyMap.get(fieldId).set(map);
-                foreignKeyMap.remove(fieldId);
+                foreignKeyMap.get(keyId).set(map);
+                foreignKeyMap.remove(keyId);
             }
         }
 
@@ -236,8 +238,8 @@ public class FormStorageScan implements FormScan {
             queryBuilder.addResourceId(rowCountBuilder);
         }
 
-        for (Map.Entry<String, PendingSlot<ForeignKeyMap>> fk : foreignKeyMap.entrySet()) {
-            queryBuilder.addField(ResourceId.valueOf(fk.getKey()), new ForeignKeyBuilder(fk.getValue()));
+        for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {
+            queryBuilder.addField(fk.getKey().getFieldId(), new ForeignKeyBuilder(fk.getKey().getRightFormId(), fk.getValue()));
         }
 
         // Run the query
@@ -268,7 +270,7 @@ public class FormStorageScan implements FormScan {
             }
             toPut.put(fieldCacheKey(column.getKey()), value);
         }
-        for (Map.Entry<String, PendingSlot<ForeignKeyMap>> fk : foreignKeyMap.entrySet()) {
+        for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {
             toPut.put(fkCacheKey(fk.getKey()), fk.getValue().get());
         }
         if(!columnMap.isEmpty()) {
@@ -293,7 +295,7 @@ public class FormStorageScan implements FormScan {
         return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + "." + fieldId;
     }
 
-    private String fkCacheKey(String fieldId) {
-        return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + ".fk." + fieldId;
+    private String fkCacheKey(ForeignKeyId key) {
+        return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + ".fk." + key.getFieldName() + "::" + key.getRightFormId();
     }
 }

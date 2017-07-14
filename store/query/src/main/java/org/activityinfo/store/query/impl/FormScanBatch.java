@@ -175,7 +175,7 @@ public class FormScanBatch {
     private Slot<ColumnView> addSubFormJoinedColumn(FilterLevel filterLevel, NodeMatch match) {
         JoinNode node = match.getJoins().get(0);
         Slot<PrimaryKeyMap> primaryKey =  addPrimaryKey(filterLevel, node.getLeftFormId());
-        Slot<ColumnView> parentColumn = addParentColumn(filterLevel, node.getFormClassId());
+        Slot<ColumnView> parentColumn = addParentColumn(filterLevel, node.getRightFormId());
         Slot<ColumnView> dataColumn = getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
 
         SubFormJoin join = new SubFormJoin(primaryKey, parentColumn);
@@ -188,8 +188,8 @@ public class FormScanBatch {
     }
 
     private ReferenceJoin addJoinLink(FilterLevel filterLevel, JoinNode node) {
-        Slot<ForeignKeyMap> foreignKey = addForeignKeyMap(filterLevel, node.getLeftFormId(), node.getReferenceField());
-        Slot<PrimaryKeyMap> primaryKey = addPrimaryKey(filterLevel, node.getFormClassId());
+        Slot<ForeignKey> foreignKey = addForeignKey(filterLevel, node);
+        Slot<PrimaryKeyMap> primaryKey = addPrimaryKey(filterLevel, node.getRightFormId());
 
         ReferenceJoinKey referenceJoinKey = new ReferenceJoinKey(filterLevel, foreignKey, primaryKey);
         ReferenceJoin joinLink = joinLinks.get(referenceJoinKey);
@@ -201,19 +201,20 @@ public class FormScanBatch {
         return joinLink;
     }
 
+
     private Slot<PrimaryKeyMap> addPrimaryKey(FilterLevel filterLevel, ResourceId formId) {
         Slot<ColumnView> filteredIdSlot = addResourceIdColumn(filterLevel, formId);
         return new PrimaryKeySlot(filteredIdSlot);
     }
 
-    private Slot<ForeignKeyMap> addForeignKeyMap(FilterLevel filterLevel, ResourceId formId, ExprNode referenceField) {
-        Slot<ForeignKeyMap> foreignKeyMap = getTable(formId).addForeignKey(referenceField);
-        Slot<TableFilter> filter = getFilter(filterLevel, formId);
+    private Slot<ForeignKey> addForeignKey(FilterLevel filterLevel, JoinNode node) {
+        Slot<ForeignKey> foreignKey = getTable(node.getLeftFormId()).addForeignKey(node.getReferenceField(), node.getRightFormId());
+        Slot<TableFilter> filter = getFilter(filterLevel, node.getLeftFormId());
 
-        return new MemoizedSlot2<>(foreignKeyMap, filter, new BiFunction<ForeignKeyMap, TableFilter, ForeignKeyMap>() {
+        return new MemoizedSlot2<>(foreignKey, filter, new BiFunction<ForeignKey, TableFilter, ForeignKey>() {
             @Override
-            public ForeignKeyMap apply(ForeignKeyMap foreignKeyMap, TableFilter filter) {
-                return filter.apply(foreignKeyMap);
+            public ForeignKey apply(ForeignKey foreignKey, TableFilter filter) {
+                return filter.apply(foreignKey);
             }
         });
     }

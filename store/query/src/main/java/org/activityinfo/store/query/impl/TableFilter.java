@@ -5,7 +5,7 @@ import org.activityinfo.model.query.BitSetColumnView;
 import org.activityinfo.model.query.BitSetWithMissingView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EmptyColumnView;
-import org.activityinfo.store.query.impl.join.ForeignKeyMap;
+import org.activityinfo.store.query.impl.join.ForeignKey;
 
 import java.util.BitSet;
 
@@ -88,11 +88,11 @@ public class TableFilter {
         }
     }
 
-    public ForeignKeyMap apply(ForeignKeyMap foreignKeyMap) {
+    public ForeignKey apply(ForeignKey foreignKey) {
         if(isAllSelected()) {
-            return foreignKeyMap;
+            return foreignKey;
         } else {
-            return foreignKeyMap.filter(getSelectedRows());
+            return foreignKey.filter(getSelectedRows());
         }
     }
 

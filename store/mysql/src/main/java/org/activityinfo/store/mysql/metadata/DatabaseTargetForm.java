@@ -89,21 +89,24 @@ public class DatabaseTargetForm implements Serializable {
         endDateField.setCode("toDate");
         endDateField.setType(LocalDateType.INSTANCE);
 
+        ResourceId partnerFormId = CuidAdapter.partnerFormId(databaseId);
+        ResourceId projectFormId = CuidAdapter.projectFormClass(databaseId);
+
         FormField partnerField = new FormField(CuidAdapter.field(classId, CuidAdapter.PARTNER_FIELD));
         partnerField.setLabel(I18N.CONSTANTS.partner());
         partnerField.setCode("partner");
-        partnerField.setType(ReferenceType.single(CuidAdapter.partnerFormId(databaseId)));
+        partnerField.setType(ReferenceType.single(partnerFormId));
         
         FormField projectField = new FormField(CuidAdapter.field(classId, CuidAdapter.PROJECT_FIELD));
         projectField.setLabel(I18N.CONSTANTS.project());
         projectField.setCode("project");
-        projectField.setType(ReferenceType.single(CuidAdapter.projectFormClass(databaseId)));
+        projectField.setType(ReferenceType.single(projectFormId));
         
         mapping.addTextField(nameField, "name");
         mapping.addDateField(startDateField, "date1");
         mapping.addDateField(endDateField, "date2");
-        mapping.addReferenceField(partnerField, CuidAdapter.PARTNER_DOMAIN, "partnerId");
-        mapping.addReferenceField(projectField, CuidAdapter.PROJECT_DOMAIN, "projectId");
+        mapping.addReferenceField(partnerField, partnerFormId, CuidAdapter.PARTNER_DOMAIN, "partnerId");
+        mapping.addReferenceField(projectField, projectFormId, CuidAdapter.PROJECT_DOMAIN, "projectId");
 
         for (FormField indicatorField : indicatorFields) {
             mapping.addUnmappedField(indicatorField);

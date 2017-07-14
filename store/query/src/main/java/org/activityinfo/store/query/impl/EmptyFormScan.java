@@ -2,7 +2,8 @@ package org.activityinfo.store.query.impl;
 
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.store.query.impl.join.ForeignKeyMap;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.query.impl.join.ForeignKey;
 
 import java.util.Collections;
 import java.util.Map;
@@ -25,12 +26,12 @@ public class EmptyFormScan implements FormScan {
     }
 
     @Override
-    public Slot<ForeignKeyMap> addForeignKey(String fieldName) {
+    public Slot<ForeignKey> addForeignKey(String fieldName, ResourceId rightFormId) {
         return EmptySlots.EMPTY_FK;
     }
 
     @Override
-    public Slot<ForeignKeyMap> addForeignKey(ExprNode referenceField) {
+    public Slot<ForeignKey> addForeignKey(ExprNode referenceField, ResourceId rightFormId) {
         return EmptySlots.EMPTY_FK;
     }
 

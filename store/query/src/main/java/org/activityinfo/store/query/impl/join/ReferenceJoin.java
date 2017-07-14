@@ -12,13 +12,13 @@ import java.util.Collection;
  */
 public class ReferenceJoin {
 
-    private Slot<ForeignKeyMap> foreignKey;
+    private Slot<ForeignKey> foreignKey;
     private Slot<PrimaryKeyMap> primaryKeyMap;
     private String debugName;
 
     private int mapping[] = null;
 
-    public ReferenceJoin(Slot<ForeignKeyMap> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap, String debugName) {
+    public ReferenceJoin(Slot<ForeignKey> foreignKey, Slot<PrimaryKeyMap> primaryKeyMap, String debugName) {
         this.foreignKey = foreignKey;
         this.primaryKeyMap = primaryKeyMap;
         this.debugName = debugName;
@@ -29,14 +29,14 @@ public class ReferenceJoin {
      * @return the number of rows in the left table.
      */
     public int getLeftRowCount() {
-        return foreignKey.get().getNumRows();
+        return foreignKey.get().numRows();
     }
 
     /**
      *
      * @return the foreign key(s) for each row in the LEFT table.
      */
-    public ForeignKeyMap getForeignKey() {
+    public ForeignKey getForeignKey() {
         return foreignKey.get();
     }
 
@@ -57,14 +57,10 @@ public class ReferenceJoin {
     public int[] mapping() {
 
         if(mapping == null) {
-            ForeignKeyMap fk = foreignKey.get();
+            ForeignKey fk = foreignKey.get();
             PrimaryKeyMap pk = primaryKeyMap.get();
 
-            mapping = new int[fk.getNumRows()];
-            for (int i = 0; i != mapping.length; ++i) {
-                Collection<ResourceId> foreignKeys = fk.getKeys(i);
-                mapping[i] = pk.getUniqueRowIndex(foreignKeys);
-            }
+            mapping = fk.buildMapping(pk);
         }
 
         return Arrays.copyOf(mapping, mapping.length);
