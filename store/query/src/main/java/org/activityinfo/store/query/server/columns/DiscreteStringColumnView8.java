@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
@@ -8,9 +8,9 @@ import java.io.Serializable;
 /**
  * Compact storage for discrete string vectors with fewer than 128 values.
  */
-public class DiscreteStringColumnView8 implements ColumnView, Serializable {
+class DiscreteStringColumnView8 implements ColumnView, Serializable {
 
-    public static final int MAX_COUNT = Byte.MAX_VALUE;
+    static final int MAX_COUNT = Byte.MAX_VALUE;
 
     private String[] labels;
     private byte[] values;
@@ -18,7 +18,7 @@ public class DiscreteStringColumnView8 implements ColumnView, Serializable {
     public DiscreteStringColumnView8() {
     }
 
-    public DiscreteStringColumnView8(String[] labels, byte[] values) {
+    DiscreteStringColumnView8(String[] labels, byte[] values) {
         assert labels.length <= MAX_COUNT;
         this.labels = labels;
         this.values = values;
@@ -79,7 +79,7 @@ public class DiscreteStringColumnView8 implements ColumnView, Serializable {
     }
 
     @Override
-    public String toString() {  
+    public String toString() {
         return getClass().getSimpleName() + "{numRows=" + numRows() + "}";
     }
 }

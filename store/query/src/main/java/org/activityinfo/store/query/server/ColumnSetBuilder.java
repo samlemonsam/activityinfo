@@ -4,6 +4,7 @@ import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -11,6 +12,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.*;
+import org.activityinfo.store.query.shared.columns.ColumnFactory;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
@@ -27,24 +29,32 @@ public class ColumnSetBuilder {
 
     public static final Logger LOGGER = Logger.getLogger(ColumnSetBuilder.class.getName());
 
+    private ColumnFactory columnFactory;
     private final FormCatalog catalog;
     private final FormTreeBuilder formTreeBuilder;
     private final FormSupervisor supervisor;
     private final FormScanCache cache;
 
-    public ColumnSetBuilder(FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
+    public ColumnSetBuilder(ColumnFactory columnFactory, FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
+        this.columnFactory = columnFactory;
         this.catalog = catalog;
         this.formTreeBuilder = new FormTreeBuilder(catalog);
         this.cache = cache;
         this.supervisor = supervisor;
     }
 
+    @GwtIncompatible
+    public ColumnSetBuilder(FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
+        this(ServerColumnFactory.INSTANCE, catalog, cache, supervisor);
+    }
+
+    @GwtIncompatible
     public ColumnSetBuilder(FormCatalog catalog, FormSupervisor supervisor) {
-        this(catalog, new AppEngineFormScanCache(), supervisor);
+        this(ServerColumnFactory.INSTANCE, catalog, new AppEngineFormScanCache(), supervisor);
     }
 
     public FormScanBatch createNewBatch() {
-        return new FormScanBatch(catalog, supervisor);
+        return new FormScanBatch(columnFactory, catalog, supervisor);
     }
 
     public ColumnSet build(QueryModel queryModel) {

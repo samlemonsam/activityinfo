@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.shared.columns;
+package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
@@ -6,9 +6,9 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.store.query.impl.views.DiscreteStringColumnView8;
+import org.activityinfo.store.query.server.columns.CompactingEnumColumnBuilder;
+import org.activityinfo.store.query.server.columns.DiscreteStringColumnView8;
 import org.activityinfo.store.query.shared.PendingSlot;
-import org.activityinfo.store.query.shared.columns.EnumColumnBuilder;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -16,7 +16,7 @@ import java.util.Objects;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.*;
 
-public class EnumColumnBuilderTest {
+public class CompactingEnumColumnBuilderTest {
 
     @Test
     public void buildCompact() {
@@ -27,7 +27,7 @@ public class EnumColumnBuilderTest {
 
         EnumType enumType = new EnumType(Cardinality.SINGLE, a, b, c);
 
-        EnumColumnBuilder builder = new EnumColumnBuilder(new PendingSlot<ColumnView>(), enumType);
+        CompactingEnumColumnBuilder builder = new CompactingEnumColumnBuilder(new PendingSlot<ColumnView>(), enumType);
 
         for (int i = 0; i < 13; i++) {
             builder.onNext(new EnumValue(a.getId()));

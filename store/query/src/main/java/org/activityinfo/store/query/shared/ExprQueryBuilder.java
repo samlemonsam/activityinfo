@@ -15,6 +15,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.store.query.shared.columns.ColumnFactory;
 import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.CursorObserver;
@@ -28,22 +29,24 @@ import java.util.List;
  */
 public class ExprQueryBuilder {
 
+    private final ColumnFactory columnFactory;
     private final FormClass formClass;
     private final ColumnQueryBuilder queryBuilder;
-    
+
     private FormSymbolTable symbolTable;
 
-    public ExprQueryBuilder(FormClass formClass, ColumnQueryBuilder queryBuilder) {
+    public ExprQueryBuilder(ColumnFactory columnFactory, FormClass formClass, ColumnQueryBuilder queryBuilder) {
+        this.columnFactory = columnFactory;
         this.formClass = formClass;
         this.symbolTable = new FormSymbolTable(formClass);
         this.queryBuilder = queryBuilder;
     }
 
-    
+
     public void addExpr(ExprNode expr, PendingSlot<ColumnView> target) {
         
         FieldType fieldType = computeType(symbolTable, expr);
-        CursorObserver<FieldValue> columnBuilder = ViewBuilderFactory.get(target, fieldType);
+        CursorObserver<FieldValue> columnBuilder = ViewBuilderFactory.get(columnFactory, target, fieldType);
 
         addExpr(expr, columnBuilder);
     }

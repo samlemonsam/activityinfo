@@ -60,7 +60,7 @@ public class JoinedSubFormColumnViewSlot implements Slot<ColumnView> {
             subColumnValues[i] = subColumn.getDouble(i);
         }
         
-        int numMasterRows = parentLookup.getNumRows();
+        int numMasterRows = parentLookup.numRows();
 
         // Sort the data values by master row index
         double[] result = Aggregation.sortAndAggregate(statistic, masterRowId, subColumnValues, numSubRows, numMasterRows);

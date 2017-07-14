@@ -1,22 +1,20 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.store.query.server.columns;
 
 import com.google.common.primitives.UnsignedBytes;
 import org.activityinfo.model.query.ColumnView;
 
-import java.util.Arrays;
-
 /**
  * Compact ColumnView for numbers are all integers and have a range of less than 255
  */
-public class NumberColumnView8 extends AbstractNumberColumn {
+class IntColumnView8 extends AbstractNumberColumn {
 
 
-    public static final int MAX_RANGE = 255;
+    static final int MAX_RANGE = 255;
 
     private byte[] values;
     private int delta;
 
-    public NumberColumnView8(double doubleValues[], int numRows, int minValue) {
+    IntColumnView8(double doubleValues[], int numRows, int minValue) {
         this.values = new byte[numRows];
 
         // Reserve 0 for missing values
@@ -30,7 +28,7 @@ public class NumberColumnView8 extends AbstractNumberColumn {
         }
     }
 
-    private NumberColumnView8(byte[] values, int delta) {
+    private IntColumnView8(byte[] values, int delta) {
         this.values = values;
         this.delta = delta;
     }
@@ -64,6 +62,6 @@ public class NumberColumnView8 extends AbstractNumberColumn {
                 selectedValues[i] = this.values[selectedRow];
             }
         }
-        return new NumberColumnView8(selectedValues, delta);
+        return new IntColumnView8(selectedValues, delta);
     }
 }

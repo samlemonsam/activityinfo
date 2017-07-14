@@ -1,17 +1,25 @@
-package org.activityinfo.store.query.shared.columns;
+package org.activityinfo.store.query.server.columns;
 
 import com.google.common.annotations.VisibleForTesting;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.impl.views.NumberColumnView16;
-import org.activityinfo.store.query.impl.views.NumberColumnView8;
-import org.activityinfo.store.query.impl.views.SparseNumberColumnView;
 import org.activityinfo.store.query.shared.PendingSlot;
+import org.activityinfo.store.query.shared.columns.DoubleReader;
 import org.activityinfo.store.spi.CursorObserver;
 
-public class DoubleColumnBuilder implements CursorObserver<FieldValue> {
+/**
+ * ColumnView builder for quantity-typed fields that adapts the resulting
+ * representation of the column based on the contents of the field.
+ *
+ * <p>For fields that have all integer values and small ranges, the
+ * {@link IntColumnView8} and {@link IntColumnView16} implementations are used.</p>
+ *
+ * <p>For fields that have a large proportion of missing values, the {@link SparseNumberColumnView}
+ * is used.</p>
+ */
+public class CompactingDoubleColumnBuilder implements CursorObserver<FieldValue> {
 
     private final PendingSlot<ColumnView> result;
 
@@ -23,7 +31,7 @@ public class DoubleColumnBuilder implements CursorObserver<FieldValue> {
     private boolean integers = true;
     private int missingCount = 0;
 
-    public DoubleColumnBuilder(PendingSlot<ColumnView> result, DoubleReader reader) {
+    public CompactingDoubleColumnBuilder(PendingSlot<ColumnView> result, DoubleReader reader) {
         this.result = result;
         this.reader = reader;
     }
@@ -74,11 +82,11 @@ public class DoubleColumnBuilder implements CursorObserver<FieldValue> {
             int minInt = (int)min;
             int maxInt = (int)max;
             int range = maxInt - minInt;
-            if(range <= NumberColumnView8.MAX_RANGE) {
-                return new NumberColumnView8(values.elements(), numRows, minInt);
+            if(range <= IntColumnView8.MAX_RANGE) {
+                return new IntColumnView8(values.elements(), numRows, minInt);
             }
-            if(range <= NumberColumnView16.MAX_RANGE) {
-                return new NumberColumnView16(values.elements(), numRows, minInt);
+            if(range <= IntColumnView16.MAX_RANGE) {
+                return new IntColumnView16(values.elements(), numRows, minInt);
             }
         }
         return buildDouble();

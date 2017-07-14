@@ -22,18 +22,20 @@ import org.activityinfo.store.spi.CursorObserver;
 public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<FieldValue>> {
 
     private final PendingSlot<ColumnView> result;
+    private final ColumnFactory factory;
 
-    private ViewBuilderFactory(PendingSlot<ColumnView> result) {
+    private ViewBuilderFactory(PendingSlot<ColumnView> result, ColumnFactory factory) {
         this.result = result;
+        this.factory = factory;
     }
 
-    public static CursorObserver<FieldValue> get(PendingSlot<ColumnView> result, FieldType type) {
-        return type.accept(new ViewBuilderFactory(result));
+    public static CursorObserver<FieldValue> get(ColumnFactory factory, PendingSlot<ColumnView> result, FieldType type) {
+        return type.accept(new ViewBuilderFactory(result, factory));
     }
 
     @Override
     public CursorObserver<FieldValue> visitAttachment(AttachmentType attachmentType) {
-        return new StringColumnBuilder(result, new AttachmentBlobIdReader());
+        return factory.newStringBuilder(result, new AttachmentBlobIdReader());
     }
 
     @Override
@@ -44,12 +46,12 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitReference(ReferenceType referenceType) {
-        return new StringColumnBuilder(result, new ReferenceIdReader());
+        return factory.newStringBuilder(result, new ReferenceIdReader());
     }
 
     @Override
     public CursorObserver<FieldValue> visitNarrative(NarrativeType narrativeType) {
-        return new StringColumnBuilder(result, new TextFieldReader());
+        return factory.newStringBuilder(result, new TextFieldReader());
     }
 
     @Override
@@ -59,7 +61,7 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitQuantity(QuantityType type) {
-        return new DoubleColumnBuilder(result, new QuantityReader());
+        return factory.newDoubleBuilder(result, new QuantityReader());
     }
 
     @Override
@@ -74,12 +76,12 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitEnum(EnumType enumType) {
-        return new EnumColumnBuilder(result, enumType);
+        return factory.newEnumBuilder(result, enumType);
     }
 
     @Override
     public CursorObserver<FieldValue> visitBarcode(BarcodeType barcodeType) {
-        return new StringColumnBuilder(result, new TextFieldReader());
+        return factory.newStringBuilder(result, new TextFieldReader());
     }
 
     @Override
@@ -89,7 +91,7 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitLocalDate(LocalDateType localDateType) {
-        return new StringColumnBuilder(result, new LocalDateReader());
+        return factory.newStringBuilder(result, new LocalDateReader());
     }
 
     @Override
@@ -109,12 +111,12 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitText(TextType textType) {
-        return new StringColumnBuilder(result, new TextFieldReader());
+        return factory.newStringBuilder(result, new TextFieldReader());
     }
 
     @Override
     public CursorObserver<FieldValue> visitSerialNumber(SerialNumberType serialNumberType) {
-        return new StringColumnBuilder(result, new SerialNumberReader(serialNumberType));
+        return factory.newStringBuilder(result, new SerialNumberReader(serialNumberType));
     }
 
     private static class TextFieldReader implements StringReader {

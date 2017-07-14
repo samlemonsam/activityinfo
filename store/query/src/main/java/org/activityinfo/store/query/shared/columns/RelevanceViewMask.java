@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.store.query.shared.columns;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;

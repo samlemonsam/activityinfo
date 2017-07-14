@@ -15,6 +15,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
+import org.activityinfo.store.query.server.ServerColumnFactory;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.junit.After;
 import org.junit.Before;

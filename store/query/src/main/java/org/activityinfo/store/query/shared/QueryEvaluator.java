@@ -11,7 +11,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.*;
 import org.activityinfo.promise.BiFunction;
-import org.activityinfo.store.query.impl.views.RelevanceViewMask;
+import org.activityinfo.store.query.shared.columns.RelevanceViewMask;
 import org.activityinfo.store.query.shared.columns.ColumnCombiner;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
 

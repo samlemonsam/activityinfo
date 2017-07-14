@@ -15,14 +15,11 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.promise.BiFunction;
-import org.activityinfo.store.query.impl.join.ForeignKey;
-import org.activityinfo.store.query.shared.columns.ConstantColumnBuilder;
-import org.activityinfo.store.query.shared.columns.FilteredRowCountSlot;
-import org.activityinfo.store.query.shared.columns.FilteredSlot;
-import org.activityinfo.store.query.shared.columns.PrimaryKeySlot;
+import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.*;
 import org.activityinfo.model.form.FormPermissions;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +37,7 @@ public class FormScanBatch {
 
     private static final Logger LOGGER = Logger.getLogger(FormScanBatch.class.getName());
 
+    private final ColumnFactory columnFactory;
     private final FormSupervisor supervisor;
     private final FormClassProvider formClassProvider;
 
@@ -57,8 +55,9 @@ public class FormScanBatch {
     private Map<JoinedColumnKey, JoinedReferenceColumnViewSlot> joinedColumns = new HashMap<>();
 
 
-    public FormScanBatch(FormClassProvider formClassProvider,
+    public FormScanBatch(ColumnFactory columnFactory, FormClassProvider formClassProvider,
                          FormSupervisor supervisor) {
+        this.columnFactory = columnFactory;
 
         this.formClassProvider = formClassProvider;
         this.supervisor = supervisor;
@@ -71,7 +70,7 @@ public class FormScanBatch {
     public FormScan getTable(ResourceId formId) {
         FormScan scan = tableMap.get(formId);
         if(scan == null) {
-            scan = new FormScan(formClassProvider.getFormClass(formId));
+            scan = new FormScan(columnFactory, formClassProvider.getFormClass(formId));
             tableMap.put(formId, scan);
         }
         return scan;
@@ -193,7 +192,13 @@ public class FormScanBatch {
 
     private Slot<PrimaryKeyMap> addPrimaryKey(FilterLevel filterLevel, ResourceId formId) {
         Slot<ColumnView> filteredIdSlot = addResourceIdColumn(filterLevel, formId);
-        return new PrimaryKeySlot(filteredIdSlot);
+
+        return new MemoizedSlot<>(filteredIdSlot, new Function<ColumnView, PrimaryKeyMap>() {
+            @Override
+            public PrimaryKeyMap apply(ColumnView columnView) {
+                return columnFactory.newPrimaryKeyMap(columnView);
+            }
+        });
     }
 
     private Slot<ForeignKey> addForeignKey(FilterLevel filterLevel, JoinNode node) {

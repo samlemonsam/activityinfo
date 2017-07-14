@@ -5,7 +5,7 @@ import org.activityinfo.model.query.BitSetColumnView;
 import org.activityinfo.model.query.BitSetWithMissingView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EmptyColumnView;
-import org.activityinfo.store.query.impl.join.ForeignKey;
+import org.activityinfo.store.query.shared.columns.ForeignKey;
 
 import java.util.BitSet;
 

@@ -21,16 +21,20 @@ import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservableTree;
+import org.activityinfo.observable.Scheduler;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
+import org.activityinfo.ui.client.store.FormTreeLoader;
 import org.activityinfo.ui.client.store.http.FormChangeWatcher;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -143,10 +147,19 @@ public class OfflineStore {
             new FormChangeWatcher(eventBus, change -> change.isRecordChanged(recordRef)));
     }
 
+    public Observable<ColumnSet> query(QueryModel queryModel) {
+        ResourceId rootFormId = queryModel.getRowSources().get(0).getRootFormId();
+        Observable<FormTree> tree = new ObservableTree<>(new FormTreeLoader(rootFormId, this::getCachedMetadata),
+            com.google.gwt.core.client.Scheduler.get());
+
+        return tree.join(formTree1 -> query(formTree1, queryModel));
+    }
+
     public Observable<ColumnSet> query(FormTree formTree, QueryModel queryModel) {
         return new ObservableTask<>(new ColumnQuery(database, formTree, queryModel),
             new FormChangeWatcher(eventBus, change -> true));
     }
+
 
     /**
      * Updates whether a form should be available offline.

@@ -1,11 +1,9 @@
 package org.activityinfo.store.query.shared.join;
 
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.query.impl.join.ForeignKey;
+import org.activityinfo.store.query.shared.columns.ForeignKey;
 import org.activityinfo.store.query.shared.Slot;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * Holds the foreignKey / primaryKeyMap columns required

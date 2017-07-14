@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
@@ -76,6 +77,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                         .join(OfflineStoreGwtTest.this::verifyWeCanQueryRecords)
                         .join(OfflineStoreGwtTest.this::verifyWeCanMakeChangesOffline)
                         .join(OfflineStoreGwtTest.this::verifyWeCanLoadCurrentSnapshot)
+                        .join(OfflineStoreGwtTest.this::verifyWeCanQuery)
                         .then(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -159,6 +161,27 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 }
             });
 
+    }
+
+
+    private Promise<Void> verifyWeCanQuery(Void input) {
+
+        QueryModel queryModel = new QueryModel(survey.getFormId());
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr(survey.getGenderFieldId().asString()).as("gender");
+        queryModel.selectExpr(survey.getAgeFieldId().asString()).as("age");
+        queryModel.selectExpr(survey.getNameFieldId().asString()).as("name");
+
+        return offlineStore.query(queryModel).once().then(new Function<ColumnSet, Void>() {
+            @Nullable
+            @Override
+            public Void apply(@Nullable ColumnSet columnSet) {
+
+                assertEquals(survey.getRowCount() + 2, columnSet.getNumRows());
+
+                return null;
+            }
+        });
     }
 
     private FormSyncSet toFormRecordSet(Survey survey) {

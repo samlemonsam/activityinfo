@@ -1,11 +1,9 @@
-package org.activityinfo.store.query.shared.columns;
+package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.impl.views.NumberColumnView16;
-import org.activityinfo.store.query.impl.views.NumberColumnView8;
-import org.activityinfo.store.query.impl.views.SparseNumberColumnView;
 import org.activityinfo.store.query.shared.PendingSlot;
+import org.activityinfo.store.query.shared.columns.DoubleReader;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -13,7 +11,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class DoubleColumnBuilderTest {
+public class CompactingDoubleColumnBuilderTest {
 
     public static final DoubleReader DUMMY = new DoubleReader() {
         @Override
@@ -25,7 +23,7 @@ public class DoubleColumnBuilderTest {
     @Test
     public void number8() {
 
-        DoubleColumnBuilder builder = new DoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
+        CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
         builder.onNext(-10);
         builder.onNext(55);
         builder.onNext(31);
@@ -34,7 +32,7 @@ public class DoubleColumnBuilderTest {
         builder.onNext(-10 + 254);
         builder.onNext(0);
 
-        NumberColumnView8 result = (NumberColumnView8) builder.build();
+        IntColumnView8 result = (IntColumnView8) builder.build();
 
         assertEquivalent(result, builder.buildDouble());
     }
@@ -43,37 +41,37 @@ public class DoubleColumnBuilderTest {
     @Test
     public void comprehensiveByte8() {
 
-        DoubleColumnBuilder builder = new DoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
+        CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
 
         builder.onNext(Double.NaN);
-        for (int i = 0; i < NumberColumnView8.MAX_RANGE; i++) {
+        for (int i = 0; i < IntColumnView8.MAX_RANGE; i++) {
             builder.onNext(i);
         }
         ColumnView result = builder.build();
 
-        assertThat(result, instanceOf(NumberColumnView8.class));
+        assertThat(result, instanceOf(IntColumnView8.class));
         assertEquivalent(result, builder.buildDouble());
     }
 
     @Test
     public void comprehensiveByte16() {
 
-        DoubleColumnBuilder builder = new DoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
+        CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
 
         builder.onNext(Double.NaN);
-        for (int i = 0; i < NumberColumnView16.MAX_RANGE; i++) {
+        for (int i = 0; i < IntColumnView16.MAX_RANGE; i++) {
             builder.onNext(i);
         }
         ColumnView result = builder.build();
 
-        assertThat(result, instanceOf(NumberColumnView16.class));
+        assertThat(result, instanceOf(IntColumnView16.class));
         assertEquivalent(result, builder.buildDouble());
     }
 
     @Test
     public void number16() {
 
-        DoubleColumnBuilder builder = new DoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
+        CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
         builder.onNext(-10);
         builder.onNext(55);
         builder.onNext(31);
@@ -85,7 +83,7 @@ public class DoubleColumnBuilderTest {
 
         ColumnView result = builder.build();
 
-        assertThat(result, instanceOf(NumberColumnView16.class));
+        assertThat(result, instanceOf(IntColumnView16.class));
 
         assertEquivalent(result, builder.buildDouble());
     }
@@ -93,7 +91,7 @@ public class DoubleColumnBuilderTest {
     @Test
     public void sparse() {
 
-        DoubleColumnBuilder builder = new DoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
+        CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
         for (int i = 0; i < 10_000; i++) {
             if(i == 3) {
                 builder.onNext(44.5);

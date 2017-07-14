@@ -1,17 +1,16 @@
-package org.activityinfo.store.query.impl.views;
+package org.activityinfo.store.query.server.columns;
 
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
 
-public class SparseNumberColumnView extends AbstractNumberColumn {
-
+class SparseNumberColumnView extends AbstractNumberColumn {
 
     private final int numRows;
     private final Int2DoubleOpenHashMap map;
 
-    public SparseNumberColumnView(double[] elements, int numRows, int numMissing) {
+    SparseNumberColumnView(double[] elements, int numRows, int numMissing) {
 
         this.numRows = numRows;
         this.map = new Int2DoubleOpenHashMap(numRows - numMissing);

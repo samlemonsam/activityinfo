@@ -5,7 +5,9 @@ import com.google.common.collect.Iterables;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.resource.ResourceId;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -36,6 +38,26 @@ public class ReferenceValue implements FieldValue {
 
     public RecordRef getOnlyReference() {
         return Iterables.getOnlyElement(references);
+    }
+
+    /**
+     * If there is only one reference to a record in the given {@code formId}, then
+     * return it's record id. Otherwise, return {@code null}
+     */
+    @Nullable
+    public String getOnlyRecordId(ResourceId formId) {
+        String key = null;
+        for (RecordRef id : references) {
+            if(id.getFormId().equals(formId)) {
+                // If this is not the first record referenced in the
+                // form, then return null
+                if(key != null) {
+                    return null;
+                }
+                key = id.getRecordId().asString();
+            }
+        }
+        return key;
     }
 
     @Override

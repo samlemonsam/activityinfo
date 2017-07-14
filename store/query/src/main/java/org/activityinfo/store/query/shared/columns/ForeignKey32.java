@@ -1,6 +1,5 @@
-package org.activityinfo.store.query.impl.join;
+package org.activityinfo.store.query.shared.columns;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 
 import java.io.Serializable;
@@ -20,7 +19,9 @@ public class ForeignKey32 implements Serializable, ForeignKey {
      * keyNames[key[i]] provides the String record key for the i-th row
      * of the left-hand table.
      */
-    private IntArrayList keys;
+    private int[] keys;
+
+    private int numRows;
 
 
     /**
@@ -28,40 +29,35 @@ public class ForeignKey32 implements Serializable, ForeignKey {
      */
     private String[] keyNames;
 
-    public static ForeignKey32 zeroRows() {
-        return new ForeignKey32(new String[0], new IntArrayList(0));
-    }
-
-    public ForeignKey32(String[] keyNames, IntArrayList keys) {
+    public ForeignKey32(String[] keyNames, int[] keys, int numRows) {
         this.keyNames = keyNames;
         this.keys = keys;
+        this.numRows = numRows;
     }
 
     @Override
     public int numRows() {
-        return keys.size();
+        return numRows;
     }
 
     @Override
     public ForeignKey filter(int[] selectedRows) {
-        IntArrayList selectedKeys = new IntArrayList(selectedRows.length);
+        int selectedKeys[] = new int[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
             if(selectedRow == -1) {
-                selectedKeys.add(-1);
+                selectedKeys[i] = -1;
             } else {
-                selectedKeys.add(keys.getInt(selectedRow));
+                selectedKeys[i] = keys[selectedRow];
             }
         }
 
-        assert selectedKeys.size() == selectedRows.length;
-
-        return new ForeignKey32(keyNames, selectedKeys);
+        return new ForeignKey32(keyNames, selectedKeys, selectedKeys.length);
     }
 
     @Override
     public String getKey(int rowIndex) {
-        int keyId = keys.getInt(rowIndex);
+        int keyId = keys[rowIndex];
         if(keyId == -1) {
             return null;
         } else {
@@ -86,7 +82,7 @@ public class ForeignKey32 implements Serializable, ForeignKey {
         // for all the rows in the left table.
         int mapping[] = new int[numRows()];
         for (int i = 0; i < mapping.length; i++) {
-            int keyId = keys.getInt(i);
+            int keyId = keys[i];
             if(keyId == -1) {
                 mapping[i] = -1;
             } else {

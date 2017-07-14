@@ -2,6 +2,7 @@ package org.activityinfo.store.query.shared.columns;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.store.query.server.join.FastPrimaryKeyMap;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 
 
@@ -17,7 +18,7 @@ public class PrimaryKeySlot implements Slot<PrimaryKeyMap> {
     @Override
     public PrimaryKeyMap get() {
         if(map == null) {
-            map = new PrimaryKeyMap(idSlot.get());
+            map = new FastPrimaryKeyMap(idSlot.get());
         }
         return map;
     }

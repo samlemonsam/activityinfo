@@ -1,12 +1,12 @@
-package org.activityinfo.store.query.shared.join;
+package org.activityinfo.store.query.server.join;
 
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.store.query.impl.join.ForeignKey;
+import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
+import org.activityinfo.store.query.shared.columns.ForeignKey;
 import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.TableFilter;
-import org.activityinfo.store.query.shared.join.ForeignKeyBuilder;
 import org.junit.Test;
 
 import java.util.BitSet;

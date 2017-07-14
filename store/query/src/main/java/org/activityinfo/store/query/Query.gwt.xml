@@ -22,5 +22,6 @@
 
 <module>
     <inherits name='org.activityinfo.store.StoreSpi' />
+    <source path="client"/>
     <source path="shared"/>
 </module>

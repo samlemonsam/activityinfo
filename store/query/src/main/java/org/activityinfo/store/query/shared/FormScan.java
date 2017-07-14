@@ -7,11 +7,12 @@ import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.query.impl.join.ForeignKey;
-import org.activityinfo.store.query.impl.join.ForeignKeyId;
+import org.activityinfo.store.query.shared.columns.ColumnFactory;
+import org.activityinfo.store.query.shared.columns.ForeignKey;
+import org.activityinfo.store.query.shared.join.ForeignKeyId;
 import org.activityinfo.store.query.shared.columns.IdColumnBuilder;
 import org.activityinfo.store.query.shared.columns.RowCountBuilder;
-import org.activityinfo.store.query.shared.join.ForeignKeyBuilder;
+import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 
 import java.util.*;
@@ -43,9 +44,11 @@ public class FormScan {
     private Map<ForeignKeyId, PendingSlot<ForeignKey>> foreignKeyMap = Maps.newHashMap();
 
     private PendingSlot<Integer> rowCount = null;
+    private ColumnFactory columnFactory;
 
 
-    public FormScan(FormClass formClass) {
+    public FormScan(ColumnFactory columnFactory, FormClass formClass) {
+        this.columnFactory = columnFactory;
         this.formId = formClass.getId();
         this.formClass = formClass;
         this.cacheVersion = 0;
@@ -215,7 +218,7 @@ public class FormScan {
         }
 
         // Build the query
-        ExprQueryBuilder queryBuilder = new ExprQueryBuilder(formClass, columnQueryBuilder);
+        ExprQueryBuilder queryBuilder = new ExprQueryBuilder(columnFactory, formClass, columnQueryBuilder);
 
         for (Map.Entry<ExprNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
             if (column.getKey().equals(PK_COLUMN_KEY)) {
@@ -235,7 +238,7 @@ public class FormScan {
 
         for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {
             queryBuilder.addField(fk.getKey().getFieldId(),
-                new ForeignKeyBuilder(fk.getKey().getRightFormId(), fk.getValue()));
+                columnFactory.newForeignKeyBuilder(fk.getKey().getRightFormId(), fk.getValue()));
         }
     }
 

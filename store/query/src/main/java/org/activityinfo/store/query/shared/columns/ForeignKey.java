@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.impl.join;
+package org.activityinfo.store.query.shared.columns;
 
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 

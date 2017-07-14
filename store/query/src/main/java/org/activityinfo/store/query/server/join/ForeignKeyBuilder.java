@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.shared.join;
+package org.activityinfo.store.query.server.join;
 
 import com.google.common.annotations.VisibleForTesting;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -8,8 +8,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.store.query.impl.join.ForeignKey;
-import org.activityinfo.store.query.impl.join.ForeignKey32;
+import org.activityinfo.store.query.shared.columns.ForeignKey;
+import org.activityinfo.store.query.shared.columns.ForeignKey32;
 import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.spi.CursorObserver;
 
@@ -102,7 +102,7 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue> {
 
     @VisibleForTesting
     ForeignKey build() {
-        return new ForeignKey32(keyList(), keys);
+        return new ForeignKey32(keyList(), keys.elements(), keys.size());
     }
 
 }
