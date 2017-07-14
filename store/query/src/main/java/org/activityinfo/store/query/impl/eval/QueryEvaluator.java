@@ -1,16 +1,22 @@
 package org.activityinfo.store.query.impl.eval;
 
 import com.google.common.base.Function;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ColumnFunction;
+import org.activityinfo.model.expr.functions.IfFunction;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.query.impl.*;
 import org.activityinfo.store.query.impl.builders.ColumnCombiner;
+import org.activityinfo.store.query.impl.views.RelevanceViewMask;
 import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.query.shared.NodeMatcher;
 
@@ -195,13 +201,39 @@ public class QueryEvaluator {
 
         private Slot<ColumnView> expandCalculatedField(NodeMatch node) {
             try {
-                return evaluateExpression(node.getCalculation());
+                Slot<ColumnView> calculation = evaluateExpression(node.getCalculation());
+
+                ExprNode relevanceFormula = tryParseRelevance(node);
+                if(relevanceFormula == null) {
+                    return calculation;
+
+                } else {
+                    return new MemoizedSlot2<>(calculation, evaluateExpression(relevanceFormula), new BiFunction<ColumnView, ColumnView, ColumnView>() {
+                        @Override
+                        public ColumnView apply(ColumnView calculation, ColumnView relevance) {
+                            return new RelevanceViewMask(calculation, relevance);
+                        }
+                    });
+                }
             } catch (ExprException e) {
                 LOGGER.log(Level.WARNING, "Exception in calculated field " +
                         node.getFormClass().getId() + "." + node.getExpr() + " = " +
                         node.getCalculation() + ": " + e.getMessage(), e);
             
                 return batch.addEmptyColumn(filterLevel, node.getFormClass());
+            }
+        }
+
+        private ExprNode tryParseRelevance(NodeMatch node) {
+            String formula = node.getFieldNode().getField().getRelevanceConditionExpression();
+            if(Strings.isNullOrEmpty(formula)) {
+                return null;
+            }
+            try {
+                return ExprParser.parse(formula);
+            } catch (ExprException e) {
+                LOGGER.info("Failed to parse relevance condition " + formula);
+                return null;
             }
         }
     }
