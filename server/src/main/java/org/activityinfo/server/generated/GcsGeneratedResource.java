@@ -1,5 +1,8 @@
 package org.activityinfo.server.generated;
 
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.appengine.tools.cloudstorage.GcsInputChannel;
 import com.google.appengine.tools.cloudstorage.GcsService;
@@ -42,6 +45,11 @@ class GcsGeneratedResource implements GeneratedResource {
         return metadata.getId();
     }
 
+    private BlobKey getAppEngineBlobKey() {
+        BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
+        return blobstore.createGsBlobKey("/gs/" + bucket + "/" + metadata.getId());
+    }
+
     @Override
     public boolean isComplete() {
         return metadata.isCompleted();
@@ -75,32 +83,24 @@ class GcsGeneratedResource implements GeneratedResource {
 
     @Override
     public Response serve() throws IOException {
-            return serveContent();
-    }
-
-    public Response serveContent() throws IOException {
         
         LOGGER.info(format("Serving generated resource %s: %s [%s]", 
                 metadata.getId(), 
                 metadata.getFilename(),
                 metadata.getContentType()));
-        
-        return Response.ok(new Download(), metadata.getContentType())
-                .header("Content-disposition", "attachment")
+
+        // Tell the serving infrastructure to serve the file directly
+        // from Google Cloud Storage.
+        // The use of the X-AppEngine-BlobKey header is undocumented,
+        // but reverse-engineered from
+        // com.google.appengine.api.blobstore.BlobstoreServiceImpl.serve()
+        // which unfortunately assumes that it is being called from a Servlet implementation.
+
+        return Response.ok()
+                .header("Content-Type", metadata.getContentType())
+                .header("Content-Disposition", "attachment")
+                .header("X-AppEngine-BlobKey", getAppEngineBlobKey().getKeyString())
                 .build();
     }
 
-    private class Download implements StreamingOutput {
-
-        @Override
-        public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-            GcsService gcs = GcsServiceFactory.createGcsService();
-            GcsFilename fileName = new GcsFilename(bucket, metadata.getGcsPath());
-            long startPosition = 0;
-            GcsInputChannel readChannel = gcs.openReadChannel(fileName, startPosition);
-            try(InputStream inputStream = Channels.newInputStream(readChannel)) {
-                ByteStreams.copy(inputStream, outputStream);
-            }
-        }
-    }
 }
