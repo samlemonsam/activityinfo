@@ -8,10 +8,7 @@ import org.activityinfo.store.query.server.FormSourceSyncImpl;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.testing.ReferralSubForm;
 import org.activityinfo.store.testing.TestingCatalog;
-import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class FieldTreeBuilderTest {
 
@@ -22,7 +19,7 @@ public class FieldTreeBuilderTest {
         FormTree tree = formStore.getFormTree(ReferralSubForm.FORM_ID).waitFor();
 
         TreeStore<MeasureTreeNode> treeStore = new TreeStore<>(MeasureTreeNode::getId);
-        FieldTreeBuilder builder = new FieldTreeBuilder(treeStore);
+        FieldTreeBuilder builder = new FieldTreeBuilder(tree.getRootFormId(), treeStore);
 
         try {
             builder.build(tree);

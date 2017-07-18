@@ -97,7 +97,7 @@ public class FieldTreeView implements IsWidget {
      * @param tree
      */
     private void fillStore(FormTree tree) {
-        FieldTreeBuilder builder = new FieldTreeBuilder(treeStore);
+        FieldTreeBuilder builder = new FieldTreeBuilder(tree, treeStore);
         builder.build(tree);
     }
 
