@@ -19,7 +19,7 @@ public class FieldTreeBuilderTest {
         FormTree tree = formStore.getFormTree(ReferralSubForm.FORM_ID).waitFor();
 
         TreeStore<MeasureTreeNode> treeStore = new TreeStore<>(MeasureTreeNode::getId);
-        FieldTreeBuilder builder = new FieldTreeBuilder(tree.getRootFormId(), treeStore);
+        FieldTreeBuilder builder = new FieldTreeBuilder(tree, treeStore);
 
         try {
             builder.build(tree);
