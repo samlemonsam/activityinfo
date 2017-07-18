@@ -38,7 +38,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitAttachment(AttachmentType attachmentType) {
-        return null;
+        return new AttachmentWidget(formTree.getRootFormId(), updater);
     }
 
     @Override

@@ -1,0 +1,40 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="icons" type="org.activityinfo.ui.icons.Icons"/>
+
+  <g:HTMLPanel ui:field="rootPanel">
+    <g:HTMLPanel ui:field="noAttachments" visible="true" width="100%">
+      <ui:text from="{i18n.noAttachments}"/>
+    </g:HTMLPanel>
+
+    <g:HTMLPanel ui:field="rows" width="100%"/>
+
+    <g:HTMLPanel width="100%">
+      <g:HTMLPanel ui:field="loadingContainer" visible="false">
+        Loading...
+      </g:HTMLPanel>
+
+      <g:HTMLPanel ui:field="uploadFailed" addStyleNames="has-error" visible="false">
+        <div class="help-block">
+          <ui:text from="{i18n.uploadFailed}"/>
+        </div>
+      </g:HTMLPanel>
+    </g:HTMLPanel>
+
+    <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
+      <g:HTMLPanel width="100%">
+        <a href="#" ui:field="browseButton">
+          <ui:text from="{i18n.browse}"/>
+        </a>
+
+        <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
+        <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
+      </g:HTMLPanel>
+    </g:FormPanel>
+  </g:HTMLPanel>
+
+</ui:UiBinder>

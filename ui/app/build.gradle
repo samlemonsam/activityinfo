@@ -45,6 +45,7 @@ dependencies {
     gwt project(':clients:gwtrest')
     gwt project(':io:match')
     gwt project(':analysis')
+    gwt project(':ui:icons')
 
 
     gwt project(':ui:codemirror')

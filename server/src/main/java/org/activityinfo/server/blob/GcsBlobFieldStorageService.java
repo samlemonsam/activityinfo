@@ -18,9 +18,11 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
+import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.BlobId;
 import org.apache.commons.io.IOUtils;
@@ -64,8 +66,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
                         + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
                 return;
             }
-            this.appIdentityService = /*DeploymentEnvironment.isAppEngineDevelopment() ?
-                    new DevAppIdentityService(config) : */AppIdentityServiceFactory.getAppIdentityService();
+            this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
+                    new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
             LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
         } catch (Exception e) {
             // ignore: fails in local tests, bug in LocalServiceTestHelper?
