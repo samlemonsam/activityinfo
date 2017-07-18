@@ -31,7 +31,7 @@ public class TestBlobstoreService extends GcsBlobFieldStorageService implements 
     }
 
     public void put(AuthenticatedUser user, String contentDisposition, String mimeType,
-                    BlobId blobId, ResourceId resourceId, InputStream inputStream) throws IOException {
+                    BlobId blobId, ResourceId formId, InputStream inputStream) throws IOException {
 
     }
 

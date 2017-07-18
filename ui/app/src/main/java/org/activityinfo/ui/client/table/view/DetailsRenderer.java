@@ -12,7 +12,9 @@ import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -136,6 +138,20 @@ public class DetailsRenderer {
         }
     }
 
+
+    private class AttachmentRenderer implements ValueRenderer {
+
+        @Override
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
+            AttachmentValue attachments = (AttachmentValue) fieldValue;
+            for (Attachment attachment : attachments.getValues()) {
+                html.appendHtmlConstant("<p>");
+                html.appendEscaped(attachment.getFilename());
+                html.appendHtmlConstant("</p>");
+            }
+        }
+    }
+
     private abstract class FieldRenderer {
 
         public abstract void renderTo(RecordTree recordTree, SafeHtmlBuilder html);
@@ -216,8 +232,7 @@ public class DetailsRenderer {
         return field.getType().accept(new FieldTypeVisitor<FieldRenderer>() {
             @Override
             public FieldRenderer visitAttachment(AttachmentType attachmentType) {
-                // TODO
-                return new NullRenderer();
+                return new SimpleFieldRenderer(field, new AttachmentRenderer());
             }
 
             @Override

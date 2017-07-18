@@ -1,5 +1,6 @@
 package org.activityinfo.api.client;
 
+import com.google.gwt.safehtml.shared.SafeUri;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
@@ -127,5 +128,7 @@ public interface ActivityInfoClientAsync {
     <T extends JobDescriptor<R>, R extends JobResult> Promise<JobStatus<T, R>>  startJob(T job);
 
     Promise<JobStatus<?, ?>> getJobStatus(String jobId);
+
+    SafeUri getAttachmentUri(ResourceId formId, String blobId);
 
 }

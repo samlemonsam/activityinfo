@@ -2,6 +2,8 @@ package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import org.activityinfo.api.client.*;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
@@ -189,6 +191,11 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     @Override
     public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
         return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
+    public SafeUri getAttachmentUri(ResourceId formId, String blobId) {
+        return UriUtils.fromTrustedString("about:blank");
     }
 
     private <T> Promise<T> offlineResult() {

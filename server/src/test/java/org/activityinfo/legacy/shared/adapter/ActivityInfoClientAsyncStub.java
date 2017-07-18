@@ -1,6 +1,8 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Optional;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.*;
 import org.activityinfo.json.Json;
@@ -244,5 +246,10 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public SafeUri getAttachmentUri(ResourceId formId, String blobId) {
+        return UriUtils.fromTrustedString("about:blank");
     }
 }

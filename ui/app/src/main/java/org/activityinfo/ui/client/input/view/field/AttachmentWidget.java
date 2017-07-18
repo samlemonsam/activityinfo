@@ -196,8 +196,10 @@ public class AttachmentWidget implements FieldWidget, AttachmentRow.ValueChanged
 
     @Override
     public void init(FieldValue value) {
-        if(value == null) {
-
+        if(value instanceof AttachmentValue) {
+            setValue(((AttachmentValue) value));
+        } else {
+            clearValue();
         }
     }
 
