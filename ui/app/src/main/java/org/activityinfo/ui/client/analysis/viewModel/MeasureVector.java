@@ -12,15 +12,14 @@ import java.util.Map;
 public class MeasureVector {
 
     private double[] values;
+    private ColumnView source;
 
     public MeasureVector(ColumnView value) {
+        source = value;
+    }
 
-        if(value.getType() == ColumnType.STRING) {
-            values = quantitize(value);
-        } else {
-            values = toDouble(value);
-        }
-
+    public boolean isNumeric() {
+        return source.getType() == ColumnType.NUMBER;
     }
 
     private static double[] toDouble(ColumnView column) {
@@ -66,6 +65,13 @@ public class MeasureVector {
      * <p>The returned array must ***NOT*** be modified.</p>
      */
     public double[] getDoubleArray() {
+        if(values == null) {
+            if(source.getType() == ColumnType.STRING) {
+                values = quantitize(source);
+            } else {
+                values = toDouble(source);
+            }
+        }
         return values;
     }
 }

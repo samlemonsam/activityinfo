@@ -3,7 +3,6 @@ package org.activityinfo.ui.client.measureDialog.view;
 import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;

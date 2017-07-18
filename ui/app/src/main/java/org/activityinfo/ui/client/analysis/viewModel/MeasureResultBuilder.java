@@ -172,8 +172,26 @@ public class MeasureResultBuilder {
              * Now calculated all the required statistics.
              */
             for (Statistic statistic : measure.getModel().getStatistics()) {
-                aggregate(totalSubset, singleValuedDims, multiDimCategory, statistic, groupArray, filteredValues);
+                if(isMeasureValidForStatistic(values, statistic)) {
+                    aggregate(totalSubset, singleValuedDims, multiDimCategory, statistic, groupArray, filteredValues);
+                }
             }
+        }
+    }
+
+    private boolean isMeasureValidForStatistic(MeasureVector measureVector, Statistic statistic) {
+        switch (statistic) {
+            case COUNT:
+            case COUNT_DISTINCT:
+                return true;
+
+            default:
+            case SUM:
+            case AVERAGE:
+            case MEDIAN:
+            case MIN:
+            case MAX:
+                return measureVector.isNumeric();
         }
     }
 
