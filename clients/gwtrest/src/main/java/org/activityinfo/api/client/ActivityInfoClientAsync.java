@@ -129,6 +129,4 @@ public interface ActivityInfoClientAsync {
 
     Promise<JobStatus<?, ?>> getJobStatus(String jobId);
 
-    SafeUri getAttachmentUri(ResourceId formId, String blobId);
-
 }

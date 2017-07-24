@@ -103,11 +103,6 @@ public class Uploader {
         return getBaseUrl(attachment.getBlobId(), resourceId);
     }
 
-    public String getPermanentLink() {
-        return getPermanentLink(attachment.getBlobId(), resourceId);
-    }
-
-
 
     private String filename() {
         final String filename = fileUpload.getFilename();
