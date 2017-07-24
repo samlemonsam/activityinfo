@@ -21,7 +21,7 @@ public class TextValue implements FieldValue, HasStringValue {
         if(value == null || value.isEmpty()) {
             return null;
         } else {
-            return new TextValue(value);
+            return new TextValue(value.trim());
         }
     }
 
