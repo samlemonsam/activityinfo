@@ -253,6 +253,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Create Target")
     String createTarget();
 
+    @DefaultStringValue("Edit Target")
+    String editTarget();
+
     @DefaultStringValue("Custom Date Range")
     String customDateRange();
 
