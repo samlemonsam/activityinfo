@@ -47,7 +47,7 @@ class GcsGeneratedResource implements GeneratedResource {
 
     private BlobKey getAppEngineBlobKey() {
         BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
-        return blobstore.createGsBlobKey("/gs/" + bucket + "/" + metadata.getId());
+        return blobstore.createGsBlobKey("/gs/" + bucket + "/" + metadata.getGcsPath());
     }
 
     @Override
@@ -91,10 +91,7 @@ class GcsGeneratedResource implements GeneratedResource {
 
         // Tell the serving infrastructure to serve the file directly
         // from Google Cloud Storage.
-        // The use of the X-AppEngine-BlobKey header is undocumented,
-        // but reverse-engineered from
-        // com.google.appengine.api.blobstore.BlobstoreServiceImpl.serve()
-        // which unfortunately assumes that it is being called from a Servlet implementation.
+        // See https://cloud.google.com/appengine/docs/standard/go/how-requests-are-handled
 
         return Response.ok()
                 .header("Content-Type", metadata.getContentType())

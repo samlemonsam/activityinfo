@@ -76,7 +76,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
 
         void createTargetValueContainer(Widget w);
 
-        FormDialogTether showAddDialog(TargetDTO target, UserDatabaseDTO db, FormDialogCallback callback);
+        FormDialogTether showAddDialog(TargetDTO target, UserDatabaseDTO db, boolean editDialog, FormDialogCallback callback);
 
         AsyncMonitor getLoadingMonitor();
     }
@@ -154,7 +154,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
     protected void onAdd() {
         final TargetDTO newTarget = new TargetDTO();
 
-        this.view.showAddDialog(newTarget, db, new FormDialogCallback() {
+        this.view.showAddDialog(newTarget, db, false, new FormDialogCallback() {
 
             @Override
             public void onValidated(final FormDialogTether dlg) {
@@ -193,7 +193,7 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
     @Override
     protected void onEdit(final TargetDTO dto) {
 
-        this.view.showAddDialog(dto, db, new FormDialogCallback() {
+        this.view.showAddDialog(dto, db, true, new FormDialogCallback() {
             @Override
             public void onValidated(final FormDialogTether dlg) {
 

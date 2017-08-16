@@ -1,11 +1,14 @@
 package org.activityinfo.store.query.server;
 
+import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
@@ -207,7 +210,9 @@ public class UpdaterTest {
 
         TypedRecordUpdate update = Updater.parseChange(formClass, change, userId);
 
-        updater.generateSerialNumber(formClass, serialNumberField, update);
+        FormInstance effectiveRecord = updater.computeEffectiveRecord(formClass, Optional.<FormRecord>absent(), update);
+
+        updater.generateSerialNumber(formClass, serialNumberField, effectiveRecord, update);
 
         FieldValue serialValue = update.getChangedFieldValues().get(serialNumberField.getId());
         assertThat(serialValue, equalTo((FieldValue)new SerialNumber("KUNDUZ", 1)));

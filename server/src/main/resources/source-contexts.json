@@ -1,0 +1,14 @@
+[
+  {
+    "context": {
+      "git": {
+        "revisionId": "$[git.commit.id]",
+        "url": "git@github.com:bedatadriven/activityinfo.git"
+      }
+    },
+    "labels": {
+      "category": "remote_repo",
+      "remote_name": "origin"
+    }
+  }
+]

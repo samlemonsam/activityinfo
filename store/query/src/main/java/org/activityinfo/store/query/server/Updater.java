@@ -31,7 +31,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.spi.*;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -240,49 +239,57 @@ public class Updater {
         }
         authorizeUpdate(form, existingResource, update);
 
+        generateSerialNumbers(formClass, existingResource, update);
+
         if(existingResource.isPresent()) {
             form.update(update);
         } else {
-
-            generateSerialNumbers(formClass, update);
-
             form.add(update);
         }
     }
 
-    private void generateSerialNumbers(FormClass formClass, TypedRecordUpdate update) {
+    private void generateSerialNumbers(FormClass formClass,
+                                       Optional<FormRecord> existingRecord,
+                                       TypedRecordUpdate update) {
+
+        FormInstance effectiveRecord = computeEffectiveRecord(formClass, existingRecord, update);
+
         for (FormField formField : formClass.getFields()) {
             if(formField.getType() instanceof SerialNumberType) {
-                generateSerialNumber(formClass, formField, update);
+                if(!effectiveRecord.getFieldValueMap().containsKey(formField.getId())) {
+                    generateSerialNumber(formClass, formField, effectiveRecord, update);
+                }
             }
         }
     }
 
     @VisibleForTesting
-    void generateSerialNumber(FormClass formClass, FormField formField, TypedRecordUpdate update) {
+    void generateSerialNumber(FormClass formClass,
+                              FormField formField,
+                              FormInstance effectiveRecord,
+                              TypedRecordUpdate update) {
 
         SerialNumberType type = (SerialNumberType) formField.getType();
-        String prefix = computeSerialNumberPrefix(formClass, type, update);
+        String prefix = computeSerialNumberPrefix(formClass, type, effectiveRecord);
 
         int serialNumber = serialNumberProvider.next(formClass.getId(), formField.getId(), prefix);
 
         update.set(formField.getId(), new SerialNumber(prefix, serialNumber));
     }
 
-    private String computeSerialNumberPrefix(FormClass formClass, SerialNumberType type, TypedRecordUpdate update) {
+    private String computeSerialNumberPrefix(
+        FormClass formClass,
+        SerialNumberType type,
+        FormInstance effectiveRecord) {
 
         if(!type.hasPrefix()) {
             return null;
         }
 
         try {
-            FormInstance record = new FormInstance(update.getRecordId(), formClass.getId());
-            for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
-                record.set(entry.getKey(), entry.getValue());
-            }
 
             FormEvalContext evalContext = new FormEvalContext(formClass);
-            evalContext.setInstance(record);
+            evalContext.setInstance(effectiveRecord);
 
             ExprNode formula = ExprParser.parse(type.getPrefixFormula());
             FieldValue prefixValue = formula.evaluate(evalContext);
@@ -298,6 +305,19 @@ public class Updater {
             LOGGER.log(Level.SEVERE, "Failed to compute prefix for serial number", e);
             return null;
         }
+    }
+
+    @VisibleForTesting
+    FormInstance computeEffectiveRecord(FormClass formClass, Optional<FormRecord> existingRecord, TypedRecordUpdate update) {
+        FormInstance record = new FormInstance(update.getRecordId(), formClass.getId());
+        if(existingRecord.isPresent()) {
+            FormInstance existingTypedRecord = FormInstance.toFormInstance(formClass, existingRecord.get());
+            record.setAll(existingTypedRecord.getFieldValueMap());
+        }
+        for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
+            record.set(entry.getKey(), entry.getValue());
+        }
+        return record;
     }
 
 
@@ -356,7 +376,9 @@ public class Updater {
         }
     }
 
-    private void authorizeUpdate(final FormStorage form, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
+    private void authorizeUpdate(final FormStorage form,
+                                 Optional<FormRecord> existingResource,
+                                 TypedRecordUpdate update) {
 
         Preconditions.checkNotNull(update.getFormId());
 

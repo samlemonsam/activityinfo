@@ -1,0 +1,6 @@
+{
+  "git": {
+    "revisionId": "$[git.commit.id]",
+    "url": "git@github.com:bedatadriven/activityinfo.git"
+  }
+}

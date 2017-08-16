@@ -41,18 +41,7 @@
     </auth-constraint>
   </security-constraint>
 
-  <!--  Require SSL for login at least -->
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>login</web-resource-name>
-      <url-pattern>/login</url-pattern>
-    </web-resource-collection>
-    <user-data-constraint>
-      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-    </user-data-constraint>
-  </security-constraint>
-
-  <!--  Force ODK to use HTTPS -->
+  <!--  Require SSL for whole site -->
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Secure Resources</web-resource-name>
