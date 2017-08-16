@@ -60,6 +60,8 @@
             </div>
         </a>
 
+        <div class="login-problem"><a href="http://www.activityinfo.org/blog/posts/2017-08-16-humanitarian-id.html">What's this?</a></div>
+
     </div>
     </@content>
     <@footer/>
