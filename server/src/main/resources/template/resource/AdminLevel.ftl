@@ -23,44 +23,45 @@
 <@scaffolding title="${name}" leaflet=true>
 
     <@content>
-    <h1>${name}</h1>
+    <div class="row">
+        <h1>${name}</h1>
 
-    <p>Administrative Level in ${country.name}</p>
+        <p>Administrative Level in ${country.name}</p>
 
-    <div id="map" style="height:350px;"></div>
+        <div id="map" style="height:350px;"></div>
 
-        <#if parent?has_content >
-        <p>Subdivision of <a href="/resources/adminLevel/${parent.id?c}">${parent.name}</a></p>
-        </#if>
+            <#if parent?has_content >
+            <p>Subdivision of <a href="/resources/adminLevel/${parent.id?c}">${parent.name}</a></p>
+            </#if>
 
-        <#if childLevels?has_content >
-        <h2>Child Levels</h2>
+            <#if childLevels?has_content >
+            <h2>Child Levels</h2>
+            <ul>
+                <#list childLevels as child>
+                    <li><a href="/resources/adminLevel/${child.id?c}">${child.name}</a></li>
+                </#list>
+            </ul>
+            </#if>
+
+        <h2>Entities</h2>
         <ul>
-            <#list childLevels as child>
-                <li><a href="/resources/adminLevel/${child.id?c}">${child.name}</a></li>
+            <#list entities?sort_by("name") as entity >
+                <#if !entity.deleted>
+                    <li><a href="/resources/adminEntity/${entity.id?c}">${entity.name}</a></li>
+                </#if>
             </#list>
         </ul>
-        </#if>
 
-    <h2>Entities</h2>
-    <ul>
-        <#list entities?sort_by("name") as entity >
-            <#if !entity.deleted>
-                <li><a href="/resources/adminEntity/${entity.id?c}">${entity.name}</a></li>
-            </#if>
-        </#list>
-    </ul>
-
-    <h2>Revision History</h2>
-    <dl>
-        <#list versions?sort_by("version") as version>
-            <dt>Version ${version.version}</dt>
-            <dd>${version.message!"No commit message"}</dd>
-        </#list>
-    </dl>
-
-
+        <h2>Revision History</h2>
+        <dl>
+            <#list versions?sort_by("version") as version>
+                <dt>Version ${version.version}</dt>
+                <dd>${version.message!"No commit message"}</dd>
+            </#list>
+        </dl>
+    </div>
     </@content>
+
 <link href="https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css" rel="stylesheet" />
 <script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
 <script type="application/javascript">
