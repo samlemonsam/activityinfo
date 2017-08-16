@@ -84,8 +84,9 @@ public class ReferenceType implements ParametrizedFieldType {
         } else if(value.isJsonArray()) {
             JsonArray array = (JsonArray) value;
             Set<RecordRef> refs = new HashSet<>();
-            for (JsonValue jsonElement : array.values()) {
-                refs.add(parseRef(jsonElement.asString()));
+            for (int i = 0; i < array.length(); i++) {
+                refs.add(parseRef(array.getString(i)));
+
             }
             return new ReferenceValue(refs);
         } else {
