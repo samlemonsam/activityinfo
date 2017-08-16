@@ -62,7 +62,8 @@ public final class ExprFunctions {
             register(YearFracFunction.INSTANCE);
             register(TodayFunction.INSTANCE);
 
-
+            register(CeilingFunction.INSTANCE);
+            register(FloorFunction.INSTANCE);
         }
         
         public ExprFunction get(String name) {

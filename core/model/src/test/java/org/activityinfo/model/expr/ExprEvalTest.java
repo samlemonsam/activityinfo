@@ -20,6 +20,14 @@ public class ExprEvalTest {
     }
 
     @Test
+    public void evaluateRoundingExpr() {
+        evaluate("CEIL(1.5)",2.0);
+        //evaluate("CEIL(-1.5)",-1.0);
+        evaluate("FLOOR(1.5)",1.0);
+        //evaluate("FLOOR(-1.5)",-2.0);
+    }
+
+    @Test
     public void evaluateBooleanExpr() {
         evaluate("true", true);
         evaluate("false", false);
