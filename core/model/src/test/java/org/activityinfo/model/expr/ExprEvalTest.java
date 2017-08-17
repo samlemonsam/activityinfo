@@ -25,19 +25,23 @@ public class ExprEvalTest {
         // String input - should throw exception
         try {
             evaluate("CEIL(\"test\")", false);
+            throw new AssertionError("String input \"test\" to CEIL() function expected to cause InvalidTypeException");
         } catch (InvalidTypeException excp) { /* Expected Exception */ }
 
         try {
             evaluate("FLOOR(\"test\")", false);
+            throw new AssertionError("String input \"test\" to FLOOR() function expected to cause InvalidTypeException");
         } catch (InvalidTypeException excp) { /* Expected Exception */ }
 
         // Boolean input - should throw exception
         try {
             evaluate("CEIL(TRUE)", true);
+            throw new AssertionError("Boolean input TRUE to CEIL() function expected to cause InvalidTypeException");
         } catch (InvalidTypeException excp) { /* Expected Exception */ }
 
         try {
             evaluate("FLOOR(TRUE)", true);
+            throw new AssertionError("Boolean input TRUE to FLOOR() function expected to cause InvalidTypeException");
         } catch (InvalidTypeException excp) { /* Expected Exception */ }
     }
 
