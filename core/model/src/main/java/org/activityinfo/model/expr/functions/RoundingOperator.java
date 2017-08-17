@@ -17,7 +17,7 @@ public abstract class RoundingOperator extends UnaryFunctionBase {
     public FieldValue apply(FieldValue argument) {
         Preconditions.checkArgument(argument instanceof Quantity);
         Quantity quantity = (Quantity) argument;
-        return apply(quantity);
+        return new Quantity(apply(quantity.getValue()),quantity.getUnits());
     }
 
     @Override
@@ -36,8 +36,6 @@ public abstract class RoundingOperator extends UnaryFunctionBase {
         }
         return new DoubleArrayColumnView(result);
     }
-
-    public abstract Quantity apply(Quantity argument);
 
     public abstract double apply(double argument);
 

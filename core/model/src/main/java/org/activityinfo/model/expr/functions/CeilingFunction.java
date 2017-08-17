@@ -9,9 +9,6 @@ public class CeilingFunction extends RoundingOperator {
     public CeilingFunction() { super("CEIL"); }
 
     @Override
-    public Quantity apply(Quantity argument) { return new Quantity(Math.ceil(argument.getValue()),argument.getUnits()); }
-
-    @Override
     public double apply(double argument) { return Math.ceil(argument); }
 
 }

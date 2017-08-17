@@ -9,9 +9,6 @@ public class FloorFunction extends RoundingOperator {
     public FloorFunction() { super("FLOOR"); }
 
     @Override
-    public Quantity apply(Quantity argument) { return new Quantity(Math.floor(argument.getValue()),argument.getUnits()); }
-
-    @Override
     public double apply(double argument) { return Math.floor(argument); }
 
 }
