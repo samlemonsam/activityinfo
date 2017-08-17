@@ -1,7 +1,7 @@
 package org.activityinfo.model.expr.functions;
 
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.expr.diagnostic.ArgumentException;
+import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
@@ -15,14 +15,16 @@ public abstract class RoundingOperator extends UnaryFunctionBase {
 
     @Override
     public FieldValue apply(FieldValue argument) {
-        Preconditions.checkArgument(argument instanceof Quantity);
+        if(!(argument instanceof Quantity)) {
+            throw new InvalidTypeException("Expected QUANTITY value");
+        }
         Quantity quantity = (Quantity) argument;
         return new Quantity(apply(quantity.getValue()),quantity.getUnits());
     }
 
     @Override
     public FieldType resolveUnaryResultType(FieldType argumentType) {
-        if (!(argumentType instanceof Quantity)) {
+        if (!(argumentType instanceof QuantityType)) {
             throw new ArgumentException(0, "Expected QUANTITY value");
         }
         return new QuantityType();

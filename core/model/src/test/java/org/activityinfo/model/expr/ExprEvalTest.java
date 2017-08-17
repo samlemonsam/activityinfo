@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr;
 
+import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.expr.eval.EmptyEvalContext;
 import org.activityinfo.model.expr.functions.Casting;
 import org.activityinfo.model.type.FieldValue;
@@ -17,6 +18,17 @@ public class ExprEvalTest {
         evaluate("1", 1);
         evaluate("1+1", 2);
         evaluate("(5+5)/2", 5);
+    }
+
+    @Test(expected = InvalidTypeException.class)
+    public void evaluateRoundExpr_InvalidType() {
+        // String input - should throw exception
+        evaluate("CEIL(\"test\")",false);
+        evaluate("FLOOR(\"test\")",false);
+
+        // Boolean input - should throw exception
+        evaluate("CEIL(TRUE)",true);
+        evaluate("FLOOR(TRUE)",true);
     }
 
     @Test
