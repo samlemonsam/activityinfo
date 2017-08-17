@@ -20,15 +20,25 @@ public class ExprEvalTest {
         evaluate("(5+5)/2", 5);
     }
 
-    @Test(expected = InvalidTypeException.class)
-    public void evaluateRoundExpr_InvalidType() {
+    @Test
+    public void evaluateAndExpectException() {
         // String input - should throw exception
-        evaluate("CEIL(\"test\")",false);
-        evaluate("FLOOR(\"test\")",false);
+        try {
+            evaluate("CEIL(\"test\")", false);
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+
+        try {
+            evaluate("FLOOR(\"test\")", false);
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
 
         // Boolean input - should throw exception
-        evaluate("CEIL(TRUE)",true);
-        evaluate("FLOOR(TRUE)",true);
+        try {
+            evaluate("CEIL(TRUE)", true);
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+
+        try {
+            evaluate("FLOOR(TRUE)", true);
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
     }
 
     @Test
