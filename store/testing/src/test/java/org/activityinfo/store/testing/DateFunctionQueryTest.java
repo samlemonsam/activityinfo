@@ -29,7 +29,7 @@ public class DateFunctionQueryTest {
 
         ColumnSet columnSet = builder.build(queryModel);
         ColumnView floor = columnSet.getColumnView("floor");
-        ColumnView ageFloored = columnSet.getColumnView("age_floored");
+        ColumnView ageFloored = columnSet.getColumnView("ageFloored");
 
         assertThat(floor.numRows(),equalTo(IntakeForm.ROW_COUNT));
         assertThat(floor.getDouble(0),equalTo(1.0));
