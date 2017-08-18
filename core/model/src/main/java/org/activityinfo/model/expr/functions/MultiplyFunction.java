@@ -2,9 +2,14 @@ package org.activityinfo.model.expr.functions;
 
 import org.activityinfo.model.type.number.Quantity;
 
-class MultiplyFunction extends RealValuedBinaryFunction {
+class MultiplyFunction extends RealValuedFunction {
     public MultiplyFunction() {
         super("*");
+    }
+
+    @Override
+    protected double apply(double a) {
+        throw new IllegalStateException("Illegal unary input to " + getLabel() + "()");
     }
 
     @Override

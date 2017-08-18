@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr;
 
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.expr.eval.EmptyEvalContext;
 import org.activityinfo.model.expr.functions.Casting;
@@ -12,7 +13,6 @@ import static org.junit.Assert.assertThat;
 
 public class ExprEvalTest {
 
-
     @Test
     public void evaluateExpr() {
         evaluate("1", 1);
@@ -21,36 +21,48 @@ public class ExprEvalTest {
     }
 
     @Test
-    public void evaluateAndExpectException() {
-        // String input - should throw exception
-        try {
-            evaluate("CEIL(\"test\")", false);
-            throw new AssertionError("String input \"test\" to CEIL() function expected to cause InvalidTypeException");
-        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+    public void evaluateUnaryOperators() {
+        // PlusFunction Unary
+        evaluate("+1",1);
+        evaluate("+1.0",1.0);
+        evaluate("+1*2",2);
+        evaluate("+1.0*2.0",2.0);
+        evaluate("2*(+1)",2);
+        evaluate("2.0*(+1.0)",2.0);
 
-        try {
-            evaluate("FLOOR(\"test\")", false);
-            throw new AssertionError("String input \"test\" to FLOOR() function expected to cause InvalidTypeException");
-        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+        // MinusFunction Unary
+        evaluate("-1",-1);
+        evaluate("-1.0",-1.0);
+        evaluate("-1*2",-2);
+        evaluate("-1.0*2.0",-2.0);
+        evaluate("2*(-1)",-2);
+        evaluate("2.0*(-1.0)",-2.0);
 
-        // Boolean input - should throw exception
-        try {
-            evaluate("CEIL(TRUE)", true);
-            throw new AssertionError("Boolean input TRUE to CEIL() function expected to cause InvalidTypeException");
-        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+        // MultiplyFunction Unary - should throw exception
+        evaluateAndExpectSyntaxException("*1");
+        evaluateAndExpectSyntaxException("*1.0");
+        evaluateAndExpectSyntaxException("1*");
+        evaluateAndExpectSyntaxException("1.0*");
 
-        try {
-            evaluate("FLOOR(TRUE)", true);
-            throw new AssertionError("Boolean input TRUE to FLOOR() function expected to cause InvalidTypeException");
-        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+        // DivideFunction Unary - should throw exception
+        evaluateAndExpectSyntaxException("/1");
+        evaluateAndExpectSyntaxException("/1.0");
+        evaluateAndExpectSyntaxException("1/");
+        evaluateAndExpectSyntaxException("1.0/");
     }
 
     @Test
     public void evaluateRoundingExpr() {
         evaluate("CEIL(1.5)",2.0);
-        //evaluate("CEIL(-1.5)",-1.0);
+        evaluate("CEIL(-1.5)",-1.0);
         evaluate("FLOOR(1.5)",1.0);
-        //evaluate("FLOOR(-1.5)",-2.0);
+        evaluate("FLOOR(-1.5)",-2.0);
+
+        // Invalid types - should throw exception
+        evaluateAndExpectInvalidTypeException("CEIL(\"test\")");
+        evaluateAndExpectInvalidTypeException("FLOOR(\"test\")");
+        evaluateAndExpectInvalidTypeException("CEIL(TRUE)");
+        evaluateAndExpectInvalidTypeException("FLOOR(TRUE)");
     }
 
     @Test
@@ -86,6 +98,20 @@ public class ExprEvalTest {
         evaluate(" (3 < 4) && (4 < 5)", true);
         evaluate(" (3 <= 3) && (4 <= 5)", true);
         evaluate(" (3 > 2) && (4 > 5)", false);
+    }
+
+    private void evaluateAndExpectSyntaxException(String exprString) {
+        try {
+            evaluate(exprString,Double.NaN);
+            throw new AssertionError("Input \"" + exprString + "\" expected to cause ExprSyntaxException");
+        } catch(ExprSyntaxException excp) { /* Expected Exception */ }
+    }
+
+    private void evaluateAndExpectInvalidTypeException(String exprString) {
+        try {
+            evaluate(exprString,Double.NaN);
+            throw new AssertionError("Input \"" + exprString + "\" expected to cause InvalidTypeException");
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
     }
 
     private void evaluate(String exprString, double expectedValue) {

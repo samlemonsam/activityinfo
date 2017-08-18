@@ -4,10 +4,15 @@ import org.activityinfo.model.type.number.Quantity;
 
 import java.util.Objects;
 
-class MinusFunction extends RealValuedBinaryFunction {
+class MinusFunction extends RealValuedFunction {
 
     public MinusFunction() {
         super("-");
+    }
+
+    @Override
+    protected double apply(double a) {
+        return -a;
     }
 
     @Override

@@ -4,12 +4,17 @@ import org.activityinfo.model.type.number.Quantity;
 
 import java.util.Objects;
 
-public class PlusFunction extends RealValuedBinaryFunction {
+public class PlusFunction extends RealValuedFunction {
 
     public static final PlusFunction INSTANCE = new PlusFunction();
 
     private PlusFunction() {
         super("+");
+    }
+
+    @Override
+    protected double apply(double a) {
+        return +a;
     }
 
     @Override

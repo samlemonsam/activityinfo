@@ -2,12 +2,17 @@ package org.activityinfo.model.expr.functions;
 
 import org.activityinfo.model.type.number.Quantity;
 
-public class DivideFunction extends RealValuedBinaryFunction {
+public class DivideFunction extends RealValuedFunction {
 
     public static final DivideFunction INSTANCE = new DivideFunction();
 
     private DivideFunction() {
         super("/");
+    }
+
+    @Override
+    protected double apply(double a) {
+        throw new IllegalStateException("Illegal unary input to " + getLabel() + "()");
     }
 
     @Override
