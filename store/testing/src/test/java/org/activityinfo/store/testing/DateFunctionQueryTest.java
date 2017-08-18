@@ -8,11 +8,37 @@ import org.activityinfo.store.query.impl.NullFormScanCache;
 import org.activityinfo.store.query.impl.NullFormSupervisor;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 /**
  * Test queries involving date functions
  */
 public class DateFunctionQueryTest {
 
+    @Test
+    public void testFloorToday() {
+        TestingCatalog catalog = new TestingCatalog();
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
+
+        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        queryModel.selectExpr("TODAY()").as("today");
+        queryModel.selectExpr("FLOOR(YEARFRAC(\"2017-05-05\", DOB))").as("ageFloored");
+        queryModel.selectExpr("FLOOR(1.5)").as("floor");
+        queryModel.selectExpr("DOB").as("dob");
+
+        ColumnSet columnSet = builder.build(queryModel);
+        ColumnView floor = columnSet.getColumnView("floor");
+        ColumnView ageFloored = columnSet.getColumnView("age_floored");
+
+        assertThat(floor.numRows(),equalTo(IntakeForm.ROW_COUNT));
+        assertThat(floor.getDouble(0),equalTo(1.0));
+        assertThat(ageFloored.getDouble(0),equalTo(45.0));
+        assertThat(ageFloored.getDouble(3),equalTo(29.0));
+
+        System.out.println(ageFloored);
+
+    }
 
     @Test
     public void testToday() {

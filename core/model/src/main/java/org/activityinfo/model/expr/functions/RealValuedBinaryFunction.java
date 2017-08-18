@@ -1,6 +1,5 @@
 package org.activityinfo.model.expr.functions;
 
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
@@ -21,7 +20,8 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
 
     @Override
     public FieldValue apply(List<FieldValue> arguments) {
-        Preconditions.checkState(arguments.size() == 2);
+
+        checkArity(arguments,2);
 
         // Excel-style (sort-of) missing value handling
         // (1) If at least one value is non-missing, however, treat the other as zero
@@ -64,7 +64,8 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
 
     @Override
     public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
-        Preconditions.checkArgument(arguments.size() == 2);
+        checkArity(arguments,2);
+
         ColumnView x = arguments.get(0);
         ColumnView y = arguments.get(1);
 
@@ -99,7 +100,8 @@ public abstract class RealValuedBinaryFunction extends ExprFunction implements C
 
     @Override
     public FieldType resolveResultType(List<FieldType> argumentTypes) {
-        Preconditions.checkArgument(argumentTypes.size() == 2);
+        checkArity(argumentTypes,2);
+
         if(argumentTypes.get(0) instanceof QuantityType &&
            argumentTypes.get(1) instanceof QuantityType) {
 

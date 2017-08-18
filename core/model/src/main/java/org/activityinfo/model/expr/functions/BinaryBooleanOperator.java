@@ -1,6 +1,5 @@
 package org.activityinfo.model.expr.functions;
 
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.expr.diagnostic.ArgumentException;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.query.BooleanColumnView;
@@ -32,7 +31,7 @@ public abstract class BinaryBooleanOperator extends ExprFunction implements Colu
 
     @Override
     public BooleanFieldValue apply(List<FieldValue> arguments) {
-        Preconditions.checkArgument(arguments.size() == 2);
+        checkArity(arguments,2);
         boolean a = Casting.toBoolean(arguments.get(0));
         boolean b = Casting.toBoolean(arguments.get(1));
 
@@ -46,12 +45,14 @@ public abstract class BinaryBooleanOperator extends ExprFunction implements Colu
 
     @Override
     public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
-        Preconditions.checkArgument(arguments.size() == 2);
+        checkArity(arguments,2);
 
         ColumnView a = arguments.get(0);
         ColumnView b = arguments.get(1);
 
-        Preconditions.checkArgument(a.numRows() == b.numRows(), "arguments must have the same number of rows");
+        if(a.numRows() != b.numRows()) {
+            throw new ExprSyntaxException("Arguments must have the same number of rows");
+        }
 
         int[] result = new int[a.numRows()];
         for (int i = 0; i < result.length; i++) {

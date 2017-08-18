@@ -1,6 +1,5 @@
 package org.activityinfo.model.expr.functions;
 
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.geo.GeoArea;
@@ -66,7 +65,7 @@ public abstract class BoundingBoxFunction extends ExprFunction {
 
     @Override
     public FieldValue apply(List<FieldValue> arguments) {
-        Preconditions.checkArgument(arguments.size() == 1);
+        checkArity(arguments,1);
 
         GeoArea value = (GeoArea) arguments.get(0);
 
@@ -77,7 +76,7 @@ public abstract class BoundingBoxFunction extends ExprFunction {
 
     @Override
     public FieldType resolveResultType(List<FieldType> argumentTypes) {
-        Preconditions.checkArgument(argumentTypes.size() == 1);
+        checkArity(argumentTypes,1);
 
         return new QuantityType("degree");
     }
