@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr;
 
+import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.expr.eval.EmptyEvalContext;
 import org.activityinfo.model.expr.functions.Casting;
 import org.activityinfo.model.type.FieldValue;
@@ -17,6 +18,39 @@ public class ExprEvalTest {
         evaluate("1", 1);
         evaluate("1+1", 2);
         evaluate("(5+5)/2", 5);
+    }
+
+    @Test
+    public void evaluateAndExpectException() {
+        // String input - should throw exception
+        try {
+            evaluate("CEIL(\"test\")", false);
+            throw new AssertionError("String input \"test\" to CEIL() function expected to cause InvalidTypeException");
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+
+        try {
+            evaluate("FLOOR(\"test\")", false);
+            throw new AssertionError("String input \"test\" to FLOOR() function expected to cause InvalidTypeException");
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+
+        // Boolean input - should throw exception
+        try {
+            evaluate("CEIL(TRUE)", true);
+            throw new AssertionError("Boolean input TRUE to CEIL() function expected to cause InvalidTypeException");
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+
+        try {
+            evaluate("FLOOR(TRUE)", true);
+            throw new AssertionError("Boolean input TRUE to FLOOR() function expected to cause InvalidTypeException");
+        } catch (InvalidTypeException excp) { /* Expected Exception */ }
+    }
+
+    @Test
+    public void evaluateRoundingExpr() {
+        evaluate("CEIL(1.5)",2.0);
+        //evaluate("CEIL(-1.5)",-1.0);
+        evaluate("FLOOR(1.5)",1.0);
+        //evaluate("FLOOR(-1.5)",-2.0);
     }
 
     @Test

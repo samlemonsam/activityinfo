@@ -43,10 +43,25 @@
             </div>
             </#if>
 
-            <button type="submit">${label.login}</button>
+            <button type="submit" style="width:100%">${label.login}</button>
 
             <div class="login-problem"><a href="loginProblem">Forgotten your password?</a></div>
         </form>
+
+        <hr style="margin: 2em auto">
+
+        <a href="/oauth/oauthconnector_hid_oauth" class="cta-link cta-link--secondary">
+            <div style="float:none; display:table; vertical-align:middle; width:100%">
+                <div style="display:table-cell; width: 20%;"></div>
+                <div style="display:table-cell; width: 35px; height: 35px; background: url(/img/humanitarian-id-logo.svg) no-repeat;"></div>
+                <div style="display:table-cell; vertical-align:inherit">Log In with Humanitarian.id</div>
+                <div style="display:table-cell; width: 35px;"></div>
+                <div style="display:table-cell; width: 20%;"></div>
+            </div>
+        </a>
+
+        <div class="login-problem"><a href="http://www.activityinfo.org/blog/posts/2017-08-16-humanitarian-id.html">What's this?</a></div>
+
     </div>
     </@content>
     <@footer/>

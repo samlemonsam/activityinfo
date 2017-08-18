@@ -24,10 +24,12 @@
 
 
     <@content>
-    <h1>${name}</h1>
+    <div class="row">
+        <h1>${name}</h1>
 
-    <h2>Administrative Unit Levels</h2>
-        <@showLevels children=adminLevels/>
+        <h2>Administrative Unit Levels</h2>
+            <@showLevels children=adminLevels/>
+    </div>
     </@content>
 </@scaffolding>
 

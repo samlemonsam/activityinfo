@@ -23,28 +23,30 @@
 <@scaffolding title="${name}">
 
     <@content>
-    <h1>${name}</h1>
+    <div class="row">
+        <h1>${name}</h1>
 
-    <p><a href="/resources/adminLevel/${level.id?c}">${level.name}</a> in <a
-            href="/resources/country/${level.country.codeISO}">${level.country.name}</a></p>
-        <#if parents?has_content>
-        <h2>Parents</h2>
-        <ul>
-            <li>${parent.level.name}: <a href="/resources/adminEntity/${parent.id?c}">${parent.name}</a></li>
-        </ul>
-        </#if>
-        <#if level.childLevels?has_content>
-        <h2>Child entities</h2>
-            <#list level.childLevels as childLevel>
-            <h3>${childLevel.name}</h3>
+        <p><a href="/resources/adminLevel/${level.id?c}">${level.name}</a> in <a
+                href="/resources/country/${level.country.codeISO}">${level.country.name}</a></p>
+            <#if parents?has_content>
+            <h2>Parents</h2>
             <ul>
-                <#list childLevel.entities?sort_by("name") as childEntity>
-                    <#if !childEntity.deleted && childEntity.parent?? && childEntity.parent.id == id>
-                        <li><a href="/resources/adminEntity/${childEntity.id?c}">${childEntity.name}</a></li>
-                    </#if>
-                </#list>
+                <li>${parent.level.name}: <a href="/resources/adminEntity/${parent.id?c}">${parent.name}</a></li>
             </ul>
-            </#list>
-        </#if>
+            </#if>
+            <#if level.childLevels?has_content>
+            <h2>Child entities</h2>
+                <#list level.childLevels as childLevel>
+                <h3>${childLevel.name}</h3>
+                <ul>
+                    <#list childLevel.entities?sort_by("name") as childEntity>
+                        <#if !childEntity.deleted && childEntity.parent?? && childEntity.parent.id == id>
+                            <li><a href="/resources/adminEntity/${childEntity.id?c}">${childEntity.name}</a></li>
+                        </#if>
+                    </#list>
+                </ul>
+                </#list>
+            </#if>
+    </div>
     </@content>
 </@scaffolding>

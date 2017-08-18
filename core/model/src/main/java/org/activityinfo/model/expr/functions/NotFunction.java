@@ -1,6 +1,5 @@
 package org.activityinfo.model.expr.functions;
 
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
@@ -26,7 +25,7 @@ public class NotFunction extends ExprFunction {
 
     @Override
     public BooleanFieldValue apply(List<FieldValue> arguments) {
-        Preconditions.checkArgument(arguments.size() == 1);
+        checkArity(arguments,1);
         boolean x = Casting.toBoolean(arguments.get(0));
         return BooleanFieldValue.valueOf(!x);
     }
