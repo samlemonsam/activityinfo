@@ -170,7 +170,17 @@ public class LatinWordDistance {
             return EXTRA_VOWEL_COST;
 
         } else if(c == 'Y') {
+            // If this y ends a cluster, such as
+            // 'aiy' vs 'ai' then assign a penalty, but
+            // not much
             if(w.isVowel(i-1)) {
+                return 1.0;
+            }
+
+            // If this y begins a cluster, such as
+            // 'yik' vs 'ik' in Tanganyika, assign a cost
+            // but accept
+            if(w.isVowel(i+1)) {
                 return 1.0;
             }
 
