@@ -77,7 +77,7 @@ public class AdminEntityTable implements SimpleTable {
             parent = new FormField(CuidAdapter.field(formId, CuidAdapter.PARTNER_FIELD));
             parent.setCode("parent");
             parent.setLabel(level.getParentName());
-            parent.setRequired(true);
+            parent.setRequired(false);
             parent.setKey(true);
             parent.setType(ReferenceType.single(CuidAdapter.adminLevelFormClass(level.getParentId())));
             parent.addSuperProperty(ApplicationProperties.PARENT_PROPERTY);
