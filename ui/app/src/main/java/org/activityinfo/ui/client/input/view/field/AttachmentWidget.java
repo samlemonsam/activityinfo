@@ -36,9 +36,12 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.*;
+import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.attachment.Attachment;
@@ -73,7 +76,7 @@ public class AttachmentWidget implements FieldWidget, AttachmentRow.ValueChanged
     @UiField
     HTMLPanel uploadFailed;
     @UiField
-    AnchorElement browseButton;
+    TextButton browseButton;
     @UiField
     FileUpload fileUpload;
     @UiField
@@ -113,16 +116,11 @@ public class AttachmentWidget implements FieldWidget, AttachmentRow.ValueChanged
                 uploader.upload();
             }
         });
+    }
 
-        Event.sinkEvents(browseButton, Event.ONCLICK);
-        Event.setEventListener(browseButton, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                event.preventDefault();
-                triggerUpload(fileUpload.getElement());
-            }
-        });
-
+    @UiHandler("browseButton")
+    public void onBrowse(SelectEvent event) {
+        triggerUpload(fileUpload.getElement());
     }
 
     private void upload() {
@@ -212,11 +210,9 @@ public class AttachmentWidget implements FieldWidget, AttachmentRow.ValueChanged
 
     private AttachmentValue getValue() {
         AttachmentValue value = new AttachmentValue();
-
         for (AttachmentRow row : rowsFromPanel()) {
             value.getValues().add(row.getValue());
         }
-
         return value;
     }
 

@@ -25,6 +25,7 @@ import org.activityinfo.ui.client.store.http.ConnectionListener;
 import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.icons.Icons;
 
 import java.util.logging.Logger;
 
@@ -44,6 +45,8 @@ public class AppEntryPoint implements EntryPoint {
         LOGGER.info("user.agent = " + System.getProperty("user.agent"));
         LOGGER.info("gxt.user.agent = " + System.getProperty("gxt.user.agent"));
         LOGGER.info("gxt.device = " + System.getProperty("gxt.device"));
+
+        Icons.INSTANCE.ensureInjected();
 
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);

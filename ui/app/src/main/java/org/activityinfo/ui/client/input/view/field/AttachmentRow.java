@@ -64,8 +64,6 @@ public class AttachmentRow extends Composite {
     AnchorElement fileName;
     @UiField
     SpanElement thumbnailContainer;
-    @UiField
-    HTMLPanel rootPanel;
 
     public AttachmentRow(Attachment attachment, ResourceId resourceId) {
         initWidget(ourUiBinder.createAndBindUi(this));
@@ -75,20 +73,6 @@ public class AttachmentRow extends Composite {
 
         setFileName();
         setThumbnail();
-
-        rootPanel.addDomHandler(new MouseOverHandler() {
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                removeButton.setVisible(true);
-            }
-        }, MouseOverEvent.getType());
-        rootPanel.addDomHandler(new MouseOutHandler() {
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                removeButton.setVisible(false);
-            }
-        }, MouseOutEvent.getType());
-
     }
 
     private void setFileName() {
