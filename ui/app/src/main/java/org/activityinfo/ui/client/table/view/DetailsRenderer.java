@@ -5,12 +5,14 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -30,6 +32,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
 import org.activityinfo.promise.Maybe;
+import org.activityinfo.ui.client.input.view.field.Blobs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +44,9 @@ public class DetailsRenderer {
     interface Templates extends SafeHtmlTemplates {
         @Template("<h3 class=\"{0}\">{1}</h3>")
         SafeHtml fieldLabel(String className, String label);
+
+        @Template("<a href=\"{0}\">{1}</a>")
+        SafeHtml attachmentLink(SafeUri uri, String name);
     }
 
     private final static Templates TEMPLATES = GWT.create(Templates.class);
@@ -141,12 +147,19 @@ public class DetailsRenderer {
 
     private class AttachmentRenderer implements ValueRenderer {
 
+        private final ResourceId formId;
+
+        public AttachmentRenderer(ResourceId formId) {
+            this.formId = formId;
+        }
+
         @Override
         public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
             AttachmentValue attachments = (AttachmentValue) fieldValue;
             for (Attachment attachment : attachments.getValues()) {
                 html.appendHtmlConstant("<p>");
-                html.appendEscaped(attachment.getFilename());
+                html.append(TEMPLATES.attachmentLink(Blobs.getAttachmentUri(formId, attachment.getBlobId()),
+                    attachment.getFilename()));
                 html.appendHtmlConstant("</p>");
             }
         }
@@ -232,7 +245,7 @@ public class DetailsRenderer {
         return field.getType().accept(new FieldTypeVisitor<FieldRenderer>() {
             @Override
             public FieldRenderer visitAttachment(AttachmentType attachmentType) {
-                return new SimpleFieldRenderer(field, new AttachmentRenderer());
+                return new SimpleFieldRenderer(field, new AttachmentRenderer(formTree.getRootFormId()));
             }
 
             @Override
