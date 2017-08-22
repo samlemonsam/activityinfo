@@ -98,6 +98,19 @@ public class LatinPlaceNameScorerTest {
     }
 
     @Test
+    public void tanganika() {
+        LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
+
+        // ika vs yika
+        // Ignore missing consonants before /i/
+        double score = scorer.score("Tanganika", "Tanganyika");
+
+        System.out.println(score);
+
+        assertThat(score, greaterThan(MINIMUM_SCORE));
+    }
+
+    @Test
     public void caseInsensitive() {
         LatinPlaceNameScorer scorer = new LatinPlaceNameScorer();
 

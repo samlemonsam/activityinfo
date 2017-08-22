@@ -56,6 +56,8 @@ public final class ResourceId implements Serializable {
                 return CuidAdapter.generateSiteCuid();
             case CuidAdapter.LOCATION_TYPE_DOMAIN:
                 return CuidAdapter.generateLocationCuid();
+            case CuidAdapter.ADMIN_LEVEL_DOMAIN:
+                return CuidAdapter.cuid(CuidAdapter.ADMIN_ENTITY_DOMAIN,  new KeyGenerator().generateInt());
             default:
                 return ResourceId.valueOf(generateCuid());
         }

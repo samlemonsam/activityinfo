@@ -69,12 +69,11 @@ public class AdminEntityTable implements SimpleTable {
         FormField bounds = new FormField(CuidAdapter.field(formId, CuidAdapter.GEOMETRY_FIELD));
         bounds.setCode("boundary");
         bounds.setLabel(I18N.CONSTANTS.geography());
-        bounds.setRequired(true);
         bounds.setType(GeoAreaType.INSTANCE);
         
         FormField parent = null;
         if(level.hasParent()) {
-            parent = new FormField(CuidAdapter.field(formId, CuidAdapter.PARTNER_FIELD));
+            parent = new FormField(CuidAdapter.field(formId, CuidAdapter.ADMIN_PARENT_FIELD));
             parent.setCode("parent");
             parent.setLabel(level.getParentName());
             parent.setRequired(true);
