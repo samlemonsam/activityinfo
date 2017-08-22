@@ -188,7 +188,12 @@ public class AttachmentWidget implements FieldWidget, AttachmentRow.ValueChanged
     }-*/;
 
     public void fireValueChanged() {
-        valueUpdater.update(new FieldInput(getValue()));
+        List<AttachmentRow> rows = rowsFromPanel();
+        if(rows.isEmpty()) {
+            valueUpdater.update(FieldInput.EMPTY);
+        } else {
+            valueUpdater.update(new FieldInput(getValue()));
+        }
     }
 
 
