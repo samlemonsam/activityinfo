@@ -2,6 +2,8 @@ package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonNull;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
@@ -93,6 +95,9 @@ public class FormInputViewModel {
             FieldInput newInput = inputModel.get(node.getFieldId());
             if(newInput.getState() == FieldInput.State.VALID) {
                 update.setFieldValue(node.getFieldId(), newInput.getValue());
+            }
+            if(newInput.getState() == FieldInput.State.EMPTY) {
+                update.setFieldValue(node.getFieldId().asString(), Json.createNull());
             }
         }
         return update;
