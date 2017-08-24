@@ -1,5 +1,6 @@
 package org.activityinfo.test.ui;
 
+import org.activityinfo.test.TestRailCase;
 import org.activityinfo.test.sut.UserAccount;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,6 +22,7 @@ public class LoginTest {
      * Then my dashboard should open
      */
     @Test
+    @TestRailCase(62)
     public void successful() {
 
         UserAccount account = harness.createAccount();
@@ -29,6 +31,7 @@ public class LoginTest {
 
         harness.getLoginPage().navigateTo().loginAs(account).andExpectSuccess();
     }
+
     @Test
     public void failed()  {
 
