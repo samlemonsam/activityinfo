@@ -8,9 +8,12 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
+import org.activityinfo.analysis.table.EffectiveTableColumn;
+import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormMetadata;
@@ -42,6 +45,7 @@ import org.activityinfo.store.query.impl.InvalidUpdateException;
 import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
+import org.activityinfo.store.query.server.FormSourceSyncImpl;
 import org.activityinfo.store.spi.*;
 
 import javax.inject.Provider;
@@ -53,7 +57,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -462,22 +468,17 @@ public class FormResource {
 
         assertVisible(formId);
 
-        final QueryModel queryModel = new QueryModel(formId);
-        final FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
-        final FormTree tree = treeBuilder.queryTree(formId);
+        QueryModel queryModel;
 
         if(uriInfo.getQueryParameters().isEmpty()) {
-            LOGGER.info("No query fields provided, querying all.");
-            queryModel.selectResourceId().as("@id");
+            FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
+            FormTree tree = treeBuilder.queryTree(formId);
 
-            for (FormTree.Node leaf : tree.getLeaves()) {
-                if(includeInDefaultQuery(leaf)) {
-                    queryModel.selectField(leaf.getPath()).as(formatId(leaf));
-                }
-            }
-            LOGGER.info("Query model: " + queryModel);
+            queryModel = new DefaultQueryBuilder(tree).build();
 
         } else {
+
+            queryModel = new QueryModel(formId);
             for (String columnId : uriInfo.getQueryParameters().keySet()) {
                 queryModel.selectExpr(uriInfo.getQueryParameters().getFirst(columnId)).as(columnId);
             }
@@ -490,31 +491,6 @@ public class FormResource {
         return builder.build(queryModel);
     }
 
-    private boolean includeInDefaultQuery(FormTree.Node leaf) {
-        FieldType type = leaf.getType();
-        return type instanceof TextType ||
-                type instanceof BarcodeType ||
-                type instanceof QuantityType ||
-                type instanceof EnumType ||
-                type instanceof ReferenceType ||
-                type instanceof BooleanType ||
-                type instanceof LocalDateType;
-    }
-
-    private String formatId(FormTree.Node node) {
-        StringBuilder id = new StringBuilder();
-        id.append(formatIdField(node));
-        FormTree.Node parent = node.getParent();
-        while(parent != null) {
-            id.insert(0, formatIdField(parent) + ".");
-            parent = parent.getParent();
-        }
-        return id.toString();
-    }
-
-    private String formatIdField(FormTree.Node node) {
-        return node.getField().getCode() == null ? node.getField().getLabel() : node.getField().getCode();
-    }
 
     private FormStorage assertVisible(ResourceId collectionId) {
         Optional<FormStorage> collection = this.catalog.get().getForm(formId);
