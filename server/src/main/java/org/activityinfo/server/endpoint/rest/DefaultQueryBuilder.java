@@ -1,5 +1,7 @@
 package org.activityinfo.server.endpoint.rest;
 
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -80,7 +82,13 @@ public class DefaultQueryBuilder {
         FormClass formClass = tree.getFormClass(referencedFormId);
         for (FormField formField : formClass.getFields()) {
             if(isSimple(formField)) {
-                queryModel.selectField(formField.getId()).as(formatReferencedFieldAlias(formClass, formField));
+                CompoundExpr fieldRef = new CompoundExpr(
+                    new SymbolExpr(referencedFormId),
+                    new SymbolExpr(formField.getId()));
+
+                String alias = formatReferencedFieldAlias(formClass, formField);
+
+                queryModel.selectExpr(fieldRef).as(alias);
             }
         }
 
