@@ -25,8 +25,18 @@ public class LoginTest {
     @Test
     public void successful() {
 
+        UserAccount account = harness.createAccount();
+        System.out.println(account.getEmail());
+        System.out.println(account.getPassword());
 
+        harness.getLoginPage().navigateTo().loginAs(account).andExpectSuccess();
     }
+    @Test
+    public void failed()  {
 
+        UserAccount badAccount = new UserAccount("bademail@example.com","1234");
+
+        harness.getLoginPage().navigateTo().loginAs(badAccount).assertErrorMessageIsVisible();
+    }
 
 }
