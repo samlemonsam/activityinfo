@@ -78,6 +78,10 @@ public class UiApplicationDriver extends ApplicationDriver {
         this.accounts = accounts;
     }
 
+    public LoginPage getLoginPage() {
+        return loginPage;
+    }
+
     @Override
     public void login() {
         login(accounts.any());
