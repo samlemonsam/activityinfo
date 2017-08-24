@@ -21,6 +21,12 @@ public abstract class TableModel implements AnalysisModel  {
 
     public abstract List<TableColumn> getColumns();
 
+    /**
+     * A boolean-valued formula that determines which rows to include in the
+     * results.
+     */
+    public abstract String getFilter();
+
     @Value.Lazy
     @Override
     public String getTypeId() {
