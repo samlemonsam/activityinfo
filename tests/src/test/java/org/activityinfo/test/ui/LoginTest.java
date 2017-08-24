@@ -1,9 +1,7 @@
 package org.activityinfo.test.ui;
 
-import org.activityinfo.test.api.ApiTestHarness;
-import org.activityinfo.test.pageobject.web.ApplicationPage;
-import org.activityinfo.test.pageobject.web.LoginPage;
 import org.activityinfo.test.sut.UserAccount;
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -12,8 +10,8 @@ import org.junit.Test;
  */
 public class LoginTest {
 
-
-    private UiTestHarness harness = new UiTestHarness();
+    @Rule
+    public UiTestHarness harness = new UiTestHarness();
 
     /**
      *

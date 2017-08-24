@@ -8,16 +8,21 @@ import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
 import org.activityinfo.test.webdriver.ChromeWebDriverProvider;
+import org.junit.rules.ExternalResource;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 import org.openqa.selenium.WebDriver;
 
 /**
  * Harness for tests written directly against the API.
  */
-public class UiTestHarness {
+public class UiTestHarness extends ExternalResource {
 
     private final Server server;
     private final AliasTable aliasTable;
     private final DevServerAccounts accounts;
+    private final WebDriver webDriver;
     private final UiApplicationDriver driver;
 
     public UiTestHarness() {
@@ -28,7 +33,7 @@ public class UiTestHarness {
         accounts = new DevServerAccounts(server);
 
         ChromeWebDriverProvider webDriverProvider = new ChromeWebDriverProvider();
-        WebDriver webDriver = webDriverProvider.start();
+        webDriver = webDriverProvider.start();
 
         ApiApplicationDriver apiDriver = new ApiApplicationDriver(server, accounts, aliasTable);
         driver = new UiApplicationDriver(
@@ -42,5 +47,10 @@ public class UiTestHarness {
 
     public UserAccount createAccount() {
         return accounts.any();
+    }
+
+    @Override
+    protected void after() {
+        webDriver.close();
     }
 }
