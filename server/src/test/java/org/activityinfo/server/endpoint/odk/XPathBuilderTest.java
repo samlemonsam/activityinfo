@@ -73,13 +73,13 @@ public class XPathBuilderTest extends CommandTestCase2 {
         ResourceId male = formClass.getEnumValueByLabel("Male").getId();
 
         formClass.getFormClass().getField(GENDER_FIELD_ID).setRelevanceConditionExpression(
-                        String.format("{%s}=={%s}", GENDER_FIELD_ID.asString(), male.asString()));
+                        String.format("{%s}==\"%s\"", GENDER_FIELD_ID.asString(), male.asString()));
 
         XForm xForm = xForm(formClass.getFormClass());
 
         assertEquals(
                 bindByFieldId(GENDER_FIELD_ID, xForm).getRelevant(),
-                String.format("/data/field_%s = '%s'", GENDER_FIELD_ID.asString(), male.asString()));
+                String.format("/data/field_%s = \"%s\"", GENDER_FIELD_ID.asString(), male.asString()));
     }
 
     @Test

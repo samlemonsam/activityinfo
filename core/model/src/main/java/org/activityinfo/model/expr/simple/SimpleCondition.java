@@ -96,7 +96,7 @@ public class SimpleCondition {
         ExprNode left  = new SymbolExpr(fieldId);
         ExprNode right;
         if(value instanceof EnumValue) {
-            right = new SymbolExpr(((EnumValue) value).getValueId());
+            right = new ConstantExpr(((EnumValue) value));
         } else if(value instanceof Quantity) {
             right = new ConstantExpr(((Quantity) value));
         } else if(value instanceof TextValue) {
