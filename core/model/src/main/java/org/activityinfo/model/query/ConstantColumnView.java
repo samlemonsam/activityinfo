@@ -3,6 +3,7 @@ package org.activityinfo.model.query;
 import com.google.common.base.Strings;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NullFieldValue;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -75,7 +76,10 @@ public class ConstantColumnView implements ColumnView, Serializable {
 
         } else if(value instanceof LocalDate) {
             return new ConstantColumnView(numRows, value.toString());
-            
+
+        } else if(value instanceof EnumValue) {
+            return new ConstantColumnView(numRows, ((EnumValue) value).getValueId().asString());
+
         } else {
             throw new IllegalArgumentException("value: " + value + " [" + value.getClass().getName() + "]");
         }
