@@ -33,6 +33,7 @@ public class GetIndicatorsHandler implements CommandHandlerAsync<GetIndicators, 
                 "i.activityId",
                 "i.sortOrder",
                 "i.mandatory",
+                "i.visible",
                 "a.databaseId")
                 .appendColumn("db.name", "databaseName")
                 .from(Tables.INDICATOR, "i")
@@ -72,6 +73,7 @@ public class GetIndicatorsHandler implements CommandHandlerAsync<GetIndicators, 
         indicator.setAggregation(rs.getInt("aggregation"));
         indicator.setUnits(rs.getString("units"));
         indicator.setMandatory(rs.getBoolean("mandatory"));
+        indicator.setVisible(rs.getBoolean("visible"));
         indicator.setSortOrder(rs.getInt("sortOrder"));
         return indicator;
     }

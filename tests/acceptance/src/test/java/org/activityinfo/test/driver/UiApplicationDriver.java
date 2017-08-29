@@ -885,7 +885,7 @@ public class UiApplicationDriver extends ApplicationDriver {
                 actualValue = propertiesPanel.form().findFieldByLabel(I18N.CONSTANTS.required()).isEnabled();
                 break;
             case VISIBLE:
-                actualValue = propertiesPanel.form().findFieldByLabel(I18N.CONSTANTS.visible()).isEnabled();
+                actualValue = propertiesPanel.form().findFieldByLabel(I18N.CONSTANTS.showInDataEntry()).isEnabled();
                 break;
             default:
                 throw new AssertionError("Unsupported field property type: " + fieldPropertyType);

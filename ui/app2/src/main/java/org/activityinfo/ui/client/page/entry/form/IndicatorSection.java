@@ -83,7 +83,7 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
         }
 
         for (IndicatorDTO indicator : activity.getIndicators()) {
-            if(indicator.isCalculated()) {
+            if(indicator.isCalculated() && indicator.isVisible()) {
                 calculatedIndicators.add(indicator);
             }
         }
@@ -132,7 +132,7 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
         table.setAutoHeight(true);
 
         for (IndicatorDTO indicator : group.getIndicators()) {
-            if(!indicator.isCalculated()) {
+            if(!indicator.isCalculated() && indicator.isVisible()) {
                 Text fieldLabel = createLabel(indicator);
 
                 Field field = createField(indicator);
@@ -159,7 +159,7 @@ public class IndicatorSection extends LayoutContainer implements FormSection<Sit
         // Field Widget
 
         for (IndicatorDTO indicator : group.getIndicators()) {
-            if(!indicator.isCalculated()) {
+            if(!indicator.isCalculated() && indicator.isVisible()) {
 
                 Text fieldLabel = createLabel(indicator);
                 fieldLabel.setStyleAttribute("marginTop", "8px");

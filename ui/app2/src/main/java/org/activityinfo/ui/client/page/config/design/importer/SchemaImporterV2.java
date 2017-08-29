@@ -49,6 +49,7 @@ public class SchemaImporterV2 extends SchemaImporter {
     private Column fieldDescription;
     private Column fieldUnits;
     private Column fieldRequired;
+    private Column fieldVisible;
     private Column multipleAllowed;
     private Column choiceLabel;
     private Column locationType;
@@ -107,6 +108,9 @@ public class SchemaImporterV2 extends SchemaImporter {
                     indicator.setExpression(fieldExpression.get(row));
                     if (isTruthy(fieldRequired.get(row))) {
                         indicator.setMandatory(true);
+                    }
+                    if (isTruthy(fieldVisible.get(row))) {
+                        indicator.setVisible(true);
                     }
                     indicatorWrapper.setDto(indicator);
                     newIndicators.add(indicatorWrapper);
@@ -219,6 +223,7 @@ public class SchemaImporterV2 extends SchemaImporter {
         fieldDescription = findColumn("Description", "");
         fieldUnits = findColumn("Units", 15);
         fieldRequired = findColumn("Mandatory", "false");
+        fieldVisible = findColumn("Visible","true");
         multipleAllowed = findColumn("multipleAllowed", "false");
         choiceLabel = findColumn("AttributeValue", 50);
         reportingFrequency = findColumn("ReportingFrequency", "once");
