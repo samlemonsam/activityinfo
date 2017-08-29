@@ -142,7 +142,11 @@ public class FormResource {
 
         JsonObject object = formClass.toJsonObject();
 
-        return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
+        return Response
+                .ok(prettyPrintingGson.toJson(object))
+                .type(JSON_CONTENT_TYPE)
+                .cacheControl(noCache())
+                .build();
     }
 
     @POST
@@ -194,8 +198,16 @@ public class FormResource {
 
         return Response.ok()
                 .entity(record.get().toJsonElement().toString())
+                .cacheControl(noCache())
                 .type(JSON_CONTENT_TYPE)
                 .build();
+    }
+
+    private CacheControl noCache() {
+        CacheControl cacheControl = new CacheControl();
+        cacheControl.setNoCache(true);
+        cacheControl.setPrivate(true);
+        return cacheControl;
     }
 
     @GET
@@ -292,6 +304,7 @@ public class FormResource {
 
         return Response.ok()
                 .entity(array.toString())
+                .cacheControl(noCache())
                 .type(JSON_CONTENT_TYPE)
                 .build();
     }
@@ -312,7 +325,10 @@ public class FormResource {
         HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
         Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
 
-        return Response.ok(encode(records), JSON_CONTENT_TYPE).build();
+        return Response
+                .ok(encode(records), JSON_CONTENT_TYPE)
+                .cacheControl(noCache())
+                .build();
     }
 
     private String encode(Iterable<FormRecord> records) {
@@ -404,7 +420,11 @@ public class FormResource {
         FormTree tree = fetchTree();
         JsonObject object = JsonFormTreeBuilder.toJson(tree);
 
-        return Response.ok(prettyPrintingGson.toJson(object)).type(JSON_CONTENT_TYPE).build();
+        return Response
+                .ok(prettyPrintingGson.toJson(object))
+                .cacheControl(noCache())
+                .type(JSON_CONTENT_TYPE)
+                .build();
     }
 
     @GET
@@ -416,7 +436,11 @@ public class FormResource {
         FormTreePrettyPrinter printer = new FormTreePrettyPrinter(new PrintWriter(stringWriter));
         printer.printTree(tree);
 
-        return Response.ok(stringWriter.toString()).type(MediaType.TEXT_PLAIN_TYPE).build();
+        return Response
+                .ok(stringWriter.toString())
+                .cacheControl(noCache())
+                .type(MediaType.TEXT_PLAIN_TYPE)
+                .build();
     }
 
     private FormTree fetchTree() {
@@ -443,7 +467,10 @@ public class FormResource {
             }
         };
 
-        return Response.ok(output).type(JSON_CONTENT_TYPE).build();
+        return Response
+                .ok(output)
+                .type(JSON_CONTENT_TYPE)
+                .build();
     }
 
     @GET
