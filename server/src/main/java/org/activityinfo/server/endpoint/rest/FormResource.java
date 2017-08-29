@@ -504,7 +504,6 @@ public class FormResource {
             queryModel = new DefaultQueryBuilder(tree).build();
 
         } else {
-
             queryModel = new QueryModel(formId);
             for (String columnId : uriInfo.getQueryParameters().keySet()) {
                 queryModel.selectExpr(uriInfo.getQueryParameters().getFirst(columnId)).as(columnId);
