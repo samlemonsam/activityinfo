@@ -461,6 +461,25 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         });
     }
 
+    private void updateEditedSelection(final SiteDTO site) {
+        final Integer activityId = site.getActivityId();
+        dispatcher.execute(new GetActivityForm(activityId), new AsyncCallback<ActivityFormDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // Leave unselected
+            }
+
+            @Override
+            public void onSuccess(ActivityFormDTO result) {
+                // make sure we haven't navigated away by the time the request comes back
+                Optional<Integer> currentActivityId = getCurrentActivityId();
+                if(!currentActivityId.isPresent() || !Objects.equals(currentActivityId.get(), activityId)) {
+                    return;
+                }
+                updateSelection(result, site);
+            }
+        });
+    }
 
     @Override
     public void onUIAction(String actionId) {
@@ -514,6 +533,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             public void onSaved() {
                 gridPanel.refresh();
                 filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
+                updateEditedSelection(gridPanel.getSelection());
             }
         });
     }
