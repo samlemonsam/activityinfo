@@ -47,6 +47,9 @@ public class TestingCatalog implements FormCatalog {
         ReferralSubForm referralSubForm = new ReferralSubForm(incidentForm);
         add(intake, bioData, incidentForm, referralSubForm);
 
+        // Empty form
+        EmptyForm empty = new EmptyForm();
+        add(empty);
     }
 
 

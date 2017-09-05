@@ -86,7 +86,7 @@ public class DiscreteStringColumnView implements EnumColumnView, ColumnView, Ser
                 filteredValues[i] = values[selectedRow];
             }
         }
-        return new DiscreteStringColumnView(labels, filteredValues);
+        return new DiscreteStringColumnView(ids, labels, filteredValues);
     }
 
     @Override
