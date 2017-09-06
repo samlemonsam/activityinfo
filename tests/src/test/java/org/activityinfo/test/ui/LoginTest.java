@@ -44,6 +44,7 @@ public class LoginTest {
         harness.getLoginPage().navigateTo().loginAs(badAccount).assertErrorMessageIsVisible();
     }
     @Test
+    @TestRailCase(61)
     public void wrong() {
         UserAccount account = harness.createAccount();
         UserAccount wrongPassword = new UserAccount(account.getEmail(),"1234");
