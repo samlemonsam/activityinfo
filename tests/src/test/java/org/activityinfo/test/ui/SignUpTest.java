@@ -47,8 +47,7 @@ public class SignUpTest {
 
     @Test
     @TestRailCase(1)
-
-    public void Successful () throws IOException {
+    public void successfulTest () throws IOException {
         UserAccount newUserAccount = harness.getEmailDriver().newAccount();
         harness.getSignUpPage().navigateTo().signUp(newUserAccount);
         Optional<NotificationEmail> email = harness.getEmailDriver().lastNotificationFor(newUserAccount);
