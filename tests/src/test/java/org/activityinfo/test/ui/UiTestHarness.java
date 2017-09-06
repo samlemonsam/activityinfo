@@ -1,9 +1,12 @@
 package org.activityinfo.test.ui;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.driver.UiApplicationDriver;
 import org.activityinfo.test.driver.mail.EmailDriver;
+import org.activityinfo.test.driver.mail.NotificationEmail;
 import org.activityinfo.test.driver.mail.mailinator.MailinatorClient;
 import org.activityinfo.test.pageobject.web.ConfirmPage;
 import org.activityinfo.test.pageobject.web.LoginPage;
@@ -18,6 +21,9 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.WebDriver;
 import sun.security.x509.UniqueIdentity;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Harness for tests written directly against the API.
@@ -68,6 +74,7 @@ public class UiTestHarness extends ExternalResource {
     public EmailDriver getEmailDriver() {
         return emailDriver;
     }
+
 
     @Override
     protected void after() {
