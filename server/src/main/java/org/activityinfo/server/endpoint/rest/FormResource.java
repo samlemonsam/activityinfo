@@ -450,6 +450,7 @@ public class FormResource {
         return builder.queryTree(formId);
     }
 
+
     @GET
     @Path("query/rows")
     @Produces(MediaType.APPLICATION_JSON)
@@ -471,6 +472,19 @@ public class FormResource {
                 .ok(output)
                 .type(JSON_CONTENT_TYPE)
                 .build();
+    }
+
+    @GET
+    @Path("query/defaultModel")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDefaultQueryModel() {
+        assertVisible(formId);
+
+        QueryModel queryModel = buildDefaultQueryModel();
+
+        return Response.ok(queryModel.toJsonString())
+            .type(JSON_CONTENT_TYPE)
+            .build();
     }
 
     @GET
@@ -498,10 +512,7 @@ public class FormResource {
         QueryModel queryModel;
 
         if(uriInfo.getQueryParameters().isEmpty()) {
-            FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
-            FormTree tree = treeBuilder.queryTree(formId);
-
-            queryModel = new DefaultQueryBuilder(tree).build();
+            queryModel = buildDefaultQueryModel();
 
         } else {
             queryModel = new QueryModel(formId);
@@ -515,6 +526,14 @@ public class FormResource {
                 new FormSupervisorAdapter(catalog.get(), userProvider.get().getId()));
 
         return builder.build(queryModel);
+    }
+
+    private QueryModel buildDefaultQueryModel() {
+        QueryModel queryModel;FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
+        FormTree tree = treeBuilder.queryTree(formId);
+
+        queryModel = new DefaultQueryBuilder(tree).build();
+        return queryModel;
     }
 
 

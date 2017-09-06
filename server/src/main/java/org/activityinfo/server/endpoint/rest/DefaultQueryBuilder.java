@@ -1,14 +1,15 @@
 package org.activityinfo.server.endpoint.rest;
 
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldTypeVisitor;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -29,7 +30,8 @@ import java.util.logging.Logger;
 
 /**
  * Builds a "default" query for a FormTree, including all
- * fields
+ * fields in the form, AND those that are referenced.
+ *
  */
 public class DefaultQueryBuilder {
 
@@ -38,57 +40,60 @@ public class DefaultQueryBuilder {
     private FormTree tree;
     private QueryModel queryModel;
 
-    private Set<ResourceId> visitedForms = new HashSet<>();
+    private Map<String, ColumnModel> columns = new HashMap<>();
 
     public DefaultQueryBuilder(FormTree tree) {
         this.tree = tree;
-        this.queryModel = new QueryModel(tree.getRootFormId());
-        this.queryModel.selectResourceId().as("@id");
+
     }
 
     public QueryModel build() {
         LOGGER.info("No query fields provided, querying all.");
 
-        addRootFields();
+        addFields("", new FieldPath(), tree.getRootFields());
+
+        this.queryModel = new QueryModel(tree.getRootFormId());
+        this.queryModel.selectResourceId().as("@id");
+
+        for (ColumnModel columnModel : columns.values()) {
+            this.queryModel.addColumn(columnModel);
+        }
 
         return queryModel;
     }
 
-    private void addRootFields() {
+    private void addFields(String aliasPrefix, FieldPath pathPrefix, List<FormTree.Node> fields) {
 
-        visitedForms.add(tree.getRootFormId());
-
-        addLeafFields("", new FieldPath(), tree.getRootFormClass());
-        addReferencedForms(tree.getRootFormClass());
-    }
-
-    private void addReferencedForms(FormClass formClass) {
-        for (FormField formField : formClass.getFields()) {
-            if(formField.getType() instanceof ReferenceType) {
-                ReferenceType type = (ReferenceType) formField.getType();
-                for (ResourceId referencedFormId : type.getRange()) {
-                    addReferenceFields(referencedFormId);
-                }
+        for (FormTree.Node node : fields) {
+            if(node.isReference()) {
+                addReferencedFields(aliasPrefix, pathPrefix, node);
+            } else {
+                addColumns(leafColumns(aliasPrefix, pathPrefix, node.getField()));
             }
         }
     }
 
-    private void addReferenceFields(ResourceId referencedFormId) {
-        if (!visitedForms.add(referencedFormId)) {
-            // Already visited
-            return;
-        }
+    private void addReferencedFields(String parentAliasPrefix, FieldPath parentPathPrefix, FormTree.Node node) {
 
-        FormClass referencedFormClass = tree.getFormClass(referencedFormId);
-        addLeafFields(referencedFormClass.getLabel() + ".", new FieldPath(referencedFormId), referencedFormClass);
-        addReferencedForms(referencedFormClass);
+        // If this field has a 'code', then use this code both as the alias,
+        // and as the query expression.
+
+        // This has the effect of merging fields with the same code into a single column.
+
+        String aliasPrefix = parentAliasPrefix + formatFieldAlias(node.getField()) + ".";
+        FieldPath pathPrefix = new FieldPath(parentPathPrefix, fieldFormula(node.getField()));
+
+        addFields(aliasPrefix, pathPrefix, node.getChildren());
     }
 
-    private void addLeafFields(String aliasPrefix, FieldPath pathPrefix, FormClass formClass) {
-        for (FormField formField : formClass.getFields()) {
-            queryModel.addColumns(leafColumns(aliasPrefix, pathPrefix, formField));
+    private void addColumns(List<ColumnModel> columnModels) {
+        for (ColumnModel columnModel : columnModels) {
+            if(!columns.containsKey(columnModel.getId())) {
+                columns.put(columnModel.getId(), columnModel);
+            }
         }
     }
+
 
     private List<ColumnModel> leafColumns(final String aliasPrefix, final FieldPath pathPrefix, final FormField formField) {
         return formField.getType().accept(new FieldTypeVisitor<List<ColumnModel>>() {
@@ -183,14 +188,14 @@ public class DefaultQueryBuilder {
     private List<ColumnModel> simpleColumnModel(String aliasPrefix, FieldPath pathPrefix, FormField formField) {
         ColumnModel column = new ColumnModel();
         column.setId(aliasPrefix + formatFieldAlias(formField));
-        column.setExpression(new FieldPath(pathPrefix, formField.getId()));
+        column.setExpression(new FieldPath(pathPrefix, fieldFormula(formField)));
 
         return Collections.singletonList(column);
     }
 
     private List<ColumnModel> geoPointColumns(String aliasPrefix, FieldPath pathPrefix, FormField field) {
         String fieldAlias = aliasPrefix + formatFieldAlias(field);
-        FieldPath fieldPath = new FieldPath(pathPrefix, field.getId());
+        FieldPath fieldPath = new FieldPath(pathPrefix, fieldFormula(field));
 
         ColumnModel latitudeColumn = new ColumnModel();
         latitudeColumn.setId(fieldAlias + ".latitude");
@@ -203,7 +208,19 @@ public class DefaultQueryBuilder {
         return Arrays.asList(latitudeColumn, longitudeColumn);
     }
 
+    private ResourceId fieldFormula(FormField field) {
+        if(field.hasCode()) {
+            return ResourceId.valueOf(field.getCode());
+        } else {
+            return field.getId();
+        }
+    }
+
     private String formatFieldAlias(FormField field) {
-        return field.getCode() == null ? field.getLabel() : field.getCode();
+        if (field.hasCode()) {
+            return field.getCode();
+        } else {
+            return field.getLabel();
+        }
     }
 }
