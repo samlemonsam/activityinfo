@@ -212,7 +212,7 @@ public class RecordHistoryBuilder {
 
                             FieldDelta fieldDelta = new FieldDelta();
                             fieldDelta.field = new FormField(fieldId);
-                            fieldDelta.field.setLabel(month);
+                            fieldDelta.field.setLabel(queryFieldLabel(fieldId) + " (" + month + ")");
                             fieldDelta.field.setType(new QuantityType());
                             fieldDelta.oldValue = oldValue;
                             fieldDelta.newValue = newValue;
@@ -226,6 +226,29 @@ public class RecordHistoryBuilder {
             deltas.add(delta);
         }
         return deltas;
+    }
+
+    private String queryFieldLabel(ResourceId fieldId) {
+        String indicatorIdFullString = fieldId.asString();
+        String indicatorIdIntString = indicatorIdFullString.substring(  indicatorIdFullString.indexOf("I")+1,
+                                                                        indicatorIdFullString.indexOf("M"));
+        Integer indicatorId = Integer.parseInt(indicatorIdIntString);
+
+        String fieldLabel = "";
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT name FROM indicator WHERE IndicatorId = '");
+        sql.append(indicatorId);
+        sql.append("'");
+
+        try(ResultSet rs = catalog.getExecutor().query(sql.toString())) {
+            while(rs.next()) {
+                fieldLabel = rs.getString(1);
+            }
+        } catch(SQLException excp) { // If we cannot find field label, simply return empty string
+            return fieldLabel;
+        }
+        return fieldLabel;
     }
 
     private Map<Long, User> queryUsers(List<RecordDelta> deltas) throws SQLException {
