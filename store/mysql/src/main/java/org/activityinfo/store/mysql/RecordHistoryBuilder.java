@@ -24,6 +24,7 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.RecordVersion;
@@ -71,12 +72,19 @@ public class RecordHistoryBuilder {
         }
 
         FormClass formClass = form.get().getFormClass();
-        List<RecordDelta> deltas = computeDeltas(formClass, null, form.get().getVersions(recordId));
+        Activity activity = catalog.getActivityLoader().load(CuidAdapter.getLegacyIdFromCuid(formClass.getId()));
+
+        Map<ResourceId,String> monthlyFieldLabels = new HashMap<>();
+        if (activity.isMonthly()) {
+            monthlyFieldLabels = getMonthlyFieldLabels(activity);
+        }
+
+        List<RecordDelta> deltas = computeDeltas(formClass, null, form.get().getVersions(recordId), monthlyFieldLabels);
 
         // Now add deltas from sub forms...
         for (FormField field : formClass.getFields()) {
             if(field.getType() instanceof SubFormReferenceType) {
-                deltas.addAll(computeSubFormDeltas(recordId, field));
+                deltas.addAll(computeSubFormDeltas(recordId, field, monthlyFieldLabels));
             }
         }
 
@@ -138,20 +146,21 @@ public class RecordHistoryBuilder {
         }));
     }
 
-    private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField) {
+    private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField, Map<ResourceId,String> monthlyFieldLabels) {
         SubFormReferenceType subFormType = (SubFormReferenceType) subFormField.getType();
         Optional<FormStorage> subForm = catalog.getForm(subFormType.getClassId());
         FormClass subFormClass = subForm.get().getFormClass();
 
         List<RecordVersion> versions = subForm.get().getVersionsForParent(parentRecordId);
 
-        return computeDeltas(subFormClass, subFormField, versions);
+        return computeDeltas(subFormClass, subFormField, versions, monthlyFieldLabels);
     }
 
 
     private List<RecordDelta> computeDeltas(FormClass formClass,
                                             FormField subFormField,
-                                            List<RecordVersion> versions) {
+                                            List<RecordVersion> versions,
+                                            Map<ResourceId,String> monthlyFieldLabels) {
 
         List<RecordDelta> deltas = new ArrayList<>();
 
@@ -209,11 +218,14 @@ public class RecordHistoryBuilder {
 
                         if (!Objects.equals(oldValue, newValue)) {
 
+                            int idInt = CuidAdapter.getLegacyIdFromCuid(fieldIdAsString.substring(fieldIdAsString.indexOf("I"),
+                                                                                                  fieldIdAsString.indexOf("M")));
+                            ResourceId id = CuidAdapter.indicatorField(idInt);
                             String month = fieldIdAsString.substring(fieldIdAsString.indexOf("M") + 1);
 
                             FieldDelta fieldDelta = new FieldDelta();
                             fieldDelta.field = new FormField(fieldId);
-                            fieldDelta.field.setLabel(getFieldLabel(fieldId) + " (" + month + ")");
+                            fieldDelta.field.setLabel(monthlyFieldLabels.get(id) + " (" + month + ")");
                             fieldDelta.field.setType(new QuantityType());
                             fieldDelta.oldValue = oldValue;
                             fieldDelta.newValue = newValue;
@@ -229,67 +241,13 @@ public class RecordHistoryBuilder {
         return deltas;
     }
 
-    private String getFieldLabel(ResourceId fieldId) {
-        String indicatorIdFullString = fieldId.asString();
-        String indicatorIdIntString = indicatorIdFullString.substring(indicatorIdFullString.indexOf("I")+1,
-                                                                        indicatorIdFullString.indexOf("M"));
-        Integer id = Integer.parseInt(indicatorIdIntString);
-        Set<Integer> ids = new HashSet<>();
-        ids.add(id);
-
-        Map<Integer,String> fieldIds = fetchFieldIdsFromCache(ids);
-        if (!fieldIds.isEmpty()) {
-            return fieldIds.get(id);
+    private Map<ResourceId,String> getMonthlyFieldLabels(Activity activity) {
+        Map<ResourceId, String> monthlyFields = new HashMap<>();
+        for (ActivityField field : activity.getFields()) {
+            monthlyFields.put(field.getFormField().getId(),
+                    Strings.nullToEmpty(field.getFormField().getLabel()));
         }
-
-        // Only fetch from database after trying cache
-        fieldIds = fetchFieldIdsFromDatabase(ids);
-        if (!fieldIds.isEmpty()) {
-            return fieldIds.get(id);
-        }
-
-        return "";
-    }
-
-    private Map<Integer,String> fetchFieldIdsFromCache(Set<Integer> ids) {
-        Map<Integer, String> fieldIds = new HashMap<Integer,String>();
-        try {
-            Map<Integer, Activity> activityMap = catalog.getActivityLoader().loadForIndicators(ids);
-            for(Activity activity : activityMap.values()) {
-                for (Integer id : ids) {
-                    FormField field = activity.getIndicatorField(id).getFormField();
-                    if (field != null) {
-                        fieldIds.put(id,Strings.nullToEmpty(field.getLabel()));
-                    }
-                }
-            }
-        } catch (SQLException excp) { // If we cannot find field label in cache, return empty map
-            return fieldIds;
-        }
-        return fieldIds;
-    }
-
-    private Map<Integer,String> fetchFieldIdsFromDatabase(Set<Integer> ids) {
-        Map<Integer,String> fieldLabels = new HashMap<Integer, String>();
-        Iterator<Integer> it = ids.iterator();
-
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT IndicatorId, name FROM indicator WHERE IndicatorId IN (");
-        while(it.hasNext()) {
-            sql.append(it.next());
-            if(it.hasNext())
-                sql.append(",");
-        }
-        sql.append(")");
-
-        try(ResultSet rs = catalog.getExecutor().query(sql.toString())) {
-            while(rs.next()) {
-                fieldLabels.put(rs.getInt(1),rs.getString(2));
-            }
-        } catch(SQLException excp) { // If we cannot find field label in database, return empty map
-            return fieldLabels;
-        }
-        return fieldLabels;
+        return monthlyFields;
     }
 
     private Map<Long, User> queryUsers(List<RecordDelta> deltas) throws SQLException {
