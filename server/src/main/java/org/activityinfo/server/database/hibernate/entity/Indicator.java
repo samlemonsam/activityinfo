@@ -349,6 +349,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
     public void delete() {
         setDateDeleted(new Date());
         getActivity().getDatabase().updateVersion();
+        getActivity().incrementSchemaVersion();
     }
 
     /**

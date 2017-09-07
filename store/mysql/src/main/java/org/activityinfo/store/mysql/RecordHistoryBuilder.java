@@ -213,25 +213,28 @@ public class RecordHistoryBuilder {
 
                     if (fieldIdAsString.startsWith("I") && fieldIdAsString.contains("M")) { // e.g. I309566527M2016-8
 
-                        FieldValue oldValue = currentState.get(fieldId);
-                        FieldValue newValue = version.getValues().get(fieldId);
+                        int idInt = CuidAdapter.getLegacyIdFromCuid(fieldIdAsString.substring(fieldIdAsString.indexOf("I"),
+                                                                                              fieldIdAsString.indexOf("M")));
+                        ResourceId id = CuidAdapter.indicatorField(idInt);
 
-                        if (!Objects.equals(oldValue, newValue)) {
+                        if(monthlyFieldLabels.containsKey(id)) { // check to ensure field still exists
+                            FieldValue oldValue = currentState.get(fieldId);
+                            FieldValue newValue = version.getValues().get(fieldId);
 
-                            int idInt = CuidAdapter.getLegacyIdFromCuid(fieldIdAsString.substring(fieldIdAsString.indexOf("I"),
-                                                                                                  fieldIdAsString.indexOf("M")));
-                            ResourceId id = CuidAdapter.indicatorField(idInt);
-                            String month = fieldIdAsString.substring(fieldIdAsString.indexOf("M") + 1);
+                            if (!Objects.equals(oldValue, newValue)) {
 
-                            FieldDelta fieldDelta = new FieldDelta();
-                            fieldDelta.field = new FormField(fieldId);
-                            fieldDelta.field.setLabel(monthlyFieldLabels.get(id) + " (" + month + ")");
-                            fieldDelta.field.setType(new QuantityType());
-                            fieldDelta.oldValue = oldValue;
-                            fieldDelta.newValue = newValue;
-                            delta.changes.add(fieldDelta);
+                                String month = fieldIdAsString.substring(fieldIdAsString.indexOf("M") + 1);
+
+                                FieldDelta fieldDelta = new FieldDelta();
+                                fieldDelta.field = new FormField(fieldId);
+                                fieldDelta.field.setLabel(Strings.nullToEmpty(monthlyFieldLabels.get(id)) + " (" + month + ")");
+                                fieldDelta.field.setType(new QuantityType());
+                                fieldDelta.oldValue = oldValue;
+                                fieldDelta.newValue = newValue;
+                                delta.changes.add(fieldDelta);
+                            }
+                            currentState.put(fieldId, newValue);
                         }
-                        currentState.put(fieldId,  newValue);
                     }
                 }
 
