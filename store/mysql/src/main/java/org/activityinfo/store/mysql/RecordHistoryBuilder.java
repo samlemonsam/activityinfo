@@ -23,6 +23,7 @@ import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.RecordVersion;
@@ -212,7 +213,7 @@ public class RecordHistoryBuilder {
 
                             FieldDelta fieldDelta = new FieldDelta();
                             fieldDelta.field = new FormField(fieldId);
-                            fieldDelta.field.setLabel(queryFieldLabel(fieldId) + " (" + month + ")");
+                            fieldDelta.field.setLabel(getFieldLabel(fieldId) + " (" + month + ")");
                             fieldDelta.field.setType(new QuantityType());
                             fieldDelta.oldValue = oldValue;
                             fieldDelta.newValue = newValue;
@@ -228,27 +229,67 @@ public class RecordHistoryBuilder {
         return deltas;
     }
 
-    private String queryFieldLabel(ResourceId fieldId) {
+    private String getFieldLabel(ResourceId fieldId) {
         String indicatorIdFullString = fieldId.asString();
-        String indicatorIdIntString = indicatorIdFullString.substring(  indicatorIdFullString.indexOf("I")+1,
+        String indicatorIdIntString = indicatorIdFullString.substring(indicatorIdFullString.indexOf("I")+1,
                                                                         indicatorIdFullString.indexOf("M"));
-        Integer indicatorId = Integer.parseInt(indicatorIdIntString);
+        Integer id = Integer.parseInt(indicatorIdIntString);
+        Set<Integer> ids = new HashSet<>();
+        ids.add(id);
 
-        String fieldLabel = "";
+        Map<Integer,String> fieldIds = fetchFieldIdsFromCache(ids);
+        if (!fieldIds.isEmpty()) {
+            return fieldIds.get(id);
+        }
+
+        // Only fetch from database after trying cache
+        fieldIds = fetchFieldIdsFromDatabase(ids);
+        if (!fieldIds.isEmpty()) {
+            return fieldIds.get(id);
+        }
+
+        return "";
+    }
+
+    private Map<Integer,String> fetchFieldIdsFromCache(Set<Integer> ids) {
+        Map<Integer, String> fieldIds = new HashMap<Integer,String>();
+        try {
+            Map<Integer, Activity> activityMap = catalog.getActivityLoader().loadForIndicators(ids);
+            for(Activity activity : activityMap.values()) {
+                for (Integer id : ids) {
+                    FormField field = activity.getIndicatorField(id).getFormField();
+                    if (field != null) {
+                        fieldIds.put(id,Strings.nullToEmpty(field.getLabel()));
+                    }
+                }
+            }
+        } catch (SQLException excp) { // If we cannot find field label in cache, return empty map
+            return fieldIds;
+        }
+        return fieldIds;
+    }
+
+    private Map<Integer,String> fetchFieldIdsFromDatabase(Set<Integer> ids) {
+        Map<Integer,String> fieldLabels = new HashMap<Integer, String>();
+        Iterator<Integer> it = ids.iterator();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT name FROM indicator WHERE IndicatorId = '");
-        sql.append(indicatorId);
-        sql.append("'");
+        sql.append("SELECT IndicatorId, name FROM indicator WHERE IndicatorId IN (");
+        while(it.hasNext()) {
+            sql.append(it.next());
+            if(it.hasNext())
+                sql.append(",");
+        }
+        sql.append(")");
 
         try(ResultSet rs = catalog.getExecutor().query(sql.toString())) {
             while(rs.next()) {
-                fieldLabel = rs.getString(1);
+                fieldLabels.put(rs.getInt(1),rs.getString(2));
             }
-        } catch(SQLException excp) { // If we cannot find field label, simply return empty string
-            return fieldLabel;
+        } catch(SQLException excp) { // If we cannot find field label in database, return empty map
+            return fieldLabels;
         }
-        return fieldLabel;
+        return fieldLabels;
     }
 
     private Map<Long, User> queryUsers(List<RecordDelta> deltas) throws SQLException {
