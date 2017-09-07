@@ -70,6 +70,10 @@ public class TestingCatalog implements FormCatalog {
         villageForm = new VillageForm(new UnitTestingIds(), 140*10, territory);
         nfiForm = new NfiForm(new UnitTestingIds(), villageForm);
         add(province, territory, villageForm, nfiForm);
+
+        // Empty form
+        EmptyForm empty = new EmptyForm();
+        add(empty);
     }
 
     public Survey getSurvey() {

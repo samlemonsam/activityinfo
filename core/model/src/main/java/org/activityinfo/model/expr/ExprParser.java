@@ -171,7 +171,11 @@ public class ExprParser {
     private ExprNode primary() {
         switch (lexer.peek().getType()) {
             case SYMBOL:
-                return symbolOrCall();
+                if(lexer.peek().getString().matches("t\\d{10}")) {
+                    return enumLiteral();
+                } else {
+                    return symbolOrCall();
+                }
             case NUMBER:
                 return number();
             case BOOLEAN_LITERAL:
@@ -196,6 +200,11 @@ public class ExprParser {
         return new ConstantExpr(token.getString(), new SourceRange(token));
     }
 
+    private ExprNode enumLiteral() {
+        Token token = lexer.next();
+        assert token.getType() == TokenType.SYMBOL;
+        return new ConstantExpr(token, new SourceRange(token));
+    }
 
     private ExprNode booleanLiteral() {
         Token token = lexer.next();

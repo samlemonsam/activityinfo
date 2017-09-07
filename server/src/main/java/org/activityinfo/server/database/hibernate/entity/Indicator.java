@@ -46,6 +46,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
     private String units;
     private String description;
     private boolean mandatory;
+    private boolean visible;
 
     private String category;
 
@@ -71,6 +72,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
         this.units = indicator.units;
         this.description = indicator.description;
         this.mandatory = indicator.mandatory;
+        this.visible = indicator.visible;
 
         this.category = indicator.category;
         this.activity = indicator.activity;
@@ -223,6 +225,25 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
      */
     public void setMandatory(boolean mandatory) {
         this.mandatory = mandatory;
+    }
+
+    /**
+     * Checks if the indicator is visible in the new and edit site forms.
+     *
+     * @return True if indicator is visible, false otherwise
+     */
+    @Column(name = "visible", nullable = false)
+    public boolean isVisible() {
+        return this.visible;
+    }
+
+    /**
+     * Sets the visible flag
+     *
+     * @param visible True if the indicator is visible in the new and edit site forms
+     */
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     /**

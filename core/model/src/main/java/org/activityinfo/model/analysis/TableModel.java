@@ -1,5 +1,6 @@
 package org.activityinfo.model.analysis;
 
+import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonObject;
@@ -7,7 +8,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The user's table model
@@ -25,7 +25,7 @@ public abstract class TableModel implements AnalysisModel  {
      * A boolean-valued formula that determines which rows to include in the
      * results.
      */
-    public abstract String getFilter();
+    public abstract Optional<String> getFilter();
 
     @Value.Lazy
     @Override

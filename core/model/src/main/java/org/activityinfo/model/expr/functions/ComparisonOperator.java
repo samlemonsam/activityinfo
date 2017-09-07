@@ -4,6 +4,7 @@ import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.EnumColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
@@ -71,10 +72,37 @@ public abstract class ComparisonOperator extends ExprFunction implements ColumnF
         if(a.getType() == ColumnType.NUMBER && b.getType() == ColumnType.NUMBER) {
             return columnApplyNumber(a, b);
         } else if(a.getType() == ColumnType.STRING && b.getType() == ColumnType.STRING) {
-            return columnApplyString(a, b);
+            if(a instanceof EnumColumnView) {
+                return columnApplyEnum((EnumColumnView) a, b);
+            } else if(b instanceof EnumColumnView) {
+                return columnApplyEnum((EnumColumnView) b, a);
+            } else {
+                return columnApplyString(a, b);
+            }
         } else {
             throw new ExprSyntaxException("Comparsion between incompatible types: " + a.getType() + ", " + b.getType());
         }
+    }
+
+    private ColumnView columnApplyEnum(EnumColumnView a, ColumnView b) {
+        int result[] = new int[a.numRows()];
+        for(int i=0; i < result.length; ++i) {
+            String xi = a.getId(i);
+            String yi = b.getString(i);
+            if(xi == null || yi == null) {
+                result[i] = ColumnView.NA;
+            } else {
+                // We can use the comparison result (-1, 0, 1)
+                // as in input into the numeric apply() function
+                // for example:
+                // xi == yi iff xi.compare(yi) == 0
+                // xi <= yi iff xi.compare(yi) <= 0
+                // etc
+                int comparison = xi.compareTo(yi);
+                result[i] = apply(comparison, 0) ? 1 : 0;
+            }
+        }
+        return new BooleanColumnView(result);
     }
 
     private ColumnView columnApplyNumber(ColumnView x, ColumnView y) {

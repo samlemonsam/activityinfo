@@ -13,6 +13,9 @@ import org.activityinfo.model.type.number.QuantityType;
  */
 public class GeoPointType implements RecordFieldType {
 
+    public static final String LATITUDE = "latitude";
+    public static final String LONGITUDE = "longitude";
+
     public static final String TYPE_ID = "geopoint";
 
     public static final GeoPointType INSTANCE = new GeoPointType();
@@ -70,13 +73,13 @@ public class GeoPointType implements RecordFieldType {
     public FormClass getFormClass() {
         FormClass formClass = new FormClass(ResourceId.valueOf("geoPoint"));
         formClass.setLabel(I18N.CONSTANTS.geographicCoordinatesFieldLabel());
-        formClass.addField(ResourceId.valueOf("latitude"))
-                .setCode("latitude")
+        formClass.addField(ResourceId.valueOf(LATITUDE))
+                .setCode(LATITUDE)
                 .setLabel(I18N.CONSTANTS.latitude())
                 .setType(new QuantityType("degrees"))
                 .setRequired(true);
-        formClass.addField(ResourceId.valueOf("longitude"))
-                .setCode("longitude")
+        formClass.addField(ResourceId.valueOf(LONGITUDE))
+                .setCode(LONGITUDE)
                 .setLabel(I18N.CONSTANTS.longitude())
                 .setType(new QuantityType("degrees"))
                 .setRequired(true);

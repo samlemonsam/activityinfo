@@ -190,6 +190,11 @@ class IndicatorForm extends AbstractDesignForm {
         binding.addFieldBinding(new FieldBinding(mandatoryCB, "mandatory"));
         this.add(mandatoryCB);
 
+        CheckBox visibleCB = new CheckBox();
+        visibleCB.setFieldLabel(constants.showInDataEntry());
+        binding.addFieldBinding(new FieldBinding(visibleCB, "visible"));
+        this.add(visibleCB);
+
         hideFieldWhenNull(idField);
 
         binding.addListener(Events.Bind, new Listener<BindingEvent>() {

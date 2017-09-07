@@ -421,7 +421,8 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     "units",
                     "activityId",
                     "sortOrder",
-                    "mandatory")
+                    "mandatory",
+                    "visible")
                     .from("indicator")
                     .where("activityId").equalTo(activity.getId())
                     .whereTrue("dateDeleted is null")
@@ -445,6 +446,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     indicator.setAggregation(rs.getInt("aggregation"));
                     indicator.setUnits(rs.getString("units"));
                     indicator.setMandatory(rs.getBoolean("mandatory"));
+                    indicator.setVisible(rs.getBoolean("visible"));
                     indicator.setSortOrder(rs.getInt("sortOrder"));
 
 

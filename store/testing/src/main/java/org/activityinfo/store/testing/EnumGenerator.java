@@ -24,6 +24,10 @@ public class EnumGenerator implements Supplier<FieldValue> {
         this.random = new Random(seed);
     }
 
+    public EnumGenerator(FormField field) {
+        this(field, field.getId().hashCode());
+    }
+
     @Override
     public FieldValue get() {
         double missing = random.nextDouble();

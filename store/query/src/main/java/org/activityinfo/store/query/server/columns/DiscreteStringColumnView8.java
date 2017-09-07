@@ -2,16 +2,19 @@ package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.EnumColumnView;
+import org.activityinfo.model.query.EnumColumnView;
 
 import java.io.Serializable;
 
 /**
  * Compact storage for discrete string vectors with fewer than 128 values.
  */
-class DiscreteStringColumnView8 implements ColumnView, Serializable {
+class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
 
     static final int MAX_COUNT = Byte.MAX_VALUE;
 
+    private String[] ids;
     private String[] labels;
     private byte[] values;
 
@@ -22,6 +25,21 @@ class DiscreteStringColumnView8 implements ColumnView, Serializable {
         assert labels.length <= MAX_COUNT;
         this.labels = labels;
         this.values = values;
+    }
+
+    public DiscreteStringColumnView8(String[] ids, String[] labels, byte[] values) {
+        this(labels, values);
+        this.ids = ids;
+    }
+
+    @Override
+    public String getId(int row) {
+        int idIndex = values[row];
+        if(idIndex < 0) {
+            return null;
+        } else {
+            return ids[idIndex];
+        }
     }
 
     @Override
@@ -75,7 +93,7 @@ class DiscreteStringColumnView8 implements ColumnView, Serializable {
                 filteredValues[i] = values[selectedRow];
             }
         }
-        return new DiscreteStringColumnView8(labels, filteredValues);
+        return new DiscreteStringColumnView8(ids, labels, filteredValues);
     }
 
     @Override

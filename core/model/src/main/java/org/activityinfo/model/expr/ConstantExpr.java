@@ -1,8 +1,11 @@
 package org.activityinfo.model.expr;
 
 import org.activityinfo.model.expr.eval.EvalContext;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
@@ -49,6 +52,16 @@ public class ConstantExpr extends ExprNode {
         this(localDate, LocalDateType.INSTANCE);
     }
 
+    public ConstantExpr(EnumValue value){
+        this(value, new EnumType());
+    }
+
+    public ConstantExpr(Token token, SourceRange range) {
+        // Enum constant from parser
+        this(new EnumValue(ResourceId.valueOf(token.getString())));
+        this.sourceRange = range;
+    }
+
     public ConstantExpr(boolean value, SourceRange source) {
         this(value);
         this.sourceRange = source;
@@ -72,6 +85,8 @@ public class ConstantExpr extends ExprNode {
             return new ConstantExpr(value == BooleanFieldValue.TRUE);
         } else if(value instanceof Quantity) {
             return new ConstantExpr(value, new QuantityType(((Quantity) value).getUnits()));
+        } else if (value instanceof EnumValue) {
+            return new ConstantExpr(value, new EnumType());
         } else {
             throw new IllegalArgumentException(value.getTypeClass().getId());
         }
@@ -93,6 +108,8 @@ public class ConstantExpr extends ExprNode {
             return Double.toString(((Quantity) value).getValue());
         } else if(value instanceof BooleanFieldValue) {
             return ((BooleanFieldValue) value).asBoolean() ? "true" : "false";
+        } else if(value instanceof EnumValue) {
+            return ((EnumValue) value).getValueId().asString();
         } else {
             // TODO: Escaping
             return "\"" + value + "\"";

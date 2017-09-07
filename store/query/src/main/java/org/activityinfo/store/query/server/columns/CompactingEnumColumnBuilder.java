@@ -25,18 +25,21 @@ public class CompactingEnumColumnBuilder implements CursorObserver<FieldValue> {
     private final PendingSlot<ColumnView> result;
 
     private final Map<ResourceId, Integer> labelIndexMap = Maps.newHashMap();
+    private final String[] ids;
     private final String[] labels;
     private IntArrayList values = new IntArrayList();
 
     public CompactingEnumColumnBuilder(PendingSlot<ColumnView> result, EnumType enumType) {
         this.result = result;
 
-        int labelIndex = 0;
+        int index = 0;
+        this.ids = new String[enumType.getValues().size()];
         this.labels = new String[enumType.getValues().size()];
         for (EnumItem item : enumType.getValues()) {
-            this.labels[labelIndex] = item.getLabel();
-            this.labelIndexMap.put(item.getId(), labelIndex);
-            labelIndex++;
+            this.ids[index] = item.getId().asString();
+            this.labels[index] = item.getLabel();
+            this.labelIndexMap.put(item.getId(), index);
+            index++;
         }
     }
 
@@ -82,12 +85,12 @@ public class CompactingEnumColumnBuilder implements CursorObserver<FieldValue> {
 
     @VisibleForTesting
     ColumnView build8() {
-        return new DiscreteStringColumnView8(labels, createIndexArray8());
+        return new DiscreteStringColumnView8(ids, labels, createIndexArray8());
     }
 
     @VisibleForTesting
     ColumnView build32() {
-        return new DiscreteStringColumnView(labels, values.toIntArray());
+        return new DiscreteStringColumnView(ids, labels, values.toIntArray());
     }
 
 }

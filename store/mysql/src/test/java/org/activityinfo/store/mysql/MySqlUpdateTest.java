@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonObject;
@@ -19,6 +20,8 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
@@ -275,6 +278,68 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 //        FormField partnerField = reform.getField(CuidAdapter.partnerField(activityId));
 //
 //        assertThat(partnerField.getType(), instanceOf(ReferenceType.class));
+    }
+
+    @Test
+    public void createFormWithCalculationAndRelevance() {
+
+        userId = 1;
+
+        KeyGenerator generator = new KeyGenerator();
+        int activityId = generator.generateInt();
+
+        FormClass formClass = new FormClass(CuidAdapter.activityFormClass(activityId));
+        formClass.setDatabaseId(1);
+        formClass.setLabel("New Form");
+
+        FormField numberField = new FormField(CuidAdapter.generateIndicatorId())
+                .setType(new QuantityType("widgets"))
+                .setLabel("NUM")
+                .setRequired(true);
+        formClass.addElement(numberField);
+
+        FormField calculatedField = new FormField(CuidAdapter.generateIndicatorId())
+                .setType(new CalculatedFieldType("1"))
+                .setLabel("Calculation")
+                .setRelevanceConditionExpression("NUM>42")
+                .setRequired(true);
+
+        formClass.addElement(calculatedField);
+
+        catalog.createOrUpdateFormSchema(formClass);
+
+        newRequest();
+
+        // Create two records
+        RecordTransactionBuilder tx = new RecordTransactionBuilder();
+
+
+        RecordUpdate site1 = tx.update(formClass.getId(), CuidAdapter.generateSiteCuid());
+        site1.setFieldValue(numberField.getId(), new Quantity(10));
+        site1.setFieldValue(partnerField(activityId), CuidAdapter.partnerRef(1, 1));
+
+        RecordUpdate site2 = tx.update(formClass.getId(), CuidAdapter.generateSiteCuid());
+        site2.setFieldValue(numberField.getId(), new Quantity(60));
+        site2.setFieldValue(partnerField(activityId), CuidAdapter.partnerRef(1, 1));
+
+        updater().execute(tx.build());
+
+        newRequest();
+
+        // Query results
+
+        QueryModel queryModel = new QueryModel(formClass.getId());
+        queryModel.selectResourceId();
+        queryModel.selectExpr("Num").as("num");
+        queryModel.selectExpr("Calculation").as("calc");
+
+        query(queryModel);
+
+        ColumnView num = columnSet.getColumnView("num");
+        ColumnView calculation = columnSet.getColumnView("calc");
+
+        assertThat(calculation.isMissing(0), equalTo(num.getDouble(0) <= 42));
+        assertThat(calculation.isMissing(1), equalTo(num.getDouble(1) <= 42));
     }
 
     @Test

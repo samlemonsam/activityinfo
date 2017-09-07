@@ -3,10 +3,11 @@ package org.activityinfo.api.client;
 import com.google.gwt.core.client.JavaScriptObject;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.EnumColumnView;
 
 
 @SuppressWarnings("GwtInconsistentSerializableClass")
-class ColumnArrayView implements ColumnView {
+class ColumnArrayView implements EnumColumnView, ColumnView {
    
     private ColumnType columnType;
     private JavaScriptObject array;
@@ -14,6 +15,11 @@ class ColumnArrayView implements ColumnView {
     ColumnArrayView(ColumnType columnType, JavaScriptObject array) {
         this.columnType = columnType;
         this.array = array;
+    }
+
+    @Override
+    public String getId(int row) {
+        return getId(array, row);
     }
 
     @Override
@@ -90,5 +96,8 @@ class ColumnArrayView implements ColumnView {
         return value == null ? @org.activityinfo.model.query.ColumnView::NA : (value ? 1 : 0);
     }-*/;
 
+    private static native String getId(JavaScriptObject array, int index) /*-{
+        return array[index];
+    }-*/;
 
 }

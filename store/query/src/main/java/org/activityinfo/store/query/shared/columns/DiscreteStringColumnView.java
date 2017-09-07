@@ -2,11 +2,13 @@ package org.activityinfo.store.query.shared.columns;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.EnumColumnView;
 
 import java.io.Serializable;
 
-public class DiscreteStringColumnView implements ColumnView, Serializable {
+public class DiscreteStringColumnView implements EnumColumnView, ColumnView, Serializable {
 
+    private String[] ids;
     private String[] labels;
     private int[] values;
 
@@ -16,6 +18,21 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
     public DiscreteStringColumnView(String[] labels, int[] values) {
         this.labels = labels;
         this.values = values;
+    }
+
+    public DiscreteStringColumnView(String[] ids, String[] labels, int[] values) {
+        this(labels, values);
+        this.ids = ids;
+    }
+
+    @Override
+    public String getId(int row) {
+        int idIndex = values[row];
+        if(idIndex < 0) {
+            return null;
+        } else {
+            return ids[idIndex];
+        }
     }
 
     @Override
@@ -69,7 +86,7 @@ public class DiscreteStringColumnView implements ColumnView, Serializable {
                 filteredValues[i] = values[selectedRow];
             }
         }
-        return new DiscreteStringColumnView(labels, filteredValues);
+        return new DiscreteStringColumnView(ids, labels, filteredValues);
     }
 
     @Override

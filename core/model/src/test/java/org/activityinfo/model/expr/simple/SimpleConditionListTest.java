@@ -115,13 +115,39 @@ public class SimpleConditionListTest {
     }
 
     @Test
+    public void numericStringLiteral() {
+        testReparsing("a==\"23\"","String Literal test failed");
+    }
+
+    @Test
+    public void enumerationType() {
+        testReparsing("(Q2146921422==t1326920547)&&(i1715311196>0)","Enum Literal test failed");
+    }
+
+    private void testReparsing(String expression, String errMessage) {
+        SimpleConditionList conditionList = SimpleConditionParser.parse(ExprParser.parse(expression));
+        String reformula = conditionList.toFormula().asExpression();
+        ExprNode reparsed = ExprParser.parse(reformula);
+        SimpleConditionList reparsedConditionList = SimpleConditionParser.parse(reparsed);
+        if(!conditionList.equals(reparsedConditionList)) {
+            System.err.println(expression);
+            System.err.println("conditionList: " + conditionList);
+            System.err.println("conditionList.toFormula(): " + reformula);
+            System.err.println("reparsedConditionList: " + reparsedConditionList);
+            throw new AssertionError(errMessage);
+        }
+    }
+
+
+    @Test
     public void existing() throws IOException {
 
         URL resource = Resources.getResource(SimpleConditionList.class, "formulas.txt");
         List<String> formulas = Resources.readLines(resource, Charsets.UTF_8);
 
         for (String formula : formulas) {
-            SimpleConditionList conditionList = SimpleConditionParser.parse(ExprParser.parse(formula));
+            ExprNode parsed = ExprParser.parse(formula);
+            SimpleConditionList conditionList = SimpleConditionParser.parse(parsed);
             String reformula = conditionList.toFormula().asExpression();
             ExprNode reparsed;
             try {

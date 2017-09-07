@@ -241,6 +241,15 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         return get("mandatory", false);
     }
 
+    public void setVisible(boolean visible) {
+        set("visible", visible);
+    }
+
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isVisible() {
+        return get("visible",true);
+    }
+
     /**
      * Sets the aggregation method for this indicator
      */
@@ -368,6 +377,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         field.setDescription(getDescription());
         field.setRelevanceConditionExpression(getRelevanceExpression());
         field.setRequired(isMandatory());
+        field.setVisible(isVisible());
 
         String code = getNameInExpression();
         if(!Strings.isNullOrEmpty(code)) {

@@ -14,10 +14,7 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -288,7 +285,7 @@ public class RecordHistoryBuilder {
         if(value == null) {
             return "";
         }
-        if(field.getType() instanceof HasStringValue) {
+        if(value instanceof HasStringValue) {
             return ((HasStringValue) value).asString();
         }
         if(field.getType() instanceof EnumType) {

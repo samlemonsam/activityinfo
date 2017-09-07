@@ -6,6 +6,7 @@ import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
 
@@ -116,11 +117,9 @@ public class SimpleConditionParser {
             } else {
                 return TextValue.valueOf(id.asString());
             }
-        }
-        if(argument instanceof ConstantExpr) {
+        } else if(argument instanceof ConstantExpr) {
             return ((ConstantExpr) argument).getValue();
         }
-
         throw new UnsupportedOperationException("constant value: " + argument);
     }
 
@@ -165,6 +164,13 @@ public class SimpleConditionParser {
     private static FieldValue parseEnum(ExprNode argument) {
         if(argument instanceof SymbolExpr) {
             return new EnumValue(ResourceId.valueOf(((SymbolExpr) argument).getName()));
+        } else if(argument instanceof ConstantExpr) {
+            if(((ConstantExpr) argument).getType() instanceof EnumType) {
+                return ((ConstantExpr) argument).getValue();
+            }
+            else {
+                return new EnumValue(ResourceId.valueOf(((ConstantExpr) argument).asExpression()));
+            }
         }
         throw new IllegalArgumentException("Expected symbol: " + argument);
     }

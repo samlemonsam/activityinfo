@@ -121,6 +121,10 @@ public class BaseEntityHandler {
             indicator.setMandatory((Boolean) changes.get("mandatory"));
         }
 
+        if (changes.containsKey("visible")) {
+            indicator.setVisible((Boolean) changes.get("visible"));
+        }
+
         indicator.getActivity().incrementSchemaVersion();
         indicator.getActivity().getDatabase().setLastSchemaUpdate(new Date());
     }
