@@ -31,7 +31,12 @@ public class QuantityType implements ParametrizedFieldType {
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
             String units = JsonParsing.toNullableString(parametersObject.get("units"));
-            String aggregationString = parametersObject.get("aggregation").getAsString();
+
+            // handling for legacy QuantityType fields (w/ null aggregation) - default to SUM
+            String aggregationString = Aggregation.SUM.name();
+            if(parametersObject.get("aggregation") != null) {
+                aggregationString = parametersObject.get("aggregation").getAsString();
+            }
             Aggregation aggregation = Aggregation.valueOf(aggregationString);
             return new QuantityType(units,aggregation);
         }
