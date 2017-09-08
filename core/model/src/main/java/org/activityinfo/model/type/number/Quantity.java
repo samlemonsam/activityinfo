@@ -9,30 +9,14 @@ import org.activityinfo.model.type.FieldValue;
 
 public class Quantity implements FieldValue {
 
-    public static final String UNKNOWN_UNITS = "unknown";
-
     private final double value;
-    private String units;
 
     public Quantity(double value) {
-        this(value, UNKNOWN_UNITS);
-    }
-
-    public Quantity(double value, String units) {
         this.value = value;
-        this.units = Strings.emptyToNull(units);
     }
 
     public double getValue() {
         return value;
-    }
-
-    public String getUnits() {
-        return units;
-    }
-
-    public void setUnits(String units) {
-        this.units = units;
     }
 
     @Override
@@ -62,30 +46,21 @@ public class Quantity implements FieldValue {
 
         if (Double.compare(quantity.value, value) != 0) {
             return false;
-        }
-
-        if (units == null) {
-            return quantity.units == null;
         } else {
-            return units.equals(quantity.units);
+            return true;
         }
     }
 
     @Override
     public int hashCode() {
         long temp = Double.doubleToLongBits(value);
-        return ((int) (temp ^ (temp >>> 32))) ^ (units != null ? units.hashCode() : 0);
-    }
-
-    public boolean hasUnits() {
-        return units != null;
+        return ((int) (temp ^ (temp >>> 32)));
     }
 
     @Override
     public String toString() {
         return "Quantity{" +
                "value=" + value +
-               ", units='" + units + '\'' +
                '}';
     }
 }

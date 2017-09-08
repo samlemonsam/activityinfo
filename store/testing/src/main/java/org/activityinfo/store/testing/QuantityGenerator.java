@@ -33,7 +33,7 @@ public class QuantityGenerator implements Supplier<FieldValue> {
             return null;
         } else {
             double quantity = minValue + (random.nextDouble() * (maxValue - minValue));
-            return new Quantity(quantity, units);
+            return new Quantity(quantity);
         }
     }
 }

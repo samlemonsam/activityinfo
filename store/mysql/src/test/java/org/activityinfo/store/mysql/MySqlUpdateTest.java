@@ -427,7 +427,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         update.setFormId(formId);
         update.setRecordId(cuid(SITE_DOMAIN, 1));
         update.set(field(formId, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 2));
-        update.set(indicatorField(1), new Quantity(900, "units"));
+        update.set(indicatorField(1), new Quantity(900));
         update.set(attributeGroupField(1), new EnumValue(attributeId(CATASTROPHE_NATURELLE_ID)));
 
         Updater updater = updater();

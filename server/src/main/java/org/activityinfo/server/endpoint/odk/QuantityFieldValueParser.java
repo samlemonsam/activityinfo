@@ -26,6 +26,6 @@ class QuantityFieldValueParser implements FieldValueParser {
             throw new IllegalArgumentException("Failed to parse quantity field value: " + text, e);
         }
 
-        return new Quantity(value, units);
+        return new Quantity(value);
     }
 }

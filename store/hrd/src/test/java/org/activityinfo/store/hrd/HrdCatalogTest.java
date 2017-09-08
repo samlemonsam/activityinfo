@@ -262,14 +262,14 @@ public class HrdCatalogTest {
         father1.setRecordId(ResourceId.generateSubmissionId(memberForm));
         father1.setParentId(hh1.getRecordId());
         father1.set(nameField.getId(), TextValue.valueOf("Homer"));
-        father1.set(ageField.getId(), new Quantity(40, "years"));
+        father1.set(ageField.getId(), new Quantity(40));
         
         RecordUpdate father2 = new RecordUpdate();
         father2.setUserId(userId);
         father2.setRecordId(ResourceId.generateSubmissionId(memberForm));
         father2.setParentId(hh2.getRecordId());
         father2.set(nameField.getId(), TextValue.valueOf("Ned"));
-        father2.set(ageField.getId(), new Quantity(41, "years"));
+        father2.set(ageField.getId(), new Quantity(41));
         
         Optional<FormStorage> hhCollection = catalog.getForm(hhForm.getId());
         assertTrue(hhCollection.isPresent());

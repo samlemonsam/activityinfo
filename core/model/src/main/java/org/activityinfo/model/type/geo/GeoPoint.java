@@ -81,9 +81,9 @@ public class GeoPoint implements GeoFieldValue, RecordFieldValue {
     public FieldValue getField(String id) {
         switch (id) {
             case "latitude":
-                return new Quantity(latitude, "degrees");
+                return new Quantity(latitude);
             case "longitude":
-                return new Quantity(longitude, "degrees");
+                return new Quantity(longitude);
         }
         return NullFieldValue.INSTANCE;
     }

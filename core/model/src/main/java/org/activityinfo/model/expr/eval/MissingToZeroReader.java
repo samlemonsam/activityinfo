@@ -21,7 +21,7 @@ public class MissingToZeroReader<InstanceT> implements FieldReader<InstanceT> {
 
     @Override
     public FieldValue readField(InstanceT record) {
-        return new Quantity(0, type.getUnits());
+        return new Quantity(0);
     }
 
     @Override

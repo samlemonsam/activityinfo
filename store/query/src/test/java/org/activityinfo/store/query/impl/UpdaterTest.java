@@ -120,7 +120,7 @@ public class UpdaterTest {
 
         RecordUpdate update = Updater.parseChange(formClass, change, userId);
         
-        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
+        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3)));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class UpdaterTest {
 
         RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
-        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
+        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3)));
     }
 
     @Test(expected = InvalidUpdateException.class)
@@ -152,7 +152,7 @@ public class UpdaterTest {
 
         RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
-        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
+        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3)));
     }
     
     @Test(expected = InvalidUpdateException.class)
@@ -168,7 +168,7 @@ public class UpdaterTest {
 
         RecordUpdate update = Updater.parseChange(formClass, change, userId);
 
-        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3, "meters")));
+        assertThat(update.getChangedFieldValues().get(fieldId), equalTo((FieldValue)new Quantity(41.3)));
     }
 
     @Test

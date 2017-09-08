@@ -19,7 +19,7 @@ public abstract class RoundingOperator extends UnaryFunctionBase {
             throw new InvalidTypeException("Expected QUANTITY value");
         }
         Quantity quantity = (Quantity) argument;
-        return new Quantity(apply(quantity.getValue()),quantity.getUnits());
+        return new Quantity(apply(quantity.getValue()));
     }
 
     @Override

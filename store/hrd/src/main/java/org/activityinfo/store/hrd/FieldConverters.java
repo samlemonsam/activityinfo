@@ -56,7 +56,7 @@ public class FieldConverters {
             @Override
             public Quantity toFieldValue(Object hrdValue) {
                 Number number = (Number) hrdValue;
-                return new Quantity(number.doubleValue(), type.getUnits());
+                return new Quantity(number.doubleValue());
             }
         };
     }

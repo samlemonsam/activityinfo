@@ -13,7 +13,6 @@ import org.activityinfo.model.type.*;
  */
 public class QuantityType implements ParametrizedFieldType {
 
-
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
 
         private TypeClass() {}
@@ -31,14 +30,25 @@ public class QuantityType implements ParametrizedFieldType {
 
         @Override
         public FieldType deserializeType(JsonObject parametersObject) {
-            return new QuantityType(JsonParsing.toNullableString(parametersObject.get("units")));
+            String units = JsonParsing.toNullableString(parametersObject.get("units"));
+            String aggregationString = parametersObject.get("aggregation").getAsString();
+            Aggregation aggregation = Aggregation.valueOf(aggregationString);
+            return new QuantityType(units,aggregation);
         }
 
     }
 
+    public enum Aggregation {
+        SUM,
+        AVERAGE,
+        COUNT
+    }
+
+    public static final String UNKNOWN_UNITS = "unknown";
     public static final TypeClass TYPE_CLASS = new TypeClass();
 
     private String units;
+    private Aggregation aggregation = Aggregation.SUM;
 
     public QuantityType() {
     }
@@ -47,8 +57,22 @@ public class QuantityType implements ParametrizedFieldType {
         this.units = units;
     }
 
+    public QuantityType(String units, String aggregation) {
+        this(units);
+        this.aggregation = Aggregation.valueOf(aggregation);
+    }
+
+    public QuantityType(String units, Aggregation aggregation) {
+        this(units);
+        this.aggregation = aggregation;
+    }
+
     public String getUnits() {
         return units;
+    }
+
+    public Aggregation getAggregation() {
+        return aggregation;
     }
 
     public QuantityType setUnits(String units) {
@@ -56,8 +80,33 @@ public class QuantityType implements ParametrizedFieldType {
         return this;
     }
 
+    public QuantityType setAggregation(Aggregation aggregation) {
+        this.aggregation = aggregation;
+        return this;
+    }
+
+    public QuantityType setAggregation(String aggregation) {
+        this.aggregation = Aggregation.valueOf(aggregation);
+        return this;
+    }
+
+    public QuantityType setAggregation(int aggregation) {
+        switch (aggregation) {
+            case 0:
+                this.aggregation = Aggregation.SUM;
+                break;
+            case 1:
+                this.aggregation = Aggregation.AVERAGE;
+                break;
+            case 2:
+                this.aggregation = Aggregation.COUNT;
+                break;
+        }
+        return this;
+    }
+
     /**
-     * @return new QuantitType with the given {@code updatedUnits}
+     * @return new QuantityType with the given {@code updatedUnits}
      */
     public QuantityType withUnits(String updatedUnits) {
         return new QuantityType(updatedUnits);
@@ -71,9 +120,9 @@ public class QuantityType implements ParametrizedFieldType {
     @Override
     public FieldValue parseJsonValue(JsonElement value) {
         if(value instanceof JsonNull) {
-            return new Quantity(Double.NaN, units);
+            return new Quantity(Double.NaN);
         } else {
-            return new Quantity(value.getAsDouble(), units);
+            return new Quantity(value.getAsDouble());
         }
     }
 
@@ -91,6 +140,7 @@ public class QuantityType implements ParametrizedFieldType {
     public JsonObject getParametersAsJson() {
         JsonObject object = new JsonObject();
         object.addProperty("units", Strings.nullToEmpty(units));
+        object.addProperty("aggregation", aggregation.toString());
         return object;
     }
 

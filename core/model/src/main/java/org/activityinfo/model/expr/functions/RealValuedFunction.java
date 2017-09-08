@@ -44,11 +44,7 @@ public abstract class RealValuedFunction extends ExprFunction implements ColumnF
         if(Double.isNaN(value)) {
             return new Quantity(Double.NaN);
         } else {
-            if(q.hasUnits()) {
-                return new Quantity(value,q.getUnits());
-            } else {
-                return new Quantity(value);
-            }
+            return new Quantity(value);
         }
     }
 
@@ -71,11 +67,7 @@ public abstract class RealValuedFunction extends ExprFunction implements ColumnF
         if(Double.isNaN(value)) {
             return new Quantity(Double.NaN);
         } else {
-            if(qa.hasUnits() && qb.hasUnits()) {
-                return new Quantity(value);
-            } else {
-                return new Quantity(value, applyUnits(qa.getUnits(), qb.getUnits()));
-            }
+            return new Quantity(value);
         }
     }
 

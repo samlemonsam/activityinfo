@@ -128,7 +128,7 @@ public class FormInputViewModelTest {
                 .update(Survey.GENDER_FIELD_ID, new FieldInput(new EnumValue(Survey.MALE_ID)))
                 .update(Survey.NAME_FIELD_ID, new FieldInput(TextValue.valueOf("BOB")))
                 .update(Survey.DOB_FIELD_ID, new FieldInput(new LocalDate(1982,1,16)))
-                .update(Survey.AGE_FIELD_ID, new FieldInput(new Quantity(35, "years")));
+                .update(Survey.AGE_FIELD_ID, new FieldInput(new Quantity(35)));
 
         // Verify that it's valid
         FormInputViewModel viewModel = builder.build(inputModel);

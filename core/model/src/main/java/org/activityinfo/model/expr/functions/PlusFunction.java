@@ -1,6 +1,6 @@
 package org.activityinfo.model.expr.functions;
 
-import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.number.QuantityType;
 
 import java.util.Objects;
 
@@ -27,7 +27,7 @@ public class PlusFunction extends RealValuedFunction {
         if(Objects.equals(a, b)) {
             return a;
         } else {
-            return Quantity.UNKNOWN_UNITS;
+            return QuantityType.UNKNOWN_UNITS;
         }
     }
 }

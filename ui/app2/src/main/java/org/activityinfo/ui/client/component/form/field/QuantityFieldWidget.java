@@ -102,7 +102,7 @@ public class QuantityFieldWidget implements FormFieldWidget<Quantity> {
             if(value == null) {
                 valueUpdater.update(null);
             } else {
-                valueUpdater.update(new Quantity(value, type.getUnits()));
+                valueUpdater.update(new Quantity(value));
             }
         } catch (ParseException e) {
             valueUpdater.onInvalid(invalidErrorMessage());

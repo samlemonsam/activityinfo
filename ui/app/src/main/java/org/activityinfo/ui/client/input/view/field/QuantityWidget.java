@@ -36,7 +36,7 @@ public class QuantityWidget implements FieldWidget {
             if(field.getValue() == null) {
                 return FieldInput.EMPTY;
             } else {
-                return new FieldInput(new Quantity(field.getValue(), quantityType.getUnits()));
+                return new FieldInput(new Quantity(field.getValue()));
             }
         } else {
             return FieldInput.INVALID_INPUT;

@@ -38,7 +38,7 @@ public class SiteFieldReaderFactory implements FieldReaderFactory<SiteDTO> {
         public FieldValue readField(SiteDTO record) {
             Object value = record.get(propertyName);
             if(value instanceof Number) {
-                return new Quantity(((Number) value).doubleValue(), type.getUnits());
+                return new Quantity(((Number) value).doubleValue());
             } else {
                 return NullFieldValue.INSTANCE;
             }

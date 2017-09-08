@@ -22,7 +22,7 @@ public class QuantityConverter implements FieldValueConverter {
         if(rs.wasNull()) {
             return null;
         } else {
-            return new Quantity(value, units);
+            return new Quantity(value);
         }
     }
 

@@ -29,6 +29,9 @@ public class ActivityField implements Serializable {
         this.id = id;
         this.category = category;
         this.formField.value = formField;
+        if(formField.getType() instanceof QuantityType) {
+            this.aggregation = ((QuantityType) formField.getType()).getAggregation().ordinal();
+        }
         this.sortOrder = sortOrder;
     }
 

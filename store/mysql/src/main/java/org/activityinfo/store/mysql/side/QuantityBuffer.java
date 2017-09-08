@@ -30,7 +30,7 @@ class QuantityBuffer implements ValueBuffer {
         if(rs.wasNull()) {
             value = null;
         } else {
-            value = new Quantity(doubleValue, units);
+            value = new Quantity(doubleValue);
         }
     }
 

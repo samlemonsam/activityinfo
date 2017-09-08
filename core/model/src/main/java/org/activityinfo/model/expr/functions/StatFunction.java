@@ -33,7 +33,7 @@ public abstract class StatFunction extends ExprFunction implements ColumnFunctio
         if(units.size() == 1) {
             return units.iterator().next();
         } else {
-            return Quantity.UNKNOWN_UNITS;
+            return QuantityType.UNKNOWN_UNITS;
         }
     }
 
@@ -51,13 +51,11 @@ public abstract class StatFunction extends ExprFunction implements ColumnFunctio
     @Override
     public final FieldValue apply(List<FieldValue> arguments) {
         double argumentValues[] = new double[arguments.size()];
-        String units = Quantity.UNKNOWN_UNITS;
 
         for (int i = 0; i < arguments.size(); i++) {
             FieldValue argument = arguments.get(i);
             if (argument instanceof Quantity) {
                 Quantity quantity = (Quantity) argument;
-                units = quantity.getUnits();
                 argumentValues[i] = quantity.getValue();
             } else {
                 argumentValues[i] = Double.NaN;
@@ -65,7 +63,7 @@ public abstract class StatFunction extends ExprFunction implements ColumnFunctio
         }
 
         double result = compute(argumentValues, 0, argumentValues.length);
-        return new Quantity(result, units);
+        return new Quantity(result);
     }
 
 

@@ -498,7 +498,8 @@ public class ActivityLoader {
                 default:
                 case "QUANTITY":
                     formField.setType(new QuantityType()
-                            .setUnits(rs.getString("units")));
+                            .setUnits(rs.getString("units"))
+                            .setAggregation(rs.getInt("Aggregation")));
                     break;
                 case "BARCODE":
                     formField.setType(BarcodeType.INSTANCE);
@@ -516,7 +517,6 @@ public class ActivityLoader {
             }
         }
         ActivityField field = new ActivityField(id, rs.getString("category"), formField, rs.getInt("sortOrder"));
-        field.aggregation = rs.getInt("aggregation");
         field.sortOrder = rs.getInt("sortOrder");
         
         activity.fields.add(field);

@@ -112,19 +112,19 @@ public class SubFormAggregationTest {
         month1.setUserId(userId);
         month1.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month1.setParentId(v1.getRecordId());
-        month1.set(countField.getId(), new Quantity(40, "households"));
+        month1.set(countField.getId(), new Quantity(40));
 
         RecordUpdate month2 = new RecordUpdate();
         month2.setUserId(userId);
         month2.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month2.setParentId(v1.getRecordId());
-        month2.set(countField.getId(), new Quantity(30, "households"));
+        month2.set(countField.getId(), new Quantity(30));
 
         RecordUpdate month3 = new RecordUpdate();
         month3.setUserId(userId);
         month3.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month3.setParentId(v2.getRecordId());
-        month3.set(countField.getId(), new Quantity(47, "households"));
+        month3.set(countField.getId(), new Quantity(47));
 
         FormStorage siteCollection = catalog.getForm(siteForm.getId()).get();
         siteCollection.add(v1);
