@@ -60,6 +60,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
     public IndicatorDTO() {
         super();
+        setVisible(true);
     }
 
     /**
@@ -70,6 +71,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         super();
         set("name", name);
         set("units", units);
+        setVisible(true);
     }
 
     /**
