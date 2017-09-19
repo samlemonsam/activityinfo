@@ -1,11 +1,14 @@
 package org.activityinfo.model.expr.functions;
 
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.diagnostic.InvalidTypeException;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.HasSetFieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
+import org.activityinfo.model.type.primitive.HasStringValue;
+import org.activityinfo.model.type.primitive.TextValue;
 
 import java.util.Set;
 
@@ -28,6 +31,13 @@ public class Casting {
         }
     }
 
+    public static String toString(FieldValue value) {
+        if(value instanceof HasStringValue) {
+            return ((HasStringValue) value).asString();
+        }
+        throw new InvalidTypeException("Cannot cast field value of type " + value.getTypeClass() + " to string");
+    }
+
     public static Set<ResourceId> toSet(FieldValue value) {
         if (value instanceof HasSetFieldValue) {
             return ((HasSetFieldValue) value).getResourceIds();
@@ -35,4 +45,5 @@ public class Casting {
             throw new InvalidTypeException("Cannot cast [" + value + "] to Set<ResourceId>");
         }
     }
+
 }

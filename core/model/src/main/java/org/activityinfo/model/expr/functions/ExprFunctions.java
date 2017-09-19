@@ -64,6 +64,9 @@ public final class ExprFunctions {
 
             register(CeilingFunction.INSTANCE);
             register(FloorFunction.INSTANCE);
+
+            register(SearchFunction.INSTANCE);
+            register(IsNumberFunction.INSTANCE);
         }
         
         public ExprFunction get(String name) {
