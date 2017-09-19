@@ -86,7 +86,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         grid.setSelectionModel(sm);
 
         // Setup grid filters
-        GridFilters<Integer> filters = new GridFilters<>();
+        TableGridFilters filters = new TableGridFilters();
         filters.initPlugin(grid);
         for (Filter<Integer, ?> filter : columns.getFilters()) {
             filters.addFilter(filter);

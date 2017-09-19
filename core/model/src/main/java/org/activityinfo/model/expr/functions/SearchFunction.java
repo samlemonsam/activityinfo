@@ -27,12 +27,12 @@ public class SearchFunction extends ExprFunction implements ColumnFunction {
 
     @Override
     public String getId() {
-        return "search";
+        return "SEARCH";
     }
 
     @Override
     public String getLabel() {
-        return "search";
+        return "SEARCH";
     }
 
     @Override
