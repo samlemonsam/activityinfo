@@ -152,11 +152,17 @@ public class TableView implements IsWidget, HasTitle {
 
         panel.setHeading(effectiveTableModel.getFormLabel());
 
+        // If the grid is already displayed, try to update without
+        // destorying everything
+        if(grid != null && grid.update(effectiveTableModel)) {
+            return;
+        }
+
         if(grid != null) {
             center.remove(grid);
         }
 
-        grid = new TableGrid(effectiveTableModel, viewModel);
+        grid = new TableGrid(effectiveTableModel, viewModel.getColumnSet(), viewModel);
         grid.addSelectionChangedHandler(event -> {
             if(!event.getSelection().isEmpty()) {
                 RecordRef ref = event.getSelection().get(0);

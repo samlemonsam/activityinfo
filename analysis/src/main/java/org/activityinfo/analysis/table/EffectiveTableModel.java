@@ -1,6 +1,5 @@
 package org.activityinfo.analysis.table;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.TableColumn;
@@ -26,7 +25,6 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.query.shared.FormSource;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,6 +83,11 @@ public class EffectiveTableModel {
     public TableModel getModel() {
         return tableModel;
     }
+
+    public Optional<String> getFilter() {
+        return getModel().getFilter();
+    }
+
 
     private void addDefaultColumns(FormTree formTree) {
         if(!isSubTable() && formTree.getRootFormClass().isSubForm()) {

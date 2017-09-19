@@ -2,12 +2,13 @@ package org.activityinfo.ui.client.table.view;
 
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.data.shared.loader.FilterConfigBean;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
-public class FilterConfigParserTest {
+public class ColumnFilterTest {
 
     @Test
     public void numeric() {
@@ -17,7 +18,7 @@ public class FilterConfigParserTest {
         config.setComparison("eq");
         config.setValue("42");
 
-        assertThat(FilterConfigParser.toFormula(config).asExpression(), equalTo("A == 42"));
+        assertThat(ColumnFilter.toFormula(new SymbolExpr("A"), config).asExpression(), equalTo("A == 42"));
     }
 
     @Test
@@ -28,7 +29,8 @@ public class FilterConfigParserTest {
         cfg.setComparison("contains");
         cfg.setValue("Bar");
 
-        assertThat(FilterConfigParser.toFormula(cfg).asExpression(), equalTo("ISNUMBER(SEARCH(\"Bar\", Q))"));
+        assertThat(ColumnFilter.toFormula(new SymbolExpr("A"), cfg).asExpression(),
+            equalTo("ISNUMBER(SEARCH(\"Bar\", Q))"));
     }
 
     @Test
@@ -39,7 +41,7 @@ public class FilterConfigParserTest {
         c.setType("date");
         c.setValue("1505779200000");
 
-        assertThat(FilterConfigParser.toFormula(c).asExpression(), equalTo("DOB == DATE(2017, 9, 19)"));
+        assertThat(ColumnFilter.toFormula(new SymbolExpr("A"), c).asExpression(),
+            equalTo("DOB == DATE(2017, 9, 19)"));
     }
-
 }

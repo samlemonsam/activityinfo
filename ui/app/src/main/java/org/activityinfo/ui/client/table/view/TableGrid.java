@@ -23,9 +23,12 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 
 import java.util.Collections;
+import java.util.List;
 
 
 public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionChangedHandlers<RecordRef> {
+
+    private List<EffectiveTableColumn> effectiveColumns;
 
     private final ListStore<Integer> store;
     private final Grid<Integer> grid;
@@ -36,7 +39,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
 
     private final EventBus eventBus = new SimpleEventBus();
 
-    public TableGrid(final EffectiveTableModel tableModel, FilterUpdater filterUpdater) {
+    public TableGrid(final EffectiveTableModel tableModel, Observable<ColumnSet> columnSet, FilterUpdater filterUpdater) {
 
         // GXT Grid's are built around row-major data storage, while AI uses
         // Column-major order here. So we construct fake loaders/stores that represent
@@ -51,6 +54,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         // Build a grid column model based on the user's selection of columns
         GridColumnModelBuilder columns = new GridColumnModelBuilder(proxy);
         columns.addAll(tableModel.getColumns());
+        effectiveColumns = tableModel.getColumns();
 
         LiveRecordGridView gridView = new LiveRecordGridView();
         gridView.setColumnLines(true);
@@ -71,7 +75,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
             @Override
             protected void onAttach() {
                 super.onAttach();
-                subscription = tableModel.getColumnSet().subscribe(observable -> onColumnsUpdated(observable));
+                subscription = columnSet.subscribe(observable -> onColumnsUpdated(observable));
                 loader.load(0, gridView.getCacheSize());
             }
 
@@ -94,6 +98,14 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         }
     }
 
+    public boolean update(EffectiveTableModel tableModel) {
+
+        if(tableModel.getColumns().equals(effectiveColumns)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     @Override
     public Widget asWidget() {

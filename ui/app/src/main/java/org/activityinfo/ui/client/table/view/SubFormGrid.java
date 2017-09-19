@@ -37,7 +37,7 @@ public class SubFormGrid extends VerticalLayoutContainer {
     private void onModelChanged(Observable<EffectiveTableModel> model) {
         if(model.isLoaded()) {
             if(grid == null) {
-                grid = new TableGrid(model.get(), new FilterUpdater() {
+                grid = new TableGrid(model.get(), model.get().getColumnSet(), new FilterUpdater() {
                     @Override
                     public void updateFilter(Optional<ExprNode> filterFormula) {
                         // TODO

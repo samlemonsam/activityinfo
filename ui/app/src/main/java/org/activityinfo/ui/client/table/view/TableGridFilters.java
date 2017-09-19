@@ -1,7 +1,6 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.common.base.Optional;
-import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import org.activityinfo.analysis.table.FilterUpdater;
@@ -32,7 +31,7 @@ public class TableGridFilters extends GridFilters<Integer> {
 
 
     public void addFilter(ColumnFilter filter) {
-        super.addFilter(filter.getFilter());
+        super.addFilter(filter.getView());
         filters.add(filter);
     }
 
@@ -50,6 +49,12 @@ public class TableGridFilters extends GridFilters<Integer> {
         }
     }
 
+    /**
+     * This method is called when the user *INITIATES* a change to the filter
+     * via the user interface.
+     *
+     * We do NOT want to mutate our state locally, we forward it to the TableModel.
+     */
     @Override
     protected void onStateChange(Filter<Integer, ?> filter) {
         Optional<ExprNode> filterFormula = buildFormula();
@@ -57,6 +62,15 @@ public class TableGridFilters extends GridFilters<Integer> {
         LOGGER.info("Filter updated: " + filterFormula);
 
         filterUpdater.updateFilter(filterFormula);
+    }
+
+
+    /**
+     * This method is called when the MODEL has changed.
+     *
+     * Update the user interface to match the model's state.
+     */
+    public void onFilterChanged(Optional<String> filter) {
     }
 
 

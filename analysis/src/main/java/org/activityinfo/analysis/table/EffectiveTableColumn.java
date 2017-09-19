@@ -66,4 +66,37 @@ public class EffectiveTableColumn {
     public String toString() {
         return "EffectiveTableColumn{" + label + "}";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        EffectiveTableColumn that = (EffectiveTableColumn) o;
+
+        if (!model.equals(that.model)) {
+            return false;
+        }
+        if (!label.equals(that.label)) {
+            return false;
+        }
+        if (!formula.equals(that.formula)) {
+            return false;
+        }
+        return format.equals(that.format);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = model.hashCode();
+        result = 31 * result + label.hashCode();
+        result = 31 * result + formula.hashCode();
+        result = 31 * result + format.hashCode();
+        return result;
+    }
 }

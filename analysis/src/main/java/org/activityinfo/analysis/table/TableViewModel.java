@@ -7,6 +7,7 @@ import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -30,6 +31,8 @@ public class TableViewModel implements FilterUpdater {
     private Observable<FormTree> formTree;
     private StatefulValue<TableModel> tableModel;
     private Observable<EffectiveTableModel> effectiveTable;
+    private Observable<ColumnSet> columnSet;
+
 
     private Map<ResourceId, Observable<EffectiveTableModel>> effectiveSubTables = new HashMap<>();
 
@@ -46,6 +49,7 @@ public class TableViewModel implements FilterUpdater {
         });
 
         this.selectionViewModel = SelectionViewModel.compute(formStore, selectedRecordRef);
+        this.columnSet = this.effectiveTable.join(table -> table.getColumnSet());
     }
 
     public TableModel getTableModel() {
@@ -83,6 +87,10 @@ public class TableViewModel implements FilterUpdater {
 
     public Observable<EffectiveTableModel> getEffectiveTable() {
         return effectiveTable;
+    }
+
+    public Observable<ColumnSet> getColumnSet() {
+        return columnSet;
     }
 
     public Observable<EffectiveTableModel> getEffectiveSubTable(final ResourceId subFormId) {
