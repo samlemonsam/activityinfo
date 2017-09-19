@@ -54,7 +54,7 @@ public class FormPanel implements IsWidget {
             } else if(node.isParentReference()) {
                 // ignore
             } else if(node.getField().isVisible()) {
-                FieldWidget fieldWidget = createWidget(formTree, node.getType(), input -> onInput(node, input));
+                FieldWidget fieldWidget = createWidget(formTree, node.getField(), input -> onInput(node, input));
 
                 if (fieldWidget != null) {
                     addField(node, fieldWidget);

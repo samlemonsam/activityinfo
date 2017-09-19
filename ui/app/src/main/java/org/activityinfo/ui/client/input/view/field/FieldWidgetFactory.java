@@ -1,8 +1,7 @@
 package org.activityinfo.ui.client.input.view.field;
 
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.LookupKey;
-import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -25,14 +24,16 @@ import org.activityinfo.model.type.time.YearType;
 public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     private FormTree formTree;
+    private FormField field;
     private FieldUpdater updater;
 
-    public static FieldWidget createWidget(FormTree formTree, FieldType type, FieldUpdater updater) {
-        return type.accept(new FieldWidgetFactory(formTree, updater));
+    public static FieldWidget createWidget(FormTree formTree, FormField field, FieldUpdater updater) {
+        return field.getType().accept(new FieldWidgetFactory(formTree, field, updater));
     }
 
-    private FieldWidgetFactory(FormTree formTree, FieldUpdater updater) {
+    private FieldWidgetFactory(FormTree formTree, FormField field, FieldUpdater updater) {
         this.formTree = formTree;
+        this.field = field;
         this.updater = updater;
     }
 
@@ -82,8 +83,13 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
     @Override
     public FieldWidget visitEnum(EnumType enumType) {
         if(enumType.getCardinality() == Cardinality.SINGLE) {
-            if(enumType.getEffectivePresentation() == EnumType.Presentation.RADIO_BUTTON) {
+            // If the field is optional, then ALWAYS use a drop down widget whose value can be cleared
+            if(!field.isRequired()) {
+                return new DropDownEnumWidget(enumType, updater);
+
+            } else if(enumType.getEffectivePresentation() == EnumType.Presentation.RADIO_BUTTON) {
                 return new RadioGroupWidget(enumType, updater);
+
             } else {
                 return new DropDownEnumWidget(enumType, updater);
             }
