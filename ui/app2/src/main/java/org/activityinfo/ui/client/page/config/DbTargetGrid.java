@@ -38,6 +38,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
@@ -95,7 +97,10 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 Integer id = modelData.get(s);
                 if (id != null) {
-                    sb.appendEscaped(db.getProjectById(id).getName());
+                    ProjectDTO project = db.getProjectById(id);
+                    if(project != null) {
+                        sb.appendEscaped(project.getName());
+                    }
                 }
                 return sb.toSafeHtml();
             }
@@ -108,7 +113,10 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
                 SafeHtmlBuilder sb = new SafeHtmlBuilder();
                 Integer id = modelData.get(s);
                 if (id != null) {
-                    sb.appendEscaped(db.getPartnerById(id).getName());
+                    PartnerDTO partner = db.getPartnerById(id);
+                    if(partner != null) {
+                        sb.appendEscaped(partner.getName());
+                    }
                 }
                 return sb.toSafeHtml();
             }
