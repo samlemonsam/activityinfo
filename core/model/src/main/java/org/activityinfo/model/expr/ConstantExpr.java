@@ -105,7 +105,12 @@ public class ConstantExpr extends ExprNode {
     @Override
     public String asExpression() {
         if(value instanceof Quantity) {
-            return Double.toString(((Quantity) value).getValue());
+            double doubleValue = ((Quantity) this.value).getValue();
+            if(Math.floor(doubleValue) == doubleValue && !Double.isInfinite(doubleValue)) {
+                return Integer.toString((int)doubleValue);
+            } else {
+                return "" + doubleValue;
+            }
         } else if(value instanceof BooleanFieldValue) {
             return ((BooleanFieldValue) value).asBoolean() ? "true" : "false";
         } else if(value instanceof EnumValue) {

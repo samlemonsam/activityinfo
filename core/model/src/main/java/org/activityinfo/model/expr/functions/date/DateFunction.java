@@ -1,0 +1,76 @@
+package org.activityinfo.model.expr.functions.date;
+
+import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
+import org.activityinfo.model.expr.functions.Casting;
+import org.activityinfo.model.expr.functions.ColumnFunction;
+import org.activityinfo.model.expr.functions.ExprFunction;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.StringArrayColumnView;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.LocalDateType;
+
+import java.util.List;
+
+/**
+ * DATE() function implementation.
+ *
+ * <p>Can you be used to create a LocalDate value, for example: DATE(2015,1,1)</p>
+ */
+public class DateFunction extends ExprFunction implements ColumnFunction {
+
+    public static final DateFunction INSTANCE = new DateFunction();
+
+    private DateFunction() {
+    }
+
+    @Override
+    public String getId() {
+        return "DATE";
+    }
+
+    @Override
+    public String getLabel() {
+        return "DATE";
+    }
+
+    @Override
+    public FieldValue apply(List<FieldValue> arguments) {
+        if(arguments.size() != 3) {
+            throw new ExprSyntaxException("DATE() expects three arguments");
+        }
+        double year = Casting.toQuantity(arguments.get(0)).getValue();
+        double month = Casting.toQuantity(arguments.get(1)).getValue();
+        double day = Casting.toQuantity(arguments.get(2)).getValue();
+
+        return apply(year, month, day);
+    }
+
+    @Override
+    public FieldType resolveResultType(List<FieldType> argumentTypes) {
+        return LocalDateType.INSTANCE;
+    }
+
+    @Override
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
+        ColumnView year = arguments.get(0);
+        ColumnView month = arguments.get(1);
+        ColumnView day = arguments.get(2);
+
+        String[] dates = new String[numRows];
+        for (int i = 0; i < numRows; i++) {
+            dates[i] = apply(
+                year.getDouble(i),
+                month.getDouble(i),
+                day.getDouble(i)).toString();
+        }
+
+        return new StringArrayColumnView(dates);
+    }
+
+
+    private LocalDate apply(double year, double month, double day) {
+        return new LocalDate((int)year, (int)month, (int)day);
+    }
+}
