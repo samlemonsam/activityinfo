@@ -41,7 +41,7 @@ public class ConstantExpr extends ExprNode {
     }
 
     public ConstantExpr(Quantity value) {
-        this(value, new QuantityType(value.getUnits()));
+        this(value, new QuantityType());
     }
 
     public ConstantExpr(TextValue value) {
@@ -84,7 +84,7 @@ public class ConstantExpr extends ExprNode {
         } else if(value instanceof BooleanFieldValue) {
             return new ConstantExpr(value == BooleanFieldValue.TRUE);
         } else if(value instanceof Quantity) {
-            return new ConstantExpr(value, new QuantityType(((Quantity) value).getUnits()));
+            return new ConstantExpr(value, new QuantityType());
         } else if (value instanceof EnumValue) {
             return new ConstantExpr(value, new EnumType());
         } else {

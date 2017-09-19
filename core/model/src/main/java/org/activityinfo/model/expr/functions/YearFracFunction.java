@@ -47,7 +47,7 @@ public class YearFracFunction extends ExprFunction implements ColumnFunction {
             return null;
         }
 
-        return new Quantity(compute(startDate, endDate), "years");
+        return new Quantity(compute(startDate, endDate));
     }
 
 

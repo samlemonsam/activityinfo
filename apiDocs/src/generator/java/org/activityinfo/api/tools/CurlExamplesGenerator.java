@@ -101,7 +101,7 @@ public class CurlExamplesGenerator {
         record.setFormId(formId);
         record.setRecordId(recordId);
         record.setFieldValue(ResourceId.generateId(), TextValue.valueOf("Text Value"));
-        record.setFieldValue(ResourceId.generateId(), new Quantity(1500, "households"));
+        record.setFieldValue(ResourceId.generateId(), new Quantity(1500));
         record.setFieldValue(ResourceId.generateId(), new LocalDate(2016, 10, 5));
         record.setFieldValue(ResourceId.generateId(), new GeoPoint(52.078663, 4.288788));
         record.setFieldValue(ResourceId.generateId(), new EnumValue(ResourceId.generateId()));

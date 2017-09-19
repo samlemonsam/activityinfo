@@ -45,7 +45,7 @@ public class QuantityWidget implements FieldWidget {
             double doubleValue;
             try {
                 doubleValue = field.getPropertyEditor().parse(text);
-                return new FieldInput(new Quantity(doubleValue, quantityType.getUnits()));
+                return new FieldInput(new Quantity(doubleValue));
             } catch (ParseException e) {
                 return FieldInput.INVALID_INPUT;
             }

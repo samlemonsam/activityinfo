@@ -24,6 +24,8 @@ import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.RecordVersion;
@@ -71,12 +73,19 @@ public class RecordHistoryBuilder {
         }
 
         FormClass formClass = form.get().getFormClass();
-        List<RecordDelta> deltas = computeDeltas(formClass, null, form.get().getVersions(recordId));
+        Activity activity = catalog.getActivityLoader().load(CuidAdapter.getLegacyIdFromCuid(formClass.getId()));
+
+        Map<ResourceId,String> monthlyFieldLabels = new HashMap<>();
+        if (activity.isMonthly()) {
+            monthlyFieldLabels = getMonthlyFieldLabels(activity);
+        }
+
+        List<RecordDelta> deltas = computeDeltas(formClass, null, form.get().getVersions(recordId), monthlyFieldLabels);
 
         // Now add deltas from sub forms...
         for (FormField field : formClass.getFields()) {
             if(field.getType() instanceof SubFormReferenceType) {
-                deltas.addAll(computeSubFormDeltas(recordId, field));
+                deltas.addAll(computeSubFormDeltas(recordId, field, monthlyFieldLabels));
             }
         }
 
@@ -138,20 +147,21 @@ public class RecordHistoryBuilder {
         }));
     }
 
-    private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField) {
+    private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField, Map<ResourceId,String> monthlyFieldLabels) {
         SubFormReferenceType subFormType = (SubFormReferenceType) subFormField.getType();
         Optional<FormStorage> subForm = catalog.getForm(subFormType.getClassId());
         FormClass subFormClass = subForm.get().getFormClass();
 
         List<RecordVersion> versions = subForm.get().getVersionsForParent(parentRecordId);
 
-        return computeDeltas(subFormClass, subFormField, versions);
+        return computeDeltas(subFormClass, subFormField, versions, monthlyFieldLabels);
     }
 
 
     private List<RecordDelta> computeDeltas(FormClass formClass,
                                             FormField subFormField,
-                                            List<RecordVersion> versions) {
+                                            List<RecordVersion> versions,
+                                            Map<ResourceId,String> monthlyFieldLabels) {
 
         List<RecordDelta> deltas = new ArrayList<>();
 
@@ -204,22 +214,28 @@ public class RecordHistoryBuilder {
 
                     if (fieldIdAsString.startsWith("I") && fieldIdAsString.contains("M")) { // e.g. I309566527M2016-8
 
-                        FieldValue oldValue = currentState.get(fieldId);
-                        FieldValue newValue = version.getValues().get(fieldId);
+                        int idInt = CuidAdapter.getLegacyIdFromCuid(fieldIdAsString.substring(fieldIdAsString.indexOf("I"),
+                                                                                              fieldIdAsString.indexOf("M")));
+                        ResourceId id = CuidAdapter.indicatorField(idInt);
 
-                        if (!Objects.equals(oldValue, newValue)) {
+                        if(monthlyFieldLabels.containsKey(id)) { // check to ensure field still exists
+                            FieldValue oldValue = currentState.get(fieldId);
+                            FieldValue newValue = version.getValues().get(fieldId);
 
-                            String month = fieldIdAsString.substring(fieldIdAsString.indexOf("M") + 1);
+                            if (!Objects.equals(oldValue, newValue)) {
 
-                            FieldDelta fieldDelta = new FieldDelta();
-                            fieldDelta.field = new FormField(fieldId);
-                            fieldDelta.field.setLabel(month);
-                            fieldDelta.field.setType(new QuantityType());
-                            fieldDelta.oldValue = oldValue;
-                            fieldDelta.newValue = newValue;
-                            delta.changes.add(fieldDelta);
+                                String month = fieldIdAsString.substring(fieldIdAsString.indexOf("M") + 1);
+
+                                FieldDelta fieldDelta = new FieldDelta();
+                                fieldDelta.field = new FormField(fieldId);
+                                fieldDelta.field.setLabel(Strings.nullToEmpty(monthlyFieldLabels.get(id)) + " (" + month + ")");
+                                fieldDelta.field.setType(new QuantityType());
+                                fieldDelta.oldValue = oldValue;
+                                fieldDelta.newValue = newValue;
+                                delta.changes.add(fieldDelta);
+                            }
+                            currentState.put(fieldId, newValue);
                         }
-                        currentState.put(fieldId,  newValue);
                     }
                 }
 
@@ -227,6 +243,15 @@ public class RecordHistoryBuilder {
             deltas.add(delta);
         }
         return deltas;
+    }
+
+    private Map<ResourceId,String> getMonthlyFieldLabels(Activity activity) {
+        Map<ResourceId, String> monthlyFields = new HashMap<>();
+        for (ActivityField field : activity.getFields()) {
+            monthlyFields.put(field.getFormField().getId(),
+                    Strings.nullToEmpty(field.getFormField().getLabel()));
+        }
+        return monthlyFields;
     }
 
     private Map<Long, User> queryUsers(List<RecordDelta> deltas) throws SQLException {

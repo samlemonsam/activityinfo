@@ -101,7 +101,6 @@ public class FormField extends FormElement {
      * @return an extended description of this field, presented to be
      * presented to the user during data entry
      */
-    @Nonnull
     public String getDescription() {
         return description;
     }

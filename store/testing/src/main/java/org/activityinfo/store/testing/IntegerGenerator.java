@@ -30,7 +30,7 @@ public class IntegerGenerator implements Supplier<FieldValue> {
             return null;
         } else {
             double quantity = minValue + random.nextInt(range);
-            return new Quantity(quantity, units);
+            return new Quantity(quantity);
         }
     }
 }

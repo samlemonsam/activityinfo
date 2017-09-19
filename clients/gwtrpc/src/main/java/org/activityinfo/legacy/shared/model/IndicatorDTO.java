@@ -60,6 +60,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
     public IndicatorDTO() {
         super();
+        setVisible(true);
     }
 
     /**
@@ -70,6 +71,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         super();
         set("name", name);
         set("units", units);
+        setVisible(true);
     }
 
     /**
@@ -262,7 +264,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
      */
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public int getAggregation() {
-        return (Integer) get("aggregation");
+        return get("aggregation", AGGREGATE_SUM);
     }
 
     /**
@@ -392,7 +394,9 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
             if(Strings.isNullOrEmpty(units)) {
                 units = "units";
             }
-            field.setType(new QuantityType().setUnits(units));
+            field.setType(new QuantityType()
+                                .setUnits(units)
+                                .setAggregation(getAggregation()));
 
         } else {
             field.setType(getType().createType());

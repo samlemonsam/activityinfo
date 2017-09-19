@@ -189,7 +189,11 @@ public class ActivityUpdater {
         insert.value("name", formField.getLabel());
         insert.value("nameInExpression", formField.getCode());
         insert.value("description", formField.getDescription());
-        insert.value("aggregation", 0);
+        if(formField.getType() instanceof QuantityType) {
+            insert.value("aggregation",((QuantityType) formField.getType()).getAggregation().ordinal());
+        } else {
+            insert.value("aggregation",0);
+        }
         insert.value("sortOrder", sortOrder);
         insert.value("type", formField.getType().getTypeClass().getId());
         insert.value("mandatory", formField.isRequired());
@@ -261,6 +265,7 @@ public class ActivityUpdater {
             QuantityType existingType = (QuantityType) existingField.getFormField().getType();
             QuantityType updatedType = (QuantityType) formField.getType();
             update.setIfChanged("units", existingType.getUnits(), updatedType.getUnits(), 255);
+            update.setIfChanged("aggregation", existingType.getAggregation(), updatedType.getAggregation());
         }
 
         if(existingField.getFormField().getType() instanceof CalculatedFieldType) {

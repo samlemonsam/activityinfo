@@ -1,6 +1,6 @@
 package org.activityinfo.model.expr.functions;
 
-import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.number.QuantityType;
 
 public class DivideFunction extends RealValuedFunction {
 
@@ -26,6 +26,6 @@ public class DivideFunction extends RealValuedFunction {
     @Override
     protected String applyUnits(String a, String b) {
         // TODO: we need to properly model units in order to handle this
-        return Quantity.UNKNOWN_UNITS;
+        return "(" + a + ")/(" + b + ")";
     }
 }

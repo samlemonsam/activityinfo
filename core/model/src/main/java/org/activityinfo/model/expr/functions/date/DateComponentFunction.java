@@ -26,7 +26,7 @@ public abstract class DateComponentFunction extends ExprFunction implements Colu
         }
         LocalDate date = (LocalDate) argument;
 
-        return new Quantity(apply(date), getUnits());
+        return new Quantity(apply(date));
     }
 
     @Override

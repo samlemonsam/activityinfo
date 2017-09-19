@@ -90,8 +90,8 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         FormInstance firstRead = assertResolves(locator.getFormInstance(NFI_DIST_FORM_CLASS, instance.getId()));
 
-        assertThat(firstRead.get(indicatorField(1)), equalTo((FieldValue)new Quantity(1, "menages")));
-        assertThat(firstRead.get(indicatorField(2)), equalTo((FieldValue)new Quantity(2, "menages")));
+        assertThat(firstRead.get(indicatorField(1)), equalTo((FieldValue)new Quantity(1)));
+        assertThat(firstRead.get(indicatorField(2)), equalTo((FieldValue)new Quantity(2)));
         
         // set indicators to null
         instance.set(indicatorField(1).asString(), null);

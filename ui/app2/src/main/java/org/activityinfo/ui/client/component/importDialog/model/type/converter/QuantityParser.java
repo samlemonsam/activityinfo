@@ -22,6 +22,6 @@ public class QuantityParser implements FieldValueParser {
     @Nonnull
     @Override
     public Quantity convert(@Nonnull String value) {
-        return new Quantity(formatter.parse(value), type.getUnits());
+        return new Quantity(formatter.parse(value));
     }
 }

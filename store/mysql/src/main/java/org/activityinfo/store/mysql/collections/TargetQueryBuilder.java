@@ -154,7 +154,7 @@ public class TargetQueryBuilder implements ColumnQueryBuilder {
             if(Double.isNaN(value)) {
                 observer.onNext(null);
             } else {
-                observer.onNext(new Quantity(value, units));
+                observer.onNext(new Quantity(value));
             }
         }
         
