@@ -28,7 +28,7 @@ public class GridColumnModelBuilder {
     private final ColumnSetProxy proxy;
     private final List<ColumnConfig<Integer, ?>> columnConfigs = new ArrayList<>();
     private final List<HeaderGroupConfig> headerGroupConfigs = new ArrayList<>();
-    private final List<Filter<Integer, ?>> filters = new ArrayList<>();
+    private final List<ColumnFilter> filters = new ArrayList<>();
 
     public GridColumnModelBuilder(ColumnSetProxy proxy) {
         this.proxy = proxy;
@@ -98,7 +98,7 @@ public class GridColumnModelBuilder {
         columnConfigs.add(config);
 
         StringFilter<Integer> filter = new StringFilter<>(valueProvider);
-        filters.add(filter);
+        filters.add(new ColumnFilter(tableColumn.getFormula(), filter));
     }
 
 
@@ -112,7 +112,8 @@ public class GridColumnModelBuilder {
 
         NumericFilter<Integer, Double> filter = new NumericFilter<>(valueProvider,
                 new NumberPropertyEditor.DoublePropertyEditor());
-        filters.add(filter);
+
+        filters.add(new ColumnFilter(tableColumn.getFormula(), filter));
     }
 
     private void addEnumType(EffectiveTableColumn tableColumn, SingleEnumFormat format) {
@@ -123,17 +124,17 @@ public class GridColumnModelBuilder {
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
-        addEnumFilter((EnumType) tableColumn.getType(), valueProvider);
+        addEnumFilter(tableColumn, (EnumType) tableColumn.getType(), valueProvider);
     }
 
-    private void addEnumFilter(EnumType enumType, ValueProvider<Integer, String> valueProvider) {
+    private void addEnumFilter(EffectiveTableColumn columnModel, EnumType enumType, ValueProvider<Integer, String> valueProvider) {
         ListStore<String> store = new ListStore<>(x -> x);
         for (EnumItem enumItem : enumType.getValues()) {
             store.add(enumItem.getLabel());
         }
 
         ListFilter<Integer, String> filter = new ListFilter<>(valueProvider, store);
-        filters.add(filter);
+        filters.add(new ColumnFilter(columnModel.getFormula(), filter));
     }
 
     private void addDateColumn(EffectiveTableColumn tableColumn, DateFormat dateFormat) {
@@ -145,7 +146,7 @@ public class GridColumnModelBuilder {
         columnConfigs.add(config);
 
         DateFilter<Integer> filter = new DateFilter<>(valueProvider);
-        filters.add(filter);
+        filters.add(new ColumnFilter(tableColumn.getFormula(), filter));
 
     }
 
@@ -157,9 +158,6 @@ public class GridColumnModelBuilder {
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
-
-        addEnumFilter(multiEnumFormat.getEnumType(), valueProvider);
-
     }
 
     private void addGeoPointColumn(EffectiveTableColumn columnModel, GeoPointFormat format) {
@@ -198,7 +196,7 @@ public class GridColumnModelBuilder {
         return cm;
     }
 
-    public List<Filter<Integer, ?>> getFilters() {
+    public List<ColumnFilter> getFilters() {
         return filters;
     }
 }

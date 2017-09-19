@@ -156,7 +156,7 @@ public class TableView implements IsWidget, HasTitle {
             center.remove(grid);
         }
 
-        grid = new TableGrid(effectiveTableModel);
+        grid = new TableGrid(effectiveTableModel, viewModel);
         grid.addSelectionChangedHandler(event -> {
             if(!event.getSelection().isEmpty()) {
                 RecordRef ref = event.getSelection().get(0);

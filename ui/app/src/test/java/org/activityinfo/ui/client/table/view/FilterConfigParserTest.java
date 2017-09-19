@@ -17,7 +17,7 @@ public class FilterConfigParserTest {
         config.setComparison("eq");
         config.setValue("42");
 
-        assertThat(FilterConfigParser.toFormula(config).asExpression(), equalTo("A == 42.0"));
+        assertThat(FilterConfigParser.toFormula(config).asExpression(), equalTo("A == 42"));
     }
 
     @Test
@@ -29,6 +29,17 @@ public class FilterConfigParserTest {
         cfg.setValue("Bar");
 
         assertThat(FilterConfigParser.toFormula(cfg).asExpression(), equalTo("ISNUMBER(SEARCH(\"Bar\", Q))"));
+    }
+
+    @Test
+    public void test() {
+        FilterConfig c = new FilterConfigBean();
+        c.setField("DOB");
+        c.setComparison("on");
+        c.setType("date");
+        c.setValue("1505779200000");
+
+        assertThat(FilterConfigParser.toFormula(c).asExpression(), equalTo("DOB == DATE(2017, 9, 19)"));
     }
 
 }

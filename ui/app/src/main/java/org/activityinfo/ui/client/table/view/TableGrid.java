@@ -16,6 +16,7 @@ import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.FilterUpdater;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -35,7 +36,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
 
     private final EventBus eventBus = new SimpleEventBus();
 
-    public TableGrid(final EffectiveTableModel tableModel) {
+    public TableGrid(final EffectiveTableModel tableModel, FilterUpdater filterUpdater) {
 
         // GXT Grid's are built around row-major data storage, while AI uses
         // Column-major order here. So we construct fake loaders/stores that represent
@@ -86,9 +87,9 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         grid.setSelectionModel(sm);
 
         // Setup grid filters
-        TableGridFilters filters = new TableGridFilters();
+        TableGridFilters filters = new TableGridFilters(filterUpdater);
         filters.initPlugin(grid);
-        for (Filter<Integer, ?> filter : columns.getFilters()) {
+        for (ColumnFilter filter : columns.getFilters()) {
             filters.addFilter(filter);
         }
     }
@@ -108,12 +109,8 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         }
     }
 
-
     @Override
     public HandlerRegistration addSelectionChangedHandler(SelectionChangedEvent.SelectionChangedHandler<RecordRef> handler) {
         return eventBus.addHandler(SelectionChangedEvent.getType(), handler);
-
     }
-
-
 }

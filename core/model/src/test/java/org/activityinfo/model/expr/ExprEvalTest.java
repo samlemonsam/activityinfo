@@ -127,6 +127,14 @@ public class ExprEvalTest {
         evaluate("YEARFRAC(DATE(2017, 1, 1), DATE(2019, 1, 1))", 2.0);
     }
 
+    @Test
+    public void dateComparison() {
+        evaluate("DATE(2017,1,1) < DATE(2017,1,30)", true);
+        evaluate("DATE(2017,1,1) >= DATE(2017,1,30)", false);
+        evaluate("DATE(2017,1,1) == DATE(2017,1,30)", false);
+        evaluate("DATE(2017,1,1) == DATE(2017,1,1)", true);
+    }
+
     private void evaluateAndExpectSyntaxException(String exprString) {
         try {
             evaluate(exprString,Double.NaN);

@@ -26,6 +26,14 @@ public class EffectiveTableColumn {
         format = ColumnFormatFactory.create(model.getId(), formula);
     }
 
+    public ParsedFormula getFormula() {
+        return formula;
+    }
+
+    public String getFormulaString() {
+        return formula.getFormula();
+    }
+
     public FieldType getType() {
         return formula.getResultType();
     }

@@ -169,6 +169,9 @@ public class EffectiveTableModel {
 
     private QueryModel buildQuery(List<EffectiveTableColumn> columns) {
         QueryModel queryModel = new QueryModel(formTree.getRootFormId());
+        if(tableModel.getFilter().isPresent()) {
+            queryModel.setFilter(tableModel.getFilter().get());
+        }
         queryModel.selectResourceId().as(ID_COLUMN_ID);
         for (EffectiveTableColumn column : columns) {
             queryModel.addColumns(column.getQueryModel());

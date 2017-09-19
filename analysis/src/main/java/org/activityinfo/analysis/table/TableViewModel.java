@@ -4,14 +4,13 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormSource;
 
 import javax.annotation.Nullable;
@@ -22,7 +21,7 @@ import java.util.logging.Logger;
 /**
  * Model's the user's selection of columns
  */
-public class TableViewModel {
+public class TableViewModel implements FilterUpdater {
 
     private static final Logger LOGGER = Logger.getLogger(TableViewModel.class.getName());
 
@@ -120,5 +119,18 @@ public class TableViewModel {
         LOGGER.info("TableModel updated: " + updatedModel.toJson().toJson());
 
         tableModel.updateIfNotEqual(updatedModel);
+    }
+
+    @Override
+    public void updateFilter(Optional<ExprNode> filterNode) {
+
+        Optional<String> filter = filterNode.transform(n -> n.asExpression());
+
+        tableModel.updateIfNotEqual(
+            ImmutableTableModel.builder()
+            .from(tableModel.get())
+            .filter(filter)
+            .build());
+
     }
 }
