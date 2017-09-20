@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import org.activityinfo.api.client.FormRecordUpdate;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -27,6 +28,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -45,6 +47,8 @@ import java.sql.SQLException;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 
@@ -524,4 +528,28 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     }
 
 
+    @Test
+    public void updateLocation() throws SQLException {
+
+        ResourceId recordId = CuidAdapter.cuid(LOCATION_DOMAIN, 1);
+        ResourceId formId = CuidAdapter.locationFormClass(1);
+
+        JsonObject change = new JsonObject();
+        change.addProperty("@id", recordId.asString());
+        change.addProperty("@class", formId.asString());
+        change.addProperty("name", "New Name");
+
+        Updater updater = updater();
+        updater.executeChange(change);
+
+        newRequest();
+
+        FormStorage formStorage = catalog.getForm(formId).get();
+        FormRecord record = formStorage.get(recordId).get();
+        FormInstance typedRecord = FormInstance.toFormInstance(formStorage.getFormClass(), record);
+
+        GeoPoint point = (GeoPoint) typedRecord.get(CuidAdapter.field(formId, CuidAdapter.GEOMETRY_FIELD));
+
+        assertThat(point, not(nullValue()));
+    }
 }
