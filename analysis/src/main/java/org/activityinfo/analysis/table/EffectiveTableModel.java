@@ -96,7 +96,7 @@ public class EffectiveTableModel {
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.getField().isVisible()) {
                 if (isSimple(node.getType())) {
-                    columns.add(new EffectiveTableColumn(formTree, columnModel(node)));
+                    columns.add(new EffectiveTableColumn(formTree, defaultColumnModel(node)));
 
                 } else if (node.getType() instanceof ReferenceType) {
                     addKeyColumns(columns, node);
@@ -124,9 +124,16 @@ public class EffectiveTableModel {
                type instanceof CalculatedFieldType;
     }
 
-    private ImmutableTableColumn columnModel(FormTree.Node node) {
+    private ImmutableTableColumn defaultColumnModel(FormTree.Node node) {
+        String formulaString = node.getPath().toExpr().asExpression();
+
+        // We need stable ids for our default columns, otherwise
+        // the views will get confused and refresh unnecessarily
+        String id = formulaString.replace('.', 'd');
+
         return ImmutableTableColumn.builder()
-                .formula(node.getPath().toExpr().asExpression())
+                .id(id)
+                .formula(formulaString)
                 .build();
     }
 
@@ -143,7 +150,7 @@ public class EffectiveTableModel {
         // Now any non-reference key fields
         for (FormTree.Node childNode : node.getChildren()) {
             if (childNode.getField().isKey() && !childNode.isReference()) {
-                columns.add(new EffectiveTableColumn(formTree, columnModel(childNode)));
+                columns.add(new EffectiveTableColumn(formTree, defaultColumnModel(childNode)));
             }
         }
     }

@@ -14,7 +14,9 @@ public abstract class AbstractRenderer<T> implements ColumnRenderer<T> {
 
     @Override
     public final T render(int rowIndex) {
-        assert view != null : "Renderer.update() has not yet been called";
+        if(view == null) {
+            return null;
+        }
         return renderRow(view, rowIndex);
     }
 
@@ -23,5 +25,6 @@ public abstract class AbstractRenderer<T> implements ColumnRenderer<T> {
     @Override
     public final void updateColumnSet(ColumnSet columnSet) {
         this.view = columnSet.getColumnView(columnId);
+        assert this.view != null : "missing column " + columnId;
     }
 }

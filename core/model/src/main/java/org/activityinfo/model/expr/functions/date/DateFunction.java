@@ -40,9 +40,13 @@ public class DateFunction extends ExprFunction implements ColumnFunction {
         if(arguments.size() != 3) {
             throw new ExprSyntaxException("DATE() expects three arguments");
         }
-        double year = Casting.toQuantity(arguments.get(0)).getValue();
-        double month = Casting.toQuantity(arguments.get(1)).getValue();
-        double day = Casting.toQuantity(arguments.get(2)).getValue();
+        return apply(arguments.get(0), arguments.get(1), arguments.get(2));
+    }
+
+    public static FieldValue apply(FieldValue yearArgument, FieldValue monthArgument, FieldValue dayArgument) {
+        double year = Casting.toQuantity(yearArgument).getValue();
+        double month = Casting.toQuantity(monthArgument).getValue();
+        double day = Casting.toQuantity(dayArgument).getValue();
 
         return apply(year, month, day);
     }
@@ -70,7 +74,8 @@ public class DateFunction extends ExprFunction implements ColumnFunction {
     }
 
 
-    private LocalDate apply(double year, double month, double day) {
+
+    private static LocalDate apply(double year, double month, double day) {
         return new LocalDate((int)year, (int)month, (int)day);
     }
 }

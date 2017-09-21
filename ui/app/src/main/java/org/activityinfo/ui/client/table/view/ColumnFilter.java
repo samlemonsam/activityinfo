@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import org.activityinfo.analysis.ParsedFormula;
@@ -13,6 +14,7 @@ import org.activityinfo.model.expr.functions.date.DateFunction;
 import org.activityinfo.model.type.time.LocalDate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +25,11 @@ public class ColumnFilter {
 
     private final ExprNode columnFormula;
     private final Filter<Integer, ?> view;
+
+    /**
+     * True if the view currently has no active filter set.
+     */
+    private boolean emptyFilter = true;
 
     public ColumnFilter(ParsedFormula formula, Filter<Integer, ?> filter) {
         this.columnFormula = formula.getRootNode();
@@ -126,5 +133,20 @@ public class ColumnFilter {
 
     private static ConstantExpr numericValue(FilterConfig filter) {
         return new ConstantExpr(Double.parseDouble(filter.getValue()));
+    }
+
+    public void updateView(Collection<FilterConfig> filterConfigs) {
+        boolean suppressEvents = true;
+        if(filterConfigs.isEmpty()) {
+            if(!emptyFilter) {
+                view.setActive(false, suppressEvents);
+                emptyFilter = true;
+            }
+        } else {
+            view.setActive(true, suppressEvents);
+            view.setFilterConfig(Lists.newArrayList(filterConfigs));
+            emptyFilter = false;
+        }
+
     }
 }

@@ -11,8 +11,6 @@ import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoader;
 import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.grid.filters.Filter;
-import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
@@ -24,9 +22,12 @@ import org.activityinfo.observable.Subscription;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionChangedHandlers<RecordRef> {
+
+    private static final Logger LOGGER = Logger.getLogger(TableGrid.class.getName());
 
     private List<EffectiveTableColumn> effectiveColumns;
 
@@ -38,6 +39,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
     private final PagingLoader<PagingLoadConfig, PagingLoadResult<Integer>> loader;
 
     private final EventBus eventBus = new SimpleEventBus();
+    private final TableGridFilters filters;
 
     public TableGrid(final EffectiveTableModel tableModel, Observable<ColumnSet> columnSet, FilterUpdater filterUpdater) {
 
@@ -91,20 +93,47 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         grid.setSelectionModel(sm);
 
         // Setup grid filters
-        TableGridFilters filters = new TableGridFilters(filterUpdater);
+        filters = new TableGridFilters(filterUpdater);
         filters.initPlugin(grid);
         for (ColumnFilter filter : columns.getFilters()) {
             filters.addFilter(filter);
         }
+        filters.updateView(tableModel.getFilter());
     }
 
     public boolean update(EffectiveTableModel tableModel) {
 
-        if(tableModel.getColumns().equals(effectiveColumns)) {
-            return true;
-        } else {
+        // Check to see if we can update columns in place
+        if (!tryUpdateColumns(tableModel)) {
+            LOGGER.info("Columns have changed, rebuild required.");
             return false;
         }
+
+        filters.updateView(tableModel.getFilter());
+
+        return true;
+    }
+
+    private boolean tryUpdateColumns(EffectiveTableModel tableModel) {
+        if(tableModel.getColumns().size() != effectiveColumns.size()) {
+            return false;
+        }
+        for (int i = 0; i < tableModel.getColumns().size(); i++) {
+            EffectiveTableColumn currentColumn = effectiveColumns.get(i);
+            EffectiveTableColumn updatedColumn = tableModel.getColumns().get(i);
+
+            // Check for incompatible changes. Changing the id or the
+            // the type of column will rebuilding the grid.
+            if (!currentColumn.getId().equals(updatedColumn.getId()) ||
+                !currentColumn.getType().equals(updatedColumn.getType())) {
+                return false;
+            }
+            if(!currentColumn.getLabel().equals(updatedColumn.getLabel())) {
+                // TODO: update column label in place
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
