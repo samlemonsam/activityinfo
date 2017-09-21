@@ -210,16 +210,17 @@ public class Activity implements Serializable {
     }
 
 
-    public ActivityField getIndicatorField(Integer indicatorId) {
+    public ActivityField getAttributeGroupField(Integer groupId) {
         for (ActivityField field : fields) {
-            if(field.getId() == indicatorId) {
+            if(field.isAttributeGroup() && field.getId() == groupId) {
                 return field;
             }
         }
 
-        throw new IllegalArgumentException("No such indicator " + indicatorId + " in activity " + activityId);
+        throw new IllegalArgumentException("No such attribute group " + groupId + " in activity " + activityId);
     }
-    
+
+
     public ActivityVersion getActivityVersion() {
         return new ActivityVersion(this.getId(), schemaVersion, siteVersion);
     }
