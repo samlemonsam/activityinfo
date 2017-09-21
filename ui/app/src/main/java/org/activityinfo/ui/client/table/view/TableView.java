@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.table.view;
 
-import com.google.common.base.Function;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
@@ -13,12 +12,10 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Subscription;
 import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.ui.client.chrome.HasTitle;
 import org.activityinfo.ui.client.store.FormStore;
 
-import javax.annotation.Nullable;
 import java.util.logging.Logger;
 
 /**
@@ -154,7 +151,7 @@ public class TableView implements IsWidget, HasTitle {
 
         // If the grid is already displayed, try to update without
         // destorying everything
-        if(grid != null && grid.update(effectiveTableModel)) {
+        if(grid != null && grid.updateView(effectiveTableModel)) {
             return;
         }
 

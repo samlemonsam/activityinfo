@@ -3,7 +3,7 @@ package org.activityinfo.ui.client.table.view;
 import com.google.common.base.Optional;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.analysis.table.EffectiveTableModel;
-import org.activityinfo.analysis.table.FilterUpdater;
+import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.resource.ResourceId;
@@ -37,7 +37,7 @@ public class SubFormGrid extends VerticalLayoutContainer {
     private void onModelChanged(Observable<EffectiveTableModel> model) {
         if(model.isLoaded()) {
             if(grid == null) {
-                grid = new TableGrid(model.get(), model.get().getColumnSet(), new FilterUpdater() {
+                grid = new TableGrid(model.get(), model.get().getColumnSet(), new TableUpdater() {
                     @Override
                     public void updateFilter(Optional<ExprNode> filterFormula) {
                         // TODO

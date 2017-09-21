@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
-import org.activityinfo.analysis.table.FilterUpdater;
+import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 
@@ -25,28 +25,28 @@ public class TableGridFilters extends GridFilters<Integer> {
 
     private static final Logger LOGGER = Logger.getLogger(TableGridFilters.class.getName());
 
-    private final List<ColumnFilter> columns = new ArrayList<>();
+    private final List<ColumnView> columns = new ArrayList<>();
     private final ColumnFilterParser filterParser;
-    private final FilterUpdater filterUpdater;
+    private final TableUpdater tableUpdater;
 
     private Optional<String> currentFilter = Optional.absent();
 
-    public TableGridFilters(FilterUpdater filterUpdater) {
-        this.filterUpdater = filterUpdater;
+    public TableGridFilters(TableUpdater tableUpdater) {
+        this.tableUpdater = tableUpdater;
         this.filterParser = new ColumnFilterParser();
         setAutoReload(false);
     }
 
-    public void addFilter(ColumnFilter filter) {
-        super.addFilter(filter.getView());
+    public void addFilter(ColumnView filter) {
+        super.addFilter(filter.getFilterView());
         columns.add(filter);
         filterParser.addColumn(filter.getColumnFormula());
     }
 
     public Optional<ExprNode> buildFormula() {
         List<ExprNode> nodes = new ArrayList<>();
-        for (ColumnFilter filter : columns) {
-            if(filter.isActive()) {
+        for (ColumnView filter : columns) {
+            if(filter.isFilterActive()) {
                 nodes.add(filter.getFilterFormula());
             }
         }
@@ -65,13 +65,18 @@ public class TableGridFilters extends GridFilters<Integer> {
      */
     @Override
     protected void onStateChange(Filter<Integer, ?> filter) {
+        changeFilter(filter);
+    }
+
+
+    private void changeFilter(Filter<Integer, ?> filter) {
         super.onStateChange(filter);
 
         Optional<ExprNode> filterFormula = buildFormula();
 
         LOGGER.info("Filter updated: " + filterFormula);
 
-        filterUpdater.updateFilter(filterFormula);
+        tableUpdater.updateFilter(filterFormula);
     }
 
 
@@ -80,7 +85,7 @@ public class TableGridFilters extends GridFilters<Integer> {
      *
      * Update the user interface to match the model's state.
      */
-    public void updateView(Optional<String> filter) {
+    void updateView(Optional<String> filter) {
 
         if(!filter.equals(currentFilter)) {
             Multimap<Integer, FilterConfig> map = filterParser.parseFilter(filter);

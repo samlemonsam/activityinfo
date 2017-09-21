@@ -19,6 +19,11 @@ public abstract class TableColumn {
 
     public abstract Optional<String> getLabel();
 
+    /**
+     * @return the width of the column in pixels.
+     */
+    public abstract Optional<Integer> getWidth();
+
     public abstract String getFormula();
 
     @Value.Lazy

@@ -15,6 +15,8 @@ import java.util.Collection;
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.expr.ExprParser.parse;
 import static org.activityinfo.ui.client.table.view.ColumnFilterParser.findConjunctionList;
+import static org.activityinfo.ui.client.table.view.ColumnFilterParser.toFormula;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -24,6 +26,41 @@ public class ColumnFilterParserTest {
     public static final SymbolExpr A = new SymbolExpr("A");
     public static final SymbolExpr B = new SymbolExpr("B");
     public static final SymbolExpr C = new SymbolExpr("C");
+
+
+
+    @Test
+    public void numeric() {
+        FilterConfig config = new FilterConfigBean();
+        config.setField("A");
+        config.setType("numeric");
+        config.setComparison("eq");
+        config.setValue("42");
+
+        assertThat(toFormula(A, config).asExpression(), equalTo("A == 42"));
+    }
+
+    @Test
+    public void string() {
+        FilterConfig cfg = new FilterConfigBean();
+        cfg.setField("Q");
+        cfg.setType("string");
+        cfg.setComparison("contains");
+        cfg.setValue("Bar");
+
+        assertThat(toFormula(A, cfg).asExpression(), equalTo("ISNUMBER(SEARCH(\"Bar\", Q))"));
+    }
+
+    @Test
+    public void test() {
+        FilterConfig c = new FilterConfigBean();
+        c.setField("DOB");
+        c.setComparison("on");
+        c.setType("date");
+        c.setValue("1505779200000");
+
+        assertThat(toFormula(A, c).asExpression(), equalTo("DOB == DATE(2017, 9, 19)"));
+    }
 
     @Test
     public void decomposition() {
@@ -112,7 +149,7 @@ public class ColumnFilterParserTest {
 
         ExprNode columnExpr = parse("IF(A && B, A * 42 / 3, CEIL(B / 99))");
 
-        String filterFormula = ColumnFilter.toFormula(columnExpr, config).asExpression();
+        String filterFormula = toFormula(columnExpr, config).asExpression();
 
         ColumnFilterParser parser = new ColumnFilterParser(asList(A, columnExpr));
         Multimap<Integer, FilterConfig> map = parser.parseFilter(parse(filterFormula));

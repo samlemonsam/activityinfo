@@ -10,7 +10,10 @@ import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
-import com.sencha.gxt.widget.core.client.grid.filters.*;
+import com.sencha.gxt.widget.core.client.grid.filters.DateFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
+import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import org.activityinfo.analysis.table.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -23,14 +26,14 @@ import java.util.List;
 /**
  * Constructs a GXT Grid column model from our EffectiveTableModel.
  */
-public class GridColumnModelBuilder {
+public class ColumnModelBuilder {
 
     private final ColumnSetProxy proxy;
     private final List<ColumnConfig<Integer, ?>> columnConfigs = new ArrayList<>();
     private final List<HeaderGroupConfig> headerGroupConfigs = new ArrayList<>();
-    private final List<ColumnFilter> filters = new ArrayList<>();
+    private final List<ColumnView> filters = new ArrayList<>();
 
-    public GridColumnModelBuilder(ColumnSetProxy proxy) {
+    public ColumnModelBuilder(ColumnSetProxy proxy) {
         this.proxy = proxy;
     }
 
@@ -98,7 +101,7 @@ public class GridColumnModelBuilder {
         columnConfigs.add(config);
 
         StringFilter<Integer> filter = new StringFilter<>(valueProvider);
-        filters.add(new ColumnFilter(tableColumn.getFormula(), filter));
+        filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
 
@@ -113,7 +116,7 @@ public class GridColumnModelBuilder {
         NumericFilter<Integer, Double> filter = new NumericFilter<>(valueProvider,
                 new NumberPropertyEditor.DoublePropertyEditor());
 
-        filters.add(new ColumnFilter(tableColumn.getFormula(), filter));
+        filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
     private void addEnumType(EffectiveTableColumn tableColumn, SingleEnumFormat format) {
@@ -134,7 +137,7 @@ public class GridColumnModelBuilder {
         }
 
         ListFilter<Integer, String> filter = new ListFilter<>(valueProvider, store);
-        filters.add(new ColumnFilter(columnModel.getFormula(), filter));
+        filters.add(new ColumnView(columnModel.getFormula(), filter));
     }
 
     private void addDateColumn(EffectiveTableColumn tableColumn, DateFormat dateFormat) {
@@ -146,7 +149,7 @@ public class GridColumnModelBuilder {
         columnConfigs.add(config);
 
         DateFilter<Integer> filter = new DateFilter<>(valueProvider);
-        filters.add(new ColumnFilter(tableColumn.getFormula(), filter));
+        filters.add(new ColumnView(tableColumn.getFormula(), filter));
 
     }
 
@@ -196,7 +199,7 @@ public class GridColumnModelBuilder {
         return cm;
     }
 
-    public List<ColumnFilter> getFilters() {
+    public List<ColumnView> getFilters() {
         return filters;
     }
 }

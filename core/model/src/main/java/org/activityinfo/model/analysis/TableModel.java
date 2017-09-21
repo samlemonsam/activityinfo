@@ -21,6 +21,8 @@ public abstract class TableModel implements AnalysisModel  {
 
     public abstract List<TableColumn> getColumns();
 
+    public abstract List<SortOrder> getOrdering();
+
     /**
      * A boolean-valued formula that determines which rows to include in the
      * results.

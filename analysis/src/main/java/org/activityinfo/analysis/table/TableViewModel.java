@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 /**
  * Model's the user's selection of columns
  */
-public class TableViewModel implements FilterUpdater {
+public class TableViewModel implements TableUpdater {
 
     private static final Logger LOGGER = Logger.getLogger(TableViewModel.class.getName());
 
