@@ -1,14 +1,12 @@
 package org.activityinfo.model.expr.functions;
 
-import org.activityinfo.model.query.BitSetColumnView;
+import org.activityinfo.model.query.BooleanColumnView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
-
-import java.util.BitSet;
 
 public class IsNumberFunction extends UnaryFunctionBase {
 
@@ -35,11 +33,13 @@ public class IsNumberFunction extends UnaryFunctionBase {
     @Override
     public ColumnView columnApply(int numRows, ColumnView argument) {
 
-        BitSet bitSet = new BitSet();
+        int[] result = new int[numRows];
         for (int i = 0; i < numRows; i++) {
-            bitSet.set(i, !Double.isNaN(argument.getDouble(i)));
+            if(!Double.isNaN(argument.getDouble(i))) {
+                result[i] = 1;
+            }
         }
 
-        return new BitSetColumnView(numRows, bitSet);
+        return new BooleanColumnView(result);
     }
 }
