@@ -85,13 +85,13 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
         if(enumType.getCardinality() == Cardinality.SINGLE) {
             // If the field is optional, then ALWAYS use a drop down widget whose value can be cleared
             if(!field.isRequired()) {
-                return new DropDownEnumWidget(enumType, updater);
+                return new DropDownEnumWidget(field, enumType, updater);
 
             } else if(enumType.getEffectivePresentation() == EnumType.Presentation.RADIO_BUTTON) {
                 return new RadioGroupWidget(enumType, updater);
 
             } else {
-                return new DropDownEnumWidget(enumType, updater);
+                return new DropDownEnumWidget(field, enumType, updater);
             }
         } else {
             return new CheckBoxGroupWidget(enumType, updater);

@@ -162,7 +162,7 @@ public class SiteFormStorage implements VersionedFormStorage {
             if(change.getKey().getDomain() == CuidAdapter.INDICATOR_DOMAIN) {
                 indicatorValues.update(change.getKey(), change.getValue());
             } else if(change.getKey().getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN) {
-                attributeValues.update(change.getKey(), change.getValue());
+                attributeValues.add(change.getValue());
             } else if(change.getKey().equals(CuidAdapter.locationField(activity.getId()))) {
                 ReferenceValue value = (ReferenceValue) change.getValue();
                 if(value.getOnlyReference().getRecordId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
