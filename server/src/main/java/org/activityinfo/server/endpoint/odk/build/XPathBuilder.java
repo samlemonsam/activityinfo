@@ -141,6 +141,23 @@ public class XPathBuilder {
         }
     }
 
+    private String resolveSymbol(ExprNode exprNode) {
+        if (exprNode instanceof SymbolExpr) {
+            return resolveSymbol((SymbolExpr) exprNode);
+        } else if (exprNode instanceof ConstantExpr) {
+            return resolveSymbol((ConstantExpr) exprNode);
+        }
+        throw new XPathBuilderException("Unknown expression - must be Enum Constant or Symbol");
+    }
+
+    private String resolveSymbol(ConstantExpr constantExpr) {
+        String xpath = constantExpr.getType() instanceof EnumType ? symbolMap.get(constantExpr.getValue()) : null;
+        if (xpath == null) {
+            throw new XPathBuilderException("Unknown constant '" + constantExpr.getValue() + "'");
+        }
+        return xpath;
+    }
+
     private String resolveSymbol(SymbolExpr symbolExpr) {
         String xpath = symbolMap.get(symbolExpr.getName());
         if (xpath == null) {
@@ -151,7 +168,7 @@ public class XPathBuilder {
 
     private void appendFunction(String functionName, List<ExprNode> arguments, StringBuilder xpath) {
         Preconditions.checkArgument(!arguments.isEmpty());
-        Preconditions.checkArgument(arguments.get(0) instanceof SymbolExpr);
+        Preconditions.checkArgument(arguments.get(0) instanceof SymbolExpr || arguments.get(0) instanceof ConstantExpr);
 
         switch (functionName) {
             case "containsAny":
@@ -168,13 +185,17 @@ public class XPathBuilder {
         Preconditions.checkArgument(arguments.size() >= 2);
         Preconditions.checkArgument(joinOperator.equals("or") || joinOperator.equals("and"));
 
-        String firstArgXpath = resolveSymbol((SymbolExpr) arguments.get(0));
+        String firstArgXpath = resolveSymbol(arguments.get(0));
 
         for (int i = 1; i < arguments.size(); i++) {
             ExprNode argument = arguments.get(i);
-            Preconditions.checkState(argument instanceof SymbolExpr, "Only symbol expr nodes are supported.");
+            Preconditions.checkState(argument instanceof SymbolExpr || argument instanceof ConstantExpr, "Only symbol/constant expr nodes are supported.");
 
-            xpath.append(String.format("selected(%s, '%s')", firstArgXpath, ((SymbolExpr)argument).getName()));
+            if (argument instanceof SymbolExpr) {
+                xpath.append(String.format("selected(%s, '%s')", firstArgXpath, ((SymbolExpr) argument).getName()));
+            } else {
+                xpath.append(String.format("selected(%s, '%s')", firstArgXpath, ((ConstantExpr) argument).getValue()));
+            }
 
             if ((i + 1) != arguments.size()) {
                 xpath.append(" ").append(joinOperator).append(" ");
