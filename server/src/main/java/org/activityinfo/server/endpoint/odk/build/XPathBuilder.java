@@ -108,6 +108,9 @@ public class XPathBuilder {
                 case "<=":
                     appendBinaryInfixTo(function.getId(), arguments, xpath);
                     break;
+                case "!":
+                    appendUnaryFunction("not", arguments.get(0), xpath);
+                    break;
                 default:
                     throw new XPathBuilderException("Unsupported function " + function.getId());
             }
@@ -184,6 +187,15 @@ public class XPathBuilder {
         appendTo(arguments.get(0), xpath);
         xpath.append(" ").append(operatorName).append(" ");
         appendTo(arguments.get(1), xpath);
+    }
+
+    private void appendUnaryFunction(String functionName, ExprNode argument, StringBuilder xpath) {
+        Preconditions.checkArgument(argument != null);
+        Preconditions.checkArgument(functionName.equalsIgnoreCase("not"));
+
+        xpath.append(functionName).append("(");
+        appendTo(argument, xpath);
+        xpath.append(")");
     }
 
     public static String fieldTagName(ResourceId fieldId) {
