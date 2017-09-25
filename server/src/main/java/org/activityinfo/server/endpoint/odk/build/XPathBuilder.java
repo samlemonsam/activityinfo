@@ -229,7 +229,6 @@ public class XPathBuilder {
 
     private void appendUnaryFunction(String functionName, ExprNode argument, StringBuilder xpath) {
         Preconditions.checkArgument(argument != null);
-        Preconditions.checkArgument(functionName.equalsIgnoreCase("not"));
 
         if (argument instanceof GroupExpr) {
             xpath.append(functionName);
