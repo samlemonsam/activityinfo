@@ -253,12 +253,16 @@ public class XPathBuilder {
         if(!operatorName.equals("=")) {
             return false;
         }
-        if ((arg0 instanceof SymbolExpr) &&
-                (arg1 instanceof SymbolExpr || arg1 instanceof  ConstantExpr)) {
+        if (arg0 instanceof SymbolExpr && arg1 instanceof SymbolExpr) {
             return true;
-        } else {
-            return (arg1 instanceof SymbolExpr && arg0 instanceof ConstantExpr);
         }
+        if (arg0 instanceof SymbolExpr && arg1 instanceof ConstantExpr) {
+            return ((ConstantExpr) arg1).getType() instanceof EnumType;
+        }
+        if (arg1 instanceof SymbolExpr && arg0 instanceof ConstantExpr) {
+            return ((ConstantExpr) arg0).getType() instanceof EnumType;
+        }
+        return false;
     }
 
     public static String fieldTagName(ResourceId fieldId) {
