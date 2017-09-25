@@ -79,7 +79,7 @@ public class XPathBuilderTest extends CommandTestCase2 {
 
         assertEquals(
                 bindByFieldId(GENDER_FIELD_ID, xForm).getRelevant(),
-                String.format("/data/field_%s = \"%s\"", GENDER_FIELD_ID.asString(), male.asString()));
+                String.format("/data/field_%s=\"%s\"", GENDER_FIELD_ID.asString(), male.asString()));
     }
 
     @Test
