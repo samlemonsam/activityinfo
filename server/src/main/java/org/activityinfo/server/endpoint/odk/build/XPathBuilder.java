@@ -9,6 +9,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.server.endpoint.odk.OdkField;
 
@@ -79,6 +80,9 @@ public class XPathBuilder {
             if (value instanceof BooleanFieldValue) {
                 BooleanFieldValue booleanFieldValue = (BooleanFieldValue) value;
                 xpath.append(booleanFieldValue.asBoolean() ? TRUE : FALSE);
+            } else if (value instanceof EnumValue) {
+                String xpathExpr = resolveSymbol(exprNode);
+                xpath.append(xpathExpr);
             } else {
                 xpath.append(constantExpr.asExpression());
             }
@@ -151,7 +155,13 @@ public class XPathBuilder {
     }
 
     private String resolveSymbol(ConstantExpr constantExpr) {
-        String xpath = constantExpr.getType() instanceof EnumType ? symbolMap.get(constantExpr.getValue()) : null;
+        String xpath;
+        if (constantExpr.getType() instanceof EnumType) {
+            EnumValue enumValue = (EnumValue) constantExpr.getValue();
+            xpath = symbolMap.get(enumValue.getValueId().asString());
+        } else {
+            xpath = constantExpr.getValue().toString();
+        }
         if (xpath == null) {
             throw new XPathBuilderException("Unknown constant '" + constantExpr.getValue() + "'");
         }
@@ -221,9 +231,14 @@ public class XPathBuilder {
         Preconditions.checkArgument(argument != null);
         Preconditions.checkArgument(functionName.equalsIgnoreCase("not"));
 
-        xpath.append(functionName).append("(");
-        appendTo(argument, xpath);
-        xpath.append(")");
+        if (argument instanceof GroupExpr) {
+            xpath.append(functionName);
+            appendTo(argument, xpath);
+        } else {
+            xpath.append(functionName).append("(");
+            appendTo(argument, xpath);
+            xpath.append(")");
+        }
     }
 
     public static String fieldTagName(ResourceId fieldId) {
