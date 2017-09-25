@@ -206,7 +206,14 @@ public class XPathBuilder {
     private void appendBinaryInfixTo(String operatorName, List<ExprNode> arguments, StringBuilder xpath) {
         Preconditions.checkArgument(arguments.size() == 2);
         appendTo(arguments.get(0), xpath);
-        xpath.append(" ").append(operatorName).append(" ");
+        switch (operatorName) {
+            case "=":
+                xpath.append(operatorName);
+                break;
+            default:
+                xpath.append(" ").append(operatorName).append(" ");
+                break;
+        }
         appendTo(arguments.get(1), xpath);
     }
 
