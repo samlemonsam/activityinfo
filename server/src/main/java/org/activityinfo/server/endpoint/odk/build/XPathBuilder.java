@@ -13,6 +13,7 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.server.endpoint.odk.OdkField;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,11 +136,12 @@ public class XPathBuilder {
 
         } else if (exprNode instanceof CompoundExpr) {
             CompoundExpr compoundExpr = (CompoundExpr) exprNode;
-            ExprNode valueNode = compoundExpr.getValue();
-            appendTo(valueNode,xpath);
-            xpath.append("=");
-            ExprNode fieldNode = compoundExpr.getField();
-            appendTo(fieldNode,xpath);
+
+            List<ExprNode> arguments = new ArrayList<>();
+            arguments.add(compoundExpr.getValue());
+            arguments.add(compoundExpr.getField());
+
+            appendBinaryInfixTo("=", arguments, xpath);
         } else {
             throw new XPathBuilderException("Unknown expr node " + exprNode);
         }
@@ -200,11 +202,12 @@ public class XPathBuilder {
         for (int i = 1; i < arguments.size(); i++) {
             ExprNode argument = arguments.get(i);
             Preconditions.checkState(argument instanceof SymbolExpr || argument instanceof ConstantExpr, "Only symbol/constant expr nodes are supported.");
+            String symbol = resolveSymbol(argument);
 
             if (argument instanceof SymbolExpr) {
-                xpath.append(String.format("selected(%s, '%s')", firstArgXpath, ((SymbolExpr) argument).getName()));
+                xpath.append(String.format("selected(%s, %s)", firstArgXpath, symbol));
             } else {
-                xpath.append(String.format("selected(%s, '%s')", firstArgXpath, ((ConstantExpr) argument).getValue()));
+                xpath.append(String.format("selected(%s, %s)", firstArgXpath, symbol));
             }
 
             if ((i + 1) != arguments.size()) {
@@ -215,6 +218,12 @@ public class XPathBuilder {
 
     private void appendBinaryInfixTo(String operatorName, List<ExprNode> arguments, StringBuilder xpath) {
         Preconditions.checkArgument(arguments.size() == 2);
+
+        if(isEnumSelectFunction(operatorName, arguments.get(0), arguments.get(1))) {
+            appendSelectedFunction("and", arguments, xpath);
+            return;
+        }
+
         appendTo(arguments.get(0), xpath);
         switch (operatorName) {
             case "=":
@@ -237,6 +246,18 @@ public class XPathBuilder {
             xpath.append(functionName).append("(");
             appendTo(argument, xpath);
             xpath.append(")");
+        }
+    }
+
+    private boolean isEnumSelectFunction(String operatorName, ExprNode arg0, ExprNode arg1) {
+        if(!operatorName.equals("=")) {
+            return false;
+        }
+        if ((arg0 instanceof SymbolExpr) &&
+                (arg1 instanceof SymbolExpr || arg1 instanceof  ConstantExpr)) {
+            return true;
+        } else {
+            return (arg1 instanceof SymbolExpr && arg0 instanceof ConstantExpr);
         }
     }
 
