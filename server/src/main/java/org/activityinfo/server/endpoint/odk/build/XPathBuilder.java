@@ -131,11 +131,11 @@ public class XPathBuilder {
 
         } else if (exprNode instanceof CompoundExpr) {
             CompoundExpr compoundExpr = (CompoundExpr) exprNode;
-            ExprNode fieldNode = compoundExpr.getField();
-            appendTo(fieldNode,xpath);
-            xpath.append("=");
             ExprNode valueNode = compoundExpr.getValue();
             appendTo(valueNode,xpath);
+            xpath.append("=");
+            ExprNode fieldNode = compoundExpr.getField();
+            appendTo(fieldNode,xpath);
         } else {
             throw new XPathBuilderException("Unknown expr node " + exprNode);
         }
