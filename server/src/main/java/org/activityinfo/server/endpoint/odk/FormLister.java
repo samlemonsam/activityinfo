@@ -44,6 +44,10 @@ public class FormLister {
             }
             if (db.isEditAllowed()) {
                 for (ActivityDTO activity : db.getActivities()) {
+                    if(hasAdminLevelLocation(activity)) {
+                        // Admin Level Locations are invalid for ODK forms - do not show
+                        continue;
+                    }
                     XFormListItem form = new XFormListItem();
                     form.setName(db.getName() + " / " + activity.getName());
                     form.setFormId("activityinfo.org:" + activity.getId());
@@ -64,5 +68,9 @@ public class FormLister {
 
     private String getVersion() {
         return Long.toString(System.currentTimeMillis() / 1000);
+    }
+
+    private boolean hasAdminLevelLocation(ActivityDTO activity) {
+        return activity.getLocationType().isAdminLevel();
     }
 }
