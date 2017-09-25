@@ -162,7 +162,7 @@ public class XPathBuilder {
             EnumValue enumValue = (EnumValue) constantExpr.getValue();
             xpath = symbolMap.get(enumValue.getValueId().asString());
         } else {
-            xpath = constantExpr.getValue().toString();
+            xpath = symbolMap.get(constantExpr.getValue().toString());
         }
         if (xpath == null) {
             throw new XPathBuilderException("Unknown constant '" + constantExpr.getValue() + "'");
@@ -253,16 +253,11 @@ public class XPathBuilder {
         if(!operatorName.equals("=")) {
             return false;
         }
-        if (arg0 instanceof SymbolExpr && arg1 instanceof SymbolExpr) {
-            return true;
+        try {
+            return resolveSymbol(arg0) != null && resolveSymbol(arg1) != null;
+        } catch(XPathBuilderException excp) {
+            return false;
         }
-        if (arg0 instanceof SymbolExpr && arg1 instanceof ConstantExpr) {
-            return ((ConstantExpr) arg1).getType() instanceof EnumType;
-        }
-        if (arg1 instanceof SymbolExpr && arg0 instanceof ConstantExpr) {
-            return ((ConstantExpr) arg0).getType() instanceof EnumType;
-        }
-        return false;
     }
 
     public static String fieldTagName(ResourceId fieldId) {
