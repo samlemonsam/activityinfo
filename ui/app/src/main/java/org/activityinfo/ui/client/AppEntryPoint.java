@@ -26,7 +26,6 @@ import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 import org.activityinfo.ui.icons.Icons;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,12 +48,8 @@ public class AppEntryPoint implements EntryPoint {
         Icons.INSTANCE.ensureInjected();
 
         AppCache appCache = new AppCache();
-
-        if (LOGGER.isLoggable(Level.INFO)) {
-            appCache.getStatus().subscribe(status -> {
-                LOGGER.info("AppCache Status: " + status.get());
-            });
-        }
+        AppCacheMonitor monitor = new AppCacheMonitor(appCache);
+        monitor.start();
 
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);

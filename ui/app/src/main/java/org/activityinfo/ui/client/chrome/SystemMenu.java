@@ -46,6 +46,8 @@ public class SystemMenu implements IsWidget {
         icon.addClickHandler(event ->
             menu.show(icon.getElement(), new Style.AnchorAlignment(Style.Anchor.TOP, Style.Anchor.BOTTOM)));
 
+        icon.addClickHandler(event -> appCache.checkForUpdates());
+
         appCache.getStatus().subscribe(this::updateAppCacheView);
     }
 
@@ -54,7 +56,6 @@ public class SystemMenu implements IsWidget {
     public Widget asWidget() {
         return icon;
     }
-
 
     private String statusMessage(AppCache.Status status) {
         switch (status) {
@@ -76,7 +77,6 @@ public class SystemMenu implements IsWidget {
         appCacheStatusItem.setEnabled(status.get() == AppCache.Status.UPDATE_READY);
     }
 
-
     private void loadUpdatedAppCache(SelectionEvent<Item> event) {
         Window.Location.reload();
     }
@@ -84,5 +84,4 @@ public class SystemMenu implements IsWidget {
     private void logout(SelectionEvent<Item> event) {
         Window.Location.assign("/logout");
     }
-
 }

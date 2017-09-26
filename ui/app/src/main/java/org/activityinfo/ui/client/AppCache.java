@@ -1,11 +1,13 @@
 package org.activityinfo.ui.client;
 
+import com.google.gwt.user.client.Window;
 import org.activityinfo.observable.Observable;
 
 /**
  * Provides management of the ActivityInfo AppCache.
  */
 public class AppCache {
+
 
     public enum Status {
         UNCACHED,
@@ -29,6 +31,27 @@ public class AppCache {
         return status;
     }
 
+    /**
+     * Initiates an asynchronous check for updates, similar to the one performed when a webpage is first loaded.
+     * @return  true if the request was started
+     */
+    public boolean checkForUpdates() {
+        try {
+            update();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void loadUpdate() {
+        Window.Location.reload();
+    }
+
+    private final native void update() /*-{
+        $wnd.applicationCache.update();
+    }-*/;
+
     private static class ObservableStatus extends Observable<Status> {
 
         public ObservableStatus() {
@@ -47,7 +70,7 @@ public class AppCache {
         private static native void sinkEvent(ObservableStatus observable, String eventName) /*-{
             $wnd.applicationCache.addEventListener(eventName, function(event) {
                 observable.@org.activityinfo.ui.client.AppCache.ObservableStatus::fireChange()();
-            })
+            }, false)
         }-*/;
 
         @Override
@@ -65,5 +88,4 @@ public class AppCache {
             super.onConnect();
         }
     }
-
 }
