@@ -21,10 +21,14 @@ package org.activityinfo.server.endpoint.odk;
  * #L%
  */
 
+import com.google.cloud.sql.jdbc.internal.Charsets;
+import com.google.common.io.Resources;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.io.xform.form.Bind;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.io.xform.util.XFormNavigator;
+import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.simple.SimpleConditionList;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.TFormClass;
@@ -37,12 +41,15 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
+import org.activityinfo.io.xform.xpath.XPathBuilder;
+import org.activityinfo.io.xform.xpath.XPathBuilderException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
-import java.util.Arrays;
+import java.io.*;
+import java.util.*;
+import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 
@@ -60,9 +67,82 @@ public class XPathBuilderTest extends CommandTestCase2 {
 
     private OdkFormFieldBuilderFactory factory;
 
+    private List<ExprNode> exprList;
+    private List<ResourceId> fieldList;
+
     @Before
     public void setUp() throws IOException {
         factory = new OdkFormFieldBuilderFactory(injector.getInstance(ResourceLocatorSync.class));
+    }
+
+    @Test
+    public void relevanceConditions() throws IOException {
+        URL resource = Resources.getResource(SimpleConditionList.class,"formulas.txt");
+        List<String> formulas = Resources.readLines(resource, Charsets.UTF_8);
+        fieldList = new ArrayList<>();
+        exprList = new ArrayList<>();
+
+        for(String formula : formulas) {
+            ExprNode node = ExprParser.parse(formula);
+            exprList.add(node);
+            List<ResourceId> fieldIds = getFieldIds(node);
+            addToFieldList(fieldIds);
+        }
+
+        TestSymbolHandler symbolHandler = new TestSymbolHandler(fieldList);
+        XPathBuilder xPathBuilder = new XPathBuilder(symbolHandler);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            String xpath;
+            Iterator<ExprNode> it = exprList.listIterator();
+            while (it.hasNext()) {
+                ExprNode node = it.next();
+                xpath = xPathBuilder.build(node);
+                stringBuilder.append(node.asExpression() + "\t" + xpath + System.lineSeparator());
+            }
+        } catch (XPathBuilderException e) {
+            throw new AssertionError("Unable to construct XPath for relevance condition: " + e.getMessage());
+        } finally {
+            try(Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("xpath.txt")))) {
+                writer.write(stringBuilder.toString());
+                writer.close();
+            }
+        }
+    }
+
+    private List<ResourceId> getFieldIds(ExprNode exprNode) {
+        List<ResourceId> fieldIds = new ArrayList<>();
+        if (exprNode instanceof FunctionCallNode) {
+            FunctionCallNode functionCall = (FunctionCallNode) exprNode;
+            for(ExprNode arg : functionCall.getArguments()) {
+                fieldIds.addAll(getFieldIds(arg));
+            }
+        } else if (exprNode instanceof SymbolExpr) {
+            SymbolExpr symbolExpr = (SymbolExpr) exprNode;
+            fieldIds.add(ResourceId.valueOf(symbolExpr.getName()));
+        } else if (exprNode instanceof ConstantExpr) {
+            ConstantExpr constantExpr = (ConstantExpr) exprNode;
+            if (constantExpr.getType() instanceof EnumType) {
+                fieldIds.add(ResourceId.valueOf(constantExpr.toString()));
+            }
+        } else if (exprNode instanceof CompoundExpr) {
+            CompoundExpr compoundExpr = (CompoundExpr) exprNode;
+            fieldIds.addAll(getFieldIds(compoundExpr.getValue()));
+            fieldIds.addAll(getFieldIds(compoundExpr.getField()));
+        } else if (exprNode instanceof GroupExpr) {
+            GroupExpr groupExpr = (GroupExpr) exprNode;
+            fieldIds.addAll(getFieldIds(groupExpr.getExpr()));
+        }
+        return fieldIds;
+    }
+
+    private void addToFieldList(List<ResourceId> fieldIds) {
+        for (ResourceId fieldId : fieldIds) {
+            if (!fieldList.contains(fieldId)) {
+                fieldList.add(fieldId);
+            }
+        }
     }
 
     @Test

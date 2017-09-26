@@ -3,6 +3,7 @@ package org.activityinfo.server.endpoint.odk.build;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.io.xform.form.*;
+import org.activityinfo.io.xform.xpath.XPathBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -12,6 +13,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.endpoint.odk.OdkField;
 import org.activityinfo.server.endpoint.odk.OdkFormFieldBuilder;
 import org.activityinfo.server.endpoint.odk.OdkFormFieldBuilderFactory;
+import org.activityinfo.server.endpoint.odk.OdkSymbolHandler;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ public class XFormBuilder {
     private Set<ResourceId> dateFields;
     private ResourceId locationNameFieldId;
     private ResourceId gpsFieldId;
+    private OdkSymbolHandler odkSymbolHandler;
     private XPathBuilder xPathBuilder;
     private XForm xform;
 
@@ -61,7 +64,8 @@ public class XFormBuilder {
         gpsFieldId = field(formClass.getId(), GPS_FIELD);
 
         fields = createFieldBuilders(formClass);
-        xPathBuilder = new XPathBuilder(fields);
+        odkSymbolHandler = new OdkSymbolHandler(fields);
+        xPathBuilder = new XPathBuilder(odkSymbolHandler);
         xform = new XForm();
         xform.getHead().setTitle(formClass.getLabel());
         xform.getHead().setModel(createModel());
