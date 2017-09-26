@@ -16,17 +16,17 @@ import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.indexedb.IDBFactoryImpl;
-import org.activityinfo.ui.client.analysis.AnalysisPlace;
 import org.activityinfo.ui.client.catalog.CatalogPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.ConnectionListener;
-import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
 import org.activityinfo.ui.icons.Icons;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -48,6 +48,14 @@ public class AppEntryPoint implements EntryPoint {
 
         Icons.INSTANCE.ensureInjected();
 
+        AppCache appCache = new AppCache();
+
+        if (LOGGER.isLoggable(Level.INFO)) {
+            appCache.getStatus().subscribe(status -> {
+                LOGGER.info("AppCache Status: " + status.get());
+            });
+        }
+
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
@@ -62,7 +70,7 @@ public class AppEntryPoint implements EntryPoint {
         FormStore formStore = new FormStoreImpl(httpStore, offlineStore, Scheduler.get());
 
         Viewport viewport = new Viewport();
-        AppFrame appFrame = new AppFrame(httpStore, offlineStore);
+        AppFrame appFrame = new AppFrame(appCache, httpStore, offlineStore);
 
         ActivityMapper activityMapper = new AppActivityMapper(formStore);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);

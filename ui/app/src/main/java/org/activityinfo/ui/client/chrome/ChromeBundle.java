@@ -18,6 +18,9 @@ public interface ChromeBundle extends ClientBundle {
     @Source("offline.svg")
     TextResource offlineIcon();
 
+    @Source("settings.svg")
+    TextResource settingsIcon();
+
     @Source("logo.html")
     TextResource logoLink();
 

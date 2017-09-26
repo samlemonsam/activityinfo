@@ -1,13 +1,17 @@
 package org.activityinfo.ui.client.chrome;
 
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
+import org.activityinfo.ui.client.AppCache;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 
@@ -22,7 +26,7 @@ public class AppFrame implements IsWidget {
 
     private Subscription titleSubscription;
 
-    public AppFrame(HttpStore httpStore, OfflineStore offlineStore) {
+    public AppFrame(AppCache appCache, HttpStore httpStore, OfflineStore offlineStore) {
         ChromeBundle.BUNDLE.style().ensureInjected();
 
         HTML logoLink = new HTML(ChromeBundle.BUNDLE.logoLink().getText());
@@ -41,6 +45,7 @@ public class AppFrame implements IsWidget {
         appBar.add(new ConnectionIcon(httpStore.getHttpBus()));
         appBar.add(new OfflineMenu(httpStore.getHttpBus(), offlineStore));
         appBar.add(new LocaleSelector());
+        appBar.add(new SystemMenu(appCache));
 
         container = new BorderLayoutContainer();
         container.setNorthWidget(appBar, new BorderLayoutContainer.BorderLayoutData(50));
