@@ -6,10 +6,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -20,8 +18,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
-import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
@@ -31,6 +27,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -50,6 +47,8 @@ import static org.activityinfo.json.Json.createObject;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 
@@ -390,13 +389,13 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         newRequest();
 
         // Now update the record's name
-        JsonObject fieldValues = createObject();
+        org.activityinfo.json.JsonObject fieldValues = createObject();
         fieldValues.put(nameField.getName(), TextValue.valueOf("Sue").toJsonElement());
 
         // the UI may send null values
         fieldValues.put(serialNumField.getName(), Json.createNull());
 
-        JsonObject update = createObject();
+        org.activityinfo.json.JsonObject update = createObject();
         update.put("fieldValues", fieldValues);
 
         updater().execute(formClass.getId(), siteId, update);
@@ -530,4 +529,28 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     }
 
 
+    @Test
+    public void updateLocation() throws SQLException {
+
+        ResourceId recordId = CuidAdapter.cuid(LOCATION_DOMAIN, 1);
+        ResourceId formId = CuidAdapter.locationFormClass(1);
+
+        RecordUpdate update = new RecordUpdate();
+        update.setFormId(formId);
+        update.setRecordId(recordId);
+        update.setFieldValue(CuidAdapter.field(formId, CuidAdapter.NAME_FIELD), TextValue.valueOf("New Name"));
+
+        Updater updater = updater();
+        updater.executeChange(update);
+
+        newRequest();
+
+        FormStorage formStorage = catalog.getForm(formId).get();
+        FormRecord record = formStorage.get(recordId).get();
+        FormInstance typedRecord = FormInstance.toFormInstance(formStorage.getFormClass(), record);
+
+        GeoPoint point = (GeoPoint) typedRecord.get(CuidAdapter.field(formId, CuidAdapter.GEOMETRY_FIELD));
+
+        assertThat(point, not(nullValue()));
+    }
 }

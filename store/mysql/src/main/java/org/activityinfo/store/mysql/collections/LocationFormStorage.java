@@ -203,7 +203,7 @@ public class LocationFormStorage implements FormStorage {
         insert.value("name", getName(update), 50);
         insert.value("axe", getAxe(update), 50);
 
-        GeoPoint point = getPoint(update);
+        GeoPoint point = (GeoPoint) update.getChangedFieldValues().get(pointFieldId);
         if (point != null) {
             insert.value("x", point.getLongitude());
             insert.value("y", point.getLatitude());
@@ -236,13 +236,15 @@ public class LocationFormStorage implements FormStorage {
             sql.set("name", getName(update), 50);
             sql.set("axe", getAxe(update), 50);
 
-            GeoPoint point = getPoint(update);
-            if (point != null) {
-                sql.set("x", point.getLongitude());
-                sql.set("y", point.getLatitude());
-            } else {
-                sql.set("x", null);
-                sql.set("y", null);
+            if(update.getChangedFieldValues().containsKey(pointFieldId)) {
+                GeoPoint point = (GeoPoint) update.getChangedFieldValues().get(pointFieldId);
+                if(point == null) {
+                    sql.set("x", null);
+                    sql.set("y", null);
+                } else {
+                    sql.set("x", point.getLongitude());
+                    sql.set("y", point.getLatitude());
+                }
             }
         }
         sql.execute(executor);
@@ -329,10 +331,6 @@ public class LocationFormStorage implements FormStorage {
         } else {
             return ((TextValue) fieldValue).asString();
         }
-    }
-
-    private GeoPoint getPoint(TypedRecordUpdate update) {
-        return (GeoPoint) update.getChangedFieldValues().get(pointFieldId);
     }
 
     private Set<Integer> getAdminEntities(TypedRecordUpdate update) {
