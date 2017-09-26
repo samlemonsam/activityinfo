@@ -2,7 +2,6 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
-
 import java.util.Date;
 
 /**
@@ -10,10 +9,10 @@ import java.util.Date;
  */
 public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
-    @DefaultMessage("Are you sure you want to delete the database <b>{0}</b>? <br><br>You will loose all activities and indicator results.")
+    @DefaultMessage("Are you sure you want to delete the database <b>{0}</b>? <br><br>You will lose all activities and indicator results.")
     SafeHtml confirmDeleteDb(String arg0);
 
-    @DefaultMessage("Are you sure you want to delete the form <b>{0}</b>? <br><br>You will loose all information associated with it.")
+    @DefaultMessage("Are you sure you want to delete the form <b>{0}</b>? <br><br>You will lose all information associated with it.")
     SafeHtml confirmDeleteForm(String arg0);
 
     @DefaultMessage("The coordinate falls outside of the bounds of {0}")
@@ -105,7 +104,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) updated an entry in the {3} sub form.")
     String siteHistorySubFormUpdated(Date date, String userName, String userEmail, String subFormName);
-    
+
     @DefaultMessage("No history is available for this form entry.")
     String siteHistoryNotAvailable();
 
@@ -230,7 +229,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @Messages.DefaultMessage("{0,date,medium} to {1,date,medium}")
     String dateRange(Date formDate, Date toDate);
-    
+
     @Messages.DefaultMessage("Logged in as {0}")
     String loggedInAs(String email);
 
@@ -240,8 +239,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Option {0,number}")
     String defaultEnumItem(int number);
 
-    @DefaultMessage("Unknown value: {0}. Each selection of 'Multiple selection' control must have separate column " +
-            "with allowed values: TRUE, FALSE or no value (which is considered as FALSE)")
+    @DefaultMessage("Unknown value: {0}. Each selection of ''Multiple selection'' control must have separate column with allowed values: TRUE, FALSE or no value (which is considered as FALSE)")
     String unknownMultiEnumValue(String value);
 
     @DefaultMessage("Required field ''{0}'' is missing in row {1}")
@@ -250,8 +248,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("You didn''t provide a column named ''{0}'', so we''ll default to ''{1}''.")
     String missingWithDefault(String columnName, String defaultValue);
 
-    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the id of the form " +
-            "to reference, is required.")
+    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the id of the form to reference, is required.")
     String referenceFieldRequiresRange(String fieldTypeName, String columnName);
 
     @DefaultMessage("Count of {0}")
