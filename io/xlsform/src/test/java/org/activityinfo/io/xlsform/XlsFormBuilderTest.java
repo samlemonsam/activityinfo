@@ -9,6 +9,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -63,7 +64,24 @@ public class XlsFormBuilderTest {
                 .setLabel("Who are your brothers?")
                 .setCode("Brothers")
                 .setType(new SubFormReferenceType(ResourceId.valueOf("F2")));
-        
+
+        formClass.addField(ResourceId.valueOf("X7"))
+                .setLabel("Likes any color?")
+                .setCode("Colorful")
+                .setType(BooleanType.INSTANCE)
+                .setRelevanceConditionExpression("containsAny(X5,Z1,Z2,Z3)");
+
+        formClass.addField(ResourceId.valueOf("X8"))
+                .setLabel("Likes the color blue?")
+                .setCode("BlueLover")
+                .setType(BooleanType.INSTANCE)
+                .setRelevanceConditionExpression("X5==Z1");
+
+        formClass.addField(ResourceId.valueOf("X9"))
+                .setLabel("Likes the color red?")
+                .setCode("RedLover")
+                .setType(BooleanType.INSTANCE)
+                .setRelevanceConditionExpression("X5==\'Z2\'");
         
         final FormClass subFormClass = new FormClass(ResourceId.valueOf("F2"));
         subFormClass.setLabel("Sub Form");

@@ -1,6 +1,8 @@
 package org.activityinfo.io.xlsform;
 
 import com.google.common.base.Strings;
+import org.activityinfo.io.xform.xpath.XPathBuilder;
+import org.activityinfo.io.xform.xpath.XSymbolHandler;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -51,6 +53,9 @@ public class XlsFormBuilder {
 
     private final FormClassProvider formClassProvider;
 
+    private XPathBuilder xPathBuilder;
+    private XSymbolHandler symbolHandler;
+
     public XlsFormBuilder(FormClassProvider formClassProvider) {
         this.formClassProvider = formClassProvider;
 
@@ -88,7 +93,10 @@ public class XlsFormBuilder {
     }
     
     public void build(ResourceId formClassId) {
-        writeFields(formClassProvider.getFormClass(formClassId));
+        FormClass formClass = formClassProvider.getFormClass(formClassId);
+        symbolHandler = new XlsSymbolHandler(formClass.getFields());
+        xPathBuilder = new XPathBuilder(symbolHandler);
+        writeFields(formClass);
     }
     
     public void write(OutputStream outputStream) throws IOException {
@@ -166,7 +174,8 @@ public class XlsFormBuilder {
         }
         
         if(field.getRelevanceConditionExpression() != null) {
-            fieldRow.createCell(RELEVANT_COLUMN).setCellValue(field.getRelevanceConditionExpression());
+            String xpathRelevanceCondition = xPathBuilder.build(field.getRelevanceConditionExpression());
+            fieldRow.createCell(RELEVANT_COLUMN).setCellValue(xpathRelevanceCondition);
         }
     }
 

@@ -1,8 +1,8 @@
 package org.activityinfo.server.endpoint.odk.xform;
 
 import com.google.common.base.Optional;
+import org.activityinfo.io.xform.xpath.XPathBuilder;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.endpoint.odk.build.XPathBuilder;
 import org.activityinfo.server.endpoint.odk.OdkHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

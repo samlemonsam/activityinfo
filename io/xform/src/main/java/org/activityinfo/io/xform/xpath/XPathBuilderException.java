@@ -1,4 +1,4 @@
-package org.activityinfo.server.endpoint.odk.build;
+package org.activityinfo.io.xform.xpath;
 
 public class XPathBuilderException extends RuntimeException {
 
