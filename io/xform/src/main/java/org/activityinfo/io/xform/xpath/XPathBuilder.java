@@ -7,6 +7,7 @@ import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 
@@ -68,7 +69,7 @@ public class XPathBuilder {
                 BooleanFieldValue booleanFieldValue = (BooleanFieldValue) value;
                 xpath.append(booleanFieldValue.asBoolean() ? TRUE : FALSE);
             } else if (value instanceof EnumValue) {
-                String xpathExpr = symbolHandler.resolveSymbol(exprNode);
+                String xpathExpr = resolveSymbol(exprNode);
                 xpath.append(xpathExpr);
             } else {
                 xpath.append(constantExpr.asExpression());
@@ -119,7 +120,7 @@ public class XPathBuilder {
         } else if (exprNode instanceof SymbolExpr) {
             SymbolExpr symbolExpr = (SymbolExpr) exprNode;
 
-            String xpathExpr = symbolHandler.resolveSymbol(symbolExpr);
+            String xpathExpr = resolveSymbol(symbolExpr);
 
             xpath.append(xpathExpr);
 
@@ -165,12 +166,12 @@ public class XPathBuilder {
         Preconditions.checkArgument(arguments.size() >= 2);
         Preconditions.checkArgument(joinOperator.equals("or") || joinOperator.equals("and"));
 
-        String firstArgXpath = symbolHandler.resolveSymbol(arguments.get(0));
+        String firstArgXpath = resolveSymbol(arguments.get(0));
 
         for (int i = 1; i < arguments.size(); i++) {
             ExprNode argument = arguments.get(i);
             Preconditions.checkState(argument instanceof SymbolExpr || argument instanceof ConstantExpr, "Only symbol/constant expr nodes are supported.");
-            String symbol = symbolHandler.resolveSymbol(argument);
+            String symbol = resolveSymbol(argument);
 
             if (argument instanceof SymbolExpr) {
                 xpath.append(String.format("selected(%s, %s)", firstArgXpath, symbol));
@@ -223,7 +224,7 @@ public class XPathBuilder {
             return false;
         }
         try {
-            return symbolHandler.resolveSymbol(arg0) != null && symbolHandler.resolveSymbol(arg1) != null;
+            return resolveSymbol(arg0) != null && resolveSymbol(arg1) != null;
         } catch(XSymbolException excp) {
             return false;
         }
@@ -231,5 +232,29 @@ public class XPathBuilder {
 
     public static String fieldTagName(ResourceId fieldId) {
         return "field_" + fieldId.asString();
+    }
+
+    private String resolveSymbol(ExprNode exprNode) throws XSymbolException {
+        if (exprNode instanceof SymbolExpr) {
+            return resolveSymbol((SymbolExpr) exprNode);
+        } else if (exprNode instanceof ConstantExpr) {
+            return resolveSymbol((ConstantExpr) exprNode);
+        }
+        throw new XSymbolException(exprNode.asExpression());
+    }
+
+    private String resolveSymbol(SymbolExpr symbolExpr) throws XSymbolException {
+        return symbolHandler.resolveSymbol(symbolExpr.getName());
+    }
+
+    private String resolveSymbol(ConstantExpr constantExpr) throws XSymbolException {
+        String resolved;
+        if (constantExpr.getType() instanceof EnumType) {
+            EnumValue enumValue = (EnumValue) constantExpr.getValue();
+            resolved = symbolHandler.resolveSymbol(enumValue.getValueId().asString());
+        } else {
+            resolved = symbolHandler.resolveSymbol(constantExpr.getValue().toString());
+        }
+        return resolved;
     }
 }

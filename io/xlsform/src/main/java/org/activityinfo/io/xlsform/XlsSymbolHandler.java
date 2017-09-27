@@ -1,36 +1,38 @@
-package org.activityinfo.server.endpoint.odk;
+package org.activityinfo.io.xlsform;
 
 import com.google.common.base.Preconditions;
 import org.activityinfo.io.xform.xpath.XSymbolException;
 import org.activityinfo.io.xform.xpath.XSymbolHandler;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OdkSymbolHandler implements XSymbolHandler {
+public class XlsSymbolHandler implements XSymbolHandler {
 
-    private final Map<String, String> symbolMap = new HashMap<>();
+    private Map<String,String> symbolMap;
 
-    public OdkSymbolHandler(List<OdkField> fields) {
-        for(OdkField field : fields) {
-            symbolMap.put(field.getModel().getId().asString(), field.getAbsoluteFieldName());
-            if(field.getModel().getType() instanceof EnumType) {
-                addEnumItems((EnumType) field.getModel().getType());
+    public XlsSymbolHandler(List<FormField> fields) {
+        symbolMap = new HashMap<>();
+        for (FormField field : fields) {
+            if (field.getType() instanceof EnumType) {
+                addEnumItems((EnumType) field.getType());
             }
+            symbolMap.put(field.getId().asString(), fieldRef(field.getCode()));
         }
     }
 
     private void addEnumItems(EnumType enumType) {
-        for (EnumItem item : enumType.getValues()) {
+        for(EnumItem item : enumType.getValues()) {
             symbolMap.put(item.getId().asString(), quote(item.getId().asString()));
         }
+    }
+
+    private String fieldRef(String field) {
+        return "${" + field + "}";
     }
 
     private String quote(String value) {
