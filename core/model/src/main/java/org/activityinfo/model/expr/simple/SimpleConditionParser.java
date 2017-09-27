@@ -29,6 +29,8 @@ public class SimpleConditionParser {
                 return contains(Criteria.ANY_TRUE, call, SimpleOperator.INCLUDES);
             } else if(call.getFunction() == NotContainsAllFunction.INSTANCE) {
                 return contains(Criteria.ALL_TRUE, call, SimpleOperator.NOT_INCLUDES);
+            } else if(call.getFunction() == NotContainsAnyFunction.INSTANCE) {
+                return contains(Criteria.ANY_TRUE, call, SimpleOperator.NOT_INCLUDES);
             }
         }
 
