@@ -82,7 +82,7 @@ public class ColumnFormatFactory implements FieldTypeVisitor<ColumnFormat> {
     @Override
     public ColumnFormat visitEnum(EnumType enumType) {
         if(enumType.getCardinality() == Cardinality.SINGLE) {
-            return new TextFormat(columnId, formula);
+            return new SingleEnumFormat(columnId, formula, enumType);
         } else {
             return new MultiEnumFormat(columnId, formula, enumType);
         }

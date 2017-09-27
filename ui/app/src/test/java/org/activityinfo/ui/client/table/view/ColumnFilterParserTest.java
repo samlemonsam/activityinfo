@@ -5,6 +5,7 @@ import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.data.shared.loader.FilterConfigBean;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.type.time.LocalDate;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -14,7 +15,7 @@ import java.util.Collection;
 
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.expr.ExprParser.parse;
-import static org.activityinfo.ui.client.table.view.ColumnFilterParser.findConjunctionList;
+import static org.activityinfo.ui.client.table.view.ColumnFilterParser.findBinaryTree;
 import static org.activityinfo.ui.client.table.view.ColumnFilterParser.toFormula;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
@@ -26,7 +27,7 @@ public class ColumnFilterParserTest {
     public static final SymbolExpr A = new SymbolExpr("A");
     public static final SymbolExpr B = new SymbolExpr("B");
     public static final SymbolExpr C = new SymbolExpr("C");
-
+    public static final AndFunction AND = AndFunction.INSTANCE;
 
 
     @Test
@@ -52,6 +53,15 @@ public class ColumnFilterParserTest {
     }
 
     @Test
+    public void list() {
+        FilterConfig cfg = new FilterConfigBean();
+        cfg.setType("list");
+        cfg.setValue("Item1::Item2::Item3");
+
+        assertThat(toFormula(A, cfg).asExpression(), equalTo("A.Item1 || A.Item2 || A.Item3"));
+    }
+
+    @Test
     public void test() {
         FilterConfig c = new FilterConfigBean();
         c.setField("DOB");
@@ -65,13 +75,13 @@ public class ColumnFilterParserTest {
     @Test
     public void decomposition() {
 
-        assertThat(findConjunctionList(parse("A && B")), contains(A, B));
+        assertThat(findBinaryTree(parse("A && B"), AND), contains(A, B));
 
-        assertThat(findConjunctionList(parse("A && B && C")), contains(A, B, C));
+        assertThat(findBinaryTree(parse("A && B && C"), AND), contains(A, B, C));
 
-        assertThat(findConjunctionList(parse("A && (B && C)")), contains(A, B, C));
+        assertThat(findBinaryTree(parse("A && (B && C)"), AND), contains(A, B, C));
 
-        assertThat(findConjunctionList(parse("(A && ((B && (C))))")), contains(A, B, C));
+        assertThat(findBinaryTree(parse("(A && ((B && (C))))"), AND), contains(A, B, C));
     }
 
     @Test
@@ -137,6 +147,19 @@ public class ColumnFilterParserTest {
             hasProperty("value", equalTo("foo")));
 
         assertThat(map.get(0), contains(equality));
+    }
+
+    @Test
+    public void parseList() {
+        ColumnFilterParser parser = new ColumnFilterParser(asList(A));
+        Multimap<Integer, FilterConfig> map = parser.parseFilter(parse("A.X1 || A.X2 || A.Y2"));
+
+        Matcher<FilterConfig> list = Matchers.allOf(
+            hasProperty("type", equalTo("list")),
+            hasProperty("value", equalTo("X1::X2::Y2")));
+
+        assertThat(map.get(0), contains(list));
+
     }
 
     @Test

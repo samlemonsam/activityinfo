@@ -127,16 +127,18 @@ public class ColumnModelBuilder {
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
-        addEnumFilter(tableColumn, (EnumType) tableColumn.getType(), valueProvider);
+        addEnumFilter(valueProvider.getPath(), tableColumn, (EnumType) tableColumn.getType());
     }
 
-    private void addEnumFilter(EffectiveTableColumn columnModel, EnumType enumType, ValueProvider<Integer, String> valueProvider) {
-        ListStore<String> store = new ListStore<>(x -> x);
+    private void addEnumFilter(String path, EffectiveTableColumn columnModel, EnumType enumType) {
+        ListStore<EnumItemViewModel> store = new ListStore<>(x -> x.getId());
         for (EnumItem enumItem : enumType.getValues()) {
-            store.add(enumItem.getLabel());
+            store.add(new EnumItemViewModel(enumItem));
         }
 
-        ListFilter<Integer, String> filter = new ListFilter<>(valueProvider, store);
+        ListFilter<Integer, EnumItemViewModel> filter = new ListFilter<>(new NullValueProvider<>(path), store);
+        filter.setUseStoreKeys(true);
+
         filters.add(new ColumnView(columnModel.getFormula(), filter));
     }
 
@@ -150,7 +152,6 @@ public class ColumnModelBuilder {
 
         DateFilter<Integer> filter = new DateFilter<>(valueProvider);
         filters.add(new ColumnView(tableColumn.getFormula(), filter));
-
     }
 
 
@@ -161,6 +162,8 @@ public class ColumnModelBuilder {
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
+
+        addEnumFilter(valueProvider.getPath(), tableColumn, (EnumType) tableColumn.getType());
     }
 
     private void addGeoPointColumn(EffectiveTableColumn columnModel, GeoPointFormat format) {
@@ -201,5 +204,52 @@ public class ColumnModelBuilder {
 
     public List<ColumnView> getFilters() {
         return filters;
+    }
+
+    private static class NullValueProvider<T, V> implements ValueProvider<T, V> {
+
+        private String path;
+
+        public NullValueProvider(String path) {
+            this.path = path;
+        }
+
+        @Override
+        public V getValue(T object) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setValue(T object, V value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getPath() {
+            return path;
+        }
+    }
+
+    /**
+     * We need this instead of EnumItem, because {@link com.sencha.gxt.widget.core.client.grid.filters.ListMenu}
+     * calls toString() to get the text for the menu.
+     */
+    private static class EnumItemViewModel {
+        private String id;
+        private String label;
+
+        public EnumItemViewModel(EnumItem item) {
+            id = item.getId().asString();
+            label = item.getLabel();
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 }

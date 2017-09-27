@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
@@ -51,7 +52,7 @@ public class ColumnFilterParser {
 
     public Multimap<Integer, FilterConfig> parseFilter(ExprNode filter) {
         Multimap<Integer, FilterConfig> result = HashMultimap.create();
-        List<ExprNode> nodes = findConjunctionList(filter);
+        List<ExprNode> nodes = findBinaryTree(filter, AndFunction.INSTANCE);
         for (ExprNode node : nodes) {
             if(!parseNode(node, result)) {
                 return EMPTY;
@@ -62,7 +63,8 @@ public class ColumnFilterParser {
 
     private boolean parseNode(ExprNode node, Multimap<Integer, FilterConfig> result) {
         return parseComparison(node, result) ||
-               parseStringContains(node, result);
+               parseStringContains(node, result) ||
+               parseEnumList(node, result);
     }
 
     private boolean parseComparison(ExprNode node, Multimap<Integer, FilterConfig> result) {
@@ -77,8 +79,7 @@ public class ColumnFilterParser {
         }
 
         // Does this comparison involve one of our fields?
-        ExprNode columnExpr = callNode.getArgument(0);
-        Integer columnIndex = columnMap.get(columnExpr);
+        Integer columnIndex = findColumnIndex(callNode.getArgument(0));
         if(columnIndex == null) {
             return false;
         }
@@ -100,6 +101,11 @@ public class ColumnFilterParser {
 
         result.put(columnIndex, config);
         return true;
+    }
+
+    private Integer findColumnIndex(ExprNode expr) {
+        ExprNode columnExpr = expr;
+        return columnMap.get(columnExpr);
     }
 
     /**
@@ -142,6 +148,52 @@ public class ColumnFilterParser {
         result.put(columnIndex, filterConfig);
         return true;
     }
+
+    /**
+     * Parse a list of enum item conditionals in the form (X.A || X.B || X.C)
+     */
+    private boolean parseEnumList(ExprNode node, Multimap<Integer, FilterConfig> result) {
+        List<ExprNode> terms = findBinaryTree(node, OrFunction.INSTANCE);
+
+        // Ensure that each term is a compound expression in the form X.Y1, X.Y2, X.Y2
+        Iterator<ExprNode> termIt = terms.iterator();
+        ExprNode first = termIt.next();
+        if(!(first instanceof CompoundExpr)) {
+            return false;
+        }
+        List<String> enumItemIds = new ArrayList<>();
+        CompoundExpr firstCompoundExpr = (CompoundExpr) first;
+        Integer firstColumnIndex = findColumnIndex(firstCompoundExpr.getValue());
+        if(firstColumnIndex == null) {
+            return false;
+        }
+        enumItemIds.add(firstCompoundExpr.getField().getName());
+
+        // Now check that the remaining terms are also compound expressions with the
+        // same field
+        while(termIt.hasNext()) {
+            ExprNode term = termIt.next();
+            if(!(term instanceof CompoundExpr)) {
+                return false;
+            }
+            CompoundExpr compoundExpr = (CompoundExpr) term;
+            Integer columnIndex = findColumnIndex(compoundExpr.getValue());
+            if(columnIndex == null || columnIndex != firstColumnIndex) {
+                return false;
+            }
+            enumItemIds.add(compoundExpr.getField().getName());
+        }
+
+        // We have a filter that is supported by ListFilter
+        FilterConfig listFilter = new FilterConfigBean();
+        listFilter.setType("list");
+        listFilter.setValue(Joiner.on("::").join(enumItemIds));
+
+        result.put(firstColumnIndex, listFilter);
+
+        return true;
+    }
+
 
     private FilterConfig numericFilter(FunctionCallNode callNode, Quantity quantity) {
         FilterConfig config = new FilterConfigBean();
@@ -206,27 +258,28 @@ public class ColumnFilterParser {
     }
 
     /**
-     * Tries to decompose the formula into a list of conjunctions (A && B).
+     * Tries to decompose a tree of binary operations into a list of operands. (A && B && C) or
+     * (A || B || C) or (A + B + C) => [A, B, C]
      */
     @VisibleForTesting
-    static List<ExprNode> findConjunctionList(ExprNode rootNode) {
+    static List<ExprNode> findBinaryTree(ExprNode rootNode, ExprFunction operator) {
         List<ExprNode> list = new ArrayList<>();
-        findConjunctionList(rootNode, list);
+        findBinaryTree(rootNode, list, operator);
 
         return list;
     }
 
-    private static void findConjunctionList(ExprNode node, List<ExprNode> list) {
+    private static void findBinaryTree(ExprNode node, List<ExprNode> list, ExprFunction operator) {
 
         // Unwrap group expressions ((A))
         node = simplify(node);
 
-        if(isConjunction(node)) {
+        if(isBinaryOperation(node, operator)) {
             // If this expression is in the form A && B, then descend
             // recursively
             FunctionCallNode callNode = (FunctionCallNode) node;
-            findConjunctionList(callNode.getArgument(0), list);
-            findConjunctionList(callNode.getArgument(1), list);
+            findBinaryTree(callNode.getArgument(0), list, operator);
+            findBinaryTree(callNode.getArgument(1), list, operator);
 
         } else {
             // If not a conjunction, then add this node to the list
@@ -241,10 +294,11 @@ public class ColumnFilterParser {
         return node;
     }
 
-    private static boolean isConjunction(ExprNode node) {
+    private static boolean isBinaryOperation(ExprNode node, ExprFunction operator) {
         if(node instanceof FunctionCallNode) {
             FunctionCallNode callNode = (FunctionCallNode) node;
-            return callNode.getFunction() == AndFunction.INSTANCE;
+            return callNode.getArgumentCount() == 2 &&
+                   callNode.getFunction() == operator;
         }
         return false;
     }
@@ -259,9 +313,12 @@ public class ColumnFilterParser {
                 return toStringFormula(field, filter);
             case "date":
                 return toDateFormula(field, filter);
+            case "list":
+                return toListFormula(field, filter);
         }
         throw new UnsupportedOperationException("type: " + filter.getType());
     }
+
 
     private static ExprNode toNumericFormula(ExprNode field, FilterConfig filter) {
         return new FunctionCallNode(comparisonFilter(filter), field, numericValue(filter));
@@ -279,6 +336,19 @@ public class ColumnFilterParser {
         return new FunctionCallNode(comparisonFilter(filter),
             field,
             dateValue(filter));
+    }
+
+
+    private static ExprNode toListFormula(ExprNode field, FilterConfig filter) {
+        // Shockingly, the gxt filterconfig for list is generated by concatenating
+        // ids together with "::"
+
+        String[] enumItemIds = filter.getValue().split("::");
+        List<ExprNode> enumConditions = new ArrayList<>();
+        for (String enumItemId : enumItemIds) {
+            enumConditions.add(new CompoundExpr(field, new SymbolExpr(enumItemId)));
+        }
+        return Exprs.anyTrue(enumConditions);
     }
 
     private static ExprNode dateValue(FilterConfig filter) {
