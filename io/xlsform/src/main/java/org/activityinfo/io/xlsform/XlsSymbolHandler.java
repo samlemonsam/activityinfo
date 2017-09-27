@@ -21,7 +21,11 @@ public class XlsSymbolHandler implements XSymbolHandler {
             if (field.getType() instanceof EnumType) {
                 addEnumItems((EnumType) field.getType());
             }
-            symbolMap.put(field.getId().asString(), fieldRef(field.getCode()));
+            if (field.getCode() != null) {
+                symbolMap.put(field.getId().asString(), fieldRef(field.getCode()));
+            } else {
+                symbolMap.put(field.getId().asString(), fieldRef(field.getId().asString()));
+            }
         }
     }
 
