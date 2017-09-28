@@ -90,10 +90,13 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         // Setup grid filters
         filters = new TableGridFilters(tableUpdater);
         filters.initPlugin(grid);
-        for (ColumnView filter : columns.getFilters()) {
-            filters.addFilter(filter);
+
+        if( !initialTableModel.isSubTable()) {
+            for (ColumnView filter : columns.getFilters()) {
+                filters.addFilter(filter);
+            }
+            filters.updateView(tableModel.getFilter());
         }
-        filters.updateView(tableModel.getFilter());
     }
 
     /**
@@ -119,7 +122,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
     public boolean updateView(EffectiveTableModel tableModel) {
 
         // Check to see if we can update columns in place
-        if (!tryUpdateColumns(tableModel)) {
+        if (!tryUpdateColumnsView(tableModel)) {
             LOGGER.info("Columns have changed, rebuild required.");
             return false;
         }
@@ -129,7 +132,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         return true;
     }
 
-    private boolean tryUpdateColumns(EffectiveTableModel tableModel) {
+    private boolean tryUpdateColumnsView(EffectiveTableModel tableModel) {
         if(tableModel.getColumns().size() != initialTableModel.getColumns().size()) {
             return false;
         }
