@@ -430,6 +430,7 @@ public class ActivityLoader {
                 "Name, " +
                 "Description, " +
                 "Mandatory, " +
+                "Visible, " +
                 "Type, " +
                 "NULL as MultipleAllowed, " +
                 "units, " +
@@ -452,6 +453,7 @@ public class ActivityLoader {
                 "Name, " +
                 "NULL as Description, " +
                 "Mandatory, " +
+                "NULL as Visible, " +
                 "'ENUM' as Type, " +
                 "multipleAllowed, " +
                 "NULL as Units, " +
@@ -487,6 +489,7 @@ public class ActivityLoader {
         }
         formField.setLabel(rs.getString("Name"));
         formField.setRequired(getMandatory(rs));
+        formField.setVisible(getVisible(rs));
         formField.setDescription(rs.getString("Description"));
         formField.setCode(rs.getString("code"));
 
@@ -524,6 +527,10 @@ public class ActivityLoader {
 
     private boolean getMandatory(ResultSet rs) throws SQLException {
         return rs.getBoolean("Mandatory");
+    }
+
+    private boolean getVisible(ResultSet rs) throws SQLException {
+        return rs.getBoolean("Visible");
     }
 
     private EnumType createEnumType(ResultSet rs, Map<Integer, List<EnumItem>> attributes) throws SQLException {
