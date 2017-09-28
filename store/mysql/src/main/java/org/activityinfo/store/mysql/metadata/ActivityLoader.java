@@ -430,7 +430,7 @@ public class ActivityLoader {
                 "Name, " +
                 "Description, " +
                 "Mandatory, " +
-                "Visible, " +
+                "visible, " +
                 "Type, " +
                 "NULL as MultipleAllowed, " +
                 "units, " +
@@ -453,7 +453,7 @@ public class ActivityLoader {
                 "Name, " +
                 "NULL as Description, " +
                 "Mandatory, " +
-                "NULL as Visible, " +
+                "NULL as visible, " +
                 "'ENUM' as Type, " +
                 "multipleAllowed, " +
                 "NULL as Units, " +
@@ -530,7 +530,7 @@ public class ActivityLoader {
     }
 
     private boolean getVisible(ResultSet rs) throws SQLException {
-        return rs.getBoolean("Visible");
+        return rs.getBoolean("visible");
     }
 
     private EnumType createEnumType(ResultSet rs, Map<Integer, List<EnumItem>> attributes) throws SQLException {
