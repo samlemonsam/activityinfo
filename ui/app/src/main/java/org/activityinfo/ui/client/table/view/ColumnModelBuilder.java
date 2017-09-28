@@ -171,16 +171,18 @@ public class ColumnModelBuilder {
         ValueProvider<Integer, Double> latProvider =
                 proxy.getValueProvider(format.getLatitudeId(), format.createLatitudeRenderer());
         ValueProvider<Integer, Double> lngProvider =
-                proxy.getValueProvider(format.getLongitudeId(), format.createLatitudeRenderer());
+                proxy.getValueProvider(format.getLongitudeId(), format.createLongitudeRenderer());
 
         int latitudeColumnIndex = columnConfigs.size();
 
         ColumnConfig<Integer, Double> latitudeConfig = new ColumnConfig<>(latProvider);
         latitudeConfig.setHeader(I18N.CONSTANTS.latitude());
+        latitudeConfig.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         columnConfigs.add(latitudeConfig);
 
         ColumnConfig<Integer, Double> longitudeConfig = new ColumnConfig<>(lngProvider);
         longitudeConfig.setHeader(I18N.CONSTANTS.longitude());
+        longitudeConfig.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         columnConfigs.add(longitudeConfig);
 
         HeaderGroupConfig groupConfig = new HeaderGroupConfig(SafeHtmlUtils.fromString(columnModel.getLabel()), 1, 2);

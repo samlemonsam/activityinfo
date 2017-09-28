@@ -22,6 +22,7 @@ public class CoordinateField extends ValueBaseField<Double> {
     }
 
     private static ValueBaseInputCell<Double> inputCell(CoordinateAxis axis, CoordinateParser parser) {
+
         NumberPropertyEditor<Double> propertyEditor = new NumberPropertyEditor.DoublePropertyEditor() {
             @Override
             public Double parse(CharSequence text) throws ParseException {
@@ -45,6 +46,8 @@ public class CoordinateField extends ValueBaseField<Double> {
                 ".,'\"°");
         numberInputCell.setAllowDecimals(true);
         numberInputCell.setAllowNegative(true);
+        numberInputCell.setHideTrigger(true);
+        numberInputCell.setClearValueOnParseError(false);
 
         return numberInputCell;
     }

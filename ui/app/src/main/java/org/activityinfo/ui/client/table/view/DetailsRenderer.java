@@ -6,10 +6,12 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
+import org.activityinfo.io.match.coord.CoordinateAxis;
+import org.activityinfo.io.match.coord.CoordinateParser;
+import org.activityinfo.io.match.coord.JsCoordinateNumberFormatter;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
@@ -23,6 +25,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
@@ -99,6 +102,23 @@ public class DetailsRenderer {
             html.append(((Quantity) fieldValue).getValue());
             html.appendHtmlConstant(" ");
             html.appendEscaped(type.getUnits());
+            html.appendHtmlConstant("</p>");
+        }
+    }
+
+    private class GeoPointRenderer implements ValueRenderer {
+        private final CoordinateParser latitude = new CoordinateParser(CoordinateAxis.LATITUDE, JsCoordinateNumberFormatter.INSTANCE);
+        private final CoordinateParser longitude = new CoordinateParser(CoordinateAxis.LONGITUDE, JsCoordinateNumberFormatter.INSTANCE);
+
+        @Override
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
+            GeoPoint point = ((GeoPoint) fieldValue);
+            html.appendHtmlConstant("<p itemprop=\"geo\" itemscope itemtype=\"http://schema.org/GeoCoordinates\">");
+            html.appendEscaped(latitude.formatAsDMS(point.getLatitude()));
+            html.appendHtmlConstant("<br>");
+            html.appendEscaped(longitude.formatAsDMS(point.getLongitude()));
+            html.appendHtmlConstant("<meta itemprop=\"latitude\" content=\"" + point.getLatitude() + "\">");
+            html.appendHtmlConstant("<meta itemprop=\"longitude\" content=\"" + point.getLongitude() + "\">");
             html.appendHtmlConstant("</p>");
         }
     }
@@ -275,7 +295,7 @@ public class DetailsRenderer {
 
             @Override
             public FieldRenderer visitGeoPoint(GeoPointType geoPointType) {
-                return new NullRenderer();
+                return new SimpleFieldRenderer(field, new GeoPointRenderer());
             }
 
             @Override
