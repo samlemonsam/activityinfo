@@ -30,16 +30,20 @@ public class OdkHelper {
         return formField.getId().equals(locationFieldId);
     }
 
-    public static boolean isAdminLevelLocation(FormField formField) {
-        if(formField.getType() instanceof ReferenceType) {
+    public static ResourceId extractLocationReference(FormField formField) {
+        if (formField.getType() instanceof ReferenceType) {
             ReferenceType referenceType = (ReferenceType) formField.getType();
             for (ResourceId locationFormId : referenceType.getRange()) {
+                // Check for non Admin Level location reference
                 Character domain = locationFormId.getDomain();
-                if (domain.equals(CuidAdapter.ADMIN_LEVEL_DOMAIN)) {
-                    return true;
+                if (!domain.equals(CuidAdapter.ADMIN_LEVEL_DOMAIN)) {
+                    return locationFormId;
                 }
             }
+            return null;
+        } else {
+            return formField.getId();
         }
-        return false;
     }
+
 }
