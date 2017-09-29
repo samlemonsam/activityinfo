@@ -27,11 +27,7 @@ public class OdkHelper {
 
     public static boolean isLocation(FormClass formClass, FormField formField) {
         ResourceId locationFieldId = CuidAdapter.field(formClass.getId(), LOCATION_FIELD);
-        if(formField.getId().equals(locationFieldId)) {
-            // Admin Level Locations are invalid for ODK fields
-            return !isAdminLevelLocation(formField);
-        }
-        return false;
+        return formField.getId().equals(locationFieldId);
     }
 
     public static boolean isAdminLevelLocation(FormField formField) {

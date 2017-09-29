@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import static org.activityinfo.model.legacy.CuidAdapter.*;
+import static org.activityinfo.server.endpoint.odk.OdkHelper.isAdminLevelLocation;
 import static org.activityinfo.server.endpoint.odk.OdkHelper.isLocation;
 
 /**
@@ -163,8 +164,10 @@ public class XFormBuilder {
 
         for (OdkField field : fields) {
             if (isLocation(formClass, field.getModel())) {
-                body.addElement(createPresentationElement(locationName(field.getModel())));
-                body.addElement(createPresentationElement(gps(field.getModel())));
+                if(!isAdminLevelLocation(field.getModel())) {
+                    body.addElement(createPresentationElement(locationName(field.getModel())));
+                    body.addElement(createPresentationElement(gps(field.getModel())));
+                }
             } else if (field.getModel().isVisible() && !dateFields.contains(field.getModel().getId())) {
                 BodyElement element = createPresentationElement(field);
                 if (element.isValid()) {
