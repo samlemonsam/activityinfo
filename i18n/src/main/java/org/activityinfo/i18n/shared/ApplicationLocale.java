@@ -12,7 +12,7 @@ public enum ApplicationLocale {
     VI("Vietnamese"),
     AR("العربية"),
     FA("فارسی"),
-    TR("Türk");
+    TR("Türkçe");
     
     private String localizedName;
 
