@@ -61,13 +61,13 @@ import org.activityinfo.promise.Promise;
 
 import java.util.*;
 
-public class GetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult> {
+public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteResult> {
 
     private final SqlDialect dialect;
 
 
     @Inject
-    public GetSitesHandler(SqlDialect dialect) {
+    public OldGetSitesHandler(SqlDialect dialect) {
         super();
         this.dialect = dialect;
     }
