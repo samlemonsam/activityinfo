@@ -1,11 +1,8 @@
 package org.activityinfo.model.formTree;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -14,72 +11,124 @@ import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.HasStringValue;
 
-import java.util.Collections;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * A level within a hierarchy of lookup choices.
+ */
 public class LookupKey {
-    private final FormClass formSchema;
-    private final String keyLabel;
-    private final Optional<FormField> field;
-    private final List<LookupKey> parentKeys;
 
-    public LookupKey(String keyLabel, FormClass formSchema, FormField field, List<LookupKey> parentKeys) {
-        this.formSchema = formSchema;
-        this.field = Optional.of(field);
-        this.keyLabel = keyLabel;
-        this.parentKeys = Lists.newArrayList(parentKeys);
+    private LookupKey parentLevel;
+
+    private SymbolExpr parentFieldId;
+
+    private ResourceId formId;
+
+    private String levelLabel;
+
+    /**
+     * This key's field id.
+     */
+    private SymbolExpr fieldId;
+
+    private List<LookupKey> childLevels = new ArrayList<>();
+
+    public LookupKey(String parentFieldId, LookupKey parentLevel, ResourceId formId, String levelLabel, String fieldId) {
+        this.parentFieldId = new SymbolExpr(parentFieldId);
+        this.parentLevel = parentLevel;
+        this.formId = formId;
+        this.levelLabel = levelLabel;
+        this.fieldId = new SymbolExpr(fieldId);
+
+        if(parentLevel != null) {
+            parentLevel.childLevels.add(this);
+        }
     }
 
-    public LookupKey(FormClass formSchema, List<LookupKey> parentKeys) {
-        this.formSchema = formSchema;
-        this.field = Optional.absent();
-        this.keyLabel = formSchema.getLabel();
-        this.parentKeys = Lists.newArrayList(parentKeys);
+    public LookupKey(ResourceId formId, String levelLabel, String fieldId) {
+        this(null, null, formId, levelLabel, fieldId);
     }
 
-    public LookupKey(String keyLabel, FormClass formSchema, FormField field) {
-        this(keyLabel, formSchema, field, Collections.<LookupKey>emptyList());
+    public boolean isRoot() {
+        return parentLevel == null;
+    }
+
+    public boolean isLeaf() {
+        return childLevels.isEmpty();
+    }
+
+    public String getLevelLabel() {
+        return levelLabel;
     }
 
     public ResourceId getFormId() {
-        return formSchema.getId();
+        return formId;
+    }
+
+    public SymbolExpr getKeyField() {
+        return fieldId;
+    }
+
+    public LookupKey getParentLevel() {
+        assert parentLevel != null;
+        return parentLevel;
+    }
+
+    public List<LookupKey> getChildLevels() {
+        return childLevels;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + levelLabel + ": " +  formId + "." + fieldId + "]";
+    }
+
+    private void collectKeys(@Nullable ExprNode baseField, Map<LookupKey, ExprNode> keys) {
+        keys.put(this, join(baseField, fieldId));
+
+        if(!isRoot()) {
+            parentLevel.collectKeys(join(baseField, parentFieldId), keys);
+        }
+    }
+
+    private ExprNode join(@Nullable ExprNode base, SymbolExpr field) {
+        if(base == null) {
+            return field;
+        } else {
+            return new CompoundExpr(base, field);
+        }
+    }
+
+    public Map<LookupKey, ExprNode> getKeys() {
+        Map<LookupKey, ExprNode> keys = new HashMap<>();
+        collectKeys(null, keys);
+        return keys;
+    }
+
+    public ExprNode getParentKey() {
+        return join(parentFieldId, parentLevel.getKeyField());
     }
 
     public String label(FormInstance record) {
-        if(!field.isPresent()) {
+        if(fieldId.getName().equals(ColumnModel.ID_SYMBOL)) {
             return record.getId().asString();
         }
 
-        FieldValue fieldValue = record.get(field.get().getId());
+        FieldValue fieldValue = record.get(ResourceId.valueOf(fieldId.getName()));
         if(fieldValue == null) {
             return record.getId().asString();
         }
 
-        if(field.get().getType() instanceof SerialNumberType) {
-            SerialNumberType type = (SerialNumberType) field.get().getType();
+        if(fieldValue instanceof SerialNumber) {
+            SerialNumberType type = new SerialNumberType();
             return type.format(((SerialNumber) fieldValue));
 
         } else {
             return ((HasStringValue) fieldValue).asString();
         }
-    }
-
-
-    public ExprNode getLabelFormula() {
-        if(!field.isPresent()) {
-            return new SymbolExpr(ColumnModel.ID_SYMBOL);
-
-        } else {
-            return new SymbolExpr(field.get().getId());
-        }
-
-    }
-
-    public String getKeyLabel() {
-        return keyLabel;
-    }
-
-    public boolean isRoot() {
-        return parentKeys.isEmpty();
     }
 }

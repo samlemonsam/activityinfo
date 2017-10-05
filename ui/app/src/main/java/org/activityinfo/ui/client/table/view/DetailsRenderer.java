@@ -227,7 +227,7 @@ public class DetailsRenderer {
 
         public ReferenceFieldRenderer(FormTree formTree, FormField field) {
             this.field = field;
-            this.keySet = new LookupKeySet(formTree, field);
+            this.keySet = new LookupKeySet(formTree, (ReferenceType) field.getType());
         }
 
 

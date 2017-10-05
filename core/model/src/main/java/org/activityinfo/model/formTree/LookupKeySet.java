@@ -6,135 +6,149 @@ import com.google.common.collect.Iterables;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.promise.Maybe;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * Constructs a cascading set of LookupKeys that can be used
- * to find or label the value of a record field.
+ * Set of keys that can be used to lookup a value for a reference field.
+ *
+ * <p>Fields of type {@link ReferenceType} refer to Records in other Forms. In order to be select
+ * a value, users need a way to "look up" the ID of a Record. We could of course ask users to the enter
+ * the auto-generated RecordId, but that would be difficult.</p>
+ *
+ * <p>One intuitive way to look up Records is to use the fields that form designers have identified as "keys".</p>
+ *
+ * <p>In the simplest case, a Form will have a single text key field. Such a reference field will have a single
+ * {@link LookupKey}. The user can select one value from the {@code LookupKey} and that will be sufficient to
+ * uniquely identify the record.</p>
+ *
+ * <p>In other cases, a Form might have two text keys, such as "Last Name" and "First Name". Neither key is
+ * sufficient to identify a record uniquely, but together they can be used to look up a record.</p>
  */
 public class LookupKeySet {
 
-    private final FormTree tree;
-    private final List<LookupKey> keys;
+    private List<LookupKey> lookupKeys = new ArrayList<>();
+    private List<LookupKey> leafKeys = new ArrayList<>();
+    private FormTree formTree;
 
-    public LookupKeySet(FormTree tree, FormField field) {
-        this.tree = tree;
-        this.keys = findKeys(field);
+    public LookupKeySet(FormTree formTree, ReferenceType referenceType) {
+        this.formTree = formTree;
+
+        for (ResourceId referenceFormId : referenceType.getRange()) {
+            leafKeys.add(addLevels("", formTree.getFormClass(referenceFormId)));
+        }
     }
 
-    public LookupKeySet(FormTree tree, ReferenceType referenceType) {
-        this.tree = tree;
-        this.keys = findKeys(referenceType);
-
+    public LookupKeySet(FormTree formTree, FormField field) {
+        this(formTree, (ReferenceType)field.getType());
     }
 
-    private List<LookupKey> findKeys(FormField field) {
-        assert field.getType() instanceof ReferenceType : field + " is not a reference field";
+    private LookupKey addLevels(String labelPrefix, FormClass formClass) {
 
-        ReferenceType referenceType = (ReferenceType) field.getType();
-        return findKeys(referenceType);
-    }
+        ResourceId formId = formClass.getId();
 
-    private List<LookupKey> findKeys(ReferenceType referenceType) {
-        ResourceId referencedFormId = Iterables.getOnlyElement(referenceType.getRange());
-        FormClass referencedForm = tree.getFormClass(referencedFormId);
-
-        return findKeys(referencedForm);
-    }
-
-
-    private List<LookupKey> findKeys(FormClass formSchema) {
-
-
-        // If a serial number is present, ALWAYS use that for lookup
-        Optional<FormField> serialNumber = firstFieldOfType(formSchema, SerialNumberType.TYPE_CLASS);
-        if(serialNumber.isPresent()) {
-            return Collections.singletonList(new LookupKey(formSchema.getLabel(), formSchema, serialNumber.get()));
+        // if serial number is present, we use that exclusively.
+        Optional<FormField> serialNumberField = findSerialNumberField(formClass);
+        if(serialNumberField.isPresent()) {
+            LookupKey lookupKey = serialNumberLevel(labelPrefix, formId, serialNumberField.get());
+            lookupKeys.add(lookupKey);
+            return lookupKey;
         }
 
-        if(!hasExplicitKeys(formSchema)) {
-            return findImplicitKeys(formSchema);
+        LookupKey parentLevel = null;
+        String parentFieldId = null;
+
+        // If there is a reference key, then we climb the reference tree recursively.
+        Optional<FormField> referenceKey = findReferenceKey(formClass);
+        if(referenceKey.isPresent()) {
+            ReferenceType referenceType = (ReferenceType) referenceKey.get().getType();
+            ResourceId referencedFormId = Iterables.getOnlyElement(referenceType.getRange());
+            FormClass referencedFormClass = formTree.getFormClass(referencedFormId);
+            parentLevel = addLevels(referencedFormClass.getLabel() + " ", referencedFormClass);
+            parentFieldId = referenceKey.get().getId().asString();
         }
 
-        // Otherwise look for "parent" keys formed when
-        // reference fields are marked as keys
-
-        List<LookupKey> keys = new ArrayList<>();
-        for (FormField field : formSchema.getFields()) {
-            if(field.isKey() && field.getType() instanceof ReferenceType) {
-                keys.addAll(findKeys(field));
-            }
-        }
-
-        // Now find our leaf keys
-        List<FormField> leafKeyFields = findExplicitLeafKeys(formSchema);
-
-        if(leafKeyFields.size() == 1) {
-            keys.add(new LookupKey(formSchema.getLabel(), formSchema, leafKeyFields.get(0), keys));
-
-        }  else if(leafKeyFields.size() > 1) {
-            for (FormField leafKeyField : leafKeyFields) {
-                keys.add(new LookupKey(formSchema.getLabel() + " " + leafKeyField.getLabel(), formSchema, leafKeyField, keys));
-            }
-        }
-        return keys;
-    }
-
-    private List<FormField> findExplicitLeafKeys(FormClass formSchema) {
-        List<FormField> fields = new ArrayList<>();
-        for (FormField formField : formSchema.getFields()) {
-            if(formField.isKey() && !(formField.getType() instanceof ReferenceType)) {
-                fields.add(formField);
-            }
-        }
-        return fields;
-    }
-
-
-    private boolean hasExplicitKeys(FormClass formClass) {
+        // Now check for text key fields
         for (FormField formField : formClass.getFields()) {
-            if(formField.isKey()) {
-                return true;
+            if(formField.isKey() && formField.getType() instanceof TextType) {
+                LookupKey lookupKey = textKeyLevel(labelPrefix, formId, parentLevel, parentFieldId, formField);
+                lookupKeys.add(lookupKey);
+                parentLevel = lookupKey;
+                parentFieldId = null;
             }
         }
-        return false;
-    }
 
-
-    private List<LookupKey> findImplicitKeys(FormClass formSchema) {
-
-        Optional<FormField> textField = firstFieldOfType(formSchema, TextType.TYPE_CLASS);
-        if(textField.isPresent()) {
-            return Collections.singletonList(new LookupKey(formSchema.getLabel(), formSchema, textField.get()));
-        } else {
-            // Otherwise we have to use the autogenerated id :-(
-            return Collections.singletonList(new LookupKey(formSchema, Collections.<LookupKey>emptyList()));
+        // If there is really no other key fields, then use the autogenerated id as a key
+        if (parentLevel == null) {
+            parentLevel = idLevel(formClass);
         }
+
+        return parentLevel;
     }
 
-    private Optional<FormField> firstFieldOfType(FormClass formClass, FieldTypeClass typeClass) {
+
+    private LookupKey serialNumberLevel(String labelPrefix, ResourceId formId, FormField field) {
+        return new LookupKey(formId, labelPrefix + field.getLabel(), field.getId().asString());
+    }
+
+    private LookupKey textKeyLevel(String labelPrefix, ResourceId formId, LookupKey parentLevel, String parentFieldId, FormField formField) {
+        String levelLabel = labelPrefix + formField.getLabel();
+
+        return new LookupKey(parentFieldId, parentLevel, formId, levelLabel, formField.getId().asString());
+    }
+
+    private LookupKey idLevel(FormClass formSchema) {
+        return new LookupKey(formSchema.getId(), formSchema.getLabel(), ColumnModel.ID_SYMBOL);
+    }
+
+    private Optional<FormField> findSerialNumberField(FormClass formClass) {
         for (FormField formField : formClass.getFields()) {
-            if(formField.getType().getTypeClass().equals(typeClass)) {
+            if(formField.getType() instanceof SerialNumberType) {
                 return Optional.of(formField);
             }
         }
         return Optional.absent();
     }
 
+    private Optional<FormField> findReferenceKey(FormClass formClass) {
+        for (FormField formField : formClass.getFields()) {
+            if(formField.isKey() && formField.getType() instanceof ReferenceType) {
+                return Optional.of(formField);
+            }
+        }
+        return Optional.absent();
+    }
+
+    public List<LookupKey> getLookupKeys() {
+        return lookupKeys;
+    }
+
+    /**
+     * @return a List of LookupKeys with no children.
+     */
+    public List<LookupKey> getLeafKeys() {
+        return leafKeys;
+    }
+
+
+    /**
+     * Composes a human-readable label for a record reference.
+     */
     public Maybe<String> label(RecordTree tree, RecordRef ref) {
-        if(keys.size() == 1) {
+        if(lookupKeys.size() == 1) {
             Maybe<FormInstance> record = tree.getRecord(ref);
             return record.transform(new Function<FormInstance, String>() {
                 @Override
                 public String apply(FormInstance record) {
-                    return keys.get(0).label(record);
+                    return lookupKeys.get(0).label(record);
                 }
             });
         } else {
@@ -142,13 +156,4 @@ public class LookupKeySet {
         }
     }
 
-
-    public List<LookupKey> getKeys() {
-        return keys;
-    }
-
-    public LookupKey getKey(int i) {
-        return keys.get(i);
-    }
 }
-

@@ -4,9 +4,6 @@ import com.google.common.base.Supplier;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 
-/**
- * Created by alex on 28-6-17.
- */
 class UniqueNameGenerator implements Supplier<FieldValue> {
 
     private int index = 1;

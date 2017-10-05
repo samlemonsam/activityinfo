@@ -90,6 +90,50 @@ public class ObservableTest {
         number.updateValue(96);
         twiceObserver.assertChangeNotFired();
     }
+
+
+    @Test
+    public void transformSynchronous() {
+        ObservableStub<Integer> number = new ObservableStub<>();
+
+        Observable<Integer> twice = number.transform(new Function<Integer, Integer>() {
+            @Override
+            public Integer apply(Integer input) {
+                return input * 2;
+            }
+        });
+
+        MockObserver<Integer> twiceObserver = new MockObserver<>();
+        Subscription twiceSubscription = twice.subscribe(twiceObserver);
+        twiceObserver.assertChangeFiredOnce();
+
+        assertTrue(number.isLoading());
+        assertTrue(twice.isLoading());
+
+        // When we update the source value, the calculated value should
+        // remain in the loading state but enqueue the recomputation
+        number.updateValue(42);
+
+        twiceObserver.assertChangeFiredOnce();
+        assertFalse(twice.isLoading());
+        assertThat(twice.get(), equalTo(42 * 2));
+
+        number.setToLoading();
+        twiceObserver.assertChangeFiredOnce();
+        assertTrue(twice.isLoading());
+
+        // When the value is changed, we expect the computed value
+        // to REMAIN in the loading state, so no change is fired
+        number.updateValue(13);
+        twiceObserver.assertChangeFiredOnce();
+        assertFalse(twice.isLoading());
+        assertThat(twice.get(), equalTo(13 * 2));
+
+        twiceSubscription.unsubscribe();
+
+        number.updateValue(96);
+        twiceObserver.assertChangeNotFired();
+    }
     
     @Test
     public void chained() {

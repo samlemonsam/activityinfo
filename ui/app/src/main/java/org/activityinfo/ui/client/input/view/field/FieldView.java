@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.input.view.field;
 
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
@@ -42,11 +41,6 @@ public class FieldView {
             } else {
                 validationMessage.setVisible(false);
             }
-        }
-
-
-        if(widget instanceof ReferenceFieldWidget) {
-            ((ReferenceFieldWidget) widget).setChoices(viewModel.getChoices(fieldId));
         }
     }
 

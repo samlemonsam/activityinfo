@@ -1766,4 +1766,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Count Distinct")
     String countDistinct();
 
+
+    @DefaultStringValue("No records found.")
+    String noRecords();
+
+    @DefaultStringValue("No matching records.")
+    String noMatchingRecords();
+
 }

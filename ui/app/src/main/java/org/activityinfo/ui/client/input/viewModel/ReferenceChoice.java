@@ -23,4 +23,12 @@ public class ReferenceChoice {
     public String getLabel() {
         return label;
     }
+
+    @Override
+    public String toString() {
+        return "ReferenceChoice{" +
+            "ref=" + ref +
+            ", label='" + label + '\'' +
+            '}';
+    }
 }

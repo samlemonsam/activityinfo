@@ -6,13 +6,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.viewModel.SubFormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.SubRecordViewModel;
 
@@ -26,6 +26,7 @@ public class RepeatingSubFormPanel implements IsWidget {
 
     private final ResourceId fieldId;
     private InputHandler inputHandler;
+    private FormSource formSource;
     private final FormTree subTree;
 
     private final FieldSet fieldSet;
@@ -35,7 +36,8 @@ public class RepeatingSubFormPanel implements IsWidget {
 
     private SubFormInputViewModel viewModel;
 
-    public RepeatingSubFormPanel(FormTree.Node node, FormTree subTree, InputHandler inputHandler) {
+    public RepeatingSubFormPanel(FormSource formSource, FormTree.Node node, FormTree subTree, InputHandler inputHandler) {
+        this.formSource = formSource;
         this.subTree = subTree;
         this.fieldId = node.getFieldId();
         this.inputHandler = inputHandler;
@@ -76,7 +78,7 @@ public class RepeatingSubFormPanel implements IsWidget {
         for (SubRecordViewModel subRecord : viewModel.getSubRecords()) {
             FormPanel subPanel = panelMap.get(subRecord.getRecordRef());
             if(subPanel == null) {
-                subPanel = new FormPanel(subTree, subRecord.getRecordRef(), inputHandler);
+                subPanel = new FormPanel(formSource, subTree, subRecord.getRecordRef(), inputHandler);
                 subPanel.init(subRecord.getSubFormViewModel());
 
                 recordContainer.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));

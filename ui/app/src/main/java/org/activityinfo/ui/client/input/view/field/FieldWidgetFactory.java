@@ -17,21 +17,24 @@ import org.activityinfo.model.type.time.LocalDateIntervalType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.model.type.time.MonthType;
 import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.store.query.shared.FormSource;
 
 /**
  * Constructs a {@link FieldWidget} for a given field.
  */
 public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
+    private FormSource formSource;
     private FormTree formTree;
     private FormField field;
     private FieldUpdater updater;
 
-    public static FieldWidget createWidget(FormTree formTree, FormField field, FieldUpdater updater) {
-        return field.getType().accept(new FieldWidgetFactory(formTree, field, updater));
+    public static FieldWidget createWidget(FormSource formSource, FormTree formTree, FormField field, FieldUpdater updater) {
+        return field.getType().accept(new FieldWidgetFactory(formSource, formTree, field, updater));
     }
 
-    private FieldWidgetFactory(FormTree formTree, FormField field, FieldUpdater updater) {
+    private FieldWidgetFactory(FormSource formSource, FormTree formTree, FormField field, FieldUpdater updater) {
+        this.formSource = formSource;
         this.formTree = formTree;
         this.field = field;
         this.updater = updater;
@@ -52,7 +55,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
         if(referenceType.getRange().size() != 1) {
             return null;
         }
-        return new ReferenceFieldWidget(updater);
+        return new ReferenceFieldWidget(formSource, formTree, field, updater);
     }
 
     @Override

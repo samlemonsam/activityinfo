@@ -32,6 +32,11 @@ public class CompoundExpr extends ExprNode {
         this.field = field;
     }
 
+    public CompoundExpr(@Nonnull ExprNode value, @Nonnull ResourceId field) {
+        this.value = value;
+        this.field = new SymbolExpr(field.asString());
+    }
+
     public CompoundExpr(@Nonnull ExprNode value, @Nonnull SymbolExpr field, SourceRange range) {
         this.value = value;
         this.field = field;

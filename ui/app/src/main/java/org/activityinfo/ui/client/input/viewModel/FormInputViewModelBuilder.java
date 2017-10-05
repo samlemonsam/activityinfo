@@ -11,7 +11,6 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.promise.Maybe;
@@ -43,13 +42,6 @@ public class FormInputViewModelBuilder {
 
     private List<SubFormInputViewModelBuilder> subBuilders = new ArrayList<>();
 
-    /**
-     * Maps reference fields to their choices.
-     */
-    private Map<ResourceId, ReferenceChoices> referenceChoices = new HashMap<>();
-
-
-
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
         this.formStore = formStore;
         this.formTree = formTree;
@@ -58,9 +50,6 @@ public class FormInputViewModelBuilder {
         for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm()) {
                 subBuilders.add(buildSubBuilder(node));
-            }
-            if(node.getType() instanceof ReferenceType) {
-                referenceChoices.put(node.getFieldId(), choices(this.formStore, node));
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
@@ -73,10 +62,6 @@ public class FormInputViewModelBuilder {
                 }
             }
         }
-    }
-
-    private ReferenceChoices choices(FormStore formStore, FormTree.Node node) {
-        return new ReferenceChoices(formStore, formTree, (ReferenceType) node.getType());
     }
 
     private SubFormInputViewModelBuilder buildSubBuilder(FormTree.Node node) {
@@ -179,7 +164,7 @@ public class FormInputViewModelBuilder {
                 record.getFieldValueMap(),
                 subFormMap,
                 relevantSet,
-                missing, referenceChoices, validationErrors, valid);
+                missing, validationErrors, valid);
     }
 
     private Set<ResourceId> computeRelevance(FormInstance record) {

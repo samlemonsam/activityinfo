@@ -5,7 +5,6 @@ import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
-import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.primitive.TextValue;
@@ -21,7 +20,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class RecordTreeLoaderTest {
 
@@ -61,7 +60,7 @@ public class RecordTreeLoaderTest {
             tree.getFormTree(),
             tree.getFormTree().getRootField(BioDataForm.PROTECTION_CODE_FIELD_ID).getField());
 
-        assertThat(lookupKeySet.getKeys(), hasSize(1));
+        assertThat(lookupKeySet.getLookupKeys(), hasSize(1));
 
         ReferenceValue referenceValue = (ReferenceValue) tree.getRoot().get(BioDataForm.PROTECTION_CODE_FIELD_ID);
         RecordRef ref = referenceValue.getOnlyReference();

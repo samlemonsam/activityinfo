@@ -3,12 +3,11 @@ package org.activityinfo.ui.client.input.viewModel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonNull;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.RecordTransaction;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -32,7 +31,6 @@ public class FormInputViewModel {
     private final Map<ResourceId, SubFormInputViewModel> subFormMap;
     private final Set<ResourceId> relevant;
     private final Set<ResourceId> missing;
-    private final Map<ResourceId, ReferenceChoices> choices;
     private final Multimap<ResourceId, String> validationErrors;
     private final boolean valid;
 
@@ -42,14 +40,13 @@ public class FormInputViewModel {
                        Map<ResourceId, SubFormInputViewModel> subFormMap,
                        Set<ResourceId> relevant,
                        Set<ResourceId> missing,
-                       Map<ResourceId, ReferenceChoices> choices, Multimap<ResourceId, String> validationErrors, boolean valid) {
+                       Multimap<ResourceId, String> validationErrors, boolean valid) {
         this.formTree = formTree;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
         this.subFormMap = subFormMap;
         this.relevant = relevant;
         this.missing = missing;
-        this.choices = choices;
         this.validationErrors = validationErrors;
         this.valid = valid;
     }
@@ -76,10 +73,6 @@ public class FormInputViewModel {
 
     public FieldValue getField(ResourceId fieldId) {
         return fieldValueMap.get(fieldId);
-    }
-
-    public ReferenceChoices getChoices(ResourceId fieldId) {
-        return choices.get(fieldId);
     }
 
     public RecordUpdate buildUpdate(Optional<RecordRef> parentRef) {

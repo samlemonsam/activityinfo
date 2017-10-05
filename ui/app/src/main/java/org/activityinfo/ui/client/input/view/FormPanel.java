@@ -1,14 +1,15 @@
 package org.activityinfo.ui.client.input.view;
 
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.*;
-import com.sencha.gxt.core.client.dom.ScrollSupport;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
-import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.view.field.FieldView;
 import org.activityinfo.ui.client.input.view.field.FieldWidget;
@@ -24,6 +25,8 @@ import static org.activityinfo.ui.client.input.view.field.FieldWidgetFactory.cre
  */
 public class FormPanel implements IsWidget {
 
+    private final FormSource formSource;
+
     private final CssFloatLayoutContainer panel;
 
     private final List<FieldView> fieldViews = new ArrayList<>();
@@ -32,7 +35,8 @@ public class FormPanel implements IsWidget {
     private InputHandler inputHandler;
     private RecordRef recordRef;
 
-    public FormPanel(FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
+    public FormPanel(FormSource formSource, FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
+        this.formSource = formSource;
 
         assert recordRef != null;
 
@@ -54,7 +58,7 @@ public class FormPanel implements IsWidget {
             } else if(node.isParentReference()) {
                 // ignore
             } else if(node.getField().isVisible()) {
-                FieldWidget fieldWidget = createWidget(formTree, node.getField(), input -> onInput(node, input));
+                FieldWidget fieldWidget = createWidget(formSource, formTree, node.getField(), input -> onInput(node, input));
 
                 if (fieldWidget != null) {
                     addField(node, fieldWidget);
@@ -118,7 +122,7 @@ public class FormPanel implements IsWidget {
         SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
         FormTree subTree = formTree.subTree(subFormType.getClassId());
 
-        RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(node, subTree, inputHandler);
+        RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(formSource, node, subTree, inputHandler);
 
         panel.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
         subFormViews.add(subPanel);

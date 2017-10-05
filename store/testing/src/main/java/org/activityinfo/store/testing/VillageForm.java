@@ -10,7 +10,6 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class VillageForm implements TestForm {
@@ -18,15 +17,17 @@ public class VillageForm implements TestForm {
     private final FormClass formClass;
     private final RecordGenerator recordGenerator;
     private int count;
+    private AdminLevelForm parentForm;
     private final FormField nameField;
     private final FormField adminField;
     private final FormField pointField;
 
-    private List<FormInstance> records;
+    private LazyRecordList records;
 
     public VillageForm(Ids ids, int count, AdminLevelForm parentForm) {
         formClass = new FormClass(ids.formId("VILLAGE"));
         this.count = count;
+        this.parentForm = parentForm;
         formClass.setLabel("Village");
         formClass.setDatabaseId(ids.databaseId());
 
@@ -36,7 +37,7 @@ public class VillageForm implements TestForm {
 
         nameField = formClass.addField(ids.fieldId("F1"))
             .setCode("NAME")
-            .setLabel("Respondent Name")
+            .setLabel("Name")
             .setType(TextType.SIMPLE)
             .setRequired(true)
             .setKey(true)
@@ -57,8 +58,30 @@ public class VillageForm implements TestForm {
             .setVisible(true);
 
         recordGenerator = new RecordGenerator(formClass);
-        recordGenerator.distribution(nameField.getId(), new UniqueNameGenerator("Village "));
+        recordGenerator.distribution(nameField.getId(), new UniqueNameGenerator("Village"));
+        recordGenerator.distribution(adminField.getId(), new RefGenerator(parentForm));
+        records = new LazyRecordList(recordGenerator, count);
 
+    }
+
+    public AdminLevelForm getParentForm() {
+        return parentForm;
+    }
+
+    public FormField getNameField() {
+        return nameField;
+    }
+
+    public FormField getPointField() {
+        return pointField;
+    }
+
+    public FormField getAdminField() {
+        return adminField;
+    }
+
+    public ResourceId getAdminFieldId() {
+        return adminField.getId();
     }
 
 
@@ -74,17 +97,12 @@ public class VillageForm implements TestForm {
 
     @Override
     public List<FormInstance> getRecords() {
-        if(records == null) {
-            records = new ArrayList<>();
-            for (int i = 0; i < count; i++) {
-                records.add(recordGenerator.get());
-            }
-        }
-        return records;
+        return records.get();
     }
 
     @Override
     public Supplier<FormInstance> getGenerator() {
         return recordGenerator;
     }
+
 }

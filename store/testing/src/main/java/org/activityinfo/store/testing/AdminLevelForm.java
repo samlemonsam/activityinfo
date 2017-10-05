@@ -10,7 +10,6 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.primitive.TextType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AdminLevelForm implements TestForm {
@@ -18,13 +17,16 @@ public class AdminLevelForm implements TestForm {
     private final FormClass formClass;
     private final FormField nameField;
     private final RecordGenerator recordGenerator;
+    private final LazyRecordList records;
     private final FormField parentField;
     private String levelName;
     private int count;
+    private Optional<AdminLevelForm> parent;
 
     public AdminLevelForm(Ids ids, String name, int count, Optional<AdminLevelForm> parent) {
         levelName = name;
         this.count = count;
+        this.parent = parent;
 
         formClass = new FormClass(ids.formId(name.toUpperCase()));
         formClass.setLabel(name);
@@ -59,6 +61,21 @@ public class AdminLevelForm implements TestForm {
         if(parent.isPresent()) {
             recordGenerator.distribution(parentField.getId(), new RefGenerator(parent.get()));
         }
+
+        records = new LazyRecordList(recordGenerator, count);
+    }
+
+    public Optional<AdminLevelForm> getParentForm() {
+        return parent;
+    }
+
+    public ResourceId getParentFieldId() {
+        assert parentField != null : "AdminLevel has no parent";
+        return parentField.getId();
+    }
+
+    public ResourceId getNameFieldId() {
+        return nameField.getId();
     }
 
     @Override
@@ -73,11 +90,7 @@ public class AdminLevelForm implements TestForm {
 
     @Override
     public List<FormInstance> getRecords() {
-        List<FormInstance> records = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            records.add(recordGenerator.get());
-        }
-        return records;
+        return records.get();
     }
 
     @Override

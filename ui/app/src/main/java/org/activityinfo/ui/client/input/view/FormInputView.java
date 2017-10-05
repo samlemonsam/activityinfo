@@ -6,8 +6,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.dom.ScrollSupport;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
-import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import org.activityinfo.i18n.shared.I18N;
@@ -91,7 +89,7 @@ public class FormInputView implements IsWidget, InputHandler {
         viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure.getFormTree());
         existingRecord = formStructure.getExistingRecord();
 
-        formPanel = new FormPanel(formStructure.getFormTree(), inputModel.getRecordRef(), this);
+        formPanel = new FormPanel(formStore, formStructure.getFormTree(), inputModel.getRecordRef(), this);
         container.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, -1, new Margins(15, 25, 10, 15)));
         container.forceLayout();
 
