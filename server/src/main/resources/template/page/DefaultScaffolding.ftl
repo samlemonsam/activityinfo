@@ -46,7 +46,7 @@
             <li><a href="/about/benefits.html">Benefits</a></li>
             <li><a href="/about/features.html">Features</a></li>
             <li><a href="/about/pricing.html">Pricing</a></li>
-            <li><a href="/signUp">Sign Up</a></li>
+            <li class="cta cta-signup"><a href="/signUp">Get Free Account</a></li>
             <li class="cta"><a href="/login">Log In</a></li>
         </ul>
     </nav>

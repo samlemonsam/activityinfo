@@ -22,7 +22,7 @@
  #L%
 -->
 <#include "Scaffolding.ftl">
-<@scaffolding title="Signup">
+<@scaffolding title="Get Free Account">
 
     <@content>
 
@@ -62,17 +62,6 @@
                         </label>
 
                         <label>
-                            Organization
-                            <input type="text" name="organization" required>
-                        </label>
-
-
-                        <label>
-                            Job Title
-                            <input type="text" name="jobtitle" required>
-                        </label>
-
-                        <label>
                             Prefered language
                             <select name="locale" id="localeInput">
                                 <#list availableLocales as locale>
@@ -86,7 +75,7 @@
                             I agree to ActivityInfo's <a href="/about/terms.html">terms and conditions</a>
                         </label>
 
-                        <button type="submit">Sign up</button>
+                        <button type="submit">Get Free Account</button>
                     </form>
 
                     <div>
