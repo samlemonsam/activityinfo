@@ -5,14 +5,20 @@ package org.activityinfo.i18n.shared;
  */
 public enum ApplicationLocale {
 
+    // ORDER:
+    // 1) English first.
+    // 2) All remaining languages with Latin script, sorted alphabetically
+    // 3) Languages written with Arabic script, sorted alphabetically
+    // 4) Additional writing systems?
+
     EN("English"),
     ES("Español"),
     FR("Français"),
     NL("Nederlands"),
+    TR("Türkçe"),
     VI("Vietnamese"),
     AR("العربية"),
-    FA("فارسی"),
-    TR("Türkçe");
+    FA("فارسی");
     
     private String localizedName;
 
