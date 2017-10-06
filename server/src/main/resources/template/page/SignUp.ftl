@@ -28,7 +28,7 @@
 
         <div class="row row--padded">
 
-            <h1>Signup</h1>
+            <h1>Get Free Account</h1>
 
             <#if genericError == true || formError == true>
                 <div class="alert alert--error">
