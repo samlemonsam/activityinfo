@@ -55,6 +55,7 @@ public class RepeatingSubFormPanel implements IsWidget {
         fieldSet.setHeading(subTree.getRootFormClass().getLabel());
         fieldSet.setCollapsible(true);
         fieldSet.setWidget(container);
+        fieldSet.collapse();
     }
 
     @Override
