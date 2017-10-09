@@ -73,4 +73,9 @@ public class ImportDialog extends ResizeComposite {
     public HasText getTitleWidget() {
         return titleWidget;
     }
+
+    public void setCancelButtonVisible(boolean visible) {
+      cancelButton.setVisible(visible);
+    }
 }
+

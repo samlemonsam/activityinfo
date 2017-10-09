@@ -57,7 +57,7 @@ public class ImportHeaderAction implements TableHeaderAction {
                         table.reload();
                     }
                 });
-                result.show();
+                result.show(ImportPresenter.Mode.MODAL);
             }
         });
     }

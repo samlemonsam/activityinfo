@@ -27,6 +27,8 @@ import com.extjs.gxt.ui.client.state.StateManager;
 import com.extjs.gxt.ui.client.util.Theme;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.legacy.shared.Log;
@@ -41,6 +43,7 @@ import org.activityinfo.ui.client.page.print.PrintFormPanel;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class ActivityInfoEntryPoint implements EntryPoint {
+
 
     /**
      * This is the entry point method.
@@ -130,4 +133,9 @@ public class ActivityInfoEntryPoint implements EntryPoint {
     private void openImport(AppInjector injector) {
         ImportPresenter.showStandalone(injector.getResourceLocator());
     }
+
+    public static void hideLoadingIndicator() {
+        Document.get().getElementById("loading").getStyle().setDisplay(Style.Display.NONE);
+    }
+
 }

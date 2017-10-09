@@ -17,6 +17,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromisesExecutionMonitor;
+import org.activityinfo.ui.client.ActivityInfoEntryPoint;
 import org.activityinfo.ui.client.component.importDialog.mapping.ColumnMappingPage;
 import org.activityinfo.ui.client.component.importDialog.model.ImportModel;
 import org.activityinfo.ui.client.component.importDialog.model.MapExistingAction;
@@ -32,6 +33,11 @@ import java.util.List;
 
 public class ImportPresenter {
 
+    public enum Mode {
+        MODAL,
+        STANDALONE
+    }
+
     private final EventBus eventBus = GWT.create(SimpleEventBus.class);
 
     private final ImportModel importModel;
@@ -42,6 +48,8 @@ public class ImportPresenter {
 
     private List<ImportPage> pages;
     private ImportPage currentPage;
+
+    private Mode mode = Mode.MODAL;
 
     public ImportPresenter(ResourceLocator resourceLocator, FormTree formTree) {
         this.importModel = new ImportModel(formTree);
@@ -206,7 +214,9 @@ public class ImportPresenter {
         dialogBox.getFinishButton().setEnabled(true);
     }
 
-    public void show() {
+    public void show(Mode mode) {
+        this.mode = mode;
+        dialogBox.setCancelButtonVisible(this.mode == Mode.MODAL);
         gotoPage(pages.get(0));
         overlay.show(dialogBox);
     }
@@ -270,7 +280,8 @@ public class ImportPresenter {
         showPresenter(formId, resourceLocator).then(new Function<ImportPresenter, Void>() {
             @Override
             public Void apply(ImportPresenter presenter) {
-                presenter.show();
+                ActivityInfoEntryPoint.hideLoadingIndicator();
+                presenter.show(Mode.MODAL);
                 return null;
             }
         });

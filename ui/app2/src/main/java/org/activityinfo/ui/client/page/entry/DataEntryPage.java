@@ -609,7 +609,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                        .then(new SuccessCallback<ImportPresenter>() {
                            @Override
                            public void onSuccess(ImportPresenter result) {
-                               result.show();
+                               result.show(ImportPresenter.Mode.MODAL);
                                result.getEventBus().addHandler(ImportResultEvent.TYPE, new ImportResultEvent.Handler() {
                                    @Override
                                    public void onResultChanged(ImportResultEvent event) {
