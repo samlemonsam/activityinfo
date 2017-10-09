@@ -248,7 +248,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("You didn''t provide a column named ''{0}'', so we''ll default to ''{1}''.")
     String missingWithDefault(String columnName, String defaultValue);
 
-    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the id of the form to reference, is required.")
+    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the ID of the form to reference, is required.")
     String referenceFieldRequiresRange(String fieldTypeName, String columnName);
 
     @DefaultMessage("Count of {0}")

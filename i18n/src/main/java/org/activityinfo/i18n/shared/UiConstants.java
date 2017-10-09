@@ -1408,7 +1408,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("There are no partners defined for this database, so it is not possible to make new submissions at this time.")
     String noPartners();
 
-    @DefaultStringValue("Do you really want to delete this field? All dependent data will me removed as well (can't be reverted).")
+    @DefaultStringValue("Do you really want to delete this field? All of this field's data will be lost and cannot be recovered.")
     String deleteFormFieldConfirmation();
 
     @DefaultStringValue("Do you want to retry deletion?")
@@ -1663,7 +1663,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Percentage")
     String percentage();
 
-
     @DefaultStringValue("Median")
     String median();
 
@@ -1712,8 +1711,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Learn more about serial numbers")
     String learnMoreAboutSerialNumbers();
 
-
-
     @DefaultStringValue("(Pending)")
     String pending();
 
@@ -1722,7 +1719,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Prefix Formula")
     String prefixFormula();
-
 
     @DefaultStringValue("Show as dropdown")
     String dropdownPresentation();
