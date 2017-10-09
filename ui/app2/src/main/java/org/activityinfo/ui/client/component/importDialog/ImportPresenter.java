@@ -281,7 +281,7 @@ public class ImportPresenter {
             @Override
             public Void apply(ImportPresenter presenter) {
                 ActivityInfoEntryPoint.hideLoadingIndicator();
-                presenter.show(Mode.MODAL);
+                presenter.show(Mode.STANDALONE);
                 return null;
             }
         });
