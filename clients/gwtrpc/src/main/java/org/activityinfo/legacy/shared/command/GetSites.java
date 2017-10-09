@@ -68,6 +68,10 @@ public class GetSites extends PagingGetCommand<SiteResult> implements Command<Si
         this.legacyFetch = legacyFetch;
     }
 
+    public boolean hasSingleActivity() {
+        return filter.getRestrictions(DimensionType.Activity).size() == 1;
+    }
+
     public Filter filter() {
         return filter;
     }

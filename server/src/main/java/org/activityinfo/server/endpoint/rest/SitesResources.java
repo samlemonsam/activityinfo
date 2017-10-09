@@ -79,8 +79,10 @@ public class SitesResources {
         Filter filter = new Filter();
         filter.addRestriction(DimensionType.Activity, activityIds);
         filter.addRestriction(DimensionType.Database, databaseIds);
-    
-        List<SiteDTO> sites = dispatcher.execute(new GetSites(filter)).getData();
+
+        GetSites command = new GetSites(filter);
+        command.setLegacyFetch(false);
+        List<SiteDTO> sites = dispatcher.execute(command).getData();
 
         StringWriter writer = new StringWriter();
         JsonGenerator json = Jackson.createJsonFactory(writer);
@@ -105,7 +107,7 @@ public class SitesResources {
             json.writeStartObject();
             json.writeNumberField("id", site.getId());
             json.writeNumberField("activity", site.getActivityId());
-            json.writeNumberField("timestamp", site.getTimeEdited());
+            //json.writeNumberField("timestamp", site.getTimeEdited());
 
             // write start / end date if applicable
             if (site.getDate1() != null && site.getDate2() != null) {
