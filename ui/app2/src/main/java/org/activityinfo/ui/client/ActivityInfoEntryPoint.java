@@ -30,6 +30,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
 import org.activityinfo.ui.client.dispatch.state.SafeStateProvider;
 import org.activityinfo.ui.client.inject.AppInjector;
 import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
@@ -79,8 +80,12 @@ public class ActivityInfoEntryPoint implements EntryPoint {
 
         if(Window.Location.getHash() != null && Window.Location.getHash().startsWith("#print/")) {
             // Show form only view appropriate for printing
-            
+
             openPrintView(injector);
+
+        } else if(Window.Location.getHash() != null && Window.Location.getHash().startsWith("#import/")) {
+
+            openImport(injector);
         
         } else {
 
@@ -120,6 +125,12 @@ public class ActivityInfoEntryPoint implements EntryPoint {
         PrintFormPanel printFormPanel = injector.createPrintFormPanel();
 
         RootPanel.get().add(printFormPanel);
-        
+
+
+    }
+
+    private void openImport(AppInjector injector) {
+        ImportPresenter.showStandalone(injector.getResourceLocator());
+
     }
 }

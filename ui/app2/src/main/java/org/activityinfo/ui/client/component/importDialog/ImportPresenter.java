@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.i18n.shared.I18N;
@@ -247,12 +248,25 @@ public class ImportPresenter {
         return eventBus;
     }
 
-    public static Promise<ImportPresenter> showPresenter(ResourceId activityId, final ResourceLocator resourceLocator) {
-        return resourceLocator.getFormTree(activityId).then(new Function<FormTree, ImportPresenter>() {
+    public static Promise<ImportPresenter> showPresenter(ResourceId formId, final ResourceLocator resourceLocator) {
+        return resourceLocator.getFormTree(formId).then(new Function<FormTree, ImportPresenter>() {
             @Override
             public ImportPresenter apply(FormTree input) {
                 return new ImportPresenter(resourceLocator, input);
             }
         });
+    }
+
+    public static void showStandalone(ResourceLocator resourceLocator) {
+        // Expect #import/{formId}
+        String hash = Window.Location.getHash();
+        String[] parts = hash.split("/");
+        if(parts.length != 2) {
+            Window.alert("Invalid URL");
+            return;
+        }
+
+        ResourceId formId = ResourceId.valueOf(parts[1]);
+        showPresenter(formId, resourceLocator);
     }
 }

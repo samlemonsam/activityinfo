@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.common.base.Optional;
+import com.google.gwt.http.client.UrlBuilder;
+import com.google.gwt.user.client.Window;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
@@ -175,7 +177,12 @@ public class TableToolBar extends ToolBar {
     }
 
     private void onImport(SelectEvent event) {
+        // Redirect to old app for the moment.
+        UrlBuilder importUrl = Window.Location.createUrlBuilder();
+        importUrl.setHash("#import/" + viewModel.getFormId().asString());
+        importUrl.removeParameter("ui");
 
+        Window.open(importUrl.buildString(), "_blank", null);
     }
 
     private void onExport(SelectEvent event) {
