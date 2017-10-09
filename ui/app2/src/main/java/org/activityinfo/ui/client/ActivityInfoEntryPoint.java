@@ -125,12 +125,9 @@ public class ActivityInfoEntryPoint implements EntryPoint {
         PrintFormPanel printFormPanel = injector.createPrintFormPanel();
 
         RootPanel.get().add(printFormPanel);
-
-
     }
 
     private void openImport(AppInjector injector) {
         ImportPresenter.showStandalone(injector.getResourceLocator());
-
     }
 }

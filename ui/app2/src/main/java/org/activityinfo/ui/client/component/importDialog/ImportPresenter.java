@@ -267,6 +267,12 @@ public class ImportPresenter {
         }
 
         ResourceId formId = ResourceId.valueOf(parts[1]);
-        showPresenter(formId, resourceLocator);
+        showPresenter(formId, resourceLocator).then(new Function<ImportPresenter, Void>() {
+            @Override
+            public Void apply(ImportPresenter presenter) {
+                presenter.show();
+                return null;
+            }
+        });
     }
 }
