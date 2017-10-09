@@ -19,8 +19,11 @@ import org.activityinfo.ui.client.lookup.viewModel.LookupViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ReferenceFieldWidget implements FieldWidget {
+
+    private static final Logger LOGGER = Logger.getLogger(ReferenceFieldWidget.class.getName());
 
 
     private final LookupViewModel viewModel;
@@ -40,9 +43,9 @@ public class ReferenceFieldWidget implements FieldWidget {
             levelWidgets.add(widget);
         }
 
-        if(viewModel.getLookupKeys().size() == 1) {
+        if(levelWidgets.size() == 1) {
             // If we have a single lookup key, then just show a single combobox
-            widget = new LevelWidget(viewModel, viewModel.getLookupKeys().get(0)).getComboBox();
+            widget = levelWidgets.get(0).getComboBox();
 
         } else {
             // Otherwise we need labeled rows of comboboxes
@@ -55,6 +58,7 @@ public class ReferenceFieldWidget implements FieldWidget {
     }
 
     private void onSelection(SelectionEvent<ReferenceChoice> event) {
+        LOGGER.info("onSelection: " + event.getSelectedItem().getRef());
         fieldUpdater.update(new FieldInput(new ReferenceValue(event.getSelectedItem().getRef())));
     }
 
