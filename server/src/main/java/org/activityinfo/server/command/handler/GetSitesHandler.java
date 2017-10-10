@@ -1,11 +1,11 @@
 package org.activityinfo.server.command.handler;
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.OldGetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
@@ -26,8 +26,6 @@ import org.activityinfo.store.query.impl.ColumnSetBuilder;
 import org.activityinfo.store.query.impl.FormSupervisorAdapter;
 
 import javax.inject.Provider;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class GetSitesHandler implements CommandHandler<GetSites> {
@@ -46,8 +44,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private FormTreeBuilder formTreeBuilder;
     private FormTree formTree;
     private FormClass activityForm;
-
-    private final SimpleDateFormat dateParser = new SimpleDateFormat("YYYY-MM-DD");
 
     @Override
     public SiteResult execute(GetSites command, User user) {
@@ -212,20 +208,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                     break;
 
                 case "startDate":
-                    try {
-                        Date startDate = dateParser.parse(columnViewMap.get("startDate").getString(row));
-                        site.setDate1(startDate);
-                    } catch (ParseException excp) {
-                        throw new CommandException("Site has no start date");
-                    }
+                    LocalDate startDate = LocalDate.parse(columnViewMap.get("startDate").getString(row));
+                    site.setDate1(startDate);
                     break;
                 case "endDate":
-                    try {
-                        Date endDate = dateParser.parse(columnViewMap.get("endDate").getString(row));
-                        site.setDate2(endDate);
-                    } catch (ParseException excp) {
-                        throw new CommandException("Site has no end date");
-                    }
+                    LocalDate endDate = LocalDate.parse(columnViewMap.get("endDate").getString(row));
+                    site.setDate2(endDate);
                     break;
 
                 case "locationId":
