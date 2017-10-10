@@ -6,6 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.activityinfo.i18n.tools.model.ResourceClass;
+import org.activityinfo.i18n.tools.model.ResourceClassTerm;
 import org.activityinfo.i18n.tools.model.TranslationSet;
 import org.activityinfo.i18n.tools.output.PropertiesBuilder;
 import org.activityinfo.i18n.tools.parser.DefaultUpdatingVisitor;
@@ -78,9 +79,22 @@ public class Pull {
         return validateMessages(resourceClass, cu, translationSet);
     }
 
-    private TranslationSet validateMessages(ResourceClass resourceClass, CompilationUnit cu, TranslationSet translationSet) {
+    private TranslationSet validateMessages(ResourceClass resourceClass, CompilationUnit cu, TranslationSet translationSet) throws IOException {
         InspectingVisitor inspector = new InspectingVisitor(resourceClass.getJavaSourceFile().getName());
         inspector.visit(cu, null);
+
+        // Check for newline in translated string
+        for (ResourceClassTerm resourceClassTerm : inspector.getTerms()) {
+            String translation = translationSet.get(resourceClassTerm.getKey());
+            if (translation != null && translation.contains("\n")) {
+                // Allow newline only if default string also contains newline (will print warning instead)
+                if(!resourceClassTerm.getDefaultTranslation().contains("\n")) {
+                    throw new IOException(String.format("Translated string %s[%s] contains illegal newline",
+                            resourceClassTerm.getKey(), translationSet.getLanguage()));
+                }
+                System.err.println("Default string for " + resourceClassTerm.getKey() + " contains illegal newline");
+            }
+        }
 
         if(!inspector.isMessageSubtype()) {
             return translationSet;
