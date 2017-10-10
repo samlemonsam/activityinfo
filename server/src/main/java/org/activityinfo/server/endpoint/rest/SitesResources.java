@@ -57,7 +57,9 @@ public class SitesResources {
         filter.addRestriction(DimensionType.Location, locationIds);
         filter.addRestriction(DimensionType.Site, siteIds);
 
-        List<SiteDTO> sites = dispatcher.execute(new GetSites(filter)).getData();
+        GetSites command = new GetSites(filter);
+        command.setLegacyFetch(false);
+        List<SiteDTO> sites = dispatcher.execute(command).getData();
 
         StringWriter writer = new StringWriter();
         JsonGenerator json = Jackson.createJsonFactory(writer);
@@ -81,7 +83,7 @@ public class SitesResources {
         filter.addRestriction(DimensionType.Database, databaseIds);
 
         GetSites command = new GetSites(filter);
-        command.setLegacyFetch(false);
+        //command.setLegacyFetch(false);
         List<SiteDTO> sites = dispatcher.execute(command).getData();
 
         StringWriter writer = new StringWriter();
