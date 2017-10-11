@@ -83,17 +83,8 @@ public class Pull {
         InspectingVisitor inspector = new InspectingVisitor(resourceClass.getJavaSourceFile().getName());
         inspector.visit(cu, null);
 
-        // Check for newline in translated string
         for (ResourceClassTerm resourceClassTerm : inspector.getTerms()) {
-            String translation = translationSet.get(resourceClassTerm.getKey());
-            if (translation != null && translation.contains("\n")) {
-                // Allow newline only if default string also contains newline (will print warning instead)
-                if(!resourceClassTerm.getDefaultTranslation().contains("\n")) {
-                    throw new IOException(String.format("Translated string %s[%s] contains illegal newline",
-                            resourceClassTerm.getKey(), translationSet.getLanguage()));
-                }
-                System.err.println("Default string for " + resourceClassTerm.getKey() + " contains illegal newline");
-            }
+            checkForNewline(resourceClassTerm, translationSet);
         }
 
         if(!inspector.isMessageSubtype()) {
@@ -104,6 +95,21 @@ public class Pull {
         validator.visit(cu, null);
 
         return validator.getValidatedSet();
+    }
+
+    private void checkForNewline(ResourceClassTerm term, TranslationSet translationSet) throws IOException {
+        if (checkForNewline(term.getDefaultTranslation())) {
+            throw new IOException(String.format("Default string %s: '%s' contains illegal newline",
+                    term.getKey(), term.getDefaultTranslation()));
+        }
+        if (checkForNewline(translationSet.get(term.getKey()))) {
+            throw new IOException(String.format("Translated string %s[%s] contains illegal newline",
+                    term.getKey(), translationSet.getLanguage()));
+        }
+    }
+
+    private boolean checkForNewline(String string) {
+        return string != null && string.contains("\n");
     }
 
     /**
