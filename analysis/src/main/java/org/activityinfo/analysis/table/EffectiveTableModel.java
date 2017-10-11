@@ -10,10 +10,7 @@ import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.SerialNumberType;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -115,6 +112,7 @@ public class EffectiveTableModel {
 
     private boolean isSimple(FieldType type) {
         return type instanceof TextType ||
+               type instanceof NarrativeType ||
                type instanceof SerialNumberType ||
                type instanceof QuantityType ||
                type instanceof BarcodeType ||
