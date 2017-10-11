@@ -799,6 +799,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Save")
     String save();
 
+    @DefaultStringValue("Save As")
+    String saveAs();
+
     @DefaultStringValue("Saved")
     String saved();
 
