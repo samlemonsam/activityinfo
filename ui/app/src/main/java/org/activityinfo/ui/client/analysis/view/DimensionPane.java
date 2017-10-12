@@ -162,7 +162,7 @@ public class DimensionPane implements IsWidget {
             for (DateLevel dateLevel : DateLevel.values()) {
                 CheckMenuItem item = new CheckMenuItem(dateLevel.getLabel());
                 item.setChecked(currentLevel == dateLevel);
-                item.addSelectionHandler(event -> updateDateLevel(dim, DateLevel.YEAR));
+                item.addSelectionHandler(event -> updateDateLevel(dim, dateLevel));
                 contextMenu.add(item);
             }
 
