@@ -77,6 +77,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         if (context.draggable instanceof DnDLabel) {
             previewDropNewWidget(context);
         } else {
+            vetoDropIfNeeded(context);
             drop(context.draggable, context);
 
             // update model
@@ -117,7 +118,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                 if (container instanceof FieldWidgetContainer) {
                     FormField formField = ((FieldWidgetContainer) container).getFormField();
 
-                    removeFromSrouceFormClass(formField);
+                    removeFromSourceFormClass(formField);
 
                     insertIntoTargetFormClass(panelDropController, container, formField);
 
@@ -129,7 +130,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
                         FormClass subForm = (FormClass) fieldsHolderContainer.getElementContainer();
                         FormField subformOwnerField = formDesigner.getModel().getSubformOwnerField(subForm);
 
-                        removeFromSrouceFormClass(subformOwnerField);
+                        removeFromSourceFormClass(subformOwnerField);
 
                         insertIntoTargetFormClass(panelDropController, container, subformOwnerField);
 
@@ -146,7 +147,7 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         }
     }
 
-    private void removeFromSrouceFormClass(FormElement formElement) {
+    private void removeFromSourceFormClass(FormElement formElement) {
         FormClass sourceFormClass = formDesigner.getModel().getFormClassByElementId(formElement.getId());
         sourceFormClass.remove(formElement);
     }
