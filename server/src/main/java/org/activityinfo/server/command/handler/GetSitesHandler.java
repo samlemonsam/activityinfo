@@ -6,7 +6,9 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
+import org.activityinfo.legacy.shared.command.OldGetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
+import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
@@ -19,9 +21,11 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -56,9 +60,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     @Override
     public SiteResult execute(GetSites command, User user) {
 
-        /*if(command.isLegacyFetch() || !command.hasSingleActivity()) {
+        if (command.isLegacyFetch()) {
             return dispatcher.execute(new OldGetSites(command));
-        }*/
+        }
 
         catalog = catalogProvider.get();
         builder = new ColumnSetBuilder(catalog, new AppEngineFormScanCache(), new FormSupervisorAdapter(catalog, user.getId()));
@@ -70,7 +74,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             FormTree formTree = formTreeBuilder.queryTree(activityId);
             FormClass activityForm = formTree.getFormClass(activityId);
 
-            QueryModel query = buildQuery(activityForm, command);
+            QueryModel query = buildQuery(formTree, activityForm, command);
             query.setFilter(determineFetchFilter(command.filter(), formTree));
             ColumnSet result = builder.build(query);
 
@@ -91,7 +95,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
         if (filter.getRestrictions(DimensionType.Database).size() > 0) {
             try {
-                Map<Integer, Activity> activityMap = catalog.getActivityLoader()
+                Map<Integer, Activity> activityMap = catalog
+                        .getActivityLoader()
                         .loadForDatabaseIds(filter.getRestrictions(DimensionType.Database));
 
                 for (Activity activity : activityMap.values()) {
@@ -99,10 +104,14 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 }
             } catch (SQLException excp) {
             }
-        } else if (filter.getRestrictions(DimensionType.Activity).size() > 0) {
+        }
+        if (filter.getRestrictions(DimensionType.Activity).size() > 0) {
             for (Integer activity : filter.getRestrictions(DimensionType.Activity)) {
                 activityList.add(CuidAdapter.activityFormClass(activity));
             }
+        }
+        if (activityList.isEmpty()) {
+            throw new CommandException("Request too broad: must filter by database or activity");
         }
 
         return activityList;
@@ -113,7 +122,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return queryFilter.composeFilter(formTree);
     }
 
-    private QueryModel buildQuery(FormClass activityForm, GetSites command) {
+    private QueryModel buildQuery(FormTree formTree, FormClass activityForm, GetSites command) {
         QueryModel query = new QueryModel(activityForm.getId());
 
         query.selectResourceId().as("id");
@@ -133,14 +142,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
 
         if (command.isFetchLocation()) {
-            //buildLocationQuery(activityForm, ""); // Maybe add some extra handling so we dont fetch superfluous fields
-            query.selectExpr("location").as("locationId");
-            query.selectExpr("location.name").as("locationName");
-            query.selectExpr("location.code").as("locationCode");
-            query.selectExpr("location.point.latitude").as("locationLatitude");
-            query.selectExpr("location.point.longitude").as("locationLongitude");
-            query.selectExpr("location.admin").as("locationAdminId");
-            query.selectExpr("location.admin.name").as("locationAdminName");
+            query = buildLocationQuery(query,formTree, activityForm);
         }
 
         if (command.isFetchAttributes()) {
@@ -158,25 +160,88 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return query;
     }
 
-    private boolean hasField(FormClass form, ResourceId fieldId) {
-        for (FormField field : form.getFields()) {
-            if (field.getId().equals(fieldId)) {
-                return true;
-            }
+    private QueryModel buildLocationQuery(QueryModel query, FormTree formTree, FormClass form) {
+
+        switch (form.getId().getDomain()) {
+            case CuidAdapter.ACTIVITY_DOMAIN:
+                FormField locationField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.LOCATION_FIELD));
+                if (locationField != null) {
+                    ResourceId locationReferenceId = getReferenceId(locationField.getType());
+                    return buildLocationQuery(query, formTree, formTree.getFormClass(locationReferenceId));
+                } else {
+                    // country form, get country from db
+                    return query;
+                }
+
+            case CuidAdapter.LOCATION_TYPE_DOMAIN:
+                query.selectExpr(form.getId().asString() + "._id").as("locationId");
+                query.selectExpr(form.getId().asString() + ".name").as("locationName");
+                query.selectExpr(form.getId().asString() + ".code").as("locationCode");
+
+                FormField geoField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.GEOMETRY_FIELD));
+                if (geoField != null) {
+                    query = buildGeoLocationQuery(query, formTree, geoField);
+                }
+
+                FormField adminField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.ADMIN_FIELD));
+                if (adminField != null) {
+                    ResourceId adminReferenceId = getReferenceId(adminField.getType());
+                    return buildLocationQuery(query, formTree, formTree.getFormClass(adminReferenceId));
+                }
+
+                return query;
+
+            case CuidAdapter.ADMIN_LEVEL_DOMAIN:
+                query.selectExpr(form.getId().asString() + "._id").as(form.getId().asString());
+                query.selectExpr(form.getId().asString() + ".name").as(form.getId().asString() + ".Name");
+                query.selectExpr("\"" + form.getId().asString() + "\"").as(form.getId().asString() + ".LevelId");
+                query.selectExpr("\"" + form.getLabel() + "\"").as(form.getId().asString() + ".Level");
+
+                FormField parentLevel = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.ADMIN_PARENT_FIELD));
+                if (parentLevel != null) {
+                    query.selectExpr(form.getId().asString() + ".parent").as(form.getId().asString() + ".Parent");
+                    // TODO: More complex admin entity structure - parents of parents...
+                    //ResourceId parentLevelId = getReferenceId(parentLevel.getType());
+                    //return buildLocationQuery(query, formTree, formTree.getFormClass(parentLevelId));
+                }
+
+                return query;
+
+            default:
+                // undefined location form...
+                return query;
         }
-        return false;
     }
 
-    /**
-     * Retrieves a field's form reference
-     * Will always return the first reference in ReferenceType range
-     * @param refField
-     * @return ResourceId of reference form
-     */
-    private ResourceId getReferenceId(FormField refField) {
-        assert (refField.getType() instanceof ReferenceType);
-        Iterator<ResourceId> it = ((ReferenceType) refField.getType()).getRange().iterator();
-        return it.next();
+    private ResourceId getReferenceId(FieldType type) {
+        if (type instanceof ReferenceType)
+            return getReferenceId((ReferenceType) type);
+        else
+            throw new IllegalArgumentException("Given FieldType " + type + " should be of reference type");
+    }
+
+    private ResourceId getReferenceId(ReferenceType referenceType) {
+        if (!referenceType.getRange().isEmpty()) {
+            Iterator<ResourceId> it = referenceType.getRange().iterator();
+            return it.next();
+        }
+        throw new IllegalArgumentException("Given ReferenceType " + referenceType + " has no reference ids in range");
+    }
+
+    private FormField getField(FormClass form, ResourceId fieldId) {
+        try {
+            return form.getField(fieldId);
+        } catch (IllegalArgumentException excp) {
+            return null;
+        }
+    }
+
+    private QueryModel buildGeoLocationQuery(QueryModel query, FormTree formTree, FormField geoField) {
+        if (geoField.getType() instanceof GeoPointType) {
+            query.selectExpr(geoField.getId() + ".latitude").as("locationLatitude");
+            query.selectExpr(geoField.getId() + ".longitude").as("locationLongitude");
+        }
+        return query;
     }
 
     private QueryModel buildAttributeQuery(QueryModel query, FormClass activityForm) {
@@ -242,6 +307,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private SiteDTO populateSite(QueryModel query, SiteDTO site, Map<String,ColumnView> columnViewMap, int row) {
+        Map<ResourceId,AdminEntityDTO> adminLevelMap = Maps.newHashMap();
+
         for (ColumnModel column : query.getColumns()) {
             switch (column.getId()) {
                 case "id":
@@ -306,18 +373,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 case "locationLongitude":
                     site.setX(columnViewMap.get("locationLongitude").getDouble(row));
                     break;
-                case "locationAdminId":
-                    // Can be null
-                    String admin = columnViewMap.get("locationAdminId").getString(row);
-                    if (admin != null) {
-                        ResourceId adminEntity = ResourceId.valueOf(admin);
-                        String adminName = columnViewMap.get("locationAdminName").getString(row);
-                        //Integer level = determineAdminLevel(adminEntity);
-                        site.setAdminEntity(0, new AdminEntityDTO(0, CuidAdapter.getLegacyIdFromCuid(adminEntity), adminName));
-                    }
-                case "locationAdminName":
-                    // Handled above
-                    break;
 
                 case "comments":
                     site.setComments(columnViewMap.get("comments").getString(row));
@@ -340,9 +395,13 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                         }
                         break;
                     }
+                    if (isDomain(colId, CuidAdapter.ADMIN_LEVEL_DOMAIN)) {
+                        addAdminLevel(adminLevelMap, columnViewMap, colId, row);
+                }
                     break;
             }
         }
+        site = insertAdminLevels(site, adminLevelMap);
         return site;
     }
 
@@ -369,6 +428,53 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         if (selected) {
             site.addDisplayAttribute(attrGroupId, attrId);
         }
+    }
+
+    private void addAdminLevel(Map<ResourceId,AdminEntityDTO> adminLevelMap, Map<String,ColumnView> columnViewMap, ResourceId colId, int row) {
+        if (colId.asString().contains(".Name")) {
+            ResourceId adminId = getAdminEntityId(colId, ".Name");
+            AdminEntityDTO adminEntity = getAdminEntityDTO(adminId, adminLevelMap);
+            String adminEntityName = columnViewMap.get(colId.asString()).getString(row);
+            adminEntity.setName(adminEntityName);
+        } else if (colId.asString().contains(".LevelId")) {
+            ResourceId adminId = getAdminEntityId(colId, ".LevelId");
+            AdminEntityDTO adminEntity = getAdminEntityDTO(adminId, adminLevelMap);
+            ResourceId adminLevelId = ResourceId.valueOf(columnViewMap.get(colId.asString()).getString(row));
+            adminEntity.setLevelId(CuidAdapter.getLegacyIdFromCuid(adminLevelId));
+        } else if (colId.asString().contains(".Level")) {
+            ResourceId adminId = getAdminEntityId(colId,".Level");
+            AdminEntityDTO adminEntity = getAdminEntityDTO(adminId, adminLevelMap);
+            String adminLevelName = columnViewMap.get(colId.asString()).getString(row);
+            adminEntity.setLevelName(adminLevelName);
+        } else if (colId.asString().contains(".Parent")) {
+            ResourceId adminId = getAdminEntityId(colId,".Parent");
+            AdminEntityDTO adminEntity = getAdminEntityDTO(adminId, adminLevelMap);
+            ResourceId adminParentId = ResourceId.valueOf(columnViewMap.get(colId.asString()).getString(row));
+            adminEntity.setParentId(CuidAdapter.getLegacyIdFromCuid(adminParentId));
+        } else {
+            AdminEntityDTO adminEntity = getAdminEntityDTO(colId, adminLevelMap);
+            ResourceId adminEntityId = ResourceId.valueOf(columnViewMap.get(colId.asString()).getString(row));
+            adminEntity.setId(CuidAdapter.getLegacyIdFromCuid(adminEntityId));
+        }
+    }
+
+    private SiteDTO insertAdminLevels(SiteDTO site, Map<ResourceId,AdminEntityDTO> adminLevelMap) {
+        for(Map.Entry<ResourceId,AdminEntityDTO> entry : adminLevelMap.entrySet()) {
+            AdminEntityDTO adminEntity = entry.getValue();
+            site.setAdminEntity(adminEntity.getLevelId(), adminEntity);
+        }
+        return site;
+    }
+
+    private ResourceId getAdminEntityId(ResourceId colId, String toRemove) {
+        return ResourceId.valueOf(colId.asString().replace(toRemove,""));
+    }
+
+    private AdminEntityDTO getAdminEntityDTO(ResourceId adminEntityId, Map<ResourceId,AdminEntityDTO> adminLevelMap) {
+        if (!adminLevelMap.containsKey(adminEntityId)) {
+            adminLevelMap.put(adminEntityId, new AdminEntityDTO());
+        }
+        return adminLevelMap.get(adminEntityId);
     }
 
 }
