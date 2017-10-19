@@ -38,6 +38,7 @@ import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.component.form.field.FieldUpdater;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
@@ -241,7 +242,16 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                         continue;
                     }
 
-                    Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(owner, formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+                    Promise<Void> promise = formDesigner.getFormFieldWidgetFactory().createWidget(owner, formField, new FieldUpdater() {
+                        @Override
+                        public void onInvalid(String errorMessage) {
+                        }
+
+                        @Override
+                        public void update(Object value) {
+                            formDesigner.getSavedGuard().setSaved(false);
+                        }
+                    }).then(new Function<FormFieldWidget, Void>() {
                         @Nullable
                         @Override
                         public Void apply(@Nullable FormFieldWidget input) {

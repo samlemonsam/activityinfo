@@ -38,6 +38,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.ui.client.component.chooseForm.ChooseFormCallback;
 import org.activityinfo.ui.client.component.chooseForm.ChooseFormDialog;
+import org.activityinfo.ui.client.component.form.field.FieldUpdater;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -168,7 +169,16 @@ public class DropPanelDropController extends FlowPanelDropController implements 
         if (template instanceof FieldTemplate) {
             final FormField formField = ((FieldTemplate)template).create();
             FormClass formClass = formDesigner.getModel().getFormClassByElementId(resourceId);
-            formDesigner.getFormFieldWidgetFactory().createWidget(formClass, formField, NullValueUpdater.INSTANCE).then(new Function<FormFieldWidget, Void>() {
+            formDesigner.getFormFieldWidgetFactory().createWidget(formClass, formField, new FieldUpdater() {
+                @Override
+                public void onInvalid(String errorMessage) {
+                }
+
+                @Override
+                public void update(Object value) {
+                    formDesigner.getSavedGuard().setSaved(false);
+                }
+            }).then(new Function<FormFieldWidget, Void>() {
                 @Nullable
                 @Override
                 public Void apply(@Nullable FormFieldWidget formFieldWidget) {
