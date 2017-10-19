@@ -300,6 +300,7 @@ public class FieldEditor implements IsWidget {
 
     private void fireUpdate() {
         fieldWidgetContainer.syncWithModel();
+        formDesigner.getSavedGuard().setSaved(false);
     }
 
     public void setRelevanceState(FormField formField, boolean setRadioButtons) {
