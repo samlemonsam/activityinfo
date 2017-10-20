@@ -129,7 +129,9 @@ public class MailinatorClient implements EmailDriver {
             Message data = objectMapper.readValue(json, MessageResult.class).getData();
             Preconditions.checkNotNull(data);
             return data;
-        } catch (Exception e) {
+        } catch (IOException e) {
+
+            e.printStackTrace();
 
             int delay = retries * 1000;
             LOGGER.info(String.format("queryMessage - Delay: %sms, retry: %s", delay, retries));

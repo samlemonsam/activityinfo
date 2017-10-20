@@ -115,18 +115,18 @@ public class SignUpSteps {
 
     @When("^I choose a password$")
     public void I_choose_a_password() throws Throwable {
-        confirmPage.confirmPassword(newUserAccount.getPassword());
+        confirmPage.confirmPasswordSubmitFormAndNavigateToApplicationPage(newUserAccount.getPassword());
     }
 
     @When("^I try to choose an empty password$")
     public void I_try_to_choose_an_empty_password() throws Throwable {
-        applicationPage = confirmPage.confirmPassword("");
+        applicationPage = confirmPage.confirmPasswordSubmitFormAndNavigateToApplicationPage("");
     }
 
 
     @And("^I choose the password \"([^\"]*)\"$")
     public void I_try_to_choose_the_password(String password) throws Throwable {
-        applicationPage = confirmPage.confirmPassword(password);
+        applicationPage = confirmPage.confirmPasswordSubmitFormAndNavigateToApplicationPage(password);
         newUserAccount = new UserAccount(newUserAccount.getEmail(), password);
     }
 

@@ -23,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import sun.security.x509.UniqueIdentity;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -61,6 +62,10 @@ public class UiTestHarness extends ExternalResource {
 
     public SignUpPage getSignUpPage() {
         return new SignUpPage(webDriver,server);
+    }
+
+    public ConfirmPage getConfirmPage(URL url){
+        return new ConfirmPage(webDriver).navigateTo(url);
     }
 
     public UserAccount createAccount() {

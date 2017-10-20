@@ -30,7 +30,7 @@ public class ConfirmPage {
         this.page = new FluentElement(webDriver);
     }
 
-    public ApplicationPage confirmPassword(String password) {
+    public ApplicationPage confirmPasswordSubmitFormAndNavigateToApplicationPage(String password) {
         page.waitUntil(new Predicate<WebDriver>() {
             @Override
             public boolean apply(WebDriver input) {
@@ -50,8 +50,9 @@ public class ConfirmPage {
         return applicationPage;
     }
 
-    public void navigateTo(URL confirmationLink) {
+    public ConfirmPage navigateTo(URL confirmationLink) {
         page.navigate().to(confirmationLink);
+        return this;
     }
     
     public void assertLinkIsInvalid() {

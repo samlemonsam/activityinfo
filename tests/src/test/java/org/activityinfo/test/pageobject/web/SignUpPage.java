@@ -15,8 +15,8 @@ public class SignUpPage {
 
     public static final By NAME_INPUT = By.name("name");
     public static final By EMAIL_INPUT = By.name("email");
-    public static final By ORGANIZATION_INPUT = By.name("organization");
-    public static final By TITLE_INPUT = By.name("jobtitle");
+    //public static final By ORGANIZATION_INPUT = By.name("organization");
+    //public static final By TITLE_INPUT = By.name("jobtitle");
     public static final By TERMS_BUTTON = By.id("termsCheckbox");
     public static final By SUBMIT_BUTTON = By.xpath("//button[@type='submit']");
 
@@ -37,8 +37,6 @@ public class SignUpPage {
 
     public SignUpPage signUp(UserAccount account) {
         page.waitFor(NAME_INPUT).sendKeys(account.nameFromEmail());
-        page.findElement(ORGANIZATION_INPUT).sendKeys(account.domainFromEmail());
-        page.findElement(TITLE_INPUT).sendKeys("Specialist");
         page.findElement(EMAIL_INPUT).sendKeys(account.getEmail());
         page.findElement(TERMS_BUTTON).click();
         page.findElement(SUBMIT_BUTTON).click();
