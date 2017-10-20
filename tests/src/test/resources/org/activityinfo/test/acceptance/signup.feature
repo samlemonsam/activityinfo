@@ -1,6 +1,6 @@
 @web
 Feature: New User Sign Up
-  
+
   Scenario: Sign up links cannot be re-used
     Given I have signed up for a new account
       And I have confirmed my account

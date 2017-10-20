@@ -15,8 +15,6 @@ public class SignUpPage {
 
     public static final By NAME_INPUT = By.name("name");
     public static final By EMAIL_INPUT = By.name("email");
-    //public static final By ORGANIZATION_INPUT = By.name("organization");
-    //public static final By TITLE_INPUT = By.name("jobtitle");
     public static final By TERMS_BUTTON = By.id("termsCheckbox");
     public static final By SUBMIT_BUTTON = By.xpath("//button[@type='submit']");
 
