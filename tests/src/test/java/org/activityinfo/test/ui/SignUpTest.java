@@ -46,7 +46,7 @@ public class SignUpTest {
         URL confirmationURL = email.get().extractLink();
         System.out.println("Confirmation email " + confirmationURL);
         ConfirmPage confirmPage = harness.getConfirmPage(confirmationURL);
-        ApplicationPage applicationPage = 
+        ApplicationPage applicationPage =
             confirmPage.confirmPasswordSubmitFormAndNavigateToApplicationPage("nosecret");
 
 
