@@ -160,10 +160,18 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         // first copy all activities without payload (indicators, attributes)
         for (Activity activity : sourceDb.getActivities()) {
+            if (activity.isDeleted()) {
+                // skip current activity if deleted...
+                continue;
+            }
             copyActivity(activity);
         }
 
         for (Activity activity : sourceDb.getActivities()) {
+            if (activity.isDeleted()) {
+                // skip current activity if deleted...
+                continue;
+            }
             final ResourceId sourceFormId = activityFormClass(activity.getId());
             final ResourceId targetFormId = activityFormClass(activityMapping.get(activity.getId()).getId());
 
