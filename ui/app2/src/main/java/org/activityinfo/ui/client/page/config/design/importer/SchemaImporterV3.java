@@ -65,6 +65,7 @@ public class SchemaImporterV3 extends SchemaImporter {
     private Map<String, FormClass> formMap = new HashMap<>();
     private Map<String, FormClass> subFormMap = new HashMap<>();
     private Map<String, EnumBuilder> enumMap = new HashMap<>();
+    private Map<FormClass, FormField> refMap = new HashMap<>();
     private int databaseId;
     private ResourceLocator locator;
 
@@ -108,12 +109,11 @@ public class SchemaImporterV3 extends SchemaImporter {
         formMap.clear();
         subFormMap.clear();
         enumMap.clear();
+        refMap.clear();
 
         fatalError = false;
         for (SourceRow row : source.getRows()) {
-
             try {
-
                 FormClass parentFormClass = getFormClass(row);
                 FormClass formClass = getSubFormClass(parentFormClass, row);
 
@@ -124,6 +124,9 @@ public class SchemaImporterV3 extends SchemaImporter {
                     FieldType fieldType = parseFieldType(row);
                     FormField newField = addField(formClass, fieldType.getTypeClass(), row);
                     newField.setType(fieldType);
+                    if (newField.getType() instanceof ReferenceType) {
+                        refMap.put(formClass, newField);
+                    }
                 }
             } catch (UnableToParseRowException e) {
                 warnings.add(SafeHtmlUtils.fromString(e.getMessage()));
@@ -135,7 +138,53 @@ public class SchemaImporterV3 extends SchemaImporter {
             enumBuilder.formField.setType(new EnumType(enumBuilder.cardinality, enumBuilder.items));
         }
 
+        for (Map.Entry<FormClass,FormField> refEntry : refMap.entrySet()) {
+            validateReference(refEntry);
+        }
+
         return !fatalError;
+    }
+
+    private void validateReference(Map.Entry<FormClass,FormField> refEntry) {
+        if (refEntry.getValue().getType() instanceof ReferenceType) {
+            ReferenceType refType = (ReferenceType) refEntry.getValue().getType();
+            ResourceId reference = refType.getRange().iterator().next();
+            // check local forms and fields
+            if (isImportedReference(reference)) {
+                return;
+            }
+            // check database forms - cannot currently check for individual fields...
+            if (isDatabaseFormReference(reference)) {
+                return;
+            }
+            throw new UnableToDereferenceException("Unable to find referenced field/form: " + reference);
+        }
+        throw new UnableToDereferenceException("Field " + refEntry.getValue().toString() + " is not of type ReferenceType");
+    }
+
+    private boolean isImportedReference(ResourceId reference) {
+        for (FormClass form : formMap.values()) {
+            if (form.getId().equals(reference)) {
+                return true;
+            }
+            try {
+                if (form.getField(reference) != null) {
+                    return true;
+                }
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+        }
+        return false;
+    }
+
+    private boolean isDatabaseFormReference(ResourceId reference) {
+        try {
+            Promise<FormClass> form = locator.getFormClass(reference);
+            return form.get() != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public List<FormClass> toSave() {
@@ -169,7 +218,6 @@ public class SchemaImporterV3 extends SchemaImporter {
         field.setVisible(true);
 
         formClass.addElement(field);
-
         return field;
     }
 
