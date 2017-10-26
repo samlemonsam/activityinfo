@@ -41,6 +41,7 @@ import org.activityinfo.ui.client.component.chooseForm.ChooseFormDialog;
 import org.activityinfo.ui.client.component.form.field.FieldUpdater;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
 import org.activityinfo.ui.client.component.formdesigner.FormDesigner;
+import org.activityinfo.ui.client.component.formdesigner.FormDesignerConstants;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetContainer;
@@ -168,6 +169,9 @@ public class DropPanelDropController extends FlowPanelDropController implements 
 
         if (template instanceof FieldTemplate) {
             final FormField formField = ((FieldTemplate)template).create();
+
+            vetoDropIfNeeded(context);
+
             FormClass formClass = formDesigner.getModel().getFormClassByElementId(resourceId);
             formDesigner.getFormFieldWidgetFactory().createWidget(formClass, formField, new FieldUpdater() {
                 @Override
@@ -270,9 +274,18 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             return;
         }
         if (isField(context.selectedWidgets.get(0))) { // field is moved
-            return;
-        }
+            // Once placed, fields can only be moved within the same form/subform
+            ResourceId targetFormId = getId(dropTarget, FormDesignerConstants.OWNER_ID);
+            ResourceId dataFieldId = getId(context.draggable, FormDesignerConstants.DATA_FIELD_ID);
 
+            FormClass targetForm = formDesigner.getModel().getFormClass(targetFormId);
+
+            if (hasField(targetForm, dataFieldId)) {
+                return;
+            } else {
+                throw new VetoDragException();
+            }
+        }
         if (formDesigner.getModel().getElementContainer(resourceId) instanceof FormSection ||
                 formDesigner.getModel().isSubform(formDesigner.getModel().getElementContainer(resourceId).getId())) {
             // we are not going to handle nested FormSection or nested SubForms in FormDesigner
@@ -281,6 +294,20 @@ public class DropPanelDropController extends FlowPanelDropController implements 
             // 2. on formField selection highlight it with green color
             // nested FormSection/SubForm brings higher complexity without comparative value.
             throw new VetoDragException();
+        }
+    }
+
+    private ResourceId getId(Widget widget, String attributeType) {
+        String id = widget.getElement().getAttribute(attributeType);
+        return id != null ? ResourceId.valueOf(id) : null;
+    }
+
+    private boolean hasField(FormClass form, ResourceId fieldId) {
+        try {
+            FormField field = form.getField(fieldId);
+            return field != null;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
