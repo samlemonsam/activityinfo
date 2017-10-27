@@ -46,7 +46,8 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
 
     private ActionListener listener;
-    private SplitButton saveButton;
+    private SplitButton saveSplitButton;
+    private Button saveButton;
     private Button addButton;
     private Button removeButton;
     private Button editButton;
@@ -136,10 +137,10 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
     }
 
     public void addSaveSplitButton() {
-        saveButton = new SplitButton(I18N.CONSTANTS.save());
-        saveButton.setIcon(IconImageBundle.ICONS.save());
-        saveButton.setItemId(UIActions.SAVE);
-        saveButton.addListener(Events.Select, this);
+        saveSplitButton = new SplitButton(I18N.CONSTANTS.save());
+        saveSplitButton.setIcon(IconImageBundle.ICONS.save());
+        saveSplitButton.setItemId(UIActions.SAVE);
+        saveSplitButton.addListener(Events.Select, this);
 
         Menu menu = new Menu();
         MenuItem saveItem = new MenuItem(I18N.CONSTANTS.save(),
@@ -164,21 +165,31 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
                 });
         menu.add(discardItem);
 
-        saveButton.setMenu(menu);
+        saveSplitButton.setMenu(menu);
 
-        add(saveButton);
+        add(saveSplitButton);
+    }
+
+    public void addSaveButton() {
+        this.saveButton = addButton(UIActions.SAVE, I18N.CONSTANTS.save(), IconImageBundle.ICONS.save());
     }
 
     public void setDirty(boolean dirty) {
-        if (saveButton != null) {
-            saveButton.setEnabled(dirty);
+        Button currentSaveButton = getSaveButton();
+
+        if (currentSaveButton != null) {
+            currentSaveButton.setEnabled(dirty);
             if (dirty) {
-                saveButton.setText(I18N.CONSTANTS.save());
-                saveButton.setIcon(IconImageBundle.ICONS.save());
+                currentSaveButton.setText(I18N.CONSTANTS.save());
+                currentSaveButton.setIcon(IconImageBundle.ICONS.save());
             } else {
-                saveButton.setText(I18N.CONSTANTS.saved());
+                currentSaveButton.setText(I18N.CONSTANTS.saved());
             }
         }
+    }
+
+    private Button getSaveButton() {
+        return saveSplitButton == null ? saveButton : saveSplitButton;
     }
 
     @Override

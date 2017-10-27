@@ -117,7 +117,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
     private void createToolBar() {
         toolBar = new ActionToolBar(this);
-        toolBar.addSaveSplitButton();
+        toolBar.addSaveButton();
         toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.addUser(), IconImageBundle.ICONS.addUser());
         toolBar.addButton(UIActions.DELETE, I18N.CONSTANTS.delete(), IconImageBundle.ICONS.deleteUser());
         toolBar.addButton(UIActions.EXPORT, I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
