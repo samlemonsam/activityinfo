@@ -13,7 +13,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.ui.client.input.viewModel.SubFormInputViewModel;
+import org.activityinfo.ui.client.input.viewModel.RepeatingSubFormViewModel;
 import org.activityinfo.ui.client.input.viewModel.SubRecordViewModel;
 
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class RepeatingSubFormPanel implements IsWidget {
     private final CssFloatLayoutContainer recordContainer;
     private final Map<RecordRef, FormPanel> panelMap = new HashMap<>();
 
-    private SubFormInputViewModel viewModel;
+    private RepeatingSubFormViewModel viewModel;
 
     public RepeatingSubFormPanel(FormSource formSource, FormTree.Node node, FormTree subTree, InputHandler inputHandler) {
         this.formSource = formSource;
@@ -68,10 +68,10 @@ public class RepeatingSubFormPanel implements IsWidget {
         return fieldId;
     }
 
-    public void init(SubFormInputViewModel viewModel) {
+    public void init(RepeatingSubFormViewModel viewModel) {
     }
 
-    public void update(SubFormInputViewModel viewModel) {
+    public void update(RepeatingSubFormViewModel viewModel) {
 
         this.viewModel = viewModel;
 

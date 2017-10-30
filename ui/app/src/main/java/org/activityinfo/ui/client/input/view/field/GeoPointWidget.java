@@ -105,6 +105,12 @@ public class GeoPointWidget implements FieldWidget {
     }
 
     @Override
+    public void clear() {
+        latitude.clear();
+        longitude.clear();
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         latitude.field.setEnabled(relevant);
         longitude.field.setEnabled(relevant);
@@ -135,12 +141,18 @@ public class GeoPointWidget implements FieldWidget {
             this.fieldLabel = new FieldLabel(field, axis.getLocalizedName());
         }
 
-
         public void init(double coordinateValue) {
             value = coordinateValue;
             valid = true;
             empty = false;
             field.setText(parser.format(coordinateValue));
+            field.clearInvalid();
+        }
+
+        public void clear() {
+            value = null;
+            empty = true;
+            field.clear();
             field.clearInvalid();
         }
 

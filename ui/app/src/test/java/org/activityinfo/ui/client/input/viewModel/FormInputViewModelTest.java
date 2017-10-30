@@ -20,8 +20,7 @@ import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
@@ -128,7 +127,7 @@ public class FormInputViewModelTest {
 
         // Should see one (empty) sub form record
         FormInputViewModel viewModel = builder.build(inputModel);
-        SubFormInputViewModel referralSubForm = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
+        RepeatingSubFormViewModel referralSubForm = viewModel.getRepeatingSubFormField(IncidentForm.REFERRAL_FIELD_ID);
 
         assertThat(referralSubForm.getSubRecords(), hasSize(1));
 
@@ -138,14 +137,14 @@ public class FormInputViewModelTest {
                 ReferralSubForm.ORGANIZATION_FIELD_ID,
                 new FieldInput(TextValue.valueOf("CRS")));
         viewModel = builder.build(inputModel);
-        referralSubForm = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
+        referralSubForm = viewModel.getRepeatingSubFormField(IncidentForm.REFERRAL_FIELD_ID);
 
         assertThat(referralSubForm.getSubRecords(), hasSize(1));
 
         // Now add a second record
         inputModel = inputModel.addSubRecord(new RecordRef(ReferralSubForm.FORM_ID, ResourceId.generateId()));
         viewModel = builder.build(inputModel);
-        referralSubForm = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
+        referralSubForm = viewModel.getRepeatingSubFormField(IncidentForm.REFERRAL_FIELD_ID);
 
         assertThat(referralSubForm.getSubRecords(), hasSize(2));
 
@@ -233,7 +232,7 @@ public class FormInputViewModelTest {
 
         FormInputViewModel viewModel = builder.build(inputModel, structure.getExistingRecord());
 
-        SubFormInputViewModel subFormField = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID);
+        RepeatingSubFormViewModel subFormField = viewModel.getRepeatingSubFormField(IncidentForm.REFERRAL_FIELD_ID);
         assertThat(subFormField.getSubRecords(), hasSize(4));
 
     }
@@ -277,22 +276,62 @@ public class FormInputViewModelTest {
         FormInputViewModel viewModel = builder.build(inputModel);
 
 
-        SubRecordViewModel referralRecord = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID).getSubRecords().get(0);
+        SubRecordViewModel referralRecord = viewModel.getRepeatingSubFormField(IncidentForm.REFERRAL_FIELD_ID).getSubRecords().get(0);
         assertTrue(referralRecord.isPlaceholder());
 
         assertThat(viewModel.isValid(), equalTo(true));
 
         // Now add a new referral sub form
         // Without completing all required fields, and make sure the form is invalid
-
         inputModel = inputModel.update(referralRecord.getRecordRef(), referralSubForm.getContactNumber().getId(), FieldInput.EMPTY);
-        viewModel = builder.build(inputModel);
 
-        referralRecord = viewModel.getSubFormField(IncidentForm.REFERRAL_FIELD_ID).getSubRecords().get(0);
+               viewModel = builder.build(inputModel);
+
+        referralRecord = viewModel.getRepeatingSubFormField(IncidentForm.REFERRAL_FIELD_ID).getSubRecords().get(0);
 
         assertFalse("subform is invalid", referralRecord.getSubFormViewModel().isValid());
         assertFalse("parent is invalid", viewModel.isValid());
+    }
 
+    @Test
+    public void monthlySubForms() {
+        ClinicForm clinicForm = setup.getCatalog().getClinicForm();
+
+        FormInputViewModelBuilder builder = builderFor(clinicForm);
+
+        ResourceId parentRecordId = ResourceId.generateId();
+        FormInputModel inputModel = new FormInputModel(new RecordRef(clinicForm.getFormId(), parentRecordId));
+
+        FormInputViewModel viewModel = builder.build(inputModel);
+
+        // Get the sub form view model.
+        // The active ref should be set to 2017-10 by default.
+        ResourceId subFormFieldId = clinicForm.getSubFormField().getId();
+        KeyedSubFormViewModel subForm = viewModel.getKeyedSubFormField(subFormFieldId);
+        assertThat(subForm, notNullValue());
+
+        RecordRef octoberId = new RecordRef(clinicForm.getSubForm().getFormId(),
+                ResourceId.generatedPeriodSubmissionId(parentRecordId, "2017-10"));
+
+        RecordRef novemberId = new RecordRef(clinicForm.getSubForm().getFormId(),
+                ResourceId.generatedPeriodSubmissionId(parentRecordId, "2017-11"));
+
+        assertThat(subForm.getSubRecord().getRecordRef(), equalTo(octoberId));
+        assertThat(subForm.getSubRecord().getSubFormViewModel().getRecordRef(), equalTo(octoberId));
+
+        // Update a field in the active form
+        ResourceId consultCountFieldId = clinicForm.getSubForm().getConsultsField().getId();
+        inputModel = inputModel.update(octoberId, consultCountFieldId, new FieldInput(new Quantity(33)));
+        viewModel = builder.build(inputModel);
+
+        FormInputViewModel subFormViewModel = viewModel.getKeyedSubFormField(subFormFieldId).getSubRecord().getSubFormViewModel();
+        assertThat(subFormViewModel.getField(consultCountFieldId), equalTo(new Quantity(33)));
+
+        // Now change the active record to another month
+        inputModel = inputModel.updateActiveSubRecord(subFormFieldId, novemberId);
+        viewModel = builder.build(inputModel);
+
+        assertThat(viewModel.getKeyedSubFormField(subFormFieldId).getActiveRecordRef(), equalTo(novemberId));
 
 
 

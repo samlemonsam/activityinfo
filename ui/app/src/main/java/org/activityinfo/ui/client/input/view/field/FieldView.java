@@ -46,7 +46,9 @@ public class FieldView {
 
     public void init(FormInputViewModel viewModel) {
         FieldValue fieldValue = viewModel.getField(fieldId);
-        if(fieldValue != null) {
+        if(fieldValue == null) {
+            widget.clear();
+        } else {
             widget.init(fieldValue);
         }
     }

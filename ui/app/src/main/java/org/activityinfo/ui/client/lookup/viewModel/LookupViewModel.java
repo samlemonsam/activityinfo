@@ -143,4 +143,8 @@ public class LookupViewModel {
     public void setInitialSelection(RecordRef recordRef) {
         model.updateIfNotEqual(new LookupModel(recordRef));
     }
+
+    public void clearSelection() {
+        model.updateIfNotEqual(new LookupModel());
+    }
 }

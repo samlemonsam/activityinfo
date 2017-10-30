@@ -28,7 +28,8 @@ public class FormInputViewModel {
     private FormTree formTree;
     private FormInputModel inputModel;
     private final Map<ResourceId, FieldValue> fieldValueMap;
-    private final Map<ResourceId, SubFormInputViewModel> subFormMap;
+    private final Map<ResourceId, RepeatingSubFormViewModel> repeatingSubFormMap;
+    private final Map<ResourceId, KeyedSubFormViewModel> keyedSubFormMap;
     private final Set<ResourceId> relevant;
     private final Set<ResourceId> missing;
     private final Multimap<ResourceId, String> validationErrors;
@@ -37,14 +38,16 @@ public class FormInputViewModel {
     FormInputViewModel(FormTree formTree,
                        FormInputModel inputModel,
                        Map<ResourceId, FieldValue> fieldValueMap,
-                       Map<ResourceId, SubFormInputViewModel> subFormMap,
+                       Map<ResourceId, RepeatingSubFormViewModel> repeatingSubFormMap,
+                       Map<ResourceId, KeyedSubFormViewModel> keyedSubFormMap,
                        Set<ResourceId> relevant,
                        Set<ResourceId> missing,
                        Multimap<ResourceId, String> validationErrors, boolean valid) {
         this.formTree = formTree;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
-        this.subFormMap = subFormMap;
+        this.repeatingSubFormMap = repeatingSubFormMap;
+        this.keyedSubFormMap = keyedSubFormMap;
         this.relevant = relevant;
         this.missing = missing;
         this.validationErrors = validationErrors;
@@ -63,8 +66,12 @@ public class FormInputViewModel {
         return valid;
     }
 
-    public SubFormInputViewModel getSubFormField(ResourceId fieldId) {
-        return subFormMap.get(fieldId);
+    public RepeatingSubFormViewModel getRepeatingSubFormField(ResourceId fieldId) {
+        return repeatingSubFormMap.get(fieldId);
+    }
+
+    public KeyedSubFormViewModel getKeyedSubFormField(ResourceId fieldId) {
+        return keyedSubFormMap.get(fieldId);
     }
 
     public boolean isMissing(ResourceId fieldId) {
@@ -104,8 +111,12 @@ public class FormInputViewModel {
         RecordTransactionBuilder tx = new RecordTransactionBuilder();
         tx.add(buildUpdate(Optional.absent()));
 
-        for (SubFormInputViewModel subFormInputViewModel : subFormMap.values()) {
-            tx.add(subFormInputViewModel.buildUpdates(inputModel.getRecordRef()));
+        for (RepeatingSubFormViewModel repeatingSubFormViewModel : repeatingSubFormMap.values()) {
+            tx.add(repeatingSubFormViewModel.buildUpdates(inputModel.getRecordRef()));
+        }
+
+        for (KeyedSubFormViewModel keyedSubFormViewModel : keyedSubFormMap.values()) {
+            tx.add(keyedSubFormViewModel.buildUpdates(inputModel.getRecordRef()));
         }
 
         return tx.build();

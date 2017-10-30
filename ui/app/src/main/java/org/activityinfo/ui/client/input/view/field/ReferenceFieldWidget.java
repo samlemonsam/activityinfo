@@ -72,6 +72,11 @@ public class ReferenceFieldWidget implements FieldWidget {
     }
 
     @Override
+    public void clear() {
+        viewModel.clearSelection();
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         for (LevelWidget levelWidget : levelWidgets) {
             levelWidget.setRelevant(relevant);

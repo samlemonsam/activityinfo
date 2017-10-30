@@ -4,7 +4,6 @@ import com.google.common.collect.Multimap;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Maybe;
 
 import java.util.ArrayList;
@@ -78,6 +77,10 @@ public class RecordTree {
         return record;
     }
 
+    public boolean contains(RecordRef ref) {
+        return this.relatedRecords.containsKey(ref);
+    }
+
     public FormTree getFormTree() {
         return formTree;
     }
@@ -104,4 +107,5 @@ public class RecordTree {
         }
         return recordTrees;
     }
+
 }

@@ -10,9 +10,8 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
@@ -49,6 +48,7 @@ public class TestingCatalog implements FormCatalog {
     private final AdminLevelForm territory;
     private final VillageForm villageForm;
     private final NfiForm nfiForm;
+    private final ClinicForm clinicForm;
 
 
     public TestingCatalog() {
@@ -74,6 +74,10 @@ public class TestingCatalog implements FormCatalog {
         // Empty form
         EmptyForm empty = new EmptyForm();
         add(empty);
+
+        // Clinic form with subform
+        clinicForm = new ClinicForm(new UnitTestingIds());
+        add(clinicForm, clinicForm.getSubForm());
     }
 
     public Survey getSurvey() {
@@ -181,5 +185,9 @@ public class TestingCatalog implements FormCatalog {
 
     public ReferralSubForm getReferralSubForm() {
         return referralSubForm;
+    }
+
+    public ClinicForm getClinicForm() {
+        return clinicForm;
     }
 }

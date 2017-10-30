@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.input.model;
 
 
+import com.google.common.collect.Maps;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
@@ -16,19 +17,23 @@ public class FormInputModel {
     private final RecordRef recordRef;
     private final Map<ResourceId, FieldInput> fieldInputs;
     private final Map<RecordRef, FormInputModel> subRecords;
+    private final Map<ResourceId, RecordRef> activeSubRecords;
 
     public FormInputModel(RecordRef recordRef) {
         this.recordRef = recordRef;
         fieldInputs = Collections.emptyMap();
         subRecords = Collections.emptyMap();
+        activeSubRecords = Collections.emptyMap();
     }
 
     private FormInputModel(RecordRef recordRef,
                            Map<ResourceId, FieldInput> fieldInputs,
-                           Map<RecordRef, FormInputModel> subRecords) {
+                           Map<RecordRef, FormInputModel> subRecords,
+                           Map<ResourceId, RecordRef> activeSubRecords) {
         this.recordRef = recordRef;
         this.fieldInputs = fieldInputs;
         this.subRecords = subRecords;
+        this.activeSubRecords = activeSubRecords;
     }
 
     public FieldInput get(ResourceId fieldId) {
@@ -52,6 +57,17 @@ public class FormInputModel {
 
     public FormInputModel update(ResourceId fieldId, FieldValue value) {
         return update(recordRef, fieldId, new FieldInput(value));
+    }
+
+
+    public FormInputModel updateActiveSubRecord(ResourceId fieldId, RecordRef newActiveRef) {
+        Map<ResourceId, RecordRef> updatedMap = Maps.newHashMap(this.activeSubRecords);
+        RecordRef oldRef = updatedMap.put(fieldId, newActiveRef);
+        if(Objects.equals(oldRef, newActiveRef)) {
+            return this;
+        }
+
+        return new FormInputModel(recordRef, fieldInputs, subRecords, updatedMap);
     }
 
     /**
@@ -80,7 +96,7 @@ public class FormInputModel {
             updatedSubRecords.put(recordRef, subRecord.update(recordRef, fieldId, input));
         }
 
-        return new FormInputModel(this.recordRef, updatedInputs, updatedSubRecords);
+        return new FormInputModel(this.recordRef, updatedInputs, updatedSubRecords, activeSubRecords);
     }
 
 
@@ -94,7 +110,7 @@ public class FormInputModel {
         Map<RecordRef, FormInputModel> updatedSubRecords = new HashMap<>(this.subRecords);
         updatedSubRecords.put(newRecordRef, new FormInputModel(newRecordRef));
 
-        return new FormInputModel(recordRef, fieldInputs, updatedSubRecords);
+        return new FormInputModel(recordRef, fieldInputs, updatedSubRecords, activeSubRecords);
     }
 
     public Collection<FormInputModel> getSubRecords() {
@@ -106,5 +122,8 @@ public class FormInputModel {
     }
 
 
+    public Optional<RecordRef> getActiveSubRecord(ResourceId fieldId) {
+        return Optional.ofNullable(activeSubRecords.get(fieldId));
+    }
 
 }

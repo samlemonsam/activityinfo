@@ -66,6 +66,13 @@ public class RadioGroupWidget implements FieldWidget {
     }
 
     @Override
+    public void clear() {
+        for (CheckBox checkBox : radios.values()) {
+            checkBox.setValue(false);
+        }
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         if(this.relevant != relevant) {
             for (CheckBox checkBox : radios.values()) {

@@ -64,6 +64,13 @@ public class CheckBoxGroupWidget implements FieldWidget {
     }
 
     @Override
+    public void clear() {
+        for (CheckBox checkBox : checkBoxes.values()) {
+            checkBox.setValue(false);
+        }
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         if (this.relevant != relevant) {
             this.relevant = relevant;

@@ -159,8 +159,8 @@ public class Survey implements TestForm {
                     wealthFridge));
 
         recordGenerator = new RecordGenerator(ids, formClass)
-                .distribution(ageField.getId(), new IntegerGenerator(15, 99, 0.05, "years"))
-                .distribution(numChildrenField.getId(), new IntegerGenerator(0, 8, 0.20, "children"))
+                .distribution(ageField.getId(), new IntegerGenerator(15, 99, 0.05))
+                .distribution(numChildrenField.getId(), new IntegerGenerator(0, 8, 0.20))
                 .enumSeed(genderField, "F4".hashCode())
                 .enumSeed(marriedField, "F5".hashCode())
                 .enumSeed(pregnantField, "F7".hashCode())

@@ -2,8 +2,8 @@ package org.activityinfo.ui.client.input.viewModel;
 
 
 import com.google.common.base.Optional;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordUpdate;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 
 import java.util.ArrayList;
@@ -14,14 +14,14 @@ import java.util.Set;
 /**
  * View model for a SubForm field.
  */
-public class SubFormInputViewModel {
+public class RepeatingSubFormViewModel {
 
     private ResourceId fieldId;
     private List<SubRecordViewModel> subRecords;
     private Set<RecordRef> subRecordRefs = new HashSet<>();
     private boolean valid;
 
-    SubFormInputViewModel(ResourceId fieldId, List<SubRecordViewModel> subRecords) {
+    RepeatingSubFormViewModel(ResourceId fieldId, List<SubRecordViewModel> subRecords) {
         this.fieldId = fieldId;
         this.subRecords = subRecords;
         this.valid = true;

@@ -28,6 +28,11 @@ public class NarrativeWidget implements FieldWidget {
     }
 
     @Override
+    public void clear() {
+        textArea.clear();
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         textArea.setEnabled(relevant);
     }

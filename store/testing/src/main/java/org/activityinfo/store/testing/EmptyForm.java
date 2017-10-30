@@ -1,6 +1,5 @@
 package org.activityinfo.store.testing;
 
-import com.google.common.base.Supplier;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -91,7 +90,7 @@ public class EmptyForm implements TestForm {
     public RecordGenerator getGenerator() {
         return new RecordGenerator(formClass)
             .distribution(TEXT_FIELD_ID, new DiscreteTextGenerator(1.0,""))
-            .distribution(QUANTITY_FIELD_ID, new IntegerGenerator(0,1,1.0,null))
+            .distribution(QUANTITY_FIELD_ID, new IntegerGenerator(0,1,1.0))
             .distribution(ENUM_FIELD_ID, new EmptyEnumGenerator())
             .distribution(POP_ENUM_FIELD_ID, new EnumGenerator(popEnumField));
     }

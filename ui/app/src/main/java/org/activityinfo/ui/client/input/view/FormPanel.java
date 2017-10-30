@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
@@ -30,7 +31,8 @@ public class FormPanel implements IsWidget {
     private final CssFloatLayoutContainer panel;
 
     private final List<FieldView> fieldViews = new ArrayList<>();
-    private final List<RepeatingSubFormPanel> subFormViews = new ArrayList<>();
+    private final List<RepeatingSubFormPanel> repeatingSubForms = new ArrayList<>();
+    private final List<KeyedSubFormPanel> keyedSubFormPanels = new ArrayList<>();
 
     private InputHandler inputHandler;
     private RecordRef recordRef;
@@ -74,24 +76,30 @@ public class FormPanel implements IsWidget {
 
     public void init(FormInputViewModel viewModel) {
 
+        this.recordRef = viewModel.getRecordRef();
+
         for (FieldView fieldView : fieldViews) {
             fieldView.init(viewModel);
         }
 
-        for (RepeatingSubFormPanel subFormView : subFormViews) {
-            subFormView.init(viewModel.getSubFormField(subFormView.getFieldId()));
+        for (RepeatingSubFormPanel subFormView : repeatingSubForms) {
+            subFormView.init(viewModel.getRepeatingSubFormField(subFormView.getFieldId()));
         }
     }
 
     public void update(FormInputViewModel viewModel) {
+
         // Update Field Views
         for (FieldView fieldView : fieldViews) {
             fieldView.update(viewModel);
         }
 
         // Update Subforms
-        for (RepeatingSubFormPanel subFormView : subFormViews) {
-            subFormView.update(viewModel.getSubFormField(subFormView.getFieldId()));
+        for (RepeatingSubFormPanel subFormView : repeatingSubForms) {
+            subFormView.update(viewModel.getRepeatingSubFormField(subFormView.getFieldId()));
+        }
+        for (KeyedSubFormPanel subFormView : keyedSubFormPanels) {
+            subFormView.update(viewModel.getKeyedSubFormField(subFormView.getFieldId()));
         }
 
     }
@@ -121,13 +129,24 @@ public class FormPanel implements IsWidget {
     private void addSubForm(FormTree formTree, FormTree.Node node) {
         SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
         FormTree subTree = formTree.subTree(subFormType.getClassId());
+        SubFormKind subFormKind = subTree.getRootFormClass().getSubFormKind();
 
-        RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(formSource, node, subTree, inputHandler);
+        if(subFormKind == SubFormKind.REPEATING) {
+            RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(formSource, node, subTree, inputHandler);
 
-        panel.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
-        subFormViews.add(subPanel);
+            panel.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
+            repeatingSubForms.add(subPanel);
+
+        } else {
+            KeyedSubFormPanel subPanel = new KeyedSubFormPanel(recordRef, formSource, node, subTree, inputHandler);
+            panel.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
+            keyedSubFormPanels.add(subPanel);
+        }
     }
 
+    public void setBorders(boolean borders) {
+        panel.setBorders(borders);
+    }
 
     @Override
     public Widget asWidget() {

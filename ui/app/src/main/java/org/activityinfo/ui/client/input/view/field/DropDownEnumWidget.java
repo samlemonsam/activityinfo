@@ -62,6 +62,11 @@ public class DropDownEnumWidget implements FieldWidget {
     }
 
     @Override
+    public void clear() {
+        comboBox.clear();
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         comboBox.setEnabled(relevant);
     }

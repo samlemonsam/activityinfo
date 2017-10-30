@@ -5,14 +5,17 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -32,7 +35,6 @@ public class FormInputViewModelBuilder {
 
     private final Logger LOGGER = Logger.getLogger(FormInputViewModelBuilder.class.getName());
 
-    private final FormStore formStore;
     private final FormTree formTree;
     private final FormEvalContext evalContext;
 
@@ -40,16 +42,21 @@ public class FormInputViewModelBuilder {
 
     private List<FieldValidator> validators = new ArrayList<>();
 
-    private List<SubFormInputViewModelBuilder> subBuilders = new ArrayList<>();
+    private List<RepeatingSubFormViewModelBuilder> repeatingSubFormBuilders = new ArrayList<>();
+    private List<KeyedSubFormViewModelBuilder> keyedSubFormBuilders = new ArrayList<>();
 
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
-        this.formStore = formStore;
         this.formTree = formTree;
         this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
         for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm()) {
-                subBuilders.add(buildSubBuilder(node));
+                FormClass subForm = formTree.getFormClass(((SubFormReferenceType) node.getType()).getClassId());
+                if(subForm.getSubFormKind() == SubFormKind.REPEATING) {
+                    repeatingSubFormBuilders.add(new RepeatingSubFormViewModelBuilder(formStore, formTree, node));
+                } else {
+                    keyedSubFormBuilders.add(new KeyedSubFormViewModelBuilder(formStore, formTree, node));
+                }
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
@@ -64,9 +71,6 @@ public class FormInputViewModelBuilder {
         }
     }
 
-    private SubFormInputViewModelBuilder buildSubBuilder(FormTree.Node node) {
-        return new SubFormInputViewModelBuilder(formStore, formTree, node);
-    }
 
     private void buildRelevanceCalculator(FormTree.Node node) {
 
@@ -146,14 +150,24 @@ public class FormInputViewModelBuilder {
             valid = false;
         }
 
-        // Build sub form view models
-        Map<ResourceId, SubFormInputViewModel> subFormMap = new HashMap<>();
-        for (SubFormInputViewModelBuilder subBuilder : subBuilders) {
-            SubFormInputViewModel subViewModel = subBuilder.build(inputModel, existingRecord);
+        // Build repeating sub form view models
+        Map<ResourceId, RepeatingSubFormViewModel> repeatingSubFormMap = new HashMap<>();
+        for (RepeatingSubFormViewModelBuilder subBuilder : repeatingSubFormBuilders) {
+            RepeatingSubFormViewModel subViewModel = subBuilder.build(inputModel, existingRecord);
             if(!subViewModel.isValid()) {
                 valid = false;
             }
-            subFormMap.put(subBuilder.getFieldId(), subViewModel);
+            repeatingSubFormMap.put(subBuilder.getFieldId(), subViewModel);
+        }
+
+        // Build Keyed sub form models
+        Map<ResourceId, KeyedSubFormViewModel> keyedSubFormMap = new HashMap<>();
+        for (KeyedSubFormViewModelBuilder subBuilder : keyedSubFormBuilders) {
+            KeyedSubFormViewModel subViewModel = subBuilder.build(inputModel, existingRecord);
+            if(!subViewModel.isValid()) {
+                valid = false;
+            }
+            keyedSubFormMap.put(subBuilder.getFieldId(), subViewModel);
         }
 
         LOGGER.info("Valid = " + valid);
@@ -162,7 +176,8 @@ public class FormInputViewModelBuilder {
 
         return new FormInputViewModel(formTree, inputModel,
                 record.getFieldValueMap(),
-                subFormMap,
+                repeatingSubFormMap,
+                keyedSubFormMap,
                 relevantSet,
                 missing, validationErrors, valid);
     }

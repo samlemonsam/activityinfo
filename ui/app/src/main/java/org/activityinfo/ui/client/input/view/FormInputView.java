@@ -114,6 +114,11 @@ public class FormInputView implements IsWidget, InputHandler {
         update(inputModel.addSubRecord(subRecordRef));
     }
 
+    @Override
+    public void changeActiveSubRecord(ResourceId fieldId, RecordRef newActiveRef) {
+        update(inputModel.updateActiveSubRecord(fieldId, newActiveRef));
+    }
+
     private void update(FormInputModel updatedModel) {
         this.inputModel = updatedModel;
         this.viewModel = viewModelBuilder.build(inputModel, existingRecord);

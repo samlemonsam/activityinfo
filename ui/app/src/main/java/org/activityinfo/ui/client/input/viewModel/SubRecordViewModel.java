@@ -18,6 +18,8 @@ public class SubRecordViewModel {
         this.recordRef = recordRef;
         this.subFormViewModel = subFormViewModel;
         this.placeholder = placeholder;
+
+        assert this.subFormViewModel.getRecordRef().equals(recordRef);
     }
 
     /**

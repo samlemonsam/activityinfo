@@ -36,6 +36,11 @@ public class LocalDateWidget implements FieldWidget {
     }
 
     @Override
+    public void clear() {
+        field.clear();
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         field.setEnabled(relevant);
     }

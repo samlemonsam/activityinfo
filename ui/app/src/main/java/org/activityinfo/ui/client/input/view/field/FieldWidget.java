@@ -10,6 +10,8 @@ public interface FieldWidget extends IsWidget {
 
     void init(FieldValue value);
 
+    void clear();
+
     void setRelevant(boolean relevant);
 
 }
