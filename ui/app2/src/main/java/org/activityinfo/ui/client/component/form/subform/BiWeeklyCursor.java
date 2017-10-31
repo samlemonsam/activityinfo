@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.component.form.subform;
 
 import org.activityinfo.model.date.BiWeek;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.model.form.SubFormKind;
+import org.activityinfo.model.type.time.Month;
 
 import java.util.Date;
 

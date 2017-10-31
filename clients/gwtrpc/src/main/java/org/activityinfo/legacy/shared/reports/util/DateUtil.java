@@ -27,7 +27,7 @@ import org.activityinfo.legacy.shared.reports.content.MonthCategory;
 import org.activityinfo.legacy.shared.reports.content.YearCategory;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.model.date.DateUnit;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 
 import java.util.Date;
 
@@ -41,8 +41,6 @@ import java.util.Date;
  * @see org.activityinfo.server.report.util.DateUtilCalendarImpl
  */
 public abstract class DateUtil {
-
-    public abstract Month getCurrentMonth();
 
     public abstract DateRange yearRange(int year);
 

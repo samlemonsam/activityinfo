@@ -8,10 +8,11 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.widget.core.client.Component;
+import com.sencha.gxt.widget.core.client.event.BeforeSelectEvent;
 import com.sencha.gxt.widget.core.client.form.StringComboBox;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.ui.client.input.viewModel.KeyedSubFormViewModel;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.List;
 
 import static org.activityinfo.model.resource.ResourceId.generatedPeriodSubmissionId;
 
-public class Monthly implements PeriodSelector {
+public class MonthlySelector implements PeriodSelector {
 
     private static final List<String> MONTHS = Arrays.asList(LocaleInfo.getCurrentLocale().getDateTimeConstants().months());
 
@@ -31,7 +32,7 @@ public class Monthly implements PeriodSelector {
     private final StringComboBox monthBox;
     private RecordRef parentRecordRef;
 
-    public Monthly(RecordRef parentRecordRef) {
+    public MonthlySelector(RecordRef parentRecordRef) {
         this.parentRecordRef = parentRecordRef;
         yearBox = new StringComboBox(yearList());
         yearBox.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
@@ -67,6 +68,11 @@ public class Monthly implements PeriodSelector {
     }
 
     @Override
+    public HandlerRegistration addBeforeSelectHandler(BeforeSelectEvent.BeforeSelectHandler handler) {
+        return eventBus.addHandler(BeforeSelectEvent.getType(), handler);
+    }
+
+    @Override
     public HandlerRegistration addSelectionHandler(SelectionHandler<ResourceId> handler) {
         return eventBus.addHandler(SelectionEvent.getType(), handler);
     }
@@ -87,4 +93,6 @@ public class Monthly implements PeriodSelector {
         yearBox.setText(Integer.toString(month.getYear()));
         monthBox.setText(MONTHS.get(month.getMonth() - 1));
     }
+
+
 }

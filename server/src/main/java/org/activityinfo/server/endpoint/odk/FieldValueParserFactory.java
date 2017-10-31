@@ -11,10 +11,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 
 public class FieldValueParserFactory implements FieldTypeVisitor<FieldValueParser> {
 
@@ -84,6 +81,11 @@ public class FieldValueParserFactory implements FieldTypeVisitor<FieldValueParse
 
     @Override
     public FieldValueParser visitMonth(MonthType monthType) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FieldValueParser visitWeek(EpiWeekType epiWeekType) {
         throw new UnsupportedOperationException();
     }
 

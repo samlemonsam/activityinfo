@@ -9,7 +9,7 @@ import org.activityinfo.legacy.shared.command.result.Bucket;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.date.DateUnit;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.report.util.DateUtilCalendarImpl;
 import org.activityinfo.server.util.monitoring.Timed;

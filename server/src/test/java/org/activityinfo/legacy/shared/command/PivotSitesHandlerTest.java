@@ -34,7 +34,7 @@ import org.activityinfo.legacy.shared.impl.pivot.PivotTableDataBuilder;
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.*;
 import org.activityinfo.model.date.DateUnit;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.report.util.DateUtilCalendarImpl;

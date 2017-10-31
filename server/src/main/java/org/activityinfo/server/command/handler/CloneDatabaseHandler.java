@@ -50,10 +50,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.spi.FormCatalog;
@@ -340,6 +337,11 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             @Override
             public FieldType visitMonth(MonthType monthType) {
                 return monthType;
+            }
+
+            @Override
+            public FieldType visitWeek(EpiWeekType epiWeekType) {
+                return epiWeekType;
             }
 
             @Override

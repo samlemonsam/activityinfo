@@ -9,11 +9,15 @@ import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
+import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.ui.client.input.view.period.Monthly;
+import org.activityinfo.ui.client.input.view.period.DailySelector;
+import org.activityinfo.ui.client.input.view.period.MonthlySelector;
+import org.activityinfo.ui.client.input.view.period.PeriodSelector;
+import org.activityinfo.ui.client.input.view.period.WeeklySelector;
 import org.activityinfo.ui.client.input.viewModel.KeyedSubFormViewModel;
 
 import java.util.Objects;
@@ -32,7 +36,7 @@ public class KeyedSubFormPanel implements IsWidget {
     private final ResourceId fieldId;
     private final ResourceId subFormId;
 
-    private final Monthly selector;
+    private final PeriodSelector selector;
     private final InputHandler inputHandler;
     private final FormPanel formPanel;
     private final ContentPanel contentPanel;
@@ -46,8 +50,9 @@ public class KeyedSubFormPanel implements IsWidget {
         this.subFormId = subTree.getRootFormId();
         this.inputHandler = inputHandler;
 
-        selector = new Monthly(parentRef);
+        selector = createSelector(parentRef, subTree.getRootFormClass().getSubFormKind());
         selector.addSelectionHandler(this::onPeriodSelected);
+
         ToolBar toolBar = new ToolBar(new KeyedSubFormBarAppearance());
         for (Component component : selector.getToolBarItems()) {
             toolBar.add(component);
@@ -66,6 +71,18 @@ public class KeyedSubFormPanel implements IsWidget {
         contentPanel.setHeading(subTree.getRootFormClass().getLabel());
         contentPanel.add(vlc);
         contentPanel.setBorders(true);
+    }
+
+    private PeriodSelector createSelector(RecordRef parentRef, SubFormKind subFormKind) {
+        switch (subFormKind) {
+            case MONTHLY:
+                return new MonthlySelector(parentRef);
+            case WEEKLY:
+                return new WeeklySelector(parentRef);
+            case DAILY:
+                return new DailySelector(parentRef);
+        }
+        throw new UnsupportedOperationException("kind: " + subFormKind);
     }
 
     private void onPeriodSelected(SelectionEvent<ResourceId> event) {

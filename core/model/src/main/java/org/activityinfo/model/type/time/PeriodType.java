@@ -21,9 +21,19 @@ package org.activityinfo.model.type.time;
  * #L%
  */
 
-import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.RecordRef;
 
-public interface TemporalValue extends FieldValue {
+/**
+ * Marker interface for FieldTypes describing a calendar interval
+ */
+public interface PeriodType extends FieldType {
 
-    LocalDateInterval asInterval();
+    PeriodValue fromSubFormKey(RecordRef ref);
+
+    /**
+     * Returns the {@code PeriodValue} of this type that contains the given
+     * {@code localDate}
+     */
+    PeriodValue containingDate(LocalDate localDate);
 }

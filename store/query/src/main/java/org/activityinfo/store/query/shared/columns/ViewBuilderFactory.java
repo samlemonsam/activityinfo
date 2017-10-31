@@ -19,6 +19,7 @@ import org.activityinfo.model.type.time.*;
 import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.spi.CursorObserver;
 
+
 public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<FieldValue>> {
 
     private final PendingSlot<ColumnView> result;
@@ -96,12 +97,41 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitMonth(MonthType monthType) {
-        return new UnsupportedColumnTypeBuilder(result);
+        return factory.newStringBuilder(result, new StringReader() {
+            @Override
+            public String readString(FieldValue value) {
+                if(value instanceof Month) {
+                    return value.toString();
+                }
+                return null;
+            }
+        });
     }
 
     @Override
     public CursorObserver<FieldValue> visitYear(YearType yearType) {
-        return new UnsupportedColumnTypeBuilder(result);
+        return factory.newDoubleBuilder(result, new DoubleReader() {
+            @Override
+            public double read(FieldValue value) {
+                if(value instanceof YearValue) {
+                    return ((YearValue) value).getYear();
+                }
+                return Double.NaN;
+            }
+        });
+    }
+
+    @Override
+    public CursorObserver<FieldValue> visitWeek(EpiWeekType epiWeekType) {
+        return factory.newStringBuilder(result, new StringReader() {
+            @Override
+            public String readString(FieldValue value) {
+                if(value instanceof EpiWeek) {
+                    return value.toString();
+                }
+                return null;
+            }
+        });
     }
 
     @Override

@@ -24,12 +24,12 @@ package org.activityinfo.server.command.handler;
 
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetMonthlyReports;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;

@@ -21,10 +21,9 @@ package org.activityinfo.model.type.time;
  * #L%
  */
 
-import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
 
-/**
- * Marker interface for FieldTypes with a temporal dimension
- */
-public interface TemporalType extends FieldType {
+public interface PeriodValue extends FieldValue {
+
+    LocalDateInterval asInterval();
 }

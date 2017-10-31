@@ -37,7 +37,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.util.JsonUtil;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.local.sync.SyncRequestEvent;
 

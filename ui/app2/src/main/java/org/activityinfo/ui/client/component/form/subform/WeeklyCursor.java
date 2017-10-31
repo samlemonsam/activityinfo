@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.component.form.subform;
 
-import org.activityinfo.model.date.EpiWeek;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.model.form.SubFormKind;
+import org.activityinfo.model.type.time.EpiWeek;
+import org.activityinfo.model.type.time.Month;
 
 import java.util.Date;
 
@@ -15,7 +15,7 @@ public class WeeklyCursor implements PeriodCursor<EpiWeek> {
 
     public WeeklyCursor() {
         Month month = Month.of(new Date());
-        currentWeek = new EpiWeek(month.getMonth() * 4, month.getYear());
+        currentWeek = new EpiWeek(month.getYear(), month.getMonth() * 4);
     }
 
     @Override

@@ -53,6 +53,11 @@ public class LocalDateInterval implements FieldValue {
     }
 
     @Override
+    public String toString() {
+        return "[" + startDate + ", " + endDate + "]";
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

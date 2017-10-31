@@ -53,7 +53,7 @@ import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;

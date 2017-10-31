@@ -28,7 +28,8 @@ import org.activityinfo.model.type.*;
  * Value type that represents a calendar month in the ISO-8601 calendar.
  * There is no representation of time-of-day or time-zone.
  */
-public class MonthType implements FieldType, TemporalType {
+public class MonthType implements FieldType, PeriodType {
+
 
     public interface TypeClass extends SingletonTypeClass, RecordFieldTypeClass {
     }
@@ -68,5 +69,18 @@ public class MonthType implements FieldType, TemporalType {
     @Override
     public boolean isUpdatable() {
         return true;
+    }
+
+
+    @Override
+    public PeriodValue fromSubFormKey(RecordRef ref) {
+        String recordId = ref.getRecordId().asString();
+        String monthKey = recordId.substring(recordId.length() - 7);
+        return Month.parseMonth(monthKey);
+    }
+
+    @Override
+    public PeriodValue containingDate(LocalDate localDate) {
+        return new Month(localDate.getYear(), localDate.getMonthOfYear());
     }
 }

@@ -1,20 +1,30 @@
 package org.activityinfo.model.type.time;
 
 import com.bedatadriven.rebar.time.CalendricalException;
-import com.google.gwt.core.shared.GWT;
-import com.google.gwt.user.datepicker.client.CalendarUtil;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
-import java.util.Calendar;
 import java.util.Date;
 
 /**
  * {@code FieldValue} of type {@code LocalDateType}
  */
-public class LocalDate implements FieldValue, TemporalValue {
+public class LocalDate implements FieldValue, PeriodValue {
+
+    public enum DayOfWeek {
+        SUNDAY,
+        MONDAY,
+        TUESDAY,
+        WEDNESAY,
+        THURSDAY,
+        FRIDAY,
+        SATURDAY
+    }
+
+    private static final int DAYS_IN_MONTH[] = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    private static final int CUM_DAYS_IN_MONTH[] = new int[] { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
     private int year;
     private int monthOfYear;
@@ -45,10 +55,6 @@ public class LocalDate implements FieldValue, TemporalValue {
         return year;
     }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
-
     /**
      * Gets the month-of-year field
      *
@@ -56,10 +62,6 @@ public class LocalDate implements FieldValue, TemporalValue {
      */
     public int getMonthOfYear() {
         return monthOfYear;
-    }
-
-    public void setMonthOfYear(int monthOfYear) {
-        this.monthOfYear = monthOfYear;
     }
 
     /**
@@ -70,16 +72,55 @@ public class LocalDate implements FieldValue, TemporalValue {
         return dayOfMonth;
     }
 
-    public void setDayOfMonth(int dayOfMonth) {
-        this.dayOfMonth = dayOfMonth;
+    /**
+     *
+     * @return an integer between 1 and 366 indicating which day of this year this date
+     * falls.
+     */
+    public int getDayOfYear() {
+        int day = CUM_DAYS_IN_MONTH[monthOfYear - 1];
+        if(monthOfYear > 2 && YearValue.isLeapYear(year)) {
+            day++;
+        }
+        return day + dayOfMonth;
     }
 
-    
+    public static int getLastDayOfMonth(int year, int month) {
+        if(month == 2) {
+            return YearValue.isLeapYear(year) ? 29 : 28;
+        } else {
+            return DAYS_IN_MONTH[month - 1];
+        }
+    }
+
+    public static LocalDate getLastDateOfMonth(int year, int month) {
+        return new LocalDate(year, month, getLastDayOfMonth(year, month));
+    }
+
+    @SuppressWarnings("deprecation")
+    public static LocalDate fromDayOfYear(int year, int dayOfYear) {
+        // Use deprecated Date API because it compiles directly to Javascript builtin.
+        Date jan1 = new LocalDate(year, 1, 1).atMidnightInMyTimezone();
+        jan1.setDate(dayOfYear);
+
+        return new LocalDate(jan1);
+    }
+
+    /**
+     * @return an integer between 1 and 4 indicating which quarter this falls.
+     */
     public int getQuarter() {
         int quarter0 = (monthOfYear - 1) / 3;
         return quarter0 + 1;
     }
-    
+
+    public DayOfWeek getDayOfWeek() {
+        // Use deprecated Date API because it compiles directly to Javascript builtin.
+        //noinspection deprecation
+        return DayOfWeek.values()[atMidnightInMyTimezone().getDay()];
+    }
+
+
     /**
      *
      * @return a java.util.Date instance representing the instant at midnight on this date
@@ -165,6 +206,24 @@ public class LocalDate implements FieldValue, TemporalValue {
         return dayOfMonth - otherDate.dayOfMonth;
     }
 
+    public static int daysBetween(LocalDate x, LocalDate y) {
+        assert !x.after(y);
+
+        int days = -x.getDayOfYear();
+
+        int year = x.getYear();
+        while(year < y.getYear()) {
+            if(YearValue.isLeapYear(year)) {
+                days += 366;
+            } else {
+                days += 365;
+            }
+            year++;
+        }
+
+        return days + y.getDayOfYear();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -208,17 +267,13 @@ public class LocalDate implements FieldValue, TemporalValue {
         return new LocalDateInterval(this, this);
     }
 
+    @SuppressWarnings("deprecation")
     public LocalDate plusDays(int count) {
+        // Use deprecated Date API because it compiles directly to Javascript builtin.
         Date date = atMidnightInMyTimezone();
-        if (GWT.isClient()) {
-            CalendarUtil.addDaysToDate(date, count);
-            return new LocalDate(date);
-        } else {
-            Calendar c = Calendar.getInstance();
-            c.setTime(date);
-            c.add(Calendar.DAY_OF_YEAR, count);
-            return new LocalDate(c.getTime());
-        }
+        date.setDate(date.getDate() + count);
+
+        return new LocalDate(date);
     }
 
     public LocalDate nextDay() {

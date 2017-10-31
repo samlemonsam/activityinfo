@@ -23,7 +23,7 @@ package org.activityinfo.server.command.handler;
  */
 
 import org.activityinfo.legacy.shared.command.Command;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 
 import java.util.Calendar;
 import java.util.Date;

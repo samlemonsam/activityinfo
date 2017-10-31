@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.legacy.shared.command.GetMonthlyReports;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.promise.Promise;
 
 import javax.annotation.Nullable;

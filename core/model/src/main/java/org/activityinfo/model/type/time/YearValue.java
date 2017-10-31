@@ -29,7 +29,7 @@ import org.activityinfo.model.type.FieldValue;
 /**
  * Represents a specific calendar year in the ISO-8601 calendar.
  */
-public class YearValue implements FieldValue, TemporalValue {
+public class YearValue implements FieldValue, PeriodValue {
 
     private final int year;
 
@@ -71,5 +71,9 @@ public class YearValue implements FieldValue, TemporalValue {
 
     public int getYear() {
         return year;
+    }
+
+    public static boolean isLeapYear(int year) {
+        return !((year % 4 != 0) || ((year % 100 == 0) && (year % 400 != 0)));
     }
 }

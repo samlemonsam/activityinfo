@@ -23,7 +23,6 @@ package org.activityinfo.ui.client.component.form;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -37,6 +36,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;

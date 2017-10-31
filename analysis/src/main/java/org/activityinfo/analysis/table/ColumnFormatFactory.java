@@ -13,10 +13,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 
 public class ColumnFormatFactory implements FieldTypeVisitor<ColumnFormat> {
 
@@ -104,13 +101,18 @@ public class ColumnFormatFactory implements FieldTypeVisitor<ColumnFormat> {
     }
 
     @Override
+    public ColumnFormat visitWeek(EpiWeekType epiWeekType) {
+        return new TextFormat(columnId, formula);
+    }
+
+    @Override
     public ColumnFormat visitMonth(MonthType monthType) {
-        return new ErrorFormat();
+        return new TextFormat(columnId, formula);
     }
 
     @Override
     public ColumnFormat visitYear(YearType yearType) {
-        return new ErrorFormat();
+        return new NumberFormat(columnId, formula);
     }
 
     @Override

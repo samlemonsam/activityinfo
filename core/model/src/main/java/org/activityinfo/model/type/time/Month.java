@@ -1,4 +1,4 @@
-package org.activityinfo.model.date;
+package org.activityinfo.model.type.time;
 
 /*
  * #%L
@@ -22,7 +22,9 @@ package org.activityinfo.model.date;
  * #L%
  */
 
-import com.bedatadriven.rebar.time.calendar.LocalDate;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.type.FieldTypeClass;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -32,9 +34,12 @@ import java.util.Date;
  *
  * @author Alex Bertram
  */
-public class Month implements Serializable, Comparable<Month> {
+public class Month implements Serializable, Comparable<Month>, PeriodValue {
 
     private static final int MONTHS_PER_YEAR = 12;
+
+
+
     private int year;
     private int month;
 
@@ -100,6 +105,11 @@ public class Month implements Serializable, Comparable<Month> {
         return month;
     }
 
+
+    public int getMonthOfYear() {
+        return month;
+    }
+
     /**
      * Sets this month
      *
@@ -160,6 +170,7 @@ public class Month implements Serializable, Comparable<Month> {
      * @param s The <code>String</code> to parse
      * @return The value of the string as a <code>Month</code>
      */
+    @SuppressWarnings("NonJREEmulationClassesInClientCode")
     public static Month parseMonth(String s) {
         String[] tokens = s.split("-");
         if (tokens.length != 2) {
@@ -209,14 +220,25 @@ public class Month implements Serializable, Comparable<Month> {
         return plus(-1);
     }
 
-    /**
-     * Returns midnight of the first day of the month
-     */
-    public LocalDate toLocalDate() {
-        return new LocalDate(year, month, 1);
-    }
-
+    @SuppressWarnings("deprecation")
     public static Month of(Date date) {
         return new Month(date.getYear()+1900, date.getMonth()+1);
+    }
+
+    @Override
+    public FieldTypeClass getTypeClass() {
+        return MonthType.TYPE_CLASS;
+    }
+
+    @Override
+    public JsonValue toJsonElement() {
+        return Json.create(toString());
+    }
+
+    @Override
+    public LocalDateInterval asInterval() {
+        return new LocalDateInterval(
+                new LocalDate(year, month, 1),
+                new LocalDate(year, month, LocalDate.getLastDayOfMonth(year, month)));
     }
 }
