@@ -12,8 +12,8 @@ public class EpiWeekTypeTest {
 
     @Test
     public void testParse() {
-        assertThat(parseSubFormKey("c342342342017-2017W3"), equalTo(new EpiWeek(2017, 3)));
-        assertThat(parseSubFormKey("c342342342017-2017W34"), equalTo(new EpiWeek(2017, 3)));
+        assertThat(parseSubFormKey("s34234234-2017-2017W3"), equalTo(new EpiWeek(2017, 3)));
+        assertThat(parseSubFormKey("s34234234-2017-2017W34"), equalTo(new EpiWeek(2017, 34)));
 
     }
 
