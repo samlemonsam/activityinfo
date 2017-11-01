@@ -126,7 +126,6 @@ public class EpiWeek implements Serializable, PeriodValue {
         return plus(-1);
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -6,6 +6,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.io.match.coord.CoordinateParser;
 import org.activityinfo.io.match.coord.JsCoordinateNumberFormatter;
@@ -137,6 +138,24 @@ public class DetailsRenderer {
         }
     }
 
+    private class MonthRenderer implements ValueRenderer {
+
+        @Override
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
+            Month month = (Month) fieldValue;
+            html.appendEscaped(I18N.MESSAGES.month(month.getFirstDayOfMonth().atMidnightInMyTimezone()));
+        }
+    }
+
+    private class WeekRenderer implements ValueRenderer {
+
+        @Override
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
+            EpiWeek week = (EpiWeek) fieldValue;
+            html.appendEscaped(I18N.MESSAGES.week(week.getYear(), week.getWeekInYear()));
+        }
+    }
+
     private class EnumRenderer implements ValueRenderer {
         private EnumType type;
 
@@ -163,7 +182,6 @@ public class DetailsRenderer {
 
         }
     }
-
 
     private class AttachmentRenderer implements ValueRenderer {
 
@@ -324,8 +342,13 @@ public class DetailsRenderer {
             }
 
             @Override
+            public FieldRenderer visitWeek(EpiWeekType epiWeekType) {
+                return new SimpleFieldRenderer(field, new WeekRenderer());
+            }
+
+            @Override
             public FieldRenderer visitMonth(MonthType monthType) {
-                return new NullRenderer();
+                return new SimpleFieldRenderer(field, new MonthRenderer());
             }
 
             @Override

@@ -26,4 +26,17 @@ import org.activityinfo.model.type.FieldValue;
 public interface PeriodValue extends FieldValue {
 
     LocalDateInterval asInterval();
+
+    /**
+     * @return the period of the same class that preceded this period.
+     */
+    PeriodValue previous();
+
+
+    /**
+     *
+     * @return the period of the same class that follows this period.
+     */
+    PeriodValue next();
+
 }

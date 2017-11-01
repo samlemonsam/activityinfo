@@ -6,7 +6,9 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.time.PeriodValue;
 import org.codehaus.jackson.annotate.JsonValue;
 
 import javax.annotation.Nonnull;
@@ -48,6 +50,10 @@ public final class ResourceId implements Serializable {
 
     public static ResourceId generatedPeriodSubmissionId(ResourceId rootInstanceId, String keyId) {
         return ResourceId.valueOf(rootInstanceId.asString() + "-" + keyId);
+    }
+
+    public static ResourceId periodSubRecordId(RecordRef parentRef, PeriodValue period) {
+        return generatedPeriodSubmissionId(parentRef.getRecordId(), period.toString());
     }
 
     public static ResourceId generateSubmissionId(ResourceId collectionId) {

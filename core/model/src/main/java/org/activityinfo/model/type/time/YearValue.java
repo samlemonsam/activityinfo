@@ -69,6 +69,16 @@ public class YearValue implements FieldValue, PeriodValue {
         return new LocalDateInterval(new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
     }
 
+    @Override
+    public PeriodValue next() {
+        return new YearValue(year + 1);
+    }
+
+    @Override
+    public PeriodValue previous() {
+        return new YearValue(year - 1);
+    }
+
     public int getYear() {
         return year;
     }

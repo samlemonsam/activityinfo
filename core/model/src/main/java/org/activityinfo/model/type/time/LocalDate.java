@@ -267,6 +267,16 @@ public class LocalDate implements FieldValue, PeriodValue {
         return new LocalDateInterval(this, this);
     }
 
+    @Override
+    public PeriodValue previous() {
+        return plusDays(-1);
+    }
+
+    @Override
+    public PeriodValue next() {
+        return plusDays(1);
+    }
+
     @SuppressWarnings("deprecation")
     public LocalDate plusDays(int count) {
         // Use deprecated Date API because it compiles directly to Javascript builtin.

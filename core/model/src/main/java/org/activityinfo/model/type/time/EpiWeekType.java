@@ -46,10 +46,10 @@ public class EpiWeekType implements PeriodType {
     }
 
     @Override
-    public PeriodValue fromSubFormKey(RecordRef ref) {
+    public EpiWeek fromSubFormKey(RecordRef ref) {
         String subRecordId = ref.getRecordId().asString();
-        String weekKey = subRecordId.substring(subRecordId.length() - 7);
-        return EpiWeek.parse(weekKey);
+        int delimiter = subRecordId.lastIndexOf('-');
+        return EpiWeek.parse(subRecordId.substring(delimiter + 1));
     }
 
     @Override

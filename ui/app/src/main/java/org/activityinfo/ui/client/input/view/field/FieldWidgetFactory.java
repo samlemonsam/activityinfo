@@ -13,10 +13,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 import org.activityinfo.store.query.shared.FormSource;
 
 /**
@@ -117,8 +114,13 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
     }
 
     @Override
+    public FieldWidget visitWeek(EpiWeekType epiWeekType) {
+        return new WeekWidget(updater);
+    }
+
+    @Override
     public FieldWidget visitMonth(MonthType monthType) {
-        return null;
+        return new MonthWidget(updater);
     }
 
     @Override

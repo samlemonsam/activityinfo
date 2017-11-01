@@ -1,23 +1,27 @@
 package org.activityinfo.ui.client.input.view;
 
-import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.TextButtonCell;
 import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.theme.triton.client.base.tabs.Css3TabPanelAppearance;
+import com.sencha.gxt.theme.triton.custom.client.button.TritonButtonCellToolBarAppearance;
 import com.sencha.gxt.theme.triton.custom.client.toolbar.TritonToolBarAppearance;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.ui.client.input.view.period.DailySelector;
-import org.activityinfo.ui.client.input.view.period.MonthlySelector;
-import org.activityinfo.ui.client.input.view.period.PeriodSelector;
-import org.activityinfo.ui.client.input.view.period.WeeklySelector;
+import org.activityinfo.ui.client.input.model.FieldInput;
+import org.activityinfo.ui.client.input.view.field.*;
 import org.activityinfo.ui.client.input.viewModel.KeyedSubFormViewModel;
 
 import java.util.Objects;
@@ -33,30 +37,47 @@ public class KeyedSubFormPanel implements IsWidget {
 
     private static final Logger LOGGER = Logger.getLogger(KeyedSubFormPanel.class.getName());
 
+    private static final Css3TabPanelAppearance.Css3TabPanelResources TAB_APPEARANCE =
+            GWT.create(Css3TabPanelAppearance.Css3TabPanelResources.class);
+
+    private RecordRef parentRef;
     private final ResourceId fieldId;
     private final ResourceId subFormId;
 
-    private final PeriodSelector selector;
-    private final InputHandler inputHandler;
+    private final PeriodFieldWidget selector;
+
     private final FormPanel formPanel;
     private final ContentPanel contentPanel;
+    private final InputHandler inputHandler;
 
+    private PeriodValue activePeriod;
     private RecordRef activeRef;
+
 
     public KeyedSubFormPanel(RecordRef parentRef, FormSource formSource, FormTree.Node node,
                              FormTree subTree, InputHandler inputHandler) {
 
         this.fieldId = node.getFieldId();
         this.subFormId = subTree.getRootFormId();
+        this.parentRef = parentRef;
         this.inputHandler = inputHandler;
 
-        selector = createSelector(parentRef, subTree.getRootFormClass().getSubFormKind());
-        selector.addSelectionHandler(this::onPeriodSelected);
+        selector = createSelector(subTree.getRootFormClass().getSubFormKind(), this::onPeriodSelected);
+
+        TextButton previousButton = new TextButton(new TextButtonCell(new PrevNextButtonAppearance()));
+        previousButton.setText("<");
+        previousButton.addSelectHandler(this::onPreviousPeriod);
+
+        TextButton nextButton = new TextButton(new TextButtonCell(new PrevNextButtonAppearance()));
+        nextButton.setText(">");
+        nextButton.addSelectHandler(this::onNextPeriod);
 
         ToolBar toolBar = new ToolBar(new KeyedSubFormBarAppearance());
-        for (Component component : selector.getToolBarItems()) {
+        toolBar.add(previousButton);
+        for (Component component : selector.asToolBarItems()) {
             toolBar.add(component);
         }
+        toolBar.add(nextButton);
 
         formPanel = new FormPanel(formSource, subTree,
                 new RecordRef(subTree.getRootFormId(), ResourceId.generateId()), inputHandler);
@@ -73,23 +94,40 @@ public class KeyedSubFormPanel implements IsWidget {
         contentPanel.setBorders(true);
     }
 
-    private PeriodSelector createSelector(RecordRef parentRef, SubFormKind subFormKind) {
+
+    private PeriodFieldWidget createSelector(SubFormKind subFormKind, FieldUpdater updater) {
         switch (subFormKind) {
             case MONTHLY:
-                return new MonthlySelector(parentRef);
+                return new MonthWidget(updater);
             case WEEKLY:
-                return new WeeklySelector(parentRef);
+                return new WeekWidget(updater);
             case DAILY:
-                return new DailySelector(parentRef);
+                return new LocalDateWidget(updater);
         }
         throw new UnsupportedOperationException("kind: " + subFormKind);
     }
 
-    private void onPeriodSelected(SelectionEvent<ResourceId> event) {
-        LOGGER.info("subFormId = " + event.getSelectedItem());
 
-        RecordRef newActiveRef = new RecordRef(subFormId, event.getSelectedItem());
-        inputHandler.changeActiveSubRecord(fieldId, newActiveRef);
+    private void onPreviousPeriod(SelectEvent event) {
+        changeActivePeriod(activePeriod.previous());
+    }
+
+
+    private void onNextPeriod(SelectEvent event) {
+        changeActivePeriod(activePeriod.next());
+    }
+
+    private void onPeriodSelected(FieldInput input) {
+        if(input.getState() == FieldInput.State.VALID) {
+            PeriodValue periodValue = (PeriodValue) input.getValue();
+            changeActivePeriod(periodValue);
+        }
+    }
+
+    private void changeActivePeriod(PeriodValue periodValue) {
+        inputHandler.changeActiveSubRecord(fieldId,
+                new RecordRef(subFormId,
+                     ResourceId.periodSubRecordId(parentRef, periodValue)));
     }
 
 
@@ -107,12 +145,12 @@ public class KeyedSubFormPanel implements IsWidget {
         LOGGER.info("activeRef = " + viewModel.getActiveRecordRef());
 
         if(!Objects.equals(activeRef, viewModel.getActiveRecordRef())) {
-            selector.update(viewModel);
+            selector.init(viewModel.getActivePeriod());
             formPanel.init(viewModel.getSubRecord().getSubFormViewModel());
             activeRef = viewModel.getActiveRecordRef();
+            activePeriod = viewModel.getActivePeriod();
         }
 
-        selector.update(viewModel);
         formPanel.update(viewModel.getSubRecord().getSubFormViewModel());
     }
 
@@ -122,5 +160,9 @@ public class KeyedSubFormPanel implements IsWidget {
         public String toolBarClassName() {
             return super.toolBarClassName() + " " + InputResources.INSTANCE.style().periodToolBar();
         }
+    }
+
+    private class PrevNextButtonAppearance extends TritonButtonCellToolBarAppearance<String> {
+
     }
 }

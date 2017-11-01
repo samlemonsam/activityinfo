@@ -88,15 +88,6 @@ public class Month implements Serializable, Comparable<Month>, PeriodValue {
     }
 
     /**
-     * Sets this <code>Month</code>'s year.
-     *
-     * @param year Gregorian year (for example, 1999, 2009)
-     */
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    /**
      * Gets this month
      *
      * @return The Gregorian month (1=january, 12=december)
@@ -110,14 +101,10 @@ public class Month implements Serializable, Comparable<Month>, PeriodValue {
         return month;
     }
 
-    /**
-     * Sets this month
-     *
-     * @param month The Gregorian month (1=january, 12=december)
-     */
-    public void setMonth(int month) {
-        this.month = month;
+    public LocalDate getFirstDayOfMonth() {
+        return new LocalDate(year, month, 1);
     }
+
 
     /**
      * Compares this <code>Month</code> to another month
@@ -153,7 +140,7 @@ public class Month implements Serializable, Comparable<Month>, PeriodValue {
      */
     @Override
     public String toString() {
-        return year + "-" + month;
+        return year + (month < 10 ? "-0" : "-") + month;
     }
 
     /**

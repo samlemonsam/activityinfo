@@ -1,15 +1,19 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.form.DateField;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * FieldWidget for {@link org.activityinfo.model.type.time.LocalDateType} fields.
  */
-public class LocalDateWidget implements FieldWidget {
+public class LocalDateWidget implements PeriodFieldWidget {
 
     private DateField field;
 
@@ -48,5 +52,10 @@ public class LocalDateWidget implements FieldWidget {
     @Override
     public Widget asWidget() {
         return field;
+    }
+
+    @Override
+    public List<Component> asToolBarItems() {
+        return Collections.singletonList(field);
     }
 }

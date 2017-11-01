@@ -1,10 +1,7 @@
 package org.activityinfo.model.type.time;
 
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.FieldTypeVisitor;
-import org.activityinfo.model.type.RecordFieldTypeClass;
+import org.activityinfo.model.type.*;
 
 /**
  * Value type that represents a date in the ISO-8601 calendar.
@@ -20,7 +17,7 @@ import org.activityinfo.model.type.RecordFieldTypeClass;
  * </blockquote>
  *
  */
-public class LocalDateType implements FieldType {
+public class LocalDateType implements PeriodType {
 
     public static final String TYPE_ID = "date";
 
@@ -79,4 +76,15 @@ public class LocalDateType implements FieldType {
         return INSTANCE;
     }
 
+    @Override
+    public PeriodValue fromSubFormKey(RecordRef ref) {
+        String subRecordId = ref.getRecordId().asString();
+        String dateKey = subRecordId.substring(subRecordId.length() - 10);
+        return LocalDate.parse(dateKey);
+    }
+
+    @Override
+    public PeriodValue containingDate(LocalDate localDate) {
+        return localDate;
+    }
 }
