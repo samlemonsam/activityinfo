@@ -3,17 +3,17 @@ package org.activityinfo.ui.client.input.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.cell.core.client.TextButtonCell;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.theme.triton.client.base.tabs.Css3TabPanelAppearance;
-import com.sencha.gxt.theme.triton.custom.client.button.TritonButtonCellToolBarAppearance;
 import com.sencha.gxt.theme.triton.custom.client.toolbar.TritonToolBarAppearance;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
@@ -24,7 +24,6 @@ import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.view.field.*;
 import org.activityinfo.ui.client.input.viewModel.KeyedSubFormViewModel;
 
-import java.util.Objects;
 import java.util.logging.Logger;
 
 /**
@@ -50,8 +49,7 @@ public class KeyedSubFormPanel implements IsWidget {
     private final ContentPanel contentPanel;
     private final InputHandler inputHandler;
 
-    private PeriodValue activePeriod;
-    private RecordRef activeRef;
+    private KeyedSubFormViewModel viewModel;
 
 
     public KeyedSubFormPanel(RecordRef parentRef, FormSource formSource, FormTree.Node node,
@@ -64,11 +62,11 @@ public class KeyedSubFormPanel implements IsWidget {
 
         selector = createSelector(subTree.getRootFormClass().getSubFormKind(), this::onPeriodSelected);
 
-        TextButton previousButton = new TextButton(new TextButtonCell(new PrevNextButtonAppearance()));
+        TextButton previousButton = new TextButton();
         previousButton.setText("<");
         previousButton.addSelectHandler(this::onPreviousPeriod);
 
-        TextButton nextButton = new TextButton(new TextButtonCell(new PrevNextButtonAppearance()));
+        TextButton nextButton = new TextButton();
         nextButton.setText(">");
         nextButton.addSelectHandler(this::onNextPeriod);
 
@@ -109,12 +107,12 @@ public class KeyedSubFormPanel implements IsWidget {
 
 
     private void onPreviousPeriod(SelectEvent event) {
-        changeActivePeriod(activePeriod.previous());
+        changeActivePeriod(viewModel.getActivePeriod().previous());
     }
 
 
     private void onNextPeriod(SelectEvent event) {
-        changeActivePeriod(activePeriod.next());
+        changeActivePeriod(viewModel.getActivePeriod().next());
     }
 
     private void onPeriodSelected(FieldInput input) {
@@ -125,6 +123,12 @@ public class KeyedSubFormPanel implements IsWidget {
     }
 
     private void changeActivePeriod(PeriodValue periodValue) {
+
+        if(!canChangePeriod()) {
+            selector.init(viewModel.getActivePeriod());
+            return;
+        }
+
         inputHandler.changeActiveSubRecord(fieldId,
                 new RecordRef(subFormId,
                      ResourceId.periodSubRecordId(parentRef, periodValue)));
@@ -144,14 +148,26 @@ public class KeyedSubFormPanel implements IsWidget {
 
         LOGGER.info("activeRef = " + viewModel.getActiveRecordRef());
 
-        if(!Objects.equals(activeRef, viewModel.getActiveRecordRef())) {
+        if(this.viewModel == null ||
+            !this.viewModel.getActiveRecordRef().equals(viewModel.getActiveRecordRef())) {
+
             selector.init(viewModel.getActivePeriod());
-            formPanel.init(viewModel.getSubRecord().getSubFormViewModel());
-            activeRef = viewModel.getActiveRecordRef();
-            activePeriod = viewModel.getActivePeriod();
+            formPanel.init(viewModel.getActiveSubViewModel());
         }
 
-        formPanel.update(viewModel.getSubRecord().getSubFormViewModel());
+        formPanel.update(viewModel.getActiveSubViewModel());
+
+        this.viewModel = viewModel;
+    }
+
+    private boolean canChangePeriod() {
+        if(viewModel.isDirty() && !viewModel.isValid()) {
+            MessageBox box = new MessageBox(I18N.CONSTANTS.error(), I18N.CONSTANTS.pleaseFillInAllRequiredFields());
+            box.setModal(true);
+            box.show();
+            return false;
+        }
+        return true;
     }
 
     private class KeyedSubFormBarAppearance extends TritonToolBarAppearance {
@@ -162,7 +178,4 @@ public class KeyedSubFormPanel implements IsWidget {
         }
     }
 
-    private class PrevNextButtonAppearance extends TritonButtonCellToolBarAppearance<String> {
-
-    }
 }

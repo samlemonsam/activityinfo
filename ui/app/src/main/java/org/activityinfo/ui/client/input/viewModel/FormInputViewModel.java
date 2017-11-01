@@ -34,6 +34,7 @@ public class FormInputViewModel {
     private final Set<ResourceId> missing;
     private final Multimap<ResourceId, String> validationErrors;
     private final boolean valid;
+    private boolean dirty;
 
     FormInputViewModel(FormTree formTree,
                        FormInputModel inputModel,
@@ -42,7 +43,7 @@ public class FormInputViewModel {
                        Map<ResourceId, KeyedSubFormViewModel> keyedSubFormMap,
                        Set<ResourceId> relevant,
                        Set<ResourceId> missing,
-                       Multimap<ResourceId, String> validationErrors, boolean valid) {
+                       Multimap<ResourceId, String> validationErrors, boolean valid, boolean dirty) {
         this.formTree = formTree;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
@@ -52,6 +53,7 @@ public class FormInputViewModel {
         this.missing = missing;
         this.validationErrors = validationErrors;
         this.valid = valid;
+        this.dirty = dirty;
     }
 
     public RecordRef getRecordRef() {
@@ -64,6 +66,10 @@ public class FormInputViewModel {
 
     public boolean isValid() {
         return valid;
+    }
+
+    public boolean isDirty() {
+        return dirty;
     }
 
     public RepeatingSubFormViewModel getRepeatingSubFormField(ResourceId fieldId) {
@@ -81,6 +87,7 @@ public class FormInputViewModel {
     public FieldValue getField(ResourceId fieldId) {
         return fieldValueMap.get(fieldId);
     }
+
 
     public RecordUpdate buildUpdate(Optional<RecordRef> parentRef) {
         RecordUpdate update = new RecordUpdate();

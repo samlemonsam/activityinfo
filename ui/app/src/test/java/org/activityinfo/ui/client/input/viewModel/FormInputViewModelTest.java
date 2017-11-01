@@ -316,15 +316,14 @@ public class FormInputViewModelTest {
         RecordRef novemberId = new RecordRef(clinicForm.getSubForm().getFormId(),
                 ResourceId.generatedPeriodSubmissionId(parentRecordId, "2017-11"));
 
-        assertThat(subForm.getSubRecord().getRecordRef(), equalTo(octoberId));
-        assertThat(subForm.getSubRecord().getSubFormViewModel().getRecordRef(), equalTo(octoberId));
+        assertThat(subForm.getActiveRecordRef(), equalTo(octoberId));
 
         // Update a field in the active form
         ResourceId consultCountFieldId = clinicForm.getSubForm().getConsultsField().getId();
         inputModel = inputModel.update(octoberId, consultCountFieldId, new FieldInput(new Quantity(33)));
         viewModel = builder.build(inputModel);
 
-        FormInputViewModel subFormViewModel = viewModel.getKeyedSubFormField(subFormFieldId).getSubRecord().getSubFormViewModel();
+        FormInputViewModel subFormViewModel = viewModel.getKeyedSubFormField(subFormFieldId).getActiveSubViewModel();
         assertThat(subFormViewModel.getField(consultCountFieldId), equalTo(new Quantity(33)));
 
         // Now change the active record to another month

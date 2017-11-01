@@ -22,8 +22,8 @@ public class KeyedSubFormViewModel {
         return fieldId;
     }
 
-    public SubRecordViewModel getSubRecord() {
-        return subRecord;
+    public FormInputViewModel getActiveSubViewModel() {
+        return subRecord.getSubFormViewModel();
     }
 
     public RecordRef getActiveRecordRef() {
@@ -40,5 +40,9 @@ public class KeyedSubFormViewModel {
 
     public RecordUpdate buildUpdates(RecordRef parentRecordRef) {
         return subRecord.buildUpdate(parentRecordRef);
+    }
+
+    public boolean isDirty() {
+        return subRecord.getSubFormViewModel().isDirty();
     }
 }

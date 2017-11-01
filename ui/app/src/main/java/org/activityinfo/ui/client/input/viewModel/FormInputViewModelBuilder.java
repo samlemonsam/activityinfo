@@ -105,6 +105,7 @@ public class FormInputViewModelBuilder {
 
         // Keep track if this form is valid and ready to submit
         boolean valid = true;
+        boolean dirty = false;
 
         // We inherit all the existing values...
         if(existingRecord.isVisible()) {
@@ -114,15 +115,23 @@ public class FormInputViewModelBuilder {
         // Now apply changes...
         for (FormTree.Node node : formTree.getRootFields()) {
             FieldInput fieldInput = inputModel.get(node.getFieldId());
+            FieldValue existingValue = record.get(node.getFieldId());
             switch (fieldInput.getState()) {
                 case EMPTY:
+                    if(existingValue != null) {
+                        dirty = true;
+                    }
                     record.set(node.getFieldId(), (FieldValue)null);
                     break;
                 case VALID:
+                    if(!fieldInput.getValue().equals(existingValue)) {
+                        dirty = true;
+                    }
                     record.set(node.getFieldId(), fieldInput.getValue());
                     break;
                 case INVALID:
                     LOGGER.info("Field with invalid input = " + node.getFieldId());
+                    dirty = true;
                     valid = false;
                     break;
             }
@@ -179,7 +188,7 @@ public class FormInputViewModelBuilder {
                 repeatingSubFormMap,
                 keyedSubFormMap,
                 relevantSet,
-                missing, validationErrors, valid);
+                missing, validationErrors, valid, dirty);
     }
 
     private Set<ResourceId> computeRelevance(FormInstance record) {
