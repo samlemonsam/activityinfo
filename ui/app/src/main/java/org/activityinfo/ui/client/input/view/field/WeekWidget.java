@@ -91,7 +91,7 @@ public class WeekWidget implements PeriodFieldWidget {
 
     private List<String> weekList() {
         List<String> weeks = new ArrayList<>();
-        for (int i = 0; i < EpiWeek.WEEKS_IN_YEAR; i++) {
+        for (int i = 1; i <= EpiWeek.WEEKS_IN_YEAR; i++) {
             weeks.add(weekName(i));
         }
         return weeks;

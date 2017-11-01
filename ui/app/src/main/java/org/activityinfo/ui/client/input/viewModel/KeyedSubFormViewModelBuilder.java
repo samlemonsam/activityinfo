@@ -58,9 +58,7 @@ public class KeyedSubFormViewModelBuilder {
 
         FormInputViewModel subInputViewModel = formBuilder.build(subInput, existingSubRecordTree);
 
-        SubRecordViewModel subRecordViewModel = new SubRecordViewModel(activeRef, subInputViewModel, false);
-
-        return new KeyedSubFormViewModel(fieldId, subRecordViewModel, periodType);
+        return new KeyedSubFormViewModel(fieldId, periodType, subInputViewModel);
     }
 
     private RecordRef computeActiveSubRecord(RecordRef parentRecordRef, FormInputModel inputModel) {

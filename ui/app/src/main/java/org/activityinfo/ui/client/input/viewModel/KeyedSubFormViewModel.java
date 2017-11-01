@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 
+import com.google.common.base.Optional;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -9,13 +10,13 @@ import org.activityinfo.model.type.time.PeriodValue;
 
 public class KeyedSubFormViewModel {
     private ResourceId fieldId;
-    private SubRecordViewModel subRecord;
+    private FormInputViewModel activeSubViewModel;
     private PeriodType periodType;
 
-    KeyedSubFormViewModel(ResourceId fieldId, SubRecordViewModel subRecord, PeriodType periodType) {
+    KeyedSubFormViewModel(ResourceId fieldId, PeriodType periodType, FormInputViewModel activeSubViewModel) {
         this.fieldId = fieldId;
-        this.subRecord = subRecord;
         this.periodType = periodType;
+        this.activeSubViewModel = activeSubViewModel;
     }
 
     public ResourceId getFieldId() {
@@ -23,11 +24,11 @@ public class KeyedSubFormViewModel {
     }
 
     public FormInputViewModel getActiveSubViewModel() {
-        return subRecord.getSubFormViewModel();
+        return activeSubViewModel;
     }
 
     public RecordRef getActiveRecordRef() {
-        return subRecord.getRecordRef();
+        return activeSubViewModel.getRecordRef();
     }
 
     public PeriodValue getActivePeriod() {
@@ -35,14 +36,15 @@ public class KeyedSubFormViewModel {
     }
 
     public boolean isValid() {
-        return subRecord.getSubFormViewModel().isValid();
+        return activeSubViewModel.isValid();
+    }
+
+
+    public boolean isDirty() {
+        return activeSubViewModel.isDirty();
     }
 
     public RecordUpdate buildUpdates(RecordRef parentRecordRef) {
-        return subRecord.buildUpdate(parentRecordRef);
-    }
-
-    public boolean isDirty() {
-        return subRecord.getSubFormViewModel().isDirty();
+        return activeSubViewModel.buildUpdate(Optional.of(parentRecordRef));
     }
 }
