@@ -14,7 +14,6 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.observable.SubscriptionSet;
-import org.activityinfo.ui.client.input.viewModel.ReferenceChoice;
 import org.activityinfo.ui.client.lookup.viewModel.LookupKeyViewModel;
 import org.activityinfo.ui.client.lookup.viewModel.LookupViewModel;
 
@@ -26,8 +25,8 @@ public class LevelWidget implements IsWidget {
     private LookupViewModel selectViewModel;
     private LookupKeyViewModel level;
 
-    private ListStore<ReferenceChoice> store;
-    private ComboBox<ReferenceChoice> comboBox;
+    private ListStore<String> store;
+    private ComboBox<String> comboBox;
     private FieldLabel fieldLabel;
 
     private Subscription choiceSubscription;
@@ -39,7 +38,7 @@ public class LevelWidget implements IsWidget {
         this.selectViewModel = selectViewModel;
         this.level = level;
 
-        store = new ListStore<>(ReferenceChoice::getKey);
+        store = new ListStore<>(key -> key);
 
         comboBox = new ComboBox<>(new ChoiceCell(level.getChoices(), store));
         comboBox.setWidth(300);
@@ -47,9 +46,9 @@ public class LevelWidget implements IsWidget {
         comboBox.addAttachHandler(this::onAttach);
         comboBox.addBeforeQueryHandler(this::onBeforeQuery);
 
-        comboBox.addSelectionHandler(new SelectionHandler<ReferenceChoice>() {
+        comboBox.addSelectionHandler(new SelectionHandler<String>() {
             @Override
-            public void onSelection(SelectionEvent<ReferenceChoice> event) {
+            public void onSelection(SelectionEvent<String> event) {
                 selectViewModel.select(level.getLookupKey(), event.getSelectedItem());
             }
         });
@@ -57,7 +56,7 @@ public class LevelWidget implements IsWidget {
         this.fieldLabel = new FieldLabel(comboBox, level.getLevelLabel());
     }
 
-    public void addSelectionHandler(SelectionHandler<ReferenceChoice> handler) {
+    public void addSelectionHandler(SelectionHandler<String> handler) {
         comboBox.addSelectionHandler(handler);
     }
 
@@ -70,7 +69,7 @@ public class LevelWidget implements IsWidget {
         }
     }
 
-    private void onBeforeQuery(BeforeQueryEvent<ReferenceChoice> event) {
+    private void onBeforeQuery(BeforeQueryEvent<String> event) {
         // Wait until the first time the list is accessed to start listening
         // to the choice list
         if(choiceSubscription == null) {
@@ -79,7 +78,7 @@ public class LevelWidget implements IsWidget {
         }
     }
 
-    private void onChoicesChanged(Observable<List<ReferenceChoice>> choices) {
+    private void onChoicesChanged(Observable<List<String>> choices) {
         if(choices.isLoading()) {
             store.clear();
         } else {
@@ -100,7 +99,7 @@ public class LevelWidget implements IsWidget {
         }
     }
 
-    public ComboBox<ReferenceChoice> getComboBox() {
+    public ComboBox<String> getComboBox() {
         return comboBox;
     }
 

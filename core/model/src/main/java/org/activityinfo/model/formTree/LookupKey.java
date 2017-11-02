@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public class LookupKey {
 
+    private int keyIndex;
+
     private LookupKey parentLevel;
 
     private SymbolExpr parentFieldId;
@@ -37,8 +39,18 @@ public class LookupKey {
 
     private List<LookupKey> childLevels = new ArrayList<>();
 
-    public LookupKey(String parentFieldId, LookupKey parentLevel, ResourceId formId, String levelLabel, String fieldId) {
-        this.parentFieldId = new SymbolExpr(parentFieldId);
+    LookupKey(int keyIndex,
+              String parentFieldId,
+              LookupKey parentLevel,
+              ResourceId formId,
+              String levelLabel,
+              String fieldId) {
+        this.keyIndex = keyIndex;
+        if(parentFieldId == null) {
+            this.parentFieldId = null;
+        } else {
+            this.parentFieldId = new SymbolExpr(parentFieldId);
+        }
         this.parentLevel = parentLevel;
         this.formId = formId;
         this.levelLabel = levelLabel;
@@ -49,8 +61,12 @@ public class LookupKey {
         }
     }
 
-    public LookupKey(ResourceId formId, String levelLabel, String fieldId) {
-        this(null, null, formId, levelLabel, fieldId);
+    LookupKey(int keyIndex, ResourceId formId, String levelLabel, String fieldId) {
+        this(keyIndex, null, null, formId, levelLabel, fieldId);
+    }
+
+    public int getKeyIndex() {
+        return keyIndex;
     }
 
     public boolean isRoot() {
@@ -78,6 +94,19 @@ public class LookupKey {
         return parentLevel;
     }
 
+    public List<LookupKey> getParentLevels() {
+        List<LookupKey> parents = new ArrayList<>();
+        collectParents(parents);
+        return parents;
+    }
+
+    private void collectParents(List<LookupKey> parents) {
+        if(!this.isRoot()) {
+            parents.add(getParentLevel());
+            getParentLevel().collectParents(parents);
+        }
+    }
+
     public List<LookupKey> getChildLevels() {
         return childLevels;
     }
@@ -103,7 +132,7 @@ public class LookupKey {
         }
     }
 
-    public Map<LookupKey, ExprNode> getKeys() {
+    public Map<LookupKey, ExprNode> getKeyFormulas() {
         Map<LookupKey, ExprNode> keys = new HashMap<>();
         collectKeys(null, keys);
         return keys;

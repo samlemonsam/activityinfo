@@ -13,7 +13,6 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.themebuilder.base.client.config.ThemeDetails;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.input.viewModel.ReferenceChoice;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ import java.util.List;
  * Subclass of {@link ComboBoxCell} that adds a loading message for Observables as well as
  * empty text messages.
  */
-class ChoiceCell extends ComboBoxCell<ReferenceChoice> {
+class ChoiceCell extends ComboBoxCell<String> {
 
 
     interface Style extends CssResource {
@@ -46,11 +45,11 @@ class ChoiceCell extends ComboBoxCell<ReferenceChoice> {
 
     private static final Templates TEMPLATES = GWT.create(Templates.class);
 
-    private Observable<List<ReferenceChoice>> observable;
+    private Observable<List<String>> observable;
 
 
-    public ChoiceCell(Observable<List<ReferenceChoice>> observable, ListStore<ReferenceChoice> store) {
-        super(store, ReferenceChoice::getLabel);
+    public ChoiceCell(Observable<List<String>> observable, ListStore<String> store) {
+        super(store, key -> key);
         this.observable = observable;
         setForceSelection(true);
         setUseQueryCache(false);
@@ -62,8 +61,8 @@ class ChoiceCell extends ComboBoxCell<ReferenceChoice> {
     @Override
     protected void onResultsLoad(Context context,
                                  XElement parent,
-                                 ValueUpdater<ReferenceChoice> updater,
-                                 ReferenceChoice value) {
+                                 ValueUpdater<String> updater,
+                                 String value) {
 
         // Copied and modified from com.sencha.gxt.cell.core.client.form.ComboBoxCell
         // to reflect loading/empty state of the observable

@@ -49,7 +49,7 @@ public class LookupKeySetTest {
         ExprNode territoryProvince = new CompoundExpr(villageTerritory, territoryForm.getParentFieldId());
         ExprNode provinceName = new CompoundExpr(territoryProvince, provinceForm.getNameFieldId());
 
-        assertThat(lookupKeySet.getLeafKeys().get(0).getKeys().values(), contains(
+        assertThat(lookupKeySet.getLeafKeys().get(0).getKeyFormulas().values(), contains(
             villageName,
             territoryName,
             provinceName));

@@ -11,6 +11,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.SerialNumberType;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.promise.Maybe;
 
@@ -78,7 +79,7 @@ public class LookupKeySet {
 
         // Now check for text key fields
         for (FormField formField : formClass.getFields()) {
-            if(formField.isKey() && formField.getType() instanceof TextType) {
+            if(isTextLikeKey(formField)) {
                 LookupKey lookupKey = textKeyLevel(labelPrefix, formId, parentLevel, parentFieldId, formField);
                 lookupKeys.add(lookupKey);
                 parentLevel = lookupKey;
@@ -94,19 +95,34 @@ public class LookupKeySet {
         return parentLevel;
     }
 
-
-    private LookupKey serialNumberLevel(String labelPrefix, ResourceId formId, FormField field) {
-        return new LookupKey(formId, labelPrefix + field.getLabel(), field.getId().asString());
+    private boolean isTextLikeKey(FormField formField) {
+        return formField.isKey() &&
+                (formField.getType() instanceof TextType ||
+                 formField.getType() instanceof EnumType);
     }
 
-    private LookupKey textKeyLevel(String labelPrefix, ResourceId formId, LookupKey parentLevel, String parentFieldId, FormField formField) {
+
+    private int nextKeyIndex() {
+        return lookupKeys.size() + 1;
+    }
+
+
+    private LookupKey serialNumberLevel(String labelPrefix, ResourceId formId, FormField field) {
+        return new LookupKey(nextKeyIndex(), formId, labelPrefix + field.getLabel(), field.getId().asString());
+    }
+
+    private LookupKey textKeyLevel(String labelPrefix,
+                                   ResourceId formId,
+                                   LookupKey parentLevel,
+                                   String parentFieldId,
+                                   FormField formField) {
         String levelLabel = labelPrefix + formField.getLabel();
 
-        return new LookupKey(parentFieldId, parentLevel, formId, levelLabel, formField.getId().asString());
+        return new LookupKey(nextKeyIndex(), parentFieldId, parentLevel, formId, levelLabel, formField.getId().asString());
     }
 
     private LookupKey idLevel(FormClass formSchema) {
-        return new LookupKey(formSchema.getId(), formSchema.getLabel(), ColumnModel.ID_SYMBOL);
+        return new LookupKey(nextKeyIndex(), formSchema.getId(), formSchema.getLabel(), ColumnModel.ID_SYMBOL);
     }
 
     private Optional<FormField> findSerialNumberField(FormClass formClass) {

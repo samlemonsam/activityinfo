@@ -49,6 +49,7 @@ public class TestingCatalog implements FormCatalog {
     private final VillageForm villageForm;
     private final NfiForm nfiForm;
     private final ClinicForm clinicForm;
+    private final IdpLocationForm idpLocationForm;
 
 
     public TestingCatalog() {
@@ -78,6 +79,10 @@ public class TestingCatalog implements FormCatalog {
         // Clinic form with subform
         clinicForm = new ClinicForm(new UnitTestingIds());
         add(clinicForm, clinicForm.getSubForm());
+
+        // List of locations
+        idpLocationForm = new IdpLocationForm(new UnitTestingIds(), 100, province);
+        add(idpLocationForm);
     }
 
     public Survey getSurvey() {
@@ -189,5 +194,9 @@ public class TestingCatalog implements FormCatalog {
 
     public ClinicForm getClinicForm() {
         return clinicForm;
+    }
+
+    public IdpLocationForm getIdpLocationForm() {
+        return idpLocationForm;
     }
 }

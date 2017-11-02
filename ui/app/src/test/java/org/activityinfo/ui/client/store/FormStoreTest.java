@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.store;
 
-import com.google.appengine.api.datastore.Query;
 import com.google.gwt.core.client.testing.StubScheduler;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -18,7 +18,6 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpStore;
-import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.*;
 import org.junit.Before;
 import org.junit.Test;

@@ -11,8 +11,6 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.ui.client.input.model.FieldInput;
-import org.activityinfo.ui.client.input.viewModel.ReferenceChoice;
 import org.activityinfo.ui.client.lookup.view.LevelWidget;
 import org.activityinfo.ui.client.lookup.viewModel.LookupKeyViewModel;
 import org.activityinfo.ui.client.lookup.viewModel.LookupViewModel;
@@ -57,9 +55,9 @@ public class ReferenceFieldWidget implements FieldWidget {
         }
     }
 
-    private void onSelection(SelectionEvent<ReferenceChoice> event) {
-        LOGGER.info("onSelection: " + event.getSelectedItem().getRef());
-        fieldUpdater.update(new FieldInput(new ReferenceValue(event.getSelectedItem().getRef())));
+    private void onSelection(SelectionEvent<String> event) {
+        LOGGER.info("onSelection: " + event.getSelectedItem());
+    //    fieldUpdater.update(new FieldInput(new ReferenceValue(event.getSelectedItem().getRef())));
     }
 
     @Override

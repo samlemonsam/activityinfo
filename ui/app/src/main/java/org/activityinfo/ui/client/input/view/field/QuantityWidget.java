@@ -3,9 +3,9 @@ package org.activityinfo.ui.client.input.view.field;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.DoubleField;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -19,7 +19,7 @@ import java.text.ParseException;
  */
 public class QuantityWidget implements FieldWidget {
 
-    private FlowPanel container;
+    private CssFloatLayoutContainer container;
     private DoubleField field;
     private QuantityType quantityType;
 
@@ -32,9 +32,10 @@ public class QuantityWidget implements FieldWidget {
         }));
         InlineHTML units = new InlineHTML(SafeHtmlUtils.fromString(quantityType.getUnits()));
 
-        container = new FlowPanel("span");
-        container.add(field);
-        container.add(units);
+
+        container = new CssFloatLayoutContainer();
+        container.add(field, new CssFloatLayoutContainer.CssFloatData(1));
+        container.add(units, new CssFloatLayoutContainer.CssFloatData(-1));
     }
 
     private FieldInput input() {
