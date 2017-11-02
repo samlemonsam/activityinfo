@@ -252,10 +252,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             case CuidAdapter.LOCATION_TYPE_DOMAIN:
                 addBinding(new LocationFieldBinding(form), query, formTree);
                 addGeoField(query, formTree, form);
-                addAdminField(query, formTree, form);
+                addAdminField(query, formTree, form, CuidAdapter.ADMIN_FIELD);
                 return query;
             case CuidAdapter.ADMIN_LEVEL_DOMAIN:
                 addBinding(new AdminEntityBinding(form), query, formTree);
+                addAdminField(query, formTree, form, CuidAdapter.ADMIN_PARENT_FIELD);
                 return query;
             default:
                 // undefined location form...
@@ -282,8 +283,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return query;
     }
 
-    private QueryModel addAdminField(QueryModel query, FormTree formTree, FormClass form) {
-        FormField adminField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.ADMIN_FIELD));
+    private QueryModel addAdminField(QueryModel query, FormTree formTree, FormClass form, int fieldIndex) {
+        FormField adminField = getField(form, CuidAdapter.field(form.getId(), fieldIndex));
         if (adminField != null) {
             ResourceId adminReferenceId = getReferenceId(adminField.getType());
             return buildLocationQuery(query, formTree, formTree.getFormClass(adminReferenceId));
