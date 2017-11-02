@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.input.view.field;
 
+import com.google.common.base.Optional;
 import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
@@ -11,6 +13,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.query.shared.FormSource;
+import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.lookup.view.LevelWidget;
 import org.activityinfo.ui.client.lookup.viewModel.LookupKeyViewModel;
 import org.activityinfo.ui.client.lookup.viewModel.LookupViewModel;
@@ -22,7 +25,6 @@ import java.util.logging.Logger;
 public class ReferenceFieldWidget implements FieldWidget {
 
     private static final Logger LOGGER = Logger.getLogger(ReferenceFieldWidget.class.getName());
-
 
     private final LookupViewModel viewModel;
     private final List<LevelWidget> levelWidgets = new ArrayList<>();
@@ -57,7 +59,20 @@ public class ReferenceFieldWidget implements FieldWidget {
 
     private void onSelection(SelectionEvent<String> event) {
         LOGGER.info("onSelection: " + event.getSelectedItem());
-    //    fieldUpdater.update(new FieldInput(new ReferenceValue(event.getSelectedItem().getRef())));
+        viewModel.getSelectedRecord().once().then(new AsyncCallback<Optional<RecordRef>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Optional<RecordRef> result) {
+                if(result.isPresent()) {
+                    fieldUpdater.update(new FieldInput(new ReferenceValue(result.get())));
+                } else {
+                    fieldUpdater.update(FieldInput.EMPTY);
+                }
+            }
+        });
     }
 
     @Override
