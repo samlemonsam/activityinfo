@@ -1,6 +1,9 @@
-package org.activityinfo.server.command.handler.pivot;
+package org.activityinfo.server.command.handler.binding.dim;
 
+import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.DimensionType;
+import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.expr.CompoundExpr;
@@ -9,6 +12,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.metadata.Activity;
 
@@ -21,7 +25,27 @@ public class ProjectDimBinding extends DimBinding {
     private static final String PROJECT_ID_COLUMN = "ProjectId";
     private static final String PROJECT_LABEL_COLUMN = "ProjectLabel";
 
+    private static final String PROJECT_FIELD = "project";
+
     private final Dimension model = new Dimension(DimensionType.Project);
+
+    @Override
+    public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {
+        ColumnView id = columnSet.getColumnView(PROJECT_ID_COLUMN);
+        ColumnView label = columnSet.getColumnView(PROJECT_LABEL_COLUMN);
+
+        for (int i=0; i<columnSet.getNumRows(); i++) {
+            String projectId = id.getString(i);
+            String projectLabel = Strings.nullToEmpty(label.getString(i));
+
+            if (projectId != null) {
+                ProjectDTO project = new ProjectDTO(CuidAdapter.getLegacyIdFromCuid(projectId), projectLabel);
+                dataArray[i].set(PROJECT_FIELD, project);
+            }
+        }
+
+        return dataArray;
+    }
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {

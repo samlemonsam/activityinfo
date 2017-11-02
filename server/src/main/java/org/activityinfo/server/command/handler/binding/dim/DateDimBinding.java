@@ -1,4 +1,4 @@
-package org.activityinfo.server.command.handler.pivot;
+package org.activityinfo.server.command.handler.binding.dim;
 
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;

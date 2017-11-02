@@ -1,5 +1,6 @@
-package org.activityinfo.server.command.handler.pivot;
+package org.activityinfo.server.command.handler.binding.dim;
 
+import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
@@ -9,6 +10,7 @@ import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.command.handler.binding.FieldBinding;
 import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Collections;
@@ -17,8 +19,12 @@ import java.util.List;
 /**
  * Retrieves values for the dimension
  */
-public abstract class DimBinding {
-    
+public abstract class DimBinding implements FieldBinding<BaseModelData> {
+
+    public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {
+        return dataArray;
+    }
+
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         return Collections.emptyList();
     }

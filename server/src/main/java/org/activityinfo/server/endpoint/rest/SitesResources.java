@@ -46,6 +46,7 @@ public class SitesResources {
                         @QueryParam("attribute") List<Integer> attributeIds,
                         @QueryParam("location") List<Integer> locationIds,
                         @QueryParam("site") List<Integer> siteIds,
+                        @QueryParam("legacy") Boolean legacy,
                         @QueryParam("format") String format) throws IOException {
 
         Filter filter = new Filter();
@@ -58,7 +59,9 @@ public class SitesResources {
         filter.addRestriction(DimensionType.Site, siteIds);
 
         GetSites command = new GetSites(filter);
-        command.setLegacyFetch(false);
+        if (legacy != null) {
+            command.setLegacyFetch(legacy);
+        }
         List<SiteDTO> sites = dispatcher.execute(command).getData();
 
         StringWriter writer = new StringWriter();
@@ -83,7 +86,6 @@ public class SitesResources {
         filter.addRestriction(DimensionType.Database, databaseIds);
 
         GetSites command = new GetSites(filter);
-        //command.setLegacyFetch(false);
         List<SiteDTO> sites = dispatcher.execute(command).getData();
 
         StringWriter writer = new StringWriter();
