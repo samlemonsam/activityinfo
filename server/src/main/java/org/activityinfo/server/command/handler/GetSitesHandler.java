@@ -27,6 +27,7 @@ import org.activityinfo.server.command.handler.binding.dim.*;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.query.impl.*;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
@@ -270,8 +271,22 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             ResourceId locationReferenceId = getReferenceId(locationField.getType());
             return buildLocationQuery(query, formTree, formTree.getFormClass(locationReferenceId));
         } else {
-            // country form, get country from db
+            // country form, get country from ActivityLoader
+            CountryInstance country = getCountryInstance(form.getId());
+            if (country != null) {
+                addBinding(new CountryFieldBinding(country), query, formTree);
+            }
             return query;
+        }
+    }
+
+    private CountryInstance getCountryInstance(ResourceId locationFormId) {
+        try {
+            Activity activity = activities.get(CuidAdapter.getLegacyIdFromCuid(locationFormId));
+            CountryInstance country = catalog.getActivityLoader().loadCountryInstance(activity.getLocationTypeId());
+            return country;
+        } catch (SQLException excp) {
+            return null;
         }
     }
 
@@ -296,7 +311,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         if (geoField.getType() instanceof GeoPointType) {
             addBinding(new GeoPointFieldBinding(geoField), query, formTree);
         } else if (geoField.getType() instanceof GeoAreaType) {
-            // TODO: Add GeoArea Binding
+            // TODO: GeoArea Binding
+            //addBinding(new GeoAreaFieldBinding(geoField), query, formTree);
         }
         return query;
     }

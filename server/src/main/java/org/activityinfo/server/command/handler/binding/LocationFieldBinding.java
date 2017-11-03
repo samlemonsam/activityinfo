@@ -20,9 +20,9 @@ public class LocationFieldBinding implements FieldBinding {
     public static final String CODE_SYMBOL = "code";
     public static final String PARENT_SYMBOL = "parent";
 
-    private static final String LOCATION_ID_COLUMN = "locationId";
-    private static final String LOCATION_NAME_COLUMN = "locationName";
-    private static final String LOCATION_CODE_COLUMN = "locationAxe";
+    public static final String LOCATION_ID_COLUMN = "locationId";
+    public static final String LOCATION_NAME_COLUMN = "locationName";
+    public static final String LOCATION_CODE_COLUMN = "locationAxe";
 
     private FormClass locationForm;
 

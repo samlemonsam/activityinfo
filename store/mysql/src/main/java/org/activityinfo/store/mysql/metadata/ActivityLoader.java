@@ -53,10 +53,42 @@ public class ActivityLoader {
      */
     private Map<Integer, Activity> activityMap = new HashMap<>();
 
+    /**
+     * Cache for singleton Country location instances, keyed by their LocationTypeIds
+     */
+    private Map<Integer,CountryInstance> countryMap = new HashMap<>();
+
     public ActivityLoader(QueryExecutor executor) {
         this.executor = executor;
         this.parentKeys = new ParentKeyCache(executor);
         this.permissionCache = new PermissionsCache(executor);
+    }
+
+    public CountryInstance loadCountryInstance(Integer locationTypeId) throws SQLException {
+        if (!countryMap.containsKey(locationTypeId)) {
+            StringBuilder sql = new StringBuilder();
+            sql.append( "SELECT country.CountryId, locationtype.locationtypeid, country.Name, country.ISO2, country.x1, country.x2, country.y1, country.y2 " +
+                        "FROM country " +
+                        "LEFT JOIN locationtype ON (locationtype.CountryId=country.CountryId) " +
+                        "WHERE locationtype.locationtypeid=");
+            sql.append(locationTypeId);
+
+            try (ResultSet rs = executor.query(sql.toString())) {
+                while (rs.next()) {
+                    countryMap.put(locationTypeId, new CountryInstance(
+                            rs.getInt(1),       // countryId
+                            rs.getInt(2),       // locationTypeId
+                            rs.getString(3),    // ISO2
+                            rs.getString(4),    // name
+                            rs.getDouble(5),    // x1
+                            rs.getDouble(6),    // x2
+                            rs.getDouble(7),    // y1
+                            rs.getDouble(8)     // y2
+                    ));
+                }
+            }
+        }
+        return countryMap.get(locationTypeId);
     }
     
     public Map<Integer, Activity> loadForIndicators(Set<Integer> indicatorIds) throws SQLException {
@@ -282,6 +314,11 @@ public class ActivityLoader {
                     } else {
                         addFields(activity, serializedFormClass);
                         activity.serializedFormClass.value = serializedFormClass;
+                    }
+
+                    // Check for Country location type. Fetch and store in cache
+                    if (!activity.hasLocationType()) {
+                        loadCountryInstance(activity.getLocationTypeId());
                     }
 
                     activityMap.put(activity.getId(), activity);
