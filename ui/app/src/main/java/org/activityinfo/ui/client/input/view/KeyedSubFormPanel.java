@@ -1,10 +1,8 @@
 package org.activityinfo.ui.client.input.view;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
-import com.sencha.gxt.theme.triton.client.base.tabs.Css3TabPanelAppearance;
 import com.sencha.gxt.theme.triton.custom.client.toolbar.TritonToolBarAppearance;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.ContentPanel;
@@ -22,7 +20,7 @@ import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.view.field.*;
-import org.activityinfo.ui.client.input.viewModel.KeyedSubFormViewModel;
+import org.activityinfo.ui.client.input.viewModel.SubFormViewModel;
 
 import java.util.logging.Logger;
 
@@ -36,9 +34,6 @@ public class KeyedSubFormPanel implements IsWidget {
 
     private static final Logger LOGGER = Logger.getLogger(KeyedSubFormPanel.class.getName());
 
-    private static final Css3TabPanelAppearance.Css3TabPanelResources TAB_APPEARANCE =
-            GWT.create(Css3TabPanelAppearance.Css3TabPanelResources.class);
-
     private RecordRef parentRef;
     private final ResourceId fieldId;
     private final ResourceId subFormId;
@@ -49,8 +44,7 @@ public class KeyedSubFormPanel implements IsWidget {
     private final ContentPanel contentPanel;
     private final InputHandler inputHandler;
 
-    private KeyedSubFormViewModel viewModel;
-
+    private SubFormViewModel viewModel;
 
     public KeyedSubFormPanel(RecordRef parentRef, FormSource formSource, FormTree.Node node,
                              FormTree subTree, InputHandler inputHandler) {
@@ -144,7 +138,7 @@ public class KeyedSubFormPanel implements IsWidget {
         return fieldId;
     }
 
-    public void update(KeyedSubFormViewModel viewModel) {
+    public void update(SubFormViewModel viewModel) {
 
         LOGGER.info("activeRef = " + viewModel.getActiveRecordRef());
 
@@ -161,7 +155,9 @@ public class KeyedSubFormPanel implements IsWidget {
     }
 
     private boolean canChangePeriod() {
-        if(viewModel.isDirty() && !viewModel.isValid()) {
+        if(viewModel.getActiveSubViewModel().isDirty() &&
+          !viewModel.getActiveSubViewModel().isValid()) {
+
             MessageBox box = new MessageBox(I18N.CONSTANTS.error(), I18N.CONSTANTS.pleaseFillInAllRequiredFields());
             box.setModal(true);
             box.show();

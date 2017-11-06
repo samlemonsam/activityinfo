@@ -7,6 +7,7 @@ import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.store.FormStore;
@@ -14,24 +15,25 @@ import org.activityinfo.ui.client.store.FormStore;
 import java.util.*;
 
 /**
- * Helper class which constructs a {@link RepeatingSubFormViewModel}.
+ * Helper class which constructs a {@link SubFormViewModel}.
  *
  * <p>This class is built from a sub form's form tree and includes all the pre-computed information
- * need to quickly compute a {@link RepeatingSubFormViewModel} from a {@link FormInputModel}.
+ * need to quickly compute a {@link SubFormViewModel} from a {@link FormInputModel}.
  */
-class RepeatingSubFormViewModelBuilder {
+class SubFormViewModelBuilder {
 
     private final ResourceId fieldId;
     private final ResourceId subFormId;
     private final FormTree subTree;
     private final SubFormKind subFormKind;
     private final FormInputViewModelBuilder formBuilder;
+    private final ActivePeriodMemory memory = new SimpleActivePeriodMemory();
 
     private ResourceId placeholderRecordId;
 
-    RepeatingSubFormViewModelBuilder(FormStore formStore,
-                                     FormTree parentTree,
-                                     FormTree.Node node) {
+    SubFormViewModelBuilder(FormStore formStore,
+                            FormTree parentTree,
+                            FormTree.Node node) {
         this.fieldId = node.getFieldId();
         this.subFormId = ((SubFormReferenceType) node.getType()).getClassId();
         this.subTree = parentTree.subTree(subFormId);
@@ -40,9 +42,9 @@ class RepeatingSubFormViewModelBuilder {
         this.formBuilder = new FormInputViewModelBuilder(formStore, subTree);
     }
 
-    public RepeatingSubFormViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingParentRecord) {
+    public SubFormViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingParentRecord) {
 
-        List<SubRecordViewModel> subRecordViews = new ArrayList<>();
+        List<FormInputViewModel> subRecordViews = new ArrayList<>();
 
         // First do existing records
 
@@ -61,7 +63,7 @@ class RepeatingSubFormViewModelBuilder {
             FormInputViewModel subViewModel = formBuilder.build(subInput, Maybe.of(existingSubRecord));
 
             existingRefs.add(ref);
-            subRecordViews.add(new SubRecordViewModel(ref, subViewModel, false));
+            subRecordViews.add(subViewModel);
         }
 
         // Now add sub records newly added by the user
@@ -69,20 +71,60 @@ class RepeatingSubFormViewModelBuilder {
             if(!existingRefs.contains(subInput.getRecordRef())) {
                 if (subInput.getRecordRef().getFormId().equals(subFormId)) {
                     FormInputViewModel subViewModel = formBuilder.build(subInput, Maybe.notFound());
-                    subRecordViews.add(new SubRecordViewModel(subInput.getRecordRef(), subViewModel, false));
+                    subRecordViews.add(subViewModel);
                 }
             }
         }
 
-        // If there are no records, then the computed view includes a new empty one
-        if(subRecordViews.isEmpty()) {
-            RecordRef newRecordRef = placeholderRecordRef();
-            FormInputViewModel subViewModel = formBuilder.build(new FormInputModel(newRecordRef), Maybe.notFound());
-            subRecordViews.add(new SubRecordViewModel(newRecordRef, subViewModel, true));
+        if(subFormKind == SubFormKind.REPEATING) {
+
+            // If there are no records, then the computed view includes a new empty one
+
+            if(subRecordViews.isEmpty()) {
+                FormInputViewModel subViewModel = formBuilder.placeholder(placeholderRecordRef());
+                subRecordViews.add(subViewModel);
+            }
+
+            return new SubFormViewModel(fieldId, subRecordViews);
+
+
+        } else {
+
+            // Keyed/Period subforms have a single active record
+
+            RecordRef activeRecord = computeActiveSubRecord(inputModel.getRecordRef(), inputModel);
+            FormInputViewModel activeRecordViewModel = find(activeRecord, subRecordViews);
+
+            return new SubFormViewModel(fieldId, subFormKind, subRecordViews, activeRecordViewModel);
+        }
+    }
+
+    private FormInputViewModel find(RecordRef activeRecord, List<FormInputViewModel> subRecordViews) {
+        for (FormInputViewModel subRecordView : subRecordViews) {
+            if(subRecordView.getRecordRef().equals(activeRecord)) {
+                return subRecordView;
+            }
+        }
+        return formBuilder.placeholder(activeRecord);
+    }
+
+
+    private RecordRef computeActiveSubRecord(RecordRef parentRecordRef, FormInputModel inputModel) {
+        // Has the user chosen a specific period?
+        Optional<RecordRef> activeSubRecord = inputModel.getActiveSubRecord(fieldId);
+        if(activeSubRecord.isPresent()) {
+            return activeSubRecord.get();
         }
 
-        return new RepeatingSubFormViewModel(fieldId, subRecordViews);
+        // Otherwise choose the active record based on the user's previous choices
+        // or the current date
+
+        PeriodValue activePeriod = subFormKind.getPeriodType().containingDate(memory.getLastUsedDate());
+        ResourceId recordId = ResourceId.periodSubRecordId(parentRecordRef, activePeriod);
+
+        return new RecordRef(subFormId, recordId);
     }
+
 
     private RecordRef placeholderRecordRef() {
         return new RecordRef(subFormId, placeholderRecordId);

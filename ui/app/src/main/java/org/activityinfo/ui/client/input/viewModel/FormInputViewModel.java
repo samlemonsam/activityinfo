@@ -28,32 +28,34 @@ public class FormInputViewModel {
     private FormTree formTree;
     private FormInputModel inputModel;
     private final Map<ResourceId, FieldValue> fieldValueMap;
-    private final Map<ResourceId, RepeatingSubFormViewModel> repeatingSubFormMap;
-    private final Map<ResourceId, KeyedSubFormViewModel> keyedSubFormMap;
+    private final Map<ResourceId, SubFormViewModel> subFormMap;
     private final Set<ResourceId> relevant;
     private final Set<ResourceId> missing;
     private final Multimap<ResourceId, String> validationErrors;
     private final boolean valid;
     private boolean dirty;
+    private boolean placeholder;
 
     FormInputViewModel(FormTree formTree,
                        FormInputModel inputModel,
                        Map<ResourceId, FieldValue> fieldValueMap,
-                       Map<ResourceId, RepeatingSubFormViewModel> repeatingSubFormMap,
-                       Map<ResourceId, KeyedSubFormViewModel> keyedSubFormMap,
+                       Map<ResourceId, SubFormViewModel> subFormMap,
                        Set<ResourceId> relevant,
                        Set<ResourceId> missing,
-                       Multimap<ResourceId, String> validationErrors, boolean valid, boolean dirty) {
+                       Multimap<ResourceId, String> validationErrors,
+                       boolean valid,
+                       boolean dirty,
+                       boolean placeholder) {
         this.formTree = formTree;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
-        this.repeatingSubFormMap = repeatingSubFormMap;
-        this.keyedSubFormMap = keyedSubFormMap;
+        this.subFormMap = subFormMap;
         this.relevant = relevant;
         this.missing = missing;
         this.validationErrors = validationErrors;
         this.valid = valid;
         this.dirty = dirty;
+        this.placeholder = placeholder;
     }
 
     public RecordRef getRecordRef() {
@@ -72,12 +74,16 @@ public class FormInputViewModel {
         return dirty;
     }
 
-    public RepeatingSubFormViewModel getRepeatingSubFormField(ResourceId fieldId) {
-        return repeatingSubFormMap.get(fieldId);
+    public boolean isEmpty() {
+        return fieldValueMap.isEmpty();
     }
 
-    public KeyedSubFormViewModel getKeyedSubFormField(ResourceId fieldId) {
-        return keyedSubFormMap.get(fieldId);
+    public boolean isPlaceholder() {
+        return placeholder;
+    }
+
+    public SubFormViewModel getSubForm(ResourceId fieldId) {
+        return subFormMap.get(fieldId);
     }
 
     public boolean isMissing(ResourceId fieldId) {
@@ -87,7 +93,6 @@ public class FormInputViewModel {
     public FieldValue getField(ResourceId fieldId) {
         return fieldValueMap.get(fieldId);
     }
-
 
     public RecordUpdate buildUpdate(Optional<RecordRef> parentRef) {
         RecordUpdate update = new RecordUpdate();
@@ -118,14 +123,9 @@ public class FormInputViewModel {
         RecordTransactionBuilder tx = new RecordTransactionBuilder();
         tx.add(buildUpdate(Optional.absent()));
 
-        for (RepeatingSubFormViewModel repeatingSubFormViewModel : repeatingSubFormMap.values()) {
-            tx.add(repeatingSubFormViewModel.buildUpdates(inputModel.getRecordRef()));
+        for (SubFormViewModel subFormViewModel : subFormMap.values()) {
+            tx.add(subFormViewModel.buildUpdates(inputModel.getRecordRef()));
         }
-
-        for (KeyedSubFormViewModel keyedSubFormViewModel : keyedSubFormMap.values()) {
-            tx.add(keyedSubFormViewModel.buildUpdates(inputModel.getRecordRef()));
-        }
-
         return tx.build();
     }
 

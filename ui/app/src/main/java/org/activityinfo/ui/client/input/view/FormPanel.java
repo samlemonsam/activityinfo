@@ -83,7 +83,7 @@ public class FormPanel implements IsWidget {
         }
 
         for (RepeatingSubFormPanel subFormView : repeatingSubForms) {
-            subFormView.init(viewModel.getRepeatingSubFormField(subFormView.getFieldId()));
+            subFormView.init(viewModel.getSubForm(subFormView.getFieldId()));
         }
     }
 
@@ -96,10 +96,10 @@ public class FormPanel implements IsWidget {
 
         // Update Subforms
         for (RepeatingSubFormPanel subFormView : repeatingSubForms) {
-            subFormView.update(viewModel.getRepeatingSubFormField(subFormView.getFieldId()));
+            subFormView.update(viewModel.getSubForm(subFormView.getFieldId()));
         }
         for (KeyedSubFormPanel subFormView : keyedSubFormPanels) {
-            subFormView.update(viewModel.getKeyedSubFormField(subFormView.getFieldId()));
+            subFormView.update(viewModel.getSubForm(subFormView.getFieldId()));
         }
 
     }

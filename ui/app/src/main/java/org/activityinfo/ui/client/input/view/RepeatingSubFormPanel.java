@@ -13,8 +13,8 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.ui.client.input.viewModel.RepeatingSubFormViewModel;
-import org.activityinfo.ui.client.input.viewModel.SubRecordViewModel;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
+import org.activityinfo.ui.client.input.viewModel.SubFormViewModel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class RepeatingSubFormPanel implements IsWidget {
     private final CssFloatLayoutContainer recordContainer;
     private final Map<RecordRef, FormPanel> panelMap = new HashMap<>();
 
-    private RepeatingSubFormViewModel viewModel;
+    private SubFormViewModel viewModel;
 
     public RepeatingSubFormPanel(FormSource formSource, FormTree.Node node, FormTree subTree, InputHandler inputHandler) {
         this.formSource = formSource;
@@ -68,24 +68,24 @@ public class RepeatingSubFormPanel implements IsWidget {
         return fieldId;
     }
 
-    public void init(RepeatingSubFormViewModel viewModel) {
+    public void init(SubFormViewModel viewModel) {
     }
 
-    public void update(RepeatingSubFormViewModel viewModel) {
+    public void update(SubFormViewModel viewModel) {
 
         this.viewModel = viewModel;
 
         // First add any records which are not yet present.
-        for (SubRecordViewModel subRecord : viewModel.getSubRecords()) {
+        for (FormInputViewModel subRecord : viewModel.getSubRecords()) {
             FormPanel subPanel = panelMap.get(subRecord.getRecordRef());
             if(subPanel == null) {
                 subPanel = new FormPanel(formSource, subTree, subRecord.getRecordRef(), inputHandler);
-                subPanel.init(subRecord.getSubFormViewModel());
+                subPanel.init(subRecord);
 
                 recordContainer.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
                 panelMap.put(subRecord.getRecordRef(), subPanel);
             }
-            subPanel.update(subRecord.getSubFormViewModel());
+            subPanel.update(subRecord);
         }
 
         // Now remove any that have been deleted
@@ -101,7 +101,7 @@ public class RepeatingSubFormPanel implements IsWidget {
 
         // If we have a placeholder, then add it first, otherwise it will
         // disappear
-        Optional<SubRecordViewModel> placeholder = viewModel.getPlaceholder();
+        Optional<FormInputViewModel> placeholder = viewModel.getPlaceholder();
         if(placeholder.isPresent()) {
             inputHandler.addSubRecord(placeholder.get().getRecordRef());
         }

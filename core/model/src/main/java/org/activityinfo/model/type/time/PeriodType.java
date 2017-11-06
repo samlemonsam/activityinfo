@@ -36,4 +36,6 @@ public interface PeriodType extends FieldType {
      * {@code localDate}
      */
     PeriodValue containingDate(LocalDate localDate);
+
+
 }
