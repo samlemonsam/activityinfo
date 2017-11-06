@@ -37,6 +37,7 @@ public class FormInputViewModelBuilder {
 
     private final FormTree formTree;
     private final FormEvalContext evalContext;
+    private final PermissionFilters filters;
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
@@ -47,6 +48,7 @@ public class FormInputViewModelBuilder {
 
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
         this.formTree = formTree;
+        this.filters = new PermissionFilters(formTree);
         this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
         for (FormTree.Node node : this.formTree.getRootFields()) {
@@ -183,7 +185,8 @@ public class FormInputViewModelBuilder {
 
         LOGGER.info("fieldValues = " + record.getFieldValueMap());
 
-        return new FormInputViewModel(formTree, inputModel,
+        return new FormInputViewModel(formTree,
+                inputModel,
                 record.getFieldValueMap(),
                 repeatingSubFormMap,
                 keyedSubFormMap,

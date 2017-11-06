@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.data.shared.loader.FilterConfigBean;
 import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.type.time.LocalDate;
@@ -15,7 +16,6 @@ import java.util.Collection;
 
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.expr.ExprParser.parse;
-import static org.activityinfo.ui.client.table.view.ColumnFilterParser.findBinaryTree;
 import static org.activityinfo.ui.client.table.view.ColumnFilterParser.toFormula;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
@@ -75,13 +75,13 @@ public class ColumnFilterParserTest {
     @Test
     public void decomposition() {
 
-        assertThat(findBinaryTree(parse("A && B"), AND), contains(A, B));
+        assertThat(Exprs.findBinaryTree(parse("A && B"), AND), contains(A, B));
 
-        assertThat(findBinaryTree(parse("A && B && C"), AND), contains(A, B, C));
+        assertThat(Exprs.findBinaryTree(parse("A && B && C"), AND), contains(A, B, C));
 
-        assertThat(findBinaryTree(parse("A && (B && C)"), AND), contains(A, B, C));
+        assertThat(Exprs.findBinaryTree(parse("A && (B && C)"), AND), contains(A, B, C));
 
-        assertThat(findBinaryTree(parse("(A && ((B && (C))))"), AND), contains(A, B, C));
+        assertThat(Exprs.findBinaryTree(parse("(A && ((B && (C))))"), AND), contains(A, B, C));
     }
 
     @Test

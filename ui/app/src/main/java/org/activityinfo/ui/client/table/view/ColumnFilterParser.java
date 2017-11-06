@@ -52,7 +52,7 @@ public class ColumnFilterParser {
 
     public Multimap<Integer, FilterConfig> parseFilter(ExprNode filter) {
         Multimap<Integer, FilterConfig> result = HashMultimap.create();
-        List<ExprNode> nodes = findBinaryTree(filter, AndFunction.INSTANCE);
+        List<ExprNode> nodes = Exprs.findBinaryTree(filter, AndFunction.INSTANCE);
         for (ExprNode node : nodes) {
             if(!parseNode(node, result)) {
                 return EMPTY;
@@ -119,7 +119,7 @@ public class ColumnFilterParser {
         if(isNumberCall.getFunction() != IsNumberFunction.INSTANCE) {
             return false;
         }
-        ExprNode isNumberArgument = simplify(isNumberCall.getArgument(0));
+        ExprNode isNumberArgument = Exprs.simplify(isNumberCall.getArgument(0));
         if(!(isNumberArgument instanceof FunctionCallNode)) {
             return false;
         }
@@ -153,7 +153,7 @@ public class ColumnFilterParser {
      * Parse a list of enum item conditionals in the form (X.A || X.B || X.C)
      */
     private boolean parseEnumList(ExprNode node, Multimap<Integer, FilterConfig> result) {
-        List<ExprNode> terms = findBinaryTree(node, OrFunction.INSTANCE);
+        List<ExprNode> terms = Exprs.findBinaryTree(node, OrFunction.INSTANCE);
 
         // Ensure that each term is a compound expression in the form X.Y1, X.Y2, X.Y2
         Iterator<ExprNode> termIt = terms.iterator();
@@ -255,52 +255,6 @@ public class ColumnFilterParser {
             }
         }
         return null;
-    }
-
-    /**
-     * Tries to decompose a tree of binary operations into a list of operands. (A && B && C) or
-     * (A || B || C) or (A + B + C) => [A, B, C]
-     */
-    @VisibleForTesting
-    static List<ExprNode> findBinaryTree(ExprNode rootNode, ExprFunction operator) {
-        List<ExprNode> list = new ArrayList<>();
-        findBinaryTree(rootNode, list, operator);
-
-        return list;
-    }
-
-    private static void findBinaryTree(ExprNode node, List<ExprNode> list, ExprFunction operator) {
-
-        // Unwrap group expressions ((A))
-        node = simplify(node);
-
-        if(isBinaryOperation(node, operator)) {
-            // If this expression is in the form A && B, then descend
-            // recursively
-            FunctionCallNode callNode = (FunctionCallNode) node;
-            findBinaryTree(callNode.getArgument(0), list, operator);
-            findBinaryTree(callNode.getArgument(1), list, operator);
-
-        } else {
-            // If not a conjunction, then add this node to the list
-            list.add(node);
-        }
-    }
-
-    private static ExprNode simplify(ExprNode node) {
-        while(node instanceof GroupExpr) {
-            node = ((GroupExpr) node).getExpr();
-        }
-        return node;
-    }
-
-    private static boolean isBinaryOperation(ExprNode node, ExprFunction operator) {
-        if(node instanceof FunctionCallNode) {
-            FunctionCallNode callNode = (FunctionCallNode) node;
-            return callNode.getArgumentCount() == 2 &&
-                   callNode.getFunction() == operator;
-        }
-        return false;
     }
 
 
