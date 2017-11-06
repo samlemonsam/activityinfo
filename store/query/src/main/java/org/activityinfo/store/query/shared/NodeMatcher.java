@@ -7,6 +7,8 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.expr.diagnostic.AmbiguousSymbolException;
+import org.activityinfo.model.expr.functions.ExprFunction;
+import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
@@ -16,9 +18,7 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Resolves symbols in queries to the fields on the base FormClass
@@ -30,8 +30,36 @@ public class NodeMatcher {
 
     private final FormTree tree;
 
+    @SuppressWarnings("NonJREEmulationClassesInClientCode") /* Supported in GWT 2.8+ */
+    private Deque<StatFunction> aggregationContextStack = new ArrayDeque<>();
+
     public NodeMatcher(FormTree formTree) {
         this.tree = formTree;
+    }
+
+    /**
+     * Called directly before the QueryEvaluator evaluates a function. If the function is
+     * a {@code StatFunction}, it will be added to the context.
+     *
+     * For example, if we encounter the expression MAX(A), and A is resolved to a symbol
+     * in a subform, then we know that we have to apply the MAX() function for each row in the parent form
+     * to all of the values in the subform for that record.
+     *
+     */
+    public void enterFunction(ExprFunction function) {
+        if(function instanceof StatFunction) {
+            aggregationContextStack.push((StatFunction) function);
+        }
+    }
+
+    public void exitFunction(ExprFunction function) {
+        if(function instanceof StatFunction) {
+            aggregationContextStack.pop();
+        }
+    }
+
+    private Optional<StatFunction> currentAggregation() {
+        return Optional.fromNullable(aggregationContextStack.peek());
     }
 
     public Collection<NodeMatch> resolveSymbol(SymbolExpr symbol) {
@@ -129,7 +157,7 @@ public class NodeMatcher {
         // Check for a match of the query Path head to the set of fields
         for (FormTree.Node field : fields) {
             if(path.matches(field)) {
-                matches.add(NodeMatch.forField(field));
+                matches.add(NodeMatch.forField(field, currentAggregation()));
             }
         }
 
