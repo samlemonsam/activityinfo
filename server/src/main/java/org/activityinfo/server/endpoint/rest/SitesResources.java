@@ -138,7 +138,7 @@ public class SitesResources {
             if (!adminEntityMap.isEmpty()) {
                 json.writeObjectFieldStart("adminLevels");
                 for (AdminEntityDTO adminEntity : adminEntityMap.values()) {
-                    json.writeObjectFieldStart(adminEntity.getLevelName());
+                    json.writeObjectFieldStart(Strings.nullToEmpty(adminEntity.getLevelName()));
                     json.writeNumberField("id", adminEntity.getId());
                     json.writeStringField("name", adminEntity.getName());
                     json.writeEndObject();
