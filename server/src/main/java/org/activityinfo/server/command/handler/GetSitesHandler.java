@@ -358,12 +358,16 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         if (command.isFetchAllIndicators()) {
             for (FormField field : activityForm.getFields()) {
                 if (isDomain(field.getId(), CuidAdapter.INDICATOR_DOMAIN)) {
-                    addBinding(new IndicatorFieldBinding(field.getId()), query, formTree);
+                    addBinding(new IndicatorFieldBinding(field), query, formTree);
                 }
             }
         } else {
             for (Integer indicator : command.getFetchIndicators()) {
-                addBinding(new IndicatorFieldBinding(indicator), query, formTree);
+                ResourceId indicatorId = CuidAdapter.indicatorField(indicator);
+                FormField indicatorField = getField(activityForm, indicatorId);
+                if (indicatorField != null) {
+                    addBinding(new IndicatorFieldBinding(indicatorField), query, formTree);
+                }
             }
         }
         return query;
