@@ -255,7 +255,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             case CuidAdapter.ACTIVITY_DOMAIN:
                 return addLocationField(query, formTree, form);
             case CuidAdapter.LOCATION_TYPE_DOMAIN:
-                addBinding(new LocationFieldBinding(form), query, formTree);
                 addGeoField(query, formTree, form);
                 addAdminField(query, formTree, form, CuidAdapter.ADMIN_FIELD);
                 return query;
@@ -273,9 +272,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         FormField locationField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.LOCATION_FIELD));
         if (locationField != null) {
             ResourceId locationReferenceId = getReferenceId(locationField.getType());
-            return buildLocationQuery(query, formTree, formTree.getFormClass(locationReferenceId));
+            FormClass locationForm = formTree.getFormClass(locationReferenceId);
+            addBinding(new LocationFieldBinding(locationForm), query, formTree);
+            return buildLocationQuery(query, formTree, locationForm);
         } else {
-            // country form, get country from ActivityLoader
+            // country form, get country instance from ActivityLoader
             CountryInstance country = getCountryInstance(form.getId());
             if (country != null) {
                 addBinding(new CountryFieldBinding(country), query, formTree);
