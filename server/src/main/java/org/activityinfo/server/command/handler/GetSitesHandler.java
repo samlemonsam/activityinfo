@@ -36,8 +36,11 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class GetSitesHandler implements CommandHandler<GetSites> {
+
+    private static final Logger LOGGER = Logger.getLogger(GetSitesHandler.class.getName());
 
     @Inject
     private Provider<MySqlCatalog> catalogProvider;
@@ -70,7 +73,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         if (command.isLegacyFetch()) {
             return dispatcher.execute(new OldGetSites(command));
         }
-
+        LOGGER.info("Entering execute()");
         aggregateTime.start();
         initialiseHandler(user);
         fetchActivityMetadata(command.getFilter());
@@ -81,16 +84,17 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         aggregateTime.stop();
 
         printTimes();
-
+        LOGGER.info("Exiting execute()");
         return new SiteResult(siteList);
     }
 
     private void printTimes() {
-        System.out.println("Metadata Fetch: " + metadataTime.toString());
-        System.out.println("Form Tree Fetch: " + treeTime.toString());
-        System.out.println("Query Build: " + queryBuildTime.toString());
-        System.out.println("Query Execution : " + queryExecTime.toString());
-        System.out.println("Aggregate Time: " + aggregateTime.toString());
+        LOGGER.info("GetSites timings: {" + "Metadata Fetch: " + metadataTime.toString() + "; " +
+                "Form Tree Fetch: " + treeTime.toString() + "; " +
+                "Query Build: " + queryBuildTime.toString() + "; " +
+                "Query Execution : " + queryExecTime.toString() + "; " +
+                "Aggregate Time: " + aggregateTime.toString()
+        + "}");
     }
 
     private void initialiseHandler(User user) {

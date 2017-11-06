@@ -133,6 +133,19 @@ public class SitesResources {
             }
             json.writeEndObject();
 
+            // write admin entities
+            Map<Integer,AdminEntityDTO> adminEntityMap = site.getAdminEntities();
+            if (!adminEntityMap.isEmpty()) {
+                json.writeObjectFieldStart("adminLevels");
+                for (AdminEntityDTO adminEntity : adminEntityMap.values()) {
+                    json.writeObjectFieldStart(adminEntity.getLevelName());
+                    json.writeNumberField("id", adminEntity.getId());
+                    json.writeStringField("name", adminEntity.getName());
+                    json.writeEndObject();
+                }
+                json.writeEndObject();
+            }
+
             json.writeObjectFieldStart("partner");
             json.writeNumberField("id", site.getPartnerId());
             json.writeStringField("name", site.getPartnerName());
