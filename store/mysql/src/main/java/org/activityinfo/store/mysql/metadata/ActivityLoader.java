@@ -78,8 +78,8 @@ public class ActivityLoader {
                     countryMap.put(locationTypeId, new CountryInstance(
                             rs.getInt(1),       // countryId
                             rs.getInt(2),       // locationTypeId
-                            rs.getString(3),    // ISO2
-                            rs.getString(4),    // name
+                            rs.getString(3),    // name
+                            rs.getString(4),    // ISO2
                             rs.getDouble(5),    // x1
                             rs.getDouble(6),    // x2
                             rs.getDouble(7),    // y1
