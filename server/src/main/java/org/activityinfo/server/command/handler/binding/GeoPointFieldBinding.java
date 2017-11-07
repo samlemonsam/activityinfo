@@ -14,8 +14,8 @@ import java.util.List;
 
 public class GeoPointFieldBinding implements FieldBinding {
 
-    private static final String LONG_SYMBOL = "longitude";
-    private static final String LAT_SYMBOL = "latitude";
+    public static final String LONG_SYMBOL = "longitude";
+    public static final String LAT_SYMBOL = "latitude";
 
     public static final String GEO_LONGITUDE_COLUMN = "x";
     public static final String GEO_LATITUDE_COLUMN = "y";

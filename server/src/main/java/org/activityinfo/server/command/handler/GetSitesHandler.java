@@ -298,7 +298,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private QueryModel addGeoField(QueryModel query, FormTree formTree, FormClass form) {
         FormField geoField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.GEOMETRY_FIELD));
         if (geoField != null) {
-            query = buildGeoLocationQuery(query, formTree, geoField);
+            query = buildGeoLocationQuery(query, formTree, form, geoField);
         }
         return query;
     }
@@ -312,12 +312,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return query;
     }
 
-    private QueryModel buildGeoLocationQuery(QueryModel query, FormTree formTree, FormField geoField) {
+    private QueryModel buildGeoLocationQuery(QueryModel query, FormTree formTree, FormClass form, FormField geoField) {
         if (geoField.getType() instanceof GeoPointType) {
             addBinding(new GeoPointFieldBinding(geoField), query, formTree);
         } else if (geoField.getType() instanceof GeoAreaType) {
-            // TODO: GeoArea Binding
-            //addBinding(new GeoAreaFieldBinding(geoField), query, formTree);
+            addBinding(new GeoAreaFieldBinding(form), query, formTree);
         }
         return query;
     }

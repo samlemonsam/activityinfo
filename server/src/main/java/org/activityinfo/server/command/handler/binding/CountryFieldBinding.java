@@ -25,8 +25,8 @@ public class CountryFieldBinding implements FieldBinding {
             dataArray[i].set(LocationFieldBinding.LOCATION_NAME_COLUMN, country.getCountryName());
             dataArray[i].set(LocationFieldBinding.LOCATION_CODE_COLUMN, country.getIso2());
 
-            dataArray[i].set(GeoPointFieldBinding.GEO_LONGITUDE_COLUMN, country.getX1());
-            dataArray[i].set(GeoPointFieldBinding.GEO_LATITUDE_COLUMN, country.getY1());
+            dataArray[i].set(GeoPointFieldBinding.GEO_LONGITUDE_COLUMN, country.getBounds().getCenterY());
+            dataArray[i].set(GeoPointFieldBinding.GEO_LATITUDE_COLUMN, country.getBounds().getCenterX());
         }
 
         return dataArray;
