@@ -15,6 +15,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,23 +72,31 @@ public class AdminEntityBinding implements FieldBinding {
                 new ColumnModel().setExpression(new CompoundExpr(adminForm.getId(),LocationFieldBinding.ID_SYMBOL)).as(ADMIN_ENTITY_ID_COLUMN),
                 new ColumnModel().setExpression(new CompoundExpr(adminForm.getId(), LocationFieldBinding.NAME_SYMBOL)).as(ADMIN_ENTITY_NAME_COLUMN)
         );
-        adminQuery.addAll(buildAdminLocationQuery(formTree));
-        return adminQuery;
+        List<ColumnModel> adminLocationQuery = buildAdminLocationQuery(formTree);
+        return joinLists(adminQuery,adminLocationQuery);
     }
 
     private List<ColumnModel> buildAdminLocationQuery(FormTree formTree) {
         try {
-            int legacyId = CuidAdapter.getLegacyIdFromCuid(adminForm.getId());
-            FormField locationField = adminForm.getField(CuidAdapter.locationField(legacyId));
-            if (locationField.getType() instanceof GeoPointType) {
-                locationBinding = new GeoPointFieldBinding(locationField);
-                return locationBinding.getColumnQuery(formTree);
-            } else if (locationField.getType() instanceof GeoAreaType) {
-                locationBinding = new GeoAreaFieldBinding(adminForm);
-                return locationBinding.getColumnQuery(formTree);
+            FormField geoField = adminForm.getField(CuidAdapter.field(adminForm.getId(),CuidAdapter.GEOMETRY_FIELD));
+            // TODO
+            // Disabled for now...
+            if (geoField.getType() instanceof GeoPointType) {
+                //locationBinding = new GeoPointFieldBinding(geoField);
+                //return locationBinding.getColumnQuery(formTree);
+            } else if (geoField.getType() instanceof GeoAreaType) {
+                //locationBinding = new GeoAreaFieldBinding(adminForm);
+                //return locationBinding.getColumnQuery(formTree);
             }
         } catch (IllegalArgumentException excp) { /* ignore and return empty list */ }
         return Lists.newArrayList();
+    }
+
+    private List<ColumnModel> joinLists(List<ColumnModel> list1, List<ColumnModel> list2) {
+        List<ColumnModel> returnColumns = new ArrayList<>(list1.size()+list2.size());
+        returnColumns.addAll(list1);
+        returnColumns.addAll(list2);
+        return returnColumns;
     }
 
     private FormField getParentField(FormClass form) {
