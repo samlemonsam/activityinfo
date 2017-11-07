@@ -65,6 +65,8 @@ public final class ExprFunctions {
 
             register(SearchFunction.INSTANCE);
             register(IsNumberFunction.INSTANCE);
+
+            register(AddDateFunction.INSTANCE);
         }
         
         public ExprFunction get(String name) {
