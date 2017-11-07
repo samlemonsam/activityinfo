@@ -14,11 +14,11 @@ import java.util.List;
 
 public class GeoPointFieldBinding implements FieldBinding {
 
-    public static final String LONG_SYMBOL = "longitude";
     public static final String LAT_SYMBOL = "latitude";
+    public static final String LONG_SYMBOL = "longitude";
 
-    public static final String GEO_LONGITUDE_COLUMN = "x";
-    public static final String GEO_LATITUDE_COLUMN = "y";
+    public static final String GEO_LATITUDE_COLUMN = "x";
+    public static final String GEO_LONGITUDE_COLUMN = "y";
 
     private FormField geoField;
 
@@ -42,16 +42,16 @@ public class GeoPointFieldBinding implements FieldBinding {
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         return Arrays.asList(
-                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LONG_SYMBOL)).as(GEO_LONGITUDE_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LAT_SYMBOL)).as(GEO_LATITUDE_COLUMN)
+                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LAT_SYMBOL)).as(GEO_LATITUDE_COLUMN),
+                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LONG_SYMBOL)).as(GEO_LONGITUDE_COLUMN)
         );
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
         return Arrays.asList(
-                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LONG_SYMBOL)).as(GEO_LONGITUDE_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LAT_SYMBOL)).as(GEO_LATITUDE_COLUMN)
+                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LAT_SYMBOL)).as(GEO_LATITUDE_COLUMN),
+                new ColumnModel().setExpression(new CompoundExpr(geoField.getId(),LONG_SYMBOL)).as(GEO_LONGITUDE_COLUMN)
         );
     }
 }
