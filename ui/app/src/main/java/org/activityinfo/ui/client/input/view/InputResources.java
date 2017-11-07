@@ -28,5 +28,7 @@ public interface InputResources extends ClientBundle {
         String subform();
 
         String periodToolBar();
+
+        String fieldUnits();
     }
 }

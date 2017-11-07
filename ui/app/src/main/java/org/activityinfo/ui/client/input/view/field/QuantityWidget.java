@@ -2,11 +2,10 @@ package org.activityinfo.ui.client.input.view.field;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
+import com.sencha.gxt.cell.core.client.form.NumberInputCell;
 import com.sencha.gxt.widget.core.client.form.DoubleField;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
@@ -19,23 +18,16 @@ import java.text.ParseException;
  */
 public class QuantityWidget implements FieldWidget {
 
-    private CssFloatLayoutContainer container;
     private DoubleField field;
-    private QuantityType quantityType;
 
     public QuantityWidget(QuantityType quantityType, FieldUpdater updater) {
-        this.quantityType = quantityType;
-
-        this.field = new DoubleField();
+        this.field = new DoubleField(new NumberInputCell<>(
+                new NumberPropertyEditor.DoublePropertyEditor(),
+                new QuantityFieldAppearance(quantityType.getUnits())));
         this.field.addKeyUpHandler(event -> Scheduler.get().scheduleDeferred(() -> {
             updater.update(input());
         }));
-        InlineHTML units = new InlineHTML(SafeHtmlUtils.fromString(quantityType.getUnits()));
 
-
-        container = new CssFloatLayoutContainer();
-        container.add(field, new CssFloatLayoutContainer.CssFloatData(1));
-        container.add(units, new CssFloatLayoutContainer.CssFloatData(-1));
     }
 
     private FieldInput input() {
@@ -70,6 +62,6 @@ public class QuantityWidget implements FieldWidget {
 
     @Override
     public Widget asWidget() {
-        return container;
+        return field;
     }
 }

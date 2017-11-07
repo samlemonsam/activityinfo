@@ -7,6 +7,9 @@
 @def HEADER_BACKGROUND_COLOR value('theme.panel.headerBackgroundColor');
 @def HEADER_GRADIENT value('theme.panel.headerGradient');
 @def PADDING value('theme.panel.headerPadding.toString');
+@def HEIGHT value('theme.field.height', 'px');
+@def PADDING value('theme.field.padding.toString');
+@def UNITS_COLOR value('theme.field.emptyTextColor');
 
 
 .form {
@@ -24,6 +27,15 @@
 
 .fieldLabel {
     font-weight: bold;
+}
+
+.fieldUnits {
+    position: absolute;
+    right: 0;
+    height: HEIGHT;
+    text-align: end;
+    padding: PADDING;
+    color: UNITS_COLOR;
 }
 
 .periodToolBar {
