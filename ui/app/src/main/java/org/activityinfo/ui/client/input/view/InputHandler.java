@@ -13,5 +13,8 @@ public interface InputHandler {
 
     void addSubRecord(RecordRef subRecordRef);
 
+    void deleteSubRecord(RecordRef recordRef);
+
     void changeActiveSubRecord(ResourceId fieldId, RecordRef newActiveRef);
+
 }

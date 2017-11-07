@@ -115,6 +115,11 @@ public class FormInputView implements IsWidget, InputHandler {
     }
 
     @Override
+    public void deleteSubRecord(RecordRef recordRef) {
+        update(inputModel.deleteSubRecord(recordRef));
+    }
+
+    @Override
     public void changeActiveSubRecord(ResourceId fieldId, RecordRef newActiveRef) {
         update(inputModel.updateActiveSubRecord(fieldId, newActiveRef));
     }

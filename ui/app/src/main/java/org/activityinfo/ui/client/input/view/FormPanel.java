@@ -5,7 +5,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.MessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
@@ -37,6 +42,8 @@ public class FormPanel implements IsWidget {
     private InputHandler inputHandler;
     private RecordRef recordRef;
 
+    private int horizontalPadding = 0;
+
     public FormPanel(FormSource formSource, FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
         this.formSource = formSource;
 
@@ -67,6 +74,22 @@ public class FormPanel implements IsWidget {
                 }
             }
         }
+
+        if(formTree.getRootFormClass().isSubForm()) {
+            TextButton deleteButton = new TextButton(I18N.CONSTANTS.remove());
+            deleteButton.addSelectHandler(this::onDelete);
+            panel.add(deleteButton, new CssFloatLayoutContainer.CssFloatData(1,
+                    new Margins(0, horizontalPadding, 10, horizontalPadding)));
+        }
+    }
+
+    private void onDelete(SelectEvent event) {
+        MessageBox messageBox = new MessageBox(I18N.CONSTANTS.confirmDeletion());
+        messageBox.setMessage(I18N.CONSTANTS.confirmDeleteRecord());
+        messageBox.setPredefinedButtons(Dialog.PredefinedButton.OK, Dialog.PredefinedButton.CANCEL);
+        messageBox.getButton(Dialog.PredefinedButton.OK)
+                .addSelectHandler(e -> inputHandler.deleteSubRecord(this.recordRef));
+        messageBox.show();
     }
 
     public RecordRef getRecordRef() {
@@ -119,9 +142,11 @@ public class FormPanel implements IsWidget {
         CssFloatLayoutContainer fieldPanel = new CssFloatLayoutContainer();
         fieldPanel.setStyleName(InputResources.INSTANCE.style().field());
         fieldPanel.add(fieldLabel, new CssFloatLayoutContainer.CssFloatData(1));
-        fieldPanel.add(fieldWidget, new CssFloatLayoutContainer.CssFloatData(1, new Margins(5, 0, 5, 0)));
+        fieldPanel.add(fieldWidget, new CssFloatLayoutContainer.CssFloatData(1,
+                new Margins(5, horizontalPadding, 5, horizontalPadding)));
         fieldPanel.add(validationMessage, new CssFloatLayoutContainer.CssFloatData(1));
-        panel.add(fieldPanel, new CssFloatLayoutContainer.CssFloatData(1, new Margins(10, 0, 10, 0)));
+        panel.add(fieldPanel, new CssFloatLayoutContainer.CssFloatData(1,
+                new Margins(10, horizontalPadding, 10, horizontalPadding)));
 
         fieldViews.add(new FieldView(node.getFieldId(), fieldWidget, validationMessage));
     }

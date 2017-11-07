@@ -88,8 +88,10 @@ class SubFormViewModelBuilder {
             // If there are no records, then the computed view includes a new empty one
 
             if(subRecordViews.isEmpty()) {
-                FormInputViewModel subViewModel = formBuilder.placeholder(placeholderRecordRef());
-                subRecordViews.add(subViewModel);
+                RecordRef placeholderId = placeholderRecordRef();
+                if(!inputModel.isDeleted(placeholderId)) {
+                    subRecordViews.add(formBuilder.placeholder(placeholderId));
+                }
             }
 
             return new SubFormViewModel(fieldId, subRecordViews, deletedRecords);

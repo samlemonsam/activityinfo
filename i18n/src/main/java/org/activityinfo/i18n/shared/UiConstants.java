@@ -1009,6 +1009,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Are you sure want to delete attachment(s)?")
     String confirmDeleteAttachment();
 
+    @DefaultStringValue("Are you sure you want to delete this record?")
+    String confirmDeleteRecord();
+
     @DefaultStringValue("No connection.")
     String versionConnectionProblem();
 
