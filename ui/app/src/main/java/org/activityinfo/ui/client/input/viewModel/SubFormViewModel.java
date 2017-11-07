@@ -23,21 +23,24 @@ public class SubFormViewModel {
     private SubFormKind subFormKind;
     private List<FormInputViewModel> subRecords;
     private FormInputViewModel activeSubRecord;
+    private Set<RecordRef> deletedRecords;
     private Set<RecordRef> subRecordRefs = new HashSet<>();
     private boolean valid;
 
-    SubFormViewModel(ResourceId fieldId, List<FormInputViewModel> subRecords) {
-        this(fieldId, SubFormKind.REPEATING, subRecords, null);
+    SubFormViewModel(ResourceId fieldId, List<FormInputViewModel> subRecords, Set<RecordRef> deletedRecords) {
+        this(fieldId, SubFormKind.REPEATING, subRecords, null, deletedRecords);
     }
 
     SubFormViewModel(ResourceId fieldId,
                      SubFormKind subFormKind,
                      List<FormInputViewModel> subRecords,
-                     FormInputViewModel activeSubRecord) {
+                     FormInputViewModel activeSubRecord,
+                     Set<RecordRef> deletedRecords) {
         this.fieldId = fieldId;
         this.subFormKind = subFormKind;
         this.subRecords = subRecords;
         this.activeSubRecord = activeSubRecord;
+        this.deletedRecords = deletedRecords;
         this.valid = true;
         for (FormInputViewModel subRecord : subRecords) {
             if(!subRecord.isPlaceholder() && !subRecord.isValid()) {
@@ -83,6 +86,13 @@ public class SubFormViewModel {
                 updates.add(subRecord.buildUpdate(Optional.of(parentRef)));
             }
         }
+        for (RecordRef deletedRecord : deletedRecords) {
+            RecordUpdate update = new RecordUpdate();
+            update.setFormId(deletedRecord.getFormId());
+            update.setRecordId(deletedRecord.getRecordId());
+            update.setDeleted(true);
+            updates.add(update);
+        }
         return updates;
     }
 
@@ -103,9 +113,14 @@ public class SubFormViewModel {
         return this.activeSubRecord;
     }
 
+
     public PeriodValue getActivePeriod() {
         RecordRef ref = getActiveRecordRef();
         PeriodType periodType = subFormKind.getPeriodType();
         return periodType.fromSubFormKey(ref);
+    }
+
+    public Set<RecordRef> getDeletedRecords() {
+        return deletedRecords;
     }
 }

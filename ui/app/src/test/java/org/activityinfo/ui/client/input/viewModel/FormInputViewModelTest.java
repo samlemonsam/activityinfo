@@ -20,9 +20,11 @@ import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class FormInputViewModelTest {
@@ -235,7 +237,21 @@ public class FormInputViewModelTest {
         SubFormViewModel subFormField = viewModel.getSubForm(IncidentForm.REFERRAL_FIELD_ID);
         assertThat(subFormField.getSubRecords(), hasSize(4));
 
+        // Try deleting the first one...
+        RecordRef deletedRef = subFormField.getSubRecords().get(0).getRecordRef();
+        inputModel = inputModel.deleteSubRecord(deletedRef);
+        viewModel = builder.build(inputModel, structure.getExistingRecord());
+        subFormField = viewModel.getSubForm(IncidentForm.REFERRAL_FIELD_ID);
+
+        assertThat(subFormField.getSubRecords(), hasSize(3));
+
+        // Should show up in transaction
+        RecordTransaction tx = viewModel.buildTransaction();
+        assertThat(tx.getChanges(), hasItem(hasProperty("deleted", equalTo(true))));
+
+
     }
+
 
     @Test
     public void inputMask() {

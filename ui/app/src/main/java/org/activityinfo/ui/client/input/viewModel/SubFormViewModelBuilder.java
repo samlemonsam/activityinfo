@@ -56,14 +56,21 @@ class SubFormViewModelBuilder {
             existingSubTrees = Collections.emptyList();
         }
 
+        Set<RecordRef> deletedRecords = new HashSet<>();
+
         for (RecordTree existingSubRecord : existingSubTrees) {
             RecordRef ref = existingSubRecord.getRootRef();
+            if(inputModel.isDeleted(ref)) {
+                deletedRecords.add(ref);
 
-            FormInputModel subInput = inputModel.getSubRecord(ref).orElse(new FormInputModel(ref));
-            FormInputViewModel subViewModel = formBuilder.build(subInput, Maybe.of(existingSubRecord));
+            } else {
 
-            existingRefs.add(ref);
-            subRecordViews.add(subViewModel);
+                FormInputModel subInput = inputModel.getSubRecord(ref).orElse(new FormInputModel(ref));
+                FormInputViewModel subViewModel = formBuilder.build(subInput, Maybe.of(existingSubRecord));
+
+                existingRefs.add(ref);
+                subRecordViews.add(subViewModel);
+            }
         }
 
         // Now add sub records newly added by the user
@@ -85,7 +92,7 @@ class SubFormViewModelBuilder {
                 subRecordViews.add(subViewModel);
             }
 
-            return new SubFormViewModel(fieldId, subRecordViews);
+            return new SubFormViewModel(fieldId, subRecordViews, deletedRecords);
 
 
         } else {
@@ -95,7 +102,7 @@ class SubFormViewModelBuilder {
             RecordRef activeRecord = computeActiveSubRecord(inputModel.getRecordRef(), inputModel);
             FormInputViewModel activeRecordViewModel = find(activeRecord, subRecordViews);
 
-            return new SubFormViewModel(fieldId, subFormKind, subRecordViews, activeRecordViewModel);
+            return new SubFormViewModel(fieldId, subFormKind, subRecordViews, activeRecordViewModel, deletedRecords);
         }
     }
 

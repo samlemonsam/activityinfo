@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.input.model;
 
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
@@ -18,22 +19,26 @@ public class FormInputModel {
     private final Map<ResourceId, FieldInput> fieldInputs;
     private final Map<RecordRef, FormInputModel> subRecords;
     private final Map<ResourceId, RecordRef> activeSubRecords;
+    private final Set<RecordRef> deletedSubRecords;
 
     public FormInputModel(RecordRef recordRef) {
         this.recordRef = recordRef;
         fieldInputs = Collections.emptyMap();
         subRecords = Collections.emptyMap();
         activeSubRecords = Collections.emptyMap();
+        deletedSubRecords = Collections.emptySet();
     }
 
     private FormInputModel(RecordRef recordRef,
                            Map<ResourceId, FieldInput> fieldInputs,
                            Map<RecordRef, FormInputModel> subRecords,
-                           Map<ResourceId, RecordRef> activeSubRecords) {
+                           Map<ResourceId, RecordRef> activeSubRecords,
+                           Set<RecordRef> deletedSubRecords) {
         this.recordRef = recordRef;
         this.fieldInputs = fieldInputs;
         this.subRecords = subRecords;
         this.activeSubRecords = activeSubRecords;
+        this.deletedSubRecords = deletedSubRecords;
     }
 
     public FieldInput get(ResourceId fieldId) {
@@ -67,7 +72,7 @@ public class FormInputModel {
             return this;
         }
 
-        return new FormInputModel(recordRef, fieldInputs, subRecords, updatedMap);
+        return new FormInputModel(recordRef, fieldInputs, subRecords, updatedMap, deletedSubRecords);
     }
 
     /**
@@ -96,9 +101,27 @@ public class FormInputModel {
             updatedSubRecords.put(recordRef, subRecord.update(recordRef, fieldId, input));
         }
 
-        return new FormInputModel(this.recordRef, updatedInputs, updatedSubRecords, activeSubRecords);
+        return new FormInputModel(this.recordRef,
+                updatedInputs,
+                updatedSubRecords,
+                activeSubRecords,
+                deletedSubRecords);
     }
 
+    public FormInputModel deleteSubRecord(RecordRef recordRef) {
+        HashMap<RecordRef, FormInputModel> newSubRecords = Maps.newHashMap(this.subRecords);
+        Set<RecordRef> newDeleted = Sets.newHashSet();
+
+        newSubRecords.remove(recordRef);
+        newDeleted.add(recordRef);
+
+        return new FormInputModel(
+                this.recordRef,
+                fieldInputs,
+                newSubRecords,
+                activeSubRecords,
+                newDeleted);
+    }
 
     public FormInputModel addSubRecord(RecordRef newRecordRef) {
         assert !newRecordRef.equals(this.recordRef);
@@ -110,7 +133,11 @@ public class FormInputModel {
         Map<RecordRef, FormInputModel> updatedSubRecords = new HashMap<>(this.subRecords);
         updatedSubRecords.put(newRecordRef, new FormInputModel(newRecordRef));
 
-        return new FormInputModel(recordRef, fieldInputs, updatedSubRecords, activeSubRecords);
+        return new FormInputModel(recordRef,
+                fieldInputs,
+                updatedSubRecords,
+                activeSubRecords,
+                deletedSubRecords);
     }
 
     public Collection<FormInputModel> getSubRecords() {
@@ -121,9 +148,11 @@ public class FormInputModel {
         return Optional.ofNullable(subRecords.get(recordRef));
     }
 
-
     public Optional<RecordRef> getActiveSubRecord(ResourceId fieldId) {
         return Optional.ofNullable(activeSubRecords.get(fieldId));
     }
 
+    public boolean isDeleted(RecordRef ref) {
+        return deletedSubRecords.contains(ref);
+    }
 }
