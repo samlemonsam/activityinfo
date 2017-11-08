@@ -11,6 +11,7 @@ import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoader;
 import com.sencha.gxt.widget.core.client.event.SortChangeEvent;
 import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.selection.CellSelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
@@ -31,6 +32,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
     private static final Logger LOGGER = Logger.getLogger(TableGrid.class.getName());
 
     private final EffectiveTableModel initialTableModel;
+    private TableUpdater tableUpdater;
 
     private final ListStore<Integer> store;
     private final Grid<Integer> grid;
@@ -45,6 +47,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
     public TableGrid(final EffectiveTableModel tableModel, Observable<ColumnSet> columnSet, TableUpdater tableUpdater) {
 
         this.initialTableModel = tableModel;
+        this.tableUpdater = tableUpdater;
 
         // GXT Grid's are built around row-major data storage, while AI uses
         // Column-major order here. So we construct fake loaders/stores that represent
@@ -63,6 +66,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         LiveRecordGridView gridView = new LiveRecordGridView();
         gridView.setColumnLines(true);
         gridView.setTrackMouseOver(false);
+        gridView.addColumnResizeHandler(this::changeColumnWidth);
 
         CellSelectionModel<Integer> sm = new CellSelectionModel<>();
         sm.addCellSelectionChangedHandler(this::changeRowSelection);
@@ -97,6 +101,15 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
             }
             filters.updateView(tableModel.getFilter());
         }
+    }
+
+    private void changeColumnWidth(ColumnResizeEvent e) {
+
+        ColumnConfig<Integer, Object> column = grid.getColumnModel().getColumn(e.getColumnIndex());
+
+        LOGGER.info("Column " + column.getValueProvider().getPath() + " resized to " + e.getColumnWidth() + "px");
+
+        tableUpdater.updateColumnWidth(column.getValueProvider().getPath(), e.getColumnWidth());
     }
 
     /**

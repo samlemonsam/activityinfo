@@ -16,6 +16,7 @@ import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.indexedb.IDBFactoryImpl;
+import org.activityinfo.storage.LocalStorage;
 import org.activityinfo.ui.client.catalog.CatalogPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.store.FormStore;
@@ -63,11 +64,12 @@ public class AppEntryPoint implements EntryPoint {
         OfflineStore offlineStore = new OfflineStore(httpStore, IDBFactoryImpl.create());
 
         FormStore formStore = new FormStoreImpl(httpStore, offlineStore, Scheduler.get());
+        LocalStorage storage = LocalStorage.create();
 
         Viewport viewport = new Viewport();
         AppFrame appFrame = new AppFrame(appCache, httpStore, offlineStore);
 
-        ActivityMapper activityMapper = new AppActivityMapper(formStore);
+        ActivityMapper activityMapper = new AppActivityMapper(formStore, storage);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
         activityManager.setDisplay(appFrame.getDisplayWidget());
 

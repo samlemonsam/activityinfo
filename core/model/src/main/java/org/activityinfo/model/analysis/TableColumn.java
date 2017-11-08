@@ -33,6 +33,9 @@ public abstract class TableColumn {
         if(getLabel().isPresent()) {
             object.put("label", getLabel().get());
         }
+        if(getWidth().isPresent()) {
+            object.put("width", getWidth().get());
+        }
         object.put("formula", getFormula());
         return object;
     }
@@ -42,6 +45,9 @@ public abstract class TableColumn {
         tableColumn.id(object.getString("id"));
         if(object.hasKey("label")) {
             tableColumn.label(object.getString("label"));
+        }
+        if(object.hasKey("width")) {
+            tableColumn.width((int)object.getNumber("width"));
         }
         tableColumn.formula(object.getString("formula"));
         return tableColumn.build();

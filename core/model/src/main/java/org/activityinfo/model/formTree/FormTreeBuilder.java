@@ -94,7 +94,7 @@ public class FormTreeBuilder {
     private void addChildren(List<ResourceId> stack, FormTree.Node parent, FormMetadata childForm) {
         stack.add(parent.getDefiningFormClass().getId());
         try {
-            for (FormField field : childForm.getSchema().getFields()) {
+            for (FormField field : childForm.getFields()) {
                 FormTree.Node childNode = parent.addChild(childForm, field);
                 if (childNode.isReference()) {
                     fetchChildren(stack, childNode, childNode.getRange());

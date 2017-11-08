@@ -49,7 +49,7 @@ public class FormTreeLoader implements ObservableTree.TreeLoader<ResourceId, For
                 children.add(node.getSchema().getParentFormId().get());
             }
 
-            for (FormField field : node.getSchema().getFields()) {
+            for (FormField field : node.getFields()) {
                 if (field.getType() instanceof ReferenceType) {
                     ReferenceType type = (ReferenceType) field.getType();
                     for (ResourceId childId : type.getRange()) {

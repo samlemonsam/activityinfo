@@ -96,7 +96,7 @@ public class ColumnModelBuilder {
     private void addTextColumn(EffectiveTableColumn tableColumn, TextFormat textFormat) {
         ValueProvider<Integer, String> valueProvider = proxy.getValueProvider(textFormat);
 
-        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
+        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
@@ -108,7 +108,7 @@ public class ColumnModelBuilder {
     private void addNumberColumn(EffectiveTableColumn tableColumn, NumberFormat numberFormat) {
         ValueProvider<Integer, Double> valueProvider = proxy.getValueProvider(numberFormat);
 
-        ColumnConfig<Integer, Double> config = new ColumnConfig<>(valueProvider);
+        ColumnConfig<Integer, Double> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
@@ -123,7 +123,7 @@ public class ColumnModelBuilder {
 
         ValueProvider<Integer, String> valueProvider = proxy.getValueProvider(format);
 
-        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
+        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
@@ -145,7 +145,7 @@ public class ColumnModelBuilder {
     private void addDateColumn(EffectiveTableColumn tableColumn, DateFormat dateFormat) {
         ValueProvider<Integer, Date> valueProvider = proxy.getValueProvider(dateFormat);
 
-        ColumnConfig<Integer, Date> config = new ColumnConfig<>(valueProvider);
+        ColumnConfig<Integer, Date> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
         config.setCell(new DateCell(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)));
         columnConfigs.add(config);
@@ -159,7 +159,7 @@ public class ColumnModelBuilder {
         // Add a single, comma-delimited list for now
         ValueProvider<Integer, String> valueProvider = proxy.getValueProvider(tableColumn.getId(), multiEnumFormat.createRenderer());
 
-        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider);
+        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 

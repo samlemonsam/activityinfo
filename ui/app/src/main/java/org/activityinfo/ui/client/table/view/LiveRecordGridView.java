@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.grid.LiveGridView;
@@ -49,5 +50,12 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
         return menu;
     }
 
+    @Override
+    protected void templateOnColumnWidthUpdated(int col, int w, int tw) {
+        fireEvent(new ColumnResizeEvent(col, w));
+    }
 
+    public HandlerRegistration addColumnResizeHandler(ColumnResizeHandler handler) {
+        return addHandler(ColumnResizeEvent.getType(), handler);
+    }
 }

@@ -40,6 +40,7 @@
   <set-configuration-property name="CssResource.conversionMode" value="strict" />
 
   <inherits name="org.activityinfo.IndexedDB"/>
+  <inherits name="org.activityinfo.Storage"/>
 
   <inherits name="org.activityinfo.ui.codemirror.CodeMirror"/>
 

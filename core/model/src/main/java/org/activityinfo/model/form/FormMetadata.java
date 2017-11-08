@@ -1,10 +1,10 @@
 package org.activityinfo.model.form;
 
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.resource.ResourceId;
-import org.codehaus.jackson.FormatSchema;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.activityinfo.json.Json.createObject;
 
@@ -154,5 +154,13 @@ public class FormMetadata {
             metadata.deleted = object.get("deleted").asBoolean();
         }
         return metadata;
+    }
+
+    public List<FormField> getFields() {
+        if(isVisible()) {
+            return getSchema().getFields();
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

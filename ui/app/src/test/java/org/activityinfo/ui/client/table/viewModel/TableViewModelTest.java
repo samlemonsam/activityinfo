@@ -6,13 +6,14 @@ import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.SelectionViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
-import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Promise;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 
 import static org.activityinfo.observable.ObservableTesting.connect;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 public class TableViewModelTest {
@@ -76,6 +78,27 @@ public class TableViewModelTest {
         EffectiveTableModel updatedModel = view.assertLoaded();
         assertThat(updatedModel.getColumns().get(0).getLabel(), equalTo("MY column"));
     }
+
+    @Test
+    public void serializeModel() {
+
+        ImmutableTableModel model = ImmutableTableModel.builder()
+                .formId(ResourceId.valueOf("MY_FORM"))
+                .addColumns(ImmutableTableColumn.builder().id("c1").label("Foo Squared").formula("foo*foo").build())
+                .addColumns(ImmutableTableColumn.builder().id("c2").formula("foo").build())
+                .build();
+
+        JsonObject object = model.toJson();
+
+        TableModel remodel = TableModel.fromJson(object);
+
+        assertThat(remodel.getFormId(), equalTo(model.getFormId()));
+        assertThat(remodel.getColumns(), hasSize(2));
+
+        assertThat(remodel.getColumns().get(0), equalTo(model.getColumns().get(0)));
+        assertThat(remodel.getColumns().get(1), equalTo(model.getColumns().get(1)));
+    }
+
 
     @Test
     public void testDeletedSelection() {

@@ -2,7 +2,9 @@ package org.activityinfo.analysis.table;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
+import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.FormTree;
@@ -15,7 +17,9 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.query.shared.FormSource;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -52,8 +56,8 @@ public class TableViewModel implements TableUpdater {
         this.columnSet = this.effectiveTable.join(table -> table.getColumnSet());
     }
 
-    public TableModel getTableModel() {
-        return tableModel.get();
+    public Observable<TableModel> getTableModel() {
+        return tableModel;
     }
 
     public Observable<Optional<RecordRef>> getSelectedRecordRef() {
@@ -140,5 +144,25 @@ public class TableViewModel implements TableUpdater {
             .filter(filter)
             .build());
 
+    }
+
+    @Override
+    public void updateColumnWidth(String columnId, int newWidth) {
+
+        TableModel model = this.tableModel.get();
+
+        List<TableColumn> updatedColumns = new ArrayList<>();
+        for (TableColumn column : model.getColumns()) {
+            if(column.getId().equals(columnId)) {
+                updatedColumns.add(ImmutableTableColumn.builder().from(column).width(newWidth).build());
+            } else {
+                updatedColumns.add(column);
+            }
+        }
+
+        tableModel.updateIfNotSame(ImmutableTableModel.builder()
+                .from(model)
+                .columns(updatedColumns)
+                .build());
     }
 }

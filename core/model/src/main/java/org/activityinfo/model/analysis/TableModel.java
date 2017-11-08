@@ -61,7 +61,7 @@ public abstract class TableModel implements AnalysisModel  {
         if(object.hasKey("columns")) {
             JsonArray columnArray = object.getArray("columns");
             for (int i = 0; i < columnArray.length(); i++) {
-                model.addColumns(TableColumn.fromJson(object));
+                model.addColumns(TableColumn.fromJson(columnArray.get(i).getAsJsonObject()));
             }
         }
         return model.build();

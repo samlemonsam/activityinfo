@@ -42,6 +42,11 @@ public class SubFormGrid extends VerticalLayoutContainer {
                     public void updateFilter(Optional<ExprNode> filterFormula) {
                         // TODO
                     }
+
+                    @Override
+                    public void updateColumnWidth(String columnId, int width) {
+                        // TODO
+                    }
                 });
                 add(grid, new VerticalLayoutData(1, 1));
             }

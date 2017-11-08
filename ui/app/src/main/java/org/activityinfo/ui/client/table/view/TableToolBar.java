@@ -186,7 +186,7 @@ public class TableToolBar extends ToolBar {
     }
 
     private void onExport(SelectEvent event) {
-        TableModel tableModel = viewModel.getTableModel();
+        TableModel tableModel = viewModel.getTableModel().get();
         ExportFormJob exportFormJob = new ExportFormJob(tableModel);
 
         Observable<JobStatus<ExportFormJob, ExportResult>> jobStatus = formStore.startJob(exportFormJob);

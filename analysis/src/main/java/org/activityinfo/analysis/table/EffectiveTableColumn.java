@@ -10,10 +10,12 @@ import java.util.List;
 
 public class EffectiveTableColumn {
 
+    public static final int DEFAULT_COLUMN_WIDTH = 100;
     private TableColumn model;
     private String label;
     private ParsedFormula formula;
     private ColumnFormat format;
+    private int width;
 
     public EffectiveTableColumn(FormTree formTree, TableColumn model) {
         this.model = model;
@@ -24,6 +26,7 @@ public class EffectiveTableColumn {
             this.label = formula.getLabel();
         }
         format = ColumnFormatFactory.create(model.getId(), formula);
+        width = model.getWidth().or(DEFAULT_COLUMN_WIDTH);
     }
 
     public ParsedFormula getFormula() {
@@ -56,6 +59,10 @@ public class EffectiveTableColumn {
 
     public boolean isValid() {
         return formula.isValid();
+    }
+
+    public int getWidth() {
+        return width;
     }
 
     public <T> T accept(TableColumnVisitor<T> visitor) {

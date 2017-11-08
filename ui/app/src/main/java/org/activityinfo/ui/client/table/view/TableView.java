@@ -9,6 +9,7 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -90,6 +91,9 @@ public class TableView implements IsWidget, HasTitle {
         this.panel.add(container);
     }
 
+    public Observable<TableModel> getTableModel() {
+        return this.viewModel.getTableModel();
+    }
 
 
     @Override
