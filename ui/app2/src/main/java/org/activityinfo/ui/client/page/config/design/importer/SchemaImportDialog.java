@@ -69,7 +69,12 @@ public class SchemaImportDialog {
         /**
          * Import has failed
          */
-        IMPORT_FAILED
+        IMPORT_FAILED,
+
+        /**
+         * Validating references
+         */
+        VALIDATING
     }
 
     private static ImportSchemaUiBinder uiBinder = GWT.create(ImportSchemaUiBinder.class);
@@ -242,8 +247,31 @@ public class SchemaImportDialog {
             return;
         }
 
-        importer.processRows();
-        onInputValid();
+        if (importer.equals(importerV3)) {
+            importerV3.processRows(new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    // invalid
+                    onInputInvalid("Invalid form reference(s)");
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    // valid
+                    onInputValid();
+                }
+            });
+            awaitValidation();
+        } else {
+            importer.processRows();
+            onInputValid();
+        }
+    }
+
+    private void awaitValidation() {
+        currentState = State.VALIDATING;
+        dialog.disablePrimaryButton();
+        textAreaHelp.setInnerText(I18N.CONSTANTS.loading());
     }
 
     private void showWarnings() {
@@ -270,6 +298,7 @@ public class SchemaImportDialog {
 
     private void onInputValid() {
         currentState = State.INPUT_VALID;
+        dialog.enablePrimaryButton();
         textAreaGroup.removeClassName("has-error");
         textAreaGroup.addClassName("has-success");
         textAreaHelp.setInnerText(I18N.CONSTANTS.validSchemaImport());
@@ -277,6 +306,7 @@ public class SchemaImportDialog {
 
     private void onInputInvalid(String message) {
         currentState = State.INPUT_INVALID;
+        dialog.enablePrimaryButton();
         textAreaGroup.addClassName("has-error");
         textAreaGroup.removeClassName("has-success");
         textAreaHelp.setInnerText(message);
