@@ -9,7 +9,6 @@
     <title>${title} - ActivityInfo</title>
 
     <link rel="stylesheet" href="/about/assets/css/style.css">
-    <link rel="stylesheet" href="//fonts.typotheque.com/WF-028542-009575.css" type="text/css" />
     <link rel="icon" href="/about/assets/images/logo-activityinfo.png">
 
     <script type="text/javascript">
