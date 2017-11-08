@@ -1734,4 +1734,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Key")
     String keyField();
+
+    @DefaultStringValue("Oops! Exception: ")
+    String exception();
+
+    @DefaultStringValue("Invalid form reference(s)")
+    String invalidReference();
 }

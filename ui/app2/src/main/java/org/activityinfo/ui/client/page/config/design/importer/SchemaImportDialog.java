@@ -223,7 +223,7 @@ public class SchemaImportDialog {
                 tryValidateImport();
             } catch(Exception e) {
                 LOGGER.log(Level.SEVERE, "Exception while validating input", e);
-                onInputInvalid("Eek! Exception: " + e.getMessage());
+                onInputInvalid(I18N.CONSTANTS.exception() + e.getMessage());
             }
         }
     }
@@ -252,7 +252,7 @@ public class SchemaImportDialog {
                 @Override
                 public void onFailure(Throwable caught) {
                     // invalid
-                    onInputInvalid("Invalid form reference(s)");
+                    onInputInvalid(I18N.CONSTANTS.invalidReference());
                 }
 
                 @Override
