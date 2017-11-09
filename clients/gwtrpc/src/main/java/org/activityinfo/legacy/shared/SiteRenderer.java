@@ -77,15 +77,14 @@ public class SiteRenderer {
     public String renderSite(SiteDTO site, ActivityFormDTO activity, boolean renderComments) {
         StringBuilder html = new StringBuilder();
 
+        if (site.getPartnerName() != null) {
+            html.append(renderField("partner", site.getPartnerName(), I18N.CONSTANTS.partner()));
+        }
+        if (site.getProjectName() != null) {
+            html.append(renderField("project", site.getProjectName(), I18N.CONSTANTS.project()));
+        }
         if (renderComments && site.getComments() != null) {
-            String commentsHtml = SafeHtmlUtils.htmlEscape(site.getComments());
-            commentsHtml = commentsHtml.replace("\n", "<br/>");
-
-            html.append("<p class='comments'><span class='groupName'>");
-            html.append(I18N.CONSTANTS.comments());
-            html.append(":</span> ");
-            html.append(commentsHtml);
-            html.append("</p>");
+            html.append(renderField("comments", site.getComments(), I18N.CONSTANTS.comments()));
         }
 
         renderAttributes(html, site, activity);
@@ -93,6 +92,20 @@ public class SiteRenderer {
         if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
             html.append(renderIndicators(site, activity));
         }
+
+        return html.toString();
+    }
+
+    private String renderField(String fieldName, String fieldValue, String localizedName) {
+        StringBuilder html = new StringBuilder();
+        String valueHtml = SafeHtmlUtils.htmlEscape(fieldValue);
+        valueHtml = valueHtml.replace("\n", "<br/>");
+
+        html.append("<p class='" + fieldName + "'><span class='groupName'>");
+        html.append(localizedName);
+        html.append(":</span> ");
+        html.append(valueHtml);
+        html.append("</p>");
 
         return html.toString();
     }
