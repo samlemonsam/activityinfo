@@ -15,7 +15,6 @@ import org.activityinfo.ui.client.page.Page;
 import org.activityinfo.ui.client.page.PageId;
 import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.pageView.formClass.DesignTab;
-import org.activityinfo.ui.client.pageView.formClass.TableTab;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 import org.activityinfo.ui.client.widget.loading.PageLoadingPanel;
 import org.activityinfo.ui.icons.Icons;
@@ -88,8 +87,6 @@ public class ResourcePage implements Page {
 
         if (resourcePlace.getPageId() == ResourcePage.DESIGN_PAGE_ID) {
             loadingPanel.setDisplayWidget(new DesignTab(locator, stateProvider));
-        } else if (resourcePlace.getPageId() == ResourcePage.TABLE_PAGE_ID) {
-            loadingPanel.setDisplayWidget(new TableTab(eventBus, locator, stateProvider));
         } else {
             throw new UnsupportedOperationException("Unknown page id:" + resourcePlace.getPageId());
         }

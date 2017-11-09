@@ -49,7 +49,6 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.component.table.action.ExportJobTask;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;

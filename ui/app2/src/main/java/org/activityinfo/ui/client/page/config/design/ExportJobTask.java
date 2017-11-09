@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.component.table.action;
+package org.activityinfo.ui.client.page.config.design;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
