@@ -26,6 +26,7 @@ import java.util.Set;
 public class FormInputViewModel {
 
     private FormTree formTree;
+    private Map<ResourceId, FieldValue> existingValues;
     private FormInputModel inputModel;
     private final Map<ResourceId, FieldValue> fieldValueMap;
     private final Map<ResourceId, SubFormViewModel> subFormMap;
@@ -37,6 +38,7 @@ public class FormInputViewModel {
     private boolean placeholder;
 
     FormInputViewModel(FormTree formTree,
+                       Map<ResourceId, FieldValue> existingValues,
                        FormInputModel inputModel,
                        Map<ResourceId, FieldValue> fieldValueMap,
                        Map<ResourceId, SubFormViewModel> subFormMap,
@@ -47,6 +49,7 @@ public class FormInputViewModel {
                        boolean dirty,
                        boolean placeholder) {
         this.formTree = formTree;
+        this.existingValues = existingValues;
         this.inputModel = inputModel;
         this.fieldValueMap = fieldValueMap;
         this.subFormMap = subFormMap;
@@ -105,10 +108,19 @@ public class FormInputViewModel {
 
         for (FormTree.Node node : formTree.getRootFields()) {
             FieldInput newInput = inputModel.get(node.getFieldId());
+
             if(newInput.getState() == FieldInput.State.VALID) {
+
                 update.setFieldValue(node.getFieldId(), newInput.getValue());
-            }
-            if(newInput.getState() == FieldInput.State.EMPTY) {
+
+            } else if(existingValues.containsKey(node.getFieldId()) &&
+                    newInput.getState() == FieldInput.State.EMPTY) {
+
+                update.setFieldValue(node.getFieldId().asString(), Json.createNull());
+
+            } else if(existingValues.containsKey(node.getFieldId()) &&
+                    !relevant.contains(node.getFieldId())) {
+
                 update.setFieldValue(node.getFieldId().asString(), Json.createNull());
             }
         }

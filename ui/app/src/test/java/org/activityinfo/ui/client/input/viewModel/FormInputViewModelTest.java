@@ -101,24 +101,39 @@ public class FormInputViewModelTest {
         assertTrue(viewModel.isValid());
     }
 
-//    @Test
-//    public void testReferenceFields() {
-//
-//        IntakeForm intakeForm = setup.getCatalog().getIntakeForm();
-//
-//        FormInputViewModelBuilder builder = builderFor(setup.getCatalog().getBioDataForm());
-//        FormInputModel inputModel = new FormInputModel(new RecordRef(BioDataForm.FORM_ID, ResourceId.generateId()));
-//
-//        FormInputViewModel viewModel = builder.build(inputModel);
-//
-//        ReferenceChoices choices = viewModel.getChoices(BioDataForm.PROTECTION_CODE_FIELD_ID);
-//        Connection<LookupChoices> choiceView = ObservableTesting.connect(choices.getChoices());
-//
-//        LookupChoices choiceSet = choiceView.assertLoaded();
-//
-//        assertThat(choiceSet.getCount(), equalTo(IntakeForm.ROW_COUNT));
-//        assertThat(choiceSet.getLabel(0), equalTo("00001"));
-//    }
+    @Test
+    public void testNewlyIrrelvantFieldSetToEmpty() {
+
+        TestingFormStore store = new TestingFormStore();
+        Survey survey = store.getCatalog().getSurvey();
+
+        RecordRef recordRef = survey.getRecordRef(8);
+
+        FormStructure structure = fetchStructure(recordRef);
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, structure.getFormTree());
+
+        FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
+
+        // The record was saved as GENDER=Female, and PREGNANT=No
+
+        FormInputViewModel viewModel = builder.build(inputModel, structure.getExistingRecord());
+        assertThat(viewModel.getField(survey.getGenderFieldId()), equalTo(new EnumValue(survey.getFemaleId())));
+        assertThat(viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(true));
+        assertThat(viewModel.getField(survey.getPregnantFieldId()), equalTo(new EnumValue(survey.getPregnantNo())));
+
+        // When we change the Gender to Male, then PREGNANT should be set to empty
+        inputModel = inputModel.update(survey.getGenderFieldId(), new EnumValue(survey.getMaleId()));
+        viewModel = builder.build(inputModel, structure.getExistingRecord());
+
+        assertThat(viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(false));
+
+        RecordTransaction tx = viewModel.buildTransaction();
+        assertThat(tx.getChangeArray(), arrayWithSize(1));
+
+        RecordUpdate update = tx.getChanges().iterator().next();
+        assertTrue(update.getFields().get(survey.getPregnantFieldId().asString()).isJsonNull());
+    }
+
 
     @Test
     public void testSubFormInput() {

@@ -267,6 +267,14 @@ public class Survey implements TestForm {
         return ROW_COUNT;
     }
 
+    public EnumItem getPregnantYes() {
+        return pregnantYes;
+    }
+
+    public EnumItem getPregnantNo() {
+        return pregnantNo;
+    }
+
     @Override
     public ResourceId getFormId() {
         return formClass.getId();

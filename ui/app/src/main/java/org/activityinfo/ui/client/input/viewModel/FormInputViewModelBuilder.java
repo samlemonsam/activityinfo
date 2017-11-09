@@ -110,9 +110,15 @@ public class FormInputViewModelBuilder {
         boolean dirty = false;
 
         // We inherit all the existing values...
+        Map<ResourceId, FieldValue> existingValues;
         if(existingRecord.isVisible()) {
-            record.setAll(existingRecord.get().getRoot().getFieldValueMap());
+            existingValues = existingRecord.get().getRoot().getFieldValueMap();
+        } else {
+            existingValues = Collections.emptyMap();
         }
+
+        record.setAll(existingValues);
+
 
         // Now apply changes...
         for (FormTree.Node node : formTree.getRootFields()) {
@@ -176,6 +182,7 @@ public class FormInputViewModelBuilder {
         LOGGER.info("fieldValues = " + record.getFieldValueMap());
 
         return new FormInputViewModel(formTree,
+                existingValues,
                 inputModel,
                 record.getFieldValueMap(),
                 subFormMap,

@@ -27,6 +27,10 @@ public class EnumValue implements FieldValue, HasSetFieldValue {
         this.valueIds = ImmutableSet.of(valueId);
     }
 
+    public EnumValue(EnumItem item) {
+        this(item.getId());
+    }
+
     public EnumValue(ResourceId... valueIds) {
         this.valueIds = ImmutableSet.copyOf(valueIds);
     }
