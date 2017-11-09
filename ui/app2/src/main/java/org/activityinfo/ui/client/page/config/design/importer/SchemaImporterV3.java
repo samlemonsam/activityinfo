@@ -69,13 +69,13 @@ public class SchemaImporterV3 extends SchemaImporter {
     private int databaseId;
     private ResourceLocator locator;
 
+    private AsyncCallback<Void> validationCallback;
 
     public SchemaImporterV3(int databaseId, ResourceLocator locator, WarningTemplates templates) {
         super(templates);
         this.databaseId = databaseId;
         this.locator = locator;
     }
-
 
     public SchemaImporterV3(int databaseId, ResourceLocator locator) {
         this(databaseId, locator, GWT.<WarningTemplates>create(WarningTemplates.class));
@@ -105,6 +105,12 @@ public class SchemaImporterV3 extends SchemaImporter {
         references = findColumn(SchemaCsv.REFERENCES, "");
     }
 
+    public boolean processRows(final AsyncCallback<Void> validationCallback) {
+        this.validationCallback = validationCallback;
+        return processRows();
+    }
+
+    @Override
     public boolean processRows() {
         formMap.clear();
         subFormMap.clear();
@@ -138,28 +144,28 @@ public class SchemaImporterV3 extends SchemaImporter {
             enumBuilder.formField.setType(new EnumType(enumBuilder.cardinality, enumBuilder.items));
         }
 
-        for (Map.Entry<FormClass,FormField> refEntry : refMap.entrySet()) {
-            validateReference(refEntry);
+        if (validationCallback != null) {
+            validateReferences();
         }
 
         return !fatalError;
     }
 
-    private void validateReference(Map.Entry<FormClass,FormField> refEntry) {
-        if (refEntry.getValue().getType() instanceof ReferenceType) {
-            ReferenceType refType = (ReferenceType) refEntry.getValue().getType();
+    private void validateReferences() {
+        List<ResourceId> references = determineReferencesToValidate();
+        promiseToValidate(references).then(validationCallback);
+    }
+
+    private List<ResourceId> determineReferencesToValidate() {
+        List<ResourceId> validationList = new ArrayList<>(refMap.size());
+        for (FormField refField : refMap.values()) {
+            ReferenceType refType = (ReferenceType) refField.getType();
             ResourceId reference = refType.getRange().iterator().next();
-            // check local forms and fields
-            if (isImportedReference(reference)) {
-                return;
+            if (!isImportedReference(reference)) {
+                validationList.add(reference);
             }
-            // check database forms - cannot currently check for individual fields...
-            if (isDatabaseFormReference(reference)) {
-                return;
-            }
-            throw new UnableToDereferenceException("Unable to find referenced field/form: " + reference);
         }
-        throw new UnableToDereferenceException("Field " + refEntry.getValue().toString() + " is not of type ReferenceType");
+        return validationList;
     }
 
     private boolean isImportedReference(ResourceId reference) {
@@ -178,13 +184,12 @@ public class SchemaImporterV3 extends SchemaImporter {
         return false;
     }
 
-    private boolean isDatabaseFormReference(ResourceId reference) {
-        try {
-            Promise<FormClass> form = locator.getFormClass(reference);
-            return form.get() != null;
-        } catch (Exception e) {
-            return false;
+    private Promise<Void> promiseToValidate(List<ResourceId> references) {
+        List<Promise<FormClass>> promises = new ArrayList<>(references.size());
+        for (final ResourceId reference : references) {
+            promises.add(locator.getFormClass(reference));
         }
+        return Promise.waitAll(promises);
     }
 
     public List<FormClass> toSave() {

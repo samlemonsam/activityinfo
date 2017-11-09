@@ -59,9 +59,15 @@ public class DataFieldImporter implements FieldImporter {
             parser.convert(source.getValue(row));
 
             if (BuiltinFields.isBuiltInDate(target.getFormField().getId())) {
-                DateRange rangeDate = getRangeDate(row, parser);
-                if (!rangeDate.isValid()) {
-                    return ValidationResult.error(I18N.CONSTANTS.inconsistentDateRangeWarning());
+                // current date field is built-in, but cannot assume we have both built-in date fields
+                try {
+                    DateRange rangeDate = getRangeDate(row, parser);
+                    if (!rangeDate.isValid()) {
+                        return ValidationResult.error(I18N.CONSTANTS.inconsistentDateRangeWarning());
+                    }
+                } catch (NullPointerException excp) {
+                    // customised date fields - return OK result
+                    return ValidationResult.OK;
                 }
             }
 
@@ -71,7 +77,7 @@ public class DataFieldImporter implements FieldImporter {
         }
     }
 
-    private DateRange getRangeDate(SourceRow row, FieldValueParser converter) {
+    private DateRange getRangeDate(SourceRow row, FieldValueParser converter) throws NullPointerException {
         ColumnAccessor startDateAccessor = null;
         ColumnAccessor endDateAccessor = null;
         for (FormField field : node.getDefiningFormClass().getFields()) {

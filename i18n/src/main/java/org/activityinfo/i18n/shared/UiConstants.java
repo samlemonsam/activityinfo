@@ -1775,4 +1775,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No matching records.")
     String noMatchingRecords();
 
+
+    @DefaultStringValue("Oops! Exception: ")
+    String exception();
+
+    @DefaultStringValue("Invalid form reference(s)")
+    String invalidReference();
+
 }

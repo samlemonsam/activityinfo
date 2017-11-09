@@ -256,6 +256,10 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                         @Override
                         public Void apply(@Nullable FormFieldWidget input) {
                             containerMap.put(formField.getId(), new FieldWidgetContainer(formDesigner, input, formField, container.getId()));
+                            if (container instanceof FormClass && ((FormClass) container).isSubForm()) {
+                                // Possibly returned after initial fill - refill for current subform
+                                fillPanel((FormClass) container, formDesigner);
+                            }
                             return null;
                         }
                     });
