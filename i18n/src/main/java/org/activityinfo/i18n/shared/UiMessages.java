@@ -2,6 +2,7 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
+
 import java.util.Date;
 
 /**
@@ -39,6 +40,9 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("{0,number,#}W{1}")
     String week(int year, int week);
+
+    @DefaultMessage("{0,number,#}W{1}-{2}")
+    String fortnight(int year, int firstWeek, int secondWeek);
 
     @DefaultMessage("{0,date,MMM}")
     @Key("monthName")

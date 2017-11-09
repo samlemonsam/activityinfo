@@ -139,6 +139,11 @@ public class OdkFormFieldBuilderFactory {
             }
 
             @Override
+            public OdkFormFieldBuilder visitFortnight(FortnightType fortnightType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
             public OdkFormFieldBuilder visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
                 return OdkFormFieldBuilder.NONE;
             }

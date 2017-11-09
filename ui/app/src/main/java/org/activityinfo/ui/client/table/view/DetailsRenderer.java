@@ -156,6 +156,18 @@ public class DetailsRenderer {
         }
     }
 
+    private class FortnightRenderer implements ValueRenderer {
+
+        @Override
+        public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
+            FortnightValue fortnight = (FortnightValue) fieldValue;
+            html.appendEscaped(I18N.MESSAGES.fortnight(
+                    fortnight.getYear(),
+                    fortnight.getWeekInYear(),
+                    fortnight.getWeekInYear() + 1));
+        }
+    }
+
     private class EnumRenderer implements ValueRenderer {
         private EnumType type;
 
@@ -354,6 +366,11 @@ public class DetailsRenderer {
             @Override
             public FieldRenderer visitYear(YearType yearType) {
                 return new NullRenderer();
+            }
+
+            @Override
+            public FieldRenderer visitFortnight(FortnightType fortnightType) {
+                return new SimpleFieldRenderer(field, new FortnightRenderer());
             }
 
             @Override

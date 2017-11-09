@@ -31,7 +31,7 @@ public class EpiWeekType implements PeriodType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonValue value) {
+    public EpiWeek parseJsonValue(JsonValue value) {
         return EpiWeek.parse(value.asString());
     }
 

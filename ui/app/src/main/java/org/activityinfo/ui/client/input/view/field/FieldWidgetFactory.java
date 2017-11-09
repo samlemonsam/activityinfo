@@ -129,6 +129,11 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
     }
 
     @Override
+    public FieldWidget visitFortnight(FortnightType fortnightType) {
+        return new FortnightWidget(updater);
+    }
+
+    @Override
     public FieldWidget visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
         return null;
     }

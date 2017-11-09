@@ -160,6 +160,11 @@ public class DefaultQueryBuilder {
             }
 
             @Override
+            public List<ColumnModel> visitFortnight(FortnightType fortnightType) {
+                return simpleColumnModel(aliasPrefix, pathPrefix, formField);
+            }
+
+            @Override
             public List<ColumnModel> visitMonth(MonthType monthType) {
                 return simpleColumnModel(aliasPrefix, pathPrefix, formField);
             }

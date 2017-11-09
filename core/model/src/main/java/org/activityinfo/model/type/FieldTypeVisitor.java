@@ -41,6 +41,8 @@ public interface FieldTypeVisitor<T> {
 
     T visitYear(YearType yearType);
 
+    T visitFortnight(FortnightType fortnightType);
+
     T visitWeek(EpiWeekType epiWeekType);
 
     T visitLocalDateInterval(LocalDateIntervalType localDateIntervalType);

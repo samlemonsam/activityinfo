@@ -1,16 +1,13 @@
 package org.activityinfo.model.form;
 
 
-import org.activityinfo.model.type.time.EpiWeekType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.PeriodType;
+import org.activityinfo.model.type.time.*;
 
 public enum SubFormKind {
     REPEATING(null),
     MONTHLY(MonthType.INSTANCE),
     WEEKLY(EpiWeekType.INSTANCE),
-    BIWEEKLY(EpiWeekType.INSTANCE),
+    BIWEEKLY(FortnightType.INSTANCE),
     DAILY(LocalDateType.INSTANCE);
 
     private PeriodType periodType;

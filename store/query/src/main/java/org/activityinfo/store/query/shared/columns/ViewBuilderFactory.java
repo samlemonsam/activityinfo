@@ -92,20 +92,12 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitLocalDate(LocalDateType localDateType) {
-        return factory.newStringBuilder(result, new LocalDateReader());
+        return factory.newStringBuilder(result, new ToStringReader());
     }
 
     @Override
     public CursorObserver<FieldValue> visitMonth(MonthType monthType) {
-        return factory.newStringBuilder(result, new StringReader() {
-            @Override
-            public String readString(FieldValue value) {
-                if(value instanceof Month) {
-                    return value.toString();
-                }
-                return null;
-            }
-        });
+        return factory.newStringBuilder(result, new ToStringReader());
     }
 
     @Override
@@ -122,16 +114,13 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
     }
 
     @Override
+    public CursorObserver<FieldValue> visitFortnight(FortnightType fortnightType) {
+        return factory.newStringBuilder(result, new ToStringReader());
+    }
+
+    @Override
     public CursorObserver<FieldValue> visitWeek(EpiWeekType epiWeekType) {
-        return factory.newStringBuilder(result, new StringReader() {
-            @Override
-            public String readString(FieldValue value) {
-                if(value instanceof EpiWeek) {
-                    return value.toString();
-                }
-                return null;
-            }
-        });
+        return factory.newStringBuilder(result, new ToStringReader());
     }
 
     @Override
@@ -156,6 +145,17 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
                 return ((HasStringValue) value).asString();
             }
             return null;
+        }
+    }
+
+    private static class ToStringReader implements StringReader {
+
+        @Override
+        public String readString(FieldValue value) {
+            if(value == null) {
+                return null;
+            }
+            return value.toString();
         }
     }
 
@@ -184,16 +184,6 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
         }
     }
 
-    private static class LocalDateReader implements StringReader {
-        @Override
-        public String readString(FieldValue value) {
-            if(value instanceof LocalDate) {
-                return value.toString();
-            }
-            return null;
-        }
-    }
-    
     private static class AttachmentBlobIdReader implements StringReader {
         @Override
         public String readString(FieldValue value) {

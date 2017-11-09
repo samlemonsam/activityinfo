@@ -95,6 +95,11 @@ public class FieldValueParserFactory implements FieldTypeVisitor<FieldValueParse
     }
 
     @Override
+    public FieldValueParser visitFortnight(FortnightType fortnightType) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public FieldValueParser visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
         throw new UnsupportedOperationException();
     }

@@ -91,6 +91,8 @@ public class KeyedSubFormPanel implements IsWidget {
         switch (subFormKind) {
             case MONTHLY:
                 return new MonthWidget(updater);
+            case BIWEEKLY:
+                return new FortnightWidget(updater);
             case WEEKLY:
                 return new WeekWidget(updater);
             case DAILY:

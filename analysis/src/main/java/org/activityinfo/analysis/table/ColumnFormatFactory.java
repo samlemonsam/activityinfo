@@ -106,6 +106,11 @@ public class ColumnFormatFactory implements FieldTypeVisitor<ColumnFormat> {
     }
 
     @Override
+    public ColumnFormat visitFortnight(FortnightType fortnightType) {
+        return new TextFormat(columnId, formula);
+    }
+
+    @Override
     public ColumnFormat visitMonth(MonthType monthType) {
         return new TextFormat(columnId, formula);
     }

@@ -350,6 +350,11 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             }
 
             @Override
+            public FieldType visitFortnight(FortnightType fortnightType) {
+                return fortnightType;
+            }
+
+            @Override
             public FieldType visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
                 return localDateIntervalType;
             }

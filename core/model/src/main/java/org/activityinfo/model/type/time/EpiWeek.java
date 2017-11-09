@@ -52,12 +52,6 @@ public class EpiWeek implements Serializable, PeriodValue {
     private int weekInYear;
     private int year;
 
-    /**
-     * Uninitialized epi week.
-     */
-    public EpiWeek() {
-    }
-
     public EpiWeek(EpiWeek week) {
         this(week.getYear(), week.getWeekInYear());
     }
