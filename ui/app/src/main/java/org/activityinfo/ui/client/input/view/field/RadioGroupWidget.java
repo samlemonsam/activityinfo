@@ -76,8 +76,9 @@ public class RadioGroupWidget implements FieldWidget {
     public void setRelevant(boolean relevant) {
         if(this.relevant != relevant) {
             for (CheckBox checkBox : radios.values()) {
-                checkBox.setEnabled(!relevant);
+                checkBox.setEnabled(relevant);
             }
+            this.relevant = relevant;
         }
     }
 }
