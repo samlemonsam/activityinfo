@@ -75,12 +75,17 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
         LOGGER.info("Entering execute()");
         aggregateTime.start();
-        initialiseHandler(user);
-        fetchActivityMetadata(command.getFilter());
-        queryFormTrees(command);
-        buildQueries(command);
-        batchQueries();
-        executeBatch();
+        try {
+            initialiseHandler(user);
+            fetchActivityMetadata(command.getFilter());
+            queryFormTrees(command);
+            buildQueries(command);
+            batchQueries();
+            executeBatch();
+        } catch (Exception excp) {
+            // Catch any thrown exceptions, log, and return empty site list
+            LOGGER.severe(excp.getMessage());
+        }
         aggregateTime.stop();
 
         printTimes();
