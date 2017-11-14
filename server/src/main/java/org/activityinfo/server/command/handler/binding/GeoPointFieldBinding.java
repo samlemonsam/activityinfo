@@ -17,8 +17,8 @@ public class GeoPointFieldBinding implements FieldBinding {
     public static final String LAT_SYMBOL = "latitude";
     public static final String LONG_SYMBOL = "longitude";
 
-    public static final String GEO_LATITUDE_COLUMN = "x";
-    public static final String GEO_LONGITUDE_COLUMN = "y";
+    public static final String GEO_LATITUDE_COLUMN = "y";
+    public static final String GEO_LONGITUDE_COLUMN = "x";
 
     private FormField geoField;
 
@@ -28,12 +28,12 @@ public class GeoPointFieldBinding implements FieldBinding {
 
     @Override
     public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {
-        ColumnView longitude = columnSet.getColumnView(GEO_LONGITUDE_COLUMN);
         ColumnView latitude = columnSet.getColumnView(GEO_LATITUDE_COLUMN);
+        ColumnView longitude = columnSet.getColumnView(GEO_LONGITUDE_COLUMN);
 
         for (int i=0; i<columnSet.getNumRows(); i++) {
-            dataArray[i].set(GEO_LONGITUDE_COLUMN, longitude.getDouble(i));
             dataArray[i].set(GEO_LATITUDE_COLUMN, latitude.getDouble(i));
+            dataArray[i].set(GEO_LONGITUDE_COLUMN, longitude.getDouble(i));
         }
 
         return dataArray;

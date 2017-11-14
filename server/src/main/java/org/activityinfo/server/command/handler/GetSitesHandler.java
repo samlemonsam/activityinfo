@@ -75,17 +75,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
         LOGGER.info("Entering execute()");
         aggregateTime.start();
-        try {
             initialiseHandler(user);
             fetchActivityMetadata(command.getFilter());
             queryFormTrees(command);
             buildQueries(command);
             batchQueries();
             executeBatch();
-        } catch (Exception excp) {
-            // Catch any thrown exceptions, log, and return empty site list
-            LOGGER.severe(excp.getMessage());
-        }
         aggregateTime.stop();
 
         printTimes();
@@ -138,6 +133,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         treeTime.start();
         Set<ResourceId> formIds = new HashSet<>();
         for (Activity activity : activities.values()) {
+            if (activity.isDeleted() || !activity.isClassicView()) {
+                continue;
+            }
             formIds.add(activity.getLeafFormClassId());
             if (command.isFetchLinks()) {
                 for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
@@ -152,6 +150,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private void buildQueries(GetSites command) {
         queryBuildTime.start();
         for (Activity activity : activities.values()) {
+            if(activity.isDeleted() || !activity.isClassicView()) {
+                continue;
+            }
             FormTree activityFormTree = formTreeMap.get(CuidAdapter.activityFormClass(activity.getId()));
             QueryModel query = buildQuery(activityFormTree, command);
             query.setFilter(determineQueryFilter(command.getFilter(), activityFormTree));
