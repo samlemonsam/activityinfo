@@ -70,6 +70,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     @Override
     public SiteResult execute(GetSites command, User user) {
 
+        if (user == null) {
+            return new SiteResult();
+        }
+
         if (command.isLegacyFetch()) {
             return dispatcher.execute(new OldGetSites(command));
         }
@@ -133,10 +137,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         treeTime.start();
         Set<ResourceId> formIds = new HashSet<>();
         for (Activity activity : activities.values()) {
-            if (activity.isDeleted() || !activity.isClassicView()) {
+            if (reject(activity)) {
                 continue;
             }
-            formIds.add(activity.getLeafFormClassId());
+            formIds.add(activity.getSiteFormClassId());
             if (command.isFetchLinks()) {
                 for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
                     formIds.add(linkedActivity.getLeafFormClassId());
@@ -147,10 +151,14 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         treeTime.stop();
     }
 
+    private boolean reject(Activity activity) {
+        return activity.isDeleted() || !activity.isClassicView() || activity.isMonthly();
+    }
+
     private void buildQueries(GetSites command) {
         queryBuildTime.start();
         for (Activity activity : activities.values()) {
-            if(activity.isDeleted() || !activity.isClassicView()) {
+            if(reject(activity)) {
                 continue;
             }
             FormTree activityFormTree = formTreeMap.get(CuidAdapter.activityFormClass(activity.getId()));
