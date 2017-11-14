@@ -70,11 +70,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     @Override
     public SiteResult execute(GetSites command, User user) {
 
-        if (user == null) {
-            return new SiteResult();
-        }
-
-        if (command.isLegacyFetch()) {
+        if (user == null || command.isLegacyFetch()) {
             return dispatcher.execute(new OldGetSites(command));
         }
         LOGGER.info("Entering execute()");
