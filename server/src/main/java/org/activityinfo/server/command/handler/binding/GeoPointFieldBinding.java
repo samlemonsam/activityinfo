@@ -32,8 +32,14 @@ public class GeoPointFieldBinding implements FieldBinding {
         ColumnView longitude = columnSet.getColumnView(GEO_LONGITUDE_COLUMN);
 
         for (int i=0; i<columnSet.getNumRows(); i++) {
-            dataArray[i].set(GEO_LATITUDE_COLUMN, latitude.getDouble(i));
-            dataArray[i].set(GEO_LONGITUDE_COLUMN, longitude.getDouble(i));
+            Double latDouble = latitude.getDouble(i);
+            Double longDouble = longitude.getDouble(i);
+            if (!latDouble.isNaN()) {
+                dataArray[i].set(GEO_LATITUDE_COLUMN, latDouble);
+            }
+            if(!longDouble.isNaN()) {
+                dataArray[i].set(GEO_LONGITUDE_COLUMN, longDouble);
+            }
         }
 
         return dataArray;
