@@ -2,6 +2,7 @@ package org.activityinfo.server.command.handler.binding;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -15,9 +16,10 @@ import java.util.List;
 
 public class LocationFieldBinding implements FieldBinding {
 
-    public static final String ID_SYMBOL = ColumnModel.ID_SYMBOL;
-    public static final String NAME_SYMBOL = "name";
-    public static final String CODE_SYMBOL = "code";
+    public static final SymbolExpr ID_SYMBOL = new SymbolExpr(ColumnModel.ID_SYMBOL);
+    public static final SymbolExpr LOCATION_SYMBOL = new SymbolExpr("location");
+    public static final SymbolExpr NAME_SYMBOL = new SymbolExpr("name");
+    public static final SymbolExpr CODE_SYMBOL = new SymbolExpr("code");
     public static final String PARENT_SYMBOL = "parent";
 
     public static final String LOCATION_ID_COLUMN = "locationId";
@@ -53,9 +55,9 @@ public class LocationFieldBinding implements FieldBinding {
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
         return Arrays.asList(
-                new ColumnModel().setExpression(new CompoundExpr(targetFormId,ID_SYMBOL)).as(LOCATION_ID_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(targetFormId,NAME_SYMBOL)).as(LOCATION_NAME_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(targetFormId,CODE_SYMBOL)).as(LOCATION_CODE_COLUMN)
+                new ColumnModel().setExpression(LOCATION_SYMBOL).as(LOCATION_ID_COLUMN),
+                new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,NAME_SYMBOL)).as(LOCATION_NAME_COLUMN),
+                new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,CODE_SYMBOL)).as(LOCATION_CODE_COLUMN)
         );
     }
 

@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
 import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -69,8 +70,8 @@ public class AdminEntityBinding implements FieldBinding {
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         List<ColumnModel> adminQuery = Arrays.asList(
-                new ColumnModel().setExpression(new CompoundExpr(adminForm.getId(),LocationFieldBinding.ID_SYMBOL)).as(ADMIN_ENTITY_ID_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(adminForm.getId(), LocationFieldBinding.NAME_SYMBOL)).as(ADMIN_ENTITY_NAME_COLUMN)
+                new ColumnModel().setExpression(new CompoundExpr(new SymbolExpr(adminForm.getId()), LocationFieldBinding.ID_SYMBOL)).as(ADMIN_ENTITY_ID_COLUMN),
+                new ColumnModel().setExpression(new CompoundExpr(new SymbolExpr(adminForm.getId()), LocationFieldBinding.NAME_SYMBOL)).as(ADMIN_ENTITY_NAME_COLUMN)
         );
         List<ColumnModel> adminLocationQuery = buildAdminLocationQuery(formTree);
         return joinLists(adminQuery,adminLocationQuery);
