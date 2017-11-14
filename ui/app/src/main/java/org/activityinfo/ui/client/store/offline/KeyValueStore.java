@@ -1,17 +1,16 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.common.base.Function;
-import org.activityinfo.indexedb.*;
+import org.activityinfo.indexedb.IDBDatabaseUpgrade;
+import org.activityinfo.indexedb.IDBObjectStore;
+import org.activityinfo.indexedb.ObjectStoreDefinition;
+import org.activityinfo.indexedb.ObjectStoreOptions;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -56,8 +55,8 @@ public class KeyValueStore {
         impl.put(OFFLINE_FORMS, toJson(offlineForms));
     }
 
-    private JsonArray toJson(Set<ResourceId> offlineForms) {
-        JsonArray array = Json.createArray();
+    private JsonValue toJson(Set<ResourceId> offlineForms) {
+        JsonValue array = Json.createArray();
         for (ResourceId offlineForm : offlineForms) {
             array.add(Json.create(offlineForm.asString()));
         }
@@ -80,7 +79,7 @@ public class KeyValueStore {
                 return Collections.emptySet();
             } else {
                 Set<ResourceId> forms = new HashSet<>();
-                JsonArray array = json.getAsJsonArray();
+                JsonValue array = json;
                 for (int i = 0; i < array.length(); i++) {
                     forms.add(ResourceId.valueOf(array.getString(i)));
                 }

@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.query.ColumnSet;
@@ -31,9 +31,7 @@ import java.util.List;
 
 import static org.activityinfo.ui.client.analysis.viewModel.Point.TOTAL;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class AnalysisViewModelTest {
 
@@ -369,7 +367,7 @@ public class AnalysisViewModelTest {
     }
 
     private PivotModel serializeAndDeserialize(PivotModel model) {
-        JsonObject json = model.toJson();
+        JsonValue json = model.toJson();
         PivotModel deserialized = PivotModel.fromJson(json);
         assertThat(deserialized, equalTo(model));
         return deserialized;

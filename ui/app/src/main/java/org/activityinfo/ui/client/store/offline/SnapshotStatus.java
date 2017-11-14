@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.store.offline;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
@@ -43,23 +42,23 @@ public class SnapshotStatus {
         return formVersions.containsKey(formId);
     }
 
-    public JsonObject toJson() {
-        JsonObject versions = createObject();
+    public JsonValue toJson() {
+        JsonValue versions = createObject();
         for (Map.Entry<ResourceId, Long> entry : formVersions.entrySet()) {
             versions.put(entry.getKey().asString(), Long.toString(entry.getValue()));
         }
 
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("time", time.getTime());
         object.put("versions", versions);
         return object;
     }
 
-    public static SnapshotStatus fromJson(JsonObject object) {
+    public static SnapshotStatus fromJson(JsonValue object) {
         SnapshotStatus status = new SnapshotStatus();
         status.time = new Date(object.get("time").asLong());
 
-        JsonObject versions = object.getObject("versions");
+        JsonValue versions = object.get("versions");
         String[] forms = versions.keys();
 
         for (String form : forms) {
@@ -70,10 +69,6 @@ public class SnapshotStatus {
         }
 
         return status;
-    }
-
-    public static SnapshotStatus fromJson(JsonValue json) {
-        return fromJson(json.getAsJsonObject());
     }
 
     @Override

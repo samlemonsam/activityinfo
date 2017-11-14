@@ -1,7 +1,6 @@
 package org.activityinfo.storage;
 
 import com.google.common.base.Optional;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 /**
@@ -9,7 +8,7 @@ import org.activityinfo.json.JsonValue;
  */
 public class LocalStorageStub implements LocalStorage {
     @Override
-    public void setObject(String keyName, JsonObject jsonValue) {
+    public void setObject(String keyName, JsonValue jsonValue) {
     }
 
     @Override

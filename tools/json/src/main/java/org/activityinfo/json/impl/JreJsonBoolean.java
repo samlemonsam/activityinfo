@@ -15,7 +15,6 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonBoolean;
 import org.activityinfo.json.JsonType;
 import org.activityinfo.json.JsonValue;
 
@@ -26,7 +25,7 @@ import java.io.ObjectOutputStream;
 /**
  * Server-side implementation of JsonBoolean.
  */
-public class JreJsonBoolean extends JreJsonValue implements JsonBoolean {
+class JreJsonBoolean extends JreJsonValue {
 
     private static final long serialVersionUID = 1L;
 
@@ -49,6 +48,16 @@ public class JreJsonBoolean extends JreJsonValue implements JsonBoolean {
     @Override
     public String asString() {
         return Boolean.toString(getBoolean());
+    }
+
+    @Override
+    public boolean isBoolean() {
+        return true;
+    }
+
+    @Override
+    public boolean isJsonPrimitive() {
+        return true;
     }
 
     public boolean getBoolean() {

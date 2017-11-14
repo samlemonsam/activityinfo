@@ -24,8 +24,8 @@ package org.activityinfo.server.command.handler.crud;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.server.command.handler.PermissionOracle;
@@ -161,7 +161,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     private void updateFormClass(Activity activity, String name, String json) {
         if (!Strings.isNullOrEmpty(json)) {
             JsonParser parser = new JsonParser();
-            JsonObject jsonObject = parser.parse(json).getAsJsonObject();
+            JsonValue jsonObject = parser.parse(json);
             FormClass formClass = FormClass.fromJson(jsonObject);
             formClass.setLabel(name);
 

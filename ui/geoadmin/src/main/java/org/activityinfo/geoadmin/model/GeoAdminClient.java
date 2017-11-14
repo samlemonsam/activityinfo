@@ -18,7 +18,7 @@ import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
@@ -27,8 +27,8 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -298,7 +298,7 @@ public class GeoAdminClient implements FormClassProvider {
         } else {
 
             String json = formResource(resourceId).path("tree").get(String.class);
-            JsonObject object = new Gson().fromJson(json, JsonObject.class);
+            JsonValue object = new Gson().fromJson(json, JsonValue.class);
             return JsonFormTreeBuilder.fromJson(object);
         }
     }

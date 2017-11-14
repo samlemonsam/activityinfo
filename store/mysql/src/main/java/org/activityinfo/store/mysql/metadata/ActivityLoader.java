@@ -10,8 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -37,6 +36,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+
+import static org.activityinfo.json.Json.parse;
 
 
 /**
@@ -348,14 +349,14 @@ public class ActivityLoader {
 
     private static FormClass tryDeserialize(Activity activity, String formClass, byte[] formClassGz) {
         try {
-            JsonObject object;
+            JsonValue object;
             if (formClassGz != null) {
                 try(Reader reader = new InputStreamReader(
                                 new GZIPInputStream(new ByteArrayInputStream(formClassGz)), Charsets.UTF_8)) {
-                    object = Json.parse(CharStreams.toString(reader)).getAsJsonObject();
+                    object = parse(CharStreams.toString(reader));
                 }
             } else if (!Strings.isNullOrEmpty(formClass)) {
-                object = Json.parse(formClass).getAsJsonObject();
+                object = parse(formClass);
             } else {
                 return null;
             }

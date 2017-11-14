@@ -15,7 +15,10 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonFactory;
+import org.activityinfo.json.JsonType;
+import org.activityinfo.json.JsonValue;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -25,7 +28,7 @@ import java.util.*;
 /**
  * Server-side implementation of JsonObject.
  */
-public class JreJsonObject extends JreJsonValue implements JsonObject {
+public class JreJsonObject extends JreJsonValue implements JsonValue {
 
     private static final long serialVersionUID = 1L;
 
@@ -70,21 +73,12 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
         return map.get(key);
     }
 
-    public JsonArray getArray(String key) {
-        return (JsonArray) get(key);
-    }
-
-
     public boolean getBoolean(String key) {
-        return ((JsonBoolean) get(key)).getBoolean();
+        return get(key).asBoolean();
     }
 
     public double getNumber(String key) {
-        return ((JsonNumber) get(key)).getNumber();
-    }
-
-    public JsonObject getObject(String key) {
-        return (JsonObject) get(key);
+        return get(key).asNumber();
     }
 
     public Object getObject() {
@@ -114,14 +108,11 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
         return getObject().equals(((JreJsonValue) value).getObject());
     }
 
+    @Override
     public String[] keys() {
         return map.keySet().toArray(new String[map.size()]);
     }
 
-    @Override
-    public Iterable<Map.Entry<String, JsonValue>> entrySet() {
-        return map.entrySet();
-    }
 
     public void put(String key, JsonValue value) {
         if (value == null) {
@@ -165,8 +156,13 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
     }
 
     @Override
+    public Iterable<Map.Entry<String, JsonValue>> entrySet() {
+        return map.entrySet();
+    }
+
+    @Override
     public void traverse(JsonVisitor visitor, JsonContext ctx) {
-        if (visitor.visit(this, ctx)) {
+        if (visitor.visitObject(this, ctx)) {
             JsonObjectContext objCtx = new JsonObjectContext(this);
             for (String key : stringifyOrder(keys())) {
                 objCtx.setCurrentKey(key);
@@ -176,18 +172,19 @@ public class JreJsonObject extends JreJsonValue implements JsonObject {
                 }
             }
         }
-        visitor.endVisit(this, ctx);
+        visitor.endObjectVisit(this, ctx);
     }
 
     @Override
-    public JsonObject getAsJsonObject() {
+    public JsonValue getAsJsonObject() {
         return this;
     }
 
     @Override
-    public boolean isJsonPrimitive() {
-        return false;
+    public boolean isJsonObject() {
+        return true;
     }
+
 
     @com.google.gwt.core.shared.GwtIncompatible
     private void readObject(ObjectInputStream stream)

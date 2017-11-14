@@ -1,6 +1,6 @@
 package org.activityinfo.model.job;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 
 import static org.activityinfo.json.Json.createObject;
@@ -23,13 +23,13 @@ public class ExportColumn {
         return formula;
     }
 
-    public org.activityinfo.json.JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("formula", formula);
         return object;
     }
 
-    public static ExportColumn fromJson(org.activityinfo.json.JsonObject object) {
+    public static ExportColumn fromJson(JsonValue object) {
         return new ExportColumn(object.get("formula").asString());
     }
 }

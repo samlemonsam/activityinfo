@@ -1,8 +1,7 @@
 package org.activityinfo.ui.client.analysis.model;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
@@ -41,14 +40,14 @@ public abstract class MeasureModel {
     }
 
     @Value.Lazy
-    public JsonObject toJson() {
-        JsonObject object = Json.createObject();
+    public JsonValue toJson() {
+        JsonValue object = Json.createObject();
         object.put("id", getId());
         object.put("label", getLabel());
         object.put("formId", getFormId().asString());
         object.put("formula", getFormula());
 
-        JsonArray statArray = Json.createArray();
+        JsonValue statArray = Json.createArray();
         for (Statistic statistic : getStatistics()) {
             statArray.add(Json.create(statistic.name()));
         }
@@ -56,14 +55,14 @@ public abstract class MeasureModel {
         return object;
     }
 
-    public static MeasureModel fromJson(JsonObject object) {
+    public static MeasureModel fromJson(JsonValue object) {
         ImmutableMeasureModel.Builder model = ImmutableMeasureModel.builder()
             .id(object.getString("id"))
             .label(object.getString("label"))
             .formId(ResourceId.valueOf(object.getString("formId")))
             .formula(object.getString("formula"));
 
-        JsonArray statArray = object.getArray("statistics");
+        JsonValue statArray = object.get("statistics");
         for (int i = 0; i < statArray.length(); i++) {
             model.addStatistics(Statistic.valueOf(statArray.get(i).asString().toUpperCase()));
         }

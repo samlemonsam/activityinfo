@@ -1,6 +1,6 @@
 package org.activityinfo.model.query;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -84,14 +84,14 @@ public class ColumnModel {
     }
 
 
-    public org.activityinfo.json.JsonObject toJsonElement() {
-        JsonObject object = createObject();
+    public JsonValue toJsonElement() {
+        JsonValue object = createObject();
         object.put("id", id);
         object.put("expression", getExpressionAsString());
         return object;
     }
 
-    public static ColumnModel fromJson(org.activityinfo.json.JsonObject object) {
+    public static ColumnModel fromJson(JsonValue object) {
         ColumnModel columnModel = new ColumnModel();
         if(!object.get("id").isJsonNull()) {
             columnModel.setId(object.get("id").asString());

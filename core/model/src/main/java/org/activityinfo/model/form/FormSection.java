@@ -2,7 +2,6 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -59,7 +58,7 @@ public class FormSection extends FormElement implements FormElementContainer {
 
     @Override
     public JsonValue toJsonObject() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("id", id.asString());
         object.put("label", label);
         object.put("type", "section");
@@ -67,11 +66,11 @@ public class FormSection extends FormElement implements FormElementContainer {
         return object;
     }
 
-    public static FormSection fromJson(JsonObject jsonObject) {
+    public static FormSection fromJson(JsonValue jsonObject) {
         FormSection section = new FormSection(ResourceId.valueOf(jsonObject.get("id").asString()));
         section.setLabel(jsonObject.get("label").asString());
         if(jsonObject.hasKey("elements")) {
-            section.getElements().addAll(FormClass.fromJsonArray(jsonObject.get("elements").getAsJsonArray()));
+            section.getElements().addAll(FormClass.fromJsonArray(jsonObject.get("elements")));
         }
         return section;
     }

@@ -1,7 +1,6 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
 import com.google.common.base.Optional;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.model.analysis.TypedAnalysis;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;

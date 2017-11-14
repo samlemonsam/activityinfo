@@ -2,7 +2,6 @@ package org.activityinfo.storage;
 
 import com.google.common.base.Optional;
 import com.google.gwt.storage.client.Storage;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 /**
@@ -10,7 +9,7 @@ import org.activityinfo.json.JsonValue;
  */
 public interface LocalStorage {
 
-    void setObject(String keyName, JsonObject jsonValue);
+    void setObject(String keyName, JsonValue jsonValue);
 
     Optional<JsonValue> getObjectIfPresent(String keyName);
 

@@ -2,6 +2,7 @@ package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -16,7 +17,6 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
-import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
 import org.hamcrest.CoreMatchers;
@@ -133,7 +133,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     private FormTree queryFormTree(ResourceId classId) {
         FormTreeBuilder builder = new FormTreeBuilder(catalog);
         FormTree formTree = builder.queryTree(classId);
-        org.activityinfo.json.JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
+        JsonValue formTreeObject = JsonFormTreeBuilder.toJson(formTree);
         formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
         return formTree;
     }

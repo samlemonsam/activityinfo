@@ -2,6 +2,7 @@ package org.activityinfo.json;
 
 import org.junit.Test;
 
+import static org.activityinfo.json.Json.toJson;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -19,7 +20,7 @@ public class ReflectionTest {
         o.object = Json.createObject();
         o.object.put("a", "Brave New World");
 
-        JsonObject jo = Json.toJson(o).getAsJsonObject();
+        JsonValue jo = toJson(o);
 
         assertThat(jo.getNumber("d"), equalTo(41d));
         assertThat(jo.getString("s"), equalTo("Hello World"));
@@ -27,7 +28,7 @@ public class ReflectionTest {
         assertThat(jo.getNumber("i"), equalTo(99d));
         assertThat(jo.getNumber("privateField"), equalTo(42d));
 
-        JsonObject joo = jo.getObject("object");
+        JsonValue joo = jo.get("object");
         assertThat(joo.getString("a"), equalTo("Brave New World"));
     }
 
@@ -36,7 +37,7 @@ public class ReflectionTest {
         DummyObject o = new DummyObject();
         o.b = true;
 
-        JsonObject jo = Json.toJson(o).getAsJsonObject();
+        JsonValue jo = toJson(o);
         assertThat(jo.getBoolean("b"), equalTo(true));
     }
 

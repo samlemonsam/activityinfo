@@ -54,7 +54,7 @@ public class TableActivity extends AbstractActivity {
         Optional<JsonValue> object = storage.getObjectIfPresent(modelKey(formId));
         if(object.isPresent()) {
             try {
-                return TableModel.fromJson(object.get().getAsJsonObject());
+                return TableModel.fromJson(object.get());
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to deserialize saved model: ", e);
             }

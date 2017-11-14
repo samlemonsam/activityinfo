@@ -1,7 +1,6 @@
 package org.activityinfo.model.type.geo;
 
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
@@ -42,7 +41,7 @@ public class GeoPointType implements RecordFieldType {
 
     @Override
     public FieldValue parseJsonValue(JsonValue value) {
-        JsonObject object = (JsonObject) value;
+        JsonValue object = (JsonValue) value;
         GeoPoint point = new GeoPoint(
                 object.get("latitude").asNumber(),
                 object.get("longitude").asNumber());

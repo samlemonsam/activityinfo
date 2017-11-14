@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -77,7 +76,7 @@ public class EnumValue implements FieldValue, HasSetFieldValue {
         } else if(valueIds.size() == 1) {
             return Json.create(valueIds.iterator().next().asString());
         } else {
-            JsonArray array = Json.createArray();
+            JsonValue array = Json.createArray();
             for (ResourceId valueId : valueIds) {
                 array.add(Json.create(valueId.asString()));
             }

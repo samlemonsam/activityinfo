@@ -1,6 +1,6 @@
 package org.activityinfo.model.job;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 import static org.activityinfo.json.Json.createObject;
 
@@ -20,18 +20,18 @@ public class ExportAuditLog implements JobDescriptor<ExportResult> {
     }
 
     @Override
-    public ExportResult parseResult(org.activityinfo.json.JsonObject resultObject) {
+    public ExportResult parseResult(JsonValue resultObject) {
         return ExportResult.fromJson(resultObject);
     }
 
     @Override
-    public JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("databaseId", databaseId);
         return object;
     }
 
-    public static ExportAuditLog fromJson(org.activityinfo.json.JsonObject object) {
+    public static ExportAuditLog fromJson(JsonValue object) {
         return new ExportAuditLog(object.get("databaseId").asInt());
     }
 

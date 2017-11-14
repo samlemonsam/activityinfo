@@ -15,7 +15,6 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 /**
@@ -25,12 +24,12 @@ class JsonObjectContext extends JsonContext {
 
     String currentKey;
 
-    public JsonObjectContext(JsonObject value) {
+    public JsonObjectContext(JsonValue value) {
         super(value);
     }
 
-    private JsonObject object() {
-        return (JsonObject) getValue();
+    private JsonValue object() {
+        return (JsonValue) getValue();
     }
 
     public String getCurrentKey() {

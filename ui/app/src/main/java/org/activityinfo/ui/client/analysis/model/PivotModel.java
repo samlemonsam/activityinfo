@@ -1,11 +1,8 @@
 package org.activityinfo.ui.client.analysis.model;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
-import org.activityinfo.model.analysis.Analysis;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.AnalysisModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
@@ -98,34 +95,34 @@ public abstract class PivotModel implements AnalysisModel {
 
     @Value.Lazy
     @Override
-    public JsonObject toJson() {
+    public JsonValue toJson() {
 
-        JsonArray measures = Json.createArray();
+        JsonValue measures = Json.createArray();
         for (MeasureModel measureModel : getMeasures()) {
             measures.add(measureModel.toJson());
         }
-        JsonArray dimensions = Json.createArray();
+        JsonValue dimensions = Json.createArray();
         for (DimensionModel dimensionModel : getDimensions()) {
             dimensions.add(dimensionModel.toJson());
         }
 
-        JsonObject object = Json.createObject();
+        JsonValue object = Json.createObject();
         object.put("measures", measures);
         object.put("dimensions", dimensions);
         return object;
     }
 
-    public static PivotModel fromJson(JsonObject jsonObject) {
+    public static PivotModel fromJson(JsonValue jsonObject) {
 
         ImmutablePivotModel.Builder model = ImmutablePivotModel.builder();
 
-        JsonArray measures = jsonObject.getArray("measures");
+        JsonValue measures = jsonObject.get("measures");
         for (int i = 0; i < measures.length(); i++) {
-            model.addMeasures(MeasureModel.fromJson(measures.getObject(i)));
+            model.addMeasures(MeasureModel.fromJson(measures.get(i)));
         }
-        JsonArray dimensions = jsonObject.getArray("dimensions");
+        JsonValue dimensions = jsonObject.get("dimensions");
         for (int i = 0; i < dimensions.length(); i++) {
-            model.addDimensions(DimensionModel.fromJson(dimensions.getObject(i)));
+            model.addDimensions(DimensionModel.fromJson(dimensions.get(i)));
         }
 
         return model.build();

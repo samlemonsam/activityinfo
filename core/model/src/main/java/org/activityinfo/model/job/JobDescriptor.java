@@ -1,6 +1,6 @@
 package org.activityinfo.model.job;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Defines a long-running job running on the server, performed
@@ -13,7 +13,7 @@ public interface JobDescriptor<T extends JobResult> {
      */
     String getType();
 
-    T parseResult(org.activityinfo.json.JsonObject resultObject);
+    T parseResult(JsonValue resultObject);
 
-    JsonObject toJsonObject();
+    JsonValue toJsonObject();
 }

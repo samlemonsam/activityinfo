@@ -285,7 +285,7 @@ public class Activity implements Serializable {
                 in.readFully(bytes);
                 JsonParser parser = new JsonParser();
                 try(InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(bytes), Charsets.UTF_8)) {
-                    this.value = FormClass.fromJson(parser.parse(reader).getAsJsonObject());
+                    this.value = FormClass.fromJson(parser.parse(reader));
                 }
             } else {
                 this.value = null;

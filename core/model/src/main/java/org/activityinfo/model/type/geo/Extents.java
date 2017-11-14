@@ -22,7 +22,6 @@ package org.activityinfo.model.type.geo;
  * #L%
  */
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonSetter;
@@ -293,7 +292,7 @@ public class Extents implements Serializable {
     }
 
     public JsonValue toJsonElement() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         if (!Double.isNaN(minLat)) {
             object.put("minLat", minLat);
         }
@@ -309,7 +308,7 @@ public class Extents implements Serializable {
         return object;
     }
 
-    public static Extents fromJsonObject(org.activityinfo.json.JsonObject object) {
+    public static Extents fromJsonObject(JsonValue object) {
         Extents area = Extents.empty();
         if(object.hasKey("minLat")) {
             area.minLat = object.get("minLat").asNumber();

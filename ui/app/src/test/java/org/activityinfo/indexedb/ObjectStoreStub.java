@@ -1,9 +1,10 @@
 package org.activityinfo.indexedb;
 
-import org.activityinfo.json.Json;
 import org.activityinfo.promise.Promise;
 
 import java.util.*;
+
+import static org.activityinfo.json.Json.toJson;
 
 
 public class ObjectStoreStub<T> {
@@ -54,7 +55,7 @@ public class ObjectStoreStub<T> {
             if(autoIncrement) {
                 key = new ObjectKey(nextId++);
             } else {
-                key = keyPath.buildKey(Json.toJson(value).getAsJsonObject());
+                key = keyPath.buildKey(toJson(value));
             }
             objectMap.put(key, value);
         }

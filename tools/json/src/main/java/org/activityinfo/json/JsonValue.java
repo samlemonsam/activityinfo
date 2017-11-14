@@ -16,6 +16,7 @@
 package org.activityinfo.json;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Base interface for all Json values.
@@ -49,10 +50,9 @@ public interface JsonValue extends Serializable {
      */
     JsonType getType();
 
+    JsonValue getAsJsonObject();
 
-    JsonObject getAsJsonObject();
-
-    JsonArray getAsJsonArray();
+    JsonValue getAsJsonArray();
 
     boolean isJsonNull();
 
@@ -94,5 +94,123 @@ public interface JsonValue extends Serializable {
     String toString();
 
 
+    /**
+     * Return the element (uncoerced) as a JsonValue or {@code null} if
+     * this object has no value for the given key.
+     *
+     */
+    JsonValue get(String key);
 
+
+    /**
+     * Return the element (uncoerced) as a boolean. If the type is not a boolean,
+     * this can result in runtime errors.
+     */
+    boolean getBoolean(String key);
+
+    /**
+     * Return the element (uncoerced) as a number. If the type is not a number, this
+     * can result in runtime errors.
+     */
+    double getNumber(String key);
+
+
+
+    /**
+     * Return the element (uncoerced) as a String. If the type is not a String, this
+     * can result in runtime errors.
+     */
+    String getString(String key);
+
+    /**
+     * Set a given key to the given value.
+     */
+    void put(String key, JsonValue value);
+
+    /**
+     * Set a given key to the given String value.
+     */
+    void put(String key, String value);
+
+    /**
+     * Set a given key to the given double value.
+     */
+    void put(String key, double value);
+
+    /**
+     * Set a given key to the given boolean value.
+     */
+    void put(String key, boolean bool);
+
+    /**
+     * Test whether a given key has present.
+     */
+    boolean hasKey(String key);
+
+    String[] keys();
+
+    /**
+     * Remove a given key and associated value from the object.
+     *
+     * @param key
+     */
+    void remove(String key);
+
+    void add(String key, JsonValue value);
+
+
+    /**
+     * Return the ith element of the array (uncoerced) as a boolean. If the type is not a boolean,
+     * this can result in runtime errors.
+     */
+    boolean getBoolean(int index);
+
+    /**
+     * Return the ith element of the array (uncoerced) as a number. If the type is not a number, this
+     * can result in runtime errors.
+     */
+    double getNumber(int index);
+
+
+    /**
+     * Return the ith element of the array (uncoerced) as a String. If the type is not a String, this
+     * can result in runtime errors.
+     */
+    String getString(int index);
+
+    /**
+     * Length of the array.
+     */
+    int length();
+
+    /**
+     * Set the value at index to be a given value.
+     */
+    void set(int index, JsonValue value);
+
+    /**
+     * Set the value at index to be a String value.
+     */
+    void set(int index, String string);
+
+    /**
+     * Set the value at index to be a number value.
+     */
+    void set(int index, double number);
+
+    /**
+     * Set the value at index to be a boolean value.
+     */
+    void set(int index, boolean bool);
+
+    void add(JsonValue value);
+
+    /**
+     * Return the ith element of the array.
+     */
+    JsonValue get(int index);
+
+    Iterable<JsonValue> values();
+
+    Iterable<Map.Entry<String, JsonValue>> entrySet();
 }

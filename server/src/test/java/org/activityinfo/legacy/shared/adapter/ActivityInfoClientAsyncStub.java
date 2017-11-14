@@ -4,13 +4,10 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.*;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.job.JobDescriptor;
@@ -18,7 +15,6 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
@@ -186,7 +182,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         FormCatalog catalog = newCatalog();
         Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
 
-        org.activityinfo.json.JsonArray recordArray = Json.createArray();
+        JsonValue recordArray = Json.createArray();
         
         if(collection.isPresent()) {
             if(collection.get() instanceof HrdFormStorage) {
@@ -197,7 +193,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
                 }
             }
         }
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("formId", formId);
         object.put("records", recordArray);
         

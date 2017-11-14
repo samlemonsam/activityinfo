@@ -1,6 +1,5 @@
 package org.activityinfo.model.job;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
@@ -45,7 +44,7 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     }
 
     @Override
-    public ExportResult parseResult(org.activityinfo.json.JsonObject resultObject) {
+    public ExportResult parseResult(JsonValue resultObject) {
         return ExportResult.fromJson(resultObject);
     }
 
@@ -54,18 +53,18 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     }
 
     @Override
-    public org.activityinfo.json.JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("formId", formId.asString());
         return object;
     }
 
-    public static ExportFormJob fromJson(org.activityinfo.json.JsonObject object) {
+    public static ExportFormJob fromJson(JsonValue object) {
 
         List<ExportColumn> columns = new ArrayList<>();
         if(object.hasKey("columns")) {
-            for (JsonValue jsonElement : object.get("columns").getAsJsonArray().values()) {
-                columns.add(ExportColumn.fromJson(jsonElement.getAsJsonObject()));
+            for (JsonValue jsonElement : object.get("columns").values()) {
+                columns.add(ExportColumn.fromJson(jsonElement));
             }
         }
 

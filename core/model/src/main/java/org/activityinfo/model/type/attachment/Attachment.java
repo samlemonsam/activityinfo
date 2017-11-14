@@ -21,7 +21,6 @@ package org.activityinfo.model.type.attachment;
  * #L%
  */
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 import static org.activityinfo.json.Json.createObject;
@@ -88,7 +87,7 @@ public class Attachment {
     }
 
     public JsonValue toJsonElement() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("mimeType", mimeType);
         object.put("width", width);
         object.put("height", height);
@@ -98,7 +97,7 @@ public class Attachment {
     }
 
 
-    public static Attachment fromJson(org.activityinfo.json.JsonObject object) {
+    public static Attachment fromJson(JsonValue object) {
         Attachment attachment = new Attachment(
                 object.get("mimeType").asString(),
                 object.get("filename").asString(),

@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -389,13 +390,13 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         newRequest();
 
         // Now update the record's name
-        org.activityinfo.json.JsonObject fieldValues = createObject();
+        JsonValue fieldValues = createObject();
         fieldValues.put(nameField.getName(), TextValue.valueOf("Sue").toJsonElement());
 
         // the UI may send null values
         fieldValues.put(serialNumField.getName(), Json.createNull());
 
-        org.activityinfo.json.JsonObject update = createObject();
+        JsonValue update = createObject();
         update.put("fieldValues", fieldValues);
 
         updater().execute(formClass.getId(), siteId, update);

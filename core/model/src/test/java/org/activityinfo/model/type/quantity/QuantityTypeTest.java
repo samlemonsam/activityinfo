@@ -52,7 +52,7 @@ public class QuantityTypeTest {
         String json = Resources.toString(resource, Charsets.UTF_8);
         JsonValue element = Json.parse(json);
 
-        return FormClass.fromJson(element.getAsJsonObject());
+        return FormClass.fromJson(element);
     }
 
 }

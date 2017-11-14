@@ -20,6 +20,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 
+import static org.activityinfo.json.Json.parse;
+
 public class AnalysesResource {
 
     private final PermissionOracle permissionOracle;
@@ -50,7 +52,7 @@ public class AnalysesResource {
                 analysis.setParentId(entity.getParentId());
                 analysis.setLabel(entity.getLabel());
                 analysis.setModelType(entity.getType());
-                analysis.setModel(Json.parse(entity.getModel()).getAsJsonObject());
+                analysis.setModel(parse(entity.getModel()));
 
                 return Response.ok().entity(Json.toJson(analysis).toJson()).build();
             }

@@ -6,13 +6,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.form.*;
 import org.activityinfo.indexedb.IDBFactory;
 import org.activityinfo.indexedb.IDBTransaction;
 import org.activityinfo.indexedb.OfflineDatabase;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -22,7 +21,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTree;
-import org.activityinfo.observable.Scheduler;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Maybe;
@@ -34,7 +32,6 @@ import org.activityinfo.ui.client.store.http.FormChangeWatcher;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -337,7 +334,7 @@ public class OfflineStore {
         if(existingRecord.isPresent()) {
             updatedRecord.setParentRecordId(existingRecord.get().getParentRecordId());
 
-            JsonObject existingFields = existingRecord.get().getFields();
+            JsonValue existingFields = existingRecord.get().getFields();
             for (String fieldName : existingFields.keys()) {
                 updatedRecord.setField(fieldName, existingFields.<JsonValue>get(fieldName));
             }

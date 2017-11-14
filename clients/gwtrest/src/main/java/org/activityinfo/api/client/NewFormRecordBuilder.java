@@ -1,13 +1,12 @@
 package org.activityinfo.api.client;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 public class NewFormRecordBuilder {
-  private JsonObject jsonObject = Json.createObject();
+  private JsonValue jsonObject = Json.createObject();
 
-  private JsonObject fieldValues = Json.createObject();
+  private JsonValue fieldValues = Json.createObject();
 
   public NewFormRecordBuilder() {
     jsonObject.add("fieldValues", fieldValues);
@@ -17,7 +16,7 @@ public class NewFormRecordBuilder {
     return jsonObject.toJson();
   }
 
-  public JsonObject toJsonObject() {
+  public JsonValue toJsonObject() {
     return jsonObject;
   }
 

@@ -15,7 +15,10 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.*;
+import com.google.gwt.core.client.JavaScriptObject;
+import org.activityinfo.json.JsonException;
+import org.activityinfo.json.JsonFactory;
+import org.activityinfo.json.JsonValue;
 
 /**
  * JSNI based implementation of JsonFactory.
@@ -29,36 +32,60 @@ public class JsJsonFactory implements JsonFactory {
         return @com.google.gwt.core.client.GWT::isScript()() || value == null ? value : Object(value);
     }-*/;
 
-    public JsonString create(String string) {
-        return JsJsonString.create(string);
+    /*
+     * MAGIC: String cast to object interface.
+     */
+    static native JsJsonValue createString(String string) /*-{
+        return string;
+    }-*/;
+
+    /*
+     * MAGIC: primitive boolean cast to object interface.
+     */
+    public static native JsJsonValue createBoolean(boolean bool) /*-{
+        return bool;
+    }-*/;
+
+    /*
+     * MAGIC: primitive number cast to object interface.
+     */
+    static native JsJsonValue createNumber(double number) /*-{
+        return number;
+    }-*/;
+
+
+    @Override
+    public JsonValue createArray() {
+        return (JsJsonValue) JavaScriptObject.createArray();
+    }
+
+    public JsonValue create(String string) {
+        return createString(string);
     }
 
     @Override
     public JsonValue createFromNullable(String string) {
-        return JsJsonString.create(string);
+        return createString(string);
     }
 
-    public JsonNumber create(double number) {
-        return JsJsonNumber.create(number);
+    public JsonValue create(double number) {
+        return createNumber(number);
     }
 
-    public JsonBoolean create(boolean bool) {
-        return JsJsonBoolean.create(bool);
+    public JsonValue create(boolean bool) {
+        return createBoolean(bool);
     }
 
-    public JsonArray createArray() {
-        return JsJsonArray.create();
+    @Override
+    public native JsonValue createNull() /*-{
+        return null;
+    }-*/;
+
+    public JsJsonValue createObject() {
+        return JavaScriptObject.createObject().cast();
     }
 
-    public JsonNull createNull() {
-        return JsJsonNull.create();
-    }
-
-    public JsonObject createObject() {
-        return JsJsonObject.create();
-    }
-
-    public <T extends JsonValue> T parse(String jsonString) throws JsonException {
+    public JsonValue parse(String jsonString) throws JsonException {
         try {
             return parse0(jsonString);
         } catch (Exception e) {

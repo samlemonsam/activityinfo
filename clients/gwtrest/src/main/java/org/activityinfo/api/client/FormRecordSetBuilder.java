@@ -1,14 +1,13 @@
 package org.activityinfo.api.client;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormRecord;
 
 public class FormRecordSetBuilder {
-  private JsonObject jsonObject = Json.createObject();
+  private JsonValue jsonObject = Json.createObject();
 
-  private JsonArray records = Json.createArray();
+  private JsonValue records = Json.createArray();
 
   public FormRecordSetBuilder() {
     jsonObject.add("records", records);
@@ -18,7 +17,7 @@ public class FormRecordSetBuilder {
     return jsonObject.toJson();
   }
 
-  public JsonObject toJsonObject() {
+  public JsonValue toJsonObject() {
     return jsonObject;
   }
 

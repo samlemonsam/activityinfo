@@ -1,7 +1,7 @@
 package org.activityinfo.model.type.enumerated;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.Cardinality;
 import org.junit.Test;
 
@@ -17,7 +17,7 @@ public class EnumTypeTest {
     @Test
     public void deserializationCheckboxes() {
 
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("presentation", "CHECKBOX");
         object.put("cardinality", "SINGLE");
         object.put("values", Json.createArray());
@@ -30,7 +30,7 @@ public class EnumTypeTest {
     @Test
     public void deserializationEnumTypeNoChoices() {
         EnumType type = new EnumType(Cardinality.SINGLE, EnumType.Presentation.AUTOMATIC, Collections.<EnumItem>emptyList());
-        org.activityinfo.json.JsonObject jsonObject = type.getParametersAsJson();
+        JsonValue jsonObject = type.getParametersAsJson();
 
         EnumType reType = EnumType.TYPE_CLASS.deserializeType(jsonObject);
         assertThat(reType.getCardinality(), equalTo(Cardinality.SINGLE));

@@ -17,7 +17,7 @@ public class JsonParsing {
     
     public static String fromEnumValue(JsonValue element) {
         if(element.isJsonObject()) {
-            org.activityinfo.json.JsonObject object = element.getAsJsonObject();
+            JsonValue object = element;
             if(object.hasKey("value")) {
                 return object.get("value").asString().toUpperCase();
             }

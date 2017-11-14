@@ -1,12 +1,14 @@
 package org.activityinfo.model.type;
 
+import org.activityinfo.json.JsonValue;
+
 /**
  * A {@code FieldType} with parameters that further specialize
  * the type class.
  */
 public interface ParametrizedFieldType extends FieldType {
 
-    org.activityinfo.json.JsonObject getParametersAsJson();
+    JsonValue getParametersAsJson();
     
     /**
      *

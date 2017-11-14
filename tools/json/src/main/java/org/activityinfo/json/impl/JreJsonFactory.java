@@ -15,7 +15,9 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.*;
+import org.activityinfo.json.JsonException;
+import org.activityinfo.json.JsonFactory;
+import org.activityinfo.json.JsonValue;
 
 
 /**
@@ -23,7 +25,7 @@ import org.activityinfo.json.*;
  */
 public class JreJsonFactory implements JsonFactory {
 
-    public JsonString create(String string) {
+    public JsonValue create(String string) {
         assert string != null;
         return new JreJsonString(string);
     }
@@ -37,27 +39,27 @@ public class JreJsonFactory implements JsonFactory {
         }
     }
 
-    public JsonNumber create(double number) {
+    public JsonValue create(double number) {
         return new JreJsonNumber(number);
     }
 
-    public JsonBoolean create(boolean bool) {
+    public JsonValue create(boolean bool) {
         return new JreJsonBoolean(bool);
     }
 
-    public JsonArray createArray() {
+    public JsonValue createArray() {
         return new JreJsonArray(this);
     }
 
-    public JsonNull createNull() {
+    public JsonValue createNull() {
         return JreJsonNull.NULL_INSTANCE;
     }
 
-    public JsonObject createObject() {
+    public JsonValue createObject() {
         return new JreJsonObject(this);
     }
 
-    public <T extends JsonValue> T parse(String jsonString) throws JsonException {
+    public JsonValue parse(String jsonString) throws JsonException {
         if (jsonString.startsWith("(") && jsonString.endsWith(")")) {
             // some clients send in (json) expecting an eval is required
             jsonString = jsonString.substring(1, jsonString.length() - 1);

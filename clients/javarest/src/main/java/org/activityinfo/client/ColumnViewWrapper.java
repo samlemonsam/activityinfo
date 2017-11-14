@@ -1,7 +1,6 @@
 package org.activityinfo.client;
 
 import com.google.common.base.Preconditions;
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
@@ -11,13 +10,13 @@ import org.activityinfo.model.query.FilteredColumnView;
 public class ColumnViewWrapper implements ColumnView {
 
     @SuppressWarnings("GwtInconsistentSerializableClass")
-    private JsonArray array;
+    private JsonValue array;
     private int numRows;
 
     public ColumnViewWrapper() {
     }
 
-    public ColumnViewWrapper(int numRows, JsonArray array) {
+    public ColumnViewWrapper(int numRows, JsonValue array) {
         this.array = array;
         this.numRows = numRows;
     }

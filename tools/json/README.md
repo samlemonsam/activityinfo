@@ -1,11 +1,11 @@
 
 # JSON Serialization
 
-ActivityInfo is above all a full-featured web application, and so by neccessity, JSON
-is our primary and canonical serialization form.
+ActivityInfo is above all a full-featured web application, and so by 
+necessity, JSON is our primary and canonical serialization form.
 
-This library is based on GWT's elemental JSON components, which is in turn based on 
-JSON.org. It is adapted 
+This library is based on GWT's elemental JSON components, which is in 
+turn based on JSON.org. It is adapted 
 
 
 ## Usage

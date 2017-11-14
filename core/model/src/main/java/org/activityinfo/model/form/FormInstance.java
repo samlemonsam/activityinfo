@@ -22,7 +22,6 @@ package org.activityinfo.model.form;
  */
 
 import com.google.common.base.Preconditions;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
@@ -279,16 +278,16 @@ public class FormInstance {
         return id != null ? id.hashCode() : 0;
     }
 
-    public JsonObject toJsonObject() {
+    public JsonValue toJsonObject() {
 
-        JsonObject fields = createObject();
+        JsonValue fields = createObject();
         for (Map.Entry<ResourceId, FieldValue> entry : fieldMap.entrySet()) {
             if(entry.getValue() != null) {
                 fields.put(entry.getKey().asString(), entry.getValue().toJsonElement());
             }
         }
 
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("formId", getFormId().asString());
         object.put("recordId", getId().asString());
         object.put("fieldValues", fields);

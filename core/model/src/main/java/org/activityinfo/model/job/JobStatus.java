@@ -1,6 +1,6 @@
 package org.activityinfo.model.job;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 import static org.activityinfo.json.Json.createObject;
 
@@ -37,8 +37,8 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
         return state;
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("id", id);
         object.put("type", descriptor.getType());
         object.put("descriptor", descriptor.toJsonObject());
@@ -49,14 +49,14 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
         return object;
     }
 
-    public static JobStatus fromJson(JsonObject object) {
+    public static JobStatus fromJson(JsonValue object) {
         String id = object.get("id").asString();
         String type = object.get("type").asString();
-        JobDescriptor descriptor = JobRequest.parseDescriptor(type, object.get("descriptor").getAsJsonObject());
+        JobDescriptor descriptor = JobRequest.parseDescriptor(type, object.get("descriptor"));
         JobState state = JobState.valueOf(object.get("state").asString().toUpperCase());
         JobResult result = null;
         if(object.hasKey("result")) {
-            result = descriptor.parseResult(object.get("result").getAsJsonObject());
+            result = descriptor.parseResult(object.get("result"));
         }
 
         return new JobStatus(id, descriptor, state, result);

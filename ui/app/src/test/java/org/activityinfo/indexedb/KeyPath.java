@@ -1,10 +1,10 @@
 package org.activityinfo.indexedb;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 public interface KeyPath {
 
-    ObjectKey buildKey(JsonObject value);
+    ObjectKey buildKey(JsonValue value);
 
     public static KeyPath from(ObjectStoreOptions options) {
         if(options.getKeyPath() instanceof String) {

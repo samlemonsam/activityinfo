@@ -3,7 +3,6 @@ package org.activityinfo.model.type;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -75,7 +74,7 @@ public class ReferenceValue implements FieldValue {
             return references.iterator().next().toJsonElement();
 
         } else {
-            JsonArray array = Json.createArray();
+            JsonValue array = Json.createArray();
             for (RecordRef reference : references) {
                 array.add(reference.toJsonElement());
             }

@@ -6,7 +6,6 @@ import com.google.common.base.Strings;
 import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.api.client.FormValueChangeBuilder;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -14,7 +13,10 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -66,7 +68,7 @@ public class RecordHistoryBuilder {
     }
 
 
-    public JsonArray build(ResourceId formId, ResourceId recordId) throws SQLException {
+    public JsonValue build(ResourceId formId, ResourceId recordId) throws SQLException {
         Optional<FormStorage> form = catalog.getForm(formId);
         if(!form.isPresent()) {
             throw new FormNotFoundException(formId);
@@ -95,7 +97,7 @@ public class RecordHistoryBuilder {
         Map<Long, User> userMap = queryUsers(deltas);
 
         // Now render the complete object for the user
-        JsonArray array = Json.createArray();
+        JsonValue array = Json.createArray();
         for (RecordDelta delta : deltas) {
 
             User user = userMap.get(delta.version.getUserId());

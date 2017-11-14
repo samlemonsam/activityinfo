@@ -26,7 +26,7 @@ public interface JsonFactory {
      * @param string a Java String
      * @return the parsed JsonString
      */
-    JsonString create(String string);
+    JsonValue create(String string);
 
     /**
      * Create a JsonValue from a Java String that may be null
@@ -42,7 +42,7 @@ public interface JsonFactory {
      * @param number a Java double
      * @return the parsed JsonNumber
      */
-    JsonNumber create(double number);
+    JsonValue create(double number);
 
     /**
      * Create a JsonBoolean from a Java boolean.
@@ -50,28 +50,28 @@ public interface JsonFactory {
      * @param bool a Java boolean
      * @return the parsed JsonBoolean
      */
-    JsonBoolean create(boolean bool);
+    JsonValue create(boolean bool);
 
     /**
      * Create an empty JsonArray.
      *
      * @return a new JsonArray
      */
-    JsonArray createArray();
+    JsonValue createArray();
 
     /**
      * Create a JsonNull.
      *
      * @return a JsonNull instance
      */
-    JsonNull createNull();
+    JsonValue createNull();
 
     /**
      * Create an empty JsonObject.
      *
      * @return a new JsonObject
      */
-    JsonObject createObject();
+    JsonValue createObject();
 
     /**
      * Parse a String in JSON format and return a JsonValue of the appropriate
@@ -80,5 +80,5 @@ public interface JsonFactory {
      * @param jsonString a String in JSON format
      * @return a parsed JsonValue
      */
-    <T extends JsonValue> T parse(String jsonString) throws JsonException;
+    JsonValue parse(String jsonString) throws JsonException;
 }

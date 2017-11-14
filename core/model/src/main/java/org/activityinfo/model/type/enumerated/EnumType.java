@@ -2,8 +2,6 @@ package org.activityinfo.model.type.enumerated;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -22,7 +20,7 @@ public class EnumType implements ParametrizedFieldType {
 
     public interface EnumTypeClass extends ParametrizedFieldTypeClass, RecordFieldTypeClass {
         @Override
-        EnumType deserializeType(org.activityinfo.json.JsonObject parametersObject);
+        EnumType deserializeType(JsonValue parametersObject);
     }
 
     public enum Presentation {
@@ -40,7 +38,7 @@ public class EnumType implements ParametrizedFieldType {
 
 
         @Override
-        public EnumType deserializeType(org.activityinfo.json.JsonObject parametersObject) {
+        public EnumType deserializeType(JsonValue parametersObject) {
             // Explicit type parameter required by GWT's compiler!
             Cardinality cardinality = Cardinality.valueOf(
                     parametersObject.<JsonValue>get("cardinality"));
@@ -66,9 +64,9 @@ public class EnumType implements ParametrizedFieldType {
             JsonValue valuesArray = parametersObject.get("values");
             if(valuesArray != null) {
                 if (valuesArray.isJsonArray()) {
-                    JsonArray enumItemArray = valuesArray.getAsJsonArray();
+                    JsonValue enumItemArray = valuesArray;
                     for (JsonValue record : enumItemArray.values()) {
-                        enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
+                        enumItems.add(EnumItem.fromJsonObject(record));
                     }
                 }
             }
@@ -150,7 +148,7 @@ public class EnumType implements ParametrizedFieldType {
             return new EnumValue(id);
         } else if(value.isJsonArray()) {
             Set<ResourceId> ids = new HashSet<>();
-            JsonArray array = value.getAsJsonArray();
+            JsonValue array = value;
             for (int i = 0; i < array.length(); i++) {
                 ResourceId id = ResourceId.valueOf(array.get(i).asString());
                 ids.add(id);
@@ -173,14 +171,14 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
+    public JsonValue getParametersAsJson() {
         
-        JsonArray enumValueArray = Json.createArray();
+        JsonValue enumValueArray = Json.createArray();
         for (EnumItem enumItem : getValues()) {
             enumValueArray.add(enumItem.toJsonObject());
         }
 
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("cardinality", cardinality.name().toLowerCase());
         object.put("presentation", presentation.name().toLowerCase());
         object.put("values", enumValueArray);

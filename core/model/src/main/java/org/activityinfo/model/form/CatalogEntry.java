@@ -1,7 +1,5 @@
 package org.activityinfo.model.form;
 
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 import java.util.ArrayList;
@@ -50,7 +48,7 @@ public class CatalogEntry {
     }
     
     public JsonValue toJsonElement() {
-        JsonObject jsonObject = createObject();
+        JsonValue jsonObject = createObject();
         jsonObject.put("id", id);
         jsonObject.put("type", type.name().toLowerCase());
         jsonObject.put("label", label);
@@ -59,7 +57,7 @@ public class CatalogEntry {
     }
 
     public static CatalogEntry fromJson(JsonValue jsonElement) {
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        JsonValue jsonObject = jsonElement;
         CatalogEntry model = new CatalogEntry();
         model.id = jsonObject.get("id").asString();
         model.type = CatalogEntryType.valueOf(jsonObject.get("type").asString().toUpperCase());
@@ -68,7 +66,7 @@ public class CatalogEntry {
         return model;
     }
 
-    public static List<CatalogEntry> fromJsonArray(JsonArray jsonArray) {
+    public static List<CatalogEntry> fromJsonArray(JsonValue jsonArray) {
         List<CatalogEntry> list = new ArrayList<>();
         for(JsonValue element : jsonArray.values()) {
             list.add(fromJson(element));

@@ -188,7 +188,7 @@ public class RootResource {
                 blobAuthorizer,
                 new HrdSerialNumberProvider());
         try {
-            updater.execute(jsonElement.getAsJsonObject());
+            updater.execute(jsonElement);
         } catch (InvalidUpdateException e) {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity(e.getMessage())

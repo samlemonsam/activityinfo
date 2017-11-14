@@ -1,7 +1,5 @@
 package org.activityinfo.api.client;
 
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 
@@ -73,7 +71,7 @@ public class FormHistoryEntry {
   }
 
   public static FormHistoryEntry fromJson(JsonValue jsonElement) {
-    JsonObject jsonObject = jsonElement.getAsJsonObject();
+      JsonValue jsonObject = jsonElement;
     FormHistoryEntry model = new FormHistoryEntry();
     model.formId = JsonParsing.toNullableString(jsonObject.get("formId"));
     model.recordId = JsonParsing.toNullableString(jsonObject.get("recordId"));
@@ -84,11 +82,11 @@ public class FormHistoryEntry {
     model.changeType = JsonParsing.toNullableString(jsonObject.get("changeType"));
     model.userName = JsonParsing.toNullableString(jsonObject.get("userName"));
     model.userEmail = JsonParsing.toNullableString(jsonObject.get("userEmail"));
-    model.values = FormValueChange.fromJsonArray(jsonObject.get("values").getAsJsonArray());
+    model.values = FormValueChange.fromJsonArray(jsonObject.get("values"));
     return model;
   }
 
-  public static List<FormHistoryEntry> fromJsonArray(JsonArray jsonArray) {
+  public static List<FormHistoryEntry> fromJsonArray(JsonValue jsonArray) {
     List<FormHistoryEntry> list = new ArrayList<FormHistoryEntry>();
     for(JsonValue element : jsonArray.values()) {
       list.add(fromJson(element));

@@ -3,8 +3,6 @@ package org.activityinfo.store.hrd;
 import com.google.appengine.api.datastore.EmbeddedEntity;
 import com.google.common.collect.Lists;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 import java.util.List;
@@ -15,7 +13,7 @@ import java.util.Map;
  */
 public class FormConverter {
     
-    public static EmbeddedEntity toEmbeddedEntity(JsonObject record) {
+    public static EmbeddedEntity toEmbeddedEntity(JsonValue record) {
         EmbeddedEntity entity = new EmbeddedEntity();
         for (Map.Entry<String, JsonValue> entry : record.entrySet()) {
             entity.setUnindexedProperty(entry.getKey(), toPropertyValue(entry.getValue()));
@@ -39,10 +37,10 @@ public class FormConverter {
             }
             
         } else if(value.isJsonObject()) {
-            return toEmbeddedEntity(value.getAsJsonObject());
+            return toEmbeddedEntity(value);
             
         } else if(value.isJsonArray()) {
-            JsonArray array = value.getAsJsonArray();
+            JsonValue array = value;
             List<Object> propertyList = Lists.newArrayListWithCapacity(array.length());
 
             for (JsonValue jsonElement : array.values()) {
@@ -55,8 +53,8 @@ public class FormConverter {
         }
     }
     
-    public static JsonObject fromEmbeddedEntity(EmbeddedEntity entity) {
-        JsonObject record = Json.createObject();
+    public static JsonValue fromEmbeddedEntity(EmbeddedEntity entity) {
+        JsonValue record = Json.createObject();
         for (Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
             if(entry.getValue() != null) {
                 record.add(entry.getKey(), fromPropertyValue(entry.getValue()));
@@ -74,7 +72,7 @@ public class FormConverter {
             
         } else if(propertyValue instanceof List) {
             List<Object> propertyValueList = (List<Object>) propertyValue;
-            JsonArray convertedList = Json.createArray();
+            JsonValue convertedList = Json.createArray();
             for (Object propertyValueListItem : propertyValueList) {
                 convertedList.add(fromPropertyValue(propertyValueListItem));
             }

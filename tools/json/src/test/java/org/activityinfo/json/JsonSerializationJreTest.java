@@ -1,7 +1,6 @@
 package org.activityinfo.json;
 
 import junit.framework.TestCase;
-import org.activityinfo.json.impl.JreJsonNull;
 import org.activityinfo.json.impl.JsonUtil;
 
 import java.io.*;
@@ -9,27 +8,27 @@ import java.io.*;
 public class JsonSerializationJreTest extends TestCase {
 
   public void testSerializeNull() throws Exception {
-    JsonNull null1 = Json.createNull();
-    JsonNull null2 = Json.createNull();
+    JsonValue null1 = Json.createNull();
+    JsonValue null2 = Json.createNull();
     JsonValue out = serializeDeserialize(null1);
     assertJsonEquals(null1, out);
     assertSame(null1, out);
     assertSame(null2, out);
-    assertSame(JreJsonNull.NULL_INSTANCE, out);
+    assertSame(Json.createNull(), out);
   }
 
   public void testSerializeObject() throws Exception {
-    JsonObject foo = Json.createObject();
+    JsonValue foo = Json.createObject();
     foo.put("true", true);
     foo.put("string", "string");
     foo.put("number", 1.25);
 
-    JsonObject subObject = Json.createObject();
+    JsonValue subObject = Json.createObject();
     subObject.put("false", false);
     subObject.put("string2", "string2");
     subObject.put("number", -151);
 
-    JsonArray subArray = Json.createArray();
+    JsonValue subArray = Json.createArray();
     subArray.set(0, true);
     subArray.set(1, 1);
     subArray.set(2, "2");
@@ -42,17 +41,17 @@ public class JsonSerializationJreTest extends TestCase {
   }
 
   public void testSerializeArray() throws Exception {
-    JsonObject subObject = Json.createObject();
+    JsonValue subObject = Json.createObject();
     subObject.put("false", false);
     subObject.put("string2", "string2");
     subObject.put("number", -151);
 
-    JsonArray subArray = Json.createArray();
+    JsonValue subArray = Json.createArray();
     subArray.set(0, true);
     subArray.set(1, 1);
     subArray.set(2, "2");
 
-    JsonArray array = Json.createArray();
+    JsonValue array = Json.createArray();
     array.set(0, true);
     array.set(1, false);
     array.set(2, 2);

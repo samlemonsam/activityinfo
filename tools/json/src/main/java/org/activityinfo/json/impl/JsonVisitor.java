@@ -15,8 +15,6 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 /**
@@ -79,16 +77,15 @@ class JsonVisitor {
     /**
      * Called after every element of array has been visited.
      */
-    public void endVisit(JsonArray array, JsonContext ctx) {
+    public void endArrayVisit(JsonValue array, JsonContext ctx) {
     }
 
     /**
      * Called after every field of an object has been visited.
-     *
-     * @param object
+     *  @param object
      * @param ctx
      */
-    public void endVisit(JsonObject object, JsonContext ctx) {
+    public void endObjectVisit(JsonValue object, JsonContext ctx) {
     }
 
     /**
@@ -117,7 +114,7 @@ class JsonVisitor {
      * @param ctx   a context to replace or delete the array
      * @return true if the array elements should be visited
      */
-    public boolean visit(JsonArray array, JsonContext ctx) {
+    public boolean visitArray(JsonValue array, JsonContext ctx) {
         return true;
     }
 
@@ -129,7 +126,7 @@ class JsonVisitor {
      * @param ctx    a context to replace or delete the object
      * @return true if object fields should be visited
      */
-    public boolean visit(JsonObject object, JsonContext ctx) {
+    public boolean visitObject(JsonValue object, JsonContext ctx) {
         return true;
     }
 

@@ -1,6 +1,6 @@
 package org.activityinfo.model.job;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 import static org.activityinfo.json.Json.createObject;
 
@@ -16,8 +16,8 @@ public class JobRequest {
         this.locale = locale;
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("type", descriptor.getType());
         object.put("descriptor", descriptor.toJsonObject());
         if(locale != null) {
@@ -34,9 +34,9 @@ public class JobRequest {
         return locale;
     }
 
-    public static JobRequest fromJson(org.activityinfo.json.JsonObject object) {
+    public static JobRequest fromJson(JsonValue object) {
         String type = object.get("type").asString();
-        JobDescriptor descriptor = parseDescriptor(type, object.getObject("descriptor"));
+        JobDescriptor descriptor = parseDescriptor(type, object.get("descriptor"));
         String locale = null;
         if(object.hasKey("locale")) {
             locale = object.get("locale").asString();
@@ -44,7 +44,7 @@ public class JobRequest {
         return new JobRequest(descriptor, locale);
     }
 
-    public static JobDescriptor parseDescriptor(String type, org.activityinfo.json.JsonObject descriptor) {
+    public static JobDescriptor parseDescriptor(String type, JsonValue descriptor) {
         switch (type) {
             case ExportFormJob.TYPE:
                 return ExportFormJob.fromJson(descriptor);

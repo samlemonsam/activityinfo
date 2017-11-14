@@ -1,7 +1,7 @@
 package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.EmbeddedEntity;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -19,10 +19,10 @@ public class FormConverterTest {
     @Test
     public void deserializationEnumTypeNoChoices() {
         EnumType type = new EnumType(Cardinality.SINGLE, EnumType.Presentation.AUTOMATIC, Collections.<EnumItem>emptyList());
-        JsonObject jsonObject = type.getParametersAsJson();
+        JsonValue jsonObject = type.getParametersAsJson();
 
         EmbeddedEntity entity = FormConverter.toEmbeddedEntity(jsonObject);
-        JsonObject fromEntity = FormConverter.fromEmbeddedEntity(entity);
+        JsonValue fromEntity = FormConverter.fromEmbeddedEntity(entity);
 
         EnumType reType = EnumType.TYPE_CLASS.deserializeType(fromEntity);
         assertThat(reType.getCardinality(), equalTo(Cardinality.SINGLE));

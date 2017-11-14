@@ -15,13 +15,9 @@
  */
 package org.activityinfo.json;
 
-import com.google.gwt.dev.protobuf.DynamicMessage;
 import com.google.gwt.junit.client.GWTTestCase;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.activityinfo.json.Json.parse;
 
 public class JsonUtilGwtTest extends GWTTestCase {
 
@@ -32,22 +28,22 @@ public class JsonUtilGwtTest extends GWTTestCase {
 
   public void testCoercions() {
     // test boolean coercions
-    JsonBoolean boolTrue = Json.create(true);
-    JsonBoolean boolFalse = Json.create(false);
+    JsonValue boolTrue = Json.create(true);
+    JsonValue boolFalse = Json.create(false);
     // true -> 1, false -> 0
     assertEquals(true, boolTrue.asBoolean());
     assertEquals(false, boolFalse.asBoolean());
 
-    JsonString trueString = Json.create("true");
-    JsonString falseString = Json.create("");
+    JsonValue trueString = Json.create("true");
+    JsonValue falseString = Json.create("");
     // "" -> false, others true
     assertEquals(true, trueString.asBoolean());
     assertEquals(false, falseString.asBoolean());
 
     // != 0 -> true, otherwise if 0.0 or -0.0 false
-    JsonNumber trueNumber = Json.create(1.0);
-    JsonNumber falseNumber = Json.create(0.0);
-    JsonNumber falseNumber2 = Json.create(-0.0);
+    JsonValue trueNumber = Json.create(1.0);
+    JsonValue falseNumber = Json.create(0.0);
+    JsonValue falseNumber2 = Json.create(-0.0);
     assertEquals(true, trueNumber.asBoolean());
     assertEquals(false, falseNumber.asBoolean());
     assertEquals(false, falseNumber2.asBoolean());
@@ -64,6 +60,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertEquals(0.0, boolFalse.asNumber());
 
     assertEquals(42.0, Json.create("42").asNumber());
+    assertEquals(42, Json.create(42).asInt());
     // non numbers are NaN
     assertTrue(Double.isNaN(trueString.asNumber()));
     // null is 0
@@ -74,8 +71,8 @@ public class JsonUtilGwtTest extends GWTTestCase {
     // [] -> 0
     assertEquals(0.0, Json.createArray().asNumber());
     // [[42]] -> 42
-    JsonArray nested = Json.createArray();
-    JsonArray outer = Json.createArray();
+    JsonValue nested = Json.createArray();
+    JsonValue outer = Json.createArray();
     outer.set(0, nested);
     nested.set(0, 42);
     assertEquals(42.0, outer.asNumber());
@@ -97,7 +94,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertEquals("42", Json.create(42).asString());
 
     // [[42, 45], [52, 55]] -> "42, 45, 52, 55"
-    JsonArray inner2 = Json.createArray();
+    JsonValue inner2 = Json.createArray();
     inner2.set(0, 52);
     inner2.set(1, 55);
     outer.set(1, inner2);
@@ -132,12 +129,67 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertNotNull(obj);
   }
 
+  public void testPredicates() {
+    JsonValue obj = Json.parse(
+            "{ \"a\":1, \"b\":\"hello\", \"c\": true,"
+                    + "\"d\": null, \"e\": [1,2,3,4], \"f\": {} }");
+
+    assertTrue(obj.get("a").isJsonPrimitive());
+    assertTrue(obj.get("a").isNumber());
+    assertFalse(obj.get("a").isJsonString());
+    assertFalse(obj.get("a").isJsonObject());
+    assertFalse(obj.get("a").isJsonArray());
+    assertFalse(obj.get("a").isBoolean());
+    assertFalse(obj.get("a").isJsonNull());
+
+    assertTrue(obj.get("b").isJsonPrimitive());
+    assertTrue(obj.get("b").isJsonString());
+    assertFalse(obj.get("b").isNumber());
+    assertFalse(obj.get("b").isJsonObject());
+    assertFalse(obj.get("b").isJsonArray());
+    assertFalse(obj.get("b").isBoolean());
+    assertFalse(obj.get("b").isJsonNull());
+
+
+    assertTrue(obj.get("c").isJsonPrimitive());
+    assertTrue(obj.get("c").isBoolean());
+    assertFalse(obj.get("c").isNumber());
+    assertFalse(obj.get("c").isJsonObject());
+    assertFalse(obj.get("c").isJsonArray());
+    assertFalse(obj.get("c").isJsonString());
+    assertFalse(obj.get("c").isJsonNull());
+
+    assertTrue(obj.get("d").isJsonNull());
+    assertFalse(obj.get("d").isJsonPrimitive());
+    assertFalse(obj.get("d").isBoolean());
+    assertFalse(obj.get("d").isNumber());
+    assertFalse(obj.get("d").isJsonObject());
+    assertFalse(obj.get("d").isJsonArray());
+    assertFalse(obj.get("d").isJsonString());
+
+    assertTrue(obj.get("e").isJsonArray());
+    assertFalse(obj.get("e").isJsonPrimitive());
+    assertFalse(obj.get("e").isBoolean());
+    assertFalse(obj.get("e").isNumber());
+    assertFalse(obj.get("e").isJsonNull());
+    assertFalse(obj.get("e").isJsonObject());
+    assertFalse(obj.get("e").isJsonString());
+
+    assertTrue(obj.get("f").isJsonObject());
+    assertFalse(obj.get("f").isJsonPrimitive());
+    assertFalse(obj.get("f").isBoolean());
+    assertFalse(obj.get("f").isNumber());
+    assertFalse(obj.get("f").isJsonNull());
+    assertFalse(obj.get("f").isJsonArray());
+    assertFalse(obj.get("f").isJsonString());
+  }
+
   public void testNative() {
-    JsonObject obj = Json.createObject();
+    JsonValue obj = Json.createObject();
     obj.put("x", 42);
     Object nativeObj = obj.toNative();
 
-    JsonObject result = nativeMethod(nativeObj);
+    JsonValue result = nativeMethod(nativeObj);
     assertEquals(43.0, result.get("y").asNumber());
   }
 
@@ -151,7 +203,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
   public void testStringifyCycle() {
     String json = "{\"a\":1,\"b\":\"hello\",\"c\":true,"
         + "\"d\":null,\"e\":[1,2,3,4],\"f\":{\"x\":1}}";
-    JsonObject obj = Json.parse(json).getAsJsonObject();
+      JsonValue obj = parse(json);
     obj.put("cycle", obj);
     try {
       Json.stringify(obj);
@@ -164,8 +216,8 @@ public class JsonUtilGwtTest extends GWTTestCase {
   public void testStringifyNonCycle() {
     String json = "{\"a\":1,\"b\":\"hello\",\"c\":true,"
         + "\"d\":null,\"e\":[1,2,3,4],\"f\":{\"x\":1}}";
-    JsonObject obj = Json.parse(json).getAsJsonObject();
-    JsonObject obj2 = Json.parse("{\"x\": 1, \"y\":2}").getAsJsonObject();
+      JsonValue obj = parse(json);
+      JsonValue obj2 = parse("{\"x\": 1, \"y\":2}");
     obj.put("nocycle", obj2);
     obj.put("nocycle2", obj2);
     try {
@@ -199,7 +251,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
 //  }
 //
   public void testStringifyDoubleNanInfinity() {
-    JsonNumber json = Json.create(Double.NaN);
+    JsonValue json = Json.create(Double.NaN);
     assertEquals("null",Json.stringify(json));
     json = Json.create(Double.POSITIVE_INFINITY);
     assertEquals("null",Json.stringify(json));
@@ -216,14 +268,14 @@ public class JsonUtilGwtTest extends GWTTestCase {
 //    assertEquals("null",json.toJson());
 //  }
 
-  private native JsonObject nativeMethod(Object o) /*-{
+  private native JsonValue nativeMethod(Object o) /*-{
     o.y = o.x + 1;
     return o;
   }-*/;
 
 
   public void testSetStringNull() {
-    JsonObject object = Json.createObject();
+    JsonValue object = Json.createObject();
     object.put("foo", (String)null);
 
     assertTrue(object.get("foo").isJsonNull());
@@ -231,7 +283,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
 
   public void testObjectNullValues() {
 
-    JsonObject object = Json.createObject();
+    JsonValue object = Json.createObject();
     object.put("a", (String)null);
     object.put("b", Json.createNull());
 
@@ -243,7 +295,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
   public void testArrayParse() {
 
     JsonValue jsonValue = Json.parse("[1,2,3,4]");
-    JsonArray jsonArray = jsonValue.getAsJsonArray();
+    JsonValue jsonArray = jsonValue;
 
     int count = 0;
     double sum = 0;
@@ -259,7 +311,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
   public void testStringArrayParse() {
 
     JsonValue jsonValue = Json.parse("[\"a\", \"b\"]");
-    JsonArray jsonArray = jsonValue.getAsJsonArray();
+    JsonValue jsonArray = jsonValue;
 
     String concat = "";
     for (JsonValue value : jsonArray.values()) {

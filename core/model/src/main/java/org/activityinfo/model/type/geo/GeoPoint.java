@@ -1,6 +1,5 @@
 package org.activityinfo.model.type.geo;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -39,7 +38,7 @@ public class GeoPoint implements GeoFieldValue, RecordFieldValue {
 
     @Override
     public JsonValue toJsonElement() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("latitude", latitude);
         object.put("longitude", longitude);
         return object;

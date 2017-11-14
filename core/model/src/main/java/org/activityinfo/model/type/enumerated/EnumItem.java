@@ -1,7 +1,6 @@
 package org.activityinfo.model.type.enumerated;
 
 import com.google.common.base.Strings;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -42,7 +41,7 @@ public class EnumItem implements Serializable {
 
 
     public JsonValue toJsonObject() {
-        JsonObject jsonObject = createObject();
+        JsonValue jsonObject = createObject();
         jsonObject.put("id", id.asString());
         jsonObject.put("label", label);
         if(!Strings.isNullOrEmpty(code)) {
@@ -51,7 +50,7 @@ public class EnumItem implements Serializable {
         return jsonObject;
     }
     
-    public static EnumItem fromJsonObject(JsonObject jsonObject) {
+    public static EnumItem fromJsonObject(JsonValue jsonObject) {
         EnumItem enumItem = new EnumItem();
         enumItem.setId(ResourceId.valueOf(jsonObject.get("id").asString()));
         if(jsonObject.hasKey("label")) {

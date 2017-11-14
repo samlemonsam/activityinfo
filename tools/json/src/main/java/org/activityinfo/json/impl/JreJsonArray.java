@@ -15,7 +15,10 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonFactory;
+import org.activityinfo.json.JsonType;
+import org.activityinfo.json.JsonValue;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -26,7 +29,7 @@ import java.util.List;
 /**
  * Server-side implementation of JsonArray.
  */
-public class JreJsonArray extends JreJsonValue implements JsonArray {
+class JreJsonArray extends JreJsonValue {
 
     private static final long serialVersionUID = 1L;
 
@@ -67,30 +70,22 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
         return toReturn.toString();
     }
 
-    public JsonValue get(int index) {
-        return arrayValues.get(index);
-    }
-
     @Override
     public Iterable<JsonValue> values() {
         return new JsonArrayIterable(this);
     }
 
-    public JsonArray getArray(int index) {
-        return (JsonArray) get(index);
-    }
-
 
     public boolean getBoolean(int index) {
-        return ((JsonBoolean) get(index)).getBoolean();
+        return get(index).asBoolean();
     }
 
     public double getNumber(int index) {
-        return ((JsonNumber) get(index)).getNumber();
+        return get(index).asNumber();
     }
 
-    public JsonObject getObject(int index) {
-        return (JsonObject) get(index);
+    public JsonValue get(int index) {
+        return arrayValues.get(index);
     }
 
     public Object getObject() {
@@ -102,7 +97,7 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
     }
 
     public String getString(int index) {
-        return ((JsonString) get(index)).getString();
+        return get(index).asString();
     }
 
     public JsonType getType() {
@@ -153,7 +148,7 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
     @Override
     public void traverse(JsonVisitor visitor,
                          JsonContext ctx) {
-        if (visitor.visit(this, ctx)) {
+        if (visitor.visitArray(this, ctx)) {
             JsonArrayContext arrayCtx = new JsonArrayContext(this);
             for (int i = 0; i < length(); i++) {
                 arrayCtx.setCurrentIndex(i);
@@ -163,7 +158,7 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
                 }
             }
         }
-        visitor.endVisit(this, ctx);
+        visitor.endArrayVisit(this, ctx);
     }
 
     @Override
@@ -172,7 +167,7 @@ public class JreJsonArray extends JreJsonValue implements JsonArray {
     }
 
     @Override
-    public JsonArray getAsJsonArray() {
+    public JsonValue getAsJsonArray() {
         return this;
     }
 

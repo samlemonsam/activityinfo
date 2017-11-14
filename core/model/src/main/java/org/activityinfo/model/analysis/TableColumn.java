@@ -3,7 +3,6 @@ package org.activityinfo.model.analysis;
 
 import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
@@ -28,7 +27,7 @@ public abstract class TableColumn {
 
     @Value.Lazy
     public JsonValue toJson() {
-        JsonObject object = Json.createObject();
+        JsonValue object = Json.createObject();
         object.put("id", getId());
         if(getLabel().isPresent()) {
             object.put("label", getLabel().get());
@@ -40,7 +39,7 @@ public abstract class TableColumn {
         return object;
     }
 
-    public static TableColumn fromJson(JsonObject object) {
+    public static TableColumn fromJson(JsonValue object) {
         ImmutableTableColumn.Builder tableColumn = ImmutableTableColumn.builder();
         tableColumn.id(object.getString("id"));
         if(object.hasKey("label")) {

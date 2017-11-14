@@ -2,7 +2,6 @@ package org.activityinfo.storage;
 
 import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 import javax.annotation.Nullable;
@@ -16,7 +15,7 @@ public final class LocalStorageImpl implements LocalStorage {
     }
 
     @Override
-    public void setObject(String keyName, JsonObject jsonValue) {
+    public void setObject(String keyName, JsonValue jsonValue) {
         setItem(keyName, jsonValue.toJson());
     }
 

@@ -1,6 +1,5 @@
 package org.activityinfo.model.form;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
@@ -18,12 +17,12 @@ public class FormRecord {
     private String recordId;
     private String formId;
     private String parentRecordId;
-    private JsonObject fields;
+    private JsonValue fields;
 
     private FormRecord() {
     }
 
-    public FormRecord(RecordRef ref, String parentRecordId, JsonObject fields) {
+    public FormRecord(RecordRef ref, String parentRecordId, JsonValue fields) {
         this.formId = ref.getFormId().asString();
         this.recordId = ref.getRecordId().asString();
         this.parentRecordId = parentRecordId;
@@ -42,7 +41,7 @@ public class FormRecord {
         return parentRecordId;
     }
 
-    public JsonObject getFields() {
+    public JsonValue getFields() {
         return fields;
     }
 
@@ -53,7 +52,7 @@ public class FormRecord {
     }
     
     public static FormRecord fromJson(JsonValue element) {
-        JsonObject jsonObject = element.getAsJsonObject();
+        JsonValue jsonObject = element;
 
         FormRecord formRecord = new FormRecord();
         formRecord.recordId = jsonObject.get("recordId").asString();
@@ -63,17 +62,17 @@ public class FormRecord {
             formRecord.parentRecordId = jsonObject.get("parentRecordId").asString();
         }
 
-        formRecord.fields = jsonObject.get("fields").getAsJsonObject();
+        formRecord.fields = jsonObject.get("fields");
 
         return formRecord;
     }
     
-    public JsonObject toJsonElement() {
+    public JsonValue toJsonElement() {
         
         assert recordId != null;
         assert formId != null;
 
-        JsonObject jsonObject = createObject();
+        JsonValue jsonObject = createObject();
         jsonObject.put("recordId", recordId);
         jsonObject.put("formId", formId);
         if(parentRecordId != null) {
@@ -83,7 +82,7 @@ public class FormRecord {
         return jsonObject;
     }
     
-    public static List<FormRecord> fromJsonArray(org.activityinfo.json.JsonArray array) {
+    public static List<FormRecord> fromJsonArray(JsonValue array) {
         List<FormRecord> list = new ArrayList<>();
         for (JsonValue jsonElement : array.values()) {
             list.add(fromJson(jsonElement));

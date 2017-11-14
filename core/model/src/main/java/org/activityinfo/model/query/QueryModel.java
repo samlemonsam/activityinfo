@@ -2,7 +2,9 @@ package org.activityinfo.model.query;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -173,15 +175,15 @@ public class QueryModel {
         QueryModel queryModel = new QueryModel();
 
         org.activityinfo.json.JsonParser jsonParser = new JsonParser();
-        JsonObject jsonObject = jsonParser.parse(json).getAsJsonObject();
+        JsonValue jsonObject = jsonParser.parse(json);
 
-        JsonArray rowSources = jsonObject.get("rowSources").getAsJsonArray();
+        JsonValue rowSources = jsonObject.get("rowSources");
         for (JsonValue rowSource : rowSources.values()) {
-            queryModel.getRowSources().add(RowSource.fromJson(rowSource.getAsJsonObject()));
+            queryModel.getRowSources().add(RowSource.fromJson(rowSource));
         }
 
-        for (JsonValue column : jsonObject.get("columns").getAsJsonArray().values()) {
-            queryModel.getColumns().add(ColumnModel.fromJson(column.getAsJsonObject()));
+        for (JsonValue column : jsonObject.get("columns").values()) {
+            queryModel.getColumns().add(ColumnModel.fromJson(column));
         }
 
         JsonValue filterValue = jsonObject.get("filter");
@@ -194,19 +196,19 @@ public class QueryModel {
         return queryModel;
     }
 
-    public JsonObject toJsonElement() {
+    public JsonValue toJsonElement() {
 
-        JsonArray sourcesArray = Json.createArray();
+        JsonValue sourcesArray = Json.createArray();
         for (RowSource rowSource : rowSources) {
             sourcesArray.add(rowSource.toJsonElement());
         }
 
-        JsonArray columnsArray = Json.createArray();
+        JsonValue columnsArray = Json.createArray();
         for (ColumnModel column : columns) {
             columnsArray.add(column.toJsonElement());
         }
 
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("rowSources", sourcesArray);
         object.put("columns", columnsArray);
 

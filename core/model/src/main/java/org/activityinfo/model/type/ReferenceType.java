@@ -4,8 +4,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -36,16 +34,16 @@ public class ReferenceType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             
             List<ResourceId> range = new ArrayList<>();
-            JsonArray rangeArray = parametersObject.get("range").getAsJsonArray();
+            JsonValue rangeArray = parametersObject.get("range");
             for (JsonValue rangeElement : rangeArray.values()) {
                 String formId;
                 if(rangeElement.isJsonPrimitive()) {
                     formId = rangeElement.asString();
                 } else {
-                    formId = rangeElement.getAsJsonObject().get("formId").asString();
+                    formId = rangeElement.get("formId").asString();
                 }
                 range.add(ResourceId.valueOf(formId));
             }
@@ -82,7 +80,7 @@ public class ReferenceType implements ParametrizedFieldType {
         if(value.isJsonNull()) {
             return new ReferenceValue();
         } else if(value.isJsonArray()) {
-            JsonArray array = (JsonArray) value;
+            JsonValue array = (JsonValue) value;
             Set<RecordRef> refs = new HashSet<>();
             for (int i = 0; i < array.length(); i++) {
                 refs.add(parseRef(array.getString(i)));
@@ -144,13 +142,13 @@ public class ReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public org.activityinfo.json.JsonObject getParametersAsJson() {
-        JsonObject object = createObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         object.put("cardinality", cardinality.name().toLowerCase());
         
-        JsonArray rangeArray = Json.createArray();
+        JsonValue rangeArray = Json.createArray();
         for (ResourceId formId : range) {
-            JsonObject rangeObject = createObject();
+            JsonValue rangeObject = createObject();
             rangeObject.put("formId", formId.asString());
             rangeArray.add(rangeObject);
         }

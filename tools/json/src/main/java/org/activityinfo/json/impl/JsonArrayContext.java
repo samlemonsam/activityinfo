@@ -15,7 +15,6 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
 
 /**
@@ -25,12 +24,12 @@ class JsonArrayContext extends JsonContext {
 
     int currentIndex = 0;
 
-    public JsonArrayContext(JsonArray array) {
+    public JsonArrayContext(JsonValue array) {
         super(array);
     }
 
-    public JsonArray array() {
-        return (JsonArray) getValue();
+    public JsonValue array() {
+        return (JsonValue) getValue();
     }
 
     public int getCurrentIndex() {

@@ -22,7 +22,6 @@ package org.activityinfo.model.type.subform;
 */
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -50,7 +49,7 @@ public class SubFormReferenceType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             JsonValue formIdElement;
             if(parametersObject.hasKey("classReference")) {
                 formIdElement = parametersObject.get("classReference");
@@ -115,8 +114,8 @@ public class SubFormReferenceType implements ParametrizedFieldType {
     }
 
     @Override
-    public org.activityinfo.json.JsonObject getParametersAsJson() {
-        JsonObject object = createObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         object.put("formId", classId == null ? Json.createNull(): Json.create(classId.asString()));
         return object;
     }

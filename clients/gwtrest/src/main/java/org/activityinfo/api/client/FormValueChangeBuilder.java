@@ -1,10 +1,10 @@
 package org.activityinfo.api.client;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 public class FormValueChangeBuilder {
-  private JsonObject jsonObject = Json.createObject();
+  private JsonValue jsonObject = Json.createObject();
 
   public FormValueChangeBuilder() {
   }
@@ -13,7 +13,7 @@ public class FormValueChangeBuilder {
     return jsonObject.toJson();
   }
 
-  public JsonObject toJsonObject() {
+  public JsonValue toJsonObject() {
     return jsonObject;
   }
 

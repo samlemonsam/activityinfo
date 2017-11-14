@@ -3,8 +3,6 @@ package org.activityinfo.model.form;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -207,8 +205,8 @@ public class FormField extends FormElement {
     }
 
     @Override
-    public JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("id", id.asString());
         object.put("code", code);
         object.put("label", label);
@@ -224,7 +222,7 @@ public class FormField extends FormElement {
         }
 
         if(!superProperties.isEmpty()) {
-            JsonArray superPropertiesArray = Json.createArray();
+            JsonValue superPropertiesArray = Json.createArray();
             for (ResourceId superProperty : superProperties) {
                 superPropertiesArray.add(Json.createFromNullable(superProperty.asString()));
             }
@@ -239,7 +237,7 @@ public class FormField extends FormElement {
     }
 
 
-    public static FormField fromJson(JsonObject jsonObject) {
+    public static FormField fromJson(JsonValue jsonObject) {
         FormField field = new FormField(ResourceId.valueOf(jsonObject.get("id").asString()));
         field.setLabel(Strings.nullToEmpty(JsonParsing.toNullableString(jsonObject.get("label"))));
         field.setCode(JsonParsing.toNullableString(jsonObject.get("code")));
@@ -263,7 +261,7 @@ public class FormField extends FormElement {
         }
 
         if(jsonObject.hasKey("superProperties")) {
-            JsonArray superPropertiesArray = jsonObject.get("superProperties").getAsJsonArray();
+            JsonValue superPropertiesArray = jsonObject.get("superProperties");
             for (int i = 0; i < superPropertiesArray.length(); i++) {
                 field.addSuperProperty(ResourceId.valueOf(superPropertiesArray.getString(i)));
             }
@@ -277,14 +275,14 @@ public class FormField extends FormElement {
             type = typeElement.asString();
             typeParameters = jsonObject.get("typeParameters");
         } else {
-            JsonObject typeObject = typeElement.getAsJsonObject();
+            JsonValue typeObject = typeElement;
             type = typeObject.get("typeClass").asString();
             typeParameters = typeObject.get("parameters");
         }
         
         FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(type);
         if(typeClass instanceof ParametrizedFieldTypeClass && typeParameters != null) {
-            field.setType(((ParametrizedFieldTypeClass) typeClass).deserializeType(typeParameters.getAsJsonObject()));
+            field.setType(((ParametrizedFieldTypeClass) typeClass).deserializeType(typeParameters));
         } else {
             field.setType(typeClass.createType());
         }

@@ -1,13 +1,13 @@
 package org.activityinfo.model.resource;
 
-import jsinterop.annotations.JsOverlay;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.activityinfo.json.Json.toJson;
 
 /**
  *  Constructs a set of updates to be applied atomically
@@ -75,8 +75,8 @@ public class RecordTransactionBuilder {
         return tx;
     }
 
-    public JsonObject toJsonObject() {
-        return Json.toJson(build()).getAsJsonObject();
+    public JsonValue toJsonObject() {
+        return toJson(build());
     }
 
 }

@@ -1,11 +1,11 @@
 package org.activityinfo.model.job;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Describes the results of a successfully-completed job
  */
 public interface JobResult {
 
-    JsonObject toJsonObject();
+    JsonValue toJsonObject();
 }

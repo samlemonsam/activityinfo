@@ -1,13 +1,12 @@
 package org.activityinfo.api.client;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 public class FormHistoryEntryBuilder {
-  private JsonObject jsonObject = Json.createObject();
+  private JsonValue jsonObject = Json.createObject();
 
-  private JsonArray values = Json.createArray();
+  private JsonValue values = Json.createArray();
 
   public FormHistoryEntryBuilder() {
     jsonObject.add("values", values);
@@ -17,7 +16,7 @@ public class FormHistoryEntryBuilder {
     return jsonObject.toJson();
   }
 
-  public JsonObject toJsonObject() {
+  public JsonValue toJsonObject() {
     return jsonObject;
   }
 

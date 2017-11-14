@@ -1,7 +1,6 @@
 package org.activityinfo.ui.client.analysis.model;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -89,7 +88,7 @@ public class DimensionMapping {
 
     public JsonValue toJson() {
 
-        JsonObject object = Json.createObject();
+        JsonValue object = Json.createObject();
         if(formId != null) {
             object.put("formId", formId.asString());
         }
@@ -97,7 +96,7 @@ public class DimensionMapping {
         return object;
     }
 
-    public static DimensionMapping fromJson(JsonObject object) {
+    public static DimensionMapping fromJson(JsonValue object) {
         ResourceId formId = null;
         if(object.hasKey("formId")) {
             formId = ResourceId.valueOf(object.getString("formId"));

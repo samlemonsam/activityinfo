@@ -69,7 +69,7 @@ public class JobResourceTest {
 
                 JsonValue resultObject = parser.parse((String) response.getEntity());
 
-                JobStatus result = JobStatus.fromJson(resultObject.getAsJsonObject());
+                JobStatus result = JobStatus.fromJson(resultObject);
 
                 assertThat(result.getState(), equalTo(JobState.STARTED));
                 return result.getId();
@@ -83,7 +83,7 @@ public class JobResourceTest {
 
                 Response statusResponse = resource.get(jobId);
                 JsonValue statusObject = parser.parse(((String) statusResponse.getEntity()));
-                JobStatus status = JobStatus.fromJson(statusObject.getAsJsonObject());
+                JobStatus status = JobStatus.fromJson(statusObject);
 
                 assertThat(status.getState(), equalTo(JobState.STARTED));
             }

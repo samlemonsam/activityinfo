@@ -2,11 +2,8 @@ package org.activityinfo.server.csp;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
@@ -18,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static org.activityinfo.json.Json.parse;
 
 /**
  * Receives reports of Content Security Policy violations
@@ -41,8 +40,8 @@ public class ContentSecurityServlet extends HttpServlet {
 
 
         String requestJson = CharStreams.toString(new InputStreamReader(req.getInputStream(), Charsets.UTF_8));
-        JsonObject request = Json.parse(requestJson).getAsJsonObject();
-        JsonObject report = request.get("csp-report").getAsJsonObject();
+        JsonValue request = parse(requestJson);
+        JsonValue report = request.get("csp-report");
 
         StringBuilder message = new StringBuilder();
         

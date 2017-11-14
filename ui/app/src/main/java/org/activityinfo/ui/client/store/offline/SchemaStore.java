@@ -1,6 +1,9 @@
 package org.activityinfo.ui.client.store.offline;
 
-import org.activityinfo.indexedb.*;
+import org.activityinfo.indexedb.IDBDatabaseUpgrade;
+import org.activityinfo.indexedb.IDBObjectStore;
+import org.activityinfo.indexedb.ObjectStoreDefinition;
+import org.activityinfo.indexedb.ObjectStoreOptions;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
@@ -47,7 +50,7 @@ public class SchemaStore {
             if(json == null) {
                 return Optional.empty();
             } else {
-                return Optional.of(FormClass.fromJson(json.getAsJsonObject()));
+                return Optional.of(FormClass.fromJson(json));
             }
         });
     }

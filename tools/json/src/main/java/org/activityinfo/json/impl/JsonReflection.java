@@ -2,7 +2,10 @@ package org.activityinfo.json.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jsinterop.annotations.JsType;
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonMappingException;
+import org.activityinfo.json.JsonType;
+import org.activityinfo.json.JsonValue;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -31,7 +34,7 @@ public class JsonReflection {
             }
         }
 
-        public void fromJson(Object instance, JsonObject jsonObject) throws JsonMappingException {
+        public void fromJson(Object instance, JsonValue jsonObject) throws JsonMappingException {
             if(jsonObject.hasKey(name)) {
                 try {
                     Object fieldValue = JsonReflection.fromJson(field.getType(), jsonObject.get(name));
@@ -48,7 +51,7 @@ public class JsonReflection {
             }
         }
 
-        public <T> void toJson(T object, JsonObject jsonObject) {
+        public <T> void toJson(T object, JsonValue jsonObject) {
             try {
                 jsonObject.put(name, JsonReflection.toJson(field.get(object)));
             } catch (Exception e) {
@@ -80,7 +83,7 @@ public class JsonReflection {
             return false;
         }
 
-        public T fromJson(JsonObject object) throws JsonMappingException {
+        public T fromJson(JsonValue object) throws JsonMappingException {
             T o = null;
             try {
                 o = clazz.newInstance();
@@ -95,8 +98,8 @@ public class JsonReflection {
             return o;
         }
 
-        public JsonObject toJson(T object) {
-            JsonObject jsonObject = Json.createObject();
+        public JsonValue toJson(T object) {
+            JsonValue jsonObject = Json.createObject();
 
             for (FieldMapping field : fields) {
                 field.toJson(object, jsonObject);
@@ -157,14 +160,14 @@ public class JsonReflection {
             return (T) value;
         }
 
-        if(clazz.equals(JsonObject.class)) {
+        if(clazz.equals(JsonValue.class)) {
             assertType(JsonType.OBJECT, value);
-            return (T) value.getAsJsonObject();
+            return (T) value;
         }
 
-        if(clazz.equals(JsonArray.class)) {
+        if(clazz.equals(JsonValue.class)) {
             assertType(JsonType.ARRAY, value);
-            return (T) value.getAsJsonArray();
+            return (T) value;
         }
 
         if(clazz.equals(String.class)) {
@@ -189,12 +192,12 @@ public class JsonReflection {
 
         if(clazz.isArray()) {
             assertType(JsonType.ARRAY, value);
-            return (T)fromArray(clazz, value.getAsJsonArray());
+            return (T)fromArray(clazz, value);
         }
 
         if(isJsType(clazz)) {
             assertType(JsonType.OBJECT, value);
-            return new ClassMapping<>(clazz).fromJson(value.getAsJsonObject());
+            return new ClassMapping<>(clazz).fromJson(value);
         }
 
 
@@ -216,7 +219,7 @@ public class JsonReflection {
         }
     }
 
-    private static Object fromArray(Class arrayType, JsonArray jsonArray) throws JsonMappingException {
+    private static Object fromArray(Class arrayType, JsonValue jsonArray) throws JsonMappingException {
         Class componentType = arrayType.getComponentType();
         Object array = Array.newInstance(componentType, jsonArray.length());
 
@@ -227,8 +230,8 @@ public class JsonReflection {
         return array;
     }
 
-    private static JsonObject toJsonObject(Object o) {
-        JsonObject object = Json.createObject();
+    private static JsonValue toJsonObject(Object o) {
+        JsonValue object = Json.createObject();
 
         for (Field field : o.getClass().getDeclaredFields()) {
             field.setAccessible(true);
@@ -245,7 +248,7 @@ public class JsonReflection {
 
     private static JsonValue toArray(Object o) {
 
-        JsonArray array = Json.createArray();
+        JsonValue array = Json.createArray();
 
         int length = Array.getLength(o);
         for (int i = 0; i < length; i++) {

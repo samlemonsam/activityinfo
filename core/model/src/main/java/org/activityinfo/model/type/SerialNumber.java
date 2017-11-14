@@ -2,7 +2,6 @@ package org.activityinfo.model.type;
 
 import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 import static org.activityinfo.json.Json.createObject;
@@ -35,7 +34,7 @@ public class SerialNumber implements FieldValue {
         if(prefix == null) {
             return Json.create(number);
         } else {
-            JsonObject object = createObject();
+            JsonValue object = createObject();
             object.put("prefix", prefix);
             object.put("number", number);
             return object;

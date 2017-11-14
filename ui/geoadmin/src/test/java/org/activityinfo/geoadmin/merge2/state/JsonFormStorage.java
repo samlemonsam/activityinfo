@@ -6,8 +6,6 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import com.vividsolutions.jts.geom.Geometry;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -39,7 +37,7 @@ public class JsonFormStorage implements FormStorage {
     private String name;
     
     private final FormClass formClass;
-    private final JsonArray instances;
+    private final JsonValue instances;
     
     public JsonFormStorage(String resourceName) throws IOException {
         formClass = loadFormClass(resourceName);
@@ -51,10 +49,10 @@ public class JsonFormStorage implements FormStorage {
         return FormClass.fromJson(json);
     }
 
-    private org.activityinfo.json.JsonArray loadInstances(String resourceName) throws IOException {
+    private JsonValue loadInstances(String resourceName) throws IOException {
         Gson gson = new Gson();
         try(Reader reader = getJson(resourceName + "/instances.json").openStream()) {
-            return gson.fromJson(reader, org.activityinfo.json.JsonArray.class);
+            return gson.fromJson(reader, JsonValue.class);
         } catch (Exception e) {
             throw new IOException("Exception loading instances for " + resourceName, e);
         }
@@ -138,7 +136,7 @@ public class JsonFormStorage implements FormStorage {
 
     private class JsonQueryBuilder implements ColumnQueryBuilder {
         
-        private List<CursorObserver<JsonObject>> bindings = new ArrayList<>();
+        private List<CursorObserver<JsonValue>> bindings = new ArrayList<>();
 
    
         @Override
@@ -168,18 +166,18 @@ public class JsonFormStorage implements FormStorage {
         @Override
         public void execute() {
             for(int i=0;i<instances.length();++i) {
-                JsonObject instance = instances.get(i).getAsJsonObject();
-                for (CursorObserver<JsonObject> binding : bindings) {
+                JsonValue instance = instances.get(i);
+                for (CursorObserver<JsonValue> binding : bindings) {
                     binding.onNext(instance);
                 }
             }
-            for (CursorObserver<JsonObject> binding : bindings) {
+            for (CursorObserver<JsonValue> binding : bindings) {
                 binding.done();
             }
         }
     }
 
-    private static class IdBinding implements CursorObserver<JsonObject> {
+    private static class IdBinding implements CursorObserver<JsonValue> {
         private CursorObserver<ResourceId> observer;
 
         public IdBinding(CursorObserver<ResourceId> observer) {
@@ -187,7 +185,7 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        public void onNext(JsonObject instance) {
+        public void onNext(JsonValue instance) {
             observer.onNext(ResourceId.valueOf(instance.get("id").asString()));
         }
 
@@ -197,7 +195,7 @@ public class JsonFormStorage implements FormStorage {
         }
     }
     
-    private abstract static class FieldBinding implements CursorObserver<JsonObject> {
+    private abstract static class FieldBinding implements CursorObserver<JsonValue> {
         private String field;
         private CursorObserver<FieldValue> observer;
 
@@ -207,7 +205,7 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        public void onNext(JsonObject instance) {
+        public void onNext(JsonValue instance) {
             if(instance.hasKey(field)) {
                 observer.onNext(convert(instance.get(field)));
             } else {
@@ -243,7 +241,7 @@ public class JsonFormStorage implements FormStorage {
 
         @Override
         protected FieldValue convert(JsonValue jsonElement) {
-            JsonArray array = jsonElement.getAsJsonObject().get("extents").getAsJsonArray();
+            JsonValue array = jsonElement.get("extents");
             Extents extents = Extents.create(
                     array.get(0).asNumber(),
                     array.get(1).asNumber(),

@@ -1,6 +1,5 @@
 package org.activityinfo.model.form;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -50,7 +49,7 @@ public class FormLabel extends FormElement {
 
     @Override
     public JsonValue toJsonObject() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("id", id.asString());
         object.put("label", label);
         object.put("type", "label");
@@ -58,7 +57,7 @@ public class FormLabel extends FormElement {
         return object;
     }
 
-    public static FormElement fromJson(org.activityinfo.json.JsonObject jsonObject) {
+    public static FormElement fromJson(JsonValue jsonObject) {
         FormLabel label = new FormLabel(ResourceId.valueOf(jsonObject.get("id").asString()));
         label.setLabel(jsonObject.get("label").asString());
         if(jsonObject.hasKey("visible")) {

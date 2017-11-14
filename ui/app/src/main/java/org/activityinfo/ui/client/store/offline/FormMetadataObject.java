@@ -3,8 +3,7 @@ package org.activityinfo.ui.client.store.offline;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormPermissions;
 
@@ -12,7 +11,7 @@ import org.activityinfo.model.form.FormPermissions;
 public final class FormMetadataObject {
 
     private String version;
-    private JsonObject permissions;
+    private JsonValue permissions;
 
     public FormMetadataObject() {
     }

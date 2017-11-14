@@ -15,7 +15,6 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonNull;
 import org.activityinfo.json.JsonType;
 import org.activityinfo.json.JsonValue;
 
@@ -24,11 +23,11 @@ import java.io.ObjectStreamException;
 /**
  * Server-side implementation of JsonObject.
  */
-public class JreJsonNull extends JreJsonValue implements JsonNull {
+class JreJsonNull extends JreJsonValue {
 
     private static final long serialVersionUID = 1L;
 
-    public static final JsonNull NULL_INSTANCE = new JreJsonNull();
+    public static final JsonValue NULL_INSTANCE = new JreJsonNull();
 
     @Override
     public double asNumber() {

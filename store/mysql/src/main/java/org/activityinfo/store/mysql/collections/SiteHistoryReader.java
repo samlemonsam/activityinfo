@@ -3,7 +3,6 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
@@ -76,7 +75,7 @@ public class SiteHistoryReader {
                 change.setTime(time);
                 change.setUserId(userId);
 
-                JsonObject jsonObject = (JsonObject) parser.parse(json);
+                JsonValue jsonObject = (JsonValue) parser.parse(json);
                 
                 if(jsonObject.hasKey("_DELETE")) {
                     change.setType(RecordChangeType.DELETED);
@@ -93,7 +92,7 @@ public class SiteHistoryReader {
         
     }
 
-    private Map<ResourceId, FieldValue> parseChanges(JsonObject jsonObject) {
+    private Map<ResourceId, FieldValue> parseChanges(JsonValue jsonObject) {
 
         Map<ResourceId, ResourceId> attributeToFieldMap = new HashMap<>();
         for (ActivityField activityField : activity.getAttributeAndIndicatorFields()) {
@@ -163,7 +162,7 @@ public class SiteHistoryReader {
 
     private boolean parseBoolean(JsonValue value) {
         if(value.isJsonObject()) {
-            JsonObject object = value.getAsJsonObject();
+            JsonValue object = value;
             if(object.hasKey("value")) {
                 return object.get("value").asBoolean();
             }
@@ -173,7 +172,7 @@ public class SiteHistoryReader {
 
     private FieldValue parseRef(JsonValue value, ResourceId formId, char domain) {
         if(value.isJsonObject()) {
-            JsonObject object = value.getAsJsonObject();
+            JsonValue object = value;
             if(object.get("type").asString().equals("Integer")) {
                 int id = object.get("value").asInt();
                 ResourceId recordId = CuidAdapter.cuid(domain, id);
@@ -185,7 +184,7 @@ public class SiteHistoryReader {
 
     private FieldValue parseDate(JsonValue value) {
         if(value.isJsonObject()) {
-            JsonObject object = value.getAsJsonObject();
+            JsonValue object = value;
             if(object.get("type").asString().equals("LocalDate")) {
                 return LocalDate.parse(object.get("value").asString());
             }
@@ -195,7 +194,7 @@ public class SiteHistoryReader {
 
     private FieldValue parseQuantity(JsonValue value) {
         if(value.isJsonObject()) {
-            JsonObject object = value.getAsJsonObject();
+            JsonValue object = value;
             if(object.get("type").asString().equals("Double")) {
                 return new Quantity(object.get("value").asNumber());
             }
@@ -205,7 +204,7 @@ public class SiteHistoryReader {
 
     private String parseString(JsonValue value) {
         if(value.isJsonObject()) {
-            JsonObject object = value.getAsJsonObject();
+            JsonValue object = value;
             if(object.get("type").asString().equals("String")) {
                 return Strings.emptyToNull(object.get("value").asString().trim());
             }

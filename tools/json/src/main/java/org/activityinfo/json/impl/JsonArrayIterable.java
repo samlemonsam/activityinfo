@@ -1,15 +1,14 @@
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonValue;
 
 import java.util.Iterator;
 
 public class JsonArrayIterable implements Iterable<JsonValue> {
 
-    private final JsonArray array;
+    private final JsonValue array;
 
-    public JsonArrayIterable(JsonArray array) {
+    public JsonArrayIterable(JsonValue array) {
         this.array = array;
     }
 

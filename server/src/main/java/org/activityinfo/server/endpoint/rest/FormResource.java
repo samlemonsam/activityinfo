@@ -9,18 +9,13 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
-import org.activityinfo.analysis.table.EffectiveTableColumn;
-import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.*;
-import org.activityinfo.model.analysis.ImmutableTableModel;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -29,15 +24,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoAreaType;
-import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.BooleanType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
@@ -46,8 +33,10 @@ import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.*;
-import org.activityinfo.store.query.server.FormSourceSyncImpl;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.VersionedFormStorage;
 
 import javax.inject.Provider;
 import javax.ws.rs.*;
@@ -59,15 +48,12 @@ import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
 import static org.activityinfo.json.impl.JsonUtil.stringify;
+import static org.activityinfo.model.resource.ResourceId.valueOf;
 
 public class FormResource {
     public static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
@@ -134,7 +120,7 @@ public class FormResource {
 
         FormClass formClass = catalog.get().getFormClass(formId);
 
-        JsonObject object = formClass.toJsonObject();
+        JsonValue object = formClass.toJsonObject();
 
         return Response
             .ok(Json.stringify(object, 2))
@@ -333,7 +319,7 @@ public class FormResource {
         assertVisible(formId);
 
         RecordHistoryBuilder builder = new RecordHistoryBuilder((MySqlCatalog) catalog.get());
-        JsonArray array = builder.build(formId, ResourceId.valueOf(recordId));
+        JsonValue array = builder.build(formId, ResourceId.valueOf(recordId));
 
         return Response.ok()
                 .entity(array.toJson())
@@ -387,7 +373,7 @@ public class FormResource {
                 new HrdSerialNumberProvider());
 
         try {
-            updater.create(formId, jsonObject.getAsJsonObject());
+            updater.create(formId, jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
@@ -408,7 +394,7 @@ public class FormResource {
         try {
             Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
                     new HrdSerialNumberProvider());
-            updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
+            updater.execute(formId, valueOf(recordId), jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
@@ -451,7 +437,7 @@ public class FormResource {
     public Response getTree() {
 
         FormTree tree = fetchTree();
-        JsonObject object = JsonFormTreeBuilder.toJson(tree);
+        JsonValue object = JsonFormTreeBuilder.toJson(tree);
 
         return Response
             .ok(Json.stringify(object, 2))

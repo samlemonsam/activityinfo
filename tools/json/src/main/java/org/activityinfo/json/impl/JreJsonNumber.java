@@ -15,7 +15,6 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonNumber;
 import org.activityinfo.json.JsonType;
 import org.activityinfo.json.JsonValue;
 
@@ -26,7 +25,7 @@ import java.io.ObjectOutputStream;
 /**
  * Server-side implementation of JsonNumber.
  */
-public class JreJsonNumber extends JreJsonValue implements JsonNumber {
+public class JreJsonNumber extends JreJsonValue  {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,14 +45,21 @@ public class JreJsonNumber extends JreJsonValue implements JsonNumber {
         return getNumber();
     }
 
+
     @Override
     public String asString() {
         return toJson();
     }
 
+    @Override
+    public boolean isJsonPrimitive() {
+        return true;
+    }
+
     public double getNumber() {
         return number;
     }
+
 
     public Object getObject() {
         return getNumber();

@@ -1,7 +1,6 @@
 package org.activityinfo.model.type.primitive;
 
 import com.google.common.base.Strings;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.*;
 
@@ -14,7 +13,7 @@ public class TextType implements ParametrizedFieldType {
 
     public static final FieldTypeClass TYPE_CLASS = new ParametrizedFieldTypeClass() {
         @Override
-        public FieldType deserializeType(org.activityinfo.json.JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             String inputMask = null;
             if(parametersObject != null) {
                 if(parametersObject.hasKey("inputMask")) {
@@ -87,8 +86,8 @@ public class TextType implements ParametrizedFieldType {
 
 
     @Override
-    public org.activityinfo.json.JsonObject getParametersAsJson() {
-        JsonObject object = createObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         if(inputMask != null) {
             object.put("inputMask", inputMask);
         }

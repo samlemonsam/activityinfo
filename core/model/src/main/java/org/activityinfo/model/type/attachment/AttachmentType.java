@@ -21,8 +21,6 @@ package org.activityinfo.model.type.attachment;
  * #L%
  */
 
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
@@ -51,7 +49,7 @@ public class AttachmentType implements ParametrizedFieldType {
 
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             // Explicit type parameter required by GWT's compiler
             Cardinality cardinality = Cardinality.valueOf(parametersObject.<JsonValue>get("cardinality"));
             Kind kind = Kind.valueOf(JsonParsing.fromEnumValue(parametersObject.get("kind")));
@@ -82,12 +80,12 @@ public class AttachmentType implements ParametrizedFieldType {
     @Override
     public AttachmentValue parseJsonValue(JsonValue value) {
         if(value.isJsonObject()) {
-            value = value.getAsJsonObject().get("values");
+            value = value.get("values");
         }
         AttachmentValue fieldValue = new AttachmentValue();
-        JsonArray array = value.getAsJsonArray();
+        JsonValue array = value;
         for (JsonValue attachmentItem : array.values()) {
-            JsonObject attachmentObject = (JsonObject) attachmentItem;
+            JsonValue attachmentObject = (JsonValue) attachmentItem;
             String mimeType = attachmentObject.get("mimeType").asString();
             String filename = attachmentObject.get("filename").asString();
             String blobId = attachmentObject.get("blobId").asString();
@@ -124,8 +122,8 @@ public class AttachmentType implements ParametrizedFieldType {
     }
 
     @Override
-    public org.activityinfo.json.JsonObject getParametersAsJson() {
-        JsonObject object = createObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         object.put("cardinality", cardinality.name().toLowerCase());
         object.put("kind", kind.name().toLowerCase());
         return object;

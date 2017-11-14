@@ -15,7 +15,6 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.JsonString;
 import org.activityinfo.json.JsonType;
 import org.activityinfo.json.JsonValue;
 
@@ -26,7 +25,7 @@ import java.io.ObjectOutputStream;
 /**
  * Server-side implementation of JsonString.
  */
-public class JreJsonString extends JreJsonValue implements JsonString {
+public class JreJsonString extends JreJsonValue implements JsonValue {
 
     private static final long serialVersionUID = 1L;
 
@@ -72,8 +71,8 @@ public class JreJsonString extends JreJsonValue implements JsonString {
     }
 
     @Override
-    public boolean isJsonNull() {
-        return false;
+    public boolean isJsonString() {
+        return true;
     }
 
     @Override
@@ -95,10 +94,9 @@ public class JreJsonString extends JreJsonValue implements JsonString {
         return JsonUtil.quote(getString());
     }
 
-
     @Override
-    public boolean isJsonObject() {
-        return false;
+    public boolean isString() {
+        return true;
     }
 
     @com.google.gwt.core.shared.GwtIncompatible

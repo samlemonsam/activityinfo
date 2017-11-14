@@ -1,6 +1,5 @@
 package org.activityinfo.model.type.time;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -46,7 +45,7 @@ public class LocalDateInterval implements FieldValue {
 
     @Override
     public JsonValue toJsonElement() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("start", startDate.toString());
         object.put("end", endDate.toString());
         return object;

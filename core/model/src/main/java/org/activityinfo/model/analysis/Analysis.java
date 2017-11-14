@@ -3,7 +3,7 @@ package org.activityinfo.model.analysis;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public final class Analysis {
@@ -11,7 +11,7 @@ public final class Analysis {
     private String parentId;
     private String label;
     private String modelType;
-    private JsonObject model;
+    private JsonValue model;
 
     public Analysis() {
     }
@@ -58,12 +58,12 @@ public final class Analysis {
     }
 
     @JsOverlay
-    public JsonObject getModel() {
+    public JsonValue getModel() {
         return model;
     }
 
     @JsOverlay
-    public void setModel(JsonObject model) {
+    public void setModel(JsonValue model) {
         this.model = model;
     }
 

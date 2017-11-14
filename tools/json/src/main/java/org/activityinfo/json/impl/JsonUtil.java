@@ -15,7 +15,9 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonException;
+import org.activityinfo.json.JsonValue;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -57,7 +59,7 @@ public class JsonUtil {
         }
 
         @Override
-        public void endVisit(JsonArray array, JsonContext ctx) {
+        public void endArrayVisit(JsonValue array, JsonContext ctx) {
             if (pretty) {
                 indentLevel = indentLevel
                         .substring(0, indentLevel.length() - indent.length());
@@ -69,7 +71,7 @@ public class JsonUtil {
         }
 
         @Override
-        public void endVisit(JsonObject object, JsonContext ctx) {
+        public void endObjectVisit(JsonValue object, JsonContext ctx) {
             if (pretty) {
                 indentLevel = indentLevel
                         .substring(0, indentLevel.length() - indent.length());
@@ -97,7 +99,7 @@ public class JsonUtil {
         }
 
         @Override
-        public boolean visit(JsonArray array, JsonContext ctx) {
+        public boolean visitArray(JsonValue array, JsonContext ctx) {
             checkCycle(array);
             sb.append("[");
             if (pretty) {
@@ -109,7 +111,7 @@ public class JsonUtil {
         }
 
         @Override
-        public boolean visit(JsonObject object, JsonContext ctx) {
+        public boolean visitObject(JsonValue object, JsonContext ctx) {
             checkCycle(object);
             sb.append("{");
             if (pretty) {
@@ -191,7 +193,7 @@ public class JsonUtil {
         return toReturn.toString();
     }
 
-    public static <T extends JsonValue> T parse(String json) throws JsonException {
+    public static JsonValue parse(String json) throws JsonException {
         return Json.instance().parse(json);
     }
 

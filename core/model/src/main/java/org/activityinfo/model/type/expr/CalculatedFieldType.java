@@ -1,6 +1,5 @@
 package org.activityinfo.model.type.expr;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
@@ -27,7 +26,7 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(org.activityinfo.json.JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             JsonValue exprElement = parametersObject.get("formula");
             if(exprElement == null) {
                 exprElement = parametersObject.get("expression");
@@ -35,7 +34,7 @@ public class CalculatedFieldType implements ParametrizedFieldType {
             if(exprElement == null) {
                 return new CalculatedFieldType();
             } else if(exprElement.isJsonObject()) {
-                org.activityinfo.json.JsonObject exprObject = exprElement.getAsJsonObject();
+                JsonValue exprObject = exprElement;
                 return new CalculatedFieldType(JsonParsing.toNullableString(exprObject.get("value")));
             } else {
                 return new CalculatedFieldType(JsonParsing.toNullableString(exprElement));
@@ -87,8 +86,8 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     }
 
     @Override
-    public org.activityinfo.json.JsonObject getParametersAsJson() {
-        JsonObject object = createObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         if (expression != null) {
             object.put("formula", expression);
         }

@@ -1,7 +1,6 @@
 package org.activityinfo.model.type;
 
 import com.google.common.base.Strings;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 
 import static org.activityinfo.json.Json.createObject;
@@ -28,7 +27,7 @@ public class SerialNumberType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             SerialNumberType type = new SerialNumberType();
             if(parametersObject.hasKey("prefixFormula")) {
                 type.prefixFormula = parametersObject.get("prefixFormula").asString();
@@ -64,7 +63,7 @@ public class SerialNumberType implements ParametrizedFieldType {
                 return new SerialNumber(value.asInt());
             }
         } else if(jsonElement.isJsonObject()) {
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            JsonValue jsonObject = jsonElement;
             return new SerialNumber(
                     jsonObject.get("prefix").asString(),
                     jsonObject.get("number").asInt());
@@ -108,8 +107,8 @@ public class SerialNumberType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = createObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         if(!Strings.isNullOrEmpty(prefixFormula)) {
             object.put("prefixFormula", prefixFormula);
         }

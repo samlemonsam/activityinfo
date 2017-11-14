@@ -15,108 +15,19 @@
  */
 package org.activityinfo.json.impl;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsonUtils;
 import org.activityinfo.json.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * JRE (non-Client) implementation of JreJsonValue.
  */
 public abstract class JreJsonValue implements JsonValue {
-    public abstract Object getObject();
-
-    public abstract void traverse(JsonVisitor visitor, JsonContext ctx);
-
-    @Override
-    public Object toNative() {
-        return this;
-    }
-
-    protected static <T extends JsonValue> T parseJson(ObjectInputStream stream)
-            throws ClassNotFoundException, IOException {
-        String jsonString = (String) stream.readObject();
-        return Json.instance().parse(jsonString);
-    }
-
-    @Override
-    public JsonObject getAsJsonObject() {
-        return ((JsonObject) this);
-    }
-
-    @Override
-    public JsonArray getAsJsonArray() {
-        return ((JsonArray) this);
-    }
-
-    @Override
-    public double asNumber() {
-        return asNumber();
-    }
-
-    @Override
-    public String asString() {
-        return asString();
-    }
-
-    @Override
-    public long asLong() {
-        return (long) asNumber();
-    }
-
-    @Override
-    public boolean isString() {
-        return getType() == JsonType.STRING;
-    }
-
-    @Override
-    public boolean asBoolean() {
-        return asBoolean();
-    }
-
-    @Override
-    public boolean isBoolean() {
-        return getType() == JsonType.BOOLEAN;
-    }
-
-    @Override
-    public int asInt() {
-        return (int)asNumber();
-    }
-
-    @Override
-    public boolean isJsonNull() {
-        return getType() == JsonType.NULL;
-    }
-
-    @Override
-    public boolean isJsonArray() {
-        return getType() == JsonType.ARRAY;
-    }
-
-    @Override
-    public boolean isJsonString() {
-        return getType() == JsonType.STRING;
-    }
-
-    @Override
-    public boolean isJsonPrimitive() {
-        switch (getType()) {
-            case STRING:
-            case NUMBER:
-            case BOOLEAN:
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    public boolean isJsonObject() {
-        return getType() == JsonType.OBJECT;
-    }
-
 
 
     @Override
@@ -124,8 +35,232 @@ public abstract class JreJsonValue implements JsonValue {
         return getType() == JsonType.NUMBER;
     }
 
+    @GwtIncompatible
+    protected static <T extends JreJsonValue> T parseJson(ObjectInputStream stream)
+            throws ClassNotFoundException, IOException {
+        String jsonString = (String) stream.readObject();
+        return (T) Json.instance().parse(jsonString);
+    }
+
     @Override
     public String toString() {
         return toJson();
+    }
+
+    @Override
+    public boolean asBoolean() {
+        throw conversionException(JsonType.BOOLEAN);
+    }
+
+    @Override
+    public double asNumber() {
+        throw conversionException(JsonType.NUMBER);
+    }
+
+    @Override
+    public final int asInt() {
+        return (int)asNumber();
+    }
+
+    @Override
+    public long asLong() {
+        throw conversionException(JsonType.NUMBER);
+    }
+
+    @Override
+    public String asString() {
+        throw conversionException(JsonType.STRING);
+    }
+
+
+    @Override
+    public JsonValue getAsJsonObject() {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public JsonValue getAsJsonArray() {
+        throw conversionException(JsonType.ARRAY);
+    }
+
+    @Override
+    public boolean isJsonNull() {
+        return false;
+    }
+
+    @Override
+    public boolean isJsonArray() {
+        return false;
+    }
+
+    @Override
+    public boolean isJsonString() {
+        return false;
+    }
+
+    @Override
+    public boolean isJsonPrimitive() {
+        return false;
+    }
+
+    @Override
+    public boolean isJsonObject() {
+        return false;
+    }
+
+    @Override
+    public boolean isString() {
+        return false;
+    }
+
+    @Override
+    public boolean isBoolean() {
+        return false;
+    }
+
+    @Override
+    public boolean jsEquals(JsonValue value) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+
+    @Override
+    public boolean getBoolean(String key) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public double getNumber(String key) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public JsonValue get(String key) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public String getString(String key) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public void put(String key, JsonValue value) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public void put(String key, String value) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public void put(String key, double value) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public void put(String key, boolean bool) {
+        throw conversionException(JsonType.OBJECT);
+    }
+
+    @Override
+    public boolean hasKey(String key) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public String[] keys() {
+        return new String[0];
+    }
+
+    @Override
+    public void remove(String key) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public void add(String key, JsonValue value) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public boolean getBoolean(int index) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public double getNumber(int index) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public JsonValue get(int index) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public String getString(int index) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public int length() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public void set(int index, JsonValue value) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public void set(int index, String string) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public void set(int index, double number) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public void set(int index, boolean bool) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public void add(JsonValue value) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    public abstract Object getObject();
+
+    @Override
+    public Iterable<JsonValue> values() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Iterable<Map.Entry<String, JsonValue>> entrySet() {
+        return Collections.emptyList();
+    }
+
+    public abstract void traverse(JsonVisitor visitor, JsonContext ctx);
+
+
+
+
+    private JsonException conversionException(JsonType toType) {
+        return new JsonException("Cannot convert " + getType().name() + " to " + toType);
+    }
+
+    @Override
+    public Object toNative() {
+        if(GWT.isClient()) {
+            return JsonUtils.safeEval(this.toJson());
+        } else {
+            throw new UnsupportedOperationException("toNative not supported on the server");
+        }
     }
 }

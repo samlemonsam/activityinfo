@@ -1,10 +1,10 @@
 package org.activityinfo.model.analysis;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 public interface AnalysisModel {
 
     String getTypeId();
 
-    JsonObject toJson();
+    JsonValue toJson();
 }

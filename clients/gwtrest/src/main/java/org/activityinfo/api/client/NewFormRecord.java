@@ -1,7 +1,5 @@
 package org.activityinfo.api.client;
 
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 
@@ -15,7 +13,7 @@ public class NewFormRecord {
 
   private String keyId;
 
-  private JsonObject fieldValues;
+  private JsonValue fieldValues;
 
   public NewFormRecord() {
   }
@@ -32,21 +30,21 @@ public class NewFormRecord {
     return keyId;
   }
 
-  public JsonObject getFieldValues() {
+  public JsonValue getFieldValues() {
     return fieldValues;
   }
 
   public static NewFormRecord fromJson(JsonValue jsonElement) {
-    JsonObject jsonObject = jsonElement.getAsJsonObject();
+      JsonValue jsonObject = jsonElement;
     NewFormRecord model = new NewFormRecord();
     model.id = JsonParsing.toNullableString(jsonObject.get("id"));
     model.parentRecordId = JsonParsing.toNullableString(jsonObject.get("parentRecordId"));
     model.keyId = JsonParsing.toNullableString(jsonObject.get("keyId"));
-    model.fieldValues = jsonObject.get("fieldValues").getAsJsonObject();
+      model.fieldValues = jsonObject.get("fieldValues");
     return model;
   }
 
-  public static List<NewFormRecord> fromJsonArray(JsonArray jsonArray) {
+  public static List<NewFormRecord> fromJsonArray(JsonValue jsonArray) {
     List<NewFormRecord> list = new ArrayList<NewFormRecord>();
     for(JsonValue element : jsonArray.values()) {
       list.add(fromJson(element));

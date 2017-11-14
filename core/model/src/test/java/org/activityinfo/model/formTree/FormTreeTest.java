@@ -1,6 +1,6 @@
 package org.activityinfo.model.formTree;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.json.impl.JsonUtil;
 import org.activityinfo.model.resource.ResourceId;
 import org.hamcrest.Description;
@@ -34,7 +34,7 @@ public class FormTreeTest {
 
         checkStudentTree(formTree);
 
-        JsonObject object = JsonFormTreeBuilder.toJson(formTree);
+        JsonValue object = JsonFormTreeBuilder.toJson(formTree);
         
         System.out.println(JsonUtil.stringify(object, 2));
         

@@ -1,6 +1,5 @@
 package org.activityinfo.model.type.geo;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 
@@ -40,7 +39,7 @@ public class GeoArea implements GeoFieldValue {
 
     @Override
     public JsonValue toJsonElement() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("blobId", blobId);
         object.put("bbox", envelope.toJsonElement());
         return object;

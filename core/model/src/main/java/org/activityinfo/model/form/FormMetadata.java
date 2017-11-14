@@ -1,6 +1,6 @@
 package org.activityinfo.model.form;
 
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collections;
@@ -111,8 +111,8 @@ public class FormMetadata {
         this.schemaVersion = schema.getSchemaVersion();
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("id", id.asString());
         if(!visible) {
             object.put("visible", false);
@@ -131,7 +131,7 @@ public class FormMetadata {
         return object;
     }
 
-    public static FormMetadata fromJson(JsonObject object) {
+    public static FormMetadata fromJson(JsonValue object) {
         FormMetadata metadata = new FormMetadata();
         metadata.id = ResourceId.valueOf(object.get("id").asString());
 
@@ -142,10 +142,10 @@ public class FormMetadata {
             metadata.schemaVersion = object.get("schemaVersion").asLong();
         }
         if(object.hasKey("schema")) {
-            metadata.schema = FormClass.fromJson(object.get("schema").getAsJsonObject());
+            metadata.schema = FormClass.fromJson(object.get("schema"));
         }
         if(object.hasKey("permissions")) {
-            metadata.permissions = FormPermissions.fromJson(object.getObject("permissions"));
+            metadata.permissions = FormPermissions.fromJson(object.get("permissions"));
         }
         if(object.hasKey("visible")) {
             metadata.visible = object.get("visible").asBoolean();

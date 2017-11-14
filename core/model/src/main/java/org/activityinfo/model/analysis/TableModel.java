@@ -2,8 +2,7 @@ package org.activityinfo.model.analysis;
 
 import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
@@ -37,14 +36,14 @@ public abstract class TableModel implements AnalysisModel  {
 
     @Value.Lazy
     @Override
-    public JsonObject toJson() {
+    public JsonValue toJson() {
 
 
-        JsonObject object = Json.createObject();
+        JsonValue object = Json.createObject();
         object.put("formId", getFormId().asString());
 
         if(getColumns().size() != 0) {
-            JsonArray columnArray = Json.createArray();
+            JsonValue columnArray = Json.createArray();
             for (TableColumn tableColumn : getColumns()) {
                 columnArray.add(tableColumn.toJson());
             }
@@ -54,14 +53,14 @@ public abstract class TableModel implements AnalysisModel  {
         return object;
     }
 
-    public static TableModel fromJson(JsonObject object) {
+    public static TableModel fromJson(JsonValue object) {
         ImmutableTableModel.Builder model = ImmutableTableModel.builder();
         model.formId(ResourceId.valueOf(object.getString("formId")));
 
         if(object.hasKey("columns")) {
-            JsonArray columnArray = object.getArray("columns");
+            JsonValue columnArray = object.get("columns");
             for (int i = 0; i < columnArray.length(); i++) {
-                model.addColumns(TableColumn.fromJson(columnArray.get(i).getAsJsonObject()));
+                model.addColumns(TableColumn.fromJson(columnArray.get(i)));
             }
         }
         return model.build();

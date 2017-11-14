@@ -2,7 +2,7 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Describes effective form-level permissions for a specific user. The principle permissions include:
@@ -104,7 +104,7 @@ public final class FormPermissions {
         return permissions;
     }
 
-    public static FormPermissions fromJson(JsonObject object) {
+    public static FormPermissions fromJson(JsonValue object) {
         FormPermissions permissions = new FormPermissions();
         permissions.view = object.getBoolean("view");
         permissions.createRecord = object.getBoolean("createRecord");
@@ -115,8 +115,8 @@ public final class FormPermissions {
         return permissions;
     }
 
-    public JsonObject toJson() {
-        JsonObject object = Json.createObject();
+    public JsonValue toJson() {
+        JsonValue object = Json.createObject();
         object.put("view", view);
         object.put("createRecord", createRecord);
         object.put("updateRecord", updateRecord);

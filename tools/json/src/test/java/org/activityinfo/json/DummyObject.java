@@ -17,7 +17,7 @@ public class DummyObject {
     public double d;
     public String s;
     public String s0;
-    public JsonObject object;
+    public JsonValue object;
 
     private double[] da;
 

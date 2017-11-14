@@ -1,8 +1,7 @@
 package org.activityinfo.ui.client.analysis.model;
 
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.immutables.value.Value;
 
 import java.util.List;
@@ -50,8 +49,8 @@ public abstract class DimensionModel {
     }
 
     @Value.Lazy
-    public JsonObject toJson() {
-        JsonObject object = Json.createObject();
+    public JsonValue toJson() {
+        JsonValue object = Json.createObject();
         object.put("id", getId());
         object.put("label", getLabel());
         object.put("axis", getAxis().name());
@@ -66,7 +65,7 @@ public abstract class DimensionModel {
             object.put("totalLabel", getTotalLabel().get());
         }
 
-        JsonArray mappingArray = Json.createArray();
+        JsonValue mappingArray = Json.createArray();
         for (DimensionMapping mapping : getMappings()) {
             mappingArray.add(mapping.toJson());
         }
@@ -76,7 +75,7 @@ public abstract class DimensionModel {
         return object;
     }
 
-    public static DimensionModel fromJson(JsonObject object) {
+    public static DimensionModel fromJson(JsonValue object) {
         ImmutableDimensionModel.Builder model = ImmutableDimensionModel.builder();
         model.id(object.getString("id"));
         model.label(object.getString("label"));
@@ -92,9 +91,9 @@ public abstract class DimensionModel {
             model.totalLabel(Optional.of(object.getString("totalLabel")));
         }
 
-        JsonArray mappings = object.getArray("mappings");
+        JsonValue mappings = object.get("mappings");
         for (int i = 0; i < mappings.length(); i++) {
-            model.addMappings(DimensionMapping.fromJson(mappings.getObject(i)));
+            model.addMappings(DimensionMapping.fromJson(mappings.get(i)));
         }
 
         return model.build();

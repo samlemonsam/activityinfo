@@ -4,11 +4,9 @@ import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.UpdatedRecord;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 
 /**
@@ -20,7 +18,7 @@ import org.activityinfo.model.type.RecordRef;
 public final class RecordObject {
 
     private String parentRecordId;
-    private JsonObject fields;
+    private JsonValue fields;
 
 
     @JsOverlay
@@ -50,12 +48,12 @@ public final class RecordObject {
     }
 
     @JsOverlay
-    public JsonObject getFields() {
+    public JsonValue getFields() {
         return fields;
     }
 
     @JsOverlay
-    public void setFields(JsonObject fields) {
+    public void setFields(JsonValue fields) {
         this.fields = fields;
     }
 

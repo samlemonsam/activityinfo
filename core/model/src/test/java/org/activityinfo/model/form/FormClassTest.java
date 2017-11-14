@@ -2,7 +2,6 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
@@ -30,7 +29,7 @@ public class FormClassTest {
         field.setType(TextType.SIMPLE);
         formClass.addElement(field);
 
-        JsonObject jsonObject = formClass.toJsonObject();
+        JsonValue jsonObject = formClass.toJsonObject();
 
         FormClass reform = FormClass.fromJson(jsonObject);
         assertThat(reform.getFields(), hasSize(1));
@@ -66,7 +65,7 @@ public class FormClassTest {
         JsonParser parser = new org.activityinfo.json.JsonParser();
         JsonValue element = parser.parse(json);
 
-        return FormClass.fromJson(element.getAsJsonObject());
+        return FormClass.fromJson(element);
     }
 
 }

@@ -1,16 +1,9 @@
 package org.activityinfo.indexedb;
 
-import org.activityinfo.indexedb.*;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
-import org.activityinfo.json.JsonValue;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.offline.KeyValueStore;
-import org.activityinfo.ui.client.store.offline.RecordObject;
-import org.activityinfo.ui.client.store.offline.RecordStore;
-import org.activityinfo.ui.client.store.offline.SchemaStore;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class IDBFactoryStub implements IDBFactory {

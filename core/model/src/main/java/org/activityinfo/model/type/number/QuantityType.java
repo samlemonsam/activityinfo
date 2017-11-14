@@ -2,12 +2,10 @@ package org.activityinfo.model.type.number;
 
 import com.google.common.base.Strings;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
 
-import static com.google.common.base.Strings.nullToEmpty;
 import static org.activityinfo.json.Json.createObject;
 
 /**
@@ -32,7 +30,7 @@ public class QuantityType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             String units = JsonParsing.toNullableString(parametersObject.get("units"));
 
             // handling for legacy QuantityType fields (w/ null aggregation) - default to SUM
@@ -145,8 +143,8 @@ public class QuantityType implements ParametrizedFieldType {
     }
 
     @Override
-    public org.activityinfo.json.JsonObject getParametersAsJson() {
-        JsonObject object = createObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         object.put("units", Strings.nullToEmpty(units));
         object.put("aggregation", aggregation.toString());
         return object;

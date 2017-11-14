@@ -56,7 +56,7 @@ public class JobResource {
 
         JobRequest request;
         try {
-            request = JobRequest.fromJson(PARSER.parse(json).getAsJsonObject());
+            request = JobRequest.fromJson(PARSER.parse(json));
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

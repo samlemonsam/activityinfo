@@ -5,12 +5,9 @@ import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
-
-import javax.annotation.Nonnull;
 
 /**
  * Constructs a series of updates to a FormClass
@@ -28,7 +25,7 @@ public final class RecordUpdate {
 
     private boolean deleted;
 
-    private JsonObject fields;
+    private JsonValue fields;
 
     @JsOverlay
     public ResourceId getFormId() {
@@ -91,12 +88,12 @@ public final class RecordUpdate {
     }
 
     @JsOverlay
-    public void setFields(JsonObject object) {
+    public void setFields(JsonValue object) {
         this.fields = object;
     }
 
     @JsOverlay
-    public JsonObject getFields() {
+    public JsonValue getFields() {
         return fields;
     }
 

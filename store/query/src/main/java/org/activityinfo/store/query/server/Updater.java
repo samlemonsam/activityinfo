@@ -10,7 +10,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
@@ -75,7 +74,7 @@ public class Updater {
      * @throws InvalidUpdateException if the given update
      * is not a validate update.
      */
-    public void execute(JsonObject transactionObject) {
+    public void execute(JsonValue transactionObject) {
         try {
             execute(Json.fromJson(RecordTransaction.class, transactionObject));
         } catch (JsonMappingException e) {
@@ -104,7 +103,7 @@ public class Updater {
     }
 
     @VisibleForTesting
-    static TypedRecordUpdate parseChange(FormClass formClass, JsonObject changeObject, int userId) throws JsonMappingException {
+    static TypedRecordUpdate parseChange(FormClass formClass, JsonValue changeObject, int userId) throws JsonMappingException {
         return parseChange(formClass, Json.fromJson(RecordUpdate.class, changeObject), userId);
     }
 
@@ -183,7 +182,7 @@ public class Updater {
         if(JsonValue.isJsonPrimitive()) {
             itemIds.add(parseEnumId(type, JsonValue.asString()));
         } else if(JsonValue.isJsonArray()) {
-            for (JsonValue element : JsonValue.getAsJsonArray().values()) {
+            for (JsonValue element : JsonValue.values()) {
                 itemIds.add(parseEnumId(type, element.asString()));
             }
         }
@@ -506,16 +505,16 @@ public class Updater {
     }
 
 
-    public void create(ResourceId formId, JsonObject jsonObject) {
+    public void create(ResourceId formId, JsonValue jsonObject) {
         String id = jsonObject.get("id").asString();
         createOrUpdate(formId, ResourceId.valueOf(id), jsonObject, true);
     }
 
-    public void execute(ResourceId formId, ResourceId recordId, JsonObject jsonObject) {
+    public void execute(ResourceId formId, ResourceId recordId, JsonValue jsonObject) {
         createOrUpdate(formId, recordId, jsonObject, false);
     }
 
-    private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonObject jsonObject, boolean create) {
+    private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonValue jsonObject, boolean create) {
         Optional<FormStorage> collection = catalog.getForm(formId);
         if(!collection.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formId);
@@ -535,7 +534,7 @@ public class Updater {
         }
 
         FormClass formClass = collection.get().getFormClass();
-        JsonObject fieldValues = jsonObject.get("fieldValues").getAsJsonObject();
+        JsonValue fieldValues = jsonObject.get("fieldValues");
         for (FormField formField : formClass.getFields()) {
             if(formField.getType().isUpdatable()) {
                 if (fieldValues.hasKey(formField.getName())) {
@@ -547,6 +546,7 @@ public class Updater {
                         try {
                             updatedValue = formField.getType().parseJsonValue(updatedValueElement);
                         } catch(Exception e) {
+                            e.printStackTrace();
                             throw new InvalidUpdateException("Could not parse updated value for field " +
                                 formField.getId() + ": " + e.getMessage());
                         }

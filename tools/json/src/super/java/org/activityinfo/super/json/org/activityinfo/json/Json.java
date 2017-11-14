@@ -30,27 +30,27 @@ public class Json {
     return instance().createFromNullable(string);
   }
 
-  public static JsonString create(String string) {
+  public static JsonValue create(String string) {
     return instance().create(string);
   }
 
-  public static JsonBoolean create(boolean bool) {
+  public static JsonValue create(boolean bool) {
     return instance().create(bool);
   }
 
-  public static JsonArray createArray() {
+  public static JsonValue createArray() {
     return instance().createArray();
   }
 
-  public static JsonNull createNull() {
+  public static JsonValue createNull() {
     return instance().createNull();
   }
 
-  public static JsonNumber create(double number) {
+  public static JsonValue create(double number) {
     return instance().create(number);
   }
 
-  public static JsonObject createObject() {
+  public static JsonValue createObject() {
     return instance().createObject();
   }
 

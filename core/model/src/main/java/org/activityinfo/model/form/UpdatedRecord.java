@@ -3,7 +3,7 @@ package org.activityinfo.model.form;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 
 @JsType(isNative = true, name = "Object", namespace = JsPackage.GLOBAL)
@@ -11,7 +11,7 @@ public final class UpdatedRecord {
 
     private String recordId;
     private String parentRecordId;
-    private JsonObject fields;
+    private JsonValue fields;
 
     public UpdatedRecord() {
     }
@@ -36,7 +36,7 @@ public final class UpdatedRecord {
     }
 
     @JsOverlay
-    public JsonObject getFields() {
+    public JsonValue getFields() {
         return fields;
     }
 }

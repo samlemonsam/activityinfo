@@ -6,7 +6,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -325,8 +327,8 @@ public class FormClass implements FormElementContainer {
         return "<FormClass: " + getLabel() + ">";
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject object = createObject();
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
         object.put("id", id.asString());
         object.put("schemaVersion", schemaVersion);
         
@@ -352,8 +354,8 @@ public class FormClass implements FormElementContainer {
         return fromJson(toJsonObject());
     }
 
-    static JsonArray toJsonArray(Iterable<FormElement> elements) {
-        JsonArray elementsArray = Json.createArray();
+    static JsonValue toJsonArray(Iterable<FormElement> elements) {
+        JsonValue elementsArray = Json.createArray();
         for (FormElement element : elements) {
             elementsArray.add(element.toJsonObject());
         }
@@ -390,7 +392,7 @@ public class FormClass implements FormElementContainer {
         return new SymbolExpr(ColumnModel.ID_SYMBOL);
     }
 
-    public static FormClass fromJson(JsonObject object) {
+    public static FormClass fromJson(JsonValue object) {
         // Deal with previous encoding
 
         ResourceId id;
@@ -424,23 +426,23 @@ public class FormClass implements FormElementContainer {
         if(object.hasKey("elements")) {
             JsonValue elements = object.get("elements");
             if(elements.isJsonArray()) {
-                org.activityinfo.json.JsonArray elementsArray = elements.getAsJsonArray();
+                JsonValue elementsArray = elements;
                 formClass.elements.addAll(fromJsonArray(elementsArray));
             }
         }
         return formClass;
     }
 
-    static List<FormElement> fromJsonArray(org.activityinfo.json.JsonArray elementsArray) {
+    static List<FormElement> fromJsonArray(JsonValue elementsArray) {
         List<FormElement> elements = new ArrayList<>();
         for (int i = 0; i < elementsArray.length(); i++) {
-            JsonObject elementObject = elementsArray.get(i).getAsJsonObject();
+            JsonValue elementObject = elementsArray.get(i);
             elements.add(elementFromJson(elementObject));
         }
         return elements;
     }
 
-    private static FormElement elementFromJson(org.activityinfo.json.JsonObject elementObject) {
+    private static FormElement elementFromJson(JsonValue elementObject) {
         JsonValue typeElement = elementObject.get("type");
         if(typeElement.isJsonPrimitive()) {
             String type = typeElement.asString();
@@ -454,7 +456,7 @@ public class FormClass implements FormElementContainer {
     }
 
     public static FormClass fromJson(String json) {
-        return fromJson(new JsonParser().parse(json).getAsJsonObject());
+        return fromJson(new JsonParser().parse(json));
     }
     
     public List<FormElement> getBuiltInElements() {

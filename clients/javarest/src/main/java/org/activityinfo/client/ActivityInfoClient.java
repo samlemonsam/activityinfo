@@ -6,7 +6,6 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
@@ -22,6 +21,8 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.activityinfo.json.Json.parse;
 
 /**
  * Standard Java REST Client for ActivityInfo
@@ -45,19 +46,19 @@ public class ActivityInfoClient {
 
     public ResourceId createDatabase(String databaseName) {
 
-        JsonObject properties = Json.createObject();
+        JsonValue properties = Json.createObject();
         properties.put("name", databaseName);
 
-        JsonObject createEntity = Json.createObject();
+        JsonValue createEntity = Json.createObject();
         createEntity.put("entityName", "UserDatabase");
         createEntity.add("properties", properties);
 
-        JsonObject command = Json.createObject();
+        JsonValue command = Json.createObject();
         command.put("type", "CreateEntity");
         command.add("command", createEntity);
 
         String result = client.resource(root).path("command").post(String.class, command.toJson());
-        JsonObject resultObject = (JsonObject) parser.parse(result);
+        JsonValue resultObject = (JsonValue) parser.parse(result);
 
         int newId = resultObject.get("newId").asInt();
 
@@ -116,7 +117,7 @@ public class ActivityInfoClient {
                 .get(String.class);
 
 
-        JsonObject jsonObject = Json.parse(json).getAsJsonObject();
+        JsonValue jsonObject = parse(json);
         FormClass formClass = FormClass.fromJson(jsonObject);
 
         return formClass;
@@ -133,7 +134,7 @@ public class ActivityInfoClient {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(String.class);
 
-        JsonObject jsonObject = (JsonObject) parser.parse(json);
+        JsonValue jsonObject = (JsonValue) parser.parse(json);
 
         return FormRecord.fromJson(jsonObject);
     }
@@ -152,16 +153,16 @@ public class ActivityInfoClient {
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .post(String.class, queryModel.toJsonString());
 
-        JsonObject object = (JsonObject) parser.parse(json);
+        JsonValue object = (JsonValue) parser.parse(json);
         int numRows = object.get("rows").asInt();
 
         Map<String, ColumnView> columnMap = new HashMap<>();
-        for (Map.Entry<String, JsonValue> column : object.get("columns").getAsJsonObject().entrySet()) {
-            JsonObject columnValue = column.getValue().getAsJsonObject();
+        for (Map.Entry<String, JsonValue> column : object.get("columns").entrySet()) {
+            JsonValue columnValue = column.getValue();
             String storage = columnValue.get("storage").asString();
             switch (storage) {
                 case "array":
-                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.get("values").getAsJsonArray()));
+                    columnMap.put(column.getKey(), new ColumnViewWrapper(numRows, columnValue.get("values")));
                     break;
                 case "empty":
                     columnMap.put(column.getKey(), parseEmpty(numRows, columnValue));
@@ -178,7 +179,7 @@ public class ActivityInfoClient {
         return new ColumnSet(numRows, columnMap);
     }
 
-    private ColumnView parseConstantColumn(int numRows, JsonObject columnValue) {
+    private ColumnView parseConstantColumn(int numRows, JsonValue columnValue) {
         if(columnValue.get("value").isJsonNull()) {
             return parseEmpty(numRows, columnValue);
         }
@@ -196,7 +197,7 @@ public class ActivityInfoClient {
     }
 
 
-    private ColumnView parseEmpty(int numRows, JsonObject columnValue) {
+    private ColumnView parseEmpty(int numRows, JsonValue columnValue) {
         String typeName = columnValue.get("type").asString();
         ColumnType type = ColumnType.valueOf(typeName);
         return new EmptyColumnView(type, numRows);

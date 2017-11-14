@@ -1,6 +1,5 @@
 package org.activityinfo.model.query;
 
-import org.activityinfo.json.JsonObject;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -46,14 +45,14 @@ public class RowSource {
 
 
     public JsonValue toJsonElement() {
-        JsonObject object = createObject();
+        JsonValue object = createObject();
         object.put("rootFormId", rootFormId.asString());
 
         return object;
     }
 
 
-    public static RowSource fromJson(org.activityinfo.json.JsonObject object) {
+    public static RowSource fromJson(JsonValue object) {
         RowSource source = new RowSource();
         source.setRootFormId(ResourceId.valueOf(object.get("rootFormId").asString()));
         return source;

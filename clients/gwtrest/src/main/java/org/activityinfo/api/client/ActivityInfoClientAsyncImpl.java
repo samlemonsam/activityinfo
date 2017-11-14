@@ -1,19 +1,16 @@
 package org.activityinfo.api.client;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.*;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import org.activityinfo.json.*;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonMappingException;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -23,7 +20,6 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
@@ -67,7 +63,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(urlBuilder.toString(), new Function<JsonValue, List<CatalogEntry>>() {
             @Override
             public List<CatalogEntry> apply(JsonValue jsonElement) {
-                return CatalogEntry.fromJsonArray(jsonElement.getAsJsonArray());
+                return CatalogEntry.fromJsonArray(jsonElement);
             }
         });
     }
@@ -136,7 +132,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(urlBuilder.toString(), new Function<JsonValue, List<FormHistoryEntry>>() {
             @Override
             public List<FormHistoryEntry> apply(JsonValue jsonElement) {
-                return FormHistoryEntry.fromJsonArray(jsonElement.getAsJsonArray());
+                return FormHistoryEntry.fromJsonArray(jsonElement);
             }
         });
     }
@@ -172,7 +168,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
             @Override
             public FormSyncSet apply(JsonValue value) {
                 try {
-                    return Json.fromJson(FormSyncSet.class, value.getAsJsonObject());
+                    return Json.fromJson(FormSyncSet.class, value);
                 } catch (JsonMappingException e) {
                     throw new RuntimeException(e);
                 }
@@ -214,7 +210,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(schemaUrl(formId), new Function<JsonValue, FormClass>() {
             @Override
             public FormClass apply(JsonValue jsonElement) {
-                return FormClass.fromJson(jsonElement.getAsJsonObject());
+                return FormClass.fromJson(jsonElement);
             }
         });
     }
@@ -224,7 +220,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(baseUrl + "/form/" + formId, new Function<JsonValue, FormMetadata>() {
             @Override
             public FormMetadata apply(JsonValue jsonElement) {
-                return FormMetadata.fromJson(jsonElement.getAsJsonObject());
+                return FormMetadata.fromJson(jsonElement);
             }
         });
     }
@@ -234,11 +230,11 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(baseUrl + "/form/" + formId.asString() + "/tree", new Function<JsonValue, FormTree>() {
             @Override
             public FormTree apply(JsonValue jsonElement) {
-                JsonObject root = jsonElement.getAsJsonObject();
-                JsonObject forms = root.get("forms").getAsJsonObject();
+                JsonValue root = jsonElement;
+                JsonValue forms = root.get("forms");
                 final Map<ResourceId, FormClass> formMap = new HashMap<>();
                 for (Map.Entry<String, JsonValue> entry : forms.entrySet()) {
-                    FormClass formClass = FormClass.fromJson(entry.getValue().getAsJsonObject());
+                    FormClass formClass = FormClass.fromJson(entry.getValue());
                     formMap.put(formClass.getId(), formClass);
                 }
                 FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
@@ -325,7 +321,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return post(RequestBuilder.POST, baseUrl + "/jobs", request.toJsonObject().toJson(), new Function<String, JobStatus<T, R>>() {
             @Override
             public JobStatus<T, R> apply(String s) {
-                return JobStatus.fromJson(JSON_PARSER.parse(s).getAsJsonObject());
+                return JobStatus.fromJson(JSON_PARSER.parse(s));
             }
         });
     }
@@ -335,7 +331,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(baseUrl + "/jobs/" + jobId, new Function<JsonValue, JobStatus<?, ?>>() {
             @Override
             public JobStatus<?, ?> apply(JsonValue jsonElement) {
-                return JobStatus.fromJson(jsonElement.getAsJsonObject());
+                return JobStatus.fromJson(jsonElement);
             }
         });
     }

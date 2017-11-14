@@ -15,7 +15,9 @@
  */
 package org.activityinfo.json.impl;
 
-import org.activityinfo.json.*;
+import org.activityinfo.json.JsonException;
+import org.activityinfo.json.JsonFactory;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Implementation of parsing a JSON string into instances of {@link
@@ -176,8 +178,8 @@ class JsonTokenizer {
         }
     }
 
-    JsonArray parseArray() throws JsonException {
-        final JsonArray array = jsonFactory.createArray();
+    JsonValue parseArray() throws JsonException {
+        final JsonValue array = jsonFactory.createArray();
         int c = nextNonWhitespace();
         assert c == '[';
         while (true) {
@@ -201,8 +203,8 @@ class JsonTokenizer {
         }
     }
 
-    JsonObject parseObject() throws JsonException {
-        final JsonObject object = jsonFactory.createObject();
+    JsonValue parseObject() throws JsonException {
+        final JsonValue object = jsonFactory.createObject();
         int c = nextNonWhitespace();
         if (c != '{') {
             throw new JsonException(
@@ -275,7 +277,7 @@ class JsonTokenizer {
         }
     }
 
-    private JsonNumber getNumberForLiteral(String literal)
+    private JsonValue getNumberForLiteral(String literal)
             throws JsonException {
         try {
             return jsonFactory.create(Double.parseDouble(literal));

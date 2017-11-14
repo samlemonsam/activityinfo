@@ -6,7 +6,7 @@ import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.SelectionViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
@@ -88,7 +88,7 @@ public class TableViewModelTest {
                 .addColumns(ImmutableTableColumn.builder().id("c2").formula("foo").build())
                 .build();
 
-        JsonObject object = model.toJson();
+        JsonValue object = model.toJson();
 
         TableModel remodel = TableModel.fromJson(object);
 

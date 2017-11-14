@@ -47,7 +47,7 @@ public class LocalDateType implements PeriodType {
     @Override
     public LocalDate parseJsonValue(JsonValue value) {
         if(value.isJsonObject()) {
-            value = value.getAsJsonObject().get("value");
+            value = value.get("value");
         }
         return LocalDate.parse(value.asString());
     }

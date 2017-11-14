@@ -2,9 +2,8 @@ package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonArray;
 import org.activityinfo.json.JsonMappingException;
-import org.activityinfo.json.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -39,40 +38,40 @@ public class UpdaterTest {
 
     @Test(expected = InvalidUpdateException.class)
     public void missingChangesProperty() {
-        JsonObject updateObject = createObject();
+        JsonValue updateObject = createObject();
         updater.execute(updateObject);
     }
     
     @Test(expected = InvalidUpdateException.class)
     public void invalidChangesProperty() {
-        JsonObject updateObject = createObject();
+        JsonValue updateObject = createObject();
         updateObject.put("changes", 42);
         updater.execute(updateObject);
     }
     
     @Test(expected = InvalidUpdateException.class)
     public void newResourceWithoutClass() {
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("formId", "XYZ123-new-id");
         
-        JsonArray changes = Json.createArray();
+        JsonValue changes = Json.createArray();
         changes.add(change);
 
-        JsonObject updateObject = createObject();
+        JsonValue updateObject = createObject();
         updateObject.put("changes", changes);
         updater.execute(updateObject);
     }
 
     @Test(expected = InvalidUpdateException.class)
     public void newResourceWithInvalidClass() {
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "XYZ123");
         change.put("formId", createObject());
 
-        JsonArray changes = Json.createArray();
+        JsonValue changes = Json.createArray();
         changes.add(change);
 
-        JsonObject updateObject = createObject();
+        JsonValue updateObject = createObject();
         updateObject.put("changes", changes);
         updater.execute(updateObject);
     }
@@ -80,14 +79,14 @@ public class UpdaterTest {
     @Test(expected = InvalidUpdateException.class)
     public void newResourceWithMissingCollection() {
 
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "XYZ123");
         change.put("formId", "foobar");
 
-        JsonArray changes = Json.createArray();
+        JsonValue changes = Json.createArray();
         changes.add(change);
 
-        JsonObject updateObject = createObject();
+        JsonValue updateObject = createObject();
         updateObject.put("changes", changes);
         updater.execute(updateObject);
     }
@@ -98,10 +97,10 @@ public class UpdaterTest {
         FormClass formClass = new FormClass(ResourceId.valueOf("XYZ123"));
         formClass.addElement(new FormField(fieldId).setType(new QuantityType("meters")));
 
-        JsonObject fields = createObject();
+        JsonValue fields = createObject();
         fields.put("Q1", Json.createNull());
 
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "A");
         change.put("formId", "XYZ123");
         change.put("fields", fields);
@@ -118,10 +117,10 @@ public class UpdaterTest {
         formClass.addElement(new FormField(fieldId).setType(new QuantityType("meters")));
 
 
-        JsonObject fields = createObject();
+        JsonValue fields = createObject();
         fields.put("Q1", 41.3);
 
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "A");
         change.put("formId", "XYZ123");
         change.put("fields", fields);
@@ -137,10 +136,10 @@ public class UpdaterTest {
         FormClass formClass = new FormClass(ResourceId.valueOf("XYZ123"));
         formClass.addElement(new FormField(fieldId).setType(new QuantityType("meters")));
 
-        JsonObject fields = Json.createObject();
+        JsonValue fields = Json.createObject();
         fields.put("Q1", "41.3");
 
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "A");
         change.put("formId", "XYZ123");
         change.put("fields", fields);
@@ -156,11 +155,11 @@ public class UpdaterTest {
         FormClass formClass = new FormClass(ResourceId.valueOf("XYZ123"));
         formClass.addElement(new FormField(fieldId).setType(new QuantityType("meters")));
 
-        JsonObject fields = createObject();
+        JsonValue fields = createObject();
         fields.put("Q1", "4.1.3");
 
 
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "A");
         change.put("formId", "XYZ123");
         change.put("fields", fields);
@@ -174,10 +173,10 @@ public class UpdaterTest {
         FormClass formClass = new FormClass(ResourceId.valueOf("XYZ123"));
         formClass.addElement(new FormField(fieldId).setType(new QuantityType("meters")));
 
-        JsonObject fields = createObject();
+        JsonValue fields = createObject();
         fields.put("Q1", "Hello World");
 
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "A");
         change.put("formId", "XYZ123");
         change.put("fields", fields);
@@ -200,10 +199,10 @@ public class UpdaterTest {
                 .setLabel("File Number")
                 .setCode("SN");
 
-        JsonObject fields = Json.createObject();
+        JsonValue fields = Json.createObject();
         fields.put("PROVINCE", "KUNDUZ");
 
-        JsonObject change = createObject();
+        JsonValue change = createObject();
         change.put("recordId", "A");
         change.put("formId", "FORM1");
         change.put("fields", fields);
