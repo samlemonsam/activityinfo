@@ -1740,4 +1740,14 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Invalid form reference(s)")
     String invalidReference();
+
+    @DefaultStringValue("Download in progress...")
+    String downloadInProgress();
+
+    @DefaultStringValue("Available offline")
+    String availableOffline();
+
+    @DefaultStringValue("Make form available offline")
+    String makeAvailableOffline();
+
 }
