@@ -2,6 +2,8 @@ package org.activityinfo.server.command.handler.binding;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
@@ -26,10 +28,15 @@ public class LocationFieldBinding implements FieldBinding {
     public static final String LOCATION_NAME_COLUMN = "locationName";
     public static final String LOCATION_CODE_COLUMN = "locationAxe";
 
+    private static final ConstantExpr ZEROED_ID = new ConstantExpr(0);
+
     private FormClass locationForm;
+    private boolean isAdminLevelDomain;
 
     public LocationFieldBinding(FormClass locationForm) {
         this.locationForm = locationForm;
+        Character domain = locationForm.getId().getDomain();
+        this.isAdminLevelDomain = domain.equals(CuidAdapter.ADMIN_LEVEL_DOMAIN);
     }
 
     @Override
@@ -39,7 +46,13 @@ public class LocationFieldBinding implements FieldBinding {
         ColumnView code = columnSet.getColumnView(LOCATION_CODE_COLUMN);
 
         for (int i=0; i<columnSet.getNumRows(); i++) {
-            dataArray[i].set(LOCATION_ID_COLUMN, CuidAdapter.getLegacyIdFromCuid(id.getString(i)));
+            if (isAdminLevelDomain) {
+                Double idVal = id.getDouble(i);
+                dataArray[i].set(LOCATION_ID_COLUMN, idVal.intValue());
+            } else {
+                String idVal = id.getString(i);
+                dataArray[i].set(LOCATION_ID_COLUMN, CuidAdapter.getLegacyIdFromCuid(idVal));
+            }
             dataArray[i].set(LOCATION_NAME_COLUMN, name.getString(i));
             dataArray[i].set(LOCATION_CODE_COLUMN, code.getString(i));
         }
@@ -54,8 +67,10 @@ public class LocationFieldBinding implements FieldBinding {
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
+        ExprNode idExpr;
+        idExpr = isAdminLevelDomain ? ZEROED_ID : LOCATION_SYMBOL;
         return Arrays.asList(
-                new ColumnModel().setExpression(LOCATION_SYMBOL).as(LOCATION_ID_COLUMN),
+                new ColumnModel().setExpression(idExpr).as(LOCATION_ID_COLUMN),
                 new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,NAME_SYMBOL)).as(LOCATION_NAME_COLUMN),
                 new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,CODE_SYMBOL)).as(LOCATION_CODE_COLUMN)
         );
