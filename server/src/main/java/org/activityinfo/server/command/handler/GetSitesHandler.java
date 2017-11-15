@@ -59,7 +59,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private List<Runnable> queryResultHandlers = new ArrayList<>();
 
     private Map<Integer,Activity> activities;
-    private List<SiteDTO> siteList = Lists.newLinkedList();
+    private List<SiteDTO> siteList = Lists.newArrayList();
 
     private final Stopwatch metadataTime = Stopwatch.createUnstarted();
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
