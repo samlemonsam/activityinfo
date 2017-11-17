@@ -45,11 +45,11 @@ public class OfflineStatusButton implements IsWidget {
         } else {
             button.setEnabled(true);
             if(!status.get().isEnabled()) {
-                button.setText("Make form available offline");
+                button.setText(I18N.CONSTANTS.makeAvailableOffline());
             } else if(status.get().isCached()) {
-                button.setText("Available offline");
+                button.setText(I18N.CONSTANTS.availableOffline());
             } else {
-                button.setText("Downloading in progress...");
+                button.setText(I18N.CONSTANTS.downloadInProgress());
             }
         }
     }
