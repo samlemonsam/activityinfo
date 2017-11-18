@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr.functions;
 
+import com.google.common.base.Strings;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.ConstantColumnView;
@@ -53,6 +54,10 @@ public class SearchFunction extends ExprFunction implements ColumnFunction {
 
         if(Double.isNaN(startPositionArgument) || Double.isInfinite(startPositionArgument) ||
             startPositionArgument > Integer.MAX_VALUE) {
+            return Double.NaN;
+        }
+
+        if(Strings.isNullOrEmpty(substring) || Strings.isNullOrEmpty(string)) {
             return Double.NaN;
         }
 
