@@ -238,7 +238,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Enter the coordinates in any format, or drag the marker on the map")
     String coordinateToolTip();
 
-    @DefaultStringValue("Copy")
+    @DefaultStringValue("copy")
     String copy();
 
     @DefaultStringValue("Country")
@@ -1768,13 +1768,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Count Distinct")
     String countDistinct();
 
-
     @DefaultStringValue("No records found.")
     String noRecords();
 
     @DefaultStringValue("No matching records.")
     String noMatchingRecords();
-
 
     @DefaultStringValue("Oops! Exception: ")
     String exception();
@@ -1790,5 +1788,4 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Make form available offline")
     String makeAvailableOffline();
-
 }
