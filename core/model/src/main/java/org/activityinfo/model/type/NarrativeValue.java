@@ -1,8 +1,8 @@
 package org.activityinfo.model.type;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.primitive.HasStringValue;
 
 public class NarrativeValue implements FieldValue, HasStringValue {
@@ -31,8 +31,8 @@ public class NarrativeValue implements FieldValue, HasStringValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        return new JsonPrimitive(text);
+    public JsonValue toJsonElement() {
+        return Json.create(text);
     }
 
 

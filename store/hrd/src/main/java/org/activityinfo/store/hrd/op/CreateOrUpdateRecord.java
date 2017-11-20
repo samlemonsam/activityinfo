@@ -7,9 +7,9 @@ import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
-import org.activityinfo.store.query.impl.InvalidUpdateException;
+import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.spi.RecordChangeType;
-import org.activityinfo.store.spi.RecordUpdate;
+import org.activityinfo.store.spi.TypedRecordUpdate;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -17,9 +17,9 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 public class CreateOrUpdateRecord extends VoidWork {
 
     private ResourceId formId;
-    private RecordUpdate update;
+    private TypedRecordUpdate update;
 
-    public CreateOrUpdateRecord(ResourceId formId, RecordUpdate update) {
+    public CreateOrUpdateRecord(ResourceId formId, TypedRecordUpdate update) {
         this.formId = formId;
         this.update = update;
     }

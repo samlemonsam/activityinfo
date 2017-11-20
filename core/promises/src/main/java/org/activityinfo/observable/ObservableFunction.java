@@ -60,7 +60,7 @@ public abstract class ObservableFunction<T> extends Observable<T> {
         /*
          * Clear the current value, setting our state to "Loading..." and notify observers
          */
-        if(value.isPresent()) {
+        if(value.isPresent() && scheduler != SynchronousScheduler.INSTANCE) {
             value = Optional.absent();
             ObservableFunction.this.fireChange();
         }

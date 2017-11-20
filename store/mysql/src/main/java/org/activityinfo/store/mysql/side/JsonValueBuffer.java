@@ -2,7 +2,7 @@ package org.activityinfo.store.mysql.side;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.spi.CursorObserver;

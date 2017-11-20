@@ -2,10 +2,10 @@ package org.activityinfo.server.job;
 
 import com.google.appengine.api.taskqueue.*;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlecode.objectify.Key;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobState;
@@ -56,7 +56,7 @@ public class JobResource {
 
         JobRequest request;
         try {
-            request = JobRequest.fromJson(PARSER.parse(json).getAsJsonObject());
+            request = JobRequest.fromJson(PARSER.parse(json));
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -64,7 +64,7 @@ public class JobResource {
         // now create the job record in the datastore
         JobEntity record = new JobEntity(user.get().getUserId());
         record.setType(request.getDescriptor().getType());
-        record.setDescriptor(request.getDescriptor().toJsonObject().toString());
+        record.setDescriptor(request.getDescriptor().toJsonObject().toJson());
         record.setState(JobState.STARTED);
         record.setStartTime(new Date());
         record.setLocale(user.get().getUserLocale());
@@ -79,7 +79,7 @@ public class JobResource {
         LOGGER.info("Starting task " + request.getDescriptor().getType());
 
 
-        return Response.ok(Response.Status.CREATED).entity(buildStatus(record).toJsonObject().toString()).build();
+        return Response.ok(Response.Status.CREATED).entity(buildStatus(record).toJsonObject().toJson()).build();
     }
 
     /**
@@ -102,7 +102,7 @@ public class JobResource {
         }
 
         JobStatus status = buildStatus(job);
-        return Response.ok().entity(status.toJsonObject().toString()).build();
+        return Response.ok().entity(status.toJsonObject().toJson()).build();
     }
 
     private JobStatus buildStatus(JobEntity job) {

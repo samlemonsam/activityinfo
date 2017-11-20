@@ -1,5 +1,10 @@
 package org.activityinfo.ui.client.store.offline;
 
+import org.activityinfo.indexedb.IDBDatabaseUpgrade;
+import org.activityinfo.indexedb.IDBObjectStore;
+import org.activityinfo.indexedb.ObjectStoreDefinition;
+import org.activityinfo.indexedb.ObjectStoreOptions;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -11,20 +16,37 @@ import java.util.Optional;
  */
 public class SchemaStore {
 
-    public static final String NAME = "formSchemas";
+    public static final ObjectStoreDefinition<SchemaStore> DEF = new ObjectStoreDefinition<SchemaStore>() {
+        @Override
+        public String getName() {
+            return "schemas";
+        }
 
-    private IDBObjectStore impl;
+        @Override
+        public void upgrade(IDBDatabaseUpgrade database, int oldVersion) {
+            if(oldVersion < 1) {
+                database.createObjectStore(getName(), ObjectStoreOptions.withKey("id"));
+            }
+        }
 
-    SchemaStore(IDBObjectStore impl) {
+        @Override
+        public SchemaStore wrap(IDBObjectStore store) {
+            return new SchemaStore(store);
+        }
+    };
+
+    private IDBObjectStore<JsonValue> impl;
+
+    private SchemaStore(IDBObjectStore<JsonValue> impl) {
         this.impl = impl;
     }
 
     public final void put(FormClass formClass) {
-        impl.putJson(formClass.toJsonString());
+        impl.put(formClass.toJsonObject());
     }
 
     public final Promise<Optional<FormClass>> get(ResourceId formId) {
-        return impl.getJson(formId.asString()).then(json -> {
+        return impl.get(formId.asString()).then(json -> {
             if(json == null) {
                 return Optional.empty();
             } else {

@@ -51,10 +51,11 @@ ext {
             guava:          "com.google.guava:guava-gwt:${guavaVersion}",
             gson:           "gson-gwt:gson-gwt:2.1",
             gears:          'com.google.gwt.google-apis:gwt-gears:1.2.1',
+            jsinterop:      'com.google.jsinterop:jsinterop-annotations:1.0.1'
 
         ],
             
-        gxt:                'com.extjs:gxt:2.3.1-gwt26-bdd-59',
+        gxt:                'com.extjs:gxt:2.3.1-gwt26-bdd-70',
             
         rebar: [
             time:           "com.bedatadriven.rebar:rebar-time:${rebarVersion}",

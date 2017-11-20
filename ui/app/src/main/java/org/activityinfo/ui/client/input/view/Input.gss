@@ -1,18 +1,43 @@
 
+@def BACKGROUND_COLOR value('theme.panel.backgroundColor');
+@def BORDER_COLOR value('theme.panel.border.color');
+@def BORDER_STYLE value('theme.panel.border.style');
+@def BORDER_WIDTH value('theme.panel.border.toString');
+@def TEXT_COLOR value('theme.panel.textColor');
+@def HEADER_BACKGROUND_COLOR value('theme.panel.headerBackgroundColor');
+@def HEADER_GRADIENT value('theme.panel.headerGradient');
+@def PADDING value('theme.panel.headerPadding.toString');
+@def HEIGHT value('theme.field.height', 'px');
+@def PADDING value('theme.field.padding.toString');
+@def UNITS_COLOR value('theme.field.emptyTextColor');
+
 
 .form {
     font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
     font-size: 13px;
-    padding: 10px;
-    overflow-y: auto;
+}
+
+.subform {
+    border: 1px solid cadetblue;
+    margin-bottom: 10px;
 }
 
 .field {
-    margin-top: 20px;
 }
 
 .fieldLabel {
     font-weight: bold;
-    margin-bottom: 5px;
 }
 
+.fieldUnits {
+    position: absolute;
+    right: 0;
+    height: HEIGHT;
+    text-align: end;
+    padding: PADDING;
+    color: UNITS_COLOR;
+}
+
+.periodToolBar {
+    background: HEADER_BACKGROUND_COLOR;
+}

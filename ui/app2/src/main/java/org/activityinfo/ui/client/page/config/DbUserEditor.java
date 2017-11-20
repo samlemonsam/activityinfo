@@ -33,38 +33,29 @@ import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
-import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.GetUsers;
-import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
-import org.activityinfo.legacy.shared.command.result.BatchResult;
-import org.activityinfo.legacy.shared.command.result.UserExistsException;
 import org.activityinfo.legacy.shared.command.result.UserResult;
-import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
-import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.PageId;
 import org.activityinfo.ui.client.page.PageState;
-import org.activityinfo.ui.client.page.common.dialog.FormDialogCallback;
-import org.activityinfo.ui.client.page.common.dialog.FormDialogImpl;
+import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
+import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
-import org.activityinfo.ui.client.page.config.form.UserForm;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.ArrayList;
@@ -83,6 +74,10 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     private UserDatabaseDTO db;
 
     private ActionToolBar toolBar;
+    private DbUserEditorActions actions;
+
+    private boolean modified = true;
+
 
     @Inject
     public DbUserEditor(EventBus eventBus, Dispatcher service, StateProvider stateMgr) {
@@ -102,6 +97,8 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         this.db = db;
         store.removeAll();
 
+        actions = new DbUserEditorActions(this, dispatcher, loader, store, grid, db);
+
         toolBar.setActionEnabled(UIActions.SAVE, false);
         toolBar.setActionEnabled(UIActions.ADD, db.isManageUsersAllowed());
         toolBar.setActionEnabled(UIActions.DELETE, false);
@@ -113,11 +110,12 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         grid.getColumnModel().getColumnById("allowDesign").setHidden(!db.isDesignAllowed());
 
         loader.load();
+        modified = false;
     }
 
     private void createToolBar() {
         toolBar = new ActionToolBar(this);
-        toolBar.addSaveSplitButton();
+        toolBar.addSaveButton();
         toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.addUser(), IconImageBundle.ICONS.addUser());
         toolBar.addButton(UIActions.DELETE, I18N.CONSTANTS.delete(), IconImageBundle.ICONS.deleteUser());
         toolBar.addButton(UIActions.EXPORT, I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
@@ -143,7 +141,8 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
             @Override
             public void handleEvent(StoreEvent<UserPermissionDTO> event) {
-                toolBar.setDirty(!store.getModifiedRecords().isEmpty());
+                modified = !store.getModifiedRecords().isEmpty();
+                toolBar.setDirty(modified);
             }
         });
 
@@ -294,7 +293,8 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         }
 
         record.endEdit();
-        toolBar.setDirty(store.getModifiedRecords().size() != 0);
+        modified = store.getModifiedRecords().size() != 0;
+        toolBar.setDirty(modified);
     }
 
     private void onSelectionChanged(UserPermissionDTO selectedItem) {
@@ -312,113 +312,51 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     @Override
     public void onUIAction(String actionId) {
         if (actionId.equals(UIActions.SAVE)) {
-            save();
+            actions.save();
+            modified = false;
         } else if (actionId.equals(UIActions.ADD)) {
-            add();
+            actions.add();
+            modified = true;
         } else if (actionId.equals(UIActions.DELETE)) {
-            delete();
+            actions.delete();
+            modified = true;
         } else if (actionId.equals(UIActions.EXPORT)) {
-            export();
+            actions.export();
         } else if (UIActions.MAILING_LIST.equals(actionId)) {
             createMailingListPopup();
         }
-    }
-
-    private void save() {
-        BatchCommand batch = new BatchCommand();
-        for (Record record : store.getModifiedRecords()) {
-            batch.add(new UpdateUserPermissions(db.getId(), (UserPermissionDTO) record.getModel()));
-        }
-
-        dispatcher.execute(batch,
-                new MaskingAsyncMonitor(this, I18N.CONSTANTS.saving()),
-                new AsyncCallback<BatchResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // handled by monitor
-                    }
-
-                    @Override
-                    public void onSuccess(BatchResult result) {
-                        store.commitChanges();
-                    }
-                });
     }
 
     private void createMailingListPopup() {
         new MailingListDialog(dispatcher, db.getId());
     }
 
-    private void add() {
-        final UserForm form = new UserForm(db);
-
-        final FormDialogImpl dlg = new FormDialogImpl(form);
-        dlg.setHeadingText(I18N.CONSTANTS.newUser());
-        dlg.setWidth(400);
-        dlg.setHeight(300);
-
-        final String host = Window.Location.getHostName();
-
-        dlg.show(new FormDialogCallback() {
-
-            @Override
-            public void onValidated() {
-                UpdateUserPermissions command = new UpdateUserPermissions(db, form.getUser(), host);
-                command.setNewUser(true);
-                dispatcher.execute(command,
-                        new AsyncCallback<VoidResult>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                if(caught instanceof UserExistsException) {
-                                    MessageBox.alert(I18N.CONSTANTS.userExistsTitle(), I18N.CONSTANTS.userExistsMessage(), null);
-                                } else {
-                                    MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorUnexpectedOccured(), null);
-                                }
-                            }
-
-                            @Override
-                            public void onSuccess(VoidResult result) {
-                                loader.load();
-                                dlg.hide();
-                            }
-                        });
-            }
-        });
-    }
-
-    private void delete() {
-        final UserPermissionDTO model = grid.getSelectionModel().getSelectedItem();
-        model.setAllowView(false);
-        model.setAllowViewAll(false);
-        model.setAllowEdit(false);
-        model.setAllowEditAll(false);
-        model.setAllowDesign(false);
-        model.setAllowManageAllUsers(false);
-        model.setAllowManageUsers(false);
-
-        dispatcher.execute(new UpdateUserPermissions(db.getId(), model),
-                new MaskingAsyncMonitor(this, I18N.CONSTANTS.deleting()),
-                new AsyncCallback<VoidResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-
-                    @Override
-                    public void onSuccess(VoidResult result) {
-                        store.remove(model);
-                    }
-                });
-    }
-
-    private void export() {
-        Window.open(GWT.getModuleBaseURL() + "export/users?dbUsers=" + db.getId(), "_blank", null);
-    }
-
     @Override
-    public void requestToNavigateAway(PageState place, NavigationCallback callback) {
-        callback.onDecided(true);
+    public void requestToNavigateAway(PageState place, final NavigationCallback callback) {
+        if (modified) {
+            final SavePromptMessageBox savePrompt = new SavePromptMessageBox();
+            savePrompt.show(new SaveChangesCallback() {
+                @Override
+                public void save(AsyncMonitor monitor) {
+                    savePrompt.hide();
+                    actions.save(callback);
+                }
+
+                @Override
+                public void cancel() {
+                    savePrompt.hide();
+                    callback.onDecided(false);
+                }
+
+                @Override
+                public void discard() {
+                    savePrompt.hide();
+                    callback.onDecided(true);
+                }
+            });
+        } else {
+            callback.onDecided(true);
+        }
     }
 
     private class PermissionCheckConfig extends CheckColumnConfig {

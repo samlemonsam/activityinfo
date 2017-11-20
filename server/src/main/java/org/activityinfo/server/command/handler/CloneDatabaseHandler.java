@@ -50,10 +50,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.spi.FormCatalog;
@@ -160,10 +157,18 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         // first copy all activities without payload (indicators, attributes)
         for (Activity activity : sourceDb.getActivities()) {
+            if (activity.isDeleted()) {
+                // skip current activity if deleted...
+                continue;
+            }
             copyActivity(activity);
         }
 
         for (Activity activity : sourceDb.getActivities()) {
+            if (activity.isDeleted()) {
+                // skip current activity if deleted...
+                continue;
+            }
             final ResourceId sourceFormId = activityFormClass(activity.getId());
             final ResourceId targetFormId = activityFormClass(activityMapping.get(activity.getId()).getId());
 
@@ -335,8 +340,18 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             }
 
             @Override
+            public FieldType visitWeek(EpiWeekType epiWeekType) {
+                return epiWeekType;
+            }
+
+            @Override
             public FieldType visitYear(YearType yearType) {
                 return yearType;
+            }
+
+            @Override
+            public FieldType visitFortnight(FortnightType fortnightType) {
+                return fortnightType;
             }
 
             @Override

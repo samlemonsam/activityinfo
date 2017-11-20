@@ -9,9 +9,6 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-/**
- * Created by alex on 8-12-16.
- */
 public class FunctionCallNodeTest {
 
     @Test
@@ -32,8 +29,11 @@ public class FunctionCallNodeTest {
     @Test
     public void ifCall() {
         assertThat(
-                new FunctionCallNode(IfFunction.INSTANCE, new ConstantExpr(true), new ConstantExpr(1), new ConstantExpr(0)).asExpression(),
-                equalTo("if(true, 1.0, 0.0)")
+                new FunctionCallNode(IfFunction.INSTANCE,
+                    new ConstantExpr(true),
+                    new ConstantExpr(1),
+                    new ConstantExpr(0)).asExpression(),
+                equalTo("if(true, 1, 0)")
         );
     }
 

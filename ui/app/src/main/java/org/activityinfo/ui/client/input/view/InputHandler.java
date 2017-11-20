@@ -12,4 +12,9 @@ public interface InputHandler {
     void updateModel(RecordRef record, ResourceId fieldId, FieldInput value);
 
     void addSubRecord(RecordRef subRecordRef);
+
+    void deleteSubRecord(RecordRef recordRef);
+
+    void changeActiveSubRecord(ResourceId fieldId, RecordRef newActiveRef);
+
 }

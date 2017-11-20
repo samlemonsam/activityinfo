@@ -3,50 +3,40 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.gson.*;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
-import org.activityinfo.analysis.table.EffectiveTableColumn;
-import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.model.analysis.ImmutableTableModel;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.barcode.BarcodeType;
-import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoAreaType;
-import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.model.type.primitive.BooleanType;
-import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.RecordHistoryBuilder;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.FormSupervisorAdapter;
-import org.activityinfo.store.query.impl.InvalidUpdateException;
-import org.activityinfo.store.query.impl.Updater;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
-import org.activityinfo.store.query.server.FormSourceSyncImpl;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.query.server.*;
+import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.VersionedFormStorage;
 
 import javax.inject.Provider;
 import javax.ws.rs.*;
@@ -56,14 +46,14 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
+import static org.activityinfo.json.impl.JsonUtil.stringify;
+import static org.activityinfo.model.resource.ResourceId.valueOf;
 
 public class FormResource {
     public static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
@@ -76,7 +66,7 @@ public class FormResource {
     private BlobAuthorizer blobAuthorizer;
 
     private final ResourceId formId;
-    private final Gson prettyPrintingGson;
+    private FormSupervisorAdapter supervisor;
 
     public FormResource(ResourceId formId,
                         Provider<FormCatalog> catalog,
@@ -88,7 +78,7 @@ public class FormResource {
         this.userProvider = userProvider;
         this.permissionOracle = permissionOracle;
         this.blobAuthorizer = blobAuthorizer;
-        this.prettyPrintingGson = new GsonBuilder().setPrettyPrinting().create();
+        this.supervisor = new FormSupervisorAdapter(catalog.get(), userProvider.get().getId());
     }
 
     @GET
@@ -97,34 +87,24 @@ public class FormResource {
         FormMetadata metadata = getFormMetadata(localVersion);
 
         return Response.ok()
-                .entity(prettyPrintingGson.toJson(metadata.toJsonObject()))
+                .entity(stringify(metadata.toJsonObject()))
                 .type(JSON_CONTENT_TYPE).build();
     }
 
     private FormMetadata getFormMetadata(Long localVersion) {
-        FormMetadata metadata = new FormMetadata();
-        metadata.setId(formId);
         Optional<FormStorage> collection = this.catalog.get().getForm(formId);
         if(!collection.isPresent()) {
-            metadata.setDeleted(true);
-            return metadata;
+            return FormMetadata.notFound(formId);
         }
         FormPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
         if(!permissions.isVisible()) {
-            metadata.setVisible(false);
-            return metadata;
+            return FormMetadata.forbidden(formId);
+        } else {
+            return FormMetadata.of(
+                collection.get().cacheVersion(),
+                collection.get().getFormClass(),
+                permissions);
         }
-
-        FormClass schema = collection.get().getFormClass();
-
-        metadata.setVersion(collection.get().cacheVersion());
-        metadata.setSchemaVersion(schema.getSchemaVersion());
-
-        if(localVersion == null || localVersion < schema.getSchemaVersion()) {
-            metadata.setSchema(schema);
-        }
-
-        return metadata;
     }
 
     /**
@@ -140,13 +120,13 @@ public class FormResource {
 
         FormClass formClass = catalog.get().getFormClass(formId);
 
-        JsonObject object = formClass.toJsonObject();
+        JsonValue object = formClass.toJsonObject();
 
         return Response
-                .ok(prettyPrintingGson.toJson(object))
-                .type(JSON_CONTENT_TYPE)
-                .cacheControl(noCache())
-                .build();
+            .ok(Json.stringify(object, 2))
+            .type(JSON_CONTENT_TYPE)
+            .cacheControl(noCache())
+            .build();
     }
 
     @POST
@@ -196,8 +176,16 @@ public class FormResource {
                     .build();
         }
 
+        PermissionsEnforcer enforcer = new PermissionsEnforcer(catalog.get(), userProvider.get().getId());
+        if(!enforcer.canView(record.get())){
+            return Response
+                    .status(Response.Status.FORBIDDEN)
+                    .entity("Not authorized")
+                    .build();
+        }
+
         return Response.ok()
-                .entity(record.get().toJsonElement().toString())
+                .entity(record.get().toJsonElement().toJson())
                 .cacheControl(noCache())
                 .type(JSON_CONTENT_TYPE)
                 .build();
@@ -215,16 +203,47 @@ public class FormResource {
     public Response getVersionRange(@QueryParam("localVersion") long localVersion, @QueryParam("version") long version) {
         FormStorage collection = assertVisible(formId);
 
-        List<FormRecord> versionRange;
+        // Compute a predicate that will tell us whether a given
+        // record should be visible to the user, based on their *current* permissions.
+
+        Predicate<ResourceId> visibilityPredicate = computeVisibilityPredicate();
+
+        FormSyncSet syncSet;
         if(collection instanceof VersionedFormStorage) {
-            versionRange = ((VersionedFormStorage) collection).getVersionRange(localVersion, version);
+            syncSet = ((VersionedFormStorage) collection).getVersionRange(localVersion, version, visibilityPredicate);
         } else {
-            versionRange = Collections.emptyList();
+            syncSet = FormSyncSet.emptySet(formId);
         }
         return Response.ok()
-                .entity(encode(versionRange))
+                .entity(Json.toJson(syncSet).toJson())
                 .type(JSON_CONTENT_TYPE)
                 .build();
+    }
+
+    /**
+     * Computes a record-level visibility predicate.
+     */
+    private Predicate<ResourceId> computeVisibilityPredicate() {
+        FormPermissions formPermissions = supervisor.getFormPermissions(formId);
+        if (!formPermissions.hasVisibilityFilter()) {
+            return Predicates.alwaysTrue();
+        }
+
+        QueryModel queryModel = new QueryModel(formId);
+        queryModel.selectResourceId().as("id");
+
+        ColumnSet columnSet = executeQuery(queryModel);
+        ColumnView id = columnSet.getColumnView("id");
+        final Set<String> idSet = new HashSet<>();
+        for (int i = 0; i < id.numRows(); i++) {
+            idSet.add(id.getString(i));
+        }
+        return new Predicate<ResourceId>() {
+            @Override
+            public boolean apply(ResourceId resourceId) {
+                return idSet.contains(resourceId.asString());
+            }
+        };
     }
 
     @POST
@@ -300,10 +319,10 @@ public class FormResource {
         assertVisible(formId);
 
         RecordHistoryBuilder builder = new RecordHistoryBuilder((MySqlCatalog) catalog.get());
-        JsonArray array = builder.build(formId, ResourceId.valueOf(recordId));
+        JsonValue array = builder.build(formId, ResourceId.valueOf(recordId));
 
         return Response.ok()
-                .entity(array.toString())
+                .entity(array.toJson())
                 .cacheControl(noCache())
                 .type(JSON_CONTENT_TYPE)
                 .build();
@@ -326,9 +345,9 @@ public class FormResource {
         Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
 
         return Response
-                .ok(encode(records), JSON_CONTENT_TYPE)
-                .cacheControl(noCache())
-                .build();
+            .ok(encode(records), JSON_CONTENT_TYPE)
+            .cacheControl(noCache())
+            .build();
     }
 
     private String encode(Iterable<FormRecord> records) {
@@ -348,13 +367,13 @@ public class FormResource {
         
         assertVisible(formId);
         
-        JsonElement jsonObject = new JsonParser().parse(body);
+        JsonValue jsonObject = new JsonParser().parse(body);
 
         Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
                 new HrdSerialNumberProvider());
 
         try {
-            updater.create(formId, jsonObject.getAsJsonObject());
+            updater.create(formId, jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
@@ -370,12 +389,12 @@ public class FormResource {
 
         assertVisible(formId);
 
-        JsonElement jsonObject = new JsonParser().parse(body);
+        JsonValue jsonObject = new JsonParser().parse(body);
 
         try {
             Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
                     new HrdSerialNumberProvider());
-            updater.execute(formId, ResourceId.valueOf(recordId), jsonObject.getAsJsonObject());
+            updater.execute(formId, valueOf(recordId), jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
@@ -418,13 +437,12 @@ public class FormResource {
     public Response getTree() {
 
         FormTree tree = fetchTree();
-        JsonObject object = JsonFormTreeBuilder.toJson(tree);
+        JsonValue object = JsonFormTreeBuilder.toJson(tree);
 
         return Response
-                .ok(prettyPrintingGson.toJson(object))
-                .cacheControl(noCache())
-                .type(JSON_CONTENT_TYPE)
-                .build();
+            .ok(Json.stringify(object, 2))
+            .cacheControl(noCache())
+            .type(JSON_CONTENT_TYPE).build();
     }
 
     @GET
@@ -437,10 +455,9 @@ public class FormResource {
         printer.printTree(tree);
 
         return Response
-                .ok(stringWriter.toString())
-                .cacheControl(noCache())
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .build();
+            .ok(stringWriter.toString())
+            .cacheControl(noCache())
+            .type(MediaType.TEXT_PLAIN_TYPE).build();
     }
 
     private FormTree fetchTree() {
@@ -449,7 +466,6 @@ public class FormResource {
         FormTreeBuilder builder = new FormTreeBuilder(catalog.get());
         return builder.queryTree(formId);
     }
-
 
     @GET
     @Path("query/rows")
@@ -469,9 +485,9 @@ public class FormResource {
         };
 
         return Response
-                .ok(output)
-                .type(JSON_CONTENT_TYPE)
-                .build();
+            .ok(output)
+            .type(JSON_CONTENT_TYPE)
+            .build();
     }
 
     @GET
@@ -486,6 +502,7 @@ public class FormResource {
             .type(JSON_CONTENT_TYPE)
             .build();
     }
+
 
     @GET
     @Path("query/columns")
@@ -521,9 +538,11 @@ public class FormResource {
             }
         }
 
-        ColumnSetBuilder builder = new ColumnSetBuilder(
-                catalog.get(),
-                new FormSupervisorAdapter(catalog.get(), userProvider.get().getId()));
+        return executeQuery(queryModel);
+    }
+
+    private ColumnSet executeQuery(QueryModel queryModel) {
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), supervisor);
 
         return builder.build(queryModel);
     }

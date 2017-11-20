@@ -6,7 +6,9 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.time.PeriodValue;
 import org.codehaus.jackson.annotate.JsonValue;
 
 import javax.annotation.Nonnull;
@@ -50,6 +52,10 @@ public final class ResourceId implements Serializable {
         return ResourceId.valueOf(rootInstanceId.asString() + "-" + keyId);
     }
 
+    public static ResourceId periodSubRecordId(RecordRef parentRef, PeriodValue period) {
+        return generatedPeriodSubmissionId(parentRef.getRecordId(), period.toString());
+    }
+
     public static ResourceId generateSubmissionId(ResourceId collectionId) {
         switch (collectionId.getDomain()) {
             case CuidAdapter.ACTIVITY_DOMAIN:
@@ -58,10 +64,9 @@ public final class ResourceId implements Serializable {
                 return CuidAdapter.generateLocationCuid();
             case CuidAdapter.ADMIN_LEVEL_DOMAIN:
                 return CuidAdapter.cuid(CuidAdapter.ADMIN_ENTITY_DOMAIN,  new KeyGenerator().generateInt());
-            case GENERATED_ID_DOMAIN:
+            default:
                 return ResourceId.valueOf(generateCuid());
         }
-        throw new IllegalArgumentException("Unsupported domain type: " + collectionId);
     }
 
     public static ResourceId generateSubmissionId(FormClass formClass) {

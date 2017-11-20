@@ -16,7 +16,7 @@ public class NotEqualFunction extends ComparisonOperator {
 
     @Override
     protected boolean apply(FieldValue a, FieldValue b) {
-        return !a.equals(b);
+        return !EqualFunction.INSTANCE.apply(a, b);
     }
 
     @Override

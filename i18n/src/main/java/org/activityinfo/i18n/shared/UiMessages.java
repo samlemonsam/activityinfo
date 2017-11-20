@@ -2,6 +2,7 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
+
 import java.util.Date;
 
 /**
@@ -39,6 +40,9 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("{0,number,#}W{1}")
     String week(int year, int week);
+
+    @DefaultMessage("{0,number,#}W{1}-{2}")
+    String fortnight(int year, int firstWeek, int secondWeek);
 
     @DefaultMessage("{0,date,MMM}")
     @Key("monthName")
@@ -248,9 +252,16 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("You didn''t provide a column named ''{0}'', so we''ll default to ''{1}''.")
     String missingWithDefault(String columnName, String defaultValue);
 
-    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the id of the form to reference, is required.")
+    @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the ID of the form to reference, is required.")
     String referenceFieldRequiresRange(String fieldTypeName, String columnName);
 
     @DefaultMessage("Count of {0}")
     String countMeasure(String formLabel);
+
+    @DefaultMessage("{0} pending changes")
+    @AlternateMessage({ "one", "One pending change" })
+    String pendingChanges(@PluralCount  int count);
+
+    @DefaultMessage("Distinct count of {0}")
+    String countDistinctMeasure(String formLabel);
 }

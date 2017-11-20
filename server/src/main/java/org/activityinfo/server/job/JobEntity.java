@@ -1,10 +1,10 @@
 package org.activityinfo.server.job;
 
-import com.google.gson.JsonParser;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Unindex;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobResult;
@@ -93,7 +93,7 @@ public class JobEntity {
     }
 
     public JobDescriptor parseDescriptor() {
-        return JobRequest.parseDescriptor(getType(), new JsonParser().parse(getDescriptor()).getAsJsonObject());
+        return JobRequest.parseDescriptor(getType(), new JsonParser().parse(getDescriptor()));
     }
 
     public JobState getState() {
@@ -141,6 +141,6 @@ public class JobEntity {
             return null;
         }
         JobDescriptor descriptor = parseDescriptor();
-        return descriptor.parseResult(new JsonParser().parse(getResult()).getAsJsonObject());
+        return descriptor.parseResult(new JsonParser().parse(getResult()));
     }
 }

@@ -5,14 +5,23 @@ public class Connection<T> {
     private final Observable<T> observable;
     private final Subscription subscription;
 
+    private int changeCount;
 
-    Connection(Observable<T> observable) {
+    public Connection(Observable<T> observable) {
         this.observable = observable;
         this.subscription = observable.subscribe(this::onChanged);
     }
 
     private void onChanged(Observable<T> observable) {
+        changeCount ++;
+    }
 
+    public void resetChangeCounter() {
+        changeCount = 0;
+    }
+
+    public int getChangeCount() {
+        return changeCount;
     }
 
     public void assertLoading() {
@@ -30,5 +39,12 @@ public class Connection<T> {
 
     public void disconnect() {
         subscription.unsubscribe();
+    }
+
+
+    public void assertChanged() {
+        if(changeCount == 0) {
+            throw new AssertionError("Expected observable to have changed.");
+        }
     }
 }

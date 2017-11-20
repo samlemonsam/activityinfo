@@ -22,12 +22,13 @@ package org.activityinfo.model.type.geo;
  * #L%
  */
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonSetter;
 
 import java.io.Serializable;
+
+import static org.activityinfo.json.Json.createObject;
 
 /*
  * Bounding box for a map. 
@@ -290,36 +291,36 @@ public class Extents implements Serializable {
                '}';
     }
 
-    public JsonElement toJsonElement() {
-        JsonObject object = new JsonObject();
+    public JsonValue toJsonElement() {
+        JsonValue object = createObject();
         if (!Double.isNaN(minLat)) {
-            object.addProperty("minLat", minLat);
+            object.put("minLat", minLat);
         }
         if (!Double.isNaN(maxLat)) {
-            object.addProperty("maxLat", maxLat);
+            object.put("maxLat", maxLat);
         }
         if (!Double.isNaN(minLon)) {
-            object.addProperty("minLon", minLon);
+            object.put("minLon", minLon);
         }
         if (!Double.isNaN(maxLon)) {
-            object.addProperty("maxLon", maxLon);
+            object.put("maxLon", maxLon);
         }
         return object;
     }
 
-    public static Extents fromJsonObject(JsonObject object) {
+    public static Extents fromJsonObject(JsonValue object) {
         Extents area = Extents.empty();
-        if(object.has("minLat")) {
-            area.minLat = object.get("minLat").getAsDouble();
+        if(object.hasKey("minLat")) {
+            area.minLat = object.get("minLat").asNumber();
         }
-        if(object.has("maxLat")) {
-            area.maxLat = object.get("maxLat").getAsDouble();
+        if(object.hasKey("maxLat")) {
+            area.maxLat = object.get("maxLat").asNumber();
         }
-        if(object.has("minLon")) {
-            area.minLon = object.get("minLon").getAsDouble();
+        if(object.hasKey("minLon")) {
+            area.minLon = object.get("minLon").asNumber();
         }
-        if(object.has("maxLon")) {
-            area.maxLon = object.get("maxLon").getAsDouble();
+        if(object.hasKey("maxLon")) {
+            area.maxLon = object.get("maxLon").asNumber();
         }
         return area;
     }

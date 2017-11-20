@@ -1,0 +1,55 @@
+
+
+apply plugin: 'gwt-base'
+
+dependencies {
+    compile libraries.gwt.user
+    compile libraries.gwt.jsinterop
+    compile libraries.guava
+    compile "com.fasterxml.jackson.core:jackson-annotations:2.4.5"
+
+    gwtSdk libraries.gwt.dev
+
+
+
+    testCompile libraries.gson
+}
+
+test {
+    exclude '**/*GwtTest*'
+}
+
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from "$projectDir/src/super/java"
+}
+
+
+task testGwt(type: JavaExec) {
+
+    dependsOn compileTestJava
+
+    outputs.upToDateWhen { true }
+
+    classpath configurations.gwtSdk
+    classpath configurations.gwt
+
+    classpath "$projectDir/src/super/java"
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath sourceSets.main.output.generatedSourcesDir
+    classpath sourceSets.test.java.srcDirs
+    classpath sourceSets.test.runtimeClasspath
+    classpath configurations.testCompile
+
+    main = 'junit.textui.TestRunner'
+
+    jvmArgs "-Dgwt.args=-prod -style pretty -war ${buildDir}/testWar -workDir ${buildDir}/testGwtWork"
+    args 'org.activityinfo.json.JsonUtilGwtTest'
+
+}
+
+test.dependsOn "testGwt"

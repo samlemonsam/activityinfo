@@ -21,11 +21,11 @@ package org.activityinfo.model.type.attachment;
  * #L%
  */
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * @author yuriyz on 8/6/14.
@@ -49,8 +49,9 @@ public class AttachmentType implements ParametrizedFieldType {
 
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
-            Cardinality cardinality = Cardinality.valueOf(parametersObject.get("cardinality"));
+        public FieldType deserializeType(JsonValue parametersObject) {
+            // Explicit type parameter required by GWT's compiler
+            Cardinality cardinality = Cardinality.valueOf(parametersObject.<JsonValue>get("cardinality"));
             Kind kind = Kind.valueOf(JsonParsing.fromEnumValue(parametersObject.get("kind")));
             return new AttachmentType(cardinality, kind);
         }
@@ -77,21 +78,21 @@ public class AttachmentType implements ParametrizedFieldType {
     }
 
     @Override
-    public AttachmentValue parseJsonValue(JsonElement value) {
-        if(value instanceof JsonObject) {
-            value = ((JsonObject) value).get("values");
+    public AttachmentValue parseJsonValue(JsonValue value) {
+        if(value.isJsonObject()) {
+            value = value.get("values");
         }
         AttachmentValue fieldValue = new AttachmentValue();
-        JsonArray array = (JsonArray) value;
-        for (JsonElement attachmentItem : array) {
-            JsonObject attachmentObject = (JsonObject) attachmentItem;
-            String mimeType = attachmentObject.get("mimeType").getAsString();
-            String filename = attachmentObject.get("filename").getAsString();
-            String blobId = attachmentObject.get("blobId").getAsString();
+        JsonValue array = value;
+        for (JsonValue attachmentItem : array.values()) {
+            JsonValue attachmentObject = (JsonValue) attachmentItem;
+            String mimeType = attachmentObject.get("mimeType").asString();
+            String filename = attachmentObject.get("filename").asString();
+            String blobId = attachmentObject.get("blobId").asString();
 
             Attachment attachment = new Attachment(mimeType, filename, blobId);
-            attachment.setWidth(attachmentObject.get("width").getAsInt());
-            attachment.setHeight(attachmentObject.get("height").getAsInt());
+            attachment.setWidth(attachmentObject.get("width").asInt());
+            attachment.setHeight(attachmentObject.get("height").asInt());
             
             fieldValue.getValues().add(attachment);
         }
@@ -121,10 +122,10 @@ public class AttachmentType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
-        object.addProperty("cardinality", cardinality.name().toLowerCase());
-        object.addProperty("kind", kind.name().toLowerCase());
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
+        object.put("cardinality", cardinality.name().toLowerCase());
+        object.put("kind", kind.name().toLowerCase());
         return object;
     }
 

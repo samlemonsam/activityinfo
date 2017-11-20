@@ -2,9 +2,8 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
@@ -30,7 +29,7 @@ public class FormClassTest {
         field.setType(TextType.SIMPLE);
         formClass.addElement(field);
 
-        JsonObject jsonObject = formClass.toJsonObject();
+        JsonValue jsonObject = formClass.toJsonObject();
 
         FormClass reform = FormClass.fromJson(jsonObject);
         assertThat(reform.getFields(), hasSize(1));
@@ -63,10 +62,10 @@ public class FormClassTest {
     private FormClass parseResource() throws IOException {
         URL resource = Resources.getResource(FormClass.class, "OldFormClass1.json");
         String json = Resources.toString(resource, Charsets.UTF_8);
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(json);
+        JsonParser parser = new org.activityinfo.json.JsonParser();
+        JsonValue element = parser.parse(json);
 
-        return FormClass.fromJson(element.getAsJsonObject());
+        return FormClass.fromJson(element);
     }
 
 }

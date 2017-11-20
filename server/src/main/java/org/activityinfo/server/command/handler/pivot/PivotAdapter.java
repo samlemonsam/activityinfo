@@ -18,6 +18,10 @@ import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.*;
 import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.functions.GreaterOrEqualFunction;
+import org.activityinfo.model.expr.functions.LessOrEqualFunction;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -36,7 +40,11 @@ import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
-import org.activityinfo.store.query.impl.*;
+import org.activityinfo.store.query.server.AppEngineFormScanCache;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.server.FormSupervisorAdapter;
+import org.activityinfo.store.query.shared.FormScanBatch;
+import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 import org.activityinfo.store.spi.FormCatalog;
 
@@ -269,10 +277,6 @@ public class PivotAdapter {
             executeQueryBatch();
 
             PivotSites.PivotResult result = new PivotSites.PivotResult(createBuckets());
-
-            LOGGER.info("Bucket count: " + result.getBuckets().size());
-
-            batch.waitForCachingToFinish();
 
             return result;
 
@@ -674,7 +678,7 @@ public class PivotAdapter {
         queryTime.start();
 
         try {
-            batch.execute();
+            builder.execute(batch);
         } catch (Exception e) {
             throw new RuntimeException("Failed to execute query batch", e);
         } finally {

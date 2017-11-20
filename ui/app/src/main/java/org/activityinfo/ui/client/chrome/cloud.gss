@@ -1,0 +1,40 @@
+
+@external cloud-icon, cloud-bg, offline-bar, fetching-icon;
+
+
+/** Default */
+
+.cloud-bg {
+    fill: white;
+}
+
+.offline-bar {
+    display: none;
+}
+
+.fetching-icon {
+    display: none;
+}
+
+
+/** When OFFLINE */
+
+.offline .offline-bar {
+    display: inherit;
+}
+
+/* When ONLINE */
+
+.online .offline-bar {
+    display: none;
+}
+
+.online .cloud-bg {
+    fill: white;
+}
+
+/** When loading over the network **/
+
+.fetching .fetching-icon {
+    display: inherit;
+}

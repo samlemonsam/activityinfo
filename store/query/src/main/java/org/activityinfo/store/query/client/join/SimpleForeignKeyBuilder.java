@@ -1,0 +1,108 @@
+package org.activityinfo.store.query.client.join;
+
+import com.google.common.annotations.VisibleForTesting;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.store.query.shared.columns.ForeignKey32;
+import org.activityinfo.store.query.shared.PendingSlot;
+import org.activityinfo.store.query.shared.columns.ForeignKey;
+import org.activityinfo.store.spi.CursorObserver;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Super simple foreign key builder that can be translated to JavaScript
+ */
+public class SimpleForeignKeyBuilder implements CursorObserver<FieldValue> {
+
+
+    /**
+     * The form against which we are joining.
+     *
+     * <p>An ActivityInfo reference field can reference more than one form, but for this
+     * data structure, we are only interesting in mapping each row to a unique row in a specific
+     * referenced form.</p>
+     */
+    private final ResourceId rightFormId;
+
+    private final PendingSlot<ForeignKey> result;
+
+    /**
+     * Map from key to key index.
+     *
+     * <p>Foreign keys are stored as strings and can be quite long. There does, however, tend to be alot
+     * of repetition. To avoid using far more storage that we need, particularly when serializing to memcache,
+     * we maintain a list of unique foreign keys and assign them a new integer id.</p>
+     */
+    private Map<String, Integer> keyMap = new HashMap<>();
+
+    /**
+     * Vector that contains an entry for each row, with the key index as value.
+     */
+    private List<Integer> keys = new ArrayList<>();
+
+
+    public SimpleForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> result) {
+        this.result = result;
+        this.rightFormId = rightFormId;
+    }
+
+    @Override
+    public void onNext(FieldValue fieldValue) {
+        int keyId = -1;
+
+        if(fieldValue instanceof ReferenceValue) {
+            String key = ((ReferenceValue) fieldValue).getOnlyRecordId(rightFormId);
+            if(key != null) {
+                keyId = keyId(key);
+            }
+        }
+        keys.add(keyId);
+    }
+
+
+    /**
+     * Finds or creates an integer key id for this String key.
+     */
+    private int keyId(String stringKey) {
+        Integer keyId = keyMap.get(stringKey);
+        if(keyId == null) {
+            keyId = keyMap.size();
+            keyMap.put(stringKey, keyId);
+        }
+        return keyId;
+    }
+
+
+    @Override
+    public void done() {
+        result.set(build());
+    }
+
+    @VisibleForTesting
+    ForeignKey build() {
+        return new ForeignKey32(keyList(), buildIntArray(), keys.size());
+    }
+
+    private String[] keyList() {
+        String[] keys = new String[keyMap.size()];
+        for (Map.Entry<String, Integer> entry : keyMap.entrySet()) {
+            keys[entry.getValue()] = entry.getKey();
+        }
+        return keys;
+    }
+
+    private int[] buildIntArray() {
+        int array[] = new int[keys.size()];
+        for (int i = 0; i < keys.size(); i++) {
+            array[i] = keys.get(i);
+        }
+        return array;
+    }
+
+}

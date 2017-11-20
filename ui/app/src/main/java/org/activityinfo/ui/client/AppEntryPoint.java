@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client;
 
+import com.google.common.base.Optional;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.EntryPoint;
@@ -14,14 +15,17 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
-import org.activityinfo.ui.client.analysis.AnalysisPlace;
+import org.activityinfo.indexedb.IDBFactoryImpl;
+import org.activityinfo.storage.LocalStorage;
+import org.activityinfo.ui.client.catalog.CatalogPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
-import org.activityinfo.ui.client.store.RecordSynchronizer;
-import org.activityinfo.ui.client.store.http.HttpBus;
-import org.activityinfo.ui.client.store.offline.IDBExecutorImpl;
+import org.activityinfo.ui.client.store.http.ConnectionListener;
+import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
+import org.activityinfo.ui.icons.Icons;
 
 import java.util.logging.Logger;
 
@@ -30,29 +34,42 @@ import java.util.logging.Logger;
  */
 public class AppEntryPoint implements EntryPoint {
 
-    //public static final TablePlace DEFAULT_PLACE = new TablePlace(CuidAdapter.activityFormClass(33));
-    public static final Place DEFAULT_PLACE = new AnalysisPlace();
+    public static final Place DEFAULT_PLACE = new CatalogPlace(Optional.absent());
 
-    private static final Logger logger = Logger.getLogger(AppEntryPoint.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AppEntryPoint.class.getName());
 
 
     @Override
     public void onModuleLoad() {
 
+        LOGGER.info("user.agent = " + System.getProperty("user.agent"));
+        LOGGER.info("gxt.user.agent = " + System.getProperty("gxt.user.agent"));
+        LOGGER.info("gxt.device = " + System.getProperty("gxt.device"));
+
+        Icons.INSTANCE.ensureInjected();
+
+        AppCache appCache = new AppCache();
+        AppCacheMonitor monitor = new AppCacheMonitor(appCache);
+        monitor.start();
 
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
 
-        OfflineStore offlineStore = new OfflineStore(new IDBExecutorImpl());
+        ConnectionListener connectionListener = new ConnectionListener();
+        connectionListener.start();
 
         ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl(findServerUrl());
-        HttpBus httpBus = new HttpBus(client);
-        FormStore formStore = new FormStoreImpl(httpBus, offlineStore, Scheduler.get());
+        HttpStore httpStore = new HttpStore(connectionListener.getOnline(), client, Scheduler.get());
+
+        OfflineStore offlineStore = new OfflineStore(httpStore, IDBFactoryImpl.create());
+
+        FormStore formStore = new FormStoreImpl(httpStore, offlineStore, Scheduler.get());
+        LocalStorage storage = LocalStorage.create();
 
         Viewport viewport = new Viewport();
-        AppFrame appFrame = new AppFrame(httpBus);
+        AppFrame appFrame = new AppFrame(appCache, httpStore, offlineStore);
 
-        ActivityMapper activityMapper = new AppActivityMapper(formStore);
+        ActivityMapper activityMapper = new AppActivityMapper(formStore, storage);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
         activityManager.setDisplay(appFrame.getDisplayWidget());
 
@@ -61,7 +78,7 @@ public class AppEntryPoint implements EntryPoint {
         historyHandler.register(placeController, eventBus, DEFAULT_PLACE);
 
         // Start synchronizer...
-        RecordSynchronizer synchronizer = new RecordSynchronizer(httpBus, offlineStore);
+        RecordSynchronizer synchronizer = new RecordSynchronizer(httpStore, offlineStore);
 
         viewport.add(appFrame);
 

@@ -38,7 +38,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.ui.client.dispatch.type.IndicatorNumberFormat;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 

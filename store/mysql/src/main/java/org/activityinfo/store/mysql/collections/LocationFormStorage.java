@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -140,10 +141,7 @@ public class LocationFormStorage implements FormStorage {
         if(databaseId != null) {
             UserPermission permission = permissionsCache.getPermission(userId, databaseId);
             if (permission.isDesign()) {
-                FormPermissions formPermissions = new FormPermissions();
-                formPermissions.setVisible(true);
-                formPermissions.setEditAllowed(true);
-                return formPermissions;
+                return FormPermissions.builder().allowEdit().build();
             }
         }
         return FormPermissions.readonly();
@@ -153,6 +151,11 @@ public class LocationFormStorage implements FormStorage {
     public Optional<FormRecord> get(ResourceId resourceId) {
         RecordFetcher fetcher = new RecordFetcher(this);
         return fetcher.get(resourceId);
+    }
+
+    @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -187,7 +190,7 @@ public class LocationFormStorage implements FormStorage {
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         long newVersion = incrementVersion();
 
         int locationId = CuidAdapter.getLegacyIdFromCuid(update.getRecordId());
@@ -215,7 +218,7 @@ public class LocationFormStorage implements FormStorage {
 
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         long newVersion = incrementVersion();
 
         int locationId = CuidAdapter.getLegacyIdFromCuid(update.getRecordId());
@@ -312,7 +315,7 @@ public class LocationFormStorage implements FormStorage {
         insertAdminLinks(locationId, adminEntities);
     }
 
-    private String getName(RecordUpdate update) {
+    private String getName(TypedRecordUpdate update) {
         FieldValue fieldValue = update.getChangedFieldValues().get(nameFieldId);
         if (fieldValue == null) {
             return null;
@@ -321,7 +324,7 @@ public class LocationFormStorage implements FormStorage {
         }
     }
 
-    private String getAxe(RecordUpdate update) {
+    private String getAxe(TypedRecordUpdate update) {
         FieldValue fieldValue = update.getChangedFieldValues().get(axeFieldId);
         if (fieldValue == null) {
             return null;
@@ -330,7 +333,7 @@ public class LocationFormStorage implements FormStorage {
         }
     }
 
-    private Set<Integer> getAdminEntities(RecordUpdate update) {
+    private Set<Integer> getAdminEntities(TypedRecordUpdate update) {
         Set<Integer> set = Sets.newHashSet();
         ReferenceValue value = (ReferenceValue) update.getChangedFieldValues().get(adminFieldId);
         if(value != null) {

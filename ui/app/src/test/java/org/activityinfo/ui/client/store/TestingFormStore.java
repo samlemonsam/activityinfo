@@ -1,18 +1,30 @@
 package org.activityinfo.ui.client.store;
 
+import com.google.common.base.Optional;
+import org.activityinfo.model.analysis.Analysis;
+import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.job.JobDescriptor;
+import org.activityinfo.model.job.JobResult;
+import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -55,6 +67,9 @@ public class TestingFormStore implements FormStore {
         testingCatalog = new TestingCatalog();
     }
 
+    public TestingCatalog getCatalog() {
+        return testingCatalog;
+    }
 
 
     public void delayLoading() {
@@ -73,19 +88,18 @@ public class TestingFormStore implements FormStore {
         return maybeExecute(() -> fetchFormMetadata(formId));
     }
 
-    private FormMetadata fetchFormMetadata(ResourceId formId) {
-        FormMetadata metadata = new FormMetadata();
-        metadata.setId(formId);
-        metadata.setVersion(1);
+    @Override
+    public Observable<Maybe<RecordTree>> getRecordTree(RecordRef rootRecordId) {
+        throw new UnsupportedOperationException("TODO");
+    }
 
+    private FormMetadata fetchFormMetadata(ResourceId formId) {
         if(deleted.contains(formId)) {
-            metadata.setDeleted(true);
-            metadata.setVersion(2);
+            return FormMetadata.forbidden(formId);
 
         } else {
-            metadata.setSchema(testingCatalog.getFormClass(formId));
+            return FormMetadata.of(1L, testingCatalog.getFormClass(formId), FormPermissions.full());
         }
-        return metadata;
     }
 
     @Override
@@ -105,8 +119,13 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
+    public Observable<List<FormRecord>> getSubRecords(ResourceId formId, RecordRef parent) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
     public Observable<FormTree> getFormTree(ResourceId formId) {
-        return new ObservableFormTree(formId, id -> getFormMetadata(id), new ImmediateScheduler());
+        return new ObservableTree<>(new FormTreeLoader(formId, id -> getFormMetadata(id)), new ImmediateScheduler());
     }
 
     @Override
@@ -115,8 +134,23 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Observable<FormRecord> getRecord(RecordRef recordRef) {
-        return maybeExecute(() -> testingCatalog.getForm(recordRef.getFormId()).get().get(recordRef.getRecordId()).get());
+    public Observable<Maybe<Analysis>> getAnalysis(String id) {
+        return Observable.just(Maybe.notFound());
+    }
+
+    @Override
+    public Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef) {
+        return maybeExecute(() -> {
+            Optional<FormStorage> storage = testingCatalog.getForm(recordRef.getFormId());
+            if(!storage.isPresent()) {
+                return Maybe.notFound();
+            }
+            Optional<FormRecord> record = storage.get().get(recordRef.getRecordId());
+            if(!record.isPresent()) {
+                return Maybe.notFound();
+            }
+            return Maybe.of(record.get());
+        });
     }
 
     @Override
@@ -125,14 +159,24 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Observable<OfflineStatus> getOfflineStatus(ResourceId formId) {
-        return Observable.just(new OfflineStatus(false, false));
+    public Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId) {
+        return Observable.just(new FormOfflineStatus(false, false));
     }
 
     @Override
-    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
-        testingCatalog.updateRecords(transactionBuilder);
+    public Promise<Void> updateRecords(RecordTransaction tx) {
+        testingCatalog.updateRecords(tx);
         return Promise.done();
+    }
+
+    @Override
+    public Promise<Void> updateAnalysis(AnalysisUpdate update) {
+        return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
+    public <T extends JobDescriptor<R>, R extends JobResult> Observable<JobStatus<T, R>> startJob(T job) {
+        return Observable.loading();
     }
 
     private <T> Observable<T> maybeExecute(Supplier<T> task) {

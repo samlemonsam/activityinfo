@@ -22,7 +22,6 @@ package org.activityinfo.server.report.util;
  * #L%
  */
 
-import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.legacy.shared.reports.util.DateUtil;
 import org.activityinfo.model.date.DateUnit;
@@ -31,12 +30,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtilCalendarImpl extends DateUtil {
-
-    @Override
-    public Month getCurrentMonth() {
-        Calendar calendar = Calendar.getInstance();
-        return new Month(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
-    }
 
     @Override
     public DateRange yearRange(int year) {

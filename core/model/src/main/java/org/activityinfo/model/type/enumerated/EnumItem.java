@@ -1,13 +1,14 @@
 package org.activityinfo.model.type.enumerated;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.io.Serializable;
+
+import static org.activityinfo.json.Json.createObject;
 
 public class EnumItem implements Serializable {
     private ResourceId id;
@@ -39,24 +40,24 @@ public class EnumItem implements Serializable {
     }
 
 
-    public JsonElement toJsonObject() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("id", id.asString());
-        jsonObject.addProperty("label", label);
+    public JsonValue toJsonObject() {
+        JsonValue jsonObject = createObject();
+        jsonObject.put("id", id.asString());
+        jsonObject.put("label", label);
         if(!Strings.isNullOrEmpty(code)) {
-            jsonObject.addProperty("code", code);
+            jsonObject.put("code", code);
         }
         return jsonObject;
     }
     
-    public static EnumItem fromJsonObject(JsonObject jsonObject) {
+    public static EnumItem fromJsonObject(JsonValue jsonObject) {
         EnumItem enumItem = new EnumItem();
-        enumItem.setId(ResourceId.valueOf(jsonObject.get("id").getAsString()));
-        if(jsonObject.has("label")) {
-            enumItem.setLabel(jsonObject.get("label").getAsString());
+        enumItem.setId(ResourceId.valueOf(jsonObject.get("id").asString()));
+        if(jsonObject.hasKey("label")) {
+            enumItem.setLabel(jsonObject.get("label").asString());
         }
-        if(jsonObject.has("code")) {
-            enumItem.setCode(jsonObject.get("code").getAsString());
+        if(jsonObject.hasKey("code")) {
+            enumItem.setCode(jsonObject.get("code").asString());
         }
         return enumItem;
     }

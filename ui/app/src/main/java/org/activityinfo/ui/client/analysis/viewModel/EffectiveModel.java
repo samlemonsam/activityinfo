@@ -10,15 +10,25 @@ import java.util.List;
 public class EffectiveModel {
 
     private final DimensionSet dimensionSet;
-    private final AnalysisModel model;
+    private final PivotModel model;
 
     private final List<EffectiveMeasure> measures = new ArrayList<>();
     private final List<EffectiveDimension> dimensions = new ArrayList<>();
 
-    public EffectiveModel(AnalysisModel model, FormForest formForest) {
+    public EffectiveModel(PivotModel model, FormForest formForest) {
         this.model = model;
 
         List<DimensionModel> dimensions = new ArrayList<>(model.getDimensions());
+
+        // If we have multiple measures, than they MUST be labled with a measure dimension
+        if(model.getMeasures().size() > 1 &&
+            !isDefined(dimensions, DimensionModel.MEASURE_ID)) {
+            dimensions.add(
+                ImmutableDimensionModel.builder()
+                    .id(DimensionModel.MEASURE_ID)
+                    .label(I18N.CONSTANTS.measures())
+                    .build());
+        }
 
         // Include a Statistics dimension if required but not added by
         // the user to the model.
@@ -49,8 +59,12 @@ public class EffectiveModel {
             for (EffectiveMeasure effectiveMeasure : measures) {
                 effectiveMappings.add(effectiveMeasure.getDimension(index));
             }
-            this.dimensions.add(new EffectiveDimension(index, dimensionModel, effectiveMappings));
+            this.dimensions.add(new EffectiveDimension(index, model, dimensionModel, effectiveMappings));
         }
+    }
+
+    public PivotModel getModel() {
+        return model;
     }
 
     private boolean isDefined(List<DimensionModel> dimensions, String dimensionId) {

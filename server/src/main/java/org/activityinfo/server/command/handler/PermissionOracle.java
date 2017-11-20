@@ -312,4 +312,22 @@ public class PermissionOracle {
     public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {
         assertDesignPrivileges(formClass, em.get().getReference(User.class, user.getId()));
     }
+
+    public void assertDesignPrivileges(int databaseId, AuthenticatedUser authenticatedUser) {
+        UserDatabase userDatabase = em.get().find(UserDatabase.class, databaseId);
+        User user = em.get().find(User.class, authenticatedUser.getId());
+
+        assertDesignPrivileges(userDatabase, user);
+    }
+
+    public boolean isViewAllowed(ResourceId databaseId, AuthenticatedUser authenticatedUser) {
+        if(databaseId.getDomain() != DATABASE_DOMAIN) {
+            return false;
+        }
+
+        UserDatabase database = em.get().find(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+        User user = em.get().find(User.class, authenticatedUser.getId());
+
+        return isViewAllowed(database, user);
+    }
 }

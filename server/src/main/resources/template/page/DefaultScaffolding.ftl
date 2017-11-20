@@ -9,7 +9,6 @@
     <title>${title} - ActivityInfo</title>
 
     <link rel="stylesheet" href="/about/assets/css/style.css">
-    <link rel="stylesheet" href="//fonts.typotheque.com/WF-028542-009575.css" type="text/css" />
     <link rel="icon" href="/about/assets/images/logo-activityinfo.png">
 
     <script type="text/javascript">
@@ -32,8 +31,6 @@
 <nav class="skiplinks">
     <a href="/login" class="visuallyhidden">Skip to login</a>
     <a href="#main" class="visuallyhidden">Skip to content</a>
-    <a href="#news" class="visuallyhidden">Skip to news</a>
-    <a href="#howto" class="visuallyhidden">Skip to learning center</a>
     <a href="#footer" class="visuallyhidden">Skip to footer</a>
 </nav>
 
@@ -46,7 +43,8 @@
             <li><a href="/about/benefits.html">Benefits</a></li>
             <li><a href="/about/features.html">Features</a></li>
             <li><a href="/about/pricing.html">Pricing</a></li>
-            <li><a href="/signUp">Sign Up</a></li>
+            <li><a href="/blog/index.html">Blog</a></li>
+            <li class="cta cta-signup"><a href="/signUp">Get Free Account</a></li>
             <li class="cta"><a href="/login">Log In</a></li>
         </ul>
     </nav>

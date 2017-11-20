@@ -1,23 +1,24 @@
 package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.FormScanCache;
-import org.activityinfo.store.query.impl.FormSupervisorAdapter;
-import org.activityinfo.store.query.impl.NullFormScanCache;
+import org.activityinfo.promise.Maybe;
+import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.FormSource;
+import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.spi.FormCatalog;
-import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
 /**
@@ -44,25 +45,17 @@ public class FormSourceSyncImpl implements FormSource {
     public FormMetadata getFormMetadata(ResourceId formId) {
         Optional<FormStorage> storage = formCatalog.getForm(formId);
         if(!storage.isPresent()) {
-            FormMetadata formMetadata = new FormMetadata();
-            formMetadata.setId(formId);
-            formMetadata.setVisible(false);
-            return formMetadata;
+            return FormMetadata.notFound(formId);
         }
         FormPermissions permissions = storage.get().getPermissions(userId);
         if(!permissions.isVisible()) {
-            FormMetadata formMetadata = new FormMetadata();
-            formMetadata.setId(formId);
-            formMetadata.setVisible(false);
-            return formMetadata;
+            return FormMetadata.forbidden(formId);
         }
 
-        FormMetadata metadata = new FormMetadata();
-        metadata.setId(formId);
-        metadata.setVisible(true);
-        metadata.setVersion(storage.get().cacheVersion());
-        metadata.setSchema(storage.get().getFormClass());
-        return metadata;
+        return FormMetadata.of(
+            storage.get().cacheVersion(),
+            storage.get().getFormClass(),
+            permissions);
     }
 
 
@@ -78,7 +71,12 @@ public class FormSourceSyncImpl implements FormSource {
     }
 
     @Override
-    public Observable<FormRecord> getRecord(RecordRef recordRef) {
+    public Observable<Maybe<RecordTree>> getRecordTree(RecordRef recordRef) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public Observable<Maybe<FormRecord>> getRecord(RecordRef recordRef) {
         return Observable.loading();
     }
 
@@ -87,5 +85,10 @@ public class FormSourceSyncImpl implements FormSource {
         ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, formScanCache,
                 new FormSupervisorAdapter(formCatalog, userId));
         return Observable.just(builder.build(queryModel));
+    }
+
+    @Override
+    public Observable<Maybe<Analysis>> getAnalysis(String id) {
+        throw new UnsupportedOperationException();
     }
 }

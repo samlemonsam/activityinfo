@@ -45,7 +45,9 @@ public class Regrouping {
     private List<String[]> newGroups;
 
 
-    private boolean[] subset;
+    private TotalSubset subset;
+
+
     /**
      * A map from the original group indices to the new collapsed group indices.
      *
@@ -75,7 +77,7 @@ public class Regrouping {
      * @param newGroups the new list of collapsed groups
      */
     public Regrouping(int[] oldGroupArray, List<String[]> oldGroups,
-                      boolean subset[], int[] map, List<String[]> newGroups) {
+                      TotalSubset subset, int[] map, List<String[]> newGroups) {
         this.oldGroupArray = oldGroupArray;
         this.subset = subset;
         this.map = map;
@@ -123,8 +125,7 @@ public class Regrouping {
     }
 
     public boolean isDimensionTotaled(int index) {
-        return subset[index];
+        return subset.isDimensionCollapsed(index);
     }
-
 
 }

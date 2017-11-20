@@ -81,13 +81,17 @@ public class EmptyForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .distribution(TEXT_FIELD_ID, new DiscreteTextGenerator(1.0,""))
-                    .distribution(QUANTITY_FIELD_ID, new IntegerGenerator(0,1,1.0,null))
-                    .distribution(ENUM_FIELD_ID, new EmptyEnumGenerator())
-                    .distribution(POP_ENUM_FIELD_ID, new EnumGenerator(popEnumField))
-                    .generate(ROW_COUNT);
+            this.records = getGenerator().get(ROW_COUNT);
         }
         return records;
+    }
+
+    @Override
+    public RecordGenerator getGenerator() {
+        return new RecordGenerator(formClass)
+            .distribution(TEXT_FIELD_ID, new DiscreteTextGenerator(1.0,""))
+            .distribution(QUANTITY_FIELD_ID, new IntegerGenerator(0,1,1.0))
+            .distribution(ENUM_FIELD_ID, new EmptyEnumGenerator())
+            .distribution(POP_ENUM_FIELD_ID, new EnumGenerator(popEnumField));
     }
 }

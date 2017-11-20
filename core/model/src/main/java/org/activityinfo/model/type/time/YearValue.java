@@ -21,15 +21,15 @@ package org.activityinfo.model.type.time;
  * #L%
  */
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
 /**
  * Represents a specific calendar year in the ISO-8601 calendar.
  */
-public class YearValue implements FieldValue, TemporalValue {
+public class YearValue implements FieldValue, PeriodValue {
 
     private final int year;
 
@@ -60,8 +60,8 @@ public class YearValue implements FieldValue, TemporalValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        return new JsonPrimitive(year);
+    public JsonValue toJsonElement() {
+        return Json.create(year);
     }
 
     @Override
@@ -69,7 +69,21 @@ public class YearValue implements FieldValue, TemporalValue {
         return new LocalDateInterval(new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
     }
 
+    @Override
+    public PeriodValue next() {
+        return new YearValue(year + 1);
+    }
+
+    @Override
+    public PeriodValue previous() {
+        return new YearValue(year - 1);
+    }
+
     public int getYear() {
         return year;
+    }
+
+    public static boolean isLeapYear(int year) {
+        return !((year % 4 != 0) || ((year % 100 == 0) && (year % 400 != 0)));
     }
 }

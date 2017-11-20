@@ -2,11 +2,12 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.EnumColumnView;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormScanCache;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
-import org.activityinfo.store.query.impl.views.DiscreteStringColumnView8;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormScanCache;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
+import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -21,10 +22,12 @@ public class EnumerationQueryTest {
         TestingCatalog catalog = new TestingCatalog();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
-        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
-        queryModel.selectField(IntakeForm.NATIONALITY_FIELD_ID).as("nationality");
-        queryModel.selectExpr(IntakeForm.NATIONALITY_FIELD_ID + "==" + "\"" + IntakeForm.PALESTINIAN_ID + "\"").as("palestinian");
-        queryModel.selectExpr( "\"" + IntakeForm.PALESTINIAN_ID + "\"" + "==" + IntakeForm.NATIONALITY_FIELD_ID).as("palestinianInverse");
+        IntakeForm intakeForm = catalog.getIntakeForm();
+
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
+        queryModel.selectField(intakeForm.getNationalityFieldId()).as("nationality");
+        queryModel.selectExpr(intakeForm.getNationalityFieldId() + "==" + "\"" + intakeForm.getPalestinianId() + "\"").as("palestinian");
+        queryModel.selectExpr( "\"" + intakeForm.getPalestinianId() + "\"" + "==" + intakeForm.getNationalityFieldId()).as("palestinianInverse");
 
         ColumnSet columnSet = builder.build(queryModel);
         ColumnView nationality = columnSet.getColumnView("nationality");
@@ -56,10 +59,10 @@ public class EnumerationQueryTest {
         //// Standard Enum Id Checks
         // Null check on empty set first
         assertThat(emptyEnum.get(0),equalTo(null));
-        assertThat(((DiscreteStringColumnView8)emptyEnum).getId(0),equalTo(null));
+        assertThat(((EnumColumnView)emptyEnum).getId(0),equalTo(null));
         // Value check on populated set
         assertThat(populatedEnum.get(0).toString(),equalTo("One"));
-        assertThat(((DiscreteStringColumnView8)populatedEnum).getId(0),equalTo(EmptyForm.ENUM_ONE_ID.asString()));
+        assertThat(((EnumColumnView)populatedEnum).getId(0),equalTo(EmptyForm.ENUM_ONE_ID.asString()));
 
         //// Selected Row Enum Id Checks
         ColumnView emptySelectedRow = emptyEnum.select(new int[]{0});
@@ -67,10 +70,10 @@ public class EnumerationQueryTest {
 
         // Null check on empty set first
         assertThat(emptySelectedRow.get(0),equalTo(null));
-        assertThat(((DiscreteStringColumnView8)emptySelectedRow).getId(0),equalTo(null));
+        assertThat(((EnumColumnView)emptySelectedRow).getId(0),equalTo(null));
         // Value check on populated set
         assertThat(populatedSelectedRow.get(0).toString(),equalTo("One"));
-        assertThat(((DiscreteStringColumnView8)populatedSelectedRow).getId(0),equalTo(EmptyForm.ENUM_ONE_ID.asString()));
+        assertThat(((EnumColumnView)populatedSelectedRow).getId(0),equalTo(EmptyForm.ENUM_ONE_ID.asString()));
     }
 
 }

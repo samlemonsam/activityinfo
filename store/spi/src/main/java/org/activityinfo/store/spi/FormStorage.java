@@ -3,6 +3,7 @@ package org.activityinfo.store.spi;
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -24,6 +25,9 @@ public interface FormStorage {
      * @return the Resource
      */
     Optional<FormRecord> get(ResourceId resourceId);
+
+    List<FormRecord> getSubRecords(ResourceId resourceId);
+
 
     /**
      * Retrieves a list of versions of this record.
@@ -48,7 +52,7 @@ public interface FormStorage {
      * @param update the properties of the new resource
      * @throws java.lang.IllegalStateException if a resource with the given {@code resourceId} already exists              
      */
-    void add(RecordUpdate update);
+    void add(TypedRecordUpdate update);
     
     /**
      * Updates an existing resource within the collection
@@ -56,7 +60,7 @@ public interface FormStorage {
      * @param update the changes to apply to the resource
      * @throws java.lang.IllegalStateException if the resource does not exist, or if the update               
      */
-    void update(RecordUpdate update);
+    void update(TypedRecordUpdate update);
 
     
 
@@ -73,5 +77,7 @@ public interface FormStorage {
      * Update the geometry associated with a specific record and field.
      */
     void updateGeometry(ResourceId recordId, ResourceId fieldId, Geometry value);
+
+
 
 }

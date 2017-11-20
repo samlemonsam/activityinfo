@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.*;
@@ -39,6 +40,11 @@ public class FeatureSourceStorage implements FormStorage {
     }
 
     @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
@@ -70,12 +76,12 @@ public class FeatureSourceStorage implements FormStorage {
     }
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 

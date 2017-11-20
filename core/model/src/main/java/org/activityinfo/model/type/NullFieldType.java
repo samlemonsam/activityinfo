@@ -1,6 +1,6 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Type of the empty value
@@ -18,7 +18,7 @@ public final class NullFieldType implements FieldType, FieldTypeClass {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
+    public FieldValue parseJsonValue(JsonValue value) {
         return NullFieldValue.INSTANCE;
     }
 

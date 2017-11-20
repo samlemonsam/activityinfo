@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -50,6 +51,22 @@ public class CheckBoxGroupWidget implements FieldWidget {
             return FieldInput.EMPTY;
         } else {
             return new FieldInput(new EnumValue(items));
+        }
+    }
+
+    @Override
+    public void init(FieldValue value) {
+        EnumValue enumValue = (EnumValue) value;
+        for (ResourceId itemId : enumValue.getResourceIds()) {
+            CheckBox checkBox = checkBoxes.get(itemId);
+            checkBox.setValue(true);
+        }
+    }
+
+    @Override
+    public void clear() {
+        for (CheckBox checkBox : checkBoxes.values()) {
+            checkBox.setValue(false);
         }
     }
 

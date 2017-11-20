@@ -10,7 +10,7 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import java.util.Random;
 
 /**
- * Generates values for a
+ * Generates values for a single select field
  */
 public class EnumGenerator implements Supplier<FieldValue> {
 
@@ -18,10 +18,14 @@ public class EnumGenerator implements Supplier<FieldValue> {
     private double probabilityMissing;
     private Random random;
 
-    public EnumGenerator(FormField field) {
+    public EnumGenerator(FormField field, int seed) {
         this.enumType = (EnumType) field.getType();
         this.probabilityMissing = field.isRequired() ? 0.0 : 0.25;
-        this.random = new Random(field.getId().hashCode());
+        this.random = new Random(seed);
+    }
+
+    public EnumGenerator(FormField field) {
+        this(field, field.getId().hashCode());
     }
 
     @Override

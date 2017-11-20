@@ -1,24 +1,23 @@
 package org.activityinfo.api.client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormRecord;
 
 public class FormRecordSetBuilder {
-  private JsonObject jsonObject = new JsonObject();
+  private JsonValue jsonObject = Json.createObject();
 
-  private JsonArray records = new JsonArray();
+  private JsonValue records = Json.createArray();
 
   public FormRecordSetBuilder() {
     jsonObject.add("records", records);
   }
 
   public String toJsonString() {
-    return jsonObject.toString();
+    return jsonObject.toJson();
   }
 
-  public JsonObject toJsonObject() {
+  public JsonValue toJsonObject() {
     return jsonObject;
   }
 
@@ -28,7 +27,7 @@ public class FormRecordSetBuilder {
    * @param formId The id of the form to which this record belongs
    */
   public FormRecordSetBuilder setFormId(String formId) {
-    this.jsonObject.add("formId", new JsonPrimitive(formId));
+    this.jsonObject.put("formId", formId);
     return this;
   }
 

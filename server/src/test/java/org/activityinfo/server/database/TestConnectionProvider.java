@@ -57,7 +57,7 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
     private static final String PASSWORD_PROPERTY = "testDatabasePassword";
     private static final String USERNAME_PROPERTY = "testDatabaseUsername";
 
-    private static final String DEFAULT_PASSWORD = "adminpwd";
+    private static final String DEFAULT_PASSWORD = "root";
     private static final String DEFAULT_USERNAME = "root";
     
     public static String DATABASE_NAME, USERNAME, PASSWORD;
@@ -124,7 +124,7 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
                 POOL.setMinPoolSize(2);
                 POOL.setAcquireIncrement(1);
                 POOL.setMaxPoolSize(5);
-                POOL.setUnreturnedConnectionTimeout(60);
+                POOL.setUnreturnedConnectionTimeout(120);
                 POOL.setDebugUnreturnedConnectionStackTraces(true);
             } catch (Exception e) {
                 throw new Error("Could not open connection to " + DATABASE_NAME, e);

@@ -1,6 +1,6 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 /**
  * A {@code FieldType} with parameters that further specialize
@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
  */
 public interface ParametrizedFieldType extends FieldType {
 
-    JsonObject getParametersAsJson();
+    JsonValue getParametersAsJson();
     
     /**
      *

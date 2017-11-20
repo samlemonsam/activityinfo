@@ -1,15 +1,14 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
@@ -49,6 +48,11 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
@@ -69,13 +73,13 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         BaseTableUpdater updater = new BaseTableUpdater(mapping, update.getRecordId());
         updater.update(executor, update);
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         BaseTableInserter inserter = new BaseTableInserter(mapping, update.getRecordId());
         inserter.insert(executor, update);
     }
@@ -86,9 +90,9 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
-    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
         if(localVersion == mapping.getVersion()) {
-            return Collections.emptyList();
+            return FormSyncSet.emptySet(getFormClass().getId());
         }
 
         // Otherwise send the whole shebang...
@@ -100,7 +104,7 @@ public class SimpleTableStorage implements VersionedFormStorage {
             records.add(FormRecord.fromInstance(it.next()));
         }
 
-        return records;
+        return FormSyncSet.complete(getFormClass().getId(), records);
     }
 
     @Override

@@ -1,18 +1,14 @@
 package org.activityinfo.ui.client.store.http;
 
-
 import com.google.common.collect.Iterables;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.ObservableFormTree;
+import org.activityinfo.ui.client.store.tasks.TaskExecution;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,17 +16,14 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Manages pendingRequests to the remote server, handling retries and other
+ * Provides serialization and retrying of HttpRequests
  */
 public class HttpBus {
 
     private static final Logger LOGGER = Logger.getLogger(HttpBus.class.getName());
 
-    private int nextRequestId = 1;
-    private Scheduler scheduler;
 
-
-    private class PendingRequest<T> implements HttpSubscription {
+    private class PendingRequest<T> implements TaskExecution {
         private int id = nextRequestId++;
         private final HttpRequest<T> request;
         private final AsyncCallback<T> callback;
@@ -72,7 +65,12 @@ public class HttpBus {
         }
 
         private boolean isFailed() {
-            return result.getState() == Promise.State.REJECTED;
+            return result != null && result.getState() == Promise.State.REJECTED;
+        }
+
+        @Override
+        public boolean isRunning() {
+            return !cancelled && (result == null || result.getState() != Promise.State.FULFILLED);
         }
 
         @Override
@@ -80,28 +78,47 @@ public class HttpBus {
             this.cancelled = true;
             onDone(this);
         }
+
+        public boolean isSubmitted() {
+            return result != null;
+        }
     }
 
 
     private final ActivityInfoClientAsync client;
+    private final Scheduler scheduler;
     private final List<PendingRequest<?>> pendingRequests = new ArrayList<>();
-    private final StatefulValue<HttpStatus> status = new StatefulValue<>();
+
+    /**
+     * True if we have a connection, according to the browser.
+     */
+    private final Observable<Boolean> online;
+
+    /**
+     * True if there are pending requests
+     */
+    private final StatefulValue<Boolean> pending = new StatefulValue<>(false);
+
+    /**
+     * True if we currently fetching from the server.
+     */
+    private final StatefulValue<Boolean> fetching = new StatefulValue<>(false);
+
+    /**
+     * True if the connection is broken
+     */
+    private final StatefulValue<Boolean> broken = new StatefulValue<>(false);
 
     private RetryTask retryTask = new RetryTask();
+    private int nextRequestId = 1;
 
-    public HttpBus(ActivityInfoClientAsync client) {
-        this.client = client;
-        scheduler = Scheduler.get();
-    }
-
-    public HttpBus(ActivityInfoClientAsync client, Scheduler scheduler) {
+    public HttpBus(ActivityInfoClientAsync client, Observable<Boolean> online, Scheduler scheduler) {
         this.client = client;
         this.scheduler = scheduler;
+        this.online = online;
+        this.online.subscribe(this::onConnectionChanged);
     }
 
-    public Observable<HttpStatus> getStatus() {
-        return status;
-    }
 
     /**
      * Submits a new HTTP request to the queue.
@@ -113,45 +130,47 @@ public class HttpBus {
      * @param <T>      the type of the result.
      * @return
      */
-    public <T> HttpSubscription submit(HttpRequest<T> request, AsyncCallback<T> callback) {
+    public <T> TaskExecution submit(HttpRequest<T> request, AsyncCallback<T> callback) {
 
         PendingRequest<T> pending = new PendingRequest<>(request, callback);
         pendingRequests.add(pending);
 
-        pending.execute();
+        // Update our status that are now pending requests
+        this.pending.updateIfNotEqual(true);
 
-        status.updateValue(HttpStatus.FETCHING);
+        // If we are online, submit the request immediately.
+        if(online.isLoaded() && online.get()) {
+
+            fetching.updateIfNotEqual(true);
+            pending.execute();
+        }
 
         return pending;
     }
 
-    public <T> Observable<T> get(HttpRequest<T> request) {
-        return new ObservableRequest<T>(this, request);
+    public Observable<Boolean> getFetchingStatus() {
+        return fetching;
     }
 
-    public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
-        return get(new FormMetadataRequest(formId));
+    public Observable<Boolean> getPendingStatus() {
+        return pending;
     }
 
-
-    public Promise<Void> updateRecords(TransactionBuilder transactionBuilder) {
-        return client.updateRecords(transactionBuilder);
-
+    public Observable<Boolean> getOnline() {
+        return Observable.transform(online, broken, new Function2<Boolean, Boolean, Boolean>() {
+            @Override
+            public Boolean apply(Boolean online, Boolean broken) {
+                return online && !broken;
+            }
+        });
     }
 
-    public Observable<FormTree> getFormTree(ResourceId rootFormId) {
-        return new ObservableFormTree(rootFormId, this::getFormMetadata, scheduler);
-    }
-
-    /**
-     * Called when a request has succeeded or cancelled and should be removed from the queue.
-     */
-    private void onDone(PendingRequest<?> request) {
-        pendingRequests.remove(request);
-        if (pendingRequests.isEmpty()) {
-            status.updateValue(HttpStatus.IDLE);
+    private void onConnectionChanged(Observable<Boolean> observable) {
+        if(observable.isLoaded() && observable.get()) {
+            submitNext();
         }
     }
+
 
     /**
      * Called when a request has failed due to a connection problem with the server.
@@ -160,7 +179,7 @@ public class HttpBus {
 
         LOGGER.severe("Request #" + request.id + " failed: " + caught.getMessage());
 
-        status.updateValue(HttpStatus.BROKEN);
+
 
         // We want to keep retrying the request, but we don't want to trigger a stampede and
         // retry queued tasks all at once.
@@ -173,14 +192,50 @@ public class HttpBus {
     /**
      * @return sequence of pending requests that have failed.
      */
-    private Iterable<PendingRequest<?>> failedRequests() {
+    private Iterable<PendingRequest<?>> failedOrUnsubmittedRequests() {
         List<PendingRequest<?>> failed = new ArrayList<>();
         for (PendingRequest<?> pendingRequest : pendingRequests) {
-            if (pendingRequest.isFailed()) {
+            if (!pendingRequest.isSubmitted() || pendingRequest.isFailed()) {
                 failed.add(pendingRequest);
             }
         }
         return failed;
+    }
+
+    /**
+     * Called when a request succeeds.
+     */
+    private void onSucceeded(PendingRequest<?> request) {
+        LOGGER.info("Request #" + request.id + " succeeded.");
+
+        broken.updateIfNotEqual(false);
+
+        submitNext();
+    }
+
+    private void submitNext() {
+        if (pendingRequests.isEmpty()) {
+            fetching.updateIfNotEqual(false);
+            pending.updateIfNotEqual(false);
+        } else {
+            for (PendingRequest<?> pendingRequest : pendingRequests) {
+                if (!pendingRequest.isSubmitted() || pendingRequest.isFailed()) {
+                    pendingRequest.execute();
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Called when a request has succeeded or cancelled and should be removed from the queue.
+     */
+    private void onDone(PendingRequest<?> request) {
+        pendingRequests.remove(request);
+        if (pendingRequests.isEmpty()) {
+            fetching.updateIfNotEqual(false);
+            pending.updateIfNotEqual(false);
+        }
     }
 
     /**
@@ -195,7 +250,7 @@ public class HttpBus {
 
             scheduled = false;
 
-            Iterable<PendingRequest<?>> failedRequests = failedRequests();
+            Iterable<PendingRequest<?>> failedRequests = failedOrUnsubmittedRequests();
 
             LOGGER.info("Retrying. Failed requests: " + Iterables.size(failedRequests));
 
@@ -212,23 +267,4 @@ public class HttpBus {
             return false;
         }
     }
-
-
-    /**
-     * Called when a request succeeds.
-     */
-    private void onSucceeded(PendingRequest<?> request) {
-        LOGGER.info("Request #" + request.id + " succeeded.");
-
-        if (pendingRequests.isEmpty()) {
-            status.updateValue(HttpStatus.IDLE);
-        } else {
-            for (PendingRequest<?> pendingRequest : pendingRequests) {
-                if (pendingRequest.isFailed()) {
-                    pendingRequest.execute();
-                }
-            }
-        }
-    }
 }
-

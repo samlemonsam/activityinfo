@@ -20,10 +20,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -158,9 +155,18 @@ public class DefaultQueryBuilder {
             }
 
             @Override
+            public List<ColumnModel> visitWeek(EpiWeekType epiWeekType) {
+                return simpleColumnModel(aliasPrefix, pathPrefix, formField);
+            }
+
+            @Override
+            public List<ColumnModel> visitFortnight(FortnightType fortnightType) {
+                return simpleColumnModel(aliasPrefix, pathPrefix, formField);
+            }
+
+            @Override
             public List<ColumnModel> visitMonth(MonthType monthType) {
                 return simpleColumnModel(aliasPrefix, pathPrefix, formField);
-
             }
 
             @Override

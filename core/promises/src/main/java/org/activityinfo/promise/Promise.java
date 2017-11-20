@@ -72,6 +72,7 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public void then(AsyncCallback<? super T> callback) {
+        assert callback != null : "callback is null";
         switch (state) {
             case PENDING:
                 if (callbacks == null) {
@@ -99,7 +100,9 @@ public final class Promise<T> implements AsyncCallback<T> {
             @Override
             public void onSuccess(T t) {
                 try {
-                    function.apply(t).then(chained);
+                    Promise<R> result = function.apply(t);
+                    assert result != null : "function " + function + " returned null!!";
+                    result.then(chained);
                 } catch(Throwable caught) {
                     chained.onFailure(caught);
                 }
@@ -195,6 +198,8 @@ public final class Promise<T> implements AsyncCallback<T> {
 
     
     public <R> Promise<R> then(final Function<? super T, R> function) {
+        assert function != null : "function is null";
+
         final Promise<R> chained = new Promise<>();
         then(new AsyncCallback<T>() {
 
@@ -216,6 +221,7 @@ public final class Promise<T> implements AsyncCallback<T> {
     }
 
     public <R> Promise<R> then(final Supplier<R> function) {
+        assert function != null : "function is null";
         return then(Functions.forSupplier(function));
     }
 
@@ -335,6 +341,20 @@ public final class Promise<T> implements AsyncCallback<T> {
             promises.get(i).then(callback);
         }
         return result;
+    }
+
+    public static <T> Promise<List<T>> flatten(final List<Promise<T>> promises) {
+        return waitAll(promises).then(new Function<Void, List<T>>() {
+            @Nullable
+            @Override
+            public List<T> apply(@Nullable Void aVoid) {
+                List<T> items = new ArrayList<T>();
+                for (Promise<T> promise : promises) {
+                    items.add(promise.get());
+                }
+                return items;
+            }
+        });
     }
 
 

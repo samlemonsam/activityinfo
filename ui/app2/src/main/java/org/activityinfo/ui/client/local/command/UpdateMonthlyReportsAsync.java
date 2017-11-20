@@ -17,8 +17,8 @@ import org.activityinfo.legacy.shared.impl.CommandHandlerAsync;
 import org.activityinfo.legacy.shared.impl.ExecutionContext;
 import org.activityinfo.legacy.shared.impl.Tables;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.dispatch.type.DateUtilGWTImpl;
 

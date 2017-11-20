@@ -40,6 +40,16 @@ public class StatefulValue<T> extends Observable<T> {
         }
     }
 
+    public boolean updateIfNotSame(T value) {
+        if(this.value != value) {
+            this.value = value;
+            fireChange();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Notify subscribers that this state's value has changed.
      */
@@ -61,4 +71,6 @@ public class StatefulValue<T> extends Observable<T> {
         }
         return value;
     }
+
+
 }

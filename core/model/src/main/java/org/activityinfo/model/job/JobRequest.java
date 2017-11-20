@@ -1,6 +1,8 @@
 package org.activityinfo.model.job;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Request body to start a new job
@@ -14,12 +16,12 @@ public class JobRequest {
         this.locale = locale;
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("type", descriptor.getType());
-        object.add("descriptor", descriptor.toJsonObject());
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
+        object.put("type", descriptor.getType());
+        object.put("descriptor", descriptor.toJsonObject());
         if(locale != null) {
-            object.addProperty("locale", locale);
+            object.put("locale", locale);
         }
         return object;
     }
@@ -32,17 +34,17 @@ public class JobRequest {
         return locale;
     }
 
-    public static JobRequest fromJson(JsonObject object) {
-        String type = object.get("type").getAsString();
-        JobDescriptor descriptor = parseDescriptor(type, object.getAsJsonObject("descriptor"));
+    public static JobRequest fromJson(JsonValue object) {
+        String type = object.get("type").asString();
+        JobDescriptor descriptor = parseDescriptor(type, object.get("descriptor"));
         String locale = null;
-        if(object.has("locale")) {
-            locale = object.get("locale").getAsString();
+        if(object.hasKey("locale")) {
+            locale = object.get("locale").asString();
         }
         return new JobRequest(descriptor, locale);
     }
 
-    public static JobDescriptor parseDescriptor(String type, JsonObject descriptor) {
+    public static JobDescriptor parseDescriptor(String type, JsonValue descriptor) {
         switch (type) {
             case ExportFormJob.TYPE:
                 return ExportFormJob.fromJson(descriptor);

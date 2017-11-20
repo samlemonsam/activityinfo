@@ -1,11 +1,12 @@
 package org.activityinfo.model.type.expr;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
 
 import javax.annotation.Nullable;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * A Value Type that represents a value calculated from a symbolic expression,
@@ -25,15 +26,15 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
-            JsonElement exprElement = parametersObject.get("formula");
+        public FieldType deserializeType(JsonValue parametersObject) {
+            JsonValue exprElement = parametersObject.get("formula");
             if(exprElement == null) {
                 exprElement = parametersObject.get("expression");
             }
             if(exprElement == null) {
                 return new CalculatedFieldType();
             } else if(exprElement.isJsonObject()) {
-                JsonObject exprObject = exprElement.getAsJsonObject();
+                JsonValue exprObject = exprElement;
                 return new CalculatedFieldType(JsonParsing.toNullableString(exprObject.get("value")));
             } else {
                 return new CalculatedFieldType(JsonParsing.toNullableString(exprElement));
@@ -70,7 +71,7 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
+    public FieldValue parseJsonValue(JsonValue value) {
         throw new UnsupportedOperationException();
     }
 
@@ -85,10 +86,10 @@ public class CalculatedFieldType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         if (expression != null) {
-            object.addProperty("formula", expression);
+            object.put("formula", expression);
         }
         return object;
     }

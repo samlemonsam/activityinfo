@@ -119,7 +119,7 @@ public class MeasurePane implements IsWidget {
 
     private void removeMeasure(String id) {
         viewModel.updateModel(
-            viewModel.getModel().withoutMeasure(id));
+            viewModel.getWorkingModel().withoutMeasure(id));
     }
 
     private void editLabel(MeasureModel measure) {
@@ -149,7 +149,7 @@ public class MeasurePane implements IsWidget {
                 .build();
 
         viewModel.updateModel(
-                viewModel.getModel().withMeasure(updatedMeasure));
+                viewModel.getWorkingModel().withMeasure(updatedMeasure));
     }
 
 
@@ -160,7 +160,7 @@ public class MeasurePane implements IsWidget {
                 .build();
 
         viewModel.updateModel(
-                viewModel.getModel().withMeasure(updatedMeasure));
+                viewModel.getWorkingModel().withMeasure(updatedMeasure));
     }
 
 
@@ -179,6 +179,6 @@ public class MeasurePane implements IsWidget {
                 .build();
 
         viewModel.updateModel(
-                viewModel.getModel().withMeasure(updatedMeasure));
+                viewModel.getWorkingModel().withMeasure(updatedMeasure));
     }
 }

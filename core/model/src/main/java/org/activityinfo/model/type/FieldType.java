@@ -1,7 +1,7 @@
 package org.activityinfo.model.type;
 
 
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 
 public interface FieldType {
 
@@ -11,7 +11,7 @@ public interface FieldType {
      */
     FieldTypeClass getTypeClass();
 
-    FieldValue parseJsonValue(JsonElement value);
+    FieldValue parseJsonValue(JsonValue value);
 
     <T> T accept(FieldTypeVisitor<T> visitor);
 

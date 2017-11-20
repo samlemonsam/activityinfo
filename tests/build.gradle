@@ -1,0 +1,148 @@
+
+dependencies {
+
+
+    compile 'org.apache.poi:poi-ooxml:3.12-beta1'
+    compile 'org.apache.poi:poi:3.12-beta1'
+    
+    compile libraries.hamcrest
+    compile libraries.junit
+    compile libraries.guice
+    compile libraries.guava
+    compile libraries.jersey.client
+    compile libraries.jersey.json
+    compile libraries.cucumber.java
+    compile libraries.cucumber.guice
+
+
+    compile libraries.jsr305
+
+    compile 'org.seleniumhq.selenium:selenium-java:2.43.0'
+    compile 'com.saucelabs:sauce_junit:2.1.13'
+    compile 'com.github.detro:phantomjsdriver:1.2.0'
+    compile 'org.yaml:snakeyaml:1.14'
+    compile 'org.apache.commons:commons-pool2:2.0'
+    compile 'joda-time:joda-time:2.5'
+    compile 'org.littleshoot:littleproxy:1.0.0-beta7'
+    compile 'org.apache.commons:commons-csv:1.1'
+    compile 'io.airlift:airline:0.7'
+    
+    compile libraries.bcrypt
+    compile libraries.metrics.core
+    compile libraries.jersey.server
+    compile libraries.jersey.simpleServer
+
+    compile 'io.appium:java-client:2.2.0'
+    
+    compile project(':core:model')
+    compile project(':i18n')
+    compile project(':store:testing')
+    compile project(':clients:javarest')
+    compile libraries.gwt.i18nServer
+}
+
+// we're not using the standard test plug
+// as we have our own test harness
+test.enabled = false
+
+task run(type: JavaExec) {
+    group = "Verification"
+    description = 'Runs end-to-end tests'
+
+    main = 'org.activityinfo.test.TestMain'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir"
+
+    if(project.hasProperty("testArgs")) {
+        def testArgs = project.getProperty("testArgs").split(" ")
+        for(testArg in testArgs) {
+            args testArg
+        }
+    }
+}
+
+task acceptanceTest(type: JavaExec) {
+    group = "Verification"
+    description = 'Runs acceptance test suite'
+
+    dependsOn 'classes'
+
+    args '--url', project.environment.url
+    args '--api'
+    args '--ui'
+    args '-T', '6'
+    args '--outputDir', "$buildDir/test-results"
+    args '--retries', '1'
+
+    main = 'org.activityinfo.test.TestMain'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir"
+    
+    // Determine the server against which to test
+    if(project.environment.local) {
+        dependsOn ':server:appengineStartAT'
+        finalizedBy ':server:appengineStop'
+    }
+}
+
+
+task capacityTest(type: JavaExec) {
+    description = 'Runs capacity tests to verify performance under load'
+    main = 'org.activityinfo.test.capacity.CapacityTest'
+    dependsOn 'classes', ':server:configureDatabase'
+    classpath = sourceSets.test.runtimeClasspath
+    workingDir = "$buildDir/capacity"
+    
+    doFirst {
+        workingDir.mkdir()
+        systemProperties.putAll(project.environment.systemProperties)
+    }
+}
+
+
+task smokeTest(type: Test) {
+    description = 'Runs pre-release smoke tests'
+    group = "Delivery Pipeline"
+    dependsOn 'classes'
+
+    include "**/*SmokeTest.*"
+
+    if(project.hasProperty("testUrl")) {
+        systemProperty "test.url", project.property("testUrl")
+    }
+}
+
+
+tasks.each { task ->
+    if(task.name =~ /[aA]cceptanceTest$/) {
+        task.configure {
+
+            doFirst {
+                systemProperties.putAll(project.environment.systemProperties)
+            }
+            systemProperty 'webdriver', project.property('webdriver')
+            systemProperty 'webdriver.chrome.silentOutput', 'true'
+
+            // When running the tests locally, the test code should start a server to 
+            // listen for postmark mail sending requests at the given port
+            if (project.environment.local) {
+                systemProperty 'postmarkStubPort', project.property('postmarkStubPort')
+            }
+
+            if (project.hasProperty('mailinatorApiKey')) {
+                systemProperty 'mailinatorApiKey', project.property('mailinatorApiKey')
+            }
+
+            if (project.hasProperty("phantomjsPath")) {
+                systemProperty "phantomjsPath", project.property("phantomjsPath")
+            }
+        }
+    }
+}
+
+configurations.all {
+
+    resolutionStrategy {
+        force libraries.guava
+    }
+}

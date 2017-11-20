@@ -1,14 +1,14 @@
 package org.activityinfo.store.spi;
 
-import org.activityinfo.model.form.FormRecord;
-
-import java.util.List;
+import com.google.common.base.Predicate;
+import org.activityinfo.model.form.FormSyncSet;
+import org.activityinfo.model.resource.ResourceId;
 
 /**
  * FormStorage implementation whose records are versioned.
  */
 public interface VersionedFormStorage extends FormStorage {
 
-    List<FormRecord> getVersionRange(long localVersion, long toVersion);
+    FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate);
 
 }

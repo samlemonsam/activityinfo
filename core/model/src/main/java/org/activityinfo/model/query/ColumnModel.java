@@ -1,6 +1,6 @@
 package org.activityinfo.model.query;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -9,6 +9,8 @@ import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.resource.ResourceId;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Defines a Column within a query
@@ -82,19 +84,21 @@ public class ColumnModel {
     }
 
 
-    public JsonObject toJsonElement() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id);
-        object.addProperty("expression", getExpressionAsString());
+    public JsonValue toJsonElement() {
+        JsonValue object = createObject();
+        object.put("id", id);
+        object.put("expression", getExpressionAsString());
         return object;
     }
 
-    public static ColumnModel fromJson(JsonObject object) {
+    public static ColumnModel fromJson(JsonValue object) {
         ColumnModel columnModel = new ColumnModel();
         if(!object.get("id").isJsonNull()) {
-            columnModel.setId(object.get("id").getAsString());
+            columnModel.setId(object.get("id").asString());
         }
-        columnModel.setExpression(object.get("expression").getAsString());
+        if(object.get("expression").isJsonPrimitive()) {
+            columnModel.setExpression(object.get("expression").asString());
+        }
         return columnModel;
     }
 

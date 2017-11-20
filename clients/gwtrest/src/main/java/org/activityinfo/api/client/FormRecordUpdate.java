@@ -1,8 +1,6 @@
 package org.activityinfo.api.client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +8,7 @@ import java.util.List;
 public class FormRecordUpdate {
   private boolean deleted;
 
-  private JsonObject fieldValues;
+  private JsonValue fieldValues;
 
   public FormRecordUpdate() {
   }
@@ -19,21 +17,21 @@ public class FormRecordUpdate {
     return deleted;
   }
 
-  public JsonObject getFieldValues() {
+  public JsonValue getFieldValues() {
     return fieldValues;
   }
 
-  public static FormRecordUpdate fromJson(JsonElement jsonElement) {
-    JsonObject jsonObject = jsonElement.getAsJsonObject();
+  public static FormRecordUpdate fromJson(JsonValue jsonElement) {
+      JsonValue jsonObject = jsonElement;
     FormRecordUpdate model = new FormRecordUpdate();
-    model.deleted = jsonObject.get("deleted").getAsBoolean();
-    model.fieldValues = jsonObject.get("fieldValues").getAsJsonObject();
+    model.deleted = jsonObject.get("deleted").asBoolean();
+      model.fieldValues = jsonObject.get("fieldValues");
     return model;
   }
 
-  public static List<FormRecordUpdate> fromJsonArray(JsonArray jsonArray) {
+  public static List<FormRecordUpdate> fromJsonArray(JsonValue jsonArray) {
     List<FormRecordUpdate> list = new ArrayList<FormRecordUpdate>();
-    for(JsonElement element : jsonArray) {
+    for(JsonValue element : jsonArray.values()) {
       list.add(fromJson(element));
     }
     return list;

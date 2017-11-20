@@ -1,6 +1,8 @@
 package org.activityinfo.model.job;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Result for a job that results in a download.
@@ -18,13 +20,13 @@ public class ExportResult implements JobResult {
     }
 
     @Override
-    public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("downloadUrl", downloadUrl);
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
+        object.put("downloadUrl", downloadUrl);
         return object;
     }
 
-    public static ExportResult fromJson(JsonObject resultObject) {
-        return new ExportResult(resultObject.get("downloadUrl").getAsString());
+    public static ExportResult fromJson(JsonValue resultObject) {
+        return new ExportResult(resultObject.get("downloadUrl").asString());
     }
 }

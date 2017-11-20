@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
+import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModelTest;
 import org.activityinfo.ui.client.store.TestingFormStore;
@@ -29,7 +31,7 @@ public class MeasureListItemStoreTest {
         AnalysisViewModel viewModel = new AnalysisViewModel(formStore);
         MeasureListItemStore store = new MeasureListItemStore(viewModel);
 
-        viewModel.addMeasure(AnalysisViewModelTest.surveyCount());
+        viewModel.addMeasure(surveyCount());
 
         assertThat(store.size(), equalTo(0));
 
@@ -37,6 +39,14 @@ public class MeasureListItemStoreTest {
 
 
         assertThat(store.size(), equalTo(1));
+    }
+
+    private MeasureModel surveyCount() {
+        return ImmutableMeasureModel.builder()
+            .label("Count")
+            .formId(formStore.getCatalog().getSurvey().getFormId())
+            .formula("1")
+            .build();
     }
 
 }

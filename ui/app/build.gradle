@@ -37,7 +37,6 @@ dependencies {
 
     gwt "com.google.gwt:gwt-user:2.8.0"
     gwt 'com.google.guava:guava-gwt:21.0'
-    gwt 'com.google.elemental2:elemental2-indexeddb:1.0.0-beta-1'
     gwt libraries.gwt.gson
 
     gwt project(':core:model')
@@ -46,6 +45,7 @@ dependencies {
     gwt project(':clients:gwtrest')
     gwt project(':io:match')
     gwt project(':analysis')
+    gwt project(':ui:icons')
 
 
     gwt project(':ui:codemirror')
@@ -82,6 +82,7 @@ task codeserver(type: JavaExec) {
     classpath project(":i18n").sourceSets.main.resources.srcDirs
     classpath project(":core:promises").sourceSets.main.java.srcDirs
     classpath project(":core:model").sourceSets.main.java.srcDirs
+    classpath project(":analysis").sourceSets.main.java.srcDirs
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs
 
@@ -123,6 +124,7 @@ task compileApp(type: JavaExec) {
 
 }
 
+compileApp.onlyIf { !project.hasProperty('skipGwt') }
 
 task testOffline(type: JavaExec) {
 
@@ -142,7 +144,7 @@ task testOffline(type: JavaExec) {
 
     main = 'junit.textui.TestRunner'
 
-    jvmArgs "-Dgwt.args=-runStyle Manual:1 -style pretty -war ${buildDir}/tesWar -workDir ${buildDir}/testGwtWork"
+    jvmArgs "-Dgwt.args=-runStyle Manual:1 -style pretty -war ${buildDir}/testWar -workDir ${buildDir}/testGwtWork"
     args 'org.activityinfo.ui.client.store.offline.OfflineStoreGwtTest'
 
 }

@@ -2,13 +2,13 @@ package org.activityinfo.ui.client.page.print;
 
 
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.inject.Inject;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.ActivityInfoEntryPoint;
 import org.activityinfo.ui.client.component.form.SimpleFormPanel;
 import org.activityinfo.ui.client.component.form.VerticalFieldContainer;
 import org.activityinfo.ui.client.component.form.field.FieldWidgetMode;
@@ -73,8 +73,8 @@ public class PrintFormPanel extends FlowPanel {
                 return resourceLocator.getFormInstance(formId, recordId);
             }
         });
-        
-        Document.get().getElementById("loading").getStyle().setDisplay(Style.Display.NONE);
+
+        ActivityInfoEntryPoint.hideLoadingIndicator();
     }
 
     public static void open(ResourceId formId, ResourceId recordId) {

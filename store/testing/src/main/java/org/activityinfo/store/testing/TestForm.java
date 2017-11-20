@@ -1,5 +1,6 @@
 package org.activityinfo.store.testing;
 
+import com.google.common.base.Supplier;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -14,5 +15,7 @@ public interface TestForm {
     FormClass getFormClass();
 
     List<FormInstance> getRecords();
+
+    Supplier<FormInstance> getGenerator();
 
 }

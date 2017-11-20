@@ -67,13 +67,5 @@ class Forms implements FormClassProvider {
     public FormClass getVillage() {
         return village;
     }
-    
-    public AsyncFormClassProvider async() {
-        return new AsyncFormClassProvider() {
-            @Override
-            public Promise<FormClass> getFormClass(ResourceId formClassId) {
-                return Promise.resolved(formClassProvider.getFormClass(formClassId));
-            }
-        };
-    }
+
 }

@@ -26,7 +26,6 @@ import com.extjs.gxt.ui.client.util.DateWrapper;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
 import org.activityinfo.legacy.shared.reports.util.DateUtil;
 import org.activityinfo.model.date.DateUnit;
-import org.activityinfo.model.date.Month;
 
 import java.util.Date;
 
@@ -39,12 +38,6 @@ import java.util.Date;
 public class DateUtilGWTImpl extends DateUtil {
 
     public static final DateUtilGWTImpl INSTANCE = new DateUtilGWTImpl();
-
-    @Override
-    public Month getCurrentMonth() {
-        DateWrapper today = new DateWrapper();
-        return new Month(today.getFullYear(), today.getMonth());
-    }
 
     @Override
     public DateRange yearRange(int year) {

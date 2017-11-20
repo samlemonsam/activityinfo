@@ -24,13 +24,13 @@ package org.activityinfo.server.command.handler;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.model.date.Month;
 import org.activityinfo.legacy.shared.command.UpdateMonthlyReports;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.event.sitehistory.ChangeType;
 import org.activityinfo.server.event.sitehistory.SiteHistoryProcessor;

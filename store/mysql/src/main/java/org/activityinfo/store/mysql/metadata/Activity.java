@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -210,16 +210,17 @@ public class Activity implements Serializable {
     }
 
 
-    public ActivityField getIndicatorField(Integer indicatorId) {
+    public ActivityField getAttributeGroupField(Integer groupId) {
         for (ActivityField field : fields) {
-            if(field.getId() == indicatorId) {
+            if(field.isAttributeGroup() && field.getId() == groupId) {
                 return field;
             }
         }
 
-        throw new IllegalArgumentException("No such indicator " + indicatorId + " in activity " + activityId);
+        throw new IllegalArgumentException("No such attribute group " + groupId + " in activity " + activityId);
     }
-    
+
+
     public ActivityVersion getActivityVersion() {
         return new ActivityVersion(this.getId(), schemaVersion, siteVersion);
     }
@@ -284,7 +285,7 @@ public class Activity implements Serializable {
                 in.readFully(bytes);
                 JsonParser parser = new JsonParser();
                 try(InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(bytes), Charsets.UTF_8)) {
-                    this.value = FormClass.fromJson(parser.parse(reader).getAsJsonObject());
+                    this.value = FormClass.fromJson(parser.parse(reader));
                 }
             } else {
                 this.value = null;

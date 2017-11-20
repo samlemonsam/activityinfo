@@ -4,9 +4,10 @@ import org.activityinfo.model.query.ColumnModelException;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormScanCache;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormScanCache;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -14,12 +15,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class UnaryFunctionQueryTest {
 
+    private TestingCatalog catalog;
+    private ColumnSetBuilder builder;
+    private IntakeForm intakeForm;
+
+    @Before
+    public void setup() {
+        catalog = new TestingCatalog();
+        builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
+        intakeForm = catalog.getIntakeForm();
+    }
+
     @Test
     public void plusFunctionTest() {
-        TestingCatalog catalog = new TestingCatalog();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
-        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         queryModel.selectExpr("+1").as("posOne");
         queryModel.selectExpr("+1.0").as("posOneDouble");
         queryModel.selectExpr("+1*2").as("posOneByTwo");
@@ -46,10 +56,7 @@ public class UnaryFunctionQueryTest {
 
     @Test
     public void minusFunctionTest() {
-        TestingCatalog catalog = new TestingCatalog();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
-
-        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         queryModel.selectExpr("-1").as("negOne");
         queryModel.selectExpr("-1.0").as("negOneDouble");
         queryModel.selectExpr("-1*2").as("negOneByTwo");
@@ -76,10 +83,8 @@ public class UnaryFunctionQueryTest {
 
     @Test
     public void multiplyFunctionTest() {
-        TestingCatalog catalog = new TestingCatalog();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
-        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         makeQueryExprAndExpectColumnModelException(queryModel,"*1","multOne");
         makeQueryExprAndExpectColumnModelException(queryModel,"*1.0","multOneDouble");
         makeQueryExprAndExpectColumnModelException(queryModel,"1*","oneMult");
@@ -88,10 +93,7 @@ public class UnaryFunctionQueryTest {
 
     @Test
     public void divideFunctionTest() {
-        TestingCatalog catalog = new TestingCatalog();
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
-
-        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         makeQueryExprAndExpectColumnModelException(queryModel,"/1","divOne");
         makeQueryExprAndExpectColumnModelException(queryModel,"/1.0","divOneDouble");
         makeQueryExprAndExpectColumnModelException(queryModel,"1/","oneDiv");

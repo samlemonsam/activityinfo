@@ -9,8 +9,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.common.io.CharStreams;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -26,13 +26,18 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+
+import static org.activityinfo.json.Json.parse;
 
 
 /**
@@ -381,18 +386,20 @@ public class ActivityLoader {
 
     private static FormClass tryDeserialize(Activity activity, String formClass, byte[] formClassGz) {
         try {
-            Reader reader;
+            JsonValue object;
             if (formClassGz != null) {
-                reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(formClassGz)), Charsets.UTF_8);
+                try(Reader reader = new InputStreamReader(
+                                new GZIPInputStream(new ByteArrayInputStream(formClassGz)), Charsets.UTF_8)) {
+                    object = parse(CharStreams.toString(reader));
+                }
             } else if (!Strings.isNullOrEmpty(formClass)) {
-                reader = new StringReader(formClass);
+                object = parse(formClass);
             } else {
                 return null;
             }
 
-            Gson gson = new Gson();
-            JsonObject object = gson.fromJson(reader, JsonObject.class);
             return patchDeserializedFormClass(activity, FormClass.fromJson(object));
+
         } catch (IOException e) {
             throw new IllegalStateException("Error deserializing form class", e);
         }
@@ -467,6 +474,7 @@ public class ActivityLoader {
                 "Name, " +
                 "Description, " +
                 "Mandatory, " +
+                "visible, " +
                 "Type, " +
                 "NULL as MultipleAllowed, " +
                 "units, " +
@@ -489,6 +497,7 @@ public class ActivityLoader {
                 "Name, " +
                 "NULL as Description, " +
                 "Mandatory, " +
+                "NULL as visible, " +
                 "'ENUM' as Type, " +
                 "multipleAllowed, " +
                 "NULL as Units, " +
@@ -524,6 +533,7 @@ public class ActivityLoader {
         }
         formField.setLabel(rs.getString("Name"));
         formField.setRequired(getMandatory(rs));
+        formField.setVisible(getVisible(rs));
         formField.setDescription(rs.getString("Description"));
         formField.setCode(rs.getString("code"));
 
@@ -561,6 +571,10 @@ public class ActivityLoader {
 
     private boolean getMandatory(ResultSet rs) throws SQLException {
         return rs.getBoolean("Mandatory");
+    }
+
+    private boolean getVisible(ResultSet rs) throws SQLException {
+        return rs.getBoolean("visible");
     }
 
     private EnumType createEnumType(ResultSet rs, Map<Integer, List<EnumItem>> attributes) throws SQLException {

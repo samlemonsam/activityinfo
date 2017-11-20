@@ -22,9 +22,8 @@ package org.activityinfo.model.type.attachment;
  */
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -63,8 +62,8 @@ public class AttachmentValue implements FieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        JsonArray array = new JsonArray();
+    public JsonValue toJsonElement() {
+        JsonValue array = Json.createArray();
         for (Attachment value : values) {
             array.add(value.toJsonElement());
         }
@@ -72,19 +71,19 @@ public class AttachmentValue implements FieldValue {
     }
 
     public static AttachmentValue fromJson(String json) {
-        JsonParser jsonParser = new JsonParser();
-        JsonArray array;
+        org.activityinfo.json.JsonParser jsonParser = new org.activityinfo.json.JsonParser();
+        JsonValue array;
 
-        JsonElement root = jsonParser.parse(json);
+        JsonValue root = jsonParser.parse(json);
         if(root.isJsonObject()) {
-            array = root.getAsJsonObject().getAsJsonArray("values");
+            array = root.get("values");
         } else {
-            array = root.getAsJsonArray();
+            array = root;
         }
 
         List<Attachment> list = new ArrayList<>();
-        for (JsonElement value : array) {
-            list.add(Attachment.fromJson(value.getAsJsonObject()));
+        for (JsonValue value : array.values()) {
+            list.add(Attachment.fromJson(value));
         }
 
         return new AttachmentValue(list);

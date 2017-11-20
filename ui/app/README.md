@@ -15,6 +15,6 @@ GWT SuperDev mode can be started in two steps:
     ./gradlew ui:app:codeserver
     ./gradlew server:appengineDevMode
     
-Navigate to http://localhost:8080/login and then http://localhost:8080/?ui=3
+Navigate to http://localhost:8080/login and then http://localhost:8080/app?ui=3dev
 
 

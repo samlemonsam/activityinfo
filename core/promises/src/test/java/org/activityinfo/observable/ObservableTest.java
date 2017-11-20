@@ -3,6 +3,8 @@ package org.activityinfo.observable;
 import com.google.common.base.Function;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
@@ -88,6 +90,50 @@ public class ObservableTest {
         number.updateValue(96);
         twiceObserver.assertChangeNotFired();
     }
+
+
+    @Test
+    public void transformSynchronous() {
+        ObservableStub<Integer> number = new ObservableStub<>();
+
+        Observable<Integer> twice = number.transform(new Function<Integer, Integer>() {
+            @Override
+            public Integer apply(Integer input) {
+                return input * 2;
+            }
+        });
+
+        MockObserver<Integer> twiceObserver = new MockObserver<>();
+        Subscription twiceSubscription = twice.subscribe(twiceObserver);
+        twiceObserver.assertChangeFiredOnce();
+
+        assertTrue(number.isLoading());
+        assertTrue(twice.isLoading());
+
+        // When we update the source value, the calculated value should
+        // remain in the loading state but enqueue the recomputation
+        number.updateValue(42);
+
+        twiceObserver.assertChangeFiredOnce();
+        assertFalse(twice.isLoading());
+        assertThat(twice.get(), equalTo(42 * 2));
+
+        number.setToLoading();
+        twiceObserver.assertChangeFiredOnce();
+        assertTrue(twice.isLoading());
+
+        // When the value is changed, we expect the computed value
+        // to REMAIN in the loading state, so no change is fired
+        number.updateValue(13);
+        twiceObserver.assertChangeFiredOnce();
+        assertFalse(twice.isLoading());
+        assertThat(twice.get(), equalTo(13 * 2));
+
+        twiceSubscription.unsubscribe();
+
+        number.updateValue(96);
+        twiceObserver.assertChangeNotFired();
+    }
     
     @Test
     public void chained() {
@@ -116,7 +162,36 @@ public class ObservableTest {
         nameObserver.assertChangeFiredOnce();
         assertThat(name.get(), equalTo("name42"));
     }
-    
+
+    @Test
+    public void joined() {
+
+        StatefulValue<Integer> x = new StatefulValue<>(0);
+        Observable<Integer> abs = x.join(new Function<Integer, Observable<Integer>>() {
+            @Override
+            public Observable<Integer> apply(Integer integer) {
+                return Observable.just(Math.abs(integer));
+            }
+        });
+
+        Observable<Double> sqrt = abs.join(new Function<Integer, Observable<Double>>() {
+            @Nullable
+            @Override
+            public Observable<Double> apply(@Nullable Integer integer) {
+               return Observable.just(Math.sqrt(integer));
+            }
+        });
+
+        CountingObserver<Double> sqrtObserver = new CountingObserver<>();
+        sqrt.subscribe(sqrtObserver);
+
+        x.updateIfNotEqual(-16);
+
+        assertThat(sqrtObserver.countChanges(), equalTo(2));
+
+
+    }
+
     @Test
     public void chainedConnection() {
         final ObservableStub<Integer> id = new ObservableStub<>(1);

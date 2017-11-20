@@ -1,30 +1,31 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.*;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.analysis.Analysis;
+import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlCatalog;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
-import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.server.Updater;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
@@ -34,6 +35,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.Collections;
 import java.util.List;
+
+import static org.activityinfo.json.Json.createObject;
 
 public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
@@ -78,7 +81,9 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormTree> getFormTree(ResourceId formId) {
-        throw new UnsupportedOperationException();
+        FormCatalog newCatalog = newCatalog();
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(newCatalog);
+        return Promise.resolved(treeBuilder.queryTree(formId));
     }
 
 
@@ -117,18 +122,18 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormRecord> getRecord(String formId, String recordId) {
+    public Promise<Maybe<FormRecord>> getRecord(String formId, String recordId) {
         try {
             FormCatalog catalog = newCatalog();
-            Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
-            if(!collection.isPresent()) {
-                throw new RuntimeException("No such form " + formId);
+            Optional<FormStorage> storage = catalog.getForm(ResourceId.valueOf(formId));
+            if(!storage.isPresent()) {
+                return Promise.resolved(Maybe.<FormRecord>notFound());
             }
-            Optional<FormRecord> record = collection.get().get(ResourceId.valueOf(recordId));
+            Optional<FormRecord> record = storage.get().get(ResourceId.valueOf(recordId));
             if(!record.isPresent()) {
-                throw new RuntimeException("No such recod " + recordId + " in form " + formId);
+                return Promise.resolved(Maybe.<FormRecord>notFound());
             }
-            return Promise.resolved(record.get());
+            return Promise.resolved(Maybe.of(record.get()));
 
         } catch (Exception e) {
             return Promise.rejected(e);
@@ -177,7 +182,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         FormCatalog catalog = newCatalog();
         Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
 
-        JsonArray recordArray = new JsonArray();
+        JsonValue recordArray = Json.createArray();
         
         if(collection.isPresent()) {
             if(collection.get() instanceof HrdFormStorage) {
@@ -188,15 +193,15 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
                 }
             }
         }
-        JsonObject object = new JsonObject();
-        object.addProperty("formId", formId);
-        object.add("records", recordArray);
+        JsonValue object = createObject();
+        object.put("formId", formId);
+        object.put("records", recordArray);
         
         return Promise.resolved(FormRecordSet.fromJson(object));
     }
 
     @Override
-    public Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
         return Promise.rejected(new UnsupportedOperationException());
     }
 
@@ -213,7 +218,17 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(TransactionBuilder transactions) {
+    public Promise<Void> updateRecords(RecordTransaction transactions) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public Promise<Maybe<Analysis>> getAnalysis(String id) {
+        return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
+    public Promise<Void> updateAnalysis(AnalysisUpdate analysis) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
@@ -226,4 +241,5 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
+
 }

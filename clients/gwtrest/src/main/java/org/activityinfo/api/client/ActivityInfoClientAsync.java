@@ -1,5 +1,8 @@
 package org.activityinfo.api.client;
 
+import com.google.gwt.safehtml.shared.SafeUri;
+import org.activityinfo.model.analysis.Analysis;
+import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
@@ -10,8 +13,10 @@ import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.form.FormSyncSet;
+import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
@@ -32,7 +37,7 @@ public interface ActivityInfoClientAsync {
      * @param formId Id of the Form
      * @param recordId Id of the record
      */
-    Promise<FormRecord> getRecord(String formId, String recordId);
+    Promise<Maybe<FormRecord>> getRecord(String formId, String recordId);
 
     /**
      * Update a Form Record
@@ -69,7 +74,7 @@ public interface ActivityInfoClientAsync {
      * @param toVersion the desired version update
      * @return
      */
-    Promise<FormRecordSet> getRecordVersionRange(String formId, long localVersion, long toVersion);
+    Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion);
 
     /**
      * Create a New Record
@@ -114,7 +119,11 @@ public interface ActivityInfoClientAsync {
      */
     Promise<ColumnSet> queryTableColumns(QueryModel query);
 
-    Promise<Void> updateRecords(TransactionBuilder transactions);
+    Promise<Void> updateRecords(RecordTransaction transactions);
+
+    Promise<Maybe<Analysis>> getAnalysis(String id);
+
+    Promise<Void> updateAnalysis(AnalysisUpdate analysis);
 
     <T extends JobDescriptor<R>, R extends JobResult> Promise<JobStatus<T, R>>  startJob(T job);
 

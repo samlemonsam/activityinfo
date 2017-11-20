@@ -19,11 +19,13 @@ import java.util.Set;
  */
 public class FieldTreeBuilder {
 
+    private final FormTree formTree;
     private final TreeStore<MeasureTreeNode> store;
 
     private final Set<ResourceId> visitedForms = new HashSet<>();
 
-    public FieldTreeBuilder(TreeStore<MeasureTreeNode> store) {
+    public FieldTreeBuilder(FormTree tree, TreeStore<MeasureTreeNode> store) {
+        this.formTree = tree;
         this.store = store;
     }
 
@@ -51,6 +53,9 @@ public class FieldTreeBuilder {
             FormNode formNode = new FormNode(referencedForm);
             store.add(formNode);
 
+            CountDistinctNode countNode = new CountDistinctNode(formTree.getRootFormId(), referencedForm);
+            store.add(formNode, countNode);
+
             addFields(Optional.of(formNode), referencedForm);
 
             visitedForms.add(referencedForm.getId());
@@ -65,7 +70,7 @@ public class FieldTreeBuilder {
     private void addFields(Optional<MeasureTreeNode> parentNode, FormClass formClass) {
         for (FormField field : formClass.getFields()) {
             if (isSimpleField(field)) {
-                addNode(parentNode, new QuantityNode(formClass.getId(), field));
+                addNode(parentNode, new QuantityNode(formTree.getRootFormId(), formClass.getId(), field));
             }
         }
     }

@@ -1,7 +1,7 @@
 package org.activityinfo.store.mysql.metadata;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -99,10 +99,10 @@ public class ActivityField implements Serializable {
         private FormField value;
 
         private void writeObject(ObjectOutputStream out) throws IOException {
-            out.writeUTF(value.toJsonObject().toString());
+            out.writeUTF(value.toJsonObject().toJson());
         }
         private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-            this.value = FormField.fromJson((JsonObject)new JsonParser().parse(in.readUTF()));
+            this.value = FormField.fromJson((JsonValue)new JsonParser().parse(in.readUTF()));
         }
     }
 }

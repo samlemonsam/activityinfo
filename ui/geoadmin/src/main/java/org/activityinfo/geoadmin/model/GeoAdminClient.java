@@ -4,7 +4,6 @@ import com.bedatadriven.geojson.GeoJsonModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
@@ -19,6 +18,7 @@ import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
@@ -27,10 +27,10 @@ import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
@@ -298,7 +298,7 @@ public class GeoAdminClient implements FormClassProvider {
         } else {
 
             String json = formResource(resourceId).path("tree").get(String.class);
-            JsonObject object = new Gson().fromJson(json, JsonObject.class);
+            JsonValue object = new Gson().fromJson(json, JsonValue.class);
             return JsonFormTreeBuilder.fromJson(object);
         }
     }
@@ -357,11 +357,11 @@ public class GeoAdminClient implements FormClassProvider {
         return baos.toByteArray();
     }
 
-    public void executeTransaction(TransactionBuilder builder) {
+    public void executeTransaction(RecordTransactionBuilder builder) {
         ClientResponse response = client.resource(root)
                 .path("update")
                 .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(builder.build().toString(), MediaType.APPLICATION_JSON_TYPE)
+                .entity(builder.toJsonObject().toJson(), MediaType.APPLICATION_JSON_TYPE)
                 .post(ClientResponse.class);
         
         if(response.getStatus() != 200) {

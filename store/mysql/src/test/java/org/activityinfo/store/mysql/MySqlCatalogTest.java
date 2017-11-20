@@ -1,11 +1,9 @@
 package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonObject;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import com.google.common.base.Predicates;
+import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -19,8 +17,8 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
-import org.activityinfo.store.spi.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.VersionedFormStorage;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
@@ -36,9 +34,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
 import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 
@@ -137,7 +133,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     private FormTree queryFormTree(ResourceId classId) {
         FormTreeBuilder builder = new FormTreeBuilder(catalog);
         FormTree formTree = builder.queryTree(classId);
-        JsonObject formTreeObject = JsonFormTreeBuilder.toJson(formTree);
+        JsonValue formTreeObject = JsonFormTreeBuilder.toJson(formTree);
         formTree = JsonFormTreeBuilder.fromJson(formTreeObject);
         return formTree;
     }
@@ -220,7 +216,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         EnumValue kitContents = (EnumValue) site.get(CuidAdapter.attributeGroupField(2));
 
         assertThat(cause, nullValue());
-        assertThat(kitContents.getResourceIds(), Matchers.contains(CuidAdapter.attributeId(3), CuidAdapter.attributeField(4)));
+        assertThat(kitContents.getResourceIds(), contains(
+            CuidAdapter.attributeId(3),
+            CuidAdapter.attributeField(4)));
     }
 
     @Test
@@ -307,7 +305,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
     }
 
     @Test
@@ -319,7 +317,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
 
     }
 
@@ -332,7 +330,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(false));
         assertThat(permissions.isEditAllowed(), equalTo(false));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
     }
 
     @Test
@@ -356,8 +354,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
-        assertThat(permissions.getEditFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
+        assertThat(permissions.getViewFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
+        assertThat(permissions.getUpdateFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
     }
 
     @Test
@@ -413,8 +411,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
-        assertThat(permissions.getEditFilter(),  nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
+        assertThat(permissions.getUpdateFilter(),  nullValue());
     }
 
     @Test
@@ -425,7 +423,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
     }
 
     @Test
@@ -435,7 +433,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
                 catalog.getForm(publicFormClassId).get().getPermissions(999);
 
         assertThat(permissions.isVisible(), equalTo(true));
-        assertThat(permissions.getVisibilityFilter(), nullValue());
+        assertThat(permissions.getViewFilter(), nullValue());
         assertThat(permissions.isEditAllowed(), equalTo(false));
     }
 
@@ -501,6 +499,22 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         FormStorage form = catalog.getForm(CuidAdapter.partnerFormId(1)).get();
         Optional<FormRecord> partnerRecord = form.get(CuidAdapter.partnerRecordId(1));
+
+    }
+
+    @Test
+    public void partnerVersionRange() {
+        ResourceId partnerFormId = CuidAdapter.partnerFormId(1);
+        VersionedFormStorage form = (VersionedFormStorage) catalog.getForm(partnerFormId).get();
+
+        System.out.println("version = " + form.cacheVersion());
+
+        assertThat(form.cacheVersion(), greaterThan(0L));
+
+        FormSyncSet versionRange = form.getVersionRange(0, form.cacheVersion(), Predicates.<ResourceId>alwaysTrue());
+        assertThat(versionRange.getUpdatedRecordCount(), equalTo(3));
+
+        System.out.println(versionRange);
 
     }
 

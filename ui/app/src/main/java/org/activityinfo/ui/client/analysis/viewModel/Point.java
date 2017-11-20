@@ -10,6 +10,8 @@ public class Point {
 
     public static final String TOTAL = "\0\0TOTAL";
 
+    public static final String MISSING = "\0\0MISSING";
+
     private final double value;
 
     private final String formattedValue;

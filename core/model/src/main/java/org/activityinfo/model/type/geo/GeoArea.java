@@ -1,8 +1,9 @@
 package org.activityinfo.model.type.geo;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
+
+import static org.activityinfo.json.Json.createObject;
 
 /* A Field Value describing a geographic area on the Earth's surface
 * in the WGS84 geographic reference system.
@@ -37,10 +38,10 @@ public class GeoArea implements GeoFieldValue {
 
 
     @Override
-    public JsonElement toJsonElement() {
-        JsonObject object = new JsonObject();
-        object.addProperty("blobId", blobId);
-        object.add("bbox", envelope.toJsonElement());
+    public JsonValue toJsonElement() {
+        JsonValue object = createObject();
+        object.put("blobId", blobId);
+        object.put("bbox", envelope.toJsonElement());
         return object;
     }
 

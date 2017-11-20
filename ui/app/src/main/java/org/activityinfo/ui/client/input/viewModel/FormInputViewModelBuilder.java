@@ -1,16 +1,20 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.SerialNumberType;
-import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
 import org.activityinfo.ui.client.store.FormStore;
@@ -29,47 +33,38 @@ public class FormInputViewModelBuilder {
 
     private final Logger LOGGER = Logger.getLogger(FormInputViewModelBuilder.class.getName());
 
-    private FormStore formStore;
     private final FormTree formTree;
     private final FormEvalContext evalContext;
+    private final PermissionFilters filters;
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
-    private List<SubFormInputViewModelBuilder> subBuilders = new ArrayList<>();
+    private List<FieldValidator> validators = new ArrayList<>();
 
-    /**
-     * Maps reference fields to their choices.
-     */
-    private Map<ResourceId, ReferenceChoices> referenceChoices = new HashMap<>();
-
+    private List<SubFormViewModelBuilder> subBuilders = new ArrayList<>();
 
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
-        this.formStore = formStore;
         this.formTree = formTree;
-        this.evalContext = new FormEvalContext(formTree.getRootFormClass());
+        this.filters = new PermissionFilters(formTree);
+        this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
-        for (FormTree.Node node : formTree.getRootFields()) {
+        for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm()) {
-                subBuilders.add(buildSubBuilder(node));
-            }
-            if(node.getType() instanceof ReferenceType) {
-                referenceChoices.put(node.getFieldId(), choices(formStore, node));
+                subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node));
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
             }
+            if(node.getType() instanceof TextType) {
+                TextType textType = (TextType) node.getType();
+                if(textType.hasInputMask()) {
+                    validators.add(new FieldValidator(node.getFieldId(),
+                        new InputMaskValidator(textType.getInputMask())));
+                }
+            }
         }
     }
 
-    private ReferenceChoices choices(FormStore formStore, FormTree.Node node) {
-        return new ReferenceChoices(formStore, formTree, (ReferenceType) node.getType());
-    }
-
-    private SubFormInputViewModelBuilder buildSubBuilder(FormTree.Node node) {
-        SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
-        FormTree subTree = formTree.subTree(subFormType.getClassId());
-        return new SubFormInputViewModelBuilder(formStore, node, subTree);
-    }
 
     private void buildRelevanceCalculator(FormTree.Node node) {
 
@@ -95,25 +90,58 @@ public class FormInputViewModelBuilder {
     }
 
     public FormInputViewModel build(FormInputModel inputModel) {
+        return build(inputModel, Maybe.notFound());
+    }
+
+    public FormInputViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingRecord) {
+        return build(inputModel, existingRecord, false);
+    }
+
+    public FormInputViewModel placeholder(RecordRef recordRef) {
+        return build(new FormInputModel(recordRef), Maybe.notFound(), true);
+    }
+
+    public FormInputViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingRecord, boolean placeholder) {
 
         FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormId());
 
         // Keep track if this form is valid and ready to submit
         boolean valid = true;
+        boolean dirty = false;
 
-        // First build up the values as input
+        // We inherit all the existing values...
+        Map<ResourceId, FieldValue> existingValues;
+        if(existingRecord.isVisible()) {
+            existingValues = existingRecord.get().getRoot().getFieldValueMap();
+        } else {
+            existingValues = Collections.emptyMap();
+        }
+
+        record.setAll(existingValues);
+
+
+        // Now apply changes...
         for (FormTree.Node node : formTree.getRootFields()) {
-            if(node.getType().isUpdatable()) {
-                FieldInput fieldInput = inputModel.get(node.getFieldId());
-                switch (fieldInput.getState()) {
-                    case VALID:
-                        record.set(node.getFieldId(), fieldInput.getValue());
-                        break;
-                    case INVALID:
-                        LOGGER.info("Field with invalid input = " + node.getFieldId());
-                        valid = false;
-                        break;
-                }
+            FieldInput fieldInput = inputModel.get(node.getFieldId());
+            FieldValue existingValue = record.get(node.getFieldId());
+            switch (fieldInput.getState()) {
+                case EMPTY:
+                    if(existingValue != null) {
+                        dirty = true;
+                    }
+                    record.set(node.getFieldId(), (FieldValue)null);
+                    break;
+                case VALID:
+                    if(!fieldInput.getValue().equals(existingValue)) {
+                        dirty = true;
+                    }
+                    record.set(node.getFieldId(), fieldInput.getValue());
+                    break;
+                case INVALID:
+                    LOGGER.info("Field with invalid input = " + node.getFieldId());
+                    dirty = true;
+                    valid = false;
+                    break;
             }
         }
 
@@ -130,20 +158,36 @@ public class FormInputViewModelBuilder {
             valid = false;
         }
 
-        // Build subform view models
-        Map<ResourceId, SubFormInputViewModel> subFormMap = new HashMap<>();
-        for (SubFormInputViewModelBuilder subBuilder : subBuilders) {
-            subFormMap.put(subBuilder.getFieldId(), subBuilder.build(inputModel));
+        // Run individual field validators
+        Multimap<ResourceId, String> validationErrors = HashMultimap.create();
+        for (FieldValidator validator : validators) {
+            validator.run(record, validationErrors);
+        }
+        if(!validationErrors.isEmpty()) {
+            valid = false;
+        }
+
+        // Build repeating sub form view models
+        Map<ResourceId, SubFormViewModel> subFormMap = new HashMap<>();
+        for (SubFormViewModelBuilder subBuilder : subBuilders) {
+            SubFormViewModel subViewModel = subBuilder.build(inputModel, existingRecord);
+            if(!subViewModel.isValid()) {
+                valid = false;
+            }
+            subFormMap.put(subBuilder.getFieldId(), subViewModel);
         }
 
         LOGGER.info("Valid = " + valid);
 
+        LOGGER.info("fieldValues = " + record.getFieldValueMap());
 
-        return new FormInputViewModel(formTree, inputModel,
+        return new FormInputViewModel(formTree,
+                existingValues,
+                inputModel,
                 record.getFieldValueMap(),
                 subFormMap,
                 relevantSet,
-                missing, referenceChoices, valid);
+                missing, validationErrors, valid, dirty, placeholder);
     }
 
     private Set<ResourceId> computeRelevance(FormInstance record) {

@@ -35,7 +35,7 @@ public class NarrativeFieldWidget implements FormFieldWidget<NarrativeValue> {
 
     @Override
     public void fireValueChanged() {
-        updater.update(NarrativeValue.valueOf(this.textArea.getValue()));
+        updater.update(NarrativeValue.valueOf(this.textArea.getText()));
     }
 
     @Override

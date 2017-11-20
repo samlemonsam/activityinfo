@@ -28,6 +28,8 @@ appengine {  // App Engine tasks configuration
     }
 
     deploy {   // deploy configuration
+        project = environment.projectId
+        version = 1
         stopPreviousVersion = true  // default - stop the current version
         promote = true              // default - & make this the current version
     }

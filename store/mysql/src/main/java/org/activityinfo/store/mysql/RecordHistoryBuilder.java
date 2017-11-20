@@ -3,17 +3,20 @@ package org.activityinfo.store.mysql;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import org.activityinfo.api.client.FormHistoryEntryBuilder;
 import org.activityinfo.api.client.FormValueChangeBuilder;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -65,7 +68,7 @@ public class RecordHistoryBuilder {
     }
 
 
-    public JsonArray build(ResourceId formId, ResourceId recordId) throws SQLException {
+    public JsonValue build(ResourceId formId, ResourceId recordId) throws SQLException {
         Optional<FormStorage> form = catalog.getForm(formId);
         if(!form.isPresent()) {
             throw new FormNotFoundException(formId);
@@ -94,7 +97,7 @@ public class RecordHistoryBuilder {
         Map<Long, User> userMap = queryUsers(deltas);
 
         // Now render the complete object for the user
-        JsonArray array = new JsonArray();
+        JsonValue array = Json.createArray();
         for (RecordDelta delta : deltas) {
 
             User user = userMap.get(delta.version.getUserId());
@@ -342,7 +345,7 @@ public class RecordHistoryBuilder {
                 for (RecordRef ref : value.getReferences()) {
                     Optional<FormRecord> record = form.get().get(ref.getRecordId());
                     if (record.isPresent()) {
-                        JsonElement labelValue = null;
+                        JsonValue labelValue = null;
 
                         if (labelFieldId.isPresent()) {
                             labelValue = record.get().getFields().get(labelFieldId.get().asString());
@@ -353,7 +356,7 @@ public class RecordHistoryBuilder {
                         }
 
                         if (labelValue != null && labelValue.isJsonPrimitive()) {
-                            labelMap.put(ref.getRecordId(), labelValue.getAsString());
+                            labelMap.put(ref.getRecordId(), labelValue.asString());
                         }
                     }
                 }

@@ -46,9 +46,9 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.job.ExportAuditLog;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
+import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.component.table.action.ExportJobTask;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
@@ -301,9 +301,7 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
                     new ResourcePlace(getSelectedFormClassId(), ResourcePage.DESIGN_PAGE_ID)));
 
         } else if(UIActions.OPEN_TABLE.equals(actionId)) {
-            eventBus.fireEvent(new NavigationEvent(
-                    NavigationHandler.NAVIGATION_REQUESTED,
-                    new ResourcePlace(getSelectedFormClassId(), ResourcePage.TABLE_PAGE_ID)));
+            App3.openNewTable(getSelectedFormClassId());
         }
     }
 

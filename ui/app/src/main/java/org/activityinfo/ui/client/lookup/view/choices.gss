@@ -1,0 +1,48 @@
+@def TEXT_FAMILY value('theme.listview.text.family');
+@def TEXT_SIZE value('theme.listview.text.size');
+@def TEXT_WEIGHT value('theme.listview.text.weight');
+@def TEXT_COLOR value('theme.listview.text.color');
+@def ITEM_LINE_HEIGHT value('theme.listview.lineHeight');
+@def BACKGROUND_COLOR value('theme.listview.backgroundColor');
+@def BORDER_WIDTH value('theme.listview.border.toString');
+@def BORDER_COLOR value('theme.listview.border.color');
+@def BORDER_STYLE value('theme.listview.border.style');
+@def ITEM_PADDING value('theme.listview.item.padding');
+@def ITEM_BACKGROUND_COLOR value('theme.listview.item.backgroundColor');
+@def ITEM_GRADIENT value('theme.listview.item.gradient');
+@def ITEM_BORDER_WIDTH value('theme.listview.item.border.toString');
+@def ITEM_BORDER_STYLE value('theme.listview.item.border.style');
+@def ITEM_BORDER_COLOR value('theme.listview.item.border.color');
+@def OVER_ITEM_PADDING value('theme.listview.overItem.padding');
+@def OVER_ITEM_BACKGROUND_COLOR value('theme.listview.overItem.backgroundColor');
+@def OVER_ITEM_COLOR value('theme.listview.overItem.color');
+@def OVER_ITEM_GRADIENT value('theme.listview.overItem.gradient');
+@def OVER_ITEM_BORDER_WIDTH value('theme.listview.overItem.border.toString');
+@def OVER_ITEM_BORDER_STYLE value('theme.listview.overItem.border.style');
+@def OVER_ITEM_BORDER_COLOR value('theme.listview.overItem.border.color');
+@def SELECTED_ITEM_PADDING value('theme.listview.selectedItem.padding');
+@def SELECTED_ITEM_BACKGROUND_COLOR value('theme.listview.selectedItem.backgroundColor');
+@def SELECTED_ITEM_COLOR value('theme.listview.selectedItem.color');
+@def SELECTED_ITEM_GRADIENT value('theme.listview.selectedItem.gradient');
+@def SELECTED_ITEM_BORDER_WIDTH value('theme.listview.selectedItem.border.toString');
+@def SELECTED_ITEM_BORDER_STYLE value('theme.listview.selectedItem.border.style');
+@def SELECTED_ITEM_BORDER_COLOR value('theme.listview.selectedItem.border.color');
+
+.message {
+    color: TEXT_COLOR;
+    font-family: TEXT_FAMILY;
+    font-size: TEXT_SIZE;
+    font-weight: TEXT_WEIGHT;
+    font-style: italic;
+    line-height: ITEM_LINE_HEIGHT;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-width: ITEM_BORDER_WIDTH;
+    border-style: ITEM_BORDER_STYLE;
+    border-color: ITEM_BORDER_COLOR;
+    padding: ITEM_PADDING;
+    background: ITEM_BACKGROUND_COLOR;
+    /* @alternate */ background: -webkit-linear-gradient(top, ITEM_GRADIENT);
+    /* @alternate */ background: -ms-linear-gradient(top, ITEM_GRADIENT);
+    /* @alternate */ background: linear-gradient(to bottom, ITEM_GRADIENT);
+}

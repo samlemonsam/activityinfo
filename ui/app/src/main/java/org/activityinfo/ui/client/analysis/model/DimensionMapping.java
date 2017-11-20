@@ -1,5 +1,7 @@
 package org.activityinfo.ui.client.analysis.model;
 
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.resource.ResourceId;
@@ -81,5 +83,46 @@ public class DimensionMapping {
 
     public String getFormula() {
         return formula;
+    }
+
+
+    public JsonValue toJson() {
+
+        JsonValue object = Json.createObject();
+        if(formId != null) {
+            object.put("formId", formId.asString());
+        }
+        object.put("formula", formula);
+        return object;
+    }
+
+    public static DimensionMapping fromJson(JsonValue object) {
+        ResourceId formId = null;
+        if(object.hasKey("formId")) {
+            formId = ResourceId.valueOf(object.getString("formId"));
+        }
+        String formula = object.getString("formula");
+        return new DimensionMapping(formId, formula);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DimensionMapping mapping = (DimensionMapping) o;
+
+        if (formId != null ? !formId.equals(mapping.formId) : mapping.formId != null) return false;
+        if (formula != null ? !formula.equals(mapping.formula) : mapping.formula != null) return false;
+        return type == mapping.type;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = formId != null ? formId.hashCode() : 0;
+        result = 31 * result + (formula != null ? formula.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
     }
 }

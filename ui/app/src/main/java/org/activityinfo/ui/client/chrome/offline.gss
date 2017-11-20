@@ -1,0 +1,50 @@
+
+@external offline-icon, pending-icon, sync-icon, sync-check, sync-circle;
+
+/** Default state */
+
+.pending-icon {
+    visibility: hidden;
+}
+
+.sync-circle path {
+    color: #DDD;
+}
+
+.sync-check {
+    visibility: hidden;
+}
+
+/** When there are pending changes *!*/
+
+.pending .sync-circle {
+    fill: #ff0000;
+}
+
+.pending .pending-icon {
+    visibility: visible;
+}
+
+
+#pending-count {
+    font-style:normal;
+    font-weight:normal;
+    font-size:20px;
+    line-height:125%;
+    font-family:sans-serif;
+    fill:#ffffff;
+    fill-opacity:1;
+    stroke:none;
+}
+
+/** When everything is synced **/
+
+.synced .sync-circle {
+    fill: #00cf79;
+}
+.synced .sync-check {
+    visibility: visible;
+    fill: white;
+
+}
+

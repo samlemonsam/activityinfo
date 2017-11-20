@@ -1,8 +1,11 @@
 package org.activityinfo.ui.client.table.view;
 
+import com.google.common.base.Optional;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
@@ -34,7 +37,17 @@ public class SubFormGrid extends VerticalLayoutContainer {
     private void onModelChanged(Observable<EffectiveTableModel> model) {
         if(model.isLoaded()) {
             if(grid == null) {
-                grid = new TableGrid(model.get());
+                grid = new TableGrid(model.get(), model.get().getColumnSet(), new TableUpdater() {
+                    @Override
+                    public void updateFilter(Optional<ExprNode> filterFormula) {
+                        // TODO
+                    }
+
+                    @Override
+                    public void updateColumnWidth(String columnId, int width) {
+                        // TODO
+                    }
+                });
                 add(grid, new VerticalLayoutData(1, 1));
             }
         }

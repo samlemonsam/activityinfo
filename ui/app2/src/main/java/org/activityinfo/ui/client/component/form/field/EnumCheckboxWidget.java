@@ -173,11 +173,14 @@ public class EnumCheckboxWidget implements FormFieldWidget<EnumValue> {
         Element target = event.getNativeEvent().getEventTarget().cast();
         if (target.getClassName().contains("enum-remove")) {
             remove(findId(target));
+            fireValueChanged();
         } else if (target.getClassName().contains("enum-edit")) {
             ResourceId id = findId(target);
             editLabel(id);
+            fireValueChanged();
         } else if (target.getClassName().contains("enum-add")) {
             addOption();
+            fireValueChanged();
         }
     }
 

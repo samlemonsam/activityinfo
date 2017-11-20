@@ -1,9 +1,11 @@
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.indexedb.IDBDatabaseUpgrade;
+import org.activityinfo.indexedb.IDBObjectStore;
+import org.activityinfo.indexedb.ObjectStoreDefinition;
+import org.activityinfo.indexedb.ObjectStoreOptions;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
@@ -16,36 +18,53 @@ import java.util.Set;
  */
 public class KeyValueStore {
 
-    public static final String NAME = "values";
+    public static final ObjectStoreDefinition<KeyValueStore> DEF = new ObjectStoreDefinition<KeyValueStore>() {
+        @Override
+        public String getName() {
+            return "values";
+        }
+
+        @Override
+        public void upgrade(IDBDatabaseUpgrade database, int oldVersion) {
+            if(oldVersion < 1) {
+                database.createObjectStore(getName(), ObjectStoreOptions.withDefaults());
+            }
+        }
+
+        @Override
+        public KeyValueStore wrap(IDBObjectStore store) {
+            return new KeyValueStore(store);
+        }
+    };
 
     private static final String CURRENT_SNAPSHOT_KEY = "snapshot";
 
     private static final String OFFLINE_FORMS = "offlineForms";
 
-    private final IDBObjectStore impl;
+    private final IDBObjectStore<JsonValue> impl;
 
-    KeyValueStore(IDBObjectStore impl) {
+    private KeyValueStore(IDBObjectStore impl) {
         this.impl = impl;
     }
 
     public final void put(SnapshotStatus status) {
-        impl.putJson(status.toJson().toString(), CURRENT_SNAPSHOT_KEY);
+        impl.put(CURRENT_SNAPSHOT_KEY, status.toJson());
     }
 
     public final void put(Set<ResourceId> offlineForms) {
-        impl.putJson(toJson(offlineForms), OFFLINE_FORMS);
+        impl.put(OFFLINE_FORMS, toJson(offlineForms));
     }
 
-    private String toJson(Set<ResourceId> offlineForms) {
-        JsonArray array = new JsonArray();
+    private JsonValue toJson(Set<ResourceId> offlineForms) {
+        JsonValue array = Json.createArray();
         for (ResourceId offlineForm : offlineForms) {
-            array.add(new JsonPrimitive(offlineForm.asString()));
+            array.add(Json.create(offlineForm.asString()));
         }
-        return array.toString();
+        return array;
     }
 
     public final Promise<SnapshotStatus> getCurrentSnapshot() {
-        return impl.getJson(CURRENT_SNAPSHOT_KEY).then(json -> {
+        return impl.get(CURRENT_SNAPSHOT_KEY).then(json -> {
             if(json == null) {
                 return SnapshotStatus.EMPTY;
             } else {
@@ -55,14 +74,14 @@ public class KeyValueStore {
     }
 
     public final Promise<Set<ResourceId>> getOfflineForms() {
-        return impl.getJson(OFFLINE_FORMS).then(json -> {
+        return impl.get(OFFLINE_FORMS).then(json -> {
             if(json == null) {
                 return Collections.emptySet();
             } else {
                 Set<ResourceId> forms = new HashSet<>();
-                JsonArray array = new JsonParser().parse(json).getAsJsonArray();
-                for (JsonElement jsonElement : array) {
-                    forms.add(ResourceId.valueOf(jsonElement.getAsString()));
+                JsonValue array = json;
+                for (int i = 0; i < array.length(); i++) {
+                    forms.add(ResourceId.valueOf(array.getString(i)));
                 }
                 return forms;
             }

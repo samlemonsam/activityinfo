@@ -1,7 +1,7 @@
 package org.activityinfo.model.type;
 
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 
 public interface ParametrizedFieldTypeClass extends FieldTypeClass {
 
@@ -12,6 +12,6 @@ public interface ParametrizedFieldTypeClass extends FieldTypeClass {
      * 
      * @return an instance of {@code FieldType}
      */
-    FieldType deserializeType(JsonObject parametersObject);
+    FieldType deserializeType(JsonValue parametersObject);
 
 }

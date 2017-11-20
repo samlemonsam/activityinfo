@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -63,7 +62,7 @@ public class SitePersisterTest extends CommandTestCase2 {
         Assert.assertNotNull(fromServer);
         Assert.assertEquals(fromServer.get(CONTENU_DI_KIT_FIELD), new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
 
-        FormTree formTree = assertResolves(new AsyncFormTreeBuilder(locator).apply(formClass.getId()));
+        FormTree formTree = assertResolves(locator.getFormTree(formClass.getId()));
 
         final List<FieldPath> paths = Lists.newArrayList(formTree.getRootPaths());
         Assert.assertTrue(paths.contains(new FieldPath(CONTENU_DI_KIT_FIELD)));

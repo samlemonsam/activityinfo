@@ -1,5 +1,7 @@
 package org.activityinfo.model.date;
 
+import org.activityinfo.model.type.time.EpiWeek;
+
 /**
  * Created by yuriyz on 8/15/2016.
  */
@@ -12,7 +14,7 @@ public class BiWeek {
     }
 
     public BiWeek(int startWeekInYear, int year) {
-        this(new EpiWeek(startWeekInYear, year));
+        this(new EpiWeek(year, startWeekInYear));
     }
 
     public EpiWeek getStartWeek() {

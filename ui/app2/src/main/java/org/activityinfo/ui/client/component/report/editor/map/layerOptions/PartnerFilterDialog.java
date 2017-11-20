@@ -85,9 +85,11 @@ public class PartnerFilterDialog extends Dialog {
         return set;
     }
 
-    public void show(Filter baseFilter, final Filter currentFilter, SelectionCallback<Set<Integer>> callback) {
+    public void show(Filter rawFilter, final Filter currentFilter, SelectionCallback<Set<Integer>> callback) {
         show();
         this.callback = callback;
+        Filter baseFilter = new Filter(rawFilter);
+        baseFilter.clearRestrictions(DimensionType.Partner);
         service.execute(new GetPartnersDimension(baseFilter), new AsyncCallback<PartnerResult>() {
 
             @Override

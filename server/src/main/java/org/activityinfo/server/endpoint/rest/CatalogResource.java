@@ -1,8 +1,9 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.gson.JsonArray;
 import com.google.inject.Provider;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.store.spi.FormCatalog;
@@ -42,11 +43,11 @@ public class CatalogResource {
     }
 
     private String toJson(List<CatalogEntry> entries) {
-        JsonArray array = new JsonArray();
+        JsonValue array = Json.createArray();
         for (CatalogEntry entry : entries) {
             array.add(entry.toJsonElement());
         }
-        return array.toString();
+        return array.toJson();
     }
 
 }

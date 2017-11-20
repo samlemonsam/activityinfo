@@ -10,10 +10,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 
 public interface FieldTypeVisitor<T> {
     T visitAttachment(AttachmentType attachmentType);
@@ -44,10 +41,15 @@ public interface FieldTypeVisitor<T> {
 
     T visitYear(YearType yearType);
 
+    T visitFortnight(FortnightType fortnightType);
+
+    T visitWeek(EpiWeekType epiWeekType);
+
     T visitLocalDateInterval(LocalDateIntervalType localDateIntervalType);
 
     T visitText(TextType textType);
 
     T visitSerialNumber(SerialNumberType serialNumberType);
+
 
 }

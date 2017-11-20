@@ -1,10 +1,12 @@
 package org.activityinfo.store.query.shared;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -14,6 +16,8 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.store.query.shared.join.JoinNode;
+import org.activityinfo.store.query.shared.join.JoinType;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,14 +48,14 @@ public class NodeMatch {
     /**
      * Creates a NodeMatch for the given field.
      */
-    public static NodeMatch forField(FormTree.Node fieldNode) {
+    public static NodeMatch forField(FormTree.Node fieldNode, Optional<StatFunction> aggregation) {
         Preconditions.checkNotNull(fieldNode, "fieldNode");
 
         List<List<FormTree.Node>> partitions = partitionOnJoins(fieldNode);
         List<FormTree.Node> leaf = partitions.get(partitions.size() - 1);
         
         NodeMatch match = new NodeMatch();
-        match.joins = joinsTo(partitions);
+        match.joins = joinsTo(partitions, aggregation);
         match.type = Type.FIELD;
         match.formClass = leaf.get(0).getDefiningFormClass();
         match.fieldExpr = toExpr(leaf);
@@ -60,7 +64,7 @@ public class NodeMatch {
     }
 
     public static NodeMatch forEnumItem(FormTree.Node fieldNode, EnumItem item) {
-        NodeMatch match = forField(fieldNode);
+        NodeMatch match = forField(fieldNode, Optional.<StatFunction>absent());
         match.fieldExpr = new CompoundExpr(match.fieldExpr, new SymbolExpr(item.getId()));
         match.enumItem = item;
         return match;
@@ -77,7 +81,7 @@ public class NodeMatch {
         Preconditions.checkArgument(leaf.get(0).isReference());
         
         NodeMatch match = new NodeMatch();
-        match.joins = joinsTo(partitions);
+        match.joins = joinsTo(partitions, Optional.<StatFunction>absent());
         match.joins.add(new JoinNode(JoinType.REFERENCE, leaf.get(0).getDefiningFormClass().getId(), toExpr(leaf), formClass.getId()));
         match.formClass = formClass;
         match.type = Type.ID;
@@ -116,7 +120,7 @@ public class NodeMatch {
         return partitions;
     }
 
-    private static List<JoinNode> joinsTo(List<List<FormTree.Node>> partitions) {
+    private static List<JoinNode> joinsTo(List<List<FormTree.Node>> partitions, Optional<StatFunction> aggregation) {
         /*
          *  Given a parent: "Site.Location.Territoire.District"
          *  This is represented as a tree of nodes:
@@ -144,10 +148,16 @@ public class NodeMatch {
 
             if(leftField.getType() instanceof ReferenceType) {
                 // Join based on the (left) foreign key ==> (right) primary key
-                joins.add(new JoinNode(JoinType.REFERENCE, leftFormId, leftFieldExpr, rightFormId));
+                joins.add(new JoinNode(JoinType.REFERENCE, leftFormId, leftFieldExpr, rightFormId,
+                        Optional.<StatFunction>absent()));
 
             } else if(leftField.getType() instanceof SubFormReferenceType) {
-                joins.add(new JoinNode(JoinType.SUBFORM, leftFormId, new SymbolExpr(ColumnModel.ID_SYMBOL), rightFormId));
+                joins.add(new JoinNode(
+                        JoinType.SUBFORM,
+                                leftFormId,
+                                new SymbolExpr(ColumnModel.ID_SYMBOL),
+                                rightFormId,
+                                aggregation));
 
             } else {
                 throw new IllegalStateException("Invalid field for joining: " + leftField.getType());

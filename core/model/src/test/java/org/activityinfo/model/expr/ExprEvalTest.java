@@ -10,6 +10,7 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ExprEvalTest {
 
@@ -100,6 +101,40 @@ public class ExprEvalTest {
         evaluate(" (3 > 2) && (4 > 5)", false);
     }
 
+    @Test
+    public void searchTest() {
+        evaluate("SEARCH('apple', 'An apple a day')", 4);
+        evaluate("SEARCH('APPLE', 'An apple a day')", 4);
+        evaluate("SEARCH('An', 'An apple a day')", 1);
+
+        evaluate("SEARCH('Foo', 'Foobar FOOBAR Foobar')", 1);
+        evaluate("SEARCH('Foo', 'Foobar FOOBAR Foobar', 2)", 8);
+        evaluate("SEARCH('Foo', 'Foobar FOOBAR Foobar', 9)", 15);
+        evaluate("SEARCH('Foo', 'Foobar FOOBAR Foobar', 20)", Double.NaN);
+    }
+
+    @Test
+    public void isNumber() {
+
+        evaluate("ISNUMBER(4)", true);
+        evaluate("ISNUMBER(1/0)", false);
+        evaluate("ISNUMBER('foobar')", false);
+        evaluate("ISNUMBER(SEARCH('needle', 'haystack'))", false);
+    }
+
+    @Test
+    public void dateLiterals() {
+        evaluate("YEARFRAC(DATE(2017, 1, 1), DATE(2019, 1, 1))", 2.0);
+    }
+
+    @Test
+    public void dateComparison() {
+        evaluate("DATE(2017,1,1) < DATE(2017,1,30)", true);
+        evaluate("DATE(2017,1,1) >= DATE(2017,1,30)", false);
+        evaluate("DATE(2017,1,1) == DATE(2017,1,30)", false);
+        evaluate("DATE(2017,1,1) == DATE(2017,1,1)", true);
+    }
+
     private void evaluateAndExpectSyntaxException(String exprString) {
         try {
             evaluate(exprString,Double.NaN);
@@ -119,7 +154,12 @@ public class ExprEvalTest {
         ExprParser parser = new ExprParser(lexer);
         ExprNode expr = parser.parse();
         FieldValue value = expr.evaluate(EmptyEvalContext.INSTANCE);
-        assertThat(exprString, Casting.toQuantity(value).getValue(), closeTo(expectedValue,0));
+        if(Double.isNaN(expectedValue)) {
+            assertTrue(exprString + " is NaN", Double.isNaN(Casting.toQuantity(value).getValue()));
+        } else {
+            assertThat(exprString, Casting.toQuantity(value).getValue(), closeTo(expectedValue, 0));
+        }
+
     }
 
     private void evaluate(String exprString, boolean expectedValue) {

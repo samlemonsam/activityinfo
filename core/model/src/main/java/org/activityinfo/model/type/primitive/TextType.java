@@ -1,9 +1,10 @@
 package org.activityinfo.model.type.primitive;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.*;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * A value type representing a single line of unicode text
@@ -12,11 +13,11 @@ public class TextType implements ParametrizedFieldType {
 
     public static final FieldTypeClass TYPE_CLASS = new ParametrizedFieldTypeClass() {
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             String inputMask = null;
             if(parametersObject != null) {
-                if(parametersObject.has("inputMask")) {
-                    inputMask = parametersObject.get("inputMask").getAsString();
+                if(parametersObject.hasKey("inputMask")) {
+                    inputMask = parametersObject.get("inputMask").asString();
                 }
             }
             return new TextType(inputMask);
@@ -61,11 +62,11 @@ public class TextType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
+    public FieldValue parseJsonValue(JsonValue value) {
         if(value == null) {
             return null;
         }
-        return TextValue.valueOf(value.getAsString());
+        return TextValue.valueOf(value.asString());
     }
 
     @Override
@@ -85,10 +86,10 @@ public class TextType implements ParametrizedFieldType {
 
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         if(inputMask != null) {
-            object.addProperty("inputMask", inputMask);
+            object.put("inputMask", inputMask);
         }
         return object;
     }

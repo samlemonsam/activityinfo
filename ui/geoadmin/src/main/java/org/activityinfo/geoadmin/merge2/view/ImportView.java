@@ -17,8 +17,8 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.resource.TransactionBuilder;
-import org.activityinfo.model.resource.UpdateBuilder;
+import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Scheduler;
 import org.activityinfo.store.ResourceStore;
@@ -111,7 +111,7 @@ public class ImportView {
      * @param client
      */
     public void runUpdate(GeoAdminClient client) {
-        TransactionBuilder tx = new TransactionBuilder();
+        RecordTransactionBuilder tx = new RecordTransactionBuilder();
 
         ResourceId targetFormId = model.getTargetFormId().get();
         
@@ -130,7 +130,7 @@ public class ImportView {
 
             } else {
 
-                UpdateBuilder update;
+                RecordUpdate update;
                 ResourceId targetId;
                 if (matchRow.isMatched(MatchSide.TARGET)) {
                     // update target with properties from the source
@@ -146,7 +146,7 @@ public class ImportView {
                 
                 // apply properties from field mapping
                 for (FieldMapping fieldMapping : mapping.get().getFieldMappings()) {
-                    update.setProperty(
+                    update.setFieldValue(
                             fieldMapping.getTargetFieldId(), 
                             fieldMapping.mapFieldValue(matchRow.getSourceRow()));
                 }

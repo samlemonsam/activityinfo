@@ -11,16 +11,14 @@ public class IntegerGenerator implements Supplier<FieldValue> {
     private int minValue;
     private int range;
     private final Random random;
-    private String units;
     private double probabilityMissing;
 
-    public IntegerGenerator(int min, int max, double probabilityMissing, String units) {
+    public IntegerGenerator(int min, int max, double probabilityMissing) {
         Preconditions.checkArgument(max > min, "max must be greater than min");
         this.minValue = min;
         this.range = (max - min);
         this.random = new Random(432222L);
         this.probabilityMissing = probabilityMissing;
-        this.units = units;
     }
 
     @Override

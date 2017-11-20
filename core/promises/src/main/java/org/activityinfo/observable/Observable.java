@@ -3,9 +3,11 @@ package org.activityinfo.observable;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Function3;
+import org.activityinfo.promise.Promise;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,8 +81,11 @@ public abstract class Observable<T> {
      * method of all subscribed {@link org.activityinfo.observable.Observer}s.
      */
     protected final void fireChange() {
-        for(Observer<T> observer : observers) {
-            observer.onChange(this);
+        if(!observers.isEmpty()) {
+            List<Observer<T>> toNotify = new ArrayList<>(observers);
+            for (Observer<T> observer : toNotify) {
+                observer.onChange(this);
+            }
         }
     }
 
@@ -110,6 +115,10 @@ public abstract class Observable<T> {
                 return Preconditions.checkNotNull(function.apply(argumentValue));
             }
         };
+    }
+
+    public final <R> Observable<R> transformIf(Function<T, Optional<R>> function) {
+        return new FlattenedOptional<>(transform(function));
     }
 
     public static <T, U, R> Observable<R> transform(Observable<T> t, Observable<U> u, final Function2<T, U, R> function) {
@@ -238,5 +247,50 @@ public abstract class Observable<T> {
         }
         subscription.unsubscribe();
         return collector.get(0);
+    }
+
+    public final Promise<T> once() {
+        final Promise<T> result = new Promise<>();
+        final Promise<Subscription> pendingSubscription = new Promise<>();
+        final Subscription subscription = this.subscribe(new Observer<T>() {
+            @Override
+            public void onChange(Observable<T> observable) {
+                if(observable.isLoaded()) {
+                    result.resolve(observable.get());
+
+                    if (pendingSubscription.isSettled()) {
+                        pendingSubscription.get().unsubscribe();
+                    }
+                }
+            }
+        });
+
+        if(result.isSettled()) {
+            subscription.unsubscribe();
+        } else {
+            pendingSubscription.resolve(subscription);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a new {@code Observable} that will only fire change notification values
+     * when the source's value has actually changed.
+     *
+     * <p>Note that {@code T} <strong>must</strong> be immutable! If {@code T} includes mutable state,
+     * change detection can fail!!!</p>
+     *
+     */
+    public final Observable<T> cache() {
+        return new CachedObservable<>(this);
+    }
+
+    public final Observable<T> debounce(int milliseconds) {
+        if(!GWT.isClient()) {
+            return this;
+        } else {
+            return new DebouncedObservable<>(this, milliseconds);
+        }
     }
 }

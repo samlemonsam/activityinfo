@@ -24,7 +24,7 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 
 /**
  * Projection DTO of the ReportingPeriod, IndicatorValue, and Indicator tables.

@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.analysis.viewModel;
 
 import com.google.common.base.Function;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.analysis.model.PivotModel;
 import org.activityinfo.ui.client.analysis.model.Axis;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
 import org.activityinfo.ui.client.analysis.model.Statistic;
@@ -10,30 +11,34 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 public class EffectiveDimension {
 
-    private int index;
-    private DimensionModel model;
-    private List<EffectiveMapping> effectiveMappings;
-    private String totalLabel;
+    private final int index;
+    private final PivotModel pivotModel;
+    private final DimensionModel dimensionModel;
+    private final List<EffectiveMapping> effectiveMappings;
+    private final String totalLabel;
 
-    public EffectiveDimension(int index, DimensionModel model, List<EffectiveMapping> effectiveMappings) {
+    public EffectiveDimension(int index, PivotModel model, DimensionModel dimensionModel, List<EffectiveMapping> effectiveMappings) {
         this.index = index;
-        this.model = model;
+        this.pivotModel = model;
+        this.dimensionModel = dimensionModel;
         this.effectiveMappings = effectiveMappings;
-        this.totalLabel = model.getTotalLabel().orElse(I18N.CONSTANTS.tableTotal());
+        this.totalLabel = dimensionModel.getTotalLabel().orElse(I18N.CONSTANTS.tableTotal());
     }
 
     public String getId() {
-        return model.getId();
+        return dimensionModel.getId();
     }
 
     public String getLabel() {
-        return model.getLabel();
+        return dimensionModel.getLabel();
     }
 
     public DimensionModel getModel() {
-        return model;
+        return dimensionModel;
     }
 
     public String getTotalLabel() {
@@ -50,7 +55,7 @@ public class EffectiveDimension {
     }
 
     public Axis getAxis() {
-        return model.getAxis();
+        return dimensionModel.getAxis();
     }
 
 
@@ -64,7 +69,9 @@ public class EffectiveDimension {
     }
 
     public Comparator<String> getCategoryComparator() {
-        switch (model.getId()) {
+        switch (dimensionModel.getId()) {
+            case DimensionModel.MEASURE_ID:
+                return new CategoryComparator(pivotModel.getMeasures().stream().map(m -> m.getLabel()).collect(toList()));
             case DimensionModel.STATISTIC_ID:
                 return new CategoryComparator(Statistic.labels());
             default:

@@ -149,7 +149,7 @@ public class XlsFormBuilder {
             fieldRow.createCell(TYPE_COLUMN).setCellValue(XlsFormTypes.TEXT);
 
         } else if(type instanceof NarrativeType) {
-            fieldRow.createCell(TYPE_COLUMN).setCellValue("narrative");
+            fieldRow.createCell(TYPE_COLUMN).setCellValue("text");
             
         } else if(type instanceof CalculatedFieldType) {
             CalculatedFieldType calculatedType = (CalculatedFieldType) field.getType();

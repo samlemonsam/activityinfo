@@ -1,9 +1,8 @@
 package org.activityinfo.model.type.number;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
@@ -25,11 +24,11 @@ public class Quantity implements FieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
+    public JsonValue toJsonElement() {
         if(Double.isNaN(value)) {
-            return JsonNull.INSTANCE;
+            return Json.createNull();
         } else {
-            return new JsonPrimitive(value);
+            return Json.create(value);
         }
     }
 

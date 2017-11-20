@@ -1,17 +1,18 @@
 package org.activityinfo.model.type.number;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * A value types that describes a real-valued quantity and its units.
  */
 public class QuantityType implements ParametrizedFieldType {
+
 
     public static class TypeClass implements ParametrizedFieldTypeClass, RecordFieldTypeClass {
 
@@ -29,16 +30,16 @@ public class QuantityType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             String units = JsonParsing.toNullableString(parametersObject.get("units"));
 
             // handling for legacy QuantityType fields (w/ null aggregation) - default to SUM
             String aggregationString = Aggregation.SUM.name();
             if(parametersObject.get("aggregation") != null) {
-                aggregationString = parametersObject.get("aggregation").getAsString();
+                aggregationString = parametersObject.getString("aggregation");
             }
             Aggregation aggregation = Aggregation.valueOf(aggregationString);
-            return new QuantityType(units,aggregation);
+            return new QuantityType(units, aggregation);
         }
 
     }
@@ -123,12 +124,12 @@ public class QuantityType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
-        if(value instanceof JsonNull) {
-            return new Quantity(Double.NaN);
-        } else {
-            return new Quantity(value.getAsDouble());
+    public FieldValue parseJsonValue(JsonValue value) {
+        double doubleValue = value.asNumber();
+        if(Double.isNaN(doubleValue)) {
+            throw new IllegalArgumentException();
         }
+        return new Quantity(doubleValue);
     }
 
     @Override
@@ -142,10 +143,10 @@ public class QuantityType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
-        object.addProperty("units", Strings.nullToEmpty(units));
-        object.addProperty("aggregation", aggregation.toString());
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
+        object.put("units", Strings.nullToEmpty(units));
+        object.put("aggregation", aggregation.toString());
         return object;
     }
 

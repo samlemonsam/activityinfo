@@ -8,15 +8,16 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.formTree.AsyncFormTreeBuilder;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromisesExecutionMonitor;
+import org.activityinfo.ui.client.ActivityInfoEntryPoint;
 import org.activityinfo.ui.client.component.importDialog.mapping.ColumnMappingPage;
 import org.activityinfo.ui.client.component.importDialog.model.ImportModel;
 import org.activityinfo.ui.client.component.importDialog.model.MapExistingAction;
@@ -32,6 +33,11 @@ import java.util.List;
 
 public class ImportPresenter {
 
+    public enum Mode {
+        MODAL,
+        STANDALONE
+    }
+
     private final EventBus eventBus = GWT.create(SimpleEventBus.class);
 
     private final ImportModel importModel;
@@ -42,6 +48,8 @@ public class ImportPresenter {
 
     private List<ImportPage> pages;
     private ImportPage currentPage;
+
+    private Mode mode = Mode.MODAL;
 
     public ImportPresenter(ResourceLocator resourceLocator, FormTree formTree) {
         this.importModel = new ImportModel(formTree);
@@ -206,7 +214,9 @@ public class ImportPresenter {
         dialogBox.getFinishButton().setEnabled(true);
     }
 
-    public void show() {
+    public void show(Mode mode) {
+        this.mode = mode;
+        dialogBox.setCancelButtonVisible(this.mode == Mode.MODAL);
         gotoPage(pages.get(0));
         overlay.show(dialogBox);
     }
@@ -248,12 +258,31 @@ public class ImportPresenter {
         return eventBus;
     }
 
-    public static Promise<ImportPresenter> showPresenter(ResourceId activityId, final ResourceLocator resourceLocator) {
-        AsyncFormTreeBuilder treeBuilder = new AsyncFormTreeBuilder(resourceLocator);
-        return treeBuilder.apply(activityId).then(new Function<FormTree, ImportPresenter>() {
+    public static Promise<ImportPresenter> showPresenter(ResourceId formId, final ResourceLocator resourceLocator) {
+        return resourceLocator.getFormTree(formId).then(new Function<FormTree, ImportPresenter>() {
             @Override
             public ImportPresenter apply(FormTree input) {
                 return new ImportPresenter(resourceLocator, input);
+            }
+        });
+    }
+
+    public static void showStandalone(ResourceLocator resourceLocator) {
+        // Expect #import/{formId}
+        String hash = Window.Location.getHash();
+        String[] parts = hash.split("/");
+        if(parts.length != 2) {
+            Window.alert("Invalid URL");
+            return;
+        }
+
+        ResourceId formId = ResourceId.valueOf(parts[1]);
+        showPresenter(formId, resourceLocator).then(new Function<ImportPresenter, Void>() {
+            @Override
+            public Void apply(ImportPresenter presenter) {
+                ActivityInfoEntryPoint.hideLoadingIndicator();
+                presenter.show(Mode.STANDALONE);
+                return null;
             }
         });
     }

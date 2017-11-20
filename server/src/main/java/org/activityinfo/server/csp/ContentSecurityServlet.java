@@ -1,11 +1,10 @@
 package org.activityinfo.server.csp;
 
 import com.google.common.base.Charsets;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 
 import javax.servlet.ServletException;
@@ -16,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static org.activityinfo.json.Json.parse;
 
 /**
  * Receives reports of Content Security Policy violations
@@ -36,11 +37,11 @@ public class ContentSecurityServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = new Gson();
-        JsonObject request = gson.fromJson(new InputStreamReader(req.getInputStream(), Charsets.UTF_8),
-                JsonObject.class);
 
-        JsonObject report = request.get("csp-report").getAsJsonObject();
+
+        String requestJson = CharStreams.toString(new InputStreamReader(req.getInputStream(), Charsets.UTF_8));
+        JsonValue request = parse(requestJson);
+        JsonValue report = request.get("csp-report");
 
         StringBuilder message = new StringBuilder();
         
@@ -52,7 +53,7 @@ public class ContentSecurityServlet extends HttpServlet {
         
         message.append("Content-Security Violation\n");
 
-        for (Map.Entry<String, JsonElement> entry : report.entrySet()) {
+        for (Map.Entry<String, JsonValue> entry : report.entrySet()) {
             message.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
         }
         

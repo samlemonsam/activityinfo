@@ -3,12 +3,12 @@ package org.activityinfo.store.testing;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormScanCache;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormScanCache;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -19,9 +19,10 @@ public class DateFunctionQueryTest {
     @Test
     public void testFloorToday() {
         TestingCatalog catalog = new TestingCatalog();
+        IntakeForm intakeForm = catalog.getIntakeForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
-        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         queryModel.selectExpr("TODAY()").as("today");
         queryModel.selectExpr("FLOOR(YEARFRAC(\"2017-05-05\", DOB))").as("ageFloored");
         queryModel.selectExpr("FLOOR(1.5)").as("floor");
@@ -31,7 +32,7 @@ public class DateFunctionQueryTest {
         ColumnView floor = columnSet.getColumnView("floor");
         ColumnView ageFloored = columnSet.getColumnView("ageFloored");
 
-        assertThat(floor.numRows(),equalTo(IntakeForm.ROW_COUNT));
+        assertThat(floor.numRows(),equalTo(intakeForm.getRecords().size()));
         assertThat(floor.getDouble(0),equalTo(1.0));
         assertThat(ageFloored.getDouble(0),equalTo(45.0));
         assertThat(ageFloored.getDouble(3),equalTo(29.0));
@@ -43,9 +44,10 @@ public class DateFunctionQueryTest {
     @Test
     public void testToday() {
         TestingCatalog catalog = new TestingCatalog();
+        IntakeForm intakeForm = catalog.getIntakeForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
-        QueryModel queryModel = new QueryModel(IntakeForm.FORM_ID);
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         queryModel.selectExpr("TODAY()").as("today");
         queryModel.selectExpr("YEARFRAC(TODAY(), DOB)").as("age");
         queryModel.selectExpr("DOB").as("dob");
@@ -66,7 +68,24 @@ public class DateFunctionQueryTest {
         }
 
         System.out.println(age);
+    }
 
+
+    @Test
+    public void invalidArityTest() {
+        TestingCatalog catalog = new TestingCatalog();
+        IntakeForm intakeForm = catalog.getIntakeForm();
+        ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
+
+        QueryModel queryModel = new QueryModel(intakeForm.getFormId());
+        queryModel.selectExpr("YEARFRAC(TODAY())").as("age");
+
+        ColumnSet columnSet = builder.build(queryModel);
+        ColumnView age = columnSet.getColumnView("age");
+
+        assertThat(age.numRows(), equalTo(IntakeForm.ROW_COUNT));
+
+        System.out.println(age);
     }
 
 }

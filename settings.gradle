@@ -5,6 +5,8 @@ include 'core:model'
 include 'core:promises'
 include 'core:gwtrpc'
 
+include 'tools:json'
+
 include 'api'
 include 'clients:gwtrpc'
 include 'clients:gwtrest'
@@ -34,5 +36,4 @@ include 'ui:app2'
 include 'ui:codemirror'
 include 'ui:geoadmin'
 
-include 'tests:acceptance'
-include 'tests:api'
+include 'tests'

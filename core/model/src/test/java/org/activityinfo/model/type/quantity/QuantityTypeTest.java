@@ -2,8 +2,8 @@ package org.activityinfo.model.type.quantity;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -50,10 +50,9 @@ public class QuantityTypeTest {
     private FormClass parseResource() throws IOException {
         URL resource = Resources.getResource(FormClass.class, "OldFormClass2.json");
         String json = Resources.toString(resource, Charsets.UTF_8);
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(json);
+        JsonValue element = Json.parse(json);
 
-        return FormClass.fromJson(element.getAsJsonObject());
+        return FormClass.fromJson(element);
     }
 
 }

@@ -5,24 +5,24 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.Hrd;
+import org.activityinfo.store.hrd.HrdCatalog;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
+import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityLoader;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-/**
- * Created by yuriyz on 8/17/2016.
- */
 public class DatabasesFolder {
 
     public static final String ROOT_ID = "databases";
 
+    private ActivityLoader activityLoader;
     private final QueryExecutor executor;
 
-    public DatabasesFolder(QueryExecutor executor) {
+    public DatabasesFolder( QueryExecutor executor) {
         this.executor = executor;
     }
 
@@ -61,14 +61,22 @@ public class DatabasesFolder {
         return entries;
     }
 
+
     private List<CatalogEntry> queryForms(ResourceId databaseId) throws SQLException {
         List<CatalogEntry> entries = new ArrayList<>();
-        try(ResultSet rs = executor.query("SELECT ActivityId, name FROM activity " +
+        try(ResultSet rs = executor.query("SELECT " +
+            "ActivityId, " +
+            "name, " +
+            "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms " +
+            "FROM activity " +
                 "WHERE dateDeleted IS NULL AND databaseId = ? ", CuidAdapter.getLegacyIdFromCuid(databaseId))) {
             while(rs.next()) {
                 String formId = CuidAdapter.activityFormClass(rs.getInt(1)).asString();
                 String label = rs.getString(2);
-                entries.add(new CatalogEntry(formId, label, CatalogEntryType.FORM));
+                boolean hasSubForms = rs.getBoolean(3);
+                CatalogEntry entry = new CatalogEntry(formId, label, CatalogEntryType.FORM);
+                entry.setLeaf(!hasSubForms);
+                entries.add(entry);
             }
         }
         return entries;

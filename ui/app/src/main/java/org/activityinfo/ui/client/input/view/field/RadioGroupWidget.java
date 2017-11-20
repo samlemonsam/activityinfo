@@ -6,6 +6,7 @@ import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.Radio;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -58,11 +59,26 @@ public class RadioGroupWidget implements FieldWidget {
     }
 
     @Override
+    public void init(FieldValue value) {
+        EnumValue enumValue = (EnumValue) value;
+        CheckBox checkBox = radios.get(enumValue.getValueId());
+        checkBox.setValue(true);
+    }
+
+    @Override
+    public void clear() {
+        for (CheckBox checkBox : radios.values()) {
+            checkBox.setValue(false);
+        }
+    }
+
+    @Override
     public void setRelevant(boolean relevant) {
         if(this.relevant != relevant) {
             for (CheckBox checkBox : radios.values()) {
-                checkBox.setEnabled(!relevant);
+                checkBox.setEnabled(relevant);
             }
+            this.relevant = relevant;
         }
     }
 }

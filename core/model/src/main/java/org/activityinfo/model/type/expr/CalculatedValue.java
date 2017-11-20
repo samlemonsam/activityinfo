@@ -21,8 +21,8 @@ package org.activityinfo.model.type.expr;
  * #L%
  */
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
@@ -45,8 +45,8 @@ public class CalculatedValue implements FieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        return JsonNull.INSTANCE;
+    public JsonValue toJsonElement() {
+        return Json.createNull();
     }
 
     public String asString() {

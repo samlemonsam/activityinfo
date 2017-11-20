@@ -5,12 +5,11 @@ import com.google.common.base.Optional;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.vividsolutions.jts.geom.Geometry;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -38,7 +37,7 @@ public class JsonFormStorage implements FormStorage {
     private String name;
     
     private final FormClass formClass;
-    private final JsonArray instances;
+    private final JsonValue instances;
     
     public JsonFormStorage(String resourceName) throws IOException {
         formClass = loadFormClass(resourceName);
@@ -50,10 +49,10 @@ public class JsonFormStorage implements FormStorage {
         return FormClass.fromJson(json);
     }
 
-    private JsonArray loadInstances(String resourceName) throws IOException {
+    private JsonValue loadInstances(String resourceName) throws IOException {
         Gson gson = new Gson();
         try(Reader reader = getJson(resourceName + "/instances.json").openStream()) {
-            return gson.fromJson(reader, JsonArray.class);
+            return gson.fromJson(reader, JsonValue.class);
         } catch (Exception e) {
             throw new IOException("Exception loading instances for " + resourceName, e);
         }
@@ -85,6 +84,11 @@ public class JsonFormStorage implements FormStorage {
     }
 
     @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<RecordVersion> getVersions(ResourceId recordId) {
         throw new UnsupportedOperationException();
     }
@@ -105,12 +109,12 @@ public class JsonFormStorage implements FormStorage {
     }
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         throw new UnsupportedOperationException();
     }
 
@@ -132,7 +136,7 @@ public class JsonFormStorage implements FormStorage {
 
     private class JsonQueryBuilder implements ColumnQueryBuilder {
         
-        private List<CursorObserver<JsonObject>> bindings = new ArrayList<>();
+        private List<CursorObserver<JsonValue>> bindings = new ArrayList<>();
 
    
         @Override
@@ -161,19 +165,19 @@ public class JsonFormStorage implements FormStorage {
 
         @Override
         public void execute() {
-            for(int i=0;i<instances.size();++i) {
-                JsonObject instance = instances.get(i).getAsJsonObject();
-                for (CursorObserver<JsonObject> binding : bindings) {
+            for(int i=0;i<instances.length();++i) {
+                JsonValue instance = instances.get(i);
+                for (CursorObserver<JsonValue> binding : bindings) {
                     binding.onNext(instance);
                 }
             }
-            for (CursorObserver<JsonObject> binding : bindings) {
+            for (CursorObserver<JsonValue> binding : bindings) {
                 binding.done();
             }
         }
     }
 
-    private static class IdBinding implements CursorObserver<JsonObject> {
+    private static class IdBinding implements CursorObserver<JsonValue> {
         private CursorObserver<ResourceId> observer;
 
         public IdBinding(CursorObserver<ResourceId> observer) {
@@ -181,8 +185,8 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        public void onNext(JsonObject instance) {
-            observer.onNext(ResourceId.valueOf(instance.get("id").getAsString()));
+        public void onNext(JsonValue instance) {
+            observer.onNext(ResourceId.valueOf(instance.get("id").asString()));
         }
 
         @Override
@@ -191,7 +195,7 @@ public class JsonFormStorage implements FormStorage {
         }
     }
     
-    private abstract static class FieldBinding implements CursorObserver<JsonObject> {
+    private abstract static class FieldBinding implements CursorObserver<JsonValue> {
         private String field;
         private CursorObserver<FieldValue> observer;
 
@@ -201,15 +205,15 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        public void onNext(JsonObject instance) {
-            if(instance.has(field)) {
+        public void onNext(JsonValue instance) {
+            if(instance.hasKey(field)) {
                 observer.onNext(convert(instance.get(field)));
             } else {
                 observer.onNext(null);
             }
         }
 
-        protected abstract FieldValue convert(JsonElement jsonElement);
+        protected abstract FieldValue convert(JsonValue jsonElement);
 
         @Override
         public void done() {
@@ -224,8 +228,8 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        protected FieldValue convert(JsonElement jsonElement) {
-            return TextValue.valueOf(jsonElement.getAsString());
+        protected FieldValue convert(JsonValue jsonElement) {
+            return TextValue.valueOf(jsonElement.asString());
         }
     }
     
@@ -236,13 +240,13 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        protected FieldValue convert(JsonElement jsonElement) {
-            JsonArray array = jsonElement.getAsJsonObject().get("extents").getAsJsonArray();
+        protected FieldValue convert(JsonValue jsonElement) {
+            JsonValue array = jsonElement.get("extents");
             Extents extents = Extents.create(
-                    array.get(0).getAsDouble(),
-                    array.get(1).getAsDouble(),
-                    array.get(2).getAsDouble(),
-                    array.get(3).getAsDouble());
+                    array.get(0).asNumber(),
+                    array.get(1).asNumber(),
+                    array.get(2).asNumber(),
+                    array.get(3).asNumber());
             
             return new GeoArea(extents);
         }
@@ -257,8 +261,8 @@ public class JsonFormStorage implements FormStorage {
         }
 
         @Override
-        protected FieldValue convert(JsonElement jsonElement) {
-            return new ReferenceValue(new RecordRef(formId, ResourceId.valueOf(jsonElement.getAsString())));
+        protected FieldValue convert(JsonValue jsonElement) {
+            return new ReferenceValue(new RecordRef(formId, ResourceId.valueOf(jsonElement.asString())));
         }
     }
     

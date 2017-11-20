@@ -2,9 +2,9 @@ package org.activityinfo.ui.client.dispatch;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonNull;
 import com.google.gwt.core.shared.GWT;
 import org.activityinfo.api.client.*;
+import org.activityinfo.json.Json;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -17,10 +17,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservablePromise;
-import org.activityinfo.promise.Promise;
-import org.activityinfo.promise.PromiseExecutionOperation;
-import org.activityinfo.promise.PromisesExecutionGuard;
-import org.activityinfo.promise.PromisesExecutionMonitor;
+import org.activityinfo.promise.*;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -69,7 +66,17 @@ ResourceLocatorAdaptor implements ResourceLocator {
     @Override
     public Promise<FormInstance> getFormInstance(final ResourceId formId, final ResourceId formRecordId) {
         final Promise<FormClass> formClass = client.getFormSchema(formId.asString());
-        final Promise<FormRecord> record = client.getRecord(formId.asString(), formRecordId.asString());
+        final Promise<Maybe<FormRecord>> maybeRecord = client.getRecord(formId.asString(), formRecordId.asString());
+        final Promise<FormRecord> record = maybeRecord.then(new Function<Maybe<FormRecord>, FormRecord>() {
+            @Override
+            public FormRecord apply(Maybe<FormRecord> formRecordMaybe) {
+                if(formRecordMaybe.isVisible()) {
+                    return formRecordMaybe.get();
+                } else {
+                    throw new RuntimeException(formId + ":" + formRecordId + ": " + formRecordMaybe.getState());
+                }
+            }
+        });
 
         return Promise.waitAll(formClass, record).then(new Function<Void, FormInstance>() {
             @Nullable
@@ -125,7 +132,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {
                 if(entry.getValue() == null) {
-                    update.setFieldValue(field, JsonNull.INSTANCE);
+                    update.setFieldValue(field, Json.createNull());
                 } else if(isSaveable(entry.getValue())){
                     update.setFieldValue(field, entry.getValue().toJsonElement());
                 }

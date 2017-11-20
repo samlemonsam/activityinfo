@@ -36,6 +36,12 @@
   <inherits name="org.activityinfo.Analysis"/>
   <inherits name="org.activityinfo.api.ApiClient"/>
 
+  <inherits name="org.activityinfo.ui.Icons"/>
+  <set-configuration-property name="CssResource.conversionMode" value="strict" />
+
+  <inherits name="org.activityinfo.IndexedDB"/>
+  <inherits name="org.activityinfo.Storage"/>
+
   <inherits name="org.activityinfo.ui.codemirror.CodeMirror"/>
 
   <inherits name="com.bedatadriven.rebar.appcache.AppCache"/>

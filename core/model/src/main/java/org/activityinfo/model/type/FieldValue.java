@@ -1,6 +1,6 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 
 /**
  * Instance of a typed field value
@@ -19,5 +19,5 @@ public interface FieldValue {
      */
     FieldTypeClass getTypeClass();
     
-    JsonElement toJsonElement();
+    JsonValue toJsonElement();
 }

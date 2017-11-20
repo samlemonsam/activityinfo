@@ -1,9 +1,8 @@
 package org.activityinfo.ui.client.input.view.field;
 
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.sencha.gxt.cell.core.client.form.NumberInputCell;
 import com.sencha.gxt.cell.core.client.form.ValueBaseInputCell;
-import com.sencha.gxt.theme.base.client.field.TextFieldDefaultAppearance;
-import com.sencha.gxt.widget.core.client.form.PropertyEditor;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.ValueBaseField;
 import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.io.match.coord.CoordinateFormatException;
@@ -15,16 +14,16 @@ import java.text.ParseException;
 public class CoordinateField extends ValueBaseField<Double> {
 
     public CoordinateField(CoordinateAxis axis) {
-        this(new CoordinateParser(axis, JsCoordinateNumberFormatter.INSTANCE));
+        this(axis, new CoordinateParser(axis, JsCoordinateNumberFormatter.INSTANCE));
     }
 
-    private CoordinateField(CoordinateParser parser) {
-        super(new ValueBaseInputCell<Double>(new TextFieldDefaultAppearance()) {
-            @Override
-            public void render(Context context, Double value, SafeHtmlBuilder sb) {
-                sb.appendEscaped(parser.format(value));
-            }
-        }, new PropertyEditor<Double>() {
+    private CoordinateField(CoordinateAxis axis, CoordinateParser parser) {
+        super(inputCell(axis, parser));
+    }
+
+    private static ValueBaseInputCell<Double> inputCell(CoordinateAxis axis, CoordinateParser parser) {
+
+        NumberPropertyEditor<Double> propertyEditor = new NumberPropertyEditor.DoublePropertyEditor() {
             @Override
             public Double parse(CharSequence text) throws ParseException {
                 try {
@@ -38,6 +37,18 @@ public class CoordinateField extends ValueBaseField<Double> {
             public String render(Double object) {
                 return parser.format(object);
             }
-        });
+        };
+
+        NumberInputCell<Double> numberInputCell = new NumberInputCell<Double>(propertyEditor);
+        numberInputCell.setBaseChars("0123456789" +
+                axis.getNegativeHemisphereCharacters() +
+                axis.getPositiveHemisphereCharacters() +
+                ".,'\"°");
+        numberInputCell.setAllowDecimals(true);
+        numberInputCell.setAllowNegative(true);
+        numberInputCell.setHideTrigger(true);
+        numberInputCell.setClearValueOnParseError(false);
+
+        return numberInputCell;
     }
 }

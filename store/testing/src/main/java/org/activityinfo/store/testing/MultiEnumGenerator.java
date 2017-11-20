@@ -28,6 +28,16 @@ public class MultiEnumGenerator implements Supplier<FieldValue> {
         assert probabilities.length == enumType.getValues().size();
     }
 
+    public MultiEnumGenerator(FormField field) {
+        this.enumType = (EnumType) field.getType();
+        this.probabilityMissing = field.isRequired() ? 0.0 : 0.10;
+        this.probabilities = new double[enumType.getValues().size()];
+        Arrays.fill(probabilities, 0.15);
+
+        this.random = new Random(field.getId().hashCode());
+        assert probabilities.length == enumType.getValues().size();
+    }
+
     @Override
     public FieldValue get() {
         if(random.nextDouble() < probabilityMissing) {

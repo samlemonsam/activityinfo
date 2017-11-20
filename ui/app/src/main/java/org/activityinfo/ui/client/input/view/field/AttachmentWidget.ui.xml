@@ -1,0 +1,51 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:gxt='urn:import:com.sencha.gxt.widget.core.client.button'
+        >
+
+  <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>
+  <ui:with field="icons" type="org.activityinfo.ui.icons.Icons"/>
+  <ui:style>
+
+    .noAttachments {
+      color: gray;
+      font-style: italic;
+    }
+
+    .rows {
+      margin-bottom: 1.5em;
+    }
+
+  </ui:style>
+
+  <g:HTMLPanel ui:field="rootPanel">
+    <g:HTMLPanel ui:field="noAttachments" visible="true" addStyleNames="{style.noAttachments}">
+      <ui:text from="{i18n.noAttachments}"/>
+    </g:HTMLPanel>
+
+    <g:HTMLPanel ui:field="rows" width="100%" addStyleNames="{style.rows}"/>
+
+    <g:HTMLPanel width="100%">
+      <g:HTMLPanel ui:field="loadingContainer" visible="false">
+        Loading...
+      </g:HTMLPanel>
+
+      <g:HTMLPanel ui:field="uploadFailed" visible="false">
+        <ui:text from="{i18n.uploadFailed}"/>
+      </g:HTMLPanel>
+    </g:HTMLPanel>
+
+    <g:FormPanel encoding="multipart/form-data" method="post" ui:field="formPanel">
+      <g:HTMLPanel width="100%">
+        <gxt:TextButton ui:field="browseButton">
+          <ui:text from="{i18n.browse}"/>
+        </gxt:TextButton>
+
+        <g:VerticalPanel ui:field="hiddenFieldsContainer"/>
+        <g:FileUpload ui:field="fileUpload" name="file" visible="false"/>
+      </g:HTMLPanel>
+    </g:FormPanel>
+  </g:HTMLPanel>
+
+</ui:UiBinder>

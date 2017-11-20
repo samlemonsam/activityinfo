@@ -3,11 +3,10 @@ package org.activityinfo.ui.client.store.http;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.RowSource;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.FormChange;
 
-/**
- * Created by alex on 27-1-17.
- */
 public class QueryRequest implements HttpRequest<ColumnSet> {
     private final QueryModel queryModel;
 
@@ -18,5 +17,10 @@ public class QueryRequest implements HttpRequest<ColumnSet> {
     @Override
     public Promise<ColumnSet> execute(ActivityInfoClientAsync client) {
         return client.queryTableColumns(queryModel);
+    }
+
+    @Override
+    public int refreshInterval(ColumnSet result) {
+        return -1;
     }
 }

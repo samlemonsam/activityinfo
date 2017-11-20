@@ -22,10 +22,10 @@ package org.activityinfo.server.endpoint.rest;
  * #L%
  */
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.GetCountries;
 import org.activityinfo.legacy.shared.command.GetSchema;
@@ -44,8 +44,8 @@ import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.collections.CountryTable;
-import org.activityinfo.store.query.impl.InvalidUpdateException;
-import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.query.server.InvalidUpdateException;
+import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.FormCatalog;
 import org.codehaus.jackson.map.annotate.JsonView;
@@ -182,14 +182,13 @@ public class RootResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(String json) {
 
-        Gson gson = new Gson();
-        final JsonElement jsonElement = gson.fromJson(json, JsonElement.class);
+        final JsonValue jsonElement = Json.parse(json);
 
         Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(),
                 blobAuthorizer,
                 new HrdSerialNumberProvider());
         try {
-            updater.execute(jsonElement.getAsJsonObject());
+            updater.execute(jsonElement);
         } catch (InvalidUpdateException e) {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity(e.getMessage())
@@ -217,6 +216,11 @@ public class RootResource {
     @Path("/catalog")
     public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
         return new CatalogResource(catalog, userProvider);
+    }
+
+    @Path("/analysis")
+    public AnalysesResource getAnalysis() {
+        return new AnalysesResource(permissionOracle, userProvider);
     }
 
 }

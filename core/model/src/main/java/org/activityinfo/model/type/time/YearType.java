@@ -20,14 +20,16 @@ package org.activityinfo.model.type.time;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.google.gson.JsonElement;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.*;
+
 
 /**
  * Value type that represents a calendar year in the ISO-8601 calendar.
  * There is no representation of time-of-day or time-zone.
  */
-public class YearType implements FieldType, TemporalType {
+public class YearType implements FieldType, PeriodType {
+
 
     public interface TypeClass extends SingletonTypeClass, RecordFieldTypeClass {
     }
@@ -55,8 +57,8 @@ public class YearType implements FieldType, TemporalType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement value) {
-        return new YearValue(value.getAsInt());
+    public FieldValue parseJsonValue(JsonValue value) {
+        return new YearValue(value.asInt());
     }
 
     @Override
@@ -69,4 +71,15 @@ public class YearType implements FieldType, TemporalType {
         return true;
     }
 
+    @Override
+    public PeriodValue fromSubFormKey(RecordRef ref) {
+        String subRecordId = ref.getRecordId().asString();
+        String yearKey = subRecordId.substring(subRecordId.length() - 4);
+        return new YearValue(Integer.parseInt(yearKey));
+    }
+
+    @Override
+    public PeriodValue containingDate(LocalDate localDate) {
+        return new YearValue(localDate.getYear());
+    }
 }

@@ -1,26 +1,34 @@
 package org.activityinfo.model.form;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.activityinfo.json.Json.createObject;
 
 public class FormRecord {
     
     private String recordId;
     private String formId;
     private String parentRecordId;
-    private JsonObject fields;
+    private JsonValue fields;
 
     private FormRecord() {
     }
-    
+
+    public FormRecord(RecordRef ref, String parentRecordId, JsonValue fields) {
+        this.formId = ref.getFormId().asString();
+        this.recordId = ref.getRecordId().asString();
+        this.parentRecordId = parentRecordId;
+        this.fields = fields;
+    }
+
     public String getRecordId() {
         return recordId;
     }
@@ -33,50 +41,50 @@ public class FormRecord {
         return parentRecordId;
     }
 
-    public JsonObject getFields() {
+    public JsonValue getFields() {
         return fields;
     }
 
 
     public static FormRecord fromJson(String json) {
-        JsonParser parser = new JsonParser();
+        JsonParser parser = new org.activityinfo.json.JsonParser();
         return fromJson(parser.parse(json));
     }
     
-    public static FormRecord fromJson(JsonElement element) {
-        JsonObject jsonObject = element.getAsJsonObject();
+    public static FormRecord fromJson(JsonValue element) {
+        JsonValue jsonObject = element;
 
         FormRecord formRecord = new FormRecord();
-        formRecord.recordId = jsonObject.get("recordId").getAsString();
-        formRecord.formId = jsonObject.get("formId").getAsString();
+        formRecord.recordId = jsonObject.get("recordId").asString();
+        formRecord.formId = jsonObject.get("formId").asString();
 
-        if(jsonObject.has("parentRecordId")) {
-            formRecord.parentRecordId = jsonObject.get("parentRecordId").getAsString();
+        if(jsonObject.hasKey("parentRecordId")) {
+            formRecord.parentRecordId = jsonObject.get("parentRecordId").asString();
         }
 
-        formRecord.fields = jsonObject.get("fields").getAsJsonObject();
+        formRecord.fields = jsonObject.get("fields");
 
         return formRecord;
     }
     
-    public JsonObject toJsonElement() {
+    public JsonValue toJsonElement() {
         
         assert recordId != null;
         assert formId != null;
-        
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("recordId", recordId);
-        jsonObject.addProperty("formId", formId);
+
+        JsonValue jsonObject = createObject();
+        jsonObject.put("recordId", recordId);
+        jsonObject.put("formId", formId);
         if(parentRecordId != null) {
-            jsonObject.addProperty("parentRecordId", parentRecordId);
+            jsonObject.put("parentRecordId", parentRecordId);
         }
-        jsonObject.add("fields", fields);
+        jsonObject.put("fields", fields);
         return jsonObject;
     }
     
-    public static List<FormRecord> fromJsonArray(JsonArray array) {
+    public static List<FormRecord> fromJsonArray(JsonValue array) {
         List<FormRecord> list = new ArrayList<>();
-        for (JsonElement jsonElement : array) {
+        for (JsonValue jsonElement : array.values()) {
             list.add(fromJson(jsonElement));
         }
         return list;
@@ -86,13 +94,13 @@ public class FormRecord {
         FormRecord record = new FormRecord();
         record.recordId = instance.getId().asString();
         record.formId = instance.getFormId().asString();
-        record.fields = new JsonObject();
+        record.fields = createObject();
 
         for (Map.Entry<ResourceId, FieldValue> entry : instance.getFieldValueMap().entrySet()) {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {
                 if(entry.getValue() != null) {
-                    record.fields.add(field, entry.getValue().toJsonElement());
+                    record.fields.put(field, entry.getValue().toJsonElement());
                 }
             }
         }
@@ -103,13 +111,17 @@ public class FormRecord {
         return new Builder();
     }
 
+    public RecordRef getRef() {
+        return new RecordRef(ResourceId.valueOf(formId), ResourceId.valueOf(recordId));
+    }
+
     public static class Builder {
         
         private FormRecord record;
 
         public Builder() {
             record = new FormRecord();
-            record.fields = new JsonObject();
+            record.fields = createObject();
         }
 
         public Builder setRecordId(ResourceId id) {
@@ -131,7 +143,7 @@ public class FormRecord {
             if(value == null) {
                 this.record.fields.remove(fieldId.asString());
             } else {
-                this.record.fields.addProperty(fieldId.asString(), value);
+                this.record.fields.put(fieldId.asString(), value);
             }
             return this;
         }
@@ -140,7 +152,7 @@ public class FormRecord {
             if(value == null) {
                 this.record.fields.remove(fieldId.asString());
             } else {
-                this.record.fields.add(fieldId.asString(), value.toJsonElement());
+                this.record.fields.put(fieldId.asString(), value.toJsonElement());
             }
             return this;
         }

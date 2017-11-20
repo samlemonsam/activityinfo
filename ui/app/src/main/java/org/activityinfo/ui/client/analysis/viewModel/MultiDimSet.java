@@ -6,7 +6,7 @@ import java.util.BitSet;
 import java.util.List;
 
 /**
- * Set of multi
+ * Set of multi-valued dimensions
  */
 public class MultiDimSet {
 
@@ -26,6 +26,18 @@ public class MultiDimSet {
     public boolean isEmpty() {
         return dims.isEmpty();
     }
+
+
+    public MultiDimSet regroup(TotalSubset totalSubset) {
+        List<MultiDim> included = new ArrayList<>();
+        for (MultiDim dim : dims) {
+            if(!totalSubset.isDimensionCollapsed(dim.getDimensionIndex())) {
+                included.add(dim);
+            }
+        }
+        return new MultiDimSet(included);
+    }
+
 
     public List<MultiDimCategory> build() {
         /*

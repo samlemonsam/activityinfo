@@ -65,16 +65,17 @@ public class SchemaImporterV3 extends SchemaImporter {
     private Map<String, FormClass> formMap = new HashMap<>();
     private Map<String, FormClass> subFormMap = new HashMap<>();
     private Map<String, EnumBuilder> enumMap = new HashMap<>();
+    private Map<FormClass, FormField> refMap = new HashMap<>();
     private int databaseId;
     private ResourceLocator locator;
 
+    private AsyncCallback<Void> validationCallback;
 
     public SchemaImporterV3(int databaseId, ResourceLocator locator, WarningTemplates templates) {
         super(templates);
         this.databaseId = databaseId;
         this.locator = locator;
     }
-
 
     public SchemaImporterV3(int databaseId, ResourceLocator locator) {
         this(databaseId, locator, GWT.<WarningTemplates>create(WarningTemplates.class));
@@ -104,16 +105,21 @@ public class SchemaImporterV3 extends SchemaImporter {
         references = findColumn(SchemaCsv.REFERENCES, "");
     }
 
+    public boolean processRows(final AsyncCallback<Void> validationCallback) {
+        this.validationCallback = validationCallback;
+        return processRows();
+    }
+
+    @Override
     public boolean processRows() {
         formMap.clear();
         subFormMap.clear();
         enumMap.clear();
+        refMap.clear();
 
         fatalError = false;
         for (SourceRow row : source.getRows()) {
-
             try {
-
                 FormClass parentFormClass = getFormClass(row);
                 FormClass formClass = getSubFormClass(parentFormClass, row);
 
@@ -124,6 +130,9 @@ public class SchemaImporterV3 extends SchemaImporter {
                     FieldType fieldType = parseFieldType(row);
                     FormField newField = addField(formClass, fieldType.getTypeClass(), row);
                     newField.setType(fieldType);
+                    if (newField.getType() instanceof ReferenceType) {
+                        refMap.put(formClass, newField);
+                    }
                 }
             } catch (UnableToParseRowException e) {
                 warnings.add(SafeHtmlUtils.fromString(e.getMessage()));
@@ -135,7 +144,52 @@ public class SchemaImporterV3 extends SchemaImporter {
             enumBuilder.formField.setType(new EnumType(enumBuilder.cardinality, enumBuilder.items));
         }
 
+        if (validationCallback != null) {
+            validateReferences();
+        }
+
         return !fatalError;
+    }
+
+    private void validateReferences() {
+        List<ResourceId> references = determineReferencesToValidate();
+        promiseToValidate(references).then(validationCallback);
+    }
+
+    private List<ResourceId> determineReferencesToValidate() {
+        List<ResourceId> validationList = new ArrayList<>(refMap.size());
+        for (FormField refField : refMap.values()) {
+            ReferenceType refType = (ReferenceType) refField.getType();
+            ResourceId reference = refType.getRange().iterator().next();
+            if (!isImportedReference(reference)) {
+                validationList.add(reference);
+            }
+        }
+        return validationList;
+    }
+
+    private boolean isImportedReference(ResourceId reference) {
+        for (FormClass form : formMap.values()) {
+            if (form.getId().equals(reference)) {
+                return true;
+            }
+            try {
+                if (form.getField(reference) != null) {
+                    return true;
+                }
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+        }
+        return false;
+    }
+
+    private Promise<Void> promiseToValidate(List<ResourceId> references) {
+        List<Promise<FormClass>> promises = new ArrayList<>(references.size());
+        for (final ResourceId reference : references) {
+            promises.add(locator.getFormClass(reference));
+        }
+        return Promise.waitAll(promises);
     }
 
     public List<FormClass> toSave() {
@@ -169,7 +223,6 @@ public class SchemaImporterV3 extends SchemaImporter {
         field.setVisible(true);
 
         formClass.addElement(field);
-
         return field;
     }
 

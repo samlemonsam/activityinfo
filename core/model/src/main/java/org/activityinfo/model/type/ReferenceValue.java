@@ -2,10 +2,11 @@ package org.activityinfo.model.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.resource.ResourceId;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -38,22 +39,42 @@ public class ReferenceValue implements FieldValue {
         return Iterables.getOnlyElement(references);
     }
 
+    /**
+     * If there is only one reference to a record in the given {@code formId}, then
+     * return it's record id. Otherwise, return {@code null}
+     */
+    @Nullable
+    public String getOnlyRecordId(ResourceId formId) {
+        String key = null;
+        for (RecordRef id : references) {
+            if(id.getFormId().equals(formId)) {
+                // If this is not the first record referenced in the
+                // form, then return null
+                if(key != null) {
+                    return null;
+                }
+                key = id.getRecordId().asString();
+            }
+        }
+        return key;
+    }
+
     @Override
     public FieldTypeClass getTypeClass() {
         return ReferenceType.TYPE_CLASS;
     }
 
     @Override
-    public JsonElement toJsonElement() {
+    public JsonValue toJsonElement() {
 
         if(references.size() == 0) {
-            return JsonNull.INSTANCE;
+            return Json.createNull();
 
         } else if(references.size() == 1) {
             return references.iterator().next().toJsonElement();
 
         } else {
-            JsonArray array = new JsonArray();
+            JsonValue array = Json.createArray();
             for (RecordRef reference : references) {
                 array.add(reference.toJsonElement());
             }

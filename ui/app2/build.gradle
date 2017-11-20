@@ -89,3 +89,5 @@ task compileApp(type: JavaExec) {
         args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }
 }
+
+compileApp.onlyIf { !project.hasProperty('skipGwt') }

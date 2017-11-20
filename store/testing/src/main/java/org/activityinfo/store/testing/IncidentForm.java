@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -37,6 +38,8 @@ public class IncidentForm implements TestForm {
     private final FormField referralField;
 
     private List<FormInstance> records = null;
+    private RecordGenerator generator;
+    private final FormField urgencyField;
 
     public IncidentForm(BioDataForm bioDataForm) {
         this.bioDataForm = bioDataForm;
@@ -50,16 +53,19 @@ public class IncidentForm implements TestForm {
                 .setRequired(true)
                 .setVisible(true);
 
-        formClass.addField(URGENCY)
-                .setLabel("Urgency of the case")
-                .setType(new EnumType(Cardinality.SINGLE,
-                        new EnumItem(HIGH, "High"),
-                        new EnumItem(MEDIUM, "Medium"),
-                        new EnumItem(LOW, "Low")));
+        urgencyField = formClass.addField(URGENCY)
+            .setLabel("Urgency of the case")
+            .setType(new EnumType(Cardinality.SINGLE,
+                new EnumItem(HIGH, "High"),
+                new EnumItem(MEDIUM, "Medium"),
+                new EnumItem(LOW, "Low")));
 
         referralField = formClass.addField(REFERRAL_FIELD_ID)
                 .setLabel("Referrals")
                 .setType(new SubFormReferenceType(ReferralSubForm.FORM_ID));
+
+        generator = new RecordGenerator(formClass)
+                .distribution(PROTECTION_CODE_FIELD_ID, new RefGenerator(bioDataForm));
 
     }
 
@@ -77,10 +83,25 @@ public class IncidentForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .distribution(PROTECTION_CODE_FIELD_ID, new RefGenerator(bioDataForm))
-                    .generate(ROW_COUNT);
+
+            this.records = generator
+                    .get(ROW_COUNT);
         }
         return records;
+    }
+
+    @Override
+    public RecordGenerator getGenerator() {
+        return generator;
+    }
+
+
+
+    public RecordRef getRecordRef(int i) {
+        return getRecords().get(i).getRef();
+    }
+
+    public FormField getUrgencyField() {
+        return urgencyField;
     }
 }

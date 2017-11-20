@@ -1,15 +1,14 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -63,7 +62,7 @@ public class SiteFormStorage implements VersionedFormStorage {
 
             UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());
 
-            FormPermissions permissions = new FormPermissions();
+            FormPermissions.Builder permissions = FormPermissions.builder();
 
             ExprNode partnerFilter = Exprs.equals(
                     new SymbolExpr(
@@ -71,28 +70,27 @@ public class SiteFormStorage implements VersionedFormStorage {
                     new ConstantExpr(
                         CuidAdapter.partnerRecordId(databasePermission.getPartnerId()).asString()));
 
+
             if(databasePermission.isViewAll()) {
-                permissions.setVisible(true);
+                permissions.allowView();
 
             } else if(databasePermission.isView()) {
-                permissions.setVisible(true);
-                permissions.setVisibilityFilter(partnerFilter.asExpression());
-
+                permissions.allowFilteredView(partnerFilter.asExpression());
             }
+
             if(databasePermission.isEditAll()) {
-                permissions.setEditAllowed(true);
+                permissions.allowEdit();
+
             } else if(databasePermission.isEdit()) {
-                permissions.setEditAllowed(true);
-                permissions.setEditFilter(partnerFilter.asExpression());
+                permissions.allowFilteredEdit(partnerFilter.asExpression());
             }
        
             // published property of activity overrides user permissions
             if(activity.isPublished()) {
-                permissions.setVisible(true);
-                permissions.setVisibilityFilter(null);
+                permissions.allowUnfilteredView();
             }
 
-            return permissions;
+            return permissions.build();
 
         }
     }
@@ -101,6 +99,11 @@ public class SiteFormStorage implements VersionedFormStorage {
     public Optional<FormRecord> get(ResourceId resourceId) {
         RecordFetcher fetcher = new RecordFetcher(this);
         return fetcher.get(resourceId);
+    }
+
+    @Override
+    public List<FormRecord> getSubRecords(ResourceId resourceId) {
+        return Collections.emptyList();
     }
 
     @Override
@@ -141,7 +144,7 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public void add(RecordUpdate update) {
+    public void add(TypedRecordUpdate update) {
         ResourceId formClassId = getFormClass().getId();
         BaseTableInserter baseTable = new BaseTableInserter(baseMapping, update.getRecordId());
         baseTable.addValue("ActivityId", activity.getId());
@@ -159,7 +162,7 @@ public class SiteFormStorage implements VersionedFormStorage {
             if(change.getKey().getDomain() == CuidAdapter.INDICATOR_DOMAIN) {
                 indicatorValues.update(change.getKey(), change.getValue());
             } else if(change.getKey().getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN) {
-                attributeValues.update(change.getKey(), change.getValue());
+                attributeValues.add(change.getValue());
             } else if(change.getKey().equals(CuidAdapter.locationField(activity.getId()))) {
                 ReferenceValue value = (ReferenceValue) change.getValue();
                 if(value.getOnlyReference().getRecordId().getDomain() == CuidAdapter.LOCATION_DOMAIN) {
@@ -185,7 +188,7 @@ public class SiteFormStorage implements VersionedFormStorage {
         dualWriteToHrd(RecordChangeType.CREATED, update, newVersion, update.getChangedFieldValues());
     }
 
-    private void dualWriteToHrd(final RecordChangeType changeType, final RecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
+    private void dualWriteToHrd(final RecordChangeType changeType, final TypedRecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
 
         ofy().transact(new VoidWork() {
             @Override
@@ -294,7 +297,7 @@ public class SiteFormStorage implements VersionedFormStorage {
 
 
     @Override
-    public void update(RecordUpdate update) {
+    public void update(TypedRecordUpdate update) {
 
         FormRecord formRecord = get(update.getRecordId()).get();
         FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);
@@ -372,8 +375,8 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public List<FormRecord> getVersionRange(long localVersion, long toVersion) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
         HrdFormStorage delegate = new HrdFormStorage(getFormClass());
-        return delegate.getVersionRange(localVersion, toVersion);
+        return delegate.getVersionRange(localVersion, toVersion, visibilityPredicate);
     }
 }

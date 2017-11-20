@@ -1,0 +1,25 @@
+
+body {
+    font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+    font-size: 13px;
+    color: #404040;
+}
+
+
+.appBarButton {
+    border: 1px solid white;
+    cursor: pointer;
+}
+
+.appBarButton:hover {
+    border: 1px solid #DDD;
+}
+
+.appBar {
+    background-color: white;
+}
+
+.appTitle {
+    font-size: 2em;
+
+}

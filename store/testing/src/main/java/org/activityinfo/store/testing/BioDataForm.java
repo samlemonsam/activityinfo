@@ -5,6 +5,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class BioDataForm implements TestForm {
 
     private List<FormInstance> records = null;
     private IntakeForm intakeForm;
+    private RecordGenerator generator;
 
 
     public BioDataForm(IntakeForm intakeForm) {
@@ -33,11 +35,13 @@ public class BioDataForm implements TestForm {
         codeField = formClass.addField(PROTECTION_CODE_FIELD_ID)
                 .setCode("PCODE")
                 .setLabel("Protection Code")
-                .setType(new ReferenceType(Cardinality.SINGLE, IntakeForm.FORM_ID))
+                .setType(new ReferenceType(Cardinality.SINGLE, intakeForm.getFormId()))
                 .setRequired(true)
                 .setKey(true)
                 .setVisible(true);
 
+        generator = new RecordGenerator(formClass)
+                .distribution(PROTECTION_CODE_FIELD_ID, new RefKeyGenerator(intakeForm));
     }
 
     @Override
@@ -54,10 +58,22 @@ public class BioDataForm implements TestForm {
     @Override
     public List<FormInstance> getRecords() {
         if(records == null) {
-            this.records = new RecordGenerator(formClass)
-                    .distribution(PROTECTION_CODE_FIELD_ID, new RefKeyGenerator(intakeForm))
-                    .generate(ROW_COUNT);
+
+            this.records = generator.get(ROW_COUNT);
         }
         return records;
+    }
+
+    @Override
+    public RecordGenerator getGenerator() {
+        return generator;
+    }
+
+    public RecordRef getRecordRef(int i) {
+        return getRecords().get(i).getRef();
+    }
+
+    public FormField getCodeField() {
+        return codeField;
     }
 }

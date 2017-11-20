@@ -71,4 +71,7 @@ public interface IconBundle extends ClientBundle {
 
     @Source("database-closed.png")
     ImageResource databaseClosed();
+
+    @Source("report.png")
+    ImageResource report();
 }

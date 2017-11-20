@@ -370,7 +370,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Publish to website")
     String embed();
 
-    @DefaultStringValue("If you don't wish to receive this email, uncheck the Email notification checkbox in your <a href=\"https://www.activityinfo.org/#userprofile\" style=\"text-decoration: underline;\">settings</a>.")
+    @DefaultStringValue("If you don't wish to receive this email, uncheck the Email notification checkbox in your <a href=\"https://www.activityinfo.org/app#userprofile\" style=\"text-decoration: underline;\">settings</a>.")
     String digestUnsubscribeConstant();
 
     @DefaultStringValue("Your dashboard is empty! You can choose which reports appear on your dashboard by starring them in the reports page.")
@@ -799,6 +799,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Save")
     String save();
 
+    @DefaultStringValue("Save As")
+    String saveAs();
+
     @DefaultStringValue("Saved")
     String saved();
 
@@ -1005,6 +1008,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Are you sure want to delete attachment(s)?")
     String confirmDeleteAttachment();
+
+    @DefaultStringValue("Are you sure you want to delete this record?")
+    String confirmDeleteRecord();
 
     @DefaultStringValue("No connection.")
     String versionConnectionProblem();
@@ -1408,7 +1414,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("There are no partners defined for this database, so it is not possible to make new submissions at this time.")
     String noPartners();
 
-    @DefaultStringValue("Do you really want to delete this field? All dependent data will me removed as well (can't be reverted).")
+    @DefaultStringValue("Do you really want to delete this field? All of this field's data will be lost and cannot be recovered.")
     String deleteFormFieldConfirmation();
 
     @DefaultStringValue("Do you want to retry deletion?")
@@ -1663,7 +1669,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Percentage")
     String percentage();
 
-
     @DefaultStringValue("Median")
     String median();
 
@@ -1712,8 +1717,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Learn more about serial numbers")
     String learnMoreAboutSerialNumbers();
 
-
-
     @DefaultStringValue("(Pending)")
     String pending();
 
@@ -1722,7 +1725,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Prefix Formula")
     String prefixFormula();
-
 
     @DefaultStringValue("Show as dropdown")
     String dropdownPresentation();
@@ -1735,4 +1737,55 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Key")
     String keyField();
+
+    @DefaultStringValue("Sync automatically")
+    String syncAutomatically();
+
+    @DefaultStringValue("Clear all offline data")
+    String clearOfflineMode();
+
+    @DefaultStringValue("Are you sure you want to remove all offline data? Any pending changes will be lost!")
+    String confirmClearOfflineMode();
+
+    @DefaultStringValue("Deleted Form")
+    String deletedForm();
+
+    @DefaultStringValue("Forbidden Form")
+    String forbiddenForm();
+
+    @DefaultStringValue("Not Found")
+    String notFound();
+
+    @DefaultStringValue("Please use our new and much improved data entry interface for adding or updating this form's records.")
+    String pleaseUseNewDataEntry();
+
+    @DefaultStringValue("Copied")
+    String copied();
+
+    @DefaultStringValue("Copied to Clipboard!")
+    String copiedToClipboard();
+
+    @DefaultStringValue("Count Distinct")
+    String countDistinct();
+
+    @DefaultStringValue("No records found.")
+    String noRecords();
+
+    @DefaultStringValue("No matching records.")
+    String noMatchingRecords();
+
+    @DefaultStringValue("Oops! Exception: ")
+    String exception();
+
+    @DefaultStringValue("Invalid form reference(s)")
+    String invalidReference();
+
+    @DefaultStringValue("Download in progress...")
+    String downloadInProgress();
+
+    @DefaultStringValue("Available offline")
+    String availableOffline();
+
+    @DefaultStringValue("Make form available offline")
+    String makeAvailableOffline();
 }

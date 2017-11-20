@@ -281,7 +281,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     @Override 
     @Transient
     public boolean isDeleted() {
-        return getDateDeleted() == null;
+        return getDateDeleted() != null;
     }
 
     @Column(length = 255, nullable = true)

@@ -83,15 +83,6 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
         this.dispatcher = dispatcher;
 
         this.store = new TreeStore<DimensionModel>();
-        addDimension(DimensionType.Database, I18N.CONSTANTS.database());
-        addDimension(DimensionType.Activity, I18N.CONSTANTS.activity());
-        addDimension(DimensionType.ActivityCategory, I18N.CONSTANTS.formCategory());
-        addDimension(DimensionType.Indicator, I18N.CONSTANTS.indicator());
-        addDimension(DimensionType.Partner, I18N.CONSTANTS.partner());
-        addDimension(DimensionType.Project, I18N.CONSTANTS.project());
-        addDimension(DimensionType.Target, I18N.CONSTANTS.realizedOrTargeted());
-        addTimeDimensions();
-        addGeographyRoot();
 
         treePanel = new TreePanel<DimensionModel>(store);
         treePanel.setBorders(true);
@@ -111,6 +102,10 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
             }
         });
 
+        addStandardDimensions();
+        addTimeDimensions();
+        addGeographyRoot();
+
         /* enable drag and drop for dev */
         // TreePanelDragSource source = new TreePanelDragSource(treePanel);
         // source.setTreeSource(DND.TreeSource.LEAF);
@@ -125,6 +120,16 @@ public class DimensionTree implements HasReportElement<PivotTableReportElement> 
                 updateModelAfterCheckChange(be);
             }
         });
+    }
+
+    private void addStandardDimensions() {
+        addDimension(DimensionType.Database, I18N.CONSTANTS.database());
+        addDimension(DimensionType.Activity, I18N.CONSTANTS.activity());
+        addDimension(DimensionType.ActivityCategory, I18N.CONSTANTS.formCategory());
+        addDimension(DimensionType.Indicator, I18N.CONSTANTS.indicator());
+        addDimension(DimensionType.Partner, I18N.CONSTANTS.partner());
+        addDimension(DimensionType.Project, I18N.CONSTANTS.project());
+        addDimension(DimensionType.Target, I18N.CONSTANTS.realizedOrTargeted());
     }
 
     private void addGeographyRoot() {

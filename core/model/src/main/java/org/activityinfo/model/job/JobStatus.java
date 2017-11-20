@@ -1,6 +1,8 @@
 package org.activityinfo.model.job;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Shows the status of the job status
@@ -35,26 +37,26 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
         return state;
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("id", id);
-        object.addProperty("type", descriptor.getType());
-        object.add("descriptor", descriptor.toJsonObject());
-        object.addProperty("state", state.name().toLowerCase());
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
+        object.put("id", id);
+        object.put("type", descriptor.getType());
+        object.put("descriptor", descriptor.toJsonObject());
+        object.put("state", state.name().toLowerCase());
         if(result != null) {
-            object.add("result", result.toJsonObject());
+            object.put("result", result.toJsonObject());
         }
         return object;
     }
 
-    public static JobStatus fromJson(JsonObject object) {
-        String id = object.get("id").getAsString();
-        String type = object.get("type").getAsString();
-        JobDescriptor descriptor = JobRequest.parseDescriptor(type, object.get("descriptor").getAsJsonObject());
-        JobState state = JobState.valueOf(object.get("state").getAsString().toUpperCase());
+    public static JobStatus fromJson(JsonValue object) {
+        String id = object.get("id").asString();
+        String type = object.get("type").asString();
+        JobDescriptor descriptor = JobRequest.parseDescriptor(type, object.get("descriptor"));
+        JobState state = JobState.valueOf(object.get("state").asString().toUpperCase());
         JobResult result = null;
-        if(object.has("result")) {
-            result = descriptor.parseResult(object.get("result").getAsJsonObject());
+        if(object.hasKey("result")) {
+            result = descriptor.parseResult(object.get("result"));
         }
 
         return new JobStatus(id, descriptor, state, result);

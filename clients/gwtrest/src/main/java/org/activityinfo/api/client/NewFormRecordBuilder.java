@@ -1,23 +1,22 @@
 package org.activityinfo.api.client;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 
 public class NewFormRecordBuilder {
-  private JsonObject jsonObject = new JsonObject();
+  private JsonValue jsonObject = Json.createObject();
 
-  private JsonObject fieldValues = new JsonObject();
+  private JsonValue fieldValues = Json.createObject();
 
   public NewFormRecordBuilder() {
     jsonObject.add("fieldValues", fieldValues);
   }
 
   public String toJsonString() {
-    return jsonObject.toString();
+    return jsonObject.toJson();
   }
 
-  public JsonObject toJsonObject() {
+  public JsonValue toJsonObject() {
     return jsonObject;
   }
 
@@ -27,7 +26,7 @@ public class NewFormRecordBuilder {
    * @param id client-generated id
    */
   public NewFormRecordBuilder setId(String id) {
-    this.jsonObject.add("id", new JsonPrimitive(id));
+    this.jsonObject.put("id", id);
     return this;
   }
 
@@ -37,7 +36,7 @@ public class NewFormRecordBuilder {
    * @param parentRecordId id of the parent FormRecord, if this is record is a member of a subform
    */
   public NewFormRecordBuilder setParentRecordId(String parentRecordId) {
-    this.jsonObject.add("parentRecordId", new JsonPrimitive(parentRecordId));
+    this.jsonObject.put("parentRecordId", parentRecordId);
     return this;
   }
 
@@ -47,26 +46,26 @@ public class NewFormRecordBuilder {
    * @param keyId key id, if this is record is a member of a subform
    */
   public NewFormRecordBuilder setKeyId(String keyId) {
-    this.jsonObject.add("keyId", new JsonPrimitive(keyId));
+    this.jsonObject.put("keyId", keyId);
     return this;
   }
 
   public NewFormRecordBuilder setFieldValue(String name, String value) {
-    fieldValues.addProperty(name, value);
+    fieldValues.put(name, value);
     return this;
   }
 
   public NewFormRecordBuilder setFieldValue(String name, Number value) {
-    fieldValues.addProperty(name, value);
+    fieldValues.put(name, value.doubleValue());
     return this;
   }
 
   public NewFormRecordBuilder setFieldValue(String name, boolean value) {
-    fieldValues.addProperty(name, value);
+    fieldValues.put(name, value);
     return this;
   }
 
-  public NewFormRecordBuilder setFieldValue(String name, JsonElement value) {
+  public NewFormRecordBuilder setFieldValue(String name, JsonValue value) {
     fieldValues.add(name, value);
     return this;
   }

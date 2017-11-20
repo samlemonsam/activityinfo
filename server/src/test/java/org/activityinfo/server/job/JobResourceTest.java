@@ -5,13 +5,12 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.inject.util.Providers;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.Work;
 import com.googlecode.objectify.util.Closeable;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.job.*;
 import org.activityinfo.model.resource.ResourceId;
@@ -50,7 +49,7 @@ public class JobResourceTest {
 
     @Test
     public void startJob() {
-        final JsonParser parser = new JsonParser();
+        final org.activityinfo.json.JsonParser parser = new org.activityinfo.json.JsonParser();
         final Queue queue = QueueFactory.getDefaultQueue();
         final AuthenticatedUser user = new AuthenticatedUser("XYZ", 1, "akbertram@gmail.com");
         final JobResource resource = new JobResource(Providers.of(user), queue);
@@ -66,11 +65,11 @@ public class JobResourceTest {
                 JobRequest request = new JobRequest(exportForm, "en");
 
 
-                Response response = resource.start(request.toJsonObject().toString());
+                Response response = resource.start(request.toJsonObject().toJson());
 
-                JsonElement resultObject = parser.parse((String) response.getEntity());
+                JsonValue resultObject = parser.parse((String) response.getEntity());
 
-                JobStatus result = JobStatus.fromJson(resultObject.getAsJsonObject());
+                JobStatus result = JobStatus.fromJson(resultObject);
 
                 assertThat(result.getState(), equalTo(JobState.STARTED));
                 return result.getId();
@@ -83,8 +82,8 @@ public class JobResourceTest {
             public void vrun() {
 
                 Response statusResponse = resource.get(jobId);
-                JsonElement statusObject = parser.parse(((String) statusResponse.getEntity()));
-                JobStatus status = JobStatus.fromJson(statusObject.getAsJsonObject());
+                JsonValue statusObject = parser.parse(((String) statusResponse.getEntity()));
+                JobStatus status = JobStatus.fromJson(statusObject);
 
                 assertThat(status.getState(), equalTo(JobState.STARTED));
             }

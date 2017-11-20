@@ -1,7 +1,7 @@
 package org.activityinfo.model.type;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 
 public class ErrorValue implements FieldValue {
 
@@ -21,8 +21,8 @@ public class ErrorValue implements FieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        return JsonNull.INSTANCE;
+    public JsonValue toJsonElement() {
+        return Json.createNull();
     }
 
 

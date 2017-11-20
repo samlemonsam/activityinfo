@@ -3,13 +3,14 @@ package org.activityinfo.store.hrd;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -21,9 +22,9 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
-import org.activityinfo.store.query.impl.Updater;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.server.Updater;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -91,13 +92,13 @@ public class HrdCatalogTest {
         
         assertTrue(collection.isPresent());
 
-        RecordUpdate village1 = new RecordUpdate();
+        TypedRecordUpdate village1 = new TypedRecordUpdate();
         village1.setUserId(userId);
         village1.setRecordId(ResourceId.generateSubmissionId(formClass));
         village1.set(villageField, TextValue.valueOf("Rutshuru"));
         village1.set(countField, new Quantity(1000));
 
-        RecordUpdate village2 = new RecordUpdate();
+        TypedRecordUpdate village2 = new TypedRecordUpdate();
         village2.setUserId(userId);
         village2.setRecordId(ResourceId.generateSubmissionId(formClass));
         village2.set(villageField, TextValue.valueOf("Beni"));
@@ -190,7 +191,7 @@ public class HrdCatalogTest {
         String villageNames[] = new String[] { "Rutshuru" , "Beni", "Goma" };
 
         for (String villageName : villageNames) {
-            RecordUpdate update = new RecordUpdate();
+            TypedRecordUpdate update = new TypedRecordUpdate();
             update.setUserId(userId);
             update.setFormId(formClass.getId());
             update.setRecordId(ResourceId.generateSubmissionId(formClass));
@@ -247,24 +248,24 @@ public class HrdCatalogTest {
         catalog.create(memberForm);
 
 
-        RecordUpdate hh1 = new RecordUpdate();
+        TypedRecordUpdate hh1 = new TypedRecordUpdate();
         hh1.setUserId(userId);
         hh1.setRecordId(ResourceId.generateSubmissionId(hhForm));
         hh1.set(hhIdField.getId(), TextValue.valueOf("HH1"));
 
-        RecordUpdate hh2 = new RecordUpdate();
+        TypedRecordUpdate hh2 = new TypedRecordUpdate();
         hh2.setUserId(userId);
         hh2.setRecordId(ResourceId.generateSubmissionId(hhForm));
         hh2.set(hhIdField.getId(), TextValue.valueOf("HH2"));
         
-        RecordUpdate father1 = new RecordUpdate();
+        TypedRecordUpdate father1 = new TypedRecordUpdate();
         father1.setUserId(userId);
         father1.setRecordId(ResourceId.generateSubmissionId(memberForm));
         father1.setParentId(hh1.getRecordId());
         father1.set(nameField.getId(), TextValue.valueOf("Homer"));
         father1.set(ageField.getId(), new Quantity(40));
         
-        RecordUpdate father2 = new RecordUpdate();
+        TypedRecordUpdate father2 = new TypedRecordUpdate();
         father2.setUserId(userId);
         father2.setRecordId(ResourceId.generateSubmissionId(memberForm));
         father2.setParentId(hh2.getRecordId());
@@ -327,12 +328,12 @@ public class HrdCatalogTest {
         // and the version range (0, 1] should be empty.
         assertThat(formStorage.cacheVersion(), equalTo(1L));
 
-        List<FormRecord> updatedRecords = formStorage.getVersionRange(0, 1L);
+        FormSyncSet updatedRecords = formStorage.getVersionRange(0, 1L, Predicates.<ResourceId>alwaysTrue());
 
         assertTrue(updatedRecords.isEmpty());
 
         // Add a new record
-        RecordUpdate firstUpdate = new RecordUpdate();
+        TypedRecordUpdate firstUpdate = new TypedRecordUpdate();
         firstUpdate.setUserId(1);
         firstUpdate.setRecordId(ResourceId.generateId());
         firstUpdate.set(villageField, TextValue.valueOf("Goma"));
@@ -344,11 +345,11 @@ public class HrdCatalogTest {
 
         assertThat(formStorage.cacheVersion(), equalTo(2L));
 
-        List<FormRecord> updated = formStorage.getVersionRange(0, 2L);
-        assertThat(updated, hasSize(1));
+        FormSyncSet updated = formStorage.getVersionRange(0, 2L, Predicates.<ResourceId>alwaysTrue());
+        assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
         // Update the first record and add a new one
-        RecordUpdate secondUpdate = new RecordUpdate();
+        TypedRecordUpdate secondUpdate = new TypedRecordUpdate();
         secondUpdate.setUserId(1);
         secondUpdate.setRecordId(ResourceId.generateId());
         secondUpdate.set(villageField, TextValue.valueOf("Rutshuru"));
@@ -359,8 +360,8 @@ public class HrdCatalogTest {
 
         assertThat(formStorage.cacheVersion(), equalTo(3L));
 
-        updated = formStorage.getVersionRange(2L, 3L);
-        assertThat(updated, hasSize(1));
+        updated = formStorage.getVersionRange(2L, 3L, Predicates.<ResourceId>alwaysTrue());
+        assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
     }
 

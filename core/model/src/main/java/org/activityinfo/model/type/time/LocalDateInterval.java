@@ -1,11 +1,12 @@
 package org.activityinfo.model.type.time;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
 import javax.annotation.Nonnull;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * {@code FieldValue} of type {@link org.activityinfo.model.type.time.LocalDateIntervalType} describing
@@ -43,11 +44,16 @@ public class LocalDateInterval implements FieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
-        JsonObject object = new JsonObject();
-        object.addProperty("start", startDate.toString());
-        object.addProperty("end", endDate.toString());
+    public JsonValue toJsonElement() {
+        JsonValue object = createObject();
+        object.put("start", startDate.toString());
+        object.put("end", endDate.toString());
         return object;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + startDate + ", " + endDate + "]";
     }
 
     @Override

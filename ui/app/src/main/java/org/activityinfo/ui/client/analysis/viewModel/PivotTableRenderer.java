@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
 import com.google.common.base.Strings;
+import org.activityinfo.i18n.shared.I18N;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Map;
  */
 public class PivotTableRenderer {
 
-    private PivotTable table;
+    public static final String LINE_ENDING = "\r\n";
 
     private static class Coord {
 
@@ -43,28 +44,20 @@ public class PivotTableRenderer {
         }
     }
 
-
     private final Map<Coord, String> cells = new HashMap<>();
     private final List<PivotTable.Node> leafColumns;
     private int numRows;
     private int numCols;
 
 
-
     private PivotTableRenderer(PivotTable table) {
-        this.table = table;
         this.leafColumns = table.getRootColumn().getLeaves();
-    }
-
-    private String render() {
         int numHeaderCols = table.getRowDimensions().size() * 2;
         int numHeaderRows = table.getColumnDimensions().size() * 2;
 
         addColumnHeaders(table.getRootColumn(), 0, numHeaderCols);
         addRowHeaders(table.getRootRow(), numHeaderRows, 0);
         addValues(table.getRootRow(), numHeaderRows, 0);
-
-        return renderPlainText();
     }
 
 
@@ -84,13 +77,20 @@ public class PivotTableRenderer {
         return col;
     }
 
-    public static String render(PivotTable table) {
-        return new PivotTableRenderer(table).render();
+    public static String renderPlainText(PivotTable table) {
+        return new PivotTableRenderer(table).renderPlainText();
+    }
+
+    public static String renderDelimited(PivotTable table, String delimiter) {
+        return new PivotTableRenderer(table).renderDelimited(delimiter);
     }
 
 
+
     private int addRowHeaders(PivotTable.Node parent, int row, int col) {
-        addCell(row, col, parent.getDimension().getLabel());
+        if(parent.getDimension() != null) {
+            addCell(row, col, parent.getDimension().getLabel());
+        }
         for (PivotTable.Node child : parent.getChildren()) {
             addCell(row, col+1, child.getCategoryLabel());
             if(child.isLeaf()) {
@@ -127,6 +127,24 @@ public class PivotTableRenderer {
         if(col+1 > numCols) {
             numCols = col+1;
         }
+    }
+
+    public String renderDelimited(String delimiter) {
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                if(j > 0) {
+                    s.append(delimiter);
+                }
+                String value = cells.get(new Coord(i,j));
+                if(value != null) {
+                    s.append(value);
+                }
+            }
+            s.append(LINE_ENDING);
+        }
+
+        return s.toString();
     }
 
     public String renderPlainText() {

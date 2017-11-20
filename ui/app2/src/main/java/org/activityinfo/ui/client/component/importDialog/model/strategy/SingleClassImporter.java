@@ -102,7 +102,7 @@ public class SingleClassImporter implements FieldImporter {
                 if(required) {
                     results.add(ValidationResult.error("required missing").setRef(new RecordRef(rangeFormId, instanceId)));
                 } else {
-                    results.add(ValidationResult.missing().setRef(new RecordRef(rangeFormId, instanceId)));
+                    results.add(ValidationResult.missing().setRef(null));
                 }
             } else if (bestMatchIndex == -1) {
                 results.add(ValidationResult.error("No match"));

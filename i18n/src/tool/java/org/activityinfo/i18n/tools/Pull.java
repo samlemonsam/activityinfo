@@ -6,6 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.activityinfo.i18n.tools.model.ResourceClass;
+import org.activityinfo.i18n.tools.model.ResourceClassTerm;
 import org.activityinfo.i18n.tools.model.TranslationSet;
 import org.activityinfo.i18n.tools.output.PropertiesBuilder;
 import org.activityinfo.i18n.tools.parser.DefaultUpdatingVisitor;
@@ -78,9 +79,13 @@ public class Pull {
         return validateMessages(resourceClass, cu, translationSet);
     }
 
-    private TranslationSet validateMessages(ResourceClass resourceClass, CompilationUnit cu, TranslationSet translationSet) {
+    private TranslationSet validateMessages(ResourceClass resourceClass, CompilationUnit cu, TranslationSet translationSet) throws IOException {
         InspectingVisitor inspector = new InspectingVisitor(resourceClass.getJavaSourceFile().getName());
         inspector.visit(cu, null);
+
+        for (ResourceClassTerm resourceClassTerm : inspector.getTerms()) {
+            checkForNewline(resourceClassTerm, translationSet);
+        }
 
         if(!inspector.isMessageSubtype()) {
             return translationSet;
@@ -90,6 +95,21 @@ public class Pull {
         validator.visit(cu, null);
 
         return validator.getValidatedSet();
+    }
+
+    private void checkForNewline(ResourceClassTerm term, TranslationSet translationSet) throws IOException {
+        if (checkForNewline(term.getDefaultTranslation())) {
+            throw new IOException(String.format("Default string %s: '%s' contains illegal newline",
+                    term.getKey(), term.getDefaultTranslation()));
+        }
+        if (checkForNewline(translationSet.get(term.getKey()))) {
+            throw new IOException(String.format("Translated string %s[%s] contains illegal newline",
+                    term.getKey(), translationSet.getLanguage()));
+        }
+    }
+
+    private boolean checkForNewline(String string) {
+        return string != null && string.contains("\n");
     }
 
     /**

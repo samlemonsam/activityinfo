@@ -19,10 +19,10 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.store.query.impl.ColumnSetBuilder;
-import org.activityinfo.store.query.impl.NullFormSupervisor;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.RecordUpdate;
+import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -98,29 +98,29 @@ public class SubFormAggregationTest {
         catalog.create(siteForm);
         catalog.create(monthlyForm);
 
-        RecordUpdate v1 = new RecordUpdate();
+        TypedRecordUpdate v1 = new TypedRecordUpdate();
         v1.setUserId(userId);
         v1.setRecordId(ResourceId.generateSubmissionId(siteForm));
         v1.set(villageField.getId(), TextValue.valueOf("Rutshuru"));
 
-        RecordUpdate v2 = new RecordUpdate();
+        TypedRecordUpdate v2 = new TypedRecordUpdate();
         v2.setUserId(userId);
         v2.setRecordId(ResourceId.generateSubmissionId(siteForm));
         v2.set(villageField.getId(), TextValue.valueOf("Beni"));
 
-        RecordUpdate month1 = new RecordUpdate();
+        TypedRecordUpdate month1 = new TypedRecordUpdate();
         month1.setUserId(userId);
         month1.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month1.setParentId(v1.getRecordId());
         month1.set(countField.getId(), new Quantity(40));
 
-        RecordUpdate month2 = new RecordUpdate();
+        TypedRecordUpdate month2 = new TypedRecordUpdate();
         month2.setUserId(userId);
         month2.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month2.setParentId(v1.getRecordId());
         month2.set(countField.getId(), new Quantity(30));
 
-        RecordUpdate month3 = new RecordUpdate();
+        TypedRecordUpdate month3 = new TypedRecordUpdate();
         month3.setUserId(userId);
         month3.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month3.setParentId(v2.getRecordId());

@@ -18,9 +18,11 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
+import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.BlobId;
 import org.apache.commons.io.IOUtils;
@@ -64,8 +66,8 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
                         + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
                 return;
             }
-            this.appIdentityService = /*DeploymentEnvironment.isAppEngineDevelopment() ?
-                    new DevAppIdentityService(config) : */AppIdentityServiceFactory.getAppIdentityService();
+            this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
+                    new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
             LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
         } catch (Exception e) {
             // ignore: fails in local tests, bug in LocalServiceTestHelper?
@@ -80,10 +82,10 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     @Override
     public Response getBlobUrl(@InjectParam AuthenticatedUser user,
                                @PathParam("blobId") BlobId blobId,
-                               @PathParam("resourceId") ResourceId resourceId) {
+                               @PathParam("resourceId") ResourceId formId) {
 
         assertNotAnonymousUser(user);
-        assertHasAccess(user, blobId, resourceId);
+        assertHasAccess(user, blobId, formId);
         assertBlobExists(blobId);
 
         try {
@@ -96,13 +98,13 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     }
 
     public void put(AuthenticatedUser user, String contentDisposition, String mimeType, BlobId blobId,
-                    ResourceId resourceId,
+                    ResourceId formId,
                     InputStream inputStream) throws IOException {
 
         ResourceId userId = CuidAdapter.userId(user.getUserId());
 
         assertNotAnonymousUser(user);
-        if (!hasAccessToResource(userId, resourceId)) {
+        if (!hasAccessToResource(userId, formId)) {
             throw new WebApplicationException(UNAUTHORIZED);
         }
 
@@ -110,7 +112,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
                 contentDisposition(contentDisposition).
                 mimeType(mimeType).
                 addUserMetadata(GcsUploadCredentialBuilder.X_CREATOR, userId.asString()).
-                addUserMetadata(GcsUploadCredentialBuilder.X_OWNER, resourceId.asString()).
+                addUserMetadata(GcsUploadCredentialBuilder.X_OWNER, formId.asString()).
                 build();
         GcsOutputChannel channel = GcsServiceFactory.createGcsService().createOrReplace(new GcsFilename(bucketName, blobId.asString()), gcsFileOptions);
 
@@ -233,7 +235,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
         throw new WebApplicationException(UNAUTHORIZED);
     }
 
-    public boolean hasAccess(ResourceId userId, ResourceId resourceId, BlobId blobId, GcsFileMetadata metadata) {
+    public boolean hasAccess(ResourceId userId, ResourceId formId, BlobId blobId, GcsFileMetadata metadata) {
         if (metadata == null) {
             return false;
         }
@@ -249,18 +251,19 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
         if (userId.equals(ResourceId.valueOf(creatorIdStr))) { // owner
             return true;
         }
-        return hasAccessToResource(userId, resourceId);
+        return hasAccessToResource(userId, formId);
     }
 
-    private boolean hasAccessToResource(ResourceId userId, ResourceId resourceId) {
-        if (resourceId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-            Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(resourceId));
+    private boolean hasAccessToResource(ResourceId userId, ResourceId formId) {
+        if (formId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(formId));
 
-            if (PermissionOracle.using(em.get()).isViewAllowed(activity.getDatabase(), em.get().getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
+            if (PermissionOracle.using(em.get()).isViewAllowed(activity.getDatabase(), em.get()
+                .getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
                 return true;
             }
         } else {
-            throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + resourceId);
+            throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + formId);
         }
         return false;
     }

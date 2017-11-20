@@ -23,10 +23,7 @@ import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.model.type.time.LocalDateIntervalType;
-import org.activityinfo.model.type.time.LocalDateType;
-import org.activityinfo.model.type.time.MonthType;
-import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,12 +124,22 @@ public class OdkFormFieldBuilderFactory {
             }
 
             @Override
+            public OdkFormFieldBuilder visitWeek(EpiWeekType epiWeekType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
             public OdkFormFieldBuilder visitMonth(MonthType monthType) {
                 return OdkFormFieldBuilder.NONE;
             }
 
             @Override
             public OdkFormFieldBuilder visitYear(YearType yearType) {
+                return OdkFormFieldBuilder.NONE;
+            }
+
+            @Override
+            public OdkFormFieldBuilder visitFortnight(FortnightType fortnightType) {
                 return OdkFormFieldBuilder.NONE;
             }
 

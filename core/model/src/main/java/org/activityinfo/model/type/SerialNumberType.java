@@ -1,9 +1,9 @@
 package org.activityinfo.model.type;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.JsonValue;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Field to which a sequential number is assigned when the record is first saved.
@@ -27,13 +27,13 @@ public class SerialNumberType implements ParametrizedFieldType {
         }
 
         @Override
-        public FieldType deserializeType(JsonObject parametersObject) {
+        public FieldType deserializeType(JsonValue parametersObject) {
             SerialNumberType type = new SerialNumberType();
-            if(parametersObject.has("prefixFormula")) {
-                type.prefixFormula = parametersObject.get("prefixFormula").getAsString();
+            if(parametersObject.hasKey("prefixFormula")) {
+                type.prefixFormula = parametersObject.get("prefixFormula").asString();
             }
-            if(parametersObject.has("digits")) {
-                type.digits = parametersObject.get("digits").getAsInt();
+            if(parametersObject.hasKey("digits")) {
+                type.digits = parametersObject.get("digits").asInt();
             }
             return type;
         }
@@ -56,17 +56,17 @@ public class SerialNumberType implements ParametrizedFieldType {
     }
 
     @Override
-    public FieldValue parseJsonValue(JsonElement jsonElement) {
+    public SerialNumber parseJsonValue(JsonValue jsonElement) {
         if(jsonElement.isJsonPrimitive()) {
-            JsonPrimitive value = jsonElement.getAsJsonPrimitive();
+            JsonValue value = jsonElement;
             if (value.isNumber()) {
-                return new SerialNumber(value.getAsInt());
+                return new SerialNumber(value.asInt());
             }
         } else if(jsonElement.isJsonObject()) {
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            JsonValue jsonObject = jsonElement;
             return new SerialNumber(
-                    jsonObject.get("prefix").getAsString(),
-                    jsonObject.get("number").getAsInt());
+                    jsonObject.get("prefix").asString(),
+                    jsonObject.get("number").asInt());
         }
 
         throw new IllegalArgumentException();
@@ -107,12 +107,12 @@ public class SerialNumberType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
-        JsonObject object = new JsonObject();
+    public JsonValue getParametersAsJson() {
+        JsonValue object = createObject();
         if(!Strings.isNullOrEmpty(prefixFormula)) {
-            object.addProperty("prefixFormula", prefixFormula);
+            object.put("prefixFormula", prefixFormula);
         }
-        object.addProperty("digits", digits);
+        object.put("digits", digits);
         return object;
     }
 

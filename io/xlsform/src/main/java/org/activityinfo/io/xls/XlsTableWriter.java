@@ -50,14 +50,10 @@ public class XlsTableWriter {
 
         XlsColumnStyleFactory styleFactory = new XlsColumnStyleFactory(book);
 
-
+        XlsColumnFactory factory = new XlsColumnFactory(styleFactory, columnSet);
         List<XlsColumn> excelColumns = new ArrayList<>();
-        int columnIndex = 0;
         for (EffectiveTableColumn tableColumn : tableModel.getColumns()) {
-            XlsColumn excelColumn = new XlsColumn(tableColumn, columnSet, columnIndex, styleFactory);
-
-            excelColumns.add(excelColumn);
-            columnIndex++;
+            excelColumns.addAll(tableColumn.accept(factory));
         }
 
         writeHeaders(sheet, tableModel.getTitle(), excelColumns);
@@ -73,12 +69,13 @@ public class XlsTableWriter {
         columnHeaderRow.setHeightInPoints(HEADER_CELL_HEIGHT);
 
         int columnIndex = 0;
-        for (XlsColumn column : columns) {
+        for (int i = 0; i < columns.size(); i++) {
+            XlsColumn column = columns.get(i);
             Cell cell = columnHeaderRow.createCell(columnIndex);
             cell.setCellStyle(headerStyle);
             cell.setCellValue(column.getHeading());
             sheet.setColumnWidth(columnIndex, width(column.getHeading()));
-            columnIndex ++;
+            columnIndex++;
         }
     }
 
@@ -86,9 +83,10 @@ public class XlsTableWriter {
         for (int row = 0; row < numRows; row++) {
 
             Row sheetRow = sheet.createRow((row + 2));
-            for (XlsColumn column : columns) {
-                if(!column.isMissing(row)) {
-                    Cell cell = sheetRow.createCell(column.getColumnIndex());
+            for (int i = 0; i < columns.size(); i++) {
+                XlsColumn column = columns.get(i);
+                if (!column.isMissing(row)) {
+                    Cell cell = sheetRow.createCell(i);
                     cell.setCellStyle(column.getStyle());
 
                     column.setValue(cell, row);

@@ -23,7 +23,7 @@ package org.activityinfo.legacy.shared.command;
  */
 
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
-import org.activityinfo.model.date.Month;
+import org.activityinfo.model.type.time.Month;
 
 /**
  * Returns {@link org.activityinfo.legacy.shared.model.IndicatorRowDTO} for a given site

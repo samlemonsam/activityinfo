@@ -2,15 +2,17 @@ package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.grid.LiveGridView;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
-import org.activityinfo.i18n.shared.I18N;
 
 public class LiveRecordGridView extends LiveGridView<Integer> {
+
+    private static final boolean SORTING_IMPLEMENTED = false;
 
     /**
      * Creates a context menu for the given column, including sort menu items and column visibility sub-menu.
@@ -21,7 +23,7 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
     protected Menu createContextMenu(final int colIndex) {
         final Menu menu = new Menu();
 
-        if (cm.isSortable(colIndex)) {
+        if (SORTING_IMPLEMENTED && cm.isSortable(colIndex)) {
             MenuItem item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortAscText());
             item.setIcon(header.getAppearance().sortAscendingIcon());
@@ -45,14 +47,15 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
             menu.add(item);
         }
 
-        MenuItem columns = new MenuItem();
-        columns.setText(I18N.CONSTANTS.chooseColumns());
-        columns.setIcon(header.getAppearance().columnsIcon());
-
-
-        menu.add(columns);
         return menu;
     }
 
+    @Override
+    protected void templateOnColumnWidthUpdated(int col, int w, int tw) {
+        fireEvent(new ColumnResizeEvent(col, w));
+    }
 
+    public HandlerRegistration addColumnResizeHandler(ColumnResizeHandler handler) {
+        return addHandler(ColumnResizeEvent.getType(), handler);
+    }
 }

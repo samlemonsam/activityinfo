@@ -1,6 +1,10 @@
 package org.activityinfo.ui.client.measureDialog.view;
 
 import com.google.gwt.resources.client.ImageResource;
+import org.activityinfo.model.analysis.ImmutableTableColumn;
+import org.activityinfo.model.analysis.TableColumn;
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -8,15 +12,19 @@ import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
+import java.util.Optional;
+
 /**
  * Measure based on a quantity
  */
 public class QuantityNode extends MeasureTreeNode {
 
+    private ResourceId rootFormId;
     private ResourceId formId;
     private FormField field;
 
-    public QuantityNode(ResourceId formId, FormField field) {
+    public QuantityNode(ResourceId rootFormId, ResourceId formId, FormField field) {
+        this.rootFormId = rootFormId;
         this.formId = formId;
         this.field = field;
     }
@@ -40,8 +48,25 @@ public class QuantityNode extends MeasureTreeNode {
     public MeasureModel newMeasure() {
         return ImmutableMeasureModel.builder()
                 .label(getLabel())
-                .formId(formId)
-                .formula(new SymbolExpr(field.getId()).asExpression())
+                .formId(rootFormId)
+                .formula(measureFormula().asExpression())
                 .build();
+    }
+
+    private ExprNode measureFormula() {
+        if (rootFormId.equals(formId)) {
+            return new SymbolExpr(field.getId());
+        } else {
+            return new CompoundExpr(formId, field.getName());
+        }
+    }
+
+    @Override
+    public Optional<TableColumn> newTableColumn() {
+        return Optional.of(
+            ImmutableTableColumn.builder()
+            .label(getLabel())
+            .formula(field.getId().asString())
+            .build());
     }
 }

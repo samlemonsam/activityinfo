@@ -1,20 +1,27 @@
 package org.activityinfo.model.form;
 
 
+import org.activityinfo.model.type.time.*;
+
 public enum SubFormKind {
-    REPEATING(false),
-    MONTHLY(true),
-    WEEKLY(true),
-    BIWEEKLY(true),
-    DAILY(true);
+    REPEATING(null),
+    MONTHLY(MonthType.INSTANCE),
+    WEEKLY(EpiWeekType.INSTANCE),
+    BIWEEKLY(FortnightType.INSTANCE),
+    DAILY(LocalDateType.INSTANCE);
 
-    private boolean period;
+    private PeriodType periodType;
 
-    SubFormKind(boolean period) {
-        this.period = period;
+    SubFormKind(PeriodType periodType) {
+        this.periodType = periodType;
+    }
+
+    public PeriodType getPeriodType() {
+        assert periodType != null;
+        return periodType;
     }
 
     public boolean isPeriod() {
-        return period;
+        return periodType != null;
     }
 }

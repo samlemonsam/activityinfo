@@ -96,8 +96,6 @@ public class DimensionPane implements IsWidget {
         });
     }
 
-
-
     @Override
     public Widget asWidget() {
         return contentPanel;
@@ -128,19 +126,19 @@ public class DimensionPane implements IsWidget {
         }
 
         viewModel.updateModel(
-                viewModel.getModel().reorderDimensions(afterDimId, dims));
+                viewModel.getWorkingModel().reorderDimensions(afterDimId, dims));
     }
 
 
     private void onNewDimensionSelected(SelectionEvent<DimensionModel> event) {
         viewModel.updateModel(
-                viewModel.getModel().withDimension(
+                viewModel.getWorkingModel().withDimension(
                         ImmutableDimensionModel.builder()
                         .from(event.getSelectedItem())
                         .axis(this.axis)
                         .build()));
 
-        LOGGER.info("Num dimensions = " + viewModel.getModel().getDimensions());
+        LOGGER.info("Num dimensions = " + viewModel.getWorkingModel().getDimensions());
 
     }
 
@@ -164,41 +162,55 @@ public class DimensionPane implements IsWidget {
             for (DateLevel dateLevel : DateLevel.values()) {
                 CheckMenuItem item = new CheckMenuItem(dateLevel.getLabel());
                 item.setChecked(currentLevel == dateLevel);
-                item.addSelectionHandler(event -> updateDateLevel(dim, DateLevel.YEAR));
+                item.addSelectionHandler(event -> updateDateLevel(dim, dateLevel));
                 contextMenu.add(item);
             }
 
             contextMenu.add(new SeparatorMenuItem());
         }
 
+        boolean canTotal = canTotal(dim);
+
         // Choose to include totals or not.
         CheckMenuItem totalsItem = new CheckMenuItem("Include Totals");
         totalsItem.setChecked(dim.getModel().getTotals());
         totalsItem.addCheckChangeHandler(event -> updateTotals(dim, event.getChecked()));
+        totalsItem.setEnabled(canTotal);
         contextMenu.add(totalsItem);
+
+        CheckMenuItem missingItem = new CheckMenuItem("Include Missing");
+        missingItem.setChecked(dim.getModel().getMissingIncluded());
+        missingItem.addCheckChangeHandler(event -> updateMissing(dim, event.getChecked()));
+        missingItem.setEnabled(canTotal);
+        contextMenu.add(missingItem);
 
         CheckMenuItem percentagesItem = new CheckMenuItem("Include Percentages");
         percentagesItem.setChecked(dim.getModel().getPercentage());
         percentagesItem.addCheckChangeHandler(event -> updatePercentages(dim, event.getChecked()));
+        percentagesItem.setEnabled(canTotal);
         contextMenu.add(percentagesItem);
-
 
         MenuItem totalsLabel = new MenuItem("Total Label...");
         totalsLabel.addSelectionHandler(event -> editTotalLabel(dim));
+        totalsLabel.setEnabled(canTotal);
         contextMenu.add(totalsLabel);
 
         contextMenu.add(new SeparatorMenuItem());
-
 
         // Remove the dimension
         MenuItem remove = new MenuItem();
         remove.setText(I18N.CONSTANTS.remove());
         remove.addSelectionHandler(event -> removeDimension(dim.getId()));
 
-        // Special handling for "Statistics' dimension
+        // Special handling for "Measures" and "Statistics" dimension
+        if(dim.getId().equals(DimensionModel.MEASURE_ID)) {
+            if(viewModel.getWorkingModel().getMeasures().size() > 1) {
+                remove.setEnabled(false);
+            }
+        }
+
         if(dim.getId().equals(DimensionModel.STATISTIC_ID)) {
-            totalsItem.setEnabled(false);
-            if(viewModel.getModel().isMeasureDefinedWithMultipleStatistics()) {
+            if(viewModel.getWorkingModel().isMeasureDefinedWithMultipleStatistics()) {
                 remove.setEnabled(false);
             }
         }
@@ -209,6 +221,15 @@ public class DimensionPane implements IsWidget {
     }
 
 
+    private boolean canTotal(EffectiveDimension dim) {
+        switch (dim.getId()) {
+            case DimensionModel.MEASURE_ID:
+            case DimensionModel.STATISTIC_ID:
+                return false;
+            default:
+                return true;
+        }
+    }
 
 
     private void editLabel(DimensionModel dim) {
@@ -225,7 +246,7 @@ public class DimensionPane implements IsWidget {
     }
 
     private void updateLabel(DimensionModel dimension, String label) {
-        viewModel.updateModel(viewModel.getModel().withDimension(
+        viewModel.updateModel(viewModel.getWorkingModel().withDimension(
             ImmutableDimensionModel.builder()
                     .from(dimension)
                     .label(label)
@@ -246,7 +267,7 @@ public class DimensionPane implements IsWidget {
     }
 
     private void updateTotalLabel(EffectiveDimension dim, String value) {
-        viewModel.updateModel(viewModel.getModel().withDimension(
+        viewModel.updateModel(viewModel.getWorkingModel().withDimension(
                 ImmutableDimensionModel.builder()
                         .from(dim.getModel())
                         .totalLabel(value)
@@ -255,16 +276,25 @@ public class DimensionPane implements IsWidget {
 
     private void updateTotals(EffectiveDimension dim, Tree.CheckState checkState) {
         viewModel.updateModel(
-                viewModel.getModel().withDimension(
+                viewModel.getWorkingModel().withDimension(
                         ImmutableDimensionModel.builder()
                                 .from(dim.getModel())
                                 .totals(checkState == Tree.CheckState.CHECKED)
                                 .build()));
     }
 
+    private void updateMissing(EffectiveDimension dim, Tree.CheckState checked) {
+        viewModel.updateModel(
+                viewModel.getWorkingModel().withDimension(
+                        ImmutableDimensionModel.builder()
+                                .from(dim.getModel())
+                                .missingIncluded(checked == Tree.CheckState.CHECKED)
+                                .build()));
+    }
+
     private void updatePercentages(EffectiveDimension dim, Tree.CheckState checkState) {
         viewModel.updateModel(
-                viewModel.getModel().withDimension(
+                viewModel.getWorkingModel().withDimension(
                         ImmutableDimensionModel.builder()
                                 .from(dim.getModel())
                                 .percentage(checkState == Tree.CheckState.CHECKED)
@@ -273,7 +303,7 @@ public class DimensionPane implements IsWidget {
 
     private void updateDateLevel(EffectiveDimension dim, DateLevel level) {
         viewModel.updateModel(
-                viewModel.getModel().withDimension(
+                viewModel.getWorkingModel().withDimension(
                         ImmutableDimensionModel.builder()
                                 .from(dim.getModel())
                                 .dateLevel(level)
@@ -282,7 +312,7 @@ public class DimensionPane implements IsWidget {
 
     private void removeDimension(String id) {
         viewModel.updateModel(
-                viewModel.getModel().withoutDimension(id));
+                viewModel.getWorkingModel().withoutDimension(id));
     }
 
 

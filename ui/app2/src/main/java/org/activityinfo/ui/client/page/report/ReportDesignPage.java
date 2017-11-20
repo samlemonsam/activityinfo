@@ -55,6 +55,7 @@ import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
 import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.ExportCallback;
+import org.activityinfo.ui.client.page.common.toolbar.SaveMethod;
 import org.activityinfo.ui.client.page.report.editor.CompositeEditor2;
 import org.activityinfo.ui.client.page.report.editor.EditorProvider;
 import org.activityinfo.ui.client.page.report.editor.ReportElementEditor;
@@ -69,7 +70,10 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
     
     private static final Logger LOGGER = Logger.getLogger(ReportDesignPage.class.getName());
 
-    private class SaveCallback implements AsyncCallback<VoidResult> {
+    public class SaveCallback implements AsyncCallback<VoidResult> {
+
+        public SaveMethod method = SaveMethod.SAVE;
+
         @Override
         public void onSuccess(final VoidResult result) {
             Info.displayText(I18N.CONSTANTS.saved(), I18N.MESSAGES.reportSaved(currentModel.getTitle()));
@@ -83,6 +87,19 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
         }
 
         public void onSaved() {
+        }
+
+        public void save(SaveMethod method) {
+            this.method = method;
+            saveTitled(null, this);
+        }
+
+        public SaveMethod getMethod() {
+            return method;
+        }
+
+        public boolean isSaveAs() {
+            return method == SaveMethod.SAVEAS;
         }
     }
 
@@ -153,13 +170,7 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
             }
         });
 
-        reportBar.getSaveButton().addSelectionListener(new SelectionListener<ButtonEvent>() {
-
-            @Override
-            public void componentSelected(final ButtonEvent ce) {
-                saveTitled(null, new SaveCallback());
-            }
-        });
+        reportBar.getSaveButton().setCallback(new SaveCallback());
 
         reportBar.getShareButton().addSelectionListener(new SelectionListener<ButtonEvent>() {
 
@@ -282,7 +293,7 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
     }
 
     private void saveTitled(final AsyncMonitor monitor, final SaveCallback callback) {
-        if (untitled()) {
+        if (untitled() || callback.isSaveAs()) {
             promptForTitle(callback);
         } else {
             save(monitor, callback);
@@ -290,20 +301,21 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
     }
 
     private void saveTitled(final SaveCallback callback) {
-        if (untitled()) {
+        if (untitled() || callback.isSaveAs()) {
             promptForTitle(callback);
         } else {
             callback.onSaved();
         }
     }
 
-    private void promptForTitle(final AsyncCallback<VoidResult> callback) {
+    private void promptForTitle(final SaveCallback callback) {
         MessageBox.promptText(I18N.CONSTANTS.save(), I18N.CONSTANTS.chooseReportTitle(), new Listener<MessageBoxEvent>() {
 
             @Override
             public void handleEvent(final MessageBoxEvent be) {
                 String newTitle = be.getMessageBox().getTextBox().getValue();
-                if (!Strings.isNullOrEmpty(newTitle)) {
+                boolean cancelled = be.getButtonClicked().getItemId().equals("cancel");
+                if (!Strings.isNullOrEmpty(newTitle) && !cancelled) {
                     currentModel.setTitle(newTitle);
                     reportBar.setReportTitle(newTitle);
                     save(callback);
@@ -312,13 +324,20 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
         });
     }
 
-    private void save(final AsyncCallback<VoidResult> callback) {
+    private void save(final SaveCallback callback) {
         save(null, callback);
     }
 
-    private void save(final AsyncMonitor monitor, final AsyncCallback<VoidResult> callback) {
+    private void save(final AsyncMonitor monitor, final SaveCallback callback) {
         if (currentMetadata.isEditAllowed()) {
-            performUpdate(monitor, callback);
+            switch (callback.getMethod()) {
+                case SAVE:
+                    performUpdate(monitor, callback);
+                    break;
+                case SAVEAS:
+                    performCreate(false);
+                    break;
+            }
         } else {
             confirmCreate(monitor, callback);
         }
@@ -348,14 +367,16 @@ public class ReportDesignPage extends ContentPanel implements Page, ExportCallba
             public void handleEvent(final MessageBoxEvent be) {
                 Button btn = be.getButtonClicked();
                 if (Dialog.YES.equalsIgnoreCase(btn.getItemId())) {
-                    performCreate();
+                    performCreate(true);
                 }
             }
         });
     }
 
-    private void performCreate() {
-        currentModel.setTitle(currentModel.getTitle() + " (" + I18N.CONSTANTS.copy() + ")");
+    private void performCreate(boolean copy) {
+        if (copy) {
+            currentModel.setTitle(currentModel.getTitle() + " (" + I18N.CONSTANTS.copy() + ")");
+        }
 
         dispatcher.execute(new CreateReport(currentModel), new AsyncCallback<CreateResult>() {
             @Override

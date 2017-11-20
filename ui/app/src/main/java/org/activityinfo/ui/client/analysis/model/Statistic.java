@@ -10,6 +10,7 @@ import java.util.List;
  */
 public enum Statistic {
     COUNT(I18N.CONSTANTS.count()),
+    COUNT_DISTINCT(I18N.CONSTANTS.countDistinct()),
     SUM(I18N.CONSTANTS.sum()),
     AVERAGE(I18N.CONSTANTS.average()),
     MEDIAN(I18N.CONSTANTS.median()),

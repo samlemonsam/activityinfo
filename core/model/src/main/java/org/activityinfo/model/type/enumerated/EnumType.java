@@ -1,14 +1,14 @@
 package org.activityinfo.model.type.enumerated;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 
 import java.util.*;
+
+import static org.activityinfo.json.Json.createObject;
 
 public class EnumType implements ParametrizedFieldType {
 
@@ -20,7 +20,7 @@ public class EnumType implements ParametrizedFieldType {
 
     public interface EnumTypeClass extends ParametrizedFieldTypeClass, RecordFieldTypeClass {
         @Override
-        EnumType deserializeType(JsonObject parametersObject);
+        EnumType deserializeType(JsonValue parametersObject);
     }
 
     public enum Presentation {
@@ -38,13 +38,14 @@ public class EnumType implements ParametrizedFieldType {
 
 
         @Override
-        public EnumType deserializeType(JsonObject parametersObject) {
+        public EnumType deserializeType(JsonValue parametersObject) {
+            // Explicit type parameter required by GWT's compiler!
             Cardinality cardinality = Cardinality.valueOf(
-                    parametersObject.get("cardinality").getAsString().toUpperCase());
+                    parametersObject.<JsonValue>get("cardinality"));
 
             Presentation presentation = Presentation.AUTOMATIC;
-            if(parametersObject.has("presentation")) {
-                String presentationType = parametersObject.get("presentation").getAsString().toUpperCase();
+            if(parametersObject.hasKey("presentation")) {
+                String presentationType = parametersObject.get("presentation").asString().toUpperCase();
                 switch (presentationType) {
                     case "CHECKBOX":
                     case "RADIO_BUTTON":
@@ -60,11 +61,13 @@ public class EnumType implements ParametrizedFieldType {
             }
 
             List<EnumItem> enumItems = Lists.newArrayList();
-            JsonElement valuesArray = parametersObject.get("values");
-            if(valuesArray instanceof JsonArray) {
-                JsonArray enumItemArray = valuesArray.getAsJsonArray();
-                for (JsonElement record : enumItemArray) {
-                    enumItems.add(EnumItem.fromJsonObject(record.getAsJsonObject()));
+            JsonValue valuesArray = parametersObject.get("values");
+            if(valuesArray != null) {
+                if (valuesArray.isJsonArray()) {
+                    JsonValue enumItemArray = valuesArray;
+                    for (JsonValue record : enumItemArray.values()) {
+                        enumItems.add(EnumItem.fromJsonObject(record));
+                    }
                 }
             }
             return new EnumType(cardinality, presentation, enumItems);
@@ -139,18 +142,19 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
-    public EnumValue parseJsonValue(JsonElement value) {
-        if(value instanceof JsonPrimitive) {
-            ResourceId id = ResourceId.valueOf(value.getAsString());
+    public EnumValue parseJsonValue(JsonValue value) {
+        if(value.isJsonString()) {
+            ResourceId id = ResourceId.valueOf(value.asString());
             return new EnumValue(id);
-        } else if(value instanceof JsonArray) {
+        } else if(value.isJsonArray()) {
             Set<ResourceId> ids = new HashSet<>();
-            JsonArray array = (JsonArray) value;
-            for (JsonElement jsonElement : array) {
-                ResourceId id = ResourceId.valueOf(jsonElement.getAsString());
+            JsonValue array = value;
+            for (int i = 0; i < array.length(); i++) {
+                ResourceId id = ResourceId.valueOf(array.get(i).asString());
                 ids.add(id);
             }
             return new EnumValue(ids);
+
         } else {
             return null;
         }
@@ -167,17 +171,17 @@ public class EnumType implements ParametrizedFieldType {
     }
 
     @Override
-    public JsonObject getParametersAsJson() {
+    public JsonValue getParametersAsJson() {
         
-        JsonArray enumValueArray = new JsonArray();
+        JsonValue enumValueArray = Json.createArray();
         for (EnumItem enumItem : getValues()) {
             enumValueArray.add(enumItem.toJsonObject());
         }
-        
-        JsonObject object = new JsonObject();
-        object.addProperty("cardinality", cardinality.name().toLowerCase());
-        object.addProperty("presentation", presentation.name().toLowerCase());
-        object.add("values", enumValueArray);
+
+        JsonValue object = createObject();
+        object.put("cardinality", cardinality.name().toLowerCase());
+        object.put("presentation", presentation.name().toLowerCase());
+        object.put("values", enumValueArray);
         return object;
     }
 

@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Specifies an input mask that constrains text input.
@@ -60,6 +61,8 @@ public class InputMask {
         public abstract void appendPlaceHolder(StringBuilder sb);
 
         public abstract void appendRegex(StringBuilder regex);
+
+        public abstract void appendRandom(Random random, StringBuilder sb);
     }
 
     public class RequiredDigit extends Atom {
@@ -87,6 +90,11 @@ public class InputMask {
         @Override
         public void appendRegex(StringBuilder regex) {
             regex.append("[0-9]");
+        }
+
+        @Override
+        public void appendRandom(Random random, StringBuilder sb) {
+            sb.append((char)('0' + random.nextInt(10)));
         }
     }
 
@@ -116,6 +124,15 @@ public class InputMask {
         public void appendRegex(StringBuilder regex) {
             regex.append("[A-Za-z]");
         }
+
+        @Override
+        public void appendRandom(Random random, StringBuilder sb) {
+            if(random.nextInt(2) == 0) {
+                sb.append((char)('A' + random.nextInt(26)));
+            } else {
+                sb.append((char)('a' + random.nextInt(26)));
+            }
+        }
     }
 
     public class RequiredLetterOrDigit extends Atom {
@@ -143,6 +160,21 @@ public class InputMask {
         @Override
         public void appendRegex(StringBuilder regex) {
             regex.append("[A-Za-z0-9]");
+        }
+
+        @Override
+        public void appendRandom(Random random, StringBuilder sb) {
+            switch (random.nextInt(3)) {
+                case 0:
+                    sb.append((char)('0' + random.nextInt(10)));
+                    break;
+                case 1:
+                    sb.append((char)('A' + random.nextInt(26)));
+                    break;
+                case 2:
+                    sb.append((char)('a' + random.nextInt(26)));
+                    break;
+            }
         }
     }
 
@@ -178,6 +210,11 @@ public class InputMask {
                 regex.append('\\');
             }
             regex.append(expectedChar);
+        }
+
+        @Override
+        public void appendRandom(Random random, StringBuilder sb) {
+            sb.append(expectedChar);
         }
 
         private boolean isRegexCharacter() {
@@ -274,6 +311,9 @@ public class InputMask {
         return sb.toString();
     }
 
+    public List<Atom> getAtoms() {
+        return atoms;
+    }
 
     /**
      *

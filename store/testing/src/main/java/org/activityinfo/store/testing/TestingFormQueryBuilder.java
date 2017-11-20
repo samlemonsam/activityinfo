@@ -2,6 +2,7 @@ package org.activityinfo.store.testing;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@GwtIncompatible
 public class TestingFormQueryBuilder implements ColumnQueryBuilder {
 
     private final List<FormInstance> records;

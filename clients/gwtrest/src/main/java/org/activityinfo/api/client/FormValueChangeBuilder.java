@@ -1,19 +1,19 @@
 package org.activityinfo.api.client;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 
 public class FormValueChangeBuilder {
-  private JsonObject jsonObject = new JsonObject();
+  private JsonValue jsonObject = Json.createObject();
 
   public FormValueChangeBuilder() {
   }
 
   public String toJsonString() {
-    return jsonObject.toString();
+    return jsonObject.toJson();
   }
 
-  public JsonObject toJsonObject() {
+  public JsonValue toJsonObject() {
     return jsonObject;
   }
 
@@ -23,7 +23,7 @@ public class FormValueChangeBuilder {
    * @param fieldId the id of the field changed
    */
   public FormValueChangeBuilder setFieldId(String fieldId) {
-    this.jsonObject.add("fieldId", new JsonPrimitive(fieldId));
+    this.jsonObject.put("fieldId", fieldId);
     return this;
   }
 
@@ -33,7 +33,7 @@ public class FormValueChangeBuilder {
    * @param fieldLabel the current label of the field changed
    */
   public FormValueChangeBuilder setFieldLabel(String fieldLabel) {
-    this.jsonObject.add("fieldLabel", new JsonPrimitive(fieldLabel));
+    this.jsonObject.put("fieldLabel", fieldLabel);
     return this;
   }
 
@@ -43,7 +43,7 @@ public class FormValueChangeBuilder {
    * @param oldValueLabel human-readable string of the old value of the field
    */
   public FormValueChangeBuilder setOldValueLabel(String oldValueLabel) {
-    this.jsonObject.add("oldValueLabel", new JsonPrimitive(oldValueLabel));
+    this.jsonObject.put("oldValueLabel", oldValueLabel);
     return this;
   }
 
@@ -53,7 +53,7 @@ public class FormValueChangeBuilder {
    * @param newValueLabel human-readable string of the new value of the field
    */
   public FormValueChangeBuilder setNewValueLabel(String newValueLabel) {
-    this.jsonObject.add("newValueLabel", new JsonPrimitive(newValueLabel));
+    this.jsonObject.put("newValueLabel", newValueLabel);
     return this;
   }
 
@@ -63,7 +63,7 @@ public class FormValueChangeBuilder {
    * @param subFormKind subform kind
    */
   public FormValueChangeBuilder setSubFormKind(String subFormKind) {
-    this.jsonObject.add("subFormKind", new JsonPrimitive(subFormKind));
+    this.jsonObject.put("subFormKind", subFormKind);
     return this;
   }
 
@@ -73,7 +73,7 @@ public class FormValueChangeBuilder {
    * @param subFormKey subform key
    */
   public FormValueChangeBuilder setSubFormKey(String subFormKey) {
-    this.jsonObject.add("subFormKey", new JsonPrimitive(subFormKey));
+    this.jsonObject.put("subFormKey", subFormKey);
     return this;
   }
 }

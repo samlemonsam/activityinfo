@@ -4,6 +4,7 @@ import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.ui.client.store.FormChange;
 
 import java.util.List;
 
@@ -20,5 +21,10 @@ public class HistoryRequest implements HttpRequest<List<FormHistoryEntry>> {
     @Override
     public Promise<List<FormHistoryEntry>> execute(ActivityInfoClientAsync client) {
         return client.getRecordHistory(formId, recordId);
+    }
+
+    @Override
+    public int refreshInterval(List<FormHistoryEntry> result) {
+        return -1;
     }
 }

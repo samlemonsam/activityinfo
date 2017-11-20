@@ -5,6 +5,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Iterables;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -17,7 +18,7 @@ import org.activityinfo.store.mysql.metadata.DatabaseCacheImpl;
 import org.activityinfo.store.mysql.update.ActivityUpdater;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormNotFoundException;
-import org.activityinfo.store.spi.FormPermissions;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.sql.SQLException;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
 public class MySqlCatalog implements FormCatalog {
 
     private static Logger LOGGER = Logger.getLogger(MySqlCatalog.class.getName());
-    
+
     private List<FormProvider> providers = new ArrayList<>();
     private final QueryExecutor executor;
     private LoadingCache<ResourceId, Optional<FormStorage>> sessionCache;
@@ -38,6 +39,7 @@ public class MySqlCatalog implements FormCatalog {
     
     private GeodbFolder geodbFolder;
     private DatabasesFolder databasesFolder;
+    private final FormFolder formFolder;
 
     public MySqlCatalog(final QueryExecutor executor) {
 
@@ -56,6 +58,7 @@ public class MySqlCatalog implements FormCatalog {
 
         geodbFolder = new GeodbFolder(executor);
         databasesFolder = new DatabasesFolder(executor);
+        formFolder = new FormFolder(this);
         
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<FormStorage>>() {
@@ -155,10 +158,14 @@ public class MySqlCatalog implements FormCatalog {
     public List<CatalogEntry> getChildren(String parentId, int userId) {
         
         try {
+            // Start async queries
+            Iterable<CatalogEntry> analyses = ReportFolder.queryReports(parentId);
+
             List<CatalogEntry> entries = new ArrayList<>();
             entries.addAll(geodbFolder.getChildren(parentId));
             entries.addAll(databasesFolder.getChildren(parentId, userId));
-
+            entries.addAll(formFolder.getChildren(ResourceId.valueOf(parentId)));
+            Iterables.addAll(entries, analyses);
             return entries;
             
         } catch (SQLException e) {

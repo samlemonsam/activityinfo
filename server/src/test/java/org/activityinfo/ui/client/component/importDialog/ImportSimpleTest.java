@@ -57,7 +57,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
     @Test
     public void test() throws IOException {
 
-        FormTree formTree = assertResolves(formTreeBuilder.apply(HOUSEHOLD_SURVEY_FORM_CLASS));
+        FormTree formTree = assertResolves(locator.getFormTree(HOUSEHOLD_SURVEY_FORM_CLASS));
         FormTreePrettyPrinter.print(formTree);
 
 
@@ -113,7 +113,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
     @Test
     public void locationWithMissingAdminLevel() throws IOException {
 
-        FormTree formTree = assertResolves(formTreeBuilder.apply(VILLAGE_FORM_ID));
+        FormTree formTree = assertResolves(locator.getFormTree(VILLAGE_FORM_ID));
         FormTreePrettyPrinter.print(formTree);
 
 
@@ -163,7 +163,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
     public void testExceptionHandling() throws IOException {
 
 
-        FormTree formTree = assertResolves(formTreeBuilder.apply(HOUSEHOLD_SURVEY_FORM_CLASS));
+        FormTree formTree = assertResolves(locator.getFormTree(HOUSEHOLD_SURVEY_FORM_CLASS));
         importModel = new ImportModel(formTree);
 
         // Step 1: User pastes in data to import
@@ -186,7 +186,7 @@ public class ImportSimpleTest extends AbstractImporterTest {
 
     @Test
     public void columnMappingGuesser() throws IOException {
-        FormTree formTree = assertResolves(formTreeBuilder.apply(HOUSEHOLD_SURVEY_FORM_CLASS));
+        FormTree formTree = assertResolves(locator.getFormTree(HOUSEHOLD_SURVEY_FORM_CLASS));
         FormTreePrettyPrinter.print(formTree);
 
         importModel = new ImportModel(formTree);

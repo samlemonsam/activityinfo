@@ -5,15 +5,14 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 
 public class AnalysisPlace extends Place {
 
-    public static class Tokenizer implements PlaceTokenizer<AnalysisPlace> {
-        @Override
-        public AnalysisPlace getPlace(String token) {
-            return new AnalysisPlace();
-        }
+    private String id;
 
-        @Override
-        public String getToken(AnalysisPlace place) {
-            return "";
-        }
+    public AnalysisPlace(String id) {
+        this.id = id;
     }
+
+    public String getId() {
+        return id;
+    }
+
 }

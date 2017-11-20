@@ -1,7 +1,9 @@
 package org.activityinfo.model.job;
 
-import com.google.gson.JsonObject;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
+
+import static org.activityinfo.json.Json.createObject;
 
 /**
  * Defines a column to be included in an export
@@ -21,13 +23,13 @@ public class ExportColumn {
         return formula;
     }
 
-    public JsonObject toJsonObject() {
-        JsonObject object = new JsonObject();
-        object.addProperty("formula", formula);
+    public JsonValue toJsonObject() {
+        JsonValue object = createObject();
+        object.put("formula", formula);
         return object;
     }
 
-    public static ExportColumn fromJson(JsonObject object) {
-        return new ExportColumn(object.get("formula").getAsString());
+    public static ExportColumn fromJson(JsonValue object) {
+        return new ExportColumn(object.get("formula").asString());
     }
 }

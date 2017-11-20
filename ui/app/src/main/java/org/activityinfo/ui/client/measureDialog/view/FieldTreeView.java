@@ -97,7 +97,7 @@ public class FieldTreeView implements IsWidget {
      * @param tree
      */
     private void fillStore(FormTree tree) {
-        FieldTreeBuilder builder = new FieldTreeBuilder(treeStore);
+        FieldTreeBuilder builder = new FieldTreeBuilder(tree, treeStore);
         builder.build(tree);
     }
 
@@ -109,4 +109,13 @@ public class FieldTreeView implements IsWidget {
     }
 
 
+    public void selectNext(MeasureTreeNode node) {
+        MeasureTreeNode newSelection = treeStore.getNextSibling(node);
+        if(newSelection == null) {
+            newSelection = treeStore.getNextSibling(treeStore.getParent(node));
+        }
+        if(newSelection != null) {
+            getSelectionModel().select(newSelection, false);
+        }
+    }
 }

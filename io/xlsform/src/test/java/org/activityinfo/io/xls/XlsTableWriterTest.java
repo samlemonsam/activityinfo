@@ -1,6 +1,7 @@
 package org.activityinfo.io.xls;
 
 import com.google.common.io.Resources;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.analysis.ImmutableTableModel;
@@ -12,6 +13,7 @@ import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileOutputStream;
@@ -24,18 +26,28 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class XlsTableWriterTest {
 
+    private FormSourceSyncImpl formSource;
+    private TestingCatalog catalog;
+
+    @Before
+    public void setup() {
+        LocaleProxy.initialize();
+
+        catalog = new TestingCatalog();
+        formSource = new FormSourceSyncImpl(catalog, 1);
+    }
+
     @Test
     public void surveyForm() throws IOException {
 
         TableModel tableModel = ImmutableTableModel.builder()
-                .formId(Survey.FORM_ID)
+                .formId(catalog.getSurvey().getFormId())
                 .build();
 
         assertThat(export(tableModel), sameWorkbook(getWorkBook("survey-expected.xls")));
     }
 
     private HSSFWorkbook export(TableModel tableModel) throws IOException {
-        FormSourceSyncImpl formSource = new FormSourceSyncImpl(new TestingCatalog(), 1);
 
         TableViewModel viewModel = new TableViewModel(formSource, tableModel);
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();

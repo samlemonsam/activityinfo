@@ -4,10 +4,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
@@ -26,6 +24,10 @@ public class EnumValue implements FieldValue, HasSetFieldValue {
 
     public EnumValue(ResourceId valueId) {
         this.valueIds = ImmutableSet.of(valueId);
+    }
+
+    public EnumValue(EnumItem item) {
+        this(item.getId());
     }
 
     public EnumValue(ResourceId... valueIds) {
@@ -68,15 +70,15 @@ public class EnumValue implements FieldValue, HasSetFieldValue {
     }
 
     @Override
-    public JsonElement toJsonElement() {
+    public JsonValue toJsonElement() {
         if(valueIds.isEmpty()) {
-            return JsonNull.INSTANCE;
+            return Json.createNull();
         } else if(valueIds.size() == 1) {
-            return new JsonPrimitive(valueIds.iterator().next().asString());
+            return Json.create(valueIds.iterator().next().asString());
         } else {
-            JsonArray array = new JsonArray();
+            JsonValue array = Json.createArray();
             for (ResourceId valueId : valueIds) {
-                array.add(new JsonPrimitive(valueId.asString()));
+                array.add(Json.create(valueId.asString()));
             }
             return array;
         }
