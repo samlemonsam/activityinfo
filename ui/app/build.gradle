@@ -124,6 +124,7 @@ task compileApp(type: JavaExec) {
 
 }
 
+compileApp.onlyIf { !project.hasProperty('skipGwt') }
 
 task testOffline(type: JavaExec) {
 
