@@ -29,7 +29,8 @@ import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
-import org.activityinfo.store.query.impl.*;
+import org.activityinfo.store.query.server.*;
+import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 
 import javax.annotation.Nullable;
@@ -207,7 +208,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private void executeBatch() {
         try {
             queryExecTime.start();
-            batch.execute();
+            builder.execute(batch);
         } catch (Exception excp) {
             throw new RuntimeException("Failed to execute query batch", excp);
         }
