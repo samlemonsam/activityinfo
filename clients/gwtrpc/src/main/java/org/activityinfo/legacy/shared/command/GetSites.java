@@ -22,6 +22,7 @@ package org.activityinfo.legacy.shared.command;
  * #L%
  */
 
+import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 
@@ -33,7 +34,7 @@ import java.util.Set;
  *
  * @author Alex Bertram
  */
-public class GetSites extends PagingGetCommand<SiteResult> {
+public class GetSites extends PagingGetCommand<SiteResult> implements Command<SiteResult> {
 
     private Filter filter = new Filter();
 
@@ -48,15 +49,27 @@ public class GetSites extends PagingGetCommand<SiteResult> {
     private boolean fetchLinks = true;
     private boolean fetchComments = true;
     private boolean fetchDates = true;
-
-
     private boolean fetchAllReportingPeriods = false;
+
+    private boolean legacyFetch = true;
 
     public GetSites() {
     }
 
     public GetSites(Filter filter) {
         this.filter = filter;
+    }
+
+    public boolean isLegacyFetch() {
+        return legacyFetch;
+    }
+
+    public void setLegacyFetch(boolean legacyFetch) {
+        this.legacyFetch = legacyFetch;
+    }
+
+    public boolean hasSingleActivity() {
+        return filter.getRestrictions(DimensionType.Activity).size() == 1;
     }
 
     public Filter filter() {

@@ -1,6 +1,7 @@
-package org.activityinfo.server.command.handler.pivot;
+package org.activityinfo.server.command.handler.binding.dim;
 
 
+import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
@@ -13,6 +14,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.server.command.handler.binding.FieldBinding;
 import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
@@ -21,11 +23,26 @@ import java.util.List;
 public class SiteDimBinding extends DimBinding {
 
     private static final String ID_COLUMN = "SiteId";
-    
     private static final String LABEL_COLUMN = "SiteName";
+
+    private static final String ID_FIELD = "id";
+    private static final String NAME_FIELD = "name";
     
     private final Dimension model = new Dimension(DimensionType.Site);
-    
+
+    @Override
+    public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {
+        ColumnView id = columnSet.getColumnView(ID_COLUMN);
+        ColumnView label = columnSet.getColumnView(LABEL_COLUMN);
+
+        for (int i=0; i<columnSet.getNumRows(); i++) {
+            dataArray[i].set(ID_FIELD, CuidAdapter.getLegacyIdFromCuid(id.getString(i)));
+            dataArray[i].set(NAME_FIELD, Strings.nullToEmpty(label.getString(i)));
+        }
+
+        return dataArray;
+    }
+
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         

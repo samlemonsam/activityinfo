@@ -1,6 +1,8 @@
-package org.activityinfo.server.command.handler.pivot;
+package org.activityinfo.server.command.handler.binding.dim;
 
+import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.legacy.shared.command.DimensionType;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.expr.CompoundExpr;
@@ -9,19 +11,38 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
 import java.util.List;
 
-
 public class PartnerDimBinding extends DimBinding {
 
     private static final String PARTNER_ID_COLUMN = "PartnerId";
     private static final String PARTNER_LABEL_COLUMN = "PartnerLabel";
 
+    private static final String PARTNER_FIELD = "partner";
+
     private final Dimension model = new Dimension(DimensionType.Partner);
+
+    @Override
+    public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {
+        ColumnView id = columnSet.getColumnView(PARTNER_ID_COLUMN);
+        ColumnView label = columnSet.getColumnView(PARTNER_LABEL_COLUMN);
+
+        for (int i=0; i<columnSet.getNumRows(); i++) {
+            String partnerId = id.getString(i);
+            String partnerLabel = label.getString(i);
+
+            PartnerDTO partner = new PartnerDTO(CuidAdapter.getLegacyIdFromCuid(partnerId), partnerLabel);
+
+            dataArray[i].set(PARTNER_FIELD, partner);
+        }
+
+        return dataArray;
+    }
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {

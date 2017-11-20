@@ -31,6 +31,7 @@ public class SitesResourcesTest extends CommandTestCase2 {
         private final List<Integer> attributeIds = Lists.newArrayList();
         private final List<Integer>  locationIds = Lists.newArrayList();
         private final List<Integer> siteIds = Lists.newArrayList();
+        private final Boolean legacy = true;
         private String format = null;
     }
 
@@ -78,6 +79,7 @@ public class SitesResourcesTest extends CommandTestCase2 {
                 parameters.activityIds, parameters.databaseIds, parameters.indicatorIds, parameters.partnerIds,
                 parameters.attributeIds, parameters.locationIds,
                 parameters.siteIds,
+                parameters.legacy,
                 parameters.format
         );
     }

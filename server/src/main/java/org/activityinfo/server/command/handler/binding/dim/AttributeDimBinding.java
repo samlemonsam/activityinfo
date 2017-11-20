@@ -1,4 +1,4 @@
-package org.activityinfo.server.command.handler.pivot;
+package org.activityinfo.server.command.handler.binding.dim;
 
 import com.google.common.base.Optional;
 import org.activityinfo.legacy.shared.reports.content.AttributeCategory;

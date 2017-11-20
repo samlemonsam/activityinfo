@@ -46,6 +46,7 @@ public class SitesResources {
                         @QueryParam("attribute") List<Integer> attributeIds,
                         @QueryParam("location") List<Integer> locationIds,
                         @QueryParam("site") List<Integer> siteIds,
+                        @QueryParam("legacy") Boolean legacy,
                         @QueryParam("format") String format) throws IOException {
 
         Filter filter = new Filter();
@@ -57,7 +58,11 @@ public class SitesResources {
         filter.addRestriction(DimensionType.Location, locationIds);
         filter.addRestriction(DimensionType.Site, siteIds);
 
-        List<SiteDTO> sites = dispatcher.execute(new GetSites(filter)).getData();
+        GetSites command = new GetSites(filter);
+        if (legacy != null) {
+            command.setLegacyFetch(legacy);
+        }
+        List<SiteDTO> sites = dispatcher.execute(command).getData();
 
         StringWriter writer = new StringWriter();
         JsonGenerator json = Jackson.createJsonFactory(writer);
@@ -79,8 +84,9 @@ public class SitesResources {
         Filter filter = new Filter();
         filter.addRestriction(DimensionType.Activity, activityIds);
         filter.addRestriction(DimensionType.Database, databaseIds);
-    
-        List<SiteDTO> sites = dispatcher.execute(new GetSites(filter)).getData();
+
+        GetSites command = new GetSites(filter);
+        List<SiteDTO> sites = dispatcher.execute(command).getData();
 
         StringWriter writer = new StringWriter();
         JsonGenerator json = Jackson.createJsonFactory(writer);
@@ -105,7 +111,7 @@ public class SitesResources {
             json.writeStartObject();
             json.writeNumberField("id", site.getId());
             json.writeNumberField("activity", site.getActivityId());
-            json.writeNumberField("timestamp", site.getTimeEdited());
+            //json.writeNumberField("timestamp", site.getTimeEdited());
 
             // write start / end date if applicable
             if (site.getDate1() != null && site.getDate2() != null) {
@@ -126,6 +132,19 @@ public class SitesResources {
                 json.writeNumber(site.getLongitude());
             }
             json.writeEndObject();
+
+            // write admin entities
+            Map<Integer,AdminEntityDTO> adminEntityMap = site.getAdminEntities();
+            if (!adminEntityMap.isEmpty()) {
+                json.writeObjectFieldStart("adminLevels");
+                for (AdminEntityDTO adminEntity : adminEntityMap.values()) {
+                    json.writeObjectFieldStart(Strings.nullToEmpty(adminEntity.getLevelName()));
+                    json.writeNumberField("id", adminEntity.getId());
+                    json.writeStringField("name", adminEntity.getName());
+                    json.writeEndObject();
+                }
+                json.writeEndObject();
+            }
 
             json.writeObjectFieldStart("partner");
             json.writeNumberField("id", site.getPartnerId());
