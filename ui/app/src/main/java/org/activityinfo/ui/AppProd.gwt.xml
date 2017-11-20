@@ -31,17 +31,7 @@
     <set-property name="gwt.logging.enabled" value="FALSE"/>
 
     <!-- Limit to supported browsers -->
-    <set-property name="user.agent" value="ie9,ie10,safari,gecko1_8"/>
-    <set-property name="gxt.user.agent" value="ie9,ie10,ie11,safari5,chrome,gecko1_9"/>
-
-    <!-- Group IE permutations to reduce build time -->
-    <collapse-property name="user.agent" values="ie*" />
-
-    <!-- Collapse gxt permutations to match gwt -->
-    <collapse-property name="gxt.user.agent" values="ie*" />
-    <collapse-property name="gxt.user.agent" values="gecko*" />
-    <collapse-property name="gxt.user.agent" values="safari*,chrome" />
-    <collapse-property name="gxt.device" values="*"/>
+    <set-property name="gxt.user.agent" value="safari5,chrome,ie9,ie10,ie11,gecko1_9"/>
 
     <!-- Generate AppCache manifests -->
     <define-linker name="std" class="com.bedatadriven.rebar.appcache.linker.AppCacheIFrameLinker"/>
