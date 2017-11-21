@@ -49,7 +49,6 @@ public class RecordTreeLoaderTest {
     public void references() {
         BioDataForm bioDataForm = setup.getBioDataForm();
 
-
         Observable<Maybe<RecordTree>> recordTree = setup.getFormStore().getRecordTree(bioDataForm.getRecordRef(0));
 
         Connection<Maybe<RecordTree>> recordTreeView = setup.connect(recordTree);

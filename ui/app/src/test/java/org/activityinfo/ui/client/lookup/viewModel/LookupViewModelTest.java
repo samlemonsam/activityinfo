@@ -161,4 +161,22 @@ public class LookupViewModelTest {
         assertThat(selection.assertLoaded().get(), equalTo(new RecordRef(locationForm.getFormId(), ResourceId.valueOf("c75"))));
     }
 
+    @Test
+    public void noKeysTest() {
+
+        TestingCatalog catalog = new TestingCatalog();
+        NfiForm nfiForm = catalog.getNfiForm();
+
+        FormTree formTree = catalog.getFormTree(nfiForm.getFormId());
+
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree,
+                new ReferenceType(Cardinality.SINGLE, nfiForm.getFormId()));
+
+        LookupKeyViewModel keyViewModel = viewModel.getLookupKeys().get(0);
+
+        Connection<List<String>> choices = setup.connect(keyViewModel.getChoices());
+
+        assertThat(choices.assertLoaded(), hasSize(821));
+
+    }
 }

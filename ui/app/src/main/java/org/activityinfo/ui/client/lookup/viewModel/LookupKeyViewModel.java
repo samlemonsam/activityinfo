@@ -8,9 +8,6 @@ import java.util.List;
 
 public class LookupKeyViewModel {
 
-    private static final String ID_COLUMN_ID = "id";
-    private static final String KEY_COLUMN_ID = "key";
-
     private LookupKey lookupKey;
     private final Observable<Boolean> enabled;
     private final Observable<Optional<String>> selectedKey;

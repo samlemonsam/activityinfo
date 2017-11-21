@@ -101,6 +101,9 @@ class KeySelection {
     }
 
     private boolean isEmpty(List<BitSet> bitSets) {
+        if(bitSets.isEmpty()) {
+            return true;
+        }
         for (BitSet set : bitSets) {
             if(set.isEmpty()) {
                 return true;
