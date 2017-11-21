@@ -158,6 +158,7 @@ public class KeyedSubFormPanel implements IsWidget {
 
     private boolean canChangePeriod() {
         if(viewModel.getActiveSubViewModel().isDirty() &&
+          !viewModel.getActiveSubViewModel().isPlaceholder() &&
           !viewModel.getActiveSubViewModel().isValid()) {
 
             MessageBox box = new MessageBox(I18N.CONSTANTS.error(), I18N.CONSTANTS.pleaseFillInAllRequiredFields());

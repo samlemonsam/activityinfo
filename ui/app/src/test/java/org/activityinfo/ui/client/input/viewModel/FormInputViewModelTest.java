@@ -368,6 +368,14 @@ public class FormInputViewModelTest {
         viewModel = builder.build(inputModel);
         subForm = viewModel.getSubForm(subFormFieldId);
 
+        // At this point, the subform is not valid because required fields are not filled in,
+        // but it is also not dirty because we have not changed anything
+        assertThat(subForm.getActiveSubViewModel().isValid(), equalTo(false));
+        assertThat(subForm.getActiveSubViewModel().isDirty(), equalTo(false));
+        assertThat(subForm.getActiveSubViewModel().isPlaceholder(), equalTo(true));
+
+        // Now fill in the required field
+
         inputModel = inputModel.updateSubForm(subForm.update(consultCountFieldId, new FieldInput(new Quantity(44))));
 
         viewModel = builder.build(inputModel);
