@@ -105,7 +105,7 @@ public class MailingListClient {
         interests.addProperty(uninvitedGroup, !invited);
         interests.addProperty(unknownGroup, false);
         interests.addProperty(noAccountGroup, false);
-        method.interests = interests;
+        method.interests = interests.toString();
     }
 
     // Holds a subscriber's merge_vars info (see http://apidocs.mailchimp.com/legacy/1.3/listsubscribe.func.php )
@@ -134,7 +134,7 @@ public class MailingListClient {
 
         // Specifies the "interest" groups user is associated with
         @JsonProperty("interests")
-        private JsonObject interests;
+        private String interests;
 
     }
 
