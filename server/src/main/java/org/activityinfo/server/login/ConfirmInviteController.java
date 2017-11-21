@@ -88,9 +88,7 @@ public class ConfirmInviteController {
             user.clearChangePasswordKey();
             user.setEmailNotification(true);
 
-            if (newsletter) {
-                mailingList.subscribe(user);
-            }
+            mailingList.subscribe(user, true, newsletter);
 
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
                            .cookie(authTokenProvider.createNewAuthCookies(user))

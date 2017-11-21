@@ -115,10 +115,8 @@ public class SignUpConfirmationController {
             addUserToDefaultDatabase(user);
 
             entityManager.getTransaction().commit();
-            
-            if (newsletter) {
-                mailingList.subscribe(user);
-            }
+
+            mailingList.subscribe(user, false, newsletter);
 
             // go to the home page
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
