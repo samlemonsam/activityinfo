@@ -1,6 +1,7 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.collect.Iterables;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
@@ -12,6 +13,7 @@ import org.activityinfo.store.query.shared.NodeMatcher;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.query.shared.join.JoinNode;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -22,6 +24,10 @@ import static org.junit.Assert.assertThat;
 
 public class SubFormSummaryTest {
 
+    @BeforeClass
+    public static void setupLocale() {
+        LocaleProxy.initialize();
+    }
 
     @Test
     public void matchNodes() {
