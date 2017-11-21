@@ -100,7 +100,7 @@ public class FieldWidgetFactory implements FieldTypeVisitor<FieldWidget> {
 
     @Override
     public FieldWidget visitBarcode(BarcodeType barcodeType) {
-        return null;
+        return new BarcodeWidget(updater);
     }
 
     @Override
