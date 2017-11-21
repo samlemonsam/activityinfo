@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.table.view;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
@@ -130,12 +131,12 @@ public class TableView implements IsWidget, HasTitle {
                     subFormPaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
 
                     this.container.setSouthWidget(subFormPane, subFormPaneLayout);
-                    this.container.forceLayout();
+                    Scheduler.get().scheduleFinally(() -> container.forceLayout());
                 }
             } else {
                 if(subFormPane != null) {
                     this.container.remove(subFormPane);
-                    this.container.forceLayout();
+                    Scheduler.get().scheduleFinally(() -> container.forceLayout());
                     subFormPane = null;
                 }
             }
