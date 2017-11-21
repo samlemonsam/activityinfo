@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormEvalContext;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
@@ -101,9 +102,19 @@ public class FormInputViewModelBuilder {
         return build(new FormInputModel(recordRef), Maybe.notFound(), true);
     }
 
+    public FormInputViewModel placeholder(RecordRef recordRef, FormField subFormKeyField, FieldValue keyValue) {
+
+
+        FormInputModel inputModel = new FormInputModel(recordRef)
+            .update(subFormKeyField.getId(), keyValue);
+
+        return build(inputModel, Maybe.notFound(), true);
+    }
+
     public FormInputViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingRecord, boolean placeholder) {
 
         FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormId());
+
 
         // Keep track if this form is valid and ready to submit
         boolean valid = true;
@@ -118,7 +129,6 @@ public class FormInputViewModelBuilder {
         }
 
         record.setAll(existingValues);
-
 
         // Now apply changes...
         for (FormTree.Node node : formTree.getRootFields()) {

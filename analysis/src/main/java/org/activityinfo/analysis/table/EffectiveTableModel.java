@@ -17,7 +17,10 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.EpiWeekType;
+import org.activityinfo.model.type.time.FortnightType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.model.type.time.MonthType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.query.shared.FormSource;
@@ -119,6 +122,9 @@ public class EffectiveTableModel {
                type instanceof EnumType ||
                type instanceof GeoPointType ||
                type instanceof LocalDateType ||
+               type instanceof EpiWeekType ||
+               type instanceof FortnightType ||
+               type instanceof MonthType ||
                type instanceof CalculatedFieldType;
     }
 

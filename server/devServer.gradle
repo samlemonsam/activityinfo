@@ -126,7 +126,7 @@ task appengineRunAT(type: RunTask) {
 tasks.withType(RunTask) {
 
     // Provide a configuration for the server
-    jvmFlags = ["-Dactivityinfo.config=${configFile}"]
+    jvmFlags += ["-Dactivityinfo.config=${configFile}", '-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000']
 
     doFirst {
         writeConfiguration ext.database

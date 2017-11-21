@@ -73,6 +73,10 @@ public class FormInstance {
         this.fieldMap = new HashMap<>();
     }
 
+    public FormInstance(RecordRef recordRef) {
+        this(recordRef.getRecordId(), recordRef.getFormId());
+    }
+
     public static FormInstance toFormInstance(FormClass formClass, FormRecord record) {
         FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
 

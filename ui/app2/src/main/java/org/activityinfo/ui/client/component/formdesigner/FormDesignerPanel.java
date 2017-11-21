@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.*;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.field.FieldUpdater;
 import org.activityinfo.ui.client.component.form.field.FormFieldWidget;
@@ -44,7 +45,6 @@ import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetCo
 import org.activityinfo.ui.client.component.formdesigner.container.FieldsHolderWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.LabelWidgetContainer;
 import org.activityinfo.ui.client.component.formdesigner.container.WidgetContainer;
-import org.activityinfo.ui.client.component.formdesigner.drop.NullValueUpdater;
 import org.activityinfo.ui.client.component.formdesigner.event.WidgetContainerSelectionEvent;
 import org.activityinfo.ui.client.component.formdesigner.header.HeaderPanel;
 import org.activityinfo.ui.client.component.formdesigner.palette.FieldPalette;
@@ -172,7 +172,9 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
         formClass.traverse(formClass, new TraverseFunction() {
             @Override
             public void apply(FormElement element, FormElementContainer container) {
-                if (element instanceof FormField) {
+                if ( isSubFormKey(formClass, element)) {
+                    // NOOP
+                } else if (element instanceof FormField) {
                     FormField formField = (FormField) element;
                     WidgetContainer widgetContainer = containerMap.get(formField.getId());
                     if (widgetContainer != null) { // widget container may be null if domain is not supported, should be removed later
@@ -220,7 +222,9 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
             } else if (element instanceof FormLabel) {
                 FormLabel label = (FormLabel) element;
                 containerMap.put(label.getId(), new LabelWidgetContainer(formDesigner, label, container.getId()));
-            } else if (element instanceof FormField) {
+            } else if (element instanceof FormField && !isSubFormKey(owner, (FormField)element)) {
+
+
                 final FormField formField = (FormField) element;
                 if (formField.getType() instanceof SubFormReferenceType) { // subform
                     SubFormReferenceType subform = (SubFormReferenceType) formField.getType();
@@ -267,6 +271,18 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
                 }
             }
         }
+    }
+
+    private boolean isSubFormKey(FormClass owner, FormElement element) {
+
+        if(element instanceof FormField) {
+            FormField field = (FormField) element;
+            return owner.isSubForm() &&
+                    owner.getSubFormKind().isPeriod() &&
+                    field.isKey() &&
+                    field.getType() instanceof PeriodType;
+        }
+        return true;
     }
 
     @Override

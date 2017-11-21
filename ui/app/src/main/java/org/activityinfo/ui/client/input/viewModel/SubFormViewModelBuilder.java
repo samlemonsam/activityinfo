@@ -1,12 +1,15 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -27,6 +30,7 @@ class SubFormViewModelBuilder {
     private final FormTree subTree;
     private final SubFormKind subFormKind;
     private final FormInputViewModelBuilder formBuilder;
+    private final Optional<FormField> keyField;
     private final ActivePeriodMemory memory = new SimpleActivePeriodMemory();
 
     private ResourceId placeholderRecordId;
@@ -40,6 +44,22 @@ class SubFormViewModelBuilder {
         this.subFormKind = subTree.getRootFormClass().getSubFormKind();
         this.placeholderRecordId = ResourceId.generateId();
         this.formBuilder = new FormInputViewModelBuilder(formStore, subTree);
+        this.keyField = findKeyField(subTree.getRootFormClass());
+
+        if(subFormKind.isPeriod()) {
+            assert keyField.isPresent() : "missing period key field";
+        }
+    }
+
+    private Optional<FormField> findKeyField(FormClass formClass) {
+        if(formClass.isSubForm() && formClass.getSubFormKind().isPeriod()) {
+            for (FormField formField : formClass.getFields()) {
+                if(formField.getType() instanceof PeriodType && formField.isKey()) {
+                    return Optional.of(formField);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     public SubFormViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingParentRecord) {
@@ -64,7 +84,6 @@ class SubFormViewModelBuilder {
                 deletedRecords.add(ref);
 
             } else {
-
                 FormInputModel subInput = inputModel.getSubRecord(ref).orElse(new FormInputModel(ref));
                 FormInputViewModel subViewModel = formBuilder.build(subInput, Maybe.of(existingSubRecord));
 
@@ -83,7 +102,17 @@ class SubFormViewModelBuilder {
             }
         }
 
-        if(subFormKind == SubFormKind.REPEATING) {
+        if (keyField.isPresent()) {
+
+            // Keyed/Period subforms have a single active record
+
+            RecordRef activeRecord = computeActiveSubRecord(inputModel.getRecordRef(), inputModel);
+            FormInputViewModel activeRecordViewModel = find(activeRecord, subRecordViews);
+
+            return new SubFormViewModel(fieldId, subFormKind, subRecordViews, activeRecordViewModel, deletedRecords);
+
+
+        } else {
 
             // If there are no records, then the computed view includes a new empty one
 
@@ -97,14 +126,6 @@ class SubFormViewModelBuilder {
             return new SubFormViewModel(fieldId, subRecordViews, deletedRecords);
 
 
-        } else {
-
-            // Keyed/Period subforms have a single active record
-
-            RecordRef activeRecord = computeActiveSubRecord(inputModel.getRecordRef(), inputModel);
-            FormInputViewModel activeRecordViewModel = find(activeRecord, subRecordViews);
-
-            return new SubFormViewModel(fieldId, subFormKind, subRecordViews, activeRecordViewModel, deletedRecords);
         }
     }
 
@@ -114,7 +135,14 @@ class SubFormViewModelBuilder {
                 return subRecordView;
             }
         }
-        return formBuilder.placeholder(activeRecord);
+        if(keyField.isPresent()) {
+            PeriodType periodType = (PeriodType) keyField.get().getType();
+            PeriodValue periodValue = periodType.fromSubFormKey(activeRecord);
+            return formBuilder.placeholder(activeRecord, keyField.get(), periodValue);
+
+        } else {
+            return formBuilder.placeholder(activeRecord);
+        }
     }
 
 

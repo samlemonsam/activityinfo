@@ -11,6 +11,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.SubFormPatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,12 @@ public class TestingFormQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
+
+        if(fieldId.equals(SubFormPatch.PERIOD_FIELD_ID)) {
+            addResourceId(SubFormPatch.fromRecordId(formClass, observer));
+            return;
+        }
+
         if(fieldId.equals(FormClass.PARENT_FIELD_ID)) {
             if(!formClass.isSubForm()) {
                 throw new IllegalStateException("Form " + formClass.getId() + " is not a sub form");

@@ -61,6 +61,10 @@ public class FormInputViewModel {
         this.placeholder = placeholder;
     }
 
+    public FormInputModel getInputModel() {
+        return inputModel;
+    }
+
     public RecordRef getRecordRef() {
         return inputModel.getRecordRef();
     }

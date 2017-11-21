@@ -8,6 +8,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.model.type.time.PeriodValue;
+import org.activityinfo.ui.client.input.model.FieldInput;
+import org.activityinfo.ui.client.input.model.FormInputModel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -122,5 +124,9 @@ public class SubFormViewModel {
 
     public Set<RecordRef> getDeletedRecords() {
         return deletedRecords;
+    }
+
+    public FormInputModel update(ResourceId fieldId, FieldInput input) {
+        return getActiveSubViewModel().getInputModel().update(fieldId, input);
     }
 }

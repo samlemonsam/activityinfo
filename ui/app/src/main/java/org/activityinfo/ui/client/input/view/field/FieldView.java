@@ -27,7 +27,7 @@ public class FieldView {
         return widget;
     }
 
-    public void update(FormInputViewModel viewModel) {
+    public void updateView(FormInputViewModel viewModel) {
         widget.setRelevant(viewModel.isRelevant(fieldId));
 
         if(viewModel.isMissing(fieldId)) {

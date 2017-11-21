@@ -116,7 +116,7 @@ public class TestingCatalog implements FormCatalog {
 
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
-        return null;
+        throw new UnsupportedOperationException("TODO");
     }
 
     @Override

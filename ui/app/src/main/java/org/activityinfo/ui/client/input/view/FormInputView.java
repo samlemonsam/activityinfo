@@ -95,7 +95,7 @@ public class FormInputView implements IsWidget, InputHandler {
 
         viewModel = viewModelBuilder.build(inputModel, existingRecord);
         formPanel.init(viewModel);
-        formPanel.update(viewModel);
+        formPanel.updateView(viewModel);
     }
 
 
@@ -124,10 +124,15 @@ public class FormInputView implements IsWidget, InputHandler {
         update(inputModel.updateActiveSubRecord(fieldId, newActiveRef));
     }
 
+    @Override
+    public void updateSubModel(FormInputModel update) {
+        update(inputModel.updateSubForm(update));
+    }
+
     private void update(FormInputModel updatedModel) {
         this.inputModel = updatedModel;
         this.viewModel = viewModelBuilder.build(inputModel, existingRecord);
-        formPanel.update(viewModel);
+        formPanel.updateView(viewModel);
     }
 
     public boolean isValid() {

@@ -12,6 +12,7 @@ import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.SubFormPatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +48,14 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
 
         FieldObserver fieldObserver;
         if(fieldId.equals(FormClass.PARENT_FIELD_ID)) {
-            if(parentFieldObservers == null) {
+            if (parentFieldObservers == null) {
                 parentFieldObservers = new ArrayList<>();
             }
             parentFieldObservers.add(observer);
+            observers.add(observer);
+
+        } else if(fieldId.equals(SubFormPatch.PERIOD_FIELD_ID)) {
+            addResourceId(SubFormPatch.fromRecordId(formClass, observer));
 
         } else {
 
@@ -58,10 +63,8 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
             FieldConverter converter = FieldConverters.forType(field.getType());
             fieldObserver = new FieldObserver(field.getName(), converter, observer);
             fieldObservers.add(fieldObserver);
-
+            observers.add(observer);
         }
-
-        observers.add(observer);
     }
 
     @Override

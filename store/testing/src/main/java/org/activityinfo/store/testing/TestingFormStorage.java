@@ -105,7 +105,7 @@ public class TestingFormStorage implements VersionedFormStorage {
 
     @Override
     public FormClass getFormClass() {
-        return testForm.getFormClass();
+        return SubFormPatch.patch(testForm.getFormClass());
     }
 
     @Override

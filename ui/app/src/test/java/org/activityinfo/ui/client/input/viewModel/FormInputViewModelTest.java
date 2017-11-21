@@ -327,6 +327,7 @@ public class FormInputViewModelTest {
     @Test
     public void monthlySubForms() {
         ClinicForm clinicForm = setup.getCatalog().getClinicForm();
+        ResourceId consultCountFieldId = clinicForm.getSubForm().getConsultsField().getId();
 
         FormInputViewModelBuilder builder = builderFor(clinicForm);
 
@@ -350,18 +351,29 @@ public class FormInputViewModelTest {
         assertThat(subForm.getActiveRecordRef(), equalTo(octoberId));
 
         // Update a field in the active form
-        ResourceId consultCountFieldId = clinicForm.getSubForm().getConsultsField().getId();
-        inputModel = inputModel.update(octoberId, consultCountFieldId, new FieldInput(new Quantity(33)));
+        inputModel = inputModel.updateSubForm(
+            subForm.update(
+                consultCountFieldId,
+                new FieldInput(new Quantity(33))));
+
         viewModel = builder.build(inputModel);
 
         FormInputViewModel subFormViewModel = viewModel.getSubForm(subFormFieldId).getActiveSubViewModel();
         assertThat(subFormViewModel.getField(consultCountFieldId), equalTo(new Quantity(33)));
+        assertThat(subFormViewModel.isValid(), equalTo(true));
 
         // Now change the active record to another month
         inputModel = inputModel.updateActiveSubRecord(subFormFieldId, novemberId);
+
+        viewModel = builder.build(inputModel);
+        subForm = viewModel.getSubForm(subFormFieldId);
+
+        inputModel = inputModel.updateSubForm(subForm.update(consultCountFieldId, new FieldInput(new Quantity(44))));
+
         viewModel = builder.build(inputModel);
 
         assertThat(viewModel.getSubForm(subFormFieldId).getActiveRecordRef(), equalTo(novemberId));
+        assertThat(viewModel.getSubForm(subFormFieldId).isValid(), equalTo(true));
     }
 
 

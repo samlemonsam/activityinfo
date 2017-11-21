@@ -16,7 +16,6 @@ import java.util.Map;
 public class RecordTree {
 
 
-
     public static class ParentKey {
         private final RecordRef parentRef;
         private final ResourceId subFormId;

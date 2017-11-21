@@ -9,6 +9,7 @@ import com.googlecode.objectify.annotation.Unindex;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.FormConverter;
+import org.activityinfo.store.spi.SubFormPatch;
 
 /**
  * Entity storing a Form's Schema.
@@ -78,6 +79,8 @@ public class FormSchemaEntity {
     }
 
     public FormClass readFormClass() {
-        return FormClass.fromJson(FormConverter.fromEmbeddedEntity(schema));
+        return
+            SubFormPatch.patch(
+              FormClass.fromJson(FormConverter.fromEmbeddedEntity(schema)));
     }
 }

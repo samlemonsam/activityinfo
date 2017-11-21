@@ -108,6 +108,20 @@ public class FormInputModel {
                 deletedSubRecords);
     }
 
+    public FormInputModel updateSubForm(FormInputModel subFormInputModel) {
+        assert !subFormInputModel.getRecordRef().getFormId().equals(this.recordRef.getFormId()) :
+            "should only be used for sub input models, not the root input model";
+
+        Map<RecordRef, FormInputModel> updatedSubRecords = new HashMap<>(this.subRecords);
+        updatedSubRecords.put(subFormInputModel.getRecordRef(), subFormInputModel);
+
+        return new FormInputModel(this.recordRef,
+            this.fieldInputs,
+            updatedSubRecords,
+            activeSubRecords,
+            deletedSubRecords);
+    }
+
     public FormInputModel deleteSubRecord(RecordRef recordRef) {
         HashMap<RecordRef, FormInputModel> newSubRecords = Maps.newHashMap(this.subRecords);
         Set<RecordRef> newDeleted = Sets.newHashSet();

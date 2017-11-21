@@ -71,7 +71,7 @@ public class RepeatingSubFormPanel implements IsWidget {
     public void init(SubFormViewModel viewModel) {
     }
 
-    public void update(SubFormViewModel viewModel) {
+    public void updateView(SubFormViewModel viewModel) {
 
         this.viewModel = viewModel;
 
@@ -85,7 +85,7 @@ public class RepeatingSubFormPanel implements IsWidget {
                 recordContainer.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
                 panelMap.put(subRecord.getRecordRef(), subPanel);
             }
-            subPanel.update(subRecord);
+            subPanel.updateView(subRecord);
         }
 
         // Now remove any that have been deleted

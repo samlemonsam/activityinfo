@@ -1027,6 +1027,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Weekly")
     String weekly();
 
+    @DefaultStringValue("Week")
+    String week();
+
     @DefaultStringValue("W")
     String westHemiChars();
 
@@ -1635,6 +1638,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Fortnightly Sub-Form")
     String fortnightlySubform();
+
+    @DefaultStringValue("Fortnight")
+    String fortnight();
 
     @DefaultStringValue("Daily Sub-Form")
     String dailySubform();

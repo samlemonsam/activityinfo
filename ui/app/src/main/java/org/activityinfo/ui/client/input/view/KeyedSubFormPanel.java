@@ -140,7 +140,7 @@ public class KeyedSubFormPanel implements IsWidget {
         return fieldId;
     }
 
-    public void update(SubFormViewModel viewModel) {
+    public void updateView(SubFormViewModel viewModel) {
 
         LOGGER.info("activeRef = " + viewModel.getActiveRecordRef());
 
@@ -151,7 +151,7 @@ public class KeyedSubFormPanel implements IsWidget {
             formPanel.init(viewModel.getActiveSubViewModel());
         }
 
-        formPanel.update(viewModel.getActiveSubViewModel());
+        formPanel.updateView(viewModel.getActiveSubViewModel());
 
         this.viewModel = viewModel;
     }
