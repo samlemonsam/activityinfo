@@ -101,10 +101,10 @@ public class MailingListClient {
     }
 
     private void setInterests(AddListMemberMethod method, boolean invited) {
-        method.interests.put(invitedGroup, String.valueOf(invited));
-        method.interests.put(uninvitedGroup, String.valueOf(!invited));
-        method.interests.put(unknownGroup, String.valueOf(false));
-        method.interests.put(noAccountGroup, String.valueOf(false));
+        method.interests.put(invitedGroup, invited);
+        method.interests.put(uninvitedGroup, !invited);
+        method.interests.put(unknownGroup, false);
+        method.interests.put(noAccountGroup, false);
     }
 
     // Holds a subscriber's merge_vars info (see http://apidocs.mailchimp.com/legacy/1.3/listsubscribe.func.php )
@@ -133,7 +133,7 @@ public class MailingListClient {
 
         // Specifies the "interest" groups user is associated with
         @JsonProperty("interests")
-        private Map<String, String> interests = Maps.newHashMap();
+        private Map<String, Boolean> interests = Maps.newHashMap();
 
     }
 
