@@ -9,12 +9,12 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,7 +65,7 @@ public class MailingListClient {
 
     private void post(AddListMemberMethod method) throws Exception {
         URL url = new URL("https://us4.api.mailchimp.com/3.0/lists/" + listId + "/members");
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         setAuthentication(conn);
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
@@ -78,13 +78,13 @@ public class MailingListClient {
         sendRequest(method, conn, mapper);
     }
 
-    private void setAuthentication(HttpsURLConnection conn) throws UnsupportedEncodingException {
+    private void setAuthentication(HttpURLConnection conn) throws UnsupportedEncodingException {
         byte[] authMessage = ("apikey:" + apiKey).getBytes("UTF-8");
         String authEncoded = DatatypeConverter.printBase64Binary(authMessage);
         conn.setRequestProperty("Authorization", "Basic " + authEncoded);
     }
 
-    private void sendRequest(AddListMemberMethod method, HttpsURLConnection conn, ObjectMapper mapper) throws Exception {
+    private void sendRequest(AddListMemberMethod method, HttpURLConnection conn, ObjectMapper mapper) throws Exception {
         OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream(), Charsets.UTF_8);
         String json = mapper.writeValueAsString(method);
         LOGGER.fine("MailChimp: " + json);
