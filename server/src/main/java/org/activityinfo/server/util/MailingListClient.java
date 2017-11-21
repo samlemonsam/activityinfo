@@ -1,7 +1,7 @@
 package org.activityinfo.server.util;
 
 import com.google.common.base.Charsets;
-import com.google.gson.JsonObject;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.server.DeploymentConfiguration;
@@ -16,6 +16,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -100,12 +101,10 @@ public class MailingListClient {
     }
 
     private void setInterests(AddListMemberMethod method, boolean invited) {
-        JsonObject interests = new JsonObject();
-        interests.addProperty(invitedGroup, invited);
-        interests.addProperty(uninvitedGroup, !invited);
-        interests.addProperty(unknownGroup, false);
-        interests.addProperty(noAccountGroup, false);
-        method.interests = interests.toString();
+        method.interests.put(invitedGroup, String.valueOf(invited));
+        method.interests.put(uninvitedGroup, String.valueOf(!invited));
+        method.interests.put(unknownGroup, String.valueOf(false));
+        method.interests.put(noAccountGroup, String.valueOf(false));
     }
 
     // Holds a subscriber's merge_vars info (see http://apidocs.mailchimp.com/legacy/1.3/listsubscribe.func.php )
@@ -134,7 +133,7 @@ public class MailingListClient {
 
         // Specifies the "interest" groups user is associated with
         @JsonProperty("interests")
-        private String interests;
+        private Map<String, String> interests = Maps.newHashMap();
 
     }
 
