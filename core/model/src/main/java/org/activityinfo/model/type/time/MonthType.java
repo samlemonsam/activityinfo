@@ -58,7 +58,7 @@ public class MonthType implements FieldType, PeriodType {
 
     @Override
     public FieldValue parseJsonValue(JsonValue value) {
-        throw new UnsupportedOperationException();
+        return Month.parseMonth(value.asString());
     }
 
     @Override
