@@ -30,7 +30,11 @@ public class MailingListClient {
     private static final Logger LOGGER = Logger.getLogger(MailingListClient.class.getName());
 
     private final String apiKey;
-    private final String listId;
+    private final String masterListId;
+    private final String newsletterListId;
+
+    private final String subbed = "subscribed";
+    private final String unsubbed = "unsubscribed";
 
     private final String invitedGroup;
     private final String uninvitedGroup;
@@ -40,7 +44,8 @@ public class MailingListClient {
     @Inject
     public MailingListClient(DeploymentConfiguration config) {
         this.apiKey = config.getProperty("mailchimp.api.key");
-        this.listId = config.getProperty("mailchimp.list.id", "9289430112");
+        this.masterListId = config.getProperty("mailchimp.list.id", "9289430112");
+        this.newsletterListId = config.getProperty("mailchimp.newsletter.id", "f7714b4f5d");
 
         this.invitedGroup = config.getProperty("mailchimp.group.invited", "a39940fdf7");
         this.uninvitedGroup = config.getProperty("mailchimp.group.uninvited", "25ecbf7449");
@@ -50,22 +55,35 @@ public class MailingListClient {
 
     public void subscribe(User user, boolean invited, boolean newsletter) {
 
-        AddListMemberMethod method = new AddListMemberMethod();
-        method.emailAddress = user.getEmail();
-        method.status = newsletter ? "subscribed" : "unsubscribed";
-        method.mergeVars.email = user.getEmail();
-        method.mergeVars.firstName = user.getName();
-        setInterests(method, invited);
+        AddListMemberMethod addToMasterList = new AddListMemberMethod();
+        addToMasterList.emailAddress = user.getEmail();
+        addToMasterList.status = subbed;
+        addToMasterList.mergeVars.email = user.getEmail();
+        addToMasterList.mergeVars.firstName = user.getName();
+        setInterests(addToMasterList, invited);
+
+        AddListMemberMethod addToNewsletter = new AddListMemberMethod();
+        addToNewsletter.emailAddress = user.getEmail();
+        addToNewsletter.status = newsletter ? subbed : unsubbed;
+        addToNewsletter.mergeVars.email = user.getEmail();
+        addToNewsletter.mergeVars.firstName = user.getName();
 
         try {
-            post(method);
+            post(addToMasterList, masterListId);
+            post(addToNewsletter, newsletterListId);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to subscribe user", e);
         }
     }
 
-    private void post(AddListMemberMethod method) throws Exception {
+    private void post(AddListMemberMethod method, String listId) throws Exception {
         URL url = new URL("https://us4.api.mailchimp.com/3.0/lists/" + listId + "/members");
+        HttpURLConnection conn = openConnection(url);
+        ObjectMapper mapper = new ObjectMapper();
+        sendRequest(method, conn, mapper);
+    }
+
+    private HttpURLConnection openConnection(URL url) throws Exception {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         setAuthentication(conn);
         conn.setDoOutput(true);
@@ -74,9 +92,7 @@ public class MailingListClient {
         conn.setRequestProperty("Accept", "application/json");
         conn.setConnectTimeout(5 * 60 * 1000);
         conn.setReadTimeout(5 * 60 * 1000);
-        ObjectMapper mapper = new ObjectMapper();
-
-        sendRequest(method, conn, mapper);
+        return conn;
     }
 
     private void setAuthentication(HttpURLConnection conn) throws UnsupportedEncodingException {
