@@ -36,6 +36,9 @@
   <inherits name="org.activityinfo.Analysis"/>
   <inherits name="org.activityinfo.api.ApiClient"/>
 
+  <!-- Avoid unsupported RTL layout even when using RTL text -->
+  <inherits name="org.activityinfo.i18n.ArabicLTR"/>
+
   <inherits name="org.activityinfo.ui.Icons"/>
   <set-configuration-property name="CssResource.conversionMode" value="strict" />
 
