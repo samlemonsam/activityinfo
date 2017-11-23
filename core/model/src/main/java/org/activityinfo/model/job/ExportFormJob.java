@@ -53,7 +53,7 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     }
 
     @Override
-    public JsonValue toJsonObject() {
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("formId", formId.asString());
         return object;

@@ -1,9 +1,9 @@
 package org.activityinfo.ui.client.dispatch;
 
 
-import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormHistoryEntry;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;

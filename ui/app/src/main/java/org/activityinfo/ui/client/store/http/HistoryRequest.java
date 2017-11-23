@@ -1,10 +1,9 @@
 package org.activityinfo.ui.client.store.http;
 
 import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.api.client.FormHistoryEntry;
+import org.activityinfo.model.form.FormHistoryEntry;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.FormChange;
 
 import java.util.List;
 

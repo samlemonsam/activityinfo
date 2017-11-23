@@ -2,6 +2,7 @@ package org.activityinfo.model.form;
 
 import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 
 /**
@@ -17,7 +18,7 @@ import org.activityinfo.json.JsonValue;
  * In addition, the view, edit, and delete permissions may be further restricted by specifying
  * view, edit, and delete <em>filters</em>, using formulas that evaluate to a boolean value.</p>
  */
-public final class FormPermissions {
+public final class FormPermissions implements JsonSerializable {
 
     private boolean view;
 
@@ -34,6 +35,13 @@ public final class FormPermissions {
 
     private String updateFilter;
 
+    private boolean updateSchema;
+
+    /**
+     * True if the use has permission to create child folders or forms in this folder.
+     */
+    private boolean createChildren;
+
     /**
      * 
      * @return true if this form is visible to the user.
@@ -46,45 +54,30 @@ public final class FormPermissions {
         return viewFilter;
     }
 
-    public FormPermissions setViewFilter(String viewFilter) {
-        this.viewFilter = viewFilter;
-        return this;
-    }
-
     public boolean isEditAllowed() {
         return updateRecord;
     }
 
-    
-    public boolean isCreateAllowed() {
+    public boolean isCreateRecordAllowed() {
         return createRecord;
     }
 
-    public void setCreateAllowed(boolean createAllowed) {
-        this.createRecord = createAllowed;
+    public boolean isCreateChildrenAllowed() {
+        return createChildren;
     }
 
     public boolean isDeleteAllowed() {
         return deleteRecord;
     }
 
-    public void setDeleteAllowed(boolean deleteAllowed) {
-        this.deleteRecord = deleteAllowed;
-    }
-
-    public FormPermissions setEditAllowed(boolean editAllowed) {
-        this.updateRecord = editAllowed;
-        return this;
-    }
-
-    
     public String getUpdateFilter() {
         return updateFilter;
     }
 
-    public void setUpdateFilter(String updateFilter) {
-        this.updateFilter = updateFilter;
+    public boolean isSchemaUpdateAllowed() {
+        return updateSchema;
     }
+
     public static FormPermissions none() {
         return new FormPermissions();
     }
@@ -95,12 +88,23 @@ public final class FormPermissions {
         return permissions;
     }
 
-    public static FormPermissions full() {
+    public static FormPermissions readWrite() {
         FormPermissions permissions = new FormPermissions();
         permissions.view = true;
         permissions.createRecord = true;
         permissions.updateRecord = true;
         permissions.deleteRecord = true;
+        return permissions;
+    }
+
+    public static FormPermissions owner() {
+        FormPermissions permissions = new FormPermissions();
+        permissions.view = true;
+        permissions.createRecord = true;
+        permissions.updateRecord = true;
+        permissions.deleteRecord = true;
+        permissions.updateSchema = true;
+        permissions.createChildren = true;
         return permissions;
     }
 
@@ -194,6 +198,11 @@ public final class FormPermissions {
          */
         public Builder allowView() {
             permissions.view = true;
+            return this;
+        }
+
+        public Builder allowSchemaUpdate() {
+            permissions.updateSchema = true;
             return this;
         }
 

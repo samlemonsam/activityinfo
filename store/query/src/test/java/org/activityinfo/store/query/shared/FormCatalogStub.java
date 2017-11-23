@@ -79,7 +79,7 @@ class FormCatalogStub implements FormCatalog {
 
         @Override
         public FormPermissions getPermissions(int userId) {
-            return FormPermissions.full();
+            return FormPermissions.readWrite();
         }
 
         @Override

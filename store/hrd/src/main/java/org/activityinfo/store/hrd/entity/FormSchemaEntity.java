@@ -38,7 +38,7 @@ public class FormSchemaEntity {
     private long schemaVersion;
 
     /**
-     * The {@link FormClass} serialized as an {@link EmbeddedEntity} via {@link FormClass#toJsonObject()} ()}
+     * The {@link FormClass} serialized as an {@link EmbeddedEntity} via {@link FormClass#toJson()} ()}
      */
     @Unindex
     private EmbeddedEntity schema;
@@ -51,7 +51,7 @@ public class FormSchemaEntity {
         
         this.formKey = FormEntity.key(formClass);
         this.id = ENTITY_ID;
-        this.schema = FormConverter.toEmbeddedEntity(formClass.toJsonObject());
+        this.schema = FormConverter.toEmbeddedEntity(formClass.toJson());
     }
     
     public static com.googlecode.objectify.Key<FormSchemaEntity> key(ResourceId formId) {
@@ -71,7 +71,7 @@ public class FormSchemaEntity {
     }
 
     public void setSchema(FormClass formClass) {
-        schema = FormConverter.toEmbeddedEntity(formClass.toJsonObject());
+        schema = FormConverter.toEmbeddedEntity(formClass.toJson());
     }
 
     public EmbeddedEntity getSchema() {

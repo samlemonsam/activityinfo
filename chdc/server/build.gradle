@@ -1,0 +1,13 @@
+
+plugins {
+    id "java"
+    id "war"
+    id "org.akhikhl.gretty" version "2.0.0"
+}
+
+dependencies {
+    compile project(':core:model')
+    compile project(':store:apiserver')
+
+    compile libraries.jersey.servlet
+}

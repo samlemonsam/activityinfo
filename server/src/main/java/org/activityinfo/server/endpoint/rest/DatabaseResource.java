@@ -15,7 +15,6 @@ import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.spi.FormCatalog;
 import org.codehaus.jackson.map.annotate.JsonView;
 
-import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -26,13 +25,11 @@ import java.io.IOException;
 public class DatabaseResource {
 
     private Provider<FormCatalog> catalog;
-    private Provider<EntityManager> entityManager;
     private final DispatcherSync dispatcher;
     private final int databaseId;
 
-    public DatabaseResource(Provider<FormCatalog> catalog, Provider<EntityManager> entityManager, DispatcherSync dispatcher, int databaseId) {
+    public DatabaseResource(Provider<FormCatalog> catalog, DispatcherSync dispatcher, int databaseId) {
         this.catalog = catalog;
-        this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.databaseId = databaseId;
     }

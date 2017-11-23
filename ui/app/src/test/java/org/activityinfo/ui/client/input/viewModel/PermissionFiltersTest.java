@@ -26,9 +26,10 @@ public class PermissionFiltersTest {
         NfiForm nfiForm = setup.getCatalog().getNfiForm();
         FormTree formTree = setup.getCatalog().getFormTree(nfiForm.getFormId());
 
-        FormPermissions permissions = new FormPermissions();
-        permissions.setViewFilter(nfiForm.getVillageField().getId() + " == 'g12345'");
-        permissions.setUpdateFilter(nfiForm.getVillageField().getId() + "=='g12345'");
+        FormPermissions permissions = new FormPermissions.Builder()
+                .allowFilteredView(nfiForm.getVillageField().getId() + " == 'g12345'")
+                .allowFilteredEdit(nfiForm.getVillageField().getId() + "=='g12345'")
+                .build();
 
         PermissionFilters filters = new PermissionFilters(formTree, permissions);
 

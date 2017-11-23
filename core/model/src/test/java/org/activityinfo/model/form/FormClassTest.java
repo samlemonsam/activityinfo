@@ -29,7 +29,7 @@ public class FormClassTest {
         field.setType(TextType.SIMPLE);
         formClass.addElement(field);
 
-        JsonValue jsonObject = formClass.toJsonObject();
+        JsonValue jsonObject = formClass.toJson();
 
         FormClass reform = FormClass.fromJson(jsonObject);
         assertThat(reform.getFields(), hasSize(1));

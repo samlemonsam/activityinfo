@@ -121,7 +121,7 @@ public class FormMetadata {
             object.put("deleted", true);
         }
         if(schema != null) {
-            object.put("schema", schema.toJsonObject());
+            object.put("schema", schema.toJson());
         }
         if(visible) {
             object.put("version", version);

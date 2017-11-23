@@ -64,7 +64,7 @@ public class JobResource {
         // now create the job record in the datastore
         JobEntity record = new JobEntity(user.get().getUserId());
         record.setType(request.getDescriptor().getType());
-        record.setDescriptor(request.getDescriptor().toJsonObject().toJson());
+        record.setDescriptor(request.getDescriptor().toJson().toJson());
         record.setState(JobState.STARTED);
         record.setStartTime(new Date());
         record.setLocale(user.get().getUserLocale());

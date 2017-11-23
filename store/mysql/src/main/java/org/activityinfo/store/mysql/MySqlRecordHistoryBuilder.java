@@ -3,14 +3,8 @@ package org.activityinfo.store.mysql;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import org.activityinfo.api.client.FormHistoryEntryBuilder;
-import org.activityinfo.api.client.FormValueChangeBuilder;
-import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormRecord;
-import org.activityinfo.model.form.SubFormKind;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -30,6 +24,7 @@ import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.RecordHistoryProvider;
 import org.activityinfo.store.spi.RecordVersion;
 
 import java.sql.ResultSet;
@@ -39,7 +34,7 @@ import java.util.*;
 /**
  * Assembles a history of a record and it's sub records.
  */
-public class RecordHistoryBuilder {
+public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
 
     private MySqlCatalog catalog;
 
@@ -63,15 +58,16 @@ public class RecordHistoryBuilder {
         private String email;
     }
 
-    public RecordHistoryBuilder(MySqlCatalog catalog) {
+    public MySqlRecordHistoryBuilder(MySqlCatalog catalog) {
         this.catalog = catalog;
     }
 
 
-    public JsonValue build(ResourceId formId, ResourceId recordId) throws SQLException {
-        Optional<FormStorage> form = catalog.getForm(formId);
+    @Override
+    public List<FormHistoryEntry> build(RecordRef recordRef) throws SQLException {
+        Optional<FormStorage> form = catalog.getForm(recordRef.getFormId());
         if(!form.isPresent()) {
-            throw new FormNotFoundException(formId);
+            throw new FormNotFoundException(recordRef.getFormId());
         }
 
         FormClass formClass = form.get().getFormClass();
@@ -82,12 +78,13 @@ public class RecordHistoryBuilder {
             monthlyFieldLabels = getMonthlyFieldLabels(activity);
         }
 
-        List<RecordDelta> deltas = computeDeltas(formClass, null, form.get().getVersions(recordId), monthlyFieldLabels);
+        List<RecordDelta> deltas = computeDeltas(formClass, null,
+                form.get().getVersions(recordRef.getRecordId()), monthlyFieldLabels);
 
         // Now add deltas from sub forms...
         for (FormField field : formClass.getFields()) {
             if(field.getType() instanceof SubFormReferenceType) {
-                deltas.addAll(computeSubFormDeltas(recordId, field, monthlyFieldLabels));
+                deltas.addAll(computeSubFormDeltas(recordRef.getRecordId(), field, monthlyFieldLabels));
             }
         }
 
@@ -97,7 +94,7 @@ public class RecordHistoryBuilder {
         Map<Long, User> userMap = queryUsers(deltas);
 
         // Now render the complete object for the user
-        JsonValue array = Json.createArray();
+        List<FormHistoryEntry> entries = new ArrayList<>();
         for (RecordDelta delta : deltas) {
 
             User user = userMap.get(delta.version.getUserId());
@@ -107,9 +104,9 @@ public class RecordHistoryBuilder {
                 user.name = "User " + delta.version.getUserId();
             }
 
-            FormHistoryEntryBuilder entry = new FormHistoryEntryBuilder();
-            entry.setFormId(formId.asString());
-            entry.setRecordId(recordId.asString());
+            FormHistoryEntry.Builder entry = new FormHistoryEntry.Builder();
+            entry.setFormId(recordRef.getFormId().asString());
+            entry.setRecordId(recordRef.getRecordId().asString());
 
             if(delta.subFormField != null) {
                 entry.setSubFieldId(delta.subFormField.getId().asString());
@@ -124,9 +121,9 @@ public class RecordHistoryBuilder {
             for (FieldDelta change : delta.changes) {
                 entry.addValue(renderChange(change));
             }
-            array.add(entry.toJsonObject());
+            entries.add(entry.build());
         }
-        return array;
+        return entries;
     }
 
     private void sort(List<RecordDelta> deltas) {
@@ -295,8 +292,8 @@ public class RecordHistoryBuilder {
         return userMap;
     }
 
-    private FormValueChangeBuilder renderChange(FieldDelta delta) {
-        FormValueChangeBuilder builder = new FormValueChangeBuilder();
+    private FormValueChange renderChange(FieldDelta delta) {
+        FormValueChange.Builder builder = new FormValueChange.Builder();
         builder.setFieldId(delta.field.getId().asString());
         builder.setFieldLabel(delta.field.getLabel());
         if(delta.subFormKey != null) {
@@ -305,7 +302,7 @@ public class RecordHistoryBuilder {
         }
         builder.setOldValueLabel(renderValue(delta.field, delta.oldValue));
         builder.setNewValueLabel(renderValue(delta.field, delta.newValue));
-        return builder;
+        return builder.build();
     }
 
     private String renderValue(FormField field, FieldValue value) {

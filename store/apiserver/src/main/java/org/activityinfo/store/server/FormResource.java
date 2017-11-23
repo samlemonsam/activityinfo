@@ -1,20 +1,17 @@
-package org.activityinfo.server.endpoint.rest;
+package org.activityinfo.store.server;
 
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
-import org.activityinfo.api.client.FormRecordSetBuilder;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -24,21 +21,15 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.geo.GeoAreaType;
-import org.activityinfo.server.command.handler.PermissionOracle;
-import org.activityinfo.store.hrd.HrdFormStorage;
-import org.activityinfo.store.hrd.HrdSerialNumberProvider;
-import org.activityinfo.store.mysql.MySqlCatalog;
-import org.activityinfo.store.mysql.RecordHistoryBuilder;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
-import org.activityinfo.store.query.server.*;
-import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.query.server.InvalidUpdateException;
+import org.activityinfo.store.query.server.PermissionsEnforcer;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
-import javax.inject.Provider;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.io.IOException;
@@ -47,160 +38,116 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
-import static org.activityinfo.json.impl.JsonUtil.stringify;
 import static org.activityinfo.model.resource.ResourceId.valueOf;
 
 public class FormResource {
+
     public static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
 
     private static final Logger LOGGER = Logger.getLogger(FormResource.class.getName());
 
-    private final Provider<FormCatalog> catalog;
-    private final Provider<AuthenticatedUser> userProvider;
-    private final PermissionOracle permissionOracle;
-    private BlobAuthorizer blobAuthorizer;
-
+    private final ApiBackend backend;
     private final ResourceId formId;
-    private FormSupervisorAdapter supervisor;
 
-    public FormResource(ResourceId formId,
-                        Provider<FormCatalog> catalog,
-                        Provider<AuthenticatedUser> userProvider,
-                        PermissionOracle permissionOracle,
-                        BlobAuthorizer blobAuthorizer) {
+    public FormResource(ApiBackend backend, ResourceId formId) {
+        this.backend = backend;
         this.formId = formId;
-        this.catalog = catalog;
-        this.userProvider = userProvider;
-        this.permissionOracle = permissionOracle;
-        this.blobAuthorizer = blobAuthorizer;
-        this.supervisor = new FormSupervisorAdapter(catalog.get(), userProvider.get().getId());
     }
 
     @GET
     @Produces(JSON_CONTENT_TYPE)
-    public Response getMetadataResponse(@QueryParam("localVersion") Long localVersion) {
-        FormMetadata metadata = getFormMetadata(localVersion);
+    public FormMetadata getMetadataResponse(@QueryParam("localVersion") Long localVersion) {
 
-        return Response.ok()
-                .entity(stringify(metadata.toJsonObject()))
-                .type(JSON_CONTENT_TYPE).build();
-    }
-
-    private FormMetadata getFormMetadata(Long localVersion) {
-        Optional<FormStorage> collection = this.catalog.get().getForm(formId);
-        if(!collection.isPresent()) {
+        Optional<FormStorage> storage = backend.getCatalog().getForm(formId);
+        if(!storage.isPresent()) {
             return FormMetadata.notFound(formId);
         }
-        FormPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
+        FormPermissions permissions = backend.getFormSupervisor().getFormPermissions(formId);
         if(!permissions.isVisible()) {
-            return FormMetadata.forbidden(formId);
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+
         } else {
             return FormMetadata.of(
-                collection.get().cacheVersion(),
-                collection.get().getFormClass(),
-                permissions);
+                    storage.get().cacheVersion(),
+                    storage.get().getFormClass(),
+                    permissions);
         }
     }
 
     /**
      *
-     * @return this collection's {@link org.activityinfo.model.form.FormClass}
+     * @return this form's {@link org.activityinfo.model.form.FormClass}
      */
     @GET
+    @NoCache
     @Path("schema")
     @Produces(JSON_CONTENT_TYPE)
-    public Response getFormSchema() {
-
-        assertVisible(formId);
-
-        FormClass formClass = catalog.get().getFormClass(formId);
-
-        JsonValue object = formClass.toJsonObject();
-
-        return Response
-            .ok(Json.stringify(object, 2))
-            .type(JSON_CONTENT_TYPE)
-            .cacheControl(noCache())
-            .build();
+    public FormClass getFormSchema() {
+        return assertVisible(formId).getFormClass();
     }
 
     @POST
     @Path("schema")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response postUpdatedFormSchema(String updatedSchemaJson) {
-        return updateFormSchema(updatedSchemaJson);
+    public Response postUpdatedFormSchema(FormClass updatedFormClass) {
+
+        return updateFormSchema(updatedFormClass);
     }
-    
+
     @PUT
     @Path("schema")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateFormSchema(String updatedSchemaJson) {
+    public Response updateFormSchema(FormClass updatedFormClass) {
 
-        FormClass formClass = FormClass.fromJson(updatedSchemaJson);
-        
         // Check first to see if this collection exists
-        Optional<FormStorage> collection = catalog.get().getForm(formClass.getId());
-        if(collection.isPresent()) {
-            FormClass existingFormClass = collection.get().getFormClass();
-            permissionOracle.assertDesignPrivileges(existingFormClass, userProvider.get());
-
-            collection.get().updateFormClass(formClass);
+        Optional<FormStorage> form = backend.getCatalog().getForm(updatedFormClass.getId());
+        if(form.isPresent()) {
+            if(!backend.getFormSupervisor().getFormPermissions(formId).isSchemaUpdateAllowed()) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+            form.get().updateFormClass(updatedFormClass);
 
         } else {
-            // Check that we have the permission to create in this database
-            permissionOracle.assertDesignPrivileges(formClass, userProvider.get());
-
-            ((MySqlCatalog)catalog.get()).createOrUpdateFormSchema(formClass);
+            backend.createNewForm(updatedFormClass);
         }
         
         return Response.ok().build();
     }
     
     @GET
+    @NoCache
     @Path("record/{recordId}")
     @Produces(JSON_CONTENT_TYPE)
-    public Response getRecord(@PathParam("recordId") String recordId) {
+    public FormRecord getRecord(@PathParam("recordId") String recordId) {
         
-        FormStorage collection = assertVisible(formId);
+        FormStorage form = assertVisible(formId);
 
-        Optional<FormRecord> record = collection.get(ResourceId.valueOf(recordId));
+        Optional<FormRecord> record = form.get(ResourceId.valueOf(recordId));
         if(!record.isPresent()) {
-            return Response
-                    .status(Response.Status.NOT_FOUND)
-                    .entity("Record " + recordId + " does not exist.")
-                    .build();
+            throw new NotFoundException("Record " + recordId + " does not exist.");
         }
 
-        PermissionsEnforcer enforcer = new PermissionsEnforcer(catalog.get(), userProvider.get().getId());
-        if(!enforcer.canView(record.get())){
-            return Response
-                    .status(Response.Status.FORBIDDEN)
-                    .entity("Not authorized")
-                    .build();
+        PermissionsEnforcer enforcer = backend.newPermissionsEnforcer();
+        if(!enforcer.canView(record.get())) {
+            throw new NotAuthorizedException();
         }
 
-        return Response.ok()
-                .entity(record.get().toJsonElement().toJson())
-                .cacheControl(noCache())
-                .type(JSON_CONTENT_TYPE)
-                .build();
-    }
-
-    private CacheControl noCache() {
-        CacheControl cacheControl = new CacheControl();
-        cacheControl.setNoCache(true);
-        cacheControl.setPrivate(true);
-        return cacheControl;
+        return record.get();
     }
 
     @GET
+    @NoCache
     @Path("records/versionRange")
-    public Response getVersionRange(@QueryParam("localVersion") long localVersion, @QueryParam("version") long version) {
+    public FormSyncSet getVersionRange(
+            @QueryParam("localVersion") long localVersion,
+            @QueryParam("version") long version) {
+
         FormStorage collection = assertVisible(formId);
 
         // Compute a predicate that will tell us whether a given
@@ -214,17 +161,14 @@ public class FormResource {
         } else {
             syncSet = FormSyncSet.emptySet(formId);
         }
-        return Response.ok()
-                .entity(Json.toJson(syncSet).toJson())
-                .type(JSON_CONTENT_TYPE)
-                .build();
+        return syncSet;
     }
 
     /**
      * Computes a record-level visibility predicate.
      */
     private Predicate<ResourceId> computeVisibilityPredicate() {
-        FormPermissions formPermissions = supervisor.getFormPermissions(formId);
+        FormPermissions formPermissions = backend.getFormSupervisor().getFormPermissions(formId);
         if (!formPermissions.hasVisibilityFilter()) {
             return Predicates.alwaysTrue();
         }
@@ -248,8 +192,10 @@ public class FormResource {
 
     @POST
     @Path("record/{recordId}/field/{fieldId}/geometry")
-    public Response updateGeometry(@PathParam("recordId") String recordId, @PathParam("fieldId") String fieldId,
-                                   byte[] binaryBody) {
+    public Response updateGeometry(
+            @PathParam("recordId") String recordId,
+            @PathParam("fieldId") String fieldId,
+            byte[] binaryBody) {
 
         // Parse the Geometry
         WKBReader reader = new WKBReader(new GeometryFactory());
@@ -273,7 +219,7 @@ public class FormResource {
         }
 
         // Check first to see if this form exists
-        Optional<FormStorage> storage = catalog.get().getForm(formId);
+        Optional<FormStorage> storage = backend.getCatalog().getForm(formId);
         if(!storage.isPresent()) {
             return Response
                     .status(Response.Status.NOT_FOUND)
@@ -312,68 +258,31 @@ public class FormResource {
     }
 
     @GET
+    @NoCache
     @Path("record/{recordId}/history")
     @Produces(JSON_CONTENT_TYPE)
-    public Response getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
+    public List<FormHistoryEntry> getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
 
         assertVisible(formId);
 
-        RecordHistoryBuilder builder = new RecordHistoryBuilder((MySqlCatalog) catalog.get());
-        JsonValue array = builder.build(formId, ResourceId.valueOf(recordId));
-
-        return Response.ok()
-                .entity(array.toJson())
-                .cacheControl(noCache())
-                .type(JSON_CONTENT_TYPE)
-                .build();
+        return backend.getRecordHistoryProvider().build(new RecordRef(formId, ResourceId.valueOf(recordId)));
     }
-
 
     @GET
+    @NoCache
     @Path("records")
     @Produces(JSON_CONTENT_TYPE)
-    public Response getRecords(@QueryParam("parentId") String parentId) {
-
-        assertVisible(formId);
-        
-        Optional<FormStorage> collection = catalog.get().getForm(formId);
-        if(!collection.isPresent()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
-        Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
-
-        return Response
-            .ok(encode(records), JSON_CONTENT_TYPE)
-            .cacheControl(noCache())
-            .build();
-    }
-
-    private String encode(Iterable<FormRecord> records) {
-        FormRecordSetBuilder recordSet = new FormRecordSetBuilder();
-        recordSet.setFormId(formId.asString());
-
-        for (FormRecord record : records) {
-            recordSet.addRecord(record);
-        }
-        return recordSet.toJsonString();
+    public List<FormRecord> getRecords(@QueryParam("parentId") String parentId) {
+        return assertVisible(formId).getSubRecords(ResourceId.valueOf(parentId));
     }
 
     @POST
     @Path("records")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createRecord(String body) {
+    public Response createRecord(JsonValue jsonObject) {
         
-        assertVisible(formId);
-        
-        JsonValue jsonObject = new JsonParser().parse(body);
-
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
-                new HrdSerialNumberProvider());
-
         try {
-            updater.create(formId, jsonObject);
+            backend.newUpdater().create(formId, jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
@@ -385,35 +294,31 @@ public class FormResource {
     @Path("record/{recordId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateRecord(@PathParam("recordId") String recordId, String body) {
-
-        assertVisible(formId);
-
-        JsonValue jsonObject = new JsonParser().parse(body);
+    public Response updateRecord(@PathParam("recordId") String recordId, JsonValue jsonObject) {
 
         try {
-            Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(), blobAuthorizer,
-                    new HrdSerialNumberProvider());
-            updater.execute(formId, valueOf(recordId), jsonObject);
+            backend.newUpdater().execute(formId, valueOf(recordId), jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
-
         return Response.ok().build();
     }
     
     @GET
+    @NoCache
+    @Produces(JSON_CONTENT_TYPE)
     @Path("class")
-    public Response getFormClass() {
+    public FormClass getFormClass() {
         return getFormSchema();
     }
 
     @GET
+    @NoCache
     @Path("form.xls")
     public Response getXlsForm() {
         assertVisible(formId);
 
-        final XlsFormBuilder xlsForm = new XlsFormBuilder(catalog.get());
+        final XlsFormBuilder xlsForm = new XlsFormBuilder(backend.getCatalog());
         xlsForm.build(formId);
 
         StreamingOutput output = new StreamingOutput() {
@@ -433,41 +338,36 @@ public class FormResource {
      * of this collection and any {@code FormClass}es reachable from this collection's fields.
      */
     @GET
+    @NoCache
+    @Produces(JSON_CONTENT_TYPE)
     @Path("tree")
-    public Response getTree() {
-
-        FormTree tree = fetchTree();
-        JsonValue object = JsonFormTreeBuilder.toJson(tree);
-
-        return Response
-            .ok(Json.stringify(object, 2))
-            .cacheControl(noCache())
-            .type(JSON_CONTENT_TYPE).build();
+    public JsonValue getTree() {
+        return JsonFormTreeBuilder.toJson(fetchTree());
     }
 
     @GET
+    @NoCache
+    @Produces(MediaType.TEXT_PLAIN)
     @Path("tree/pretty")
-    public Response getTreePrettyPrinted() {
+    public String getTreePrettyPrinted() {
 
         FormTree tree = fetchTree();
         StringWriter stringWriter = new StringWriter();
         FormTreePrettyPrinter printer = new FormTreePrettyPrinter(new PrintWriter(stringWriter));
         printer.printTree(tree);
 
-        return Response
-            .ok(stringWriter.toString())
-            .cacheControl(noCache())
-            .type(MediaType.TEXT_PLAIN_TYPE).build();
+        return stringWriter.toString();
     }
 
     private FormTree fetchTree() {
         assertVisible(formId);
 
-        FormTreeBuilder builder = new FormTreeBuilder(catalog.get());
+        FormTreeBuilder builder = new FormTreeBuilder(backend.getCatalog());
         return builder.queryTree(formId);
     }
 
     @GET
+    @NoCache
     @Path("query/rows")
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryRows(@Context UriInfo uriInfo) {
@@ -491,6 +391,7 @@ public class FormResource {
     }
 
     @GET
+    @NoCache
     @Path("query/defaultModel")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDefaultQueryModel() {
@@ -505,6 +406,7 @@ public class FormResource {
 
 
     @GET
+    @NoCache
     @Path("query/columns")
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryColumns(@Context UriInfo uriInfo) {
@@ -542,13 +444,12 @@ public class FormResource {
     }
 
     private ColumnSet executeQuery(QueryModel queryModel) {
-        ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), supervisor);
-
-        return builder.build(queryModel);
+        return backend.newQueryBuilder().build(queryModel);
     }
 
     private QueryModel buildDefaultQueryModel() {
-        QueryModel queryModel;FormTreeBuilder treeBuilder = new FormTreeBuilder(catalog.get());
+        QueryModel queryModel;
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(backend.getCatalog());
         FormTree tree = treeBuilder.queryTree(formId);
 
         queryModel = new DefaultQueryBuilder(tree).build();
@@ -556,22 +457,22 @@ public class FormResource {
     }
 
 
-    private FormStorage assertVisible(ResourceId collectionId) {
-        Optional<FormStorage> collection = this.catalog.get().getForm(formId);
-        if(!collection.isPresent()) {
+    private FormStorage assertVisible(ResourceId formId) {
+        Optional<FormStorage> storage = this.backend.getCatalog().getForm(this.formId);
+        if(!storage.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.NOT_FOUND)
-                            .entity(format("Collection %s does not exist.", collectionId.asString()))
+                            .entity(format("Form %s does not exist.", formId.asString()))
                             .build());
         }
-        FormPermissions permissions = collection.get().getPermissions(userProvider.get().getUserId());
+        FormPermissions permissions = backend.getFormSupervisor().getFormPermissions(formId);
         if(!permissions.isVisible()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.FORBIDDEN)
-                            .entity(format("You do not have permission to view the form %s", collectionId.asString()))
+                            .entity(format("You do not have permission to view the form %s", formId.asString()))
                             .build());
 
         }
-        return collection.get();
+        return storage.get();
     }
 }

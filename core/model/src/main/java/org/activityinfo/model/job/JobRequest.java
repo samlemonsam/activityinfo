@@ -19,7 +19,7 @@ public class JobRequest {
     public JsonValue toJsonObject() {
         JsonValue object = createObject();
         object.put("type", descriptor.getType());
-        object.put("descriptor", descriptor.toJsonObject());
+        object.put("descriptor", descriptor.toJson());
         if(locale != null) {
             object.put("locale", locale);
         }

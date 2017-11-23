@@ -1,7 +1,6 @@
-package org.activityinfo.api.client;
+package org.activityinfo.model.form;
 
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.form.JsonParsing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +63,69 @@ public class FormValueChange {
       list.add(fromJson(element));
     }
     return list;
+  }
+  
+  public static class Builder {
+
+    private FormValueChange change = new FormValueChange();
+ 
+    public Builder setFieldId(String fieldId) {
+      change.fieldId = fieldId;
+      return this;
+    }
+
+    /**
+     * Sets the fieldLabel.
+     *
+     * @param fieldLabel the current label of the field changed
+     */
+    public Builder setFieldLabel(String fieldLabel) {
+      change.fieldLabel = fieldLabel;
+      return this;
+    }
+
+    /**
+     * Sets the oldValueLabel.
+     *
+     * @param oldValueLabel human-readable string of the old value of the field
+     */
+    public Builder setOldValueLabel(String oldValueLabel) {
+      change.oldValueLabel = oldValueLabel;
+      return this;
+    }
+
+    /**
+     * Sets the newValueLabel.
+     *
+     * @param newValueLabel human-readable string of the new value of the field
+     */
+    public Builder setNewValueLabel(String newValueLabel) {
+      change.newValueLabel = newValueLabel;
+      return this;
+    }
+
+    /**
+     * Sets the subFormKind.
+     *
+     * @param subFormKind subform kind
+     */
+    public Builder setSubFormKind(String subFormKind) {
+      change.subFormKind = subFormKind;
+      return this;
+    }
+
+    /**
+     * Sets the subFormKey.
+     *
+     * @param subFormKey subform key
+     */
+    public Builder setSubFormKey(String subFormKey) {
+      change.subFormKey = subFormKey;
+      return this;
+    }
+
+    public FormValueChange build() {
+      return change;
+    }
   }
 }

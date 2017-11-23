@@ -19,4 +19,5 @@ public interface FormCatalog extends FormClassProvider, BatchFormClassProvider {
     List<CatalogEntry> getRootEntries();
     
     List<CatalogEntry> getChildren(String parentId, int userId);
+
 }

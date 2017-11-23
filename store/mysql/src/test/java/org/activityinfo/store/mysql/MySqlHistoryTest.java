@@ -19,7 +19,7 @@ public class MySqlHistoryTest extends AbstractMySqlTest {
 
     @Test
     public void locationChange() throws SQLException {
-        RecordHistoryBuilder builder = new RecordHistoryBuilder(catalog);
+        MySqlRecordHistoryBuilder builder = new MySqlRecordHistoryBuilder(catalog);
         JsonValue array = builder.build(CuidAdapter.activityFormClass(33), CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 968196924));
 
         prettyPrint(array);

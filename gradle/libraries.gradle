@@ -69,6 +69,7 @@ ext {
         jersey: [
             core:           "com.sun.jersey:jersey-core:${jerseyVersion}",
             server:         "com.sun.jersey:jersey-server:${jerseyVersion}",
+            servlet:        "com.sun.jersey:jersey-servlet:${jerseyVersion}",
             simpleServer:   "com.sun.jersey.contribs:jersey-simple-server:${jerseyVersion}",
             client:         "com.sun.jersey:jersey-client:${jerseyVersion}",
             guice:          "com.sun.jersey.contribs:jersey-guice:${jerseyVersion}",

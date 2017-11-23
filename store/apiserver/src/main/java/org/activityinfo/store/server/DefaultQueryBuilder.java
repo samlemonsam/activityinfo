@@ -1,4 +1,4 @@
-package org.activityinfo.server.endpoint.rest;
+package org.activityinfo.store.server;
 
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FieldPath;

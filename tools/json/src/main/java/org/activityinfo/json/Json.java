@@ -73,6 +73,9 @@ public class Json {
     }
 
     public static JsonValue toJson(Object value) {
+        if(value instanceof JsonSerializable) {
+            return ((JsonSerializable) value).toJson();
+        }
         return JsonReflection.toJson(value);
     }
 

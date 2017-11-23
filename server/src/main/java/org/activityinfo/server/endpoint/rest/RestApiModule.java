@@ -23,6 +23,7 @@ package org.activityinfo.server.endpoint.rest;
  */
 
 import org.activityinfo.server.util.jaxrs.AbstractRestModule;
+import org.activityinfo.store.server.ApiBackend;
 
 public class RestApiModule extends AbstractRestModule {
 
@@ -30,6 +31,7 @@ public class RestApiModule extends AbstractRestModule {
     protected void configureResources() {
         bindResource(RootResource.class);
         bindResource(TileResource.class, "/tile/*");
+        bind(ApiBackend.class).to(ActivityInfoApiBackend.class);
     }
 
 }

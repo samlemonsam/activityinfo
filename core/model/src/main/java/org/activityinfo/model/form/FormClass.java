@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
@@ -32,7 +33,7 @@ import static org.activityinfo.json.Json.createObject;
  * {@code Resources} which fulfill the contract described by a {@code FormClass}
  * are called {@code FormInstances}.
  */
-public class FormClass implements FormElementContainer {
+public class FormClass implements FormElementContainer, JsonSerializable {
 
 
     public static final ResourceId PARENT_FIELD_ID = ResourceId.valueOf("@parent");
@@ -327,7 +328,13 @@ public class FormClass implements FormElementContainer {
         return "<FormClass: " + getLabel() + ">";
     }
 
+    @Deprecated
     public JsonValue toJsonObject() {
+        return toJson();
+    }
+
+    @Override
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("id", id.asString());
         object.put("schemaVersion", schemaVersion);
@@ -351,7 +358,7 @@ public class FormClass implements FormElementContainer {
     }
 
     public FormClass copy() {
-        return fromJson(toJsonObject());
+        return fromJson(toJson());
     }
 
     static JsonValue toJsonArray(Iterable<FormElement> elements) {
@@ -363,7 +370,7 @@ public class FormClass implements FormElementContainer {
     }
 
     public String toJsonString() {
-        return toJsonObject().toJson();
+        return toJson().toJson();
     }
 
     public ExprNode findLabelExpression() {

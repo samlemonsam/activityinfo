@@ -58,7 +58,7 @@ public class JsonFormTreeBuilder {
         for (FormTree.Node node : nodes) {
             FormClass formClass = node.getDefiningFormClass();
             if(!forms.hasKey(formClass.getId().asString())) {
-                forms.put(formClass.getId().asString(), formClass.toJsonObject());
+                forms.put(formClass.getId().asString(), formClass.toJson());
             }
             if(node.hasChildren()) {
                 collectForms(forms, node.getChildren());

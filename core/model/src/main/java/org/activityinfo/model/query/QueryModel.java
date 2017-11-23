@@ -205,7 +205,7 @@ public class QueryModel {
 
         JsonValue columnsArray = Json.createArray();
         for (ColumnModel column : columns) {
-            columnsArray.add(column.toJsonElement());
+            columnsArray.add(column.toJson());
         }
 
         JsonValue object = createObject();

@@ -20,7 +20,7 @@ public class ExportResult implements JobResult {
     }
 
     @Override
-    public JsonValue toJsonObject() {
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("downloadUrl", downloadUrl);
         return object;

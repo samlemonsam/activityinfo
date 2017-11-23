@@ -41,10 +41,10 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
         JsonValue object = createObject();
         object.put("id", id);
         object.put("type", descriptor.getType());
-        object.put("descriptor", descriptor.toJsonObject());
+        object.put("descriptor", descriptor.toJson());
         object.put("state", state.name().toLowerCase());
         if(result != null) {
-            object.put("result", result.toJsonObject());
+            object.put("result", result.toJson());
         }
         return object;
     }

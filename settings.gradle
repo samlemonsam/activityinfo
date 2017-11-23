@@ -21,6 +21,7 @@ include 'store:hrd'
 include 'store:offline'
 include 'store:testing'
 include 'store:migration'
+include 'store:apiserver'
 
 include 'server'
 
@@ -37,3 +38,7 @@ include 'ui:codemirror'
 include 'ui:geoadmin'
 
 include 'tests'
+
+
+include 'chdc:database'
+include 'chdc:server'

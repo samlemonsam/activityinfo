@@ -1,5 +1,6 @@
 package org.activityinfo.model.query;
 
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
@@ -15,7 +16,7 @@ import static org.activityinfo.json.Json.createObject;
 /**
  * Defines a Column within a query
  */
-public class ColumnModel {
+public class ColumnModel implements JsonSerializable {
 
     public static final String ID_SYMBOL = "_id";
     public static final String CLASS_SYMBOL = "_class";
@@ -83,8 +84,12 @@ public class ColumnModel {
         return setExpression(path.toExpr());
     }
 
-
+    @Deprecated
     public JsonValue toJsonElement() {
+        return toJson();
+    }
+
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("id", id);
         object.put("expression", getExpressionAsString());
