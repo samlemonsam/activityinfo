@@ -47,7 +47,7 @@ public class SubFormPatch {
       case MONTHLY:
         return I18N.CONSTANTS.month();
       case WEEKLY:
-        return I18N.CONSTANTS.week();
+        return I18N.CONSTANTS.weekFieldLabel();
       case BIWEEKLY:
         return I18N.CONSTANTS.fortnight();
       case DAILY:

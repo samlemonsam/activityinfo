@@ -1027,8 +1027,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Weekly")
     String weekly();
 
-    @DefaultStringValue("{0,number,#}W{1}")
-    String week();
+    @DefaultStringValue("Week")
+    String weekFieldLabel();
 
     @DefaultStringValue("W")
     String westHemiChars();
