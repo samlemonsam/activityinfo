@@ -1794,4 +1794,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Make form available offline")
     String makeAvailableOffline();
+
+    @DefaultStringValue("New Activity (Classic Form)")
+    String newClassicActivity();
 }
