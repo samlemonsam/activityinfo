@@ -39,6 +39,7 @@ public class AppFrame implements IsWidget {
         titleLayout.setMargins(new Margins(0, 0, 0, 10));
 
         HBoxLayoutContainer appBar = new HBoxLayoutContainer(HBoxLayoutContainer.HBoxLayoutAlign.MIDDLE);
+        appBar.setEnableOverflow(false);
         appBar.addStyleName(ChromeBundle.BUNDLE.style().appBar());
         appBar.add(logoLink);
         appBar.add(titleHtml, titleLayout);
