@@ -88,4 +88,14 @@ public class Json {
     // the result will be gibberish.
     return object;
   }-*/;
+
+  public static <T> List<T> fromJsonArray(Class<T> clazz, JsonValue array) throws JsonMappingException {
+    return Arrays.asList(fromJsonArray(array));
+  }
+
+  private static <T> T[] fromJsonArray(JsonValue array) throws JsonMappingException /*-{
+      // value *must* be either JsonValue or a type annotated with @JsType or
+      // the result will be gibberish.
+      return array;
+  }-*/;
 }

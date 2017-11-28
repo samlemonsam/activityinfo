@@ -132,7 +132,11 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(urlBuilder.toString(), new Function<JsonValue, List<FormHistoryEntry>>() {
             @Override
             public List<FormHistoryEntry> apply(JsonValue jsonElement) {
-                return FormHistoryEntry.fromJsonArray(jsonElement);
+                try {
+                    return Json.fromJsonArray(FormHistoryEntry.class, jsonElement);
+                } catch (JsonMappingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
