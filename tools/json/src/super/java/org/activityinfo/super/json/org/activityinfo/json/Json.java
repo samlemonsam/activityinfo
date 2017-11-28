@@ -15,6 +15,9 @@
  */
 package org.activityinfo.json;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GwtScriptOnly;
 import org.activityinfo.json.impl.JsJsonFactory;
@@ -90,10 +93,10 @@ public class Json {
   }-*/;
 
   public static <T> List<T> fromJsonArray(Class<T> clazz, JsonValue array) throws JsonMappingException {
-    return Arrays.asList(fromJsonArray(array));
+    return (List)Arrays.asList(fromJsonArray(array));
   }
 
-  private static <T> T[] fromJsonArray(JsonValue array) throws JsonMappingException /*-{
+  private static native <T> T[] fromJsonArray(JsonValue array) throws JsonMappingException /*-{
       // value *must* be either JsonValue or a type annotated with @JsType or
       // the result will be gibberish.
       return array;
