@@ -1,9 +1,9 @@
 apply plugin: 'gwt-base'
 
 dependencies {
-    compile project(':core:promises')
+    compile project(':tools:promises')
     compile project(':i18n')
-    compile project(':core:model')
+    compile project(':model')
 
     compile libraries.jersey.core
     compile libraries.jackson.mapper

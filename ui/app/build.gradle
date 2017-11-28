@@ -39,16 +39,17 @@ dependencies {
     gwt 'com.google.guava:guava-gwt:21.0'
     gwt libraries.gwt.gson
 
-    gwt project(':core:model')
+    gwt project(':model')
     gwt project(':store:query');
     gwt project(':i18n')
     gwt project(':clients:gwtrest')
     gwt project(':io:match')
     gwt project(':analysis')
     gwt project(':ui:icons')
+    gwt project(':ui:core')
 
-
-    gwt project(':ui:codemirror')
+    gwt project(':tools:indexeddb')
+    gwt project(':tools:codemirror')
 
     gwt libraries.rebar.appcache
 
@@ -80,8 +81,10 @@ task codeserver(type: JavaExec) {
     // Java sources first, so that changes get picked up on refresh
     classpath project(":i18n").sourceSets.main.java.srcDirs
     classpath project(":i18n").sourceSets.main.resources.srcDirs
-    classpath project(":core:promises").sourceSets.main.java.srcDirs
-    classpath project(":core:model").sourceSets.main.java.srcDirs
+    classpath project(":ui:core").sourceSets.main.java.srcDirs
+    classpath project(":ui:core").sourceSets.main.resources.srcDirs
+    classpath project(":tools:promises").sourceSets.main.java.srcDirs
+    classpath project(":tools:promises").sourceSets.main.java.srcDirs
     classpath project(":analysis").sourceSets.main.java.srcDirs
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs

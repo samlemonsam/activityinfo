@@ -3,7 +3,7 @@
 
 
 dependencies {
-    compile project(':core:model')
+    compile project(':model')
     compile project(':analysis')
     compile project(':io:xform')
     compile libraries.guava

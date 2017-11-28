@@ -1,7 +1,7 @@
 
 dependencies {
-    compile project(':core:promises')
-    compile project(':core:model')
+    compile project(':tools:promises')
+    compile project(':model')
 
     compile libraries.jersey.core
     compile libraries.jersey.client

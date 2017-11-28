@@ -7,8 +7,7 @@ mainClassName = 'org.activityinfo.geoadmin.GeoAdmin'
 
 
 dependencies {
-    compile project(':core:model')
-    compile project(':core:promises')
+    compile project(':model')
     compile project(':io:match')
     compile project(':store:query')
     compile project(':clients:javarest')

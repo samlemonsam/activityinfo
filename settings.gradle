@@ -1,11 +1,12 @@
 rootProject.name = 'activityinfo'
 
 include 'i18n'
-include 'core:model'
-include 'core:promises'
-include 'core:gwtrpc'
+include 'model'
 
 include 'tools:json'
+include 'tools:indexeddb'
+include 'tools:codemirror'
+include 'tools:promises'
 
 include 'api'
 include 'clients:gwtrpc'
@@ -34,8 +35,7 @@ include 'io:xlsform'
 include 'ui:icons'
 include 'ui:app'
 include 'ui:app2'
-include 'ui:parts'
-include 'ui:codemirror'
+include 'ui:core'
 include 'ui:geoadmin'
 
 include 'tests'

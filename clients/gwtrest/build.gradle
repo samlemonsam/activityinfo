@@ -27,9 +27,9 @@ dependencies {
     generatorCompile libraries.guava
     generatorCompile 'com.squareup:javapoet:1.7.0'
     generatorCompile 'io.swagger:swagger-parser:1.0.19'
-    generatorCompile project(":core:model")
+    generatorCompile project(":model")
 
-    compile project(":core:model")
+    compile project(":model")
     compile libraries.guava
     compile libraries.gwt.i18nServer
     gwt     libraries.gwt.user
