@@ -49,6 +49,7 @@ dependencies {
     gwt project(':ui:core')
 
     gwt project(':tools:codemirror')
+    gwt project(':tools:indexeddb')
 
     gwt libraries.rebar.appcache
 
@@ -58,7 +59,7 @@ dependencies {
 
 
     testCompile project(':store:testing')
-
+    testCompile project(':tools:indexeddb').sourceSets.test.output
 }
 
 configurations.all {
