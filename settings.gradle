@@ -34,6 +34,7 @@ include 'io:xlsform'
 include 'ui:icons'
 include 'ui:app'
 include 'ui:app2'
+include 'ui:parts'
 include 'ui:codemirror'
 include 'ui:geoadmin'
 
@@ -42,3 +43,5 @@ include 'tests'
 
 include 'chdc:database'
 include 'chdc:server'
+include 'chdc:frontend'
+include 'chdc:theme'

@@ -10,4 +10,16 @@ dependencies {
     compile project(':store:apiserver')
 
     compile libraries.jersey.servlet
+
+    compile 'org.jooq:jooq:3.10.1'
+    compile 'mysql:mysql-connector-java:5.1.44'
 }
+
+war {
+    /* Include compiled Javascript application */
+    from(project(':chdc:frontend').outputDir) {
+        exclude("**/*.symbolMap")
+    }
+}
+
+tasks.war.dependsOn ':chdc:frontend:compileApp'

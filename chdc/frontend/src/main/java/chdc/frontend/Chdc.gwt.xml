@@ -1,0 +1,42 @@
+<module rename-to="App">
+
+    <inherits name='com.google.gwt.user.User' />
+    <inherits name='com.google.gwt.activity.Activity'/>
+    <inherits name='com.google.gwt.place.Place'/>
+
+    <!-- Include only the GXT modules we need -->
+    <inherits name='com.sencha.gxt.ui.GXT' />
+
+    <inherits name='chdc.theme.Theme' />
+
+    <set-configuration-property name="CssResource.conversionMode" value="strict" />
+
+    <set-property name="gwt.logging.logLevel" value="FINEST"/>
+    <set-property name="gwt.logging.enabled" value="TRUE"/>
+
+    <extend-property name="locale" values="en"/>
+    <set-property name="locale" value="en"/>
+
+    <!-- GZip the output files by default -->
+    <!--<inherits name='com.google.gwt.precompress.Precompress'/>-->
+
+    <!-- Limit browser support -->
+    <set-property name="gxt.user.agent" value="ie9, ie10, gecko1_9, safari5, chrome" />
+
+    <set-configuration-property name="CssResource.style" value="pretty"/>
+
+    <entry-point class="chdc.frontend.client.ChdcEntryPoint"/>
+
+    <!-- collapse properties for fewer permutations -->
+
+    <!-- We need to collapse the GXT user agent property because
+         we can't do the server-side selection required for appcache -->
+    <collapse-property name="gxt.device" values="*" />
+    <collapse-property name="user.agent.os" values="*"/>
+    <collapse-property name="gxt.user.agent" values="*"/>
+
+    <!-- Specify the paths for translatable code -->
+    <source path='client'/>
+    <source path='shared'/>
+
+</module>
