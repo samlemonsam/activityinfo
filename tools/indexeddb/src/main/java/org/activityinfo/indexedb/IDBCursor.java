@@ -5,8 +5,6 @@ import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
-import org.activityinfo.json.JsonValue;
-import org.activityinfo.ui.client.store.offline.PendingTransaction;
 
 /**
  * Cursor for traversing or iterating over multiple records in an IndexedDB database.
@@ -14,8 +12,8 @@ import org.activityinfo.ui.client.store.offline.PendingTransaction;
  * <p>This interface only defines the methods and types required by ActivityInfo and is not
  * a completed description of the IndexedDB API.</p>
  *
- * @param T the type of this cursor's value. Must be either a subclass of {@link JsonValue} or a type
- *          annotated with {@link JsType}
+ * @param T the type of this cursor's value. Must be either a subclass of
+ *          {@link com.google.gwt.core.client.JavaScriptObject} or a type annotated with {@link JsType}
  *
  * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor">IDBCursor API Reference</a>
  */

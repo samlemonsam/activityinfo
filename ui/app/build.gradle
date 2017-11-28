@@ -48,7 +48,6 @@ dependencies {
     gwt project(':ui:icons')
     gwt project(':ui:core')
 
-    gwt project(':tools:indexeddb')
     gwt project(':tools:codemirror')
 
     gwt libraries.rebar.appcache

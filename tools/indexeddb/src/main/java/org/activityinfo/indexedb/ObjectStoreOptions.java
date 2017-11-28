@@ -1,6 +1,5 @@
 package org.activityinfo.indexedb;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
