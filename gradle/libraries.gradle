@@ -93,7 +93,7 @@ ext {
             spatial:        'org.hibernate:hibernate-spatial:4.0',
             validator:      'org.hibernate:hibernate-validator:4.3.1.Final'
         ],
-        liquibase:          'org.liquibase:liquibase-core:2.0.2-bdd',
+        liquibase:          'org.liquibase:liquibase-core:3.4.2',
 
         commons: [
             fileupload:     'commons-fileupload:commons-fileupload:1.2.2',

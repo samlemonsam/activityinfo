@@ -25,6 +25,7 @@ package org.activityinfo.server.database;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Provider;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
@@ -150,7 +151,7 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
 
     private static void initializeDatabase() throws SQLException, LiquibaseException {
 
-        Connection connection = DriverManager.getConnection(connectionUrl(""), USERNAME, PASSWORD);
+        Connection connection = DriverManager.getConnection(connectionUrl(DATABASE_NAME), USERNAME, PASSWORD);
         Statement stmt = connection.createStatement();
         stmt.execute("DROP DATABASE IF EXISTS " + DATABASE_NAME);
         stmt.execute("CREATE DATABASE " + DATABASE_NAME);
@@ -159,7 +160,8 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
         Liquibase liquibase = new Liquibase("org/activityinfo/database/changelog/db.changelog-master.xml",
                 new ClassLoaderResourceAccessor(),
                 new JdbcConnection(connection));
-        liquibase.update(null);
+
+        liquibase.update(new Contexts());
         connection.close();
     }
 
