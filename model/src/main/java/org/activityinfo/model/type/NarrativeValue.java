@@ -31,7 +31,7 @@ public class NarrativeValue implements FieldValue, HasStringValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         return Json.create(text);
     }
 

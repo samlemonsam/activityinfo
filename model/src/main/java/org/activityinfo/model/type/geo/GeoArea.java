@@ -38,7 +38,7 @@ public class GeoArea implements GeoFieldValue {
 
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("blobId", blobId);
         object.put("bbox", envelope.toJsonElement());

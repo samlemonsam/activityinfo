@@ -43,9 +43,9 @@ public class JsonFormTreeBuilder {
 
         FormClassProvider provider = new FormClassProvider() {
             @Override
-            public FormClass getFormClass(ResourceId resourceId) {
-                FormClass formClass = formMap.get(resourceId);
-                assert formClass != null : "FormClass " + resourceId + " was referenced but not include in the " +
+            public FormClass getFormClass(ResourceId formId) {
+                FormClass formClass = formMap.get(formId);
+                assert formClass != null : "FormClass " + formId + " was referenced but not include in the " +
                         "list of forms";
                 return formClass;
             }

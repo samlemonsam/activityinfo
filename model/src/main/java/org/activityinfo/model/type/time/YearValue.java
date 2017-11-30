@@ -60,7 +60,7 @@ public class YearValue implements FieldValue, PeriodValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         return Json.create(year);
     }
 

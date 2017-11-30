@@ -37,7 +37,7 @@ public class NullFieldValue implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         return Json.createNull();
     }
 }

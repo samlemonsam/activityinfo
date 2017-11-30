@@ -102,7 +102,7 @@ public class FormRecord implements JsonSerializable {
             String field = entry.getKey().asString();
             if(!field.equals("classId")) {
                 if(entry.getValue() != null) {
-                    record.fields.put(field, entry.getValue().toJsonElement());
+                    record.fields.put(field, entry.getValue().toJson());
                 }
             }
         }
@@ -154,7 +154,7 @@ public class FormRecord implements JsonSerializable {
             if(value == null) {
                 this.record.fields.remove(fieldId.asString());
             } else {
-                this.record.fields.put(fieldId.asString(), value.toJsonElement());
+                this.record.fields.put(fieldId.asString(), value.toJson());
             }
             return this;
         }

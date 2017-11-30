@@ -24,7 +24,7 @@ public class Quantity implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         if(Double.isNaN(value)) {
             return Json.createNull();
         } else {

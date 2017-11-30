@@ -21,8 +21,8 @@ public class FortnightValue implements PeriodValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
-        return startWeek.toJsonElement();
+    public JsonValue toJson() {
+        return startWeek.toJson();
     }
 
     public int getYear() {

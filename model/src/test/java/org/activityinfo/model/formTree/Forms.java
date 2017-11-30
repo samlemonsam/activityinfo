@@ -51,8 +51,8 @@ class Forms implements FormClassProvider {
     }
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        return formClassProvider.getFormClass(resourceId);
+    public FormClass getFormClass(ResourceId formId) {
+        return formClassProvider.getFormClass(formId);
     }
 
     public FormClass getStudent() {

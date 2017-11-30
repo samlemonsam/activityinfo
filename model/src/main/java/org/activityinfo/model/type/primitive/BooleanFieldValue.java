@@ -15,7 +15,7 @@ public enum BooleanFieldValue implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         return Json.create(asBoolean());
     }
 

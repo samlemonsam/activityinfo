@@ -37,7 +37,7 @@ public class GeoPoint implements GeoFieldValue, RecordFieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("latitude", latitude);
         object.put("longitude", longitude);

@@ -131,7 +131,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
                 if(entry.getValue() == null) {
                     update.setFieldValue(field, Json.createNull());
                 } else if(isSaveable(entry.getValue())){
-                    update.setFieldValue(field, entry.getValue().toJsonElement());
+                    update.setFieldValue(field, entry.getValue().toJson());
                 }
             }
         }

@@ -1,11 +1,12 @@
 package org.activityinfo.model.type;
 
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 
 /**
  * Instance of a typed field value
  */
-public interface FieldValue {
+public interface FieldValue extends JsonSerializable {
 
     /**
      * The name of the field that contains the id of the {@code FieldTypeClass}
@@ -18,6 +19,7 @@ public interface FieldValue {
      * @return this value's {@code FieldTypeClass}
      */
     FieldTypeClass getTypeClass();
-    
-    JsonValue toJsonElement();
+
+    @Override
+    JsonValue toJson();
 }

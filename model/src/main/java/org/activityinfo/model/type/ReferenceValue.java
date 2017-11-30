@@ -65,7 +65,7 @@ public class ReferenceValue implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
 
         if(references.size() == 0) {
             return Json.createNull();

@@ -221,7 +221,7 @@ public class EpiWeek implements Serializable, PeriodValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         return Json.create(toString());
     }
 

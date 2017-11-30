@@ -44,7 +44,7 @@ public class LocalDateInterval implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("start", startDate.toString());
         object.put("end", endDate.toString());

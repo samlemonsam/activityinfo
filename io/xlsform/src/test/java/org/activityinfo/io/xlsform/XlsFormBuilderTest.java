@@ -93,10 +93,10 @@ public class XlsFormBuilderTest {
 
         FormClassProvider provider = new FormClassProvider() {
             @Override
-            public FormClass getFormClass(ResourceId resourceId) {
-                if (resourceId.equals(formClass.getId())) {
+            public FormClass getFormClass(ResourceId formId) {
+                if (formId.equals(formClass.getId())) {
                     return formClass;
-                } else if (resourceId.equals(subFormClass.getId())) {
+                } else if (formId.equals(subFormClass.getId())) {
                     return subFormClass;
                 } else {
                     throw new IllegalArgumentException();

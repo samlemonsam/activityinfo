@@ -30,7 +30,7 @@ public class SerialNumber implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         if(prefix == null) {
             return Json.create(number);
         } else {

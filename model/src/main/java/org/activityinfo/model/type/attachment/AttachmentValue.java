@@ -62,7 +62,7 @@ public class AttachmentValue implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         JsonValue array = Json.createArray();
         for (Attachment value : values) {
             array.add(value.toJsonElement());

@@ -12,8 +12,8 @@ public class FormClassProviders {
     public static FormClassProvider fromMap(final Map<ResourceId, FormClass> map) {
         return new FormClassProvider() {
             @Override
-            public FormClass getFormClass(ResourceId resourceId) {
-                return map.get(resourceId);
+            public FormClass getFormClass(ResourceId formId) {
+                return map.get(formId);
             }
         };
     }

@@ -70,7 +70,7 @@ public class EnumValue implements FieldValue, HasSetFieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         if(valueIds.isEmpty()) {
             return Json.createNull();
         } else if(valueIds.size() == 1) {

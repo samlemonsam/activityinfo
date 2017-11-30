@@ -39,7 +39,7 @@ public class BarcodeValue implements FieldValue, HasStringValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         return Json.createFromNullable(code);
     }
 

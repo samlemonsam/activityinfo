@@ -102,7 +102,7 @@ public final class RecordUpdate {
         if(value == null) {
             setFieldValue(fieldId.asString(), Json.createNull());
         } else {
-            setFieldValue(fieldId.asString(), value.toJsonElement());
+            setFieldValue(fieldId.asString(), value.toJson());
         }
     }
 

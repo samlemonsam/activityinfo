@@ -45,7 +45,7 @@ public class CalculatedValue implements FieldValue {
     }
 
     @Override
-    public JsonValue toJsonElement() {
+    public JsonValue toJson() {
         return Json.createNull();
     }
 

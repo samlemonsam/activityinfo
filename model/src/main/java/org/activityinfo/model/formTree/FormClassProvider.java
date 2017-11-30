@@ -6,7 +6,7 @@ import org.activityinfo.model.resource.ResourceId;
 
 public interface FormClassProvider {
 
-    FormClass getFormClass(ResourceId resourceId);
+    FormClass getFormClass(ResourceId formId);
     
 
 }
