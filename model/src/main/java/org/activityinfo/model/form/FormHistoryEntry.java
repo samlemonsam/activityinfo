@@ -2,6 +2,7 @@ package org.activityinfo.model.form;
 
 import jsinterop.annotations.JsType;
 import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 
@@ -9,28 +10,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@JsType
-public final class FormHistoryEntry {
+public final class FormHistoryEntry implements JsonSerializable {
 
     private String formId;
-
     private String recordId;
-
     private int time;
-
     private String subFieldId;
-
     private String subFieldLabel;
-
     private String subRecordKey;
-
     private String changeType;
-
     private String userName;
-
     private String userEmail;
 
-    private FormValueChange[] values;
+    private List<FormValueChange> values;
 
     public FormHistoryEntry() {
     }
@@ -72,9 +64,42 @@ public final class FormHistoryEntry {
     }
 
     public List<FormValueChange> getValues() {
-        return Arrays.asList(values);
+        return values;
     }
 
+    @Override
+    public JsonValue toJson() {
+        JsonValue object = Json.createObject();
+        object.put("formId", formId);
+        object.put("recordId", recordId);
+        object.put("time", time);
+        if(subFieldId != null) {
+            object.put("subFieldId", subFieldId);
+            object.put("subFieldLabel", subFieldLabel);
+            object.put("subRecordKey", subRecordKey);
+        }
+        object.put("changeType", changeType);
+        object.put("userName", userName);
+        object.put("userEmail", userEmail);
+        object.put("values", Json.toJson(values));
+
+        return object;
+    }
+
+    public static FormHistoryEntry fromJson(JsonValue object) throws JsonMappingException {
+        FormHistoryEntry entry = new FormHistoryEntry();
+        entry.formId = object.getString("formId");
+        entry.recordId = object.getString("recordId");
+        entry.time = (int) object.getNumber("time");
+        entry.subFieldId = object.getString("subFieldId");
+        entry.subFieldLabel = object.getString("subFieldLabel");
+        entry.subRecordKey = object.getString("subRecordKey");
+        entry.changeType = object.getString("changeType");
+        entry.userName = object.getString("userName");
+        entry.userEmail = object.getString("userEmail");
+        entry.values = Json.fromJsonArray(FormValueChange.class, object.get("values"));
+        return entry;
+    }
 
     public static class Builder {
 
@@ -181,7 +206,7 @@ public final class FormHistoryEntry {
         }
 
         public FormHistoryEntry build() {
-            entry.values = changes.toArray(new FormValueChange[changes.size()]);
+            entry.values = changes;
             return entry;
         }
     }

@@ -1,24 +1,15 @@
 package org.activityinfo.model.form;
 
-import jsinterop.annotations.JsType;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@JsType
-public final class FormValueChange {
+public final class FormValueChange implements JsonSerializable {
     private String fieldId;
-
     private String fieldLabel;
-
     private String oldValueLabel;
-
     private String newValueLabel;
-
     private String subFormKind;
-
     private String subFormKey;
 
     public FormValueChange() {
@@ -48,6 +39,29 @@ public final class FormValueChange {
         return subFormKey;
     }
 
+    @Override
+    public JsonValue toJson() {
+        JsonValue object = Json.createObject();
+        object.put("fieldId", fieldId);
+        object.put("fieldLabel", fieldLabel);
+        object.put("oldValueLabel", oldValueLabel);
+        object.put("newValueLabel", newValueLabel);
+        object.put("subFormKind", subFormKind);
+        object.put("subFormKey", subFormKey);
+
+        return object;
+    }
+
+    public static FormValueChange fromJson(JsonValue object) {
+        FormValueChange change = new FormValueChange();
+        change.fieldId = object.getString("fieldId");
+        change.fieldLabel = object.getString("fieldLabel");
+        change.oldValueLabel = object.getString("oldValueLabel");
+        change.newValueLabel = object.getString("newValueLabel");
+        change.subFormKind = object.getString("subFormKind");
+        change.subFormKey = object.getString("subFormKey");
+        return change;
+    }
 
     public static class Builder {
 
