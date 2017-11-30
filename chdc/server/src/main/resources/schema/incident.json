@@ -1,0 +1,526 @@
+{
+  "id": "incident",
+  "schemaVersion": 1,
+  "label": "Incident",
+  "elements": [
+    {
+      "id": "date",
+      "label": "Incident Date",
+      "visible": true,
+      "required": true,
+      "type": "date"
+    },
+    {
+      "id": "narrative",
+      "label": "Incident Narrative",
+      "visible": true,
+      "required": false,
+      "type": "NARRATIVE"
+    },
+    {
+      "id": "actor",
+      "label": "Actor",
+      "visible": true,
+      "required": false,
+      "type": "reference",
+      "typeParameters": {
+        "cardinality": "single",
+        "range": [
+          {
+            "formId": "actor"
+          }
+        ]
+      }
+    },
+    {
+      "id": "primary_target",
+      "label": "Primary intended target",
+      "visible": true,
+      "required": false,
+      "type": "reference",
+      "typeParameters": {
+        "cardinality": "single",
+        "range": [
+          {
+            "formId": "actor"
+          }
+        ]
+      }
+    },
+    {
+      "id": "act",
+      "label": "Act",
+      "visible": true,
+      "required": false,
+      "type": "reference",
+      "typeParameters": {
+        "cardinality": "single",
+        "range": [
+          {
+            "formId": "act"
+          }
+        ]
+      }
+    },
+    {
+      "id": "act_mode",
+      "label": "Act Mode",
+      "visible": true,
+      "required": false,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "perpetrated",
+            "label": "Perpetrated"
+          },
+          {
+            "id": "attempted",
+            "label": "Attempted"
+          }
+        ]
+      }
+    },
+    {
+      "id": "location",
+      "label": "Location",
+      "required": false,
+      "type": "reference",
+      "typeParameters": {
+        "cardinality": "single",
+        "range": [
+          {
+            "formId": "location"
+          }
+        ]
+      }
+    },
+    {
+      "id": "precise_location",
+      "label": "Precise Location",
+      "description": "Please describe the precise location within the settlement",
+      "type": "FREE_TEXT"
+    },
+    {
+      "id": "precise_coords",
+      "label": "Precise Coordinates",
+      "type": "geopoint"
+    },
+    {
+      "id": "perpetrator_personnel",
+      "label": "Number of personnel (perpetrator)",
+      "type": "quantity",
+      "typeParameters": {
+        "units": "individuals"
+      }
+    },
+    {
+      "id": "means",
+      "label": "Means",
+      "required": true,
+      "type": "reference",
+      "typeParameters": {
+        "cardinality": "single",
+        "range": [
+          {
+            "formId": "means"
+          }
+        ]
+      }
+    },
+    {
+      "id": "life_impact",
+      "label": "Life Impact",
+      "type": "subform",
+      "typeParameters": {
+        "formId": "life_impact"
+      }
+    },
+    {
+      "id": "abduction_status",
+      "label": "Abduction Status",
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "open",
+            "label": "Open"
+          },
+          {
+            "id": "closed",
+            "label": "Closed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "abduction_duration",
+      "label": "Duration of abduction",
+      "type": "quantity",
+      "typeParameters": {
+        "units": "days"
+      }
+    },
+    {
+      "id": "ngo_incident",
+      "label": "NGO Affected?",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "yes",
+            "label": "Yes"
+          },
+          {
+            "id": "no",
+            "label": "No"
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_related",
+      "label": "Work related?",
+      "relevanceCondition": "ngo_incident == 'yes'",
+      "visible": true,
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "work_related",
+            "label": "Yes"
+          },
+          {
+            "id": "personal",
+            "label": "No (Personal)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "duty",
+      "label": "On duty?",
+      "relevanceCondition": "ngo_incident == 'yes'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "on_duty",
+            "label": "On duty"
+          },
+          {
+            "id": "off_duty",
+            "label": "Off duty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "relative_location",
+      "label": "Relative location?",
+      "relevanceCondition": "ngo_incident == 'yes'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "public_place",
+            "label": "Public place"
+          },
+          {
+            "id": "in_transit_urban",
+            "label": "In tranist (urban)"
+          },
+          {
+            "id": "in_transit_rural",
+            "label": "In transit (rural)"
+          },
+          {
+            "id": "in_custody",
+            "label": "In custody/detention"
+          },
+          {
+            "id": "at_work",
+            "label": "At work"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_incident_targeted",
+      "label": "Was the incident targeted?",
+      "relevanceCondition": "ngo_incident == 'yes'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "targeted",
+            "label": "Targeted"
+          },
+          {
+            "id": "wpwt",
+            "label": "Wrong place, Wrong time"
+          },
+          {
+            "id": "accidental",
+            "label": "Accidental"
+          },
+          {
+            "id": "unclear",
+            "label": "Unclear"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_targeted_reason",
+      "label": "Why was the organization targeted?",
+      "relevanceCondition": "ngo_incident_targeted == 'targeted' && work_related == 'work_related'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "targeted_as_foreign",
+            "label": "As 'Foreign'"
+          },
+          {
+            "id": "targeted_as_ngo",
+            "label": "As 'NGO'"
+          },
+          {
+            "id": "targeted_as_itself",
+            "label": "As 'itself' (as the individual NGO)"
+          },
+          {
+            "id": "targeted_as_sector",
+            "label": "As sector"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_individual_targeted_reason",
+      "label": "Why was the individual targeted?",
+      "relevanceCondition": "ngo_incident_targeted == targeted && work_related == 'personal'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "gender",
+            "label": "Gender"
+          },
+          {
+            "id": "nationality",
+            "label": "Nationality"
+          },
+          {
+            "id": "ethnicity",
+            "label": "Ethnicity/CLan"
+          },
+          {
+            "id": "faith",
+            "label": "Faith"
+          },
+          {
+            "id": "resources",
+            "label": "Resources"
+          },
+          {
+            "id": "other",
+            "label": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_targeted_aspect",
+      "label": "What aspect of the NGO was targeted?",
+      "relevanceCondition": "ngo_targeted_reason == 'targeted_as_itself'",
+      "visible": true,
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "identity",
+            "label": "Identity"
+          },
+          {
+            "id": "programme",
+            "label": "Programme"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_targeted_identity",
+      "label": "What aspect of its identity?",
+      "relevanceCondition": "ngo_targeted_reason == 'identity'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "faith",
+            "label": "Faith"
+          },
+          {
+            "id": "nationality",
+            "label": "Nationality"
+          },
+          {
+            "id": "ethnicity",
+            "label": "Ethnicity/Clan"
+          },
+          {
+            "id": "resources",
+            "label": "Resources"
+          },
+          {
+            "id": "other",
+            "label": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_targeted_programme",
+      "label": "What aspect of its programme?",
+      "relevanceCondition": "ngo_targeted_aspect == 'programme'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "women",
+            "label": "Women"
+          },
+          {
+            "id": "health",
+            "label": "Health"
+          },
+          {
+            "id": "education",
+            "label": "Education"
+          },
+          {
+            "id": "gov_mil",
+            "label": "Gov/Mil"
+          },
+          {
+            "id": "other",
+            "label": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_targeted_sector",
+      "label": "Which sector was targeted?",
+      "relevanceCondition": "ngo_targeted_reason == 'targeted_as_sector'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "women",
+            "label": "Women"
+          },
+          {
+            "id": "health",
+            "label": "Health"
+          },
+          {
+            "id": "education",
+            "label": "Education"
+          },
+          {
+            "id": "other",
+            "label": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_reaction",
+      "label": "How did the NGO react to the incident?",
+      "relevanceCondition": "ngo_incident == 'yes'",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "withdrew_temporarily",
+            "label": "Temporarily Withdrew"
+          },
+          {
+            "id": "withdrew_permanently",
+            "label": "Permanently Withdrew"
+          },
+          {
+            "id": "remained",
+            "label": "Remained, no programme modifications"
+          },
+          {
+            "id": "remained_modified",
+            "label": "Remained, modified programme"
+          }
+        ]
+      }
+    },
+    {
+      "id": "authority_reaction",
+      "label": "How did the authorities react?",
+      "relevanceCondition": "ngo_incident == yes",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "multiple",
+        "values": [
+          {
+            "id": "increased_forces",
+            "label": "Increased forces"
+          },
+          {
+            "id": "changed_policy",
+            "label": "Changed policy"
+          },
+          {
+            "id": "no_change",
+            "label": "No change"
+          }
+        ]
+      }
+    },
+    {
+      "id": "confidential_notes",
+      "label": "Confidential Notes",
+      "type": "NARRATIVE"
+    }
+  ]
+}

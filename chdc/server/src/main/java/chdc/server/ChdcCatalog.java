@@ -1,41 +1,75 @@
 package chdc.server;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.io.Resources;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.activityinfo.model.form.CatalogEntry;
+import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 
+import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ChdcCatalog implements FormCatalog {
+
+    private static final Logger LOGGER = Logger.getLogger(ChdcCatalog.class.getName());
 
     private Map<ResourceId, FormClass> schemas = new HashMap<>();
 
     public ChdcCatalog() {
-        FormClass countryForm = new FormClass(ResourceId.valueOf("country"));
-        countryForm.setLabel("Country");
-        countryForm.addField(ResourceId.valueOf("name"))
-                .setLabel("Name")
-                .setType(TextType.SIMPLE)
-                .setRequired(true)
-                .setKey(true);
+        loadSchema("/schema/act.json");
+        loadSchema("/schema/actor.json");
+        loadSchema("/schema/actor_category.json");
+        loadSchema("/schema/country.json");
+        loadSchema("/schema/incident.json");
+        loadSchema("/schema/life_impact.json");
+        loadSchema("/schema/location.json");
+        loadSchema("/schema/means.json");
+        loadSchema("/schema/property_impact.json");
 
-        schemas.put(countryForm.getId(), countryForm);
 
+
+    }
+
+    /**
+     * Loads the FormSchema from a JSON-encoded resource.
+     */
+    private void loadSchema(String resourceName) {
+        try {
+            URL url = Resources.getResource(resourceName);
+            String formSchemaJson = Resources.toString(url, Charsets.UTF_8);
+            FormClass formClass = FormClass.fromJson(formSchemaJson);
+
+            schemas.put(formClass.getId(), formClass);
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to load schema " + resourceName, e);
+        }
     }
 
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        throw new UnsupportedOperationException("TODO");
+    public FormClass getFormClass(ResourceId formId) {
+        return schemas.get(formId);
     }
 
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
-        throw new UnsupportedOperationException("TODO");
+        Map<ResourceId, FormClass> schemas = new HashMap<>();
+        for (ResourceId formId : formIds) {
+            schemas.put(formId, getFormClass(formId));
+        }
+        return schemas;
     }
 
     @Override
@@ -48,7 +82,16 @@ public class ChdcCatalog implements FormCatalog {
 
     @Override
     public List<CatalogEntry> getRootEntries() {
-        return Collections.emptyList();
+        List<CatalogEntry> entries = new ArrayList<>();
+        for (FormClass formClass : schemas.values()) {
+            if(!formClass.isSubForm()) {
+                CatalogEntry entry = new CatalogEntry(
+                        formClass.getId().asString(),
+                        formClass.getLabel(), CatalogEntryType.FORM);
+                entries.add(entry);
+            }
+        }
+        return entries;
     }
 
     @Override
