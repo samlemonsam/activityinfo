@@ -3,10 +3,12 @@ package chdc.server;
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.RecordVersion;
@@ -32,7 +34,26 @@ public class MySqlFormStorage implements FormStorage {
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        throw new UnsupportedOperationException("TODO");
+
+        try(PreparedStatement stmt = ChdcDatabase.getConnection().prepareStatement(
+                "SELECT fields FROM record WHERE form_id = ? AND record_id = ?")) {
+
+            stmt.setString(1, schema.getId().asString());
+            stmt.setString(2, resourceId.asString());
+
+            try(ResultSet rs = stmt.executeQuery()) {
+                if(!rs.next()) {
+                    return Optional.absent();
+                }
+                JsonValue fieldMap = Json.parse(rs.getString(1));
+                FormRecord record = new FormRecord(new RecordRef(schema.getId(), resourceId), null, fieldMap);
+
+                return Optional.of(record);
+            }
+
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

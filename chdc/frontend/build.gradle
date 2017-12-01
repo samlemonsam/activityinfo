@@ -26,6 +26,8 @@ dependencies {
 
     compile "com.google.gwt:gwt-dev:2.8.0"
     compile "com.sencha.gxt:gxt-themebuilder:4.0.0"
+
+    compile project(':ui:app')
 }
 
 task compileApp(type: JavaExec) {

@@ -1,6 +1,7 @@
 package chdc.server;
 
 import com.google.common.collect.Sets;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.store.server.JaxRsJsonReader;
 
 import javax.ws.rs.core.Application;
@@ -17,6 +18,9 @@ public class ChdcApplication extends Application {
 
     public ChdcApplication() {
         LOGGER.info("Initializing Chdc Application");
+
+        // Initialize ActivityInfo translations
+        LocaleProxy.initialize();
     }
 
     @Override

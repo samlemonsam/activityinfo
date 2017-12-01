@@ -5,6 +5,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.PermissionsEnforcer;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
+import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.server.ApiBackend;
 import org.activityinfo.store.spi.FormCatalog;
@@ -40,7 +41,7 @@ public class ChdcApiBackend implements ApiBackend {
 
     @Override
     public ColumnSetBuilder newQueryBuilder() {
-        return new ColumnSetBuilder(getCatalog(), new NullFormSupervisor());
+        return new ColumnSetBuilder(getCatalog(), new NullFormScanCache(), new NullFormSupervisor());
     }
 
     @Override

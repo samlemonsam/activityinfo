@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonParser;
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
@@ -21,7 +22,7 @@ import static org.activityinfo.json.Json.createObject;
  * Describes a Table to be constructed from a
  * FormTree.
  */
-public class QueryModel {
+public class QueryModel implements JsonSerializable {
 
     private final List<RowSource> rowSources = Lists.newArrayList();
     private final List<ColumnModel> columns = Lists.newArrayList();
@@ -168,15 +169,11 @@ public class QueryModel {
     }
     
     public String toJsonString() {
-        return toJsonElement().toJson();
+        return toJson().toJson();
     }
 
-    public static QueryModel fromJson(String json) {
+    public static QueryModel fromJson(JsonValue jsonObject) {
         QueryModel queryModel = new QueryModel();
-
-        org.activityinfo.json.JsonParser jsonParser = new JsonParser();
-        JsonValue jsonObject = jsonParser.parse(json);
-
         JsonValue rowSources = jsonObject.get("rowSources");
         for (JsonValue rowSource : rowSources.values()) {
             queryModel.getRowSources().add(RowSource.fromJson(rowSource));
@@ -196,21 +193,11 @@ public class QueryModel {
         return queryModel;
     }
 
-    public JsonValue toJsonElement() {
-
-        JsonValue sourcesArray = Json.createArray();
-        for (RowSource rowSource : rowSources) {
-            sourcesArray.add(rowSource.toJsonElement());
-        }
-
-        JsonValue columnsArray = Json.createArray();
-        for (ColumnModel column : columns) {
-            columnsArray.add(column.toJson());
-        }
-
+    @Override
+    public JsonValue toJson() {
         JsonValue object = createObject();
-        object.put("rowSources", sourcesArray);
-        object.put("columns", columnsArray);
+        object.put("rowSources", Json.toJson(rowSources));
+        object.put("columns", Json.toJson(columns));
 
         if(filter != null) {
             object.put("filter", filter.asExpression());
