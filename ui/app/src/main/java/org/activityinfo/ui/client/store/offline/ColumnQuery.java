@@ -10,7 +10,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.client.columns.JsColumnFactory;
 import org.activityinfo.store.query.shared.*;
-import org.activityinfo.store.query.shared.columns.ColumnFactory;
+import org.activityinfo.store.spi.NullFormVersionProvider;
 import org.activityinfo.ui.client.store.tasks.Task;
 import org.activityinfo.ui.client.store.tasks.TaskExecution;
 
@@ -49,7 +49,11 @@ public class ColumnQuery implements Task<ColumnSet> {
             this.callback = callback;
 
             // Queue up the data we need
-            FormScanBatch batch = new FormScanBatch(JsColumnFactory.INSTANCE, formTree, new NullFormSupervisor());
+            FormScanBatch batch = new FormScanBatch(
+                    JsColumnFactory.INSTANCE,
+                    formTree, NullFormVersionProvider.INSTANCE,
+                    new NullFormSupervisor());
+
             QueryEvaluator evaluator = new QueryEvaluator(FilterLevel.PERMISSIONS, formTree, batch);
             Slot<ColumnSet> queryResult = evaluator.evaluate(queryModel);
 

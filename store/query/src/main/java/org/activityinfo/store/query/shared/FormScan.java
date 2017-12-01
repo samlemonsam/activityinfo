@@ -47,11 +47,11 @@ public class FormScan {
     private ColumnFactory columnFactory;
 
 
-    public FormScan(ColumnFactory columnFactory, FormClass formClass) {
+    public FormScan(ColumnFactory columnFactory, FormClass formClass, long formVersion) {
         this.columnFactory = columnFactory;
         this.formId = formClass.getId();
         this.formClass = formClass;
-        this.cacheVersion = 0;
+        this.cacheVersion = formVersion;
     }
 
     public ResourceId getFormId() {

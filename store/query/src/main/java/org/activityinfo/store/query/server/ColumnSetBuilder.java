@@ -13,9 +13,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.FormCatalog;
-import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.*;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -54,7 +52,11 @@ public class ColumnSetBuilder {
     }
 
     public FormScanBatch createNewBatch() {
-        return new FormScanBatch(columnFactory, catalog, supervisor);
+        return new FormScanBatch(
+                columnFactory,
+                catalog,
+                new FormVersionProviderAdapter(catalog),
+                supervisor);
     }
 
     public ColumnSet build(QueryModel queryModel) {
