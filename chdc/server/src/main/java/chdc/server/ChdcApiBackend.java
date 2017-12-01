@@ -11,6 +11,8 @@ import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.RecordHistoryProvider;
 
 public class ChdcApiBackend implements ApiBackend {
+
+
     @Override
     public FormCatalog getCatalog() {
         return new ChdcCatalog();
@@ -38,7 +40,7 @@ public class ChdcApiBackend implements ApiBackend {
 
     @Override
     public ColumnSetBuilder newQueryBuilder() {
-        throw new UnsupportedOperationException("TODO");
+        return new ColumnSetBuilder(getCatalog(), new NullFormSupervisor());
     }
 
     @Override

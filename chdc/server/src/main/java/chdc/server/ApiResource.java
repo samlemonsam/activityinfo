@@ -11,7 +11,7 @@ import javax.ws.rs.PathParam;
 /**
  * Serves the API endpoints
  */
-@Path("/api/v3")
+@Path("/resources")
 public class ApiResource {
 
     private ApiBackend backend = new ChdcApiBackend();

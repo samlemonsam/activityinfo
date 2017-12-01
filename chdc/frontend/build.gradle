@@ -28,26 +28,6 @@ dependencies {
     compile "com.sencha.gxt:gxt-themebuilder:4.0.0"
 }
 
-
-task generateTheme(type: JavaExec) {
-
-    inputs.file project.file('chdc.theme')
-
-    // Compiled java classes and libraries second
-    classpath sourceSets.main.java.srcDirs
-    classpath sourceSets.main.resources.srcDirs
-    classpath sourceSets.main.runtimeClasspath
-
-    main = 'com.sencha.gxt.themebuilder.ThemeBuilder'
-
-    args '-gen', "$buildDir/theme"
-    args '-slicedDisabled', 'true'
-    args '-sourcesOnly', 'true'
-
-    args project.file('chdc.theme')
-
-}
-
 task compileApp(type: JavaExec) {
 
     dependsOn 'generateTheme'
@@ -84,21 +64,3 @@ task compileApp(type: JavaExec) {
 
 compileApp.onlyIf { !project.hasProperty('skipGwt') }
 
-
-
-task devMode(type: JavaExec) {
-
-    classpath "$buildDir/theme"
-
-    classpath sourceSets.main.java.srcDirs
-    classpath sourceSets.main.resources.srcDirs
-    classpath sourceSets.main.runtimeClasspath
-
-    main = 'com.google.gwt.dev.DevMode'
-
-    args '-startupUrl', 'demo.html'
-    args '-war', "$buildDir/war"
-
-    args 'chdc.frontend.Chdc'
-
-}

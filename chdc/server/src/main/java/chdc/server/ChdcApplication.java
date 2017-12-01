@@ -13,11 +13,18 @@ import java.util.Set;
 public class ChdcApplication extends Application {
 
     @Override
+    public Set<Object> getSingletons() {
+        Set<Object> singletons = new HashSet<>();
+        singletons.add(new JaxRsJsonReader());
+
+        return singletons;
+    }
+
+    @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>();
         classes.add(ApiResource.class);
         classes.add(FrontendResource.class);
-        classes.add(JaxRsJsonReader.class);
         return classes;
     }
 }

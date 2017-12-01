@@ -8,11 +8,18 @@
     <display-name>INSO CHDC</display-name>
 
     <servlet>
-        <servlet-name>chdc.server.ChdcApplication</servlet-name>
+        <servlet-name>ChdcApplication</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>chdc.server.ChdcApplication</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>chdc.server.ChdcApplication</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>ChdcApplication</servlet-name>
+        <url-pattern>/resources/*</url-pattern>
     </servlet-mapping>
 
 
