@@ -12,11 +12,11 @@
     },
     {
       "id": "category",
+      "label": "Actor Category",
+      "required": true,
+      "type": "reference",
+      "typeParameters": {
         "cardinality": "single",
-        "label": "Actor Category",
-        "required": true,
-        "type": "reference",
-        "typeParameters": {
         "range": [
           {
             "formId": "actor_category"
