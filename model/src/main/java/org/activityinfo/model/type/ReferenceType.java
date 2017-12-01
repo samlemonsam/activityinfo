@@ -49,8 +49,7 @@ public class ReferenceType implements ParametrizedFieldType {
             }
             
             ReferenceType type = new ReferenceType();
-            // Explicit type parameter required by GWT's compiler!
-            type.setCardinality(Cardinality.valueOf(parametersObject.<JsonValue>get("cardinality")));
+            type.setCardinality(Cardinality.valueOf(parametersObject.get("cardinality")));
             type.setRange(range);
             return type;
         }
