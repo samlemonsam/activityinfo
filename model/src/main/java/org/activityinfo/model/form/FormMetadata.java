@@ -1,5 +1,6 @@
 package org.activityinfo.model.form;
 
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -12,7 +13,7 @@ import static org.activityinfo.json.Json.createObject;
  * Provides user-specific metadata for a given form, including permissions
  * and versioning.
  */
-public class FormMetadata {
+public class FormMetadata implements JsonSerializable {
 
     private ResourceId id;
 
@@ -111,7 +112,8 @@ public class FormMetadata {
         this.schemaVersion = schema.getSchemaVersion();
     }
 
-    public JsonValue toJsonObject() {
+    @Override
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("id", id.asString());
         if(!visible) {
