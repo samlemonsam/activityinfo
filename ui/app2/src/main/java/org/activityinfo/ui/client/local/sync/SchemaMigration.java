@@ -68,7 +68,8 @@ public class SchemaMigration {
             "ALTER TABLE Indicator ADD COLUMN nameInExpression",
             "ALTER TABLE AttributeGroup ADD COLUMN defaultValue",
             "ALTER TABLE AttributeGroup ADD COLUMN workflow",
-            "UPDATE location SET workflowStatusId='validated' WHERE workflowStatusId is null "
+            "UPDATE location SET workflowStatusId='validated' WHERE workflowStatusId is null ",
+            "ALTER TABLE indicator ADD COLUMN visible bit(1) NOT null DEFAULT 1"
     };
 
     @Inject
