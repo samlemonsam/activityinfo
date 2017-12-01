@@ -3,21 +3,15 @@ package chdc.server;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.io.Resources;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
 
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ChdcCatalog implements FormCatalog {
@@ -27,17 +21,15 @@ public class ChdcCatalog implements FormCatalog {
     private Map<ResourceId, FormClass> schemas = new HashMap<>();
 
     public ChdcCatalog() {
-        loadSchema("/schema/act.json");
-        loadSchema("/schema/actor.json");
-        loadSchema("/schema/actor_category.json");
-        loadSchema("/schema/country.json");
-        loadSchema("/schema/incident.json");
-        loadSchema("/schema/life_impact.json");
-        loadSchema("/schema/location.json");
-        loadSchema("/schema/means.json");
-        loadSchema("/schema/property_impact.json");
-
-
+        loadSchema("schema/act.json");
+        loadSchema("schema/actor.json");
+        loadSchema("schema/actor_category.json");
+        loadSchema("schema/country.json");
+        loadSchema("schema/incident.json");
+        loadSchema("schema/life_impact.json");
+        loadSchema("schema/location.json");
+        loadSchema("schema/means.json");
+//        loadSchema("schema/property_impact.json");
 
     }
 
@@ -53,7 +45,7 @@ public class ChdcCatalog implements FormCatalog {
             schemas.put(formClass.getId(), formClass);
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to load schema " + resourceName, e);
+            throw new IllegalStateException("Failed to load schema: " + resourceName, e);
         }
     }
 

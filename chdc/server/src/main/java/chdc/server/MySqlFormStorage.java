@@ -11,12 +11,11 @@ import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.RecordVersion;
 import org.activityinfo.store.spi.TypedRecordUpdate;
-import org.jooq.Record;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-
-import static chdc.server.sql.Tables.FORM_VERSION;
-import static chdc.server.sql.Tables.RECORD;
 
 public class MySqlFormStorage implements FormStorage {
 
@@ -69,20 +68,27 @@ public class MySqlFormStorage implements FormStorage {
         long newVersion = cacheVersion() + 1;
         String fields = Json.stringify(update.getChangedFieldValuesObject());
 
-        // Insert the new record with all of its values
-        ChdcDatabase.sql()
-                .insertInto(RECORD, RECORD.FORM_ID, RECORD.RECORD_ID, RECORD.VERSION, RECORD.FIELDS)
-                .values(schema.getId().asString(), update.getRecordId().asString(), newVersion, fields)
-                .execute();
+        try(PreparedStatement stmt = ChdcDatabase.getConnection().prepareStatement(
+                "INSERT INTO record (form_id, record_id, version, fields) VALUES (?, ?, ?, ?)")) {
 
-        // Update the form version
-        ChdcDatabase.sql()
-                .insertInto(FORM_VERSION, FORM_VERSION.FORM_ID, FORM_VERSION.VERSION)
-                .values(schema.getId().asString(), newVersion)
-                .onDuplicateKeyUpdate()
-                .set(FORM_VERSION.VERSION, newVersion)
-                .execute();
+            stmt.setString(1, schema.getId().asString());
+            stmt.setString(2, update.getRecordId().asString());
+            stmt.setLong(3, newVersion);
+            stmt.setString(4, fields);
 
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        try(PreparedStatement stmt = ChdcDatabase.getConnection().prepareStatement(
+                "INSERT INTO form_version (form_id, version) VALUES (?, ?)")) {
+
+            stmt.setString(1, schema.getId().asString());
+            stmt.setLong(2, newVersion);
+
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -97,15 +103,21 @@ public class MySqlFormStorage implements FormStorage {
 
     @Override
     public long cacheVersion() {
-        Record record = ChdcDatabase.sql().select()
-                .from(FORM_VERSION)
-                .where(FORM_VERSION.FORM_ID.eq(schema.getId().asString()))
-                .fetchOne();
 
-        if(record == null) {
-            return 1L;
-        } else {
-            return record.getValue(FORM_VERSION.VERSION);
+        try(PreparedStatement stmt = ChdcDatabase.getConnection().prepareStatement(
+                "SELECT version FROM form_version WHERE form_id = ?")) {
+
+            stmt.setString(1, schema.getId().asString());
+            try(ResultSet rs = stmt.executeQuery()) {
+                if(rs.next()) {
+                    return rs.getLong(1);
+                } else {
+                    return 1L;
+                }
+            }
+
+        } catch(SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -2,31 +2,29 @@ package chdc.server;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.jooq.ConnectionProvider;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.exception.DataAccessException;
-import org.jooq.impl.DSL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles the connection with the SQL database
  */
-public class ChdcDatabase implements ConnectionProvider {
+public class ChdcDatabase {
 
     public static ChdcDatabase DATABASE = new ChdcDatabase();
+
+    private static final Logger LOGGER = Logger.getLogger(ChdcDatabase.class.getName());
 
     private final HikariDataSource datasource;
 
     /**
      * Maintain one connection per thread, or one connection per request.
      */
-    private final ThreadLocal<Connection> connection = new ThreadLocal<>();
+    private final ThreadLocal<Connection> threadLocalConnection = new ThreadLocal<>();
 
     private ChdcDatabase() {
-
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://localhost:3306/chdc");
         config.setUsername("root");
@@ -38,31 +36,49 @@ public class ChdcDatabase implements ConnectionProvider {
         datasource = new HikariDataSource(config);
     }
 
-
-    public static DSLContext sql() {
-        return DSL.using(DATABASE, SQLDialect.MYSQL);
-    }
-
-    @Override
-    public Connection acquire() throws DataAccessException {
-        Connection threadConnection = this.connection.get();
-        if(threadConnection == null) {
-            try {
-                threadConnection = datasource.getConnection();
-                connection.set(threadConnection);
-            } catch (SQLException e) {
-                throw new DataAccessException("Failed to acquire connection", e);
-            }
+    public static Connection getConnection() throws SQLException {
+        Connection connection = DATABASE.threadLocalConnection.get();
+        if(connection == null) {
+            connection = DATABASE.datasource.getConnection();
+            DATABASE.threadLocalConnection.set(connection);
         }
-        return threadConnection;
+
+        connection.setAutoCommit(false);
+        return connection;
     }
 
-    @Override
-    public void release(Connection connection) throws DataAccessException {
+    public static void rollbackRequestTransactionIfActive() {
+        Connection connection = DATABASE.threadLocalConnection.get();
+        if(connection != null) {
+            try {
+                connection.rollback();
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to rollback active transaction", e);
+            }
+
+            cleanupThreadConnection(connection);
+        }
+    }
+
+    public static void commitRequestTransactionIfActive() {
+        Connection connection = DATABASE.threadLocalConnection.get();
+        if(connection != null) {
+            try {
+                connection.commit();
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to commit active transaction", e);
+            }
+            cleanupThreadConnection(connection);
+        }
+    }
+
+    private static void cleanupThreadConnection(Connection connection) {
         try {
             connection.close();
-        } catch (SQLException e) {
-            throw new DataAccessException("Exception closing connection", e);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to release this request's connection", e);
         }
+
+        DATABASE.threadLocalConnection.remove();
     }
 }

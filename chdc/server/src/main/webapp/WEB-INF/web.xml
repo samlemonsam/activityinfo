@@ -14,4 +14,17 @@
         <servlet-name>chdc.server.ChdcApplication</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
+
+    <!-- The ChdcDatabaseFilter commits any pending transactions at the end of the request
+         and releases this request's connection to the connection pool -->
+    <filter>
+        <filter-name>ChdcDatabaseFilter</filter-name>
+        <filter-class>chdc.server.ChdcDatabaseFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>ChdcDatabaseFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 </web-app>
