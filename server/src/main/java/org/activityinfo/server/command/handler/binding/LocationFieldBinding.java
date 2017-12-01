@@ -21,7 +21,7 @@ public class LocationFieldBinding implements FieldBinding {
     public static final SymbolExpr ID_SYMBOL = new SymbolExpr(ColumnModel.ID_SYMBOL);
     public static final SymbolExpr LOCATION_SYMBOL = new SymbolExpr("location");
     public static final SymbolExpr NAME_SYMBOL = new SymbolExpr("name");
-    public static final SymbolExpr CODE_SYMBOL = new SymbolExpr("code");
+    public static final SymbolExpr CODE_SYMBOL = new SymbolExpr("axe");
     public static final String PARENT_SYMBOL = "parent";
 
     public static final String LOCATION_ID_COLUMN = "locationId";

@@ -19,6 +19,7 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.*;
+import org.activityinfo.store.spi.FormVersionProvider;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ public class FormScanBatch {
 
     private final ColumnFactory columnFactory;
     private final FormSupervisor supervisor;
+    private FormVersionProvider formVersionProvider;
     private final FormClassProvider formClassProvider;
 
 
@@ -55,10 +57,11 @@ public class FormScanBatch {
     private Map<JoinedColumnKey, JoinedReferenceColumnViewSlot> joinedColumns = new HashMap<>();
 
 
-    public FormScanBatch(ColumnFactory columnFactory, FormClassProvider formClassProvider,
+    public FormScanBatch(ColumnFactory columnFactory,
+                         FormClassProvider formClassProvider, FormVersionProvider formVersionProvider,
                          FormSupervisor supervisor) {
         this.columnFactory = columnFactory;
-
+        this.formVersionProvider = formVersionProvider;
         this.formClassProvider = formClassProvider;
         this.supervisor = supervisor;
     }
@@ -70,7 +73,9 @@ public class FormScanBatch {
     public FormScan getTable(ResourceId formId) {
         FormScan scan = tableMap.get(formId);
         if(scan == null) {
-            scan = new FormScan(columnFactory, formClassProvider.getFormClass(formId));
+            scan = new FormScan(columnFactory,
+                    formClassProvider.getFormClass(formId),
+                    formVersionProvider.getCurrentFormVersion(formId));
             tableMap.put(formId, scan);
         }
         return scan;

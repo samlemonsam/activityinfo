@@ -20,6 +20,7 @@ import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormVersionProvider;
 
 import java.sql.SQLException;
 import java.util.*;

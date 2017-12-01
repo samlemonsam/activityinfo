@@ -288,7 +288,7 @@ public class DesignView extends AbstractEditorTreeGridView<ModelData, DesignPres
 
     protected void initNewMenu(Menu menu, SelectionListener<MenuEvent> listener) {
 
-        MenuItem newActivity = new MenuItem(I18N.CONSTANTS.newActivity(), IconImageBundle.ICONS.addActivity(), listener);
+        MenuItem newActivity = new MenuItem(I18N.CONSTANTS.newClassicActivity(), IconImageBundle.ICONS.addActivity(), listener);
         newActivity.setItemId("Activity");
         menu.add(newActivity);
 

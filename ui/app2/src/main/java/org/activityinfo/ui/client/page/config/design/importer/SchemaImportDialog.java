@@ -248,6 +248,7 @@ public class SchemaImportDialog {
         }
 
         if (importer.equals(importerV3)) {
+            awaitValidation();
             importerV3.processRows(new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -261,7 +262,6 @@ public class SchemaImportDialog {
                     onInputValid();
                 }
             });
-            awaitValidation();
         } else {
             importer.processRows();
             onInputValid();
