@@ -7,21 +7,6 @@
 
     <display-name>INSO CHDC</display-name>
 
-    <servlet>
-        <servlet-name>ChdcApplication</servlet-name>
-        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>chdc.server.ChdcApplication</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ChdcApplication</servlet-name>
-        <url-pattern>/resources/*</url-pattern>
-    </servlet-mapping>
-
 
     <!-- The ChdcDatabaseFilter commits any pending transactions at the end of the request
          and releases this request's connection to the connection pool -->
@@ -34,4 +19,24 @@
         <filter-name>ChdcDatabaseFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
+    <!-- The RestFilter allows Jersey to handle matching resource paths -->
+    <filter>
+        <filter-name>RestFilter</filter-name>
+        <filter-class>com.sun.jersey.spi.container.servlet.ServletContainer</filter-class>
+
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>chdc.server.ChdcApplication</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.WebPageContentRegex</param-name>
+            <param-value>/App/.*</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>RestFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
 </web-app>
