@@ -1,6 +1,7 @@
 package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Constants;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
 /**
  *
@@ -1797,4 +1798,19 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("New Activity (Classic Form)")
     String newClassicActivity();
+
+    @DefaultStringValue("Parent Form")
+    String parentForm();
+
+    @DefaultStringValue("Sub Form")
+    String subForm();
+
+    @DefaultStringValue("Selected Columns")
+    String selectedColumns();
+
+    @DefaultStringValue("All")
+    String allRows();
+
+    @DefaultStringValue("Filtered Rows")
+    String filteredRows();
 }

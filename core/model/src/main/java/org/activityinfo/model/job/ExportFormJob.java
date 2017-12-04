@@ -5,9 +5,6 @@ import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.resource.ResourceId;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.activityinfo.json.Json.createObject;
 
 /**
@@ -17,30 +14,19 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
 
     public static final String TYPE = "exportForm";
 
-    private ResourceId formId;
-    private List<ExportColumn> columns;
-
-    public ExportFormJob(ResourceId formId, List<ExportColumn> columns) {
-        this.formId = formId;
-        this.columns = columns;
-    }
+    private TableModel tableModel;
 
     public ExportFormJob(TableModel tableModel) {
-        this.formId = tableModel.getFormId();
-        this.columns = new ArrayList<>();
+        this.tableModel = tableModel;
     }
 
     public ResourceId getFormId() {
-        return formId;
+        return tableModel.getFormId();
     }
 
     @Override
     public String getType() {
         return TYPE;
-    }
-
-    public List<ExportColumn> getColumns() {
-        return columns;
     }
 
     @Override
@@ -49,25 +35,25 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     }
 
     public TableModel getTableModel() {
-        return ImmutableTableModel.builder().formId(formId).build();
+        return tableModel;
     }
 
     @Override
     public JsonValue toJsonObject() {
         JsonValue object = createObject();
-        object.put("formId", formId.asString());
+        object.put("model", tableModel.toJson());
         return object;
     }
 
     public static ExportFormJob fromJson(JsonValue object) {
-
-        List<ExportColumn> columns = new ArrayList<>();
-        if(object.hasKey("columns")) {
-            for (JsonValue jsonElement : object.get("columns").values()) {
-                columns.add(ExportColumn.fromJson(jsonElement));
-            }
+        TableModel tableModel;
+        if(object.hasKey("formId")) {
+            tableModel = ImmutableTableModel.builder()
+                    .formId(ResourceId.valueOf(object.get("formId").asString()))
+                    .build();
+        } else {
+            tableModel = TableModel.fromJson(object.get("model"));
         }
-
-        return new ExportFormJob(ResourceId.valueOf(object.get("formId").asString()), columns);
+        return new ExportFormJob(tableModel);
     }
 }
