@@ -120,6 +120,12 @@ public class ColumnSetBuilder {
     }
 
     private void executeScan(FormScan scan) {
+
+        if(scan.isEmpty()) {
+            LOGGER.info("Skipping form scan of " + scan.getFormId() + ", fully resolved from cache");
+            return;
+        }
+
         Optional<FormStorage> form = catalog.getForm(scan.getFormId());
         if(!form.isPresent()) {
             throw new IllegalStateException("No storage for form " + scan.getFormId());
