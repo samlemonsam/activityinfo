@@ -44,6 +44,9 @@ public class TestingCatalog implements FormCatalog {
     private final IncidentForm incidentForm;
     private final ReferralSubForm referralSubForm;
 
+    private final GenericForm generic;
+    private final BlankSubForm blankSubForm;
+
     private final AdminLevelForm province;
     private final AdminLevelForm territory;
     private final VillageForm villageForm;
@@ -64,6 +67,11 @@ public class TestingCatalog implements FormCatalog {
         incidentForm = new IncidentForm(bioData);
         referralSubForm = new ReferralSubForm(incidentForm);
         add(intake, bioData, incidentForm, referralSubForm);
+
+        // Generic form setup with blank subform
+        generic = new GenericForm();
+        blankSubForm = new BlankSubForm(generic);
+        add(generic, blankSubForm);
 
         // Classic NFI use case
         province = new AdminLevelForm(new UnitTestingIds(), "Province", 16, Optional.<AdminLevelForm>absent());
@@ -198,5 +206,13 @@ public class TestingCatalog implements FormCatalog {
 
     public IdpLocationForm getIdpLocationForm() {
         return idpLocationForm;
+    }
+
+    public GenericForm getGenericForm() {
+        return generic;
+    }
+
+    public BlankSubForm getBlankSubForm() {
+        return blankSubForm;
     }
 }
