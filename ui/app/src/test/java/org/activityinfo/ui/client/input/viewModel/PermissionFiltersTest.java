@@ -32,7 +32,8 @@ public class PermissionFiltersTest {
 
         PermissionFilters filters = new PermissionFilters(formTree, permissions);
 
-        assertThat(filters.getFilter(nfiForm.getVillageField().getId()).asExpression(), equalTo("F2 == \"g12345\""));
+        assertThat(filters.getReferenceBaseFilter(nfiForm.getVillageField().getId()).get().asExpression(),
+                equalTo("[_id] == \"g12345\""));
     }
 
 }

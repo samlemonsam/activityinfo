@@ -6,14 +6,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
+import org.activityinfo.ui.client.input.viewModel.PermissionFilters;
 import org.activityinfo.ui.client.lookup.view.LevelWidget;
 import org.activityinfo.ui.client.lookup.viewModel.LookupKeyViewModel;
 import org.activityinfo.ui.client.lookup.viewModel.LookupViewModel;
@@ -31,9 +34,15 @@ public class ReferenceFieldWidget implements FieldWidget {
     private final Widget widget;
     private FieldUpdater fieldUpdater;
 
-    public ReferenceFieldWidget(FormSource formSource, FormTree formTree, FormField field, FieldUpdater fieldUpdater) {
+    public ReferenceFieldWidget(FormSource formSource,
+                                FormTree formTree,
+                                FormField field,
+                                PermissionFilters filters,
+                                FieldUpdater fieldUpdater) {
+
         this.fieldUpdater = fieldUpdater;
-        this.viewModel = new LookupViewModel(formSource, formTree, (ReferenceType) field.getType());
+        this.viewModel = new LookupViewModel(formSource, formTree, (ReferenceType) field.getType(),
+                Observable.just(filters.getReferenceBaseFilter(field.getId())));
 
         for (LookupKeyViewModel level : viewModel.getLookupKeys()) {
             LevelWidget widget = new LevelWidget(viewModel, level);

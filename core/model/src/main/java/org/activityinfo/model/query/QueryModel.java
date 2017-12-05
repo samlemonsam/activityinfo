@@ -1,5 +1,6 @@
 package org.activityinfo.model.query;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.json.Json;
@@ -126,6 +127,14 @@ public class QueryModel {
         this.filter = filter;
     }
 
+    public void setFilter(Optional<ExprNode> filter) {
+        if(filter.isPresent()) {
+            this.filter = filter.get();
+        } else {
+            this.filter = null;
+        }
+    }
+
     public QueryModel addColumn(ColumnModel criteriaColumn) {
         columns.add(criteriaColumn);
         return this;
@@ -217,5 +226,6 @@ public class QueryModel {
         }
         return object;
     }
+
 }
 

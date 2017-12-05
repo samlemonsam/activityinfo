@@ -39,23 +39,25 @@ class KeyMatrix {
     private final Observable<ColumnSet> keyColumns;
     private final ResourceId formId;
 
-    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet) {
+    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet, Observable<Optional<ExprNode>> filter) {
         this.formId = lookupKeySet.getLeafKeys().get(0).getFormId();
         this.lookupKeySet = lookupKeySet;
 
-        keyColumns = formSource.query(keyMatrixQuery());
+        keyColumns = filter.join(f -> formSource.query(keyMatrixQuery(f)));
     }
 
     /**
      * Composes a query for all the records in the referenced form along with the full
      * hierarchy of keys.
+     * @param filter
      */
-    private QueryModel keyMatrixQuery() {
+    private QueryModel keyMatrixQuery(Optional<ExprNode> filter) {
 
         LookupKey leafKey = lookupKeySet.getLeafKeys().get(0);
         Map<LookupKey, ExprNode> keyFormulas = leafKey.getKeyFormulas();
 
         QueryModel queryModel = new QueryModel(formId);
+        queryModel.setFilter(filter);
         queryModel.selectResourceId().as(ID_COLUMN);
         for (Map.Entry<LookupKey, ExprNode> entry : keyFormulas.entrySet()) {
             queryModel.selectExpr(entry.getValue()).as(keyColumn(entry.getKey()));

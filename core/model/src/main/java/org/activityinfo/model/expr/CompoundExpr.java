@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr;
 
+import com.google.common.base.Function;
 import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.expr.eval.EvalContext;
 import org.activityinfo.model.resource.ResourceId;
@@ -90,6 +91,13 @@ public class CompoundExpr extends ExprNode {
     @Override
     public <T> T accept(ExprVisitor<T> visitor) {
         return visitor.visitCompoundExpr(this);
+    }
+
+    @Override
+    public ExprNode transform(Function<ExprNode, ExprNode> function) {
+        return function.apply(new CompoundExpr(
+                value.transform(function),
+                field));
     }
 
     @Override
