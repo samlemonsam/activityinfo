@@ -38,12 +38,12 @@ dependencies {
 war {
     archiveName = "ROOT.war"
     /* Include compiled Javascript application */
-//    from(project(':chdc:frontend').outputDir) {
-//        exclude("**/*.symbolMap")
-//    }
+    from(project(':chdc:frontend').outputDir) {
+        exclude("**/*.symbolMap")
+    }
 }
 
-//tasks.war.dependsOn ':chdc:frontend:compileApp'
+tasks.war.dependsOn ':chdc:frontend:compileApp'
 
 task prepareDevMode(type: Copy) {
     into "$buildDir/devMode"

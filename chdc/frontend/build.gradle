@@ -32,8 +32,6 @@ dependencies {
 
 task compileApp(type: JavaExec) {
 
-//    dependsOn 'generateTheme'
-
     outputs.dir outputDir
     inputs.dir sourceSets.main.allSource.srcDirs
 
