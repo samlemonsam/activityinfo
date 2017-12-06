@@ -25,6 +25,7 @@ import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.command.handler.binding.*;
 import org.activityinfo.server.command.handler.binding.dim.*;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.CountryInstance;

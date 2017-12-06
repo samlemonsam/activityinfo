@@ -26,9 +26,16 @@ public class ChdcDatabase {
 
     private ChdcDatabase() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/chdc");
-        config.setUsername("root");
-        config.setPassword("root");
+
+        if(ChdcConfig.isProduction()) {
+            config.setJdbcUrl("jdbc:mysql://chdc.mysql.database.azure.com/chdc?useSSL=true");
+            config.setUsername("insoadmin@chdc");
+            config.setPassword(ChdcConfig.getAppSetting("MYSQL_PASSWORD"));
+        } else {
+            config.setJdbcUrl("jdbc:mysql://localhost:3306/chdc");
+            config.setUsername("root");
+            config.setPassword("root");
+        }
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");

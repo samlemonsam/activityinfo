@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.MySqlRecordHistoryBuilder;

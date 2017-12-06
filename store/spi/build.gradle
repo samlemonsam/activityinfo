@@ -3,7 +3,6 @@
 dependencies {
     compile project(':model')
     compile libraries.jersey.server
-    compile libraries.appengine.api
     compile libraries.guava
     compile libraries.gson
     compile libraries.jts

@@ -3,7 +3,9 @@
 apply plugin: 'gwt-base'
 
 dependencies {
-    compile libraries.gwt.user
+
+    gwt libraries.gwt.user
+
     compile libraries.gwt.jsinterop
     compile libraries.guava
     compile libraries.jersey.core
@@ -11,14 +13,12 @@ dependencies {
 
     gwtSdk libraries.gwt.dev
 
-
     testCompile libraries.gson
 }
 
 test {
     exclude '**/*GwtTest*'
 }
-
 
 jar {
     from project.sourceSets.main.allSource
