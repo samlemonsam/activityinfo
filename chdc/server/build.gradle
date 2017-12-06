@@ -1,4 +1,13 @@
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'commons-net:commons-net:3.6'
+    }
+}
+
 plugins {
     id "java"
     id "war"
@@ -7,9 +16,6 @@ plugins {
 configurations {
     gwtSdk {
         extendsFrom compile
-    }
-
-    ftp {
     }
 }
 
@@ -27,12 +33,6 @@ dependencies {
 
 
     gwtSdk "com.google.gwt:gwt-dev:2.8.0"
-
-    ftp("org.apache.ant:ant-commons-net:1.8.4") {
-        module("commons-net:commons-net:1.4.1") {
-            dependencies "oro:oro:2.0.8:jar"
-        }
-    }
 }
 
 war {
@@ -73,9 +73,7 @@ task devMode(type: JavaExec) {
     args '-war', "$buildDir/devMode"
 
     args 'chdc.frontend.Chdc'
-
 }
-
 
 task deploy {
     dependsOn war
@@ -84,41 +82,23 @@ task deploy {
         host = 'waws-prod-am2-163.ftp.azurewebsites.windows.net'
         user = 'chdc\\inso-deploy'
         password = project.property('insoDeployPassword')
+        webappsDir = '/site/wwwroot/webapps'
     }
 
     doLast {
-        ant.taskdef(name: 'ftp',
-                classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
-                classpath: configurations.ftp.asPath)
+        def ftp = new org.apache.commons.net.ftp.FTPClient()
+        ftp.connect(host)
 
-
-        ant.ftp(server: host,
-                userid: user,
-                password: password,
-                action: 'delete',
-                remotedir: '/site/wwwroot/webapps') {
-            fileset {
-                include(name: "**")
-            }
+        if(!ftp.login(user, password)) {
+            throw new RuntimeException("FTPS Login Failed. (user: ${user}")
         }
 
-        ant.ftp(server: host,
-                userid: user,
-                password: password,
-                action: 'rmdir',
-                remotedir: '/site/wwwroot/webapps') {
-            fileset {
-                include(name: "**")
-            }
+        war.archivePath.withInputStream {
+            ftp.fileType = 2 // binary
+            ftp.storeFile("${webappsDir}/ROOT.temp", it)
         }
-
-        ant.ftp(server: host,
-                userid: user,
-                password: password,
-                remoteDir: "/site/wwwroot/webapps") {
-            fileset(dir: tasks.war.destinationDir) {
-                include(name: tasks.war.archiveName)
-            }
-        }
+        ftp.deleteFile("${webappsDir}/ROOT.war")
+        ftp.rename("${webappsDir}/ROOT.temp", "${webappsDir}/ROOT.war")
+        ftp.disconnect()
     }
 }

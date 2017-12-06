@@ -24,7 +24,7 @@ public class ApiResource {
     @GET
     @Path("hello")
     public String hello() {
-        return "Hello World xxx";
+        return "Hello World";
     }
 
 }
