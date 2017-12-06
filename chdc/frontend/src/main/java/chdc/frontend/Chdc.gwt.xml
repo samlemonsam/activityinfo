@@ -4,15 +4,13 @@
     <inherits name='com.google.gwt.activity.Activity'/>
     <inherits name='com.google.gwt.place.Place'/>
 
-    <!-- Include only the GXT modules we need -->
-    <inherits name='com.sencha.gxt.ui.GXT' />
+    <inherits name="org.activityinfo.ui.AppCore"/>
 
     <set-configuration-property name="CssResource.conversionMode" value="strict" />
 
     <set-property name="gwt.logging.logLevel" value="FINEST"/>
     <set-property name="gwt.logging.enabled" value="TRUE"/>
 
-    <extend-property name="locale" values="en"/>
     <set-property name="locale" value="en"/>
 
     <!-- GZip the output files by default -->

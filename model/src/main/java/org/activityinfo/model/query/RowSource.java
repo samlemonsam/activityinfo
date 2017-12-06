@@ -1,11 +1,12 @@
 package org.activityinfo.model.query;
 
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 import static org.activityinfo.json.Json.createObject;
 
-public class RowSource {
+public class RowSource implements JsonSerializable {
 
     private ResourceId rootFormId;
 
@@ -44,13 +45,12 @@ public class RowSource {
     }
 
 
-    public JsonValue toJsonElement() {
+    @Override
+    public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("rootFormId", rootFormId.asString());
-
         return object;
     }
-
 
     public static RowSource fromJson(JsonValue object) {
         RowSource source = new RowSource();
