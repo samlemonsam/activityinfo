@@ -6,6 +6,7 @@ import org.activityinfo.store.query.shared.FormScanCache;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -22,6 +23,7 @@ public class TestingFormScanCache implements FormScanCache {
         }
         return Futures.immediateFuture(toPut.size());
     }
+
 
     @Override
     public Map<String, Object> getAll(Set<String> keys) {
@@ -55,4 +57,10 @@ public class TestingFormScanCache implements FormScanCache {
             throw new AssertionError("Failed to deserialize key " + key);
         }
     }
+
+    @Override
+    public void waitForCachingToFinish(List<Future<Integer>> pendingCachePuts) {
+        // NOOP
+    }
+
 }

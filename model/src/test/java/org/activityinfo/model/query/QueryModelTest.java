@@ -1,5 +1,6 @@
 package org.activityinfo.model.query;
 
+import org.activityinfo.json.Json;
 import org.activityinfo.model.resource.ResourceId;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class QueryModelTest {
 
         System.out.println(json);
 
-        QueryModel remodel = QueryModel.fromJson(json);
+        QueryModel remodel = QueryModel.fromJson(Json.parse(json));
     }
 
 }
