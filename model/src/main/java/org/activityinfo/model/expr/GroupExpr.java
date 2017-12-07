@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr;
 
+import com.google.common.base.Function;
 import org.activityinfo.model.expr.eval.EvalContext;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
@@ -34,6 +35,11 @@ public class GroupExpr extends ExprNode {
     @Override
     public <T> T accept(ExprVisitor<T> visitor) {
         return visitor.visitGroup(this);
+    }
+
+    @Override
+    public ExprNode transform(Function<ExprNode, ExprNode> function) {
+        return function.apply(new GroupExpr(expr.transform(function)));
     }
 
     @Override

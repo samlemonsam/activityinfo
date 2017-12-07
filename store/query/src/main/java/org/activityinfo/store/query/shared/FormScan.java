@@ -281,4 +281,8 @@ public class FormScan {
     private String fkCacheKey(ForeignKeyId key) {
         return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + ".fk." + key.getFieldName() + "::" + key.getRightFormId();
     }
+
+    public boolean isEmpty() {
+        return columnMap.isEmpty() && foreignKeyMap.isEmpty() && rowCount == null;
+    }
 }

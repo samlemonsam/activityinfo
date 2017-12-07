@@ -12,6 +12,8 @@ import com.googlecode.objectify.Work;
 import com.googlecode.objectify.util.Closeable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.model.analysis.ImmutableTableModel;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.job.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.junit.After;
@@ -61,7 +63,9 @@ public class JobResourceTest {
             @Override
             public String run() {
 
-                ExportFormJob exportForm = new ExportFormJob(ResourceId.valueOf("FORM1"), Collections.<ExportColumn>emptyList());
+                TableModel tableModel = ImmutableTableModel.builder().formId(ResourceId.valueOf("FORM1")).build();
+
+                ExportFormJob exportForm = new ExportFormJob(tableModel);
                 JobRequest request = new JobRequest(exportForm, "en");
 
 

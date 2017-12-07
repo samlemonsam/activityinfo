@@ -63,7 +63,7 @@ dependencies {
 
     compile libraries.appengine.apiLabs
     compile libraries.appengine.trace
-    compile 'com.bedatadriven.appengine:appengine-hibernate:30'
+    compile 'com.bedatadriven.appengine:appengine-hibernate:44'
 
 
     // Report Rendering

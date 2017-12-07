@@ -20,12 +20,12 @@ import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.view.field.FieldView;
 import org.activityinfo.ui.client.input.view.field.FieldWidget;
+import org.activityinfo.ui.client.input.view.field.FieldWidgetFactory;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.activityinfo.ui.client.input.view.field.FieldWidgetFactory.createWidget;
 
 /**
  * View that displays a form's fields and sub forms and accepts user input.
@@ -64,13 +64,15 @@ public class FormPanel implements IsWidget {
             panel.addStyleName(InputResources.INSTANCE.style().subform());
         }
 
+        FieldWidgetFactory widgetFactory = new FieldWidgetFactory(formSource, formTree);
+
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.isSubForm()) {
                 addSubForm(formTree, node);
             } else if(node.isParentReference()) {
                 // ignore
             } else if(node.getField().isVisible() && !isSubFormKey(node)) {
-                FieldWidget fieldWidget = createWidget(formSource, formTree, node.getField(), input -> onInput(node, input));
+                FieldWidget fieldWidget = widgetFactory.create(node.getField(), input -> onInput(node, input));
 
                 if (fieldWidget != null) {
                     addField(node, fieldWidget);

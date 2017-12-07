@@ -13,6 +13,8 @@ ext {
 
 dependencies {
 
+    gwt libraries.immutables.annotations
+
     gwt project(':i18n')
     gwt project(':model')
     gwt project(':clients:gwtrpc')

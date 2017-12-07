@@ -12,6 +12,7 @@ import org.activityinfo.store.testing.IdpLocationForm;
 import org.activityinfo.store.testing.NfiForm;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.activityinfo.store.testing.VillageForm;
+import org.activityinfo.ui.client.input.viewModel.PermissionFilters;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -179,4 +180,11 @@ public class LookupViewModelTest {
         assertThat(choices.assertLoaded(), hasSize(821));
 
     }
+
+    @Test
+    public void partnerTest() {
+
+
+    }
+
 }

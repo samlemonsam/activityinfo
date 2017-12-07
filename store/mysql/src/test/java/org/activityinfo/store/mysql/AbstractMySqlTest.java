@@ -16,6 +16,7 @@ import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.server.ServerColumnFactory;
+import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.junit.After;
 import org.junit.Before;
@@ -42,6 +43,8 @@ public abstract class AbstractMySqlTest {
     private Closeable objectify;
 
     private int userId = 1;
+
+    protected FormScanCache cache = new NullFormScanCache();
 
     @BeforeClass
     public static void initLocale() throws Throwable {
@@ -106,7 +109,7 @@ public abstract class AbstractMySqlTest {
 
         ColumnSetBuilder builder = new ColumnSetBuilder(
                 catalog,
-                new NullFormScanCache(),
+                cache,
                 new FormSupervisorAdapter(catalog, userId));
 
         columnSet = builder.build(queryModel);

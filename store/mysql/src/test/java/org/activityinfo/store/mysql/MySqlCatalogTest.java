@@ -58,6 +58,8 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     @Test
     public void testLocation() {
 
+        cache = new TestingFormScanCache();
+
         System.out.println("***** testLocation() starting ******* ");
 
         FormTreePrettyPrinter.print(queryFormTree(locationFormClass(1)));
@@ -74,6 +76,11 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("territoire.province.name"), hasValues("Sud Kivu", null, "Ituri", "Sud Kivu"));
         assertThat(column("province.name"), hasValues("Sud Kivu", "Kinshasa", "Ituri", "Sud Kivu"));
         assertThat(column("province._id"), hasValues("z0000000002", "z0000000001", "z0000000004", "z0000000002"));
+
+
+        // Verify that all is loaded from cache.
+        query(CuidAdapter.locationFormClass(1), "label", "axe", "territoire.province.name", "territoire.name",
+                "province.name", "province._id", "visible");
     }
 
     @Test

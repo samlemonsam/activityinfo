@@ -40,6 +40,8 @@ public class TableToolBar extends ToolBar {
     private final SubscriptionSet subscriptions = new SubscriptionSet();
     private final TextButton importButton;
 
+    private ExportOptionsDialog exportOptionsDialog;
+
 
     public TableToolBar(FormStore formStore, TableViewModel viewModel) {
         this.formStore = formStore;
@@ -186,12 +188,11 @@ public class TableToolBar extends ToolBar {
     }
 
     private void onExport(SelectEvent event) {
-        TableModel tableModel = viewModel.getTableModel().get();
-        ExportFormJob exportFormJob = new ExportFormJob(tableModel);
 
-        Observable<JobStatus<ExportFormJob, ExportResult>> jobStatus = formStore.startJob(exportFormJob);
-        ExportJobDialog dialog = new ExportJobDialog(jobStatus);
-        dialog.show();
+        if(exportOptionsDialog == null) {
+            exportOptionsDialog = new ExportOptionsDialog(formStore, viewModel);
+        }
+        exportOptionsDialog.show();
     }
 
 
@@ -204,3 +205,4 @@ public class TableToolBar extends ToolBar {
         }
     }
 }
+

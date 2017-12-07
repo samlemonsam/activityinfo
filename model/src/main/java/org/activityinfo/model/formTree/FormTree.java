@@ -85,7 +85,6 @@ public class FormTree implements FormClassProvider {
             childNode.form = declaringClass;
             children.add(childNode);
             nodeMap.put(childNode.path, childNode);
-            formMap.put(declaringClass.getId(), declaringClass);
 
             if (childNode.parent != null) {
                 childNode.depth = childNode.parent.depth + 1;
@@ -316,9 +315,15 @@ public class FormTree implements FormClassProvider {
         node.field = field;
         node.path = new FieldPath(field.getId());
         rootFields.add(node);
-        formMap.put(form.getId(), form);
         nodeMap.put(node.path, node);
         return node;
+    }
+
+    public void addFormMetadata(FormMetadata form) {
+        assert form != null;
+        if (!formMap.containsKey(form.getId())) {
+            formMap.put(form.getId(), form);
+        }
     }
 
     public List<Node> getRootFields() {
@@ -407,7 +412,7 @@ public class FormTree implements FormClassProvider {
     }
 
     public Optional<FormClass> getFormClassIfPresent(ResourceId formId) {
-        return Optional.fromNullable(formMap.get(formId).getSchema());
+        return Optional.fromNullable(getFormMetadata(formId).getSchema());
     }
 
     public Node getNodeByPath(FieldPath path) {

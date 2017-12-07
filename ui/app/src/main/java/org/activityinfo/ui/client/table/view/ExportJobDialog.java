@@ -2,9 +2,11 @@ package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
 import com.sencha.gxt.widget.core.client.AutoProgressBar;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import org.activityinfo.i18n.shared.I18N;
@@ -32,18 +34,20 @@ public class ExportJobDialog {
         downloadLink = new Anchor(I18N.CONSTANTS.clickToDownload());
         downloadLink.setVisible(false);
         downloadLink.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        downloadLink.setWidth("200px");
 
         VBoxLayoutContainer container = new VBoxLayoutContainer(VBoxLayoutContainer.VBoxLayoutAlign.CENTER);
         container.setPadding(new Padding(10));
         container.add(progressBar);
-        container.add(downloadLink);
+        container.add(downloadLink, new BoxLayoutContainer.BoxLayoutData(new Margins(20, 0, 0, 0)));
 
         dialog = new Dialog();
         dialog.setHeading(I18N.CONSTANTS.download());
         dialog.setPredefinedButtons(Dialog.PredefinedButton.CANCEL);
         dialog.addDialogHideHandler(this::onDialogHide);
         dialog.setWidget(container);
-        dialog.setPixelSize(450, 300);
+        dialog.setPixelSize(450, 200);
+        dialog.setHideOnButtonClick(true);
     }
 
     public void show() {
@@ -56,6 +60,8 @@ public class ExportJobDialog {
                     progressBar.updateProgress(1, I18N.CONSTANTS.downloadReady());
                     downloadLink.setVisible(true);
                     downloadLink.setHref(observable.get().getResult().getDownloadUrl());
+                    dialog.forceLayout();
+
                     ExportJobDialog.this.dialog.getButton(Dialog.PredefinedButton.CANCEL).setText(I18N.CONSTANTS.close());
                 }
             }

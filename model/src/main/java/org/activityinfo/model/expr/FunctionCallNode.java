@@ -1,5 +1,6 @@
 package org.activityinfo.model.expr;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.eval.EvalContext;
@@ -8,6 +9,7 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -93,6 +95,15 @@ public class FunctionCallNode extends ExprNode {
     @Override
     public <T> T accept(ExprVisitor<T> visitor) {
         return visitor.visitFunctionCall(this);
+    }
+
+    @Override
+    public ExprNode transform(Function<ExprNode, ExprNode> function) {
+        List<ExprNode> transformedArgs = new ArrayList<>();
+        for (ExprNode argument : arguments) {
+            transformedArgs.add(argument.transform(function));
+        }
+        return function.apply(new FunctionCallNode(this.function, transformedArgs));
     }
 
     @Override
