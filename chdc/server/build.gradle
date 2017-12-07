@@ -81,11 +81,11 @@ task deploy {
     ext {
         host = 'waws-prod-am2-163.ftp.azurewebsites.windows.net'
         user = 'chdc\\inso-deploy'
-        password = project.property('insoDeployPassword')
         webappsDir = '/site/wwwroot/webapps'
     }
 
     doLast {
+        def password = project.property('insoDeployPassword')
         def ftp = new org.apache.commons.net.ftp.FTPClient()
         ftp.connect(host)
 
@@ -101,4 +101,10 @@ task deploy {
         ftp.rename("${webappsDir}/ROOT.temp", "${webappsDir}/ROOT.war")
         ftp.disconnect()
     }
+}
+
+task restart(type: Exec) {
+
+    commandLine 'az', 'webapp', 'restart', '--resource-group', 'chdc', '--name', 'chdc'
+
 }
