@@ -9,6 +9,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.TypedRecordUpdate;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 public class ChdcCatalogTest {
 
     @Test
+    @Ignore("WIP")
     public void test() throws SQLException {
 
         ChdcCatalog catalog = new ChdcCatalog();
