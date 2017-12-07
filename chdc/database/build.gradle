@@ -14,15 +14,20 @@ plugins {
 
 if(project.hasProperty('env') && project.getProperty('env') == "production") {
 
-    project.ext.databaseUrl = 'jdbc:mysql://chdc.mysql.database.azure.com:3306/chdc?verifyServerCertificate=true&useSSL=true&requireSSL=false'
+    project.ext.databaseUrl = 'jdbc:mysql://chdc.mysql.database.azure.com:3306/chdc' +
+            '?verifyServerCertificate=true' +
+            '&useSSL=true' +
+            '&requireSSL=false'
     project.ext.databaseUsername = 'insoadmin@chdc'
     project.ext.databasePassword = project.property("chdcMySqlPassword")
 
 
 } else {
-    project.ext.databaseUrl = 'jdbc:mysql://localhost:3306/chdc'
-    project.ext.databaseUsername = 'root'
-    project.ext.databasePassword = 'root'
+    project.ext.databaseUrl = 'jdbc:mysql://localhost:3306/chdc' +
+            '?createDatabaseIfNotExist=true'
+    if(projec)
+    project.ext.databaseUsername = project.property("localMySqlUsername")
+    project.ext.databasePassword = project.property("localMySqlPassword")
 }
 
 liquibase {
