@@ -25,7 +25,6 @@ if(project.hasProperty('env') && project.getProperty('env') == "production") {
 } else {
     project.ext.databaseUrl = 'jdbc:mysql://localhost:3306/chdc' +
             '?createDatabaseIfNotExist=true'
-    if(projec)
     project.ext.databaseUsername = project.property("localMySqlUsername")
     project.ext.databasePassword = project.property("localMySqlPassword")
 }
