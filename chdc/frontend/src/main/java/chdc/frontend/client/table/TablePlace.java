@@ -14,6 +14,6 @@ public class TablePlace extends Place {
 
     @Override
     public String toString() {
-        return "table";
+        return "table/" + formId;
     }
 }
