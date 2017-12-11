@@ -133,7 +133,9 @@ public class SitesResources {
             }
             json.writeEndObject();
 
+            // TODO: Disable until new GetSites implementation
             // write admin entities
+            /*
             Map<Integer,AdminEntityDTO> adminEntityMap = site.getAdminEntities();
             if (!adminEntityMap.isEmpty()) {
                 json.writeObjectFieldStart("adminLevels");
@@ -145,6 +147,7 @@ public class SitesResources {
                 }
                 json.writeEndObject();
             }
+            */
 
             json.writeObjectFieldStart("partner");
             json.writeNumberField("id", site.getPartnerId());
