@@ -1,4 +1,4 @@
-package chdc.frontend.client;
+package chdc.frontend.client.theme;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -9,10 +9,9 @@ public interface ChdcTemplates extends XTemplates {
     ChdcTemplates TEMPLATES = GWT.create(ChdcTemplates.class);
 
     @XTemplate(source = "Banner.html")
-    SafeHtml getBannerTemplate();
+    SafeHtml banner();
 
-    @XTemplate(source = "Sidebar.html")
-    SafeHtml getSidebar(ChdcResources.Style style);
-
+    @XTemplate(source = "NavigationHeader.html")
+    SafeHtml sidebarHeader();
 
 }
