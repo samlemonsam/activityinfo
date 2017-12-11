@@ -20,8 +20,8 @@ import java.util.List;
 
 public class PartnerDimBinding extends DimBinding {
 
-    private static final String PARTNER_ID_COLUMN = "PartnerId";
-    private static final String PARTNER_LABEL_COLUMN = "PartnerLabel";
+    public static final String PARTNER_ID_COLUMN = "PartnerId";
+    public static final String PARTNER_LABEL_COLUMN = "PartnerLabel";
 
     private static final String PARTNER_FIELD = "partner";
 

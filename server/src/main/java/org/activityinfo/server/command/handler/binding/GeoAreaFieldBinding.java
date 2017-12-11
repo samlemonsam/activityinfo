@@ -18,6 +18,11 @@ import java.util.List;
 
 public class GeoAreaFieldBinding implements FieldBinding<AdminEntityDTO> {
 
+    private CompoundExpr XMIN_COLUMN;
+    private CompoundExpr XMAX_COLUMN;
+    private CompoundExpr YMIN_COLUMN;
+    private CompoundExpr YMAX_COLUMN;
+
     private final String XMIN = "xmin";
     private final String XMAX = "xmax";
     private final String YMIN = "ymin";
@@ -33,10 +38,10 @@ public class GeoAreaFieldBinding implements FieldBinding<AdminEntityDTO> {
 
     @Override
     public AdminEntityDTO[] extractFieldData(AdminEntityDTO[] dataArray, ColumnSet columnSet) {
-        ColumnView xmin = columnSet.getColumnView(XMIN);
-        ColumnView xmax = columnSet.getColumnView(XMAX);
-        ColumnView ymin = columnSet.getColumnView(YMIN);
-        ColumnView ymax = columnSet.getColumnView(YMAX);
+        ColumnView xmin = columnSet.getColumnView(XMIN_COLUMN.asExpression());
+        ColumnView xmax = columnSet.getColumnView(XMAX_COLUMN.asExpression());
+        ColumnView ymin = columnSet.getColumnView(YMIN_COLUMN.asExpression());
+        ColumnView ymax = columnSet.getColumnView(YMAX_COLUMN.asExpression());
 
         int levelId = CuidAdapter.getLegacyIdFromCuid(form.getId());
 
@@ -51,11 +56,18 @@ public class GeoAreaFieldBinding implements FieldBinding<AdminEntityDTO> {
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         ResourceId formId = form.getId();
+
+        CompoundExpr boundExpr = new CompoundExpr(formId,bound);
+        XMIN_COLUMN = new CompoundExpr(formId, XMIN);
+        XMAX_COLUMN = new CompoundExpr(formId, XMAX);
+        YMIN_COLUMN = new CompoundExpr(formId, YMIN);
+        YMAX_COLUMN = new CompoundExpr(formId, YMAX);
+
         return Arrays.asList(
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.XMIN, new CompoundExpr(formId,bound))).as(XMIN),
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.XMAX, new CompoundExpr(formId,bound))).as(XMAX),
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.YMIN, new CompoundExpr(formId,bound))).as(YMIN),
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.YMAX, new CompoundExpr(formId,bound))).as(YMAX)
+                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.XMIN, boundExpr)).as(XMIN_COLUMN.asExpression()),
+                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.XMAX, boundExpr)).as(XMAX_COLUMN.asExpression()),
+                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.YMIN, boundExpr)).as(YMIN_COLUMN.asExpression()),
+                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.YMAX, boundExpr)).as(YMAX_COLUMN.asExpression())
         );
     }
 

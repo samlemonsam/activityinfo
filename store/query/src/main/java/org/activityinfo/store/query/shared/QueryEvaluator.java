@@ -10,6 +10,7 @@ import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.*;
+import org.activityinfo.model.query.SortModel.Range;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.query.shared.columns.ColumnCombiner;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
@@ -57,7 +58,7 @@ public class QueryEvaluator {
     }
 
 
-    public Slot<ColumnSet> evaluate(QueryModel model) {
+    public Slot<ColumnSet> evaluate(final QueryModel model) {
 
         Slot<TableFilter> filter = filter(model.getFilter());
 
@@ -96,13 +97,92 @@ public class QueryEvaluator {
                             dataMap.put(entry.getKey(), entry.getValue().get());
                         }
 
-                        result = new ColumnSet(commonLength(dataMap), dataMap);
+                        ColumnSet dataset = new ColumnSet(commonLength(dataMap), dataMap);
+                        if (model.getSortModels().isEmpty()) {
+                            result = dataset;
+                        } else {
+                            result = sort(dataset, model.getSortModels());
+                        }
                     }
                     return result;
                 }
             };
         }
     }
+
+
+    private static ColumnSet sort(ColumnSet columnSet, List<SortModel> sortModels) {
+        Stack<SortModel> sortModelStack = constructSortModelStack(sortModels);
+        int[] sortVector = generateIndexArray(columnSet.getNumRows());
+
+        // determine the sort vector of the current columnset, based on the defined sort models
+        order(columnSet, sortModelStack, sortVector, new Range(0, columnSet.getNumRows()-1));
+        // return the new sorted column set, with rows reordered by the sort vector
+        return sortColumnSet(columnSet, sortVector);
+    }
+
+    private static Stack<SortModel> constructSortModelStack(List<SortModel> sortModels) {
+        Stack<SortModel> sortCriteria = new Stack<>();
+        for (int i=(sortModels.size()-1); i>=0; i--) {
+            sortCriteria.push(sortModels.get(i));
+        }
+        return sortCriteria;
+    }
+
+    private static int[] generateIndexArray(int length) {
+        int[] array = new int[length];
+        for (int i=0; i<length; i++) {
+            array[i] = i;
+        }
+        return array;
+    }
+
+    private static void order(ColumnSet columnSet, Stack<SortModel> sortModelStack, int[] sortVector, Range range) {
+        SortModel sortModel = sortModelStack.pop();
+        ColumnView sortColumn = columnSet.getColumnView(sortModel.getField());
+
+        // Order on the current sort column
+        // If there are further sort models on stack, categorize and then order within categories
+        sortColumn.order(sortVector, sortModel.getDir(), range.getRange());
+        if (!sortModelStack.empty()) {
+            categorize(columnSet, sortColumn, sortModelStack, sortVector, range);
+        }
+
+        sortModelStack.push(sortModel);
+    }
+
+    private static void categorize(ColumnSet columnSet, ColumnView sortColumn, Stack<SortModel> sortModelStack, int[] sortVector, Range range) {
+        // start new category group with first element
+        range.resetRange().addToRange(0);
+
+        // step through sortColumn rows
+        // group together like members
+        // order within each group which has more than one member, after we transition to a new group
+        for (int i=1; i<sortVector.length; i++) {
+            if (sortColumn.get(sortVector[i-1]).equals(sortColumn.get(sortVector[i]))) {
+                // same group - add to group's range
+                range.addToRange(i);
+            } else if (range.getRangeSize() == 1){
+                // transition to new group => no ordering needed as previous group has only 1 member
+                range.resetRange().addToRange(i);
+            } else {
+                // transition to new group => ordering of previous group needed as it has (n > 1) members
+                order(columnSet, sortModelStack, sortVector, range);
+                range.resetRange().addToRange(i);
+            }
+        }
+    }
+
+    private static ColumnSet sortColumnSet(ColumnSet columnSet, int[] sortVector) {
+        Map<String, ColumnView> sortedDataMap = Maps.newHashMap();
+
+        for (Map.Entry<String,ColumnView> column : columnSet.getColumns().entrySet()) {
+            sortedDataMap.put(column.getKey(), column.getValue().select(sortVector));
+        }
+
+        return new ColumnSet(columnSet.getNumRows(), sortedDataMap);
+    }
+
 
     private static int commonLength(Map<String, ColumnView> dataMap) {
         Iterator<ColumnView> iterator = dataMap.values().iterator();

@@ -13,8 +13,8 @@ import java.util.List;
 
 public class StartEndDateFieldBinding implements FieldBinding {
 
-    private static final String START_DATE_COLUMN = "date1";
-    private static final String END_DATE_COLUMN = "date2";
+    public static final String START_DATE_COLUMN = "date1";
+    public static final String END_DATE_COLUMN = "date2";
 
     @Override
     public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {

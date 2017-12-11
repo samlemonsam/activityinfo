@@ -1,9 +1,8 @@
 package org.activityinfo.store.query.server.columns;
 
-import org.activityinfo.model.query.ColumnType;
-import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.query.EnumColumnView;
-import org.activityinfo.model.query.EnumColumnView;
+import org.activityinfo.model.util.HeapsortColumn;
 
 import java.io.Serializable;
 
@@ -99,5 +98,27 @@ class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{numRows=" + numRows() + "}";
+    }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        int numRows = values.length;
+        switch(direction) {
+            case ASC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, range.length, range);
+                }
+                break;
+            case DESC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, range.length, range);
+                }
+                break;
+        }
+        return sortVector;
     }
 }

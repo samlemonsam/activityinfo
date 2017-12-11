@@ -78,4 +78,11 @@ public class BitSetColumnView implements ColumnView, Serializable {
         }
     }
 
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        // TODO: BitSet Sorting
+        // Do not sort on column
+        return sortVector;
+    }
+
 }

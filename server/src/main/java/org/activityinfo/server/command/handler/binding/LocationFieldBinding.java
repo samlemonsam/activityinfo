@@ -5,7 +5,6 @@ import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -30,12 +29,10 @@ public class LocationFieldBinding implements FieldBinding {
 
     private static final ConstantExpr ZEROED_ID = new ConstantExpr(0);
 
-    private FormClass locationForm;
     private boolean isAdminLevelDomain;
 
-    public LocationFieldBinding(FormClass locationForm) {
-        this.locationForm = locationForm;
-        Character domain = locationForm.getId().getDomain();
+    public LocationFieldBinding(ResourceId locationFormId) {
+        Character domain = locationFormId.getDomain();
         this.isAdminLevelDomain = domain.equals(CuidAdapter.ADMIN_LEVEL_DOMAIN);
     }
 
@@ -62,11 +59,6 @@ public class LocationFieldBinding implements FieldBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        return getTargetColumnQuery(locationForm.getId());
-    }
-
-    @Override
-    public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
         ExprNode idExpr;
         idExpr = isAdminLevelDomain ? ZEROED_ID : LOCATION_SYMBOL;
         return Arrays.asList(
@@ -74,6 +66,11 @@ public class LocationFieldBinding implements FieldBinding {
                 new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,NAME_SYMBOL)).as(LOCATION_NAME_COLUMN),
                 new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,CODE_SYMBOL)).as(LOCATION_CODE_COLUMN)
         );
+    }
+
+    @Override
+    public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
+        return null;
     }
 
 }
