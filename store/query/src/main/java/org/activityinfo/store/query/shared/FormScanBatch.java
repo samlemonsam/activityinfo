@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.functions.SumFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -173,8 +172,7 @@ public class FormScanBatch {
 
         SubFormJoin join = new SubFormJoin(primaryKey, parentColumn);
 
-        return new JoinedSubFormColumnViewSlot(Collections.singletonList(join), dataColumn,
-                node.getAggregation().or(SumFunction.INSTANCE));
+        return new JoinedSubFormColumnViewSlot(Collections.singletonList(join), dataColumn);
     }
 
     private Slot<ColumnView> addParentColumn(FilterLevel filterLevel, ResourceId formId) {

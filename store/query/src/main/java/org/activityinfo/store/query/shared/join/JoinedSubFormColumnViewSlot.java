@@ -1,6 +1,7 @@
 package org.activityinfo.store.query.shared.join;
 
 import com.google.common.collect.Iterables;
+import org.activityinfo.model.expr.functions.MaxFunction;
 import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
@@ -15,14 +16,13 @@ public class JoinedSubFormColumnViewSlot implements Slot<ColumnView> {
     private List<SubFormJoin> links;
     private Slot<ColumnView> nestedColumn;
 
-    private StatFunction statistic;
+    private StatFunction statistic = MaxFunction.INSTANCE;
     
     private ColumnView result;
 
-    public JoinedSubFormColumnViewSlot(List<SubFormJoin> links, Slot<ColumnView> nestedColumn, StatFunction statistic) {
+    public JoinedSubFormColumnViewSlot(List<SubFormJoin> links, Slot<ColumnView> nestedColumn) {
         this.links = links;
         this.nestedColumn = nestedColumn;
-        this.statistic = statistic;
     }
 
     @Override

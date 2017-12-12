@@ -11,9 +11,9 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.*;
 import org.activityinfo.promise.BiFunction;
+import org.activityinfo.store.query.shared.columns.RelevanceViewMask;
 import org.activityinfo.store.query.shared.columns.ColumnCombiner;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
-import org.activityinfo.store.query.shared.columns.RelevanceViewMask;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -219,39 +219,29 @@ public class QueryEvaluator {
         }
 
         private Slot<ColumnView> createFunctionCall(final FunctionCallNode call) {
-
-            resolver.enterFunction(call.getFunction());
-
-            try {
-                final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
-
-                for (ExprNode argument : call.getArguments()) {
-                    argumentSlots.add(argument.accept(this));
-                }
-
-                return new Slot<ColumnView>() {
-                    @Override
-                    public ColumnView get() {
-                        List<ColumnView> arguments = Lists.newArrayList();
-                        for (Slot<ColumnView> argument : argumentSlots) {
-                            ColumnView view = argument.get();
-                            if(view == null) {
-                                throw new IllegalStateException();
-                            }
-                            arguments.add(view);
-                        }
-                        try {
-                            return ((ColumnFunction) call.getFunction()).columnApply(arguments.get(0).numRows(), arguments);
-                        } catch (ExprException e) {
-                            int numRows = arguments.get(0).numRows();
-                            return new EmptyColumnView(ColumnType.STRING, numRows);
-                        }
-                    }
-                };
-            } finally {
-                resolver.exitFunction(call.getFunction());
+            final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
+            for(ExprNode argument : call.getArguments()) {
+                argumentSlots.add(argument.accept(this));
             }
-
+            return new Slot<ColumnView>() {
+                @Override
+                public ColumnView get() {
+                    List<ColumnView> arguments = Lists.newArrayList();
+                    for (Slot<ColumnView> argument : argumentSlots) {
+                        ColumnView view = argument.get();
+                        if(view == null) {
+                            throw new IllegalStateException();
+                        }
+                        arguments.add(view);
+                    }
+                    try {
+                        return ((ColumnFunction) call.getFunction()).columnApply(arguments.get(0).numRows(), arguments);
+                    } catch (ExprException e) {
+                        int numRows = arguments.get(0).numRows();
+                        return new EmptyColumnView(ColumnType.STRING, numRows);
+                    }
+                }
+            };
         }
 
         private Slot<ColumnView> addColumn(Collection<NodeMatch> nodes) {

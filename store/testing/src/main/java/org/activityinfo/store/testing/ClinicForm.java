@@ -38,7 +38,7 @@ public class ClinicForm implements TestForm {
             formClass.addElement(field);
         }
 
-        subForm = new ClinicSubForm(ids, this, RECORD_COUNT * 25);
+        subForm = new ClinicSubForm(ids, this, RECORD_COUNT * 5);
 
 
         nameField = formClass.addField(ids.fieldId("F1"))
