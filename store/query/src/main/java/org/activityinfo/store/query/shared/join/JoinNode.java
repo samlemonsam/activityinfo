@@ -47,18 +47,20 @@ public class JoinNode {
 
         JoinNode joinNode = (JoinNode) o;
 
-        if (leftFormId != null ? !leftFormId.equals(joinNode.leftFormId) : joinNode.leftFormId != null) return false;
-        if (referenceField != null ? !referenceField.equals(joinNode.referenceField) : joinNode.referenceField != null)
-            return false;
-        return rightFormId != null ? rightFormId.equals(joinNode.rightFormId) : joinNode.rightFormId == null;
+        if (type != joinNode.type) return false;
+        if (!leftFormId.equals(joinNode.leftFormId)) return false;
+        if (!referenceField.equals(joinNode.referenceField)) return false;
+        if (!rightFormId.equals(joinNode.rightFormId)) return false;
 
+        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = leftFormId != null ? leftFormId.hashCode() : 0;
-        result = 31 * result + (referenceField != null ? referenceField.hashCode() : 0);
-        result = 31 * result + (rightFormId != null ? rightFormId.hashCode() : 0);
+        int result = type.hashCode();
+        result = 31 * result + leftFormId.hashCode();
+        result = 31 * result + referenceField.hashCode();
+        result = 31 * result + rightFormId.hashCode();
         return result;
     }
 }

@@ -21,6 +21,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.store.query.shared.plan.FieldPlanNode;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -248,7 +249,7 @@ public class NodeMatcherTest {
         symbolTable = new NodeMatcher(tree);
         
         ExprNode expr = ExprParser.parse(exprString);
-        Collection<NodeMatch> matches;
+        Collection<FieldPlanNode> matches;
         if(expr instanceof SymbolExpr) {
             matches = symbolTable.resolveSymbol((SymbolExpr) expr);
         } else if(expr instanceof CompoundExpr) {
@@ -259,7 +260,7 @@ public class NodeMatcherTest {
         
         // Create a string that we can match against easily
         List<String> strings = Lists.newArrayList();
-        for (NodeMatch match : matches) {
+        for (FieldPlanNode match : matches) {
             strings.add(match.toDebugString());
         }
         

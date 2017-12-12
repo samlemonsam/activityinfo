@@ -1,10 +1,12 @@
 package org.activityinfo.store.query.shared;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -149,7 +151,11 @@ public class NodeMatch {
                 joins.add(new JoinNode(JoinType.REFERENCE, leftFormId, leftFieldExpr, rightFormId));
 
             } else if(leftField.getType() instanceof SubFormReferenceType) {
-                joins.add(new JoinNode(JoinType.SUBFORM, leftFormId, new SymbolExpr(ColumnModel.ID_SYMBOL), rightFormId));
+                joins.add(new JoinNode(
+                        JoinType.SUBFORM,
+                                leftFormId,
+                                new SymbolExpr(ColumnModel.ID_SYMBOL),
+                                rightFormId));
 
             } else {
                 throw new IllegalStateException("Invalid field for joining: " + leftField.getType());

@@ -18,4 +18,9 @@ TODO
 Given the many good JSON libraries available for the JVM, it may not be immediately
 clear why ActivityInfo needs its own JSON library.
 
-TODO
+### Goals
+
+The following were design goals for this library:
+
+* Support custom JSON custom serialization/deserialization on both the
+  server 

@@ -9,10 +9,12 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NodeMatch;
+import org.activityinfo.store.query.shared.plan.FieldPlanNode;
 import org.activityinfo.store.query.shared.NodeMatcher;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.query.shared.join.JoinNode;
+import org.activityinfo.store.query.shared.plan.PlanNode;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

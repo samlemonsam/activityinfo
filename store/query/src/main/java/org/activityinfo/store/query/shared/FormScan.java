@@ -63,7 +63,7 @@ public class FormScan {
      *
      * @return a slot that will receive the result when the scan completes
      */
-    public Slot<ColumnView> addResourceId() {
+    public Slot<ColumnView> addRecordId() {
         PendingSlot<ColumnView> column = columnMap.get(PK_COLUMN_KEY);
         if(column == null) {
             column = new PendingSlot<>();

@@ -1,9 +1,9 @@
-package org.activityinfo.store.query.shared.columns;
+package org.activityinfo.model.expr.functions;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.query.*;
-import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
 
 import java.util.List;
 
@@ -11,44 +11,60 @@ import java.util.List;
  * Supplies a Column that is combined from several source columns.
  *
  */
-public class ColumnCombiner implements Slot<ColumnView> {
+public class CoalesceFunction extends ExprFunction implements ColumnFunction {
 
-    private List<Slot<ColumnView>> sources;
 
-    private ColumnView result;
+    public static final CoalesceFunction INSTANCE = new CoalesceFunction();
 
-    public ColumnCombiner(List<Slot<ColumnView>> sources) {
-        Preconditions.checkArgument(sources.size() > 1, "source.size() > 1");
-        this.sources = sources;
+
+    private CoalesceFunction() {
     }
 
     @Override
-    public ColumnView get() {
-        if(result == null) {
-            result = combine();
-        }
-        return result;
+    public String getId() {
+        return "coalesce";
     }
 
-    private ColumnView combine() {
-        ColumnView[] cols = new ColumnView[sources.size()];
-        for(int j=0;j<cols.length;++j) {
-            cols[j] = sources.get(j).get();
+    @Override
+    public String getLabel() {
+        return getId();
+    }
+
+    @Override
+    public FieldValue apply(List<FieldValue> arguments) {
+        for (FieldValue argument : arguments) {
+            if(argument != null) {
+                return argument;
+            }
         }
-        ColumnType columnType = sources.get(0).get().getType();
+        return null;
+    }
+
+    @Override
+    public FieldType resolveResultType(List<FieldType> argumentTypes) {
+        return argumentTypes.get(0);
+    }
+
+    @Override
+    public ColumnView columnApply(int numRows, List<ColumnView> cols) {
+
+        if(cols.isEmpty()) {
+            return new EmptyColumnView(ColumnType.STRING, numRows);
+        }
+
+        ColumnType columnType = cols.get(0).getType();
+        ColumnView[] columnArray = cols.toArray(new ColumnView[cols.size()]);
 
         switch(columnType) {
-
             case STRING:
-                return combineString(cols);
+                return combineString(columnArray);
             case NUMBER:
-                return combineDouble(cols);
+                return combineDouble(columnArray);
             case BOOLEAN:
-                return combineBoolean(cols);
+                return combineBoolean(columnArray);
         }
         throw new UnsupportedOperationException();
     }
-
 
     private ColumnView combineString(ColumnView[] cols) {
         int numRows = cols[0].numRows();
@@ -89,7 +105,6 @@ public class ColumnCombiner implements Slot<ColumnView> {
         return new DoubleArrayColumnView(values);
     }
 
-
     private ColumnView combineBoolean(ColumnView[] cols) {
         int numRows = cols[0].numRows();
         int numCols = cols.length;
@@ -109,4 +124,5 @@ public class ColumnCombiner implements Slot<ColumnView> {
         }
         return new BooleanColumnView(values);
     }
+
 }
