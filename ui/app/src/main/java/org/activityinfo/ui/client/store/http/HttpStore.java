@@ -6,6 +6,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.FormSyncSet;
@@ -34,6 +35,7 @@ import org.activityinfo.ui.client.store.tasks.ObservableTask;
 import org.activityinfo.ui.client.store.tasks.Watcher;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -115,6 +117,10 @@ public class HttpStore {
 
     public Observable<Maybe<FormRecord>> getRecord(RecordRef ref) {
         return get(new RecordRequest(ref), new FormChangeWatcher(eventBus, change -> change.isRecordChanged(ref)));
+    }
+
+    public Observable<List<FormHistoryEntry>> getHistory(RecordRef ref) {
+        return get(new HistoryRequest(ref), new FormChangeWatcher(eventBus, change -> change.isRecordChanged(ref)));
     }
 
     public Promise<Void> updateRecords(RecordTransaction tx) {

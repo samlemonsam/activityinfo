@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.store;
 
+import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
@@ -36,6 +37,8 @@ public interface FormStore extends FormSource {
     void setFormOffline(ResourceId formId, boolean offline);
 
     Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId);
+
+    Observable<List<FormHistoryEntry>> getFormRecordHistory(RecordRef ref);
 
     /**
      * Applies an update transactionally to the Form store.

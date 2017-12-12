@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
+import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
@@ -22,9 +23,7 @@ import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.http.CatalogRequest;
-import org.activityinfo.ui.client.store.http.HttpStore;
-import org.activityinfo.ui.client.store.http.SubRecordsRequest;
+import org.activityinfo.ui.client.store.http.*;
 import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
@@ -180,6 +179,11 @@ public class FormStoreImpl implements FormStore {
         Observable<SnapshotStatus> snapshot = offlineStore.getCurrentSnapshot();
 
         return Observable.transform(enabled, snapshot, (e, s) -> new FormOfflineStatus(e, s.isFormCached(formId)));
+    }
+
+    @Override
+    public Observable<List<FormHistoryEntry>> getFormRecordHistory(RecordRef ref) {
+        return httpStore.getHistory(ref);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class TableView implements IsWidget, HasTitle {
 
         this.container = new BorderLayoutContainer();
 
-        sidePanel = new SidePanel(viewModel);
+        sidePanel = new SidePanel(formStore, viewModel);
         BorderLayoutContainer.BorderLayoutData sidePaneLayout = new BorderLayoutContainer.BorderLayoutData(.3);
         sidePaneLayout.setSplit(true);
         sidePaneLayout.setMargins(new Margins(0, 0, 0, MARGINS));
