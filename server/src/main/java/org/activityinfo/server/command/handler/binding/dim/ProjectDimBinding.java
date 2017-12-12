@@ -38,7 +38,7 @@ public class ProjectDimBinding extends DimBinding {
             String projectId = id.getString(i);
             String projectLabel = Strings.nullToEmpty(label.getString(i));
 
-            if (projectId != null) {
+            if (projectId != null && !Strings.isNullOrEmpty(projectLabel)) {
                 ProjectDTO project = new ProjectDTO(CuidAdapter.getLegacyIdFromCuid(projectId), projectLabel);
                 dataArray[i].set(PROJECT_FIELD, project);
             }

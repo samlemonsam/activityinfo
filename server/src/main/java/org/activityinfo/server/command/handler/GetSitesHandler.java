@@ -65,6 +65,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private Map<ResourceId,List<ResourceId>> locationMap = new HashMap<>();
 
     private Map<Integer,Activity> activities;
+    private int offset;
+    private int limit;
+    private int totalResultLength;
     private List<SiteDTO> siteList = Lists.newArrayList();
 
     private final Stopwatch metadataTime = Stopwatch.createUnstarted();
@@ -96,15 +99,17 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
         printTimes();
         LOGGER.info("Exiting execute()");
-        return new SiteResult(siteList);
+
+        SiteResult result = new SiteResult(siteList);
+        result.setOffset(command.getOffset());
+        result.setTotalLength(totalResultLength);
+        return result;
     }
 
     private boolean useLegacyMethod(GetSites command, User user) {
         return user == null
                 || command.getFilter() == null
-                || command.isLegacyFetch()
-                || command.getLimit() > 0
-                || command.getOffset() > 0;
+                || command.isLegacyFetch();
     }
 
     private void printTimes() {
@@ -123,6 +128,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             batchFormTreeBuilder = new BatchingFormTreeBuilder(catalog);
             batch = builder.createNewBatch();
             sortInfo = command.getSortInfo();
+            offset = command.getOffset();
+            limit = command.getLimit();
+            totalResultLength = 0;
         } else {
             throw new CommandException("Could not retrieve form catalog");
         }
@@ -237,18 +245,29 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 @Nullable
                 @Override
                 public Void apply(@Nullable ColumnSet columnSet) {
+                    totalResultLength = totalResultLength + columnSet.getNumRows();
                     List<FieldBinding> fieldBindings = fieldBindingMap.get(queryEntry.getKey());
-                    SiteDTO[] sites = initialiseSites(columnSet.getNumRows());
 
-                    for (FieldBinding binding : fieldBindings) {
-                        binding.extractFieldData(sites, columnSet);
+                    if (acceptResult(columnSet.getNumRows())) {
+                        SiteDTO[] sites = extractSiteData(fieldBindings, columnSet);
+                        siteList.addAll(Lists.newArrayList(sites));
                     }
 
-                    siteList.addAll(Lists.newArrayList(sites));
                     return null;
                 }
             });
         }
+    }
+
+    private boolean acceptResult(int numResults) {
+        if ((limit > 0) && (siteList.size() >= limit)) {
+            return false;
+        }
+        if ((offset > 0) && (numResults < offset)) {
+            offset = offset - numResults;
+            return false;
+        }
+        return true;
     }
 
     private SiteDTO[] initialiseSites(int length) {
@@ -257,6 +276,52 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             array[i] = new SiteDTO();
         }
         return array;
+    }
+
+    private SiteDTO[] extractSiteData(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
+        ColumnSet finalColumnSet;
+        SiteDTO[] sites;
+
+        if (offset > 0 || limit > 0) {
+            Map<String,ColumnView> paginatedColumns = Maps.newHashMap();
+            int[] index = generatePaginationIndex(columnSet.getNumRows());
+            sites = initialiseSites(index.length);
+
+            for (Map.Entry<String,ColumnView> column : columnSet.getColumns().entrySet()) {
+                paginatedColumns.put(column.getKey(), column.getValue().select(index));
+            }
+
+            finalColumnSet = new ColumnSet(index.length, paginatedColumns);
+        } else {
+            sites = initialiseSites(columnSet.getNumRows());
+            finalColumnSet = columnSet;
+        }
+
+        for (FieldBinding binding : fieldBindings) {
+            binding.extractFieldData(sites, finalColumnSet);
+        }
+
+        return sites;
+    }
+
+    private int[] generatePaginationIndex(int numResultRows) {
+        int pageOffset = (offset > 0) ? offset : 0;
+        int pageLimit;
+
+        if ((limit > 0) && (numResultRows > limit-siteList.size())) {
+            pageLimit = limit - siteList.size();
+        } else {
+            pageLimit = numResultRows;
+        }
+
+        int[] pageIndex = new int[pageLimit-pageOffset];
+
+        for (int i=0; i<pageIndex.length; i++) {
+            pageIndex[i] = pageOffset + i;
+        }
+
+        offset = offset - pageOffset;
+        return pageIndex;
     }
 
     private void enqueueQuery(QueryModel query, final Function<ColumnSet,Void> handler) {
