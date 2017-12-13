@@ -129,6 +129,8 @@ task compileApp(type: JavaExec) {
 
     args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
+    args '-saveSource'
+    args '-saveSourceOutput', "$buildDir/sourceMaps"
     args '-war', outputDir
     args 'org.activityinfo.ui.AppProd'
 
