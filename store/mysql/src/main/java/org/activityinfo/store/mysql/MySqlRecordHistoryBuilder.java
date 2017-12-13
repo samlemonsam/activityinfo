@@ -71,12 +71,7 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
         }
 
         FormClass formClass = form.get().getFormClass();
-        Activity activity = catalog.getActivityLoader().load(CuidAdapter.getLegacyIdFromCuid(formClass.getId()));
-
-        Map<ResourceId,String> monthlyFieldLabels = new HashMap<>();
-        if (activity.isMonthly()) {
-            monthlyFieldLabels = getMonthlyFieldLabels(activity);
-        }
+        Map<ResourceId, String> monthlyFieldLabels = getMonthlyFieldLabels(formClass);
 
         List<RecordDelta> deltas = computeDeltas(formClass, null,
                 form.get().getVersions(recordRef.getRecordId()), monthlyFieldLabels);
@@ -124,6 +119,17 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
             entries.add(entry.build());
         }
         return entries;
+    }
+
+    private Map<ResourceId, String> getMonthlyFieldLabels(FormClass formClass) throws SQLException {
+        Map<ResourceId,String> labels = new HashMap<>();
+        if(formClass.getId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
+            Activity activity = catalog.getActivityLoader().load(CuidAdapter.getLegacyIdFromCuid(formClass.getId()));
+            if (activity.isMonthly()) {
+                labels = getMonthlyFieldLabels(activity);
+            }
+        }
+        return labels;
     }
 
     private void sort(List<RecordDelta> deltas) {
