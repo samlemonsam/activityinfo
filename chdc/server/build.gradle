@@ -1,4 +1,13 @@
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'commons-net:commons-net:3.6'
+    }
+}
+
 plugins {
     id "java"
     id "war"
@@ -7,9 +16,6 @@ plugins {
 configurations {
     gwtSdk {
         extendsFrom compile
-    }
-
-    ftp {
     }
 }
 
@@ -27,23 +33,17 @@ dependencies {
 
 
     gwtSdk "com.google.gwt:gwt-dev:2.8.0"
-
-    ftp("org.apache.ant:ant-commons-net:1.8.4") {
-        module("commons-net:commons-net:1.4.1") {
-            dependencies "oro:oro:2.0.8:jar"
-        }
-    }
 }
 
 war {
     archiveName = "ROOT.war"
     /* Include compiled Javascript application */
-//    from(project(':chdc:frontend').outputDir) {
-//        exclude("**/*.symbolMap")
-//    }
+    from(project(':chdc:frontend').outputDir) {
+        exclude("**/*.symbolMap")
+    }
 }
 
-//tasks.war.dependsOn ':chdc:frontend:compileApp'
+tasks.war.dependsOn ':chdc:frontend:compileApp'
 
 task prepareDevMode(type: Copy) {
     into "$buildDir/devMode"
@@ -55,6 +55,7 @@ task devMode(type: JavaExec) {
 
     dependsOn prepareDevMode
     dependsOn classes
+    dependsOn ":chdc:database:update"
 
     classpath project(':chdc:frontend').buildDir.absolutePath + "/theme"
     classpath project(':chdc:frontend').sourceSets.main.java.srcDirs
@@ -69,56 +70,41 @@ task devMode(type: JavaExec) {
     jvmArgs "-Xdebug"
     jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
 
-    args '-startupUrl', 'demo.html'
+    args '-startupUrl', 'App/demo.html'
     args '-war', "$buildDir/devMode"
 
     args 'chdc.frontend.Chdc'
-
 }
-
 
 task deploy {
     dependsOn war
-
     ext {
         host = 'waws-prod-am2-163.ftp.azurewebsites.windows.net'
         user = 'chdc\\inso-deploy'
-        password = project.property('insoDeployPassword')
+        webappsDir = '/site/wwwroot/webapps'
     }
 
     doLast {
-        ant.taskdef(name: 'ftp',
-                classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
-                classpath: configurations.ftp.asPath)
+        def password = project.property('insoDeployPassword')
+        def ftp = new org.apache.commons.net.ftp.FTPClient()
+        ftp.connect(host)
 
-
-        ant.ftp(server: host,
-                userid: user,
-                password: password,
-                action: 'delete',
-                remotedir: '/site/wwwroot/webapps') {
-            fileset {
-                include(name: "**")
-            }
+        if(!ftp.login(user, password)) {
+            throw new RuntimeException("FTPS Login Failed. (user: ${user}")
         }
 
-        ant.ftp(server: host,
-                userid: user,
-                password: password,
-                action: 'rmdir',
-                remotedir: '/site/wwwroot/webapps') {
-            fileset {
-                include(name: "**")
-            }
+        war.archivePath.withInputStream {
+            ftp.fileType = 2 // binary
+            ftp.storeFile("${webappsDir}/ROOT.temp", it)
         }
-
-        ant.ftp(server: host,
-                userid: user,
-                password: password,
-                remoteDir: "/site/wwwroot/webapps") {
-            fileset(dir: tasks.war.destinationDir) {
-                include(name: tasks.war.archiveName)
-            }
-        }
+        ftp.deleteFile("${webappsDir}/ROOT.war")
+        ftp.rename("${webappsDir}/ROOT.temp", "${webappsDir}/ROOT.war")
+        ftp.disconnect()
     }
+}
+
+task restart(type: Exec) {
+
+    commandLine 'az', 'webapp', 'restart', '--resource-group', 'chdc', '--name', 'chdc'
+
 }

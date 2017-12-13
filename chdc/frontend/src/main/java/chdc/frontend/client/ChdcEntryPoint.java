@@ -1,6 +1,8 @@
 package chdc.frontend.client;
 
-import chdc.frontend.client.table.TablePlace;
+import chdc.frontend.client.dashboard.DashboardPlace;
+import chdc.frontend.client.theme.Banner;
+import chdc.frontend.client.theme.MainDisplay;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.EntryPoint;
@@ -8,11 +10,9 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.indexedb.IDBFactoryImpl;
@@ -24,20 +24,23 @@ import org.activityinfo.ui.client.store.offline.OfflineStore;
 
 /**
  * This is the entry point for the Single Page Application (SPA).
+ *
+ *
+ * <p>This classes' onModuleLoad method is invoked when the application loads and is responsible
+ * for setting up the UI, handling navigation, etc.</p>
  */
 public class ChdcEntryPoint implements EntryPoint {
-    private static final Place DEFAULT_PLACE = new TablePlace();
+
+    private static final Place DEFAULT_PLACE = new DashboardPlace();
 
     @Override
     public void onModuleLoad() {
 
-        ChdcResources.RESOURCES.getStyle().ensureInjected();
+        RootPanel rootPanel = RootPanel.get();
+        rootPanel.add(new Banner());
 
         EventBus eventBus = new SimpleEventBus();
         PlaceController placeController = new PlaceController(eventBus);
-
-        Viewport viewport = new Viewport();
-        ChdcFrame appFrame = new ChdcFrame();
 
         ConnectionListener connectionListener = new ConnectionListener();
         connectionListener.start();
@@ -51,15 +54,11 @@ public class ChdcEntryPoint implements EntryPoint {
 
         ActivityMapper activityMapper = new ChdcActivityMapper(formStore);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
-        activityManager.setDisplay(appFrame.getDisplayWidget());
+        activityManager.setDisplay(new MainDisplay(rootPanel));
 
         ChdcPlaceHistoryMapper historyMapper = new ChdcPlaceHistoryMapper();
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, DEFAULT_PLACE);
-
-        viewport.add(appFrame);
-
-        RootLayoutPanel.get().add(viewport);
 
         historyHandler.handleCurrentHistory();
     }

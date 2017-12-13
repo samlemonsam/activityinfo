@@ -1,5 +1,7 @@
 package chdc.frontend.client;
 
+import chdc.frontend.client.dashboard.DashboardActivity;
+import chdc.frontend.client.dashboard.DashboardPlace;
 import chdc.frontend.client.entry.DataEntryActivity;
 import chdc.frontend.client.entry.DataEntryPlace;
 import chdc.frontend.client.table.TableActivity;
@@ -9,7 +11,10 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
 import org.activityinfo.ui.client.store.FormStore;
 
-
+/**
+ * Maps a symbol "Place" describe the location within the application to the corresponding
+ * {@link Activity}, which can be started or stopped.
+ */
 public class ChdcActivityMapper implements ActivityMapper {
 
     private final FormStore formStore;
@@ -20,8 +25,13 @@ public class ChdcActivityMapper implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
-        if(place instanceof DataEntryPlace) {
+
+        if(place instanceof DashboardPlace) {
+            return new DashboardActivity();
+
+        } else if(place instanceof DataEntryPlace) {
             return new DataEntryActivity();
+
         } else if(place instanceof TablePlace) {
             return new TableActivity(formStore);
         }

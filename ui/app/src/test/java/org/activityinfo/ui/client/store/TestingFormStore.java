@@ -1,13 +1,9 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
-import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormPermissions;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;

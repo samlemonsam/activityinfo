@@ -5,8 +5,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.analysis.table.TableViewModel;
-import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormHistoryEntry;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
 

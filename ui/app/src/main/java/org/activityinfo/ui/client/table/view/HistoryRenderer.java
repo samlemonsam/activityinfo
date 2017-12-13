@@ -4,9 +4,9 @@ import com.google.common.base.Strings;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import org.activityinfo.api.client.FormHistoryEntry;
-import org.activityinfo.api.client.FormValueChange;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FormHistoryEntry;
+import org.activityinfo.model.form.FormValueChange;
 
 import java.util.Date;
 import java.util.List;

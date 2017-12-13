@@ -17,7 +17,7 @@ public class QueryModelTest {
 
         System.out.println(json);
 
-        QueryModel renmodel = QueryModel.fromJson(Json.parse(json));
+        QueryModel remodel = QueryModel.fromJson(Json.parse(json));
     }
 
 }

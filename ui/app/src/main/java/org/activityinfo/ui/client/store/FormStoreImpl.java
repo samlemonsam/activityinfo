@@ -2,10 +2,10 @@ package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
-import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
+import org.activityinfo.model.form.FormHistoryEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
