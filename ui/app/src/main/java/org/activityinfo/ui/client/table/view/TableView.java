@@ -29,7 +29,6 @@ public class TableView implements IsWidget, HasTitle {
 
     private static final Logger LOGGER = Logger.getLogger(TableView.class.getName());
 
-
     private TableViewModel viewModel;
     private ContentPanel panel;
     private final BorderLayoutContainer container;

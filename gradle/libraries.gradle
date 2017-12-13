@@ -5,7 +5,7 @@ ext {
     guavaVersion = '15.0'
     rebarVersion = '2.5.31'
     gwtVersion = '2.6.1'
-    jerseyVersion = '1.17'
+    jerseyVersion = '1.19.4'
     gaeVersion = '1.9.48'
     jacksonVersion = '1.9.2'
     cucumberVersion = '1.2.2'
@@ -41,7 +41,7 @@ ext {
         ],
 
         gwt:[
-            user:           "com.google.gwt:gwt-user:${gwtVersion}", 
+            user:           "com.google.gwt:gwt-user:${gwtVersion}",
             servlet:        "com.google.gwt:gwt-servlet:${gwtVersion}",
             dev:            "com.google.gwt:gwt-dev:${gwtVersion}",
             i18nServer:     'net.lightoze.gwt-i18n-server:gwt-i18n-server:0.22',
@@ -54,7 +54,7 @@ ext {
             jsinterop:      'com.google.jsinterop:jsinterop-annotations:1.0.1'
 
         ],
-            
+
         gxt:                'com.extjs:gxt:2.3.1-gwt26-bdd-70',
             
         rebar: [
@@ -69,6 +69,7 @@ ext {
         jersey: [
             core:           "com.sun.jersey:jersey-core:${jerseyVersion}",
             server:         "com.sun.jersey:jersey-server:${jerseyVersion}",
+            servlet:        "com.sun.jersey:jersey-servlet:${jerseyVersion}",
             simpleServer:   "com.sun.jersey.contribs:jersey-simple-server:${jerseyVersion}",
             client:         "com.sun.jersey:jersey-client:${jerseyVersion}",
             guice:          "com.sun.jersey.contribs:jersey-guice:${jerseyVersion}",
@@ -92,7 +93,7 @@ ext {
             spatial:        'org.hibernate:hibernate-spatial:4.0',
             validator:      'org.hibernate:hibernate-validator:4.3.1.Final'
         ],
-        liquibase:          'org.liquibase:liquibase-core:2.0.2-bdd',
+        liquibase:          'org.liquibase:liquibase-core:3.4.2',
 
         commons: [
             fileupload:     'commons-fileupload:commons-fileupload:1.2.2',

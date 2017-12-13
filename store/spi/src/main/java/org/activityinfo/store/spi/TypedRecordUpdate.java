@@ -1,5 +1,7 @@
 package org.activityinfo.store.spi;
 
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
@@ -56,6 +58,14 @@ public class TypedRecordUpdate {
 
     public Map<ResourceId, FieldValue> getChangedFieldValues() {
         return changedFieldValues;
+    }
+
+    public JsonValue getChangedFieldValuesObject() {
+        JsonValue object = Json.createObject();
+        for (Map.Entry<ResourceId, FieldValue> entry : changedFieldValues.entrySet()) {
+            object.put(entry.getKey().asString(), entry.getValue().toJson());
+        }
+        return object;
     }
 
     public boolean isDeleted() {

@@ -17,7 +17,10 @@ import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
 import org.activityinfo.store.hrd.op.QuerySubRecords;
 import org.activityinfo.store.hrd.op.QueryVersions;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.RecordVersion;
+import org.activityinfo.store.spi.TypedRecordUpdate;
+import org.activityinfo.store.spi.VersionedFormStorage;
 
 import java.util.List;
 
@@ -38,7 +41,7 @@ public class HrdFormStorage implements VersionedFormStorage {
 
     @Override
     public FormPermissions getPermissions(int userId) {
-        return FormPermissions.full();
+        return FormPermissions.readWrite();
     }
 
     @Override

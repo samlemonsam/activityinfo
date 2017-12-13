@@ -1,6 +1,7 @@
 package org.activityinfo.server.util.jaxrs;
 
 import com.google.inject.servlet.ServletModule;
+import org.activityinfo.store.server.CacheFilterFactory;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 /**
@@ -14,5 +15,6 @@ public class JaxRsModule extends ServletModule {
     protected void configureServlets() {
         bind(FreemarkerViewProcessor.class);
         bind(JacksonJsonProvider.class).toInstance(new Utf8JacksonJsonProvider());
+        bind(CacheFilterFactory.class);
     }
 }

@@ -28,10 +28,10 @@ import com.extjs.gxt.ui.client.widget.TabItem;
 import com.google.common.base.Strings;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.api.client.FormHistoryEntry;
-import org.activityinfo.api.client.FormValueChange;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.form.FormHistoryEntry;
+import org.activityinfo.model.form.FormValueChange;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 

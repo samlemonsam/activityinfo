@@ -16,7 +16,7 @@ dependencies {
     gwt libraries.immutables.annotations
 
     gwt project(':i18n')
-    gwt project(':core:model')
+    gwt project(':model')
     gwt project(':clients:gwtrpc')
     gwt project(':clients:gwtrest')
     gwt project(':io:match')

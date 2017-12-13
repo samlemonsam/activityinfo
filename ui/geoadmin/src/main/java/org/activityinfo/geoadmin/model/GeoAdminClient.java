@@ -58,9 +58,9 @@ public class GeoAdminClient implements FormClassProvider {
     private FeatureSourceCatalog localCatalog = new FeatureSourceCatalog();
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        Preconditions.checkArgument(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN);
-        return GeoAdminClient.this.getFormClass(CuidAdapter.getLegacyIdFromCuid(resourceId));
+    public FormClass getFormClass(ResourceId formId) {
+        Preconditions.checkArgument(formId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN);
+        return GeoAdminClient.this.getFormClass(CuidAdapter.getLegacyIdFromCuid(formId));
     }
 
     public static class ObjectMapperProvider implements ContextResolver<ObjectMapper> {

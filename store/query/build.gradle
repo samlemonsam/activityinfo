@@ -1,9 +1,8 @@
 
 
 dependencies {
-    compile project(':core:model')
+    compile project(':model')
     compile project(':store:spi')
-    compile libraries.appengine.api
     compile libraries.guava
     compile libraries.gson
     compile libraries.jts

@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql
 
+import liquibase.Contexts
 import liquibase.Liquibase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.FileSystemResourceAccessor
@@ -60,7 +61,7 @@ class MySqlSetupTask extends DefaultTask {
                 new JdbcConnection(connection));
 
         liquibase.log.logLevel = LiquibaseLogging.get(project)
-        liquibase.update(null)
+        liquibase.update(new Contexts())
     }
 
     def populateData(connection) {

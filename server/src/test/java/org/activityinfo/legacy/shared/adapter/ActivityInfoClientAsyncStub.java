@@ -2,7 +2,10 @@ package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-import org.activityinfo.api.client.*;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.api.client.FormRecordUpdateBuilder;
+import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.Analysis;
@@ -112,7 +115,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     private FormClass defensiveCopy(FormClass formClass) {
-        return FormClass.fromJson(formClass.toJsonObject());
+        return FormClass.fromJson(formClass.toJson());
     }
 
 
@@ -189,7 +192,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
                 HrdFormStorage hrdForm = (HrdFormStorage) collection.get();
                 Iterable<FormRecord> records = hrdForm.getSubRecords(ResourceId.valueOf(parentId));
                 for (FormRecord record : records) {
-                    recordArray.add(record.toJsonElement());
+                    recordArray.add(record.toJson());
                 }
             }
         }

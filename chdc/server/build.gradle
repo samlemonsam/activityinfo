@@ -1,0 +1,124 @@
+
+plugins {
+    id "java"
+    id "war"
+}
+
+configurations {
+    gwtSdk {
+        extendsFrom compile
+    }
+
+    ftp {
+    }
+}
+
+dependencies {
+    compile project(':model')
+    compile project(':store:apiserver')
+
+    compile group: 'javax.inject', name: 'javax.inject', version: '1'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+
+    compile libraries.jersey.servlet
+
+    compile 'com.zaxxer:HikariCP:2.7.2'
+    compile 'mysql:mysql-connector-java:5.1.44'
+
+
+    gwtSdk "com.google.gwt:gwt-dev:2.8.0"
+
+    ftp("org.apache.ant:ant-commons-net:1.8.4") {
+        module("commons-net:commons-net:1.4.1") {
+            dependencies "oro:oro:2.0.8:jar"
+        }
+    }
+}
+
+war {
+    archiveName = "ROOT.war"
+    /* Include compiled Javascript application */
+//    from(project(':chdc:frontend').outputDir) {
+//        exclude("**/*.symbolMap")
+//    }
+}
+
+//tasks.war.dependsOn ':chdc:frontend:compileApp'
+
+task prepareDevMode(type: Copy) {
+    into "$buildDir/devMode"
+    from "src/main/webapp"
+}
+
+
+task devMode(type: JavaExec) {
+
+    dependsOn prepareDevMode
+    dependsOn classes
+
+    classpath project(':chdc:frontend').buildDir.absolutePath + "/theme"
+    classpath project(':chdc:frontend').sourceSets.main.java.srcDirs
+    classpath project(':chdc:frontend').sourceSets.main.resources.srcDirs
+    classpath project(':chdc:frontend').sourceSets.main.runtimeClasspath
+
+    classpath sourceSets.main.runtimeClasspath
+
+    main = 'com.google.gwt.dev.DevMode'
+
+    // Enable debugging
+    jvmArgs "-Xdebug"
+    jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
+
+    args '-startupUrl', 'demo.html'
+    args '-war', "$buildDir/devMode"
+
+    args 'chdc.frontend.Chdc'
+
+}
+
+
+task deploy {
+    dependsOn war
+
+    ext {
+        host = 'waws-prod-am2-163.ftp.azurewebsites.windows.net'
+        user = 'chdc\\inso-deploy'
+        password = project.property('insoDeployPassword')
+    }
+
+    doLast {
+        ant.taskdef(name: 'ftp',
+                classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
+                classpath: configurations.ftp.asPath)
+
+
+        ant.ftp(server: host,
+                userid: user,
+                password: password,
+                action: 'delete',
+                remotedir: '/site/wwwroot/webapps') {
+            fileset {
+                include(name: "**")
+            }
+        }
+
+        ant.ftp(server: host,
+                userid: user,
+                password: password,
+                action: 'rmdir',
+                remotedir: '/site/wwwroot/webapps') {
+            fileset {
+                include(name: "**")
+            }
+        }
+
+        ant.ftp(server: host,
+                userid: user,
+                password: password,
+                remoteDir: "/site/wwwroot/webapps") {
+            fileset(dir: tasks.war.destinationDir) {
+                include(name: tasks.war.archiveName)
+            }
+        }
+    }
+}

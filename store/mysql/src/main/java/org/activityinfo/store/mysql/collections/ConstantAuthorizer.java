@@ -18,7 +18,7 @@ public class ConstantAuthorizer implements Authorizer {
     }
     
     public static ConstantAuthorizer full() {
-        return new ConstantAuthorizer(FormPermissions.full());
+        return new ConstantAuthorizer(FormPermissions.readWrite());
     }
     
     public static ConstantAuthorizer readonly() {

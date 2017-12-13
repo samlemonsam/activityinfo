@@ -36,8 +36,8 @@ public class FormCatalogStub implements FormCatalog {
     }
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        return getForm(resourceId).get().getFormClass();
+    public FormClass getFormClass(ResourceId formId) {
+        return getForm(formId).get().getFormClass();
     }
     
     public void addJsonCollection(String resourceName) throws IOException {

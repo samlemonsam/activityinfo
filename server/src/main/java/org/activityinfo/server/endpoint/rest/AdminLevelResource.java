@@ -30,20 +30,18 @@ import com.vividsolutions.jts.io.ParseException;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.rest.model.NewAdminEntity;
 import org.activityinfo.server.endpoint.rest.model.NewAdminLevel;
 import org.activityinfo.server.util.monitoring.Timed;
-import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.server.ApiBackend;
+import org.activityinfo.store.server.FormResource;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
-import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.ws.rs.*;
@@ -60,25 +58,15 @@ public class AdminLevelResource {
 
     private static final Logger LOGGER = Logger.getLogger(AdminLevelResource.class.getName());
 
-    private final Provider<EntityManager> entityManager;
-    private final Provider<FormCatalog> catalog;
-    private final Provider<AuthenticatedUser> userProvider;
-    private BlobAuthorizer blobAuthorizer;
+    private final ApiBackend backend;
     private final AdminLevel level;
 
 
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
 
-    public AdminLevelResource(Provider<FormCatalog> catalog, Provider<EntityManager> entityManager,
-                              Provider<AuthenticatedUser> userProvider,
-                              BlobAuthorizer blobAuthorizer,
-                              AdminLevel level) {
-        super();
-        this.catalog = catalog;
-        this.entityManager = entityManager;
-        this.userProvider = userProvider;
-        this.blobAuthorizer = blobAuthorizer;
+    public AdminLevelResource(ApiBackend backend, AdminLevel level) {
+        this.backend = backend;
         this.level = level;
     }
 
@@ -96,18 +84,17 @@ public class AdminLevelResource {
 
     @Path("/form")
     public FormResource getForm() {
-        return new FormResource(CuidAdapter.adminLevelFormClass(level.getId()), catalog, userProvider,
-                new PermissionOracle(entityManager.get()), blobAuthorizer);
+        return new FormResource(backend, CuidAdapter.adminLevelFormClass(level.getId()));
     }
     
     @DELETE
-    public Response deleteLevel(@InjectParam AuthenticatedUser user) {
+    public Response deleteLevel(
+            @InjectParam EntityManager em,
+            @InjectParam AuthenticatedUser user) {
         assertAuthorized(user);
 
-        EntityManager em = entityManager.get();
         em.getTransaction().begin();
-
-        AdminLevel level = entityManager.get().merge(this.level);
+        AdminLevel level = em.merge(this.level);
         level.setDeleted(true);
 
         em.getTransaction().commit();
@@ -185,11 +172,12 @@ public class AdminLevelResource {
     @POST
     @Timed(name = "site.rest.admin.child_levels")
     @Path("/childLevels") @Consumes(MediaType.APPLICATION_JSON)
-    public Response postNewLevel(@InjectParam AuthenticatedUser user, NewAdminLevel newLevel) throws ParseException {
+    public Response postNewLevel(
+            @InjectParam EntityManager em,
+            @InjectParam AuthenticatedUser user, NewAdminLevel newLevel) throws ParseException {
 
         assertAuthorized(user);
 
-        EntityManager em = entityManager.get();
         em.getTransaction().begin();
         em.setFlushMode(FlushModeType.COMMIT);
 

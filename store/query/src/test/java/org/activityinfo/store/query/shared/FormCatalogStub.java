@@ -55,8 +55,8 @@ class FormCatalogStub implements FormCatalog {
     }
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
-        StorageStub form = formMap.get(resourceId);
+    public FormClass getFormClass(ResourceId formId) {
+        StorageStub form = formMap.get(formId);
         if(form == null) {
             throw new IllegalArgumentException();
         }
@@ -79,7 +79,7 @@ class FormCatalogStub implements FormCatalog {
 
         @Override
         public FormPermissions getPermissions(int userId) {
-            return FormPermissions.full();
+            return FormPermissions.readWrite();
         }
 
         @Override

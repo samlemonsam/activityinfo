@@ -5,7 +5,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import junit.framework.TestCase;
-import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.query.ColumnSet;
@@ -49,7 +48,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
         survey = new Survey();
 
-        FormMetadata surveyMetadata = FormMetadata.of(1L, survey.getFormClass(), FormPermissions.full());
+        FormMetadata surveyMetadata = FormMetadata.of(1L, survey.getFormClass(), FormPermissions.readWrite());
 
         // First put the schema to the store
 

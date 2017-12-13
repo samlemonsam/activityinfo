@@ -42,7 +42,7 @@ public class SchemaStore {
     }
 
     public final void put(FormClass formClass) {
-        impl.put(formClass.toJsonObject());
+        impl.put(formClass.toJson());
     }
 
     public final Promise<Optional<FormClass>> get(ResourceId formId) {

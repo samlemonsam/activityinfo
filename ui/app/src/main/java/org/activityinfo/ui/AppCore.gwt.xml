@@ -1,0 +1,57 @@
+<!--
+  #%L
+  ActivityInfo Server
+  %%
+  Copyright (C) 2009 - 2013 UNICEF
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+
+<module>
+
+    <inherits name='com.google.gwt.user.User' />
+    <inherits name='com.google.gwt.activity.Activity'/>
+    <inherits name='com.google.gwt.place.Place'/>
+
+    <!-- Include only the GXT modules we need -->
+    <inherits name='com.sencha.gxt.ui.GXT' />
+    <inherits name='com.sencha.gxt.theme.triton.Theme' />
+
+    <inherits name="org.activityinfo.model.Model"/>
+    <inherits name="org.activityinfo.io.Match"/>
+    <inherits name="org.activityinfo.store.query.Query"/>
+    <inherits name="org.activityinfo.Analysis"/>
+    <inherits name="org.activityinfo.api.ApiClient"/>
+
+    <!-- Avoid unsupported RTL layout even when using RTL text -->
+    <inherits name="org.activityinfo.i18n.ArabicLTR"/>
+
+    <inherits name="org.activityinfo.ui.Icons"/>
+    <set-configuration-property name="CssResource.conversionMode" value="strict" />
+
+    <inherits name="org.activityinfo.IndexedDB"/>
+    <inherits name="org.activityinfo.Storage"/>
+
+    <inherits name="org.activityinfo.ui.codemirror.CodeMirror"/>
+
+    <inherits name="com.bedatadriven.rebar.appcache.AppCache"/>
+
+    <!-- Specify the paths for translatable code -->
+    <source path='client'/>
+    <source path='shared'/>
+
+
+</module>

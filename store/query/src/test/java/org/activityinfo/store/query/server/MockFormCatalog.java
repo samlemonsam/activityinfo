@@ -46,7 +46,7 @@ public class MockFormCatalog implements FormCatalog {
     }
 
     @Override
-    public FormClass getFormClass(ResourceId resourceId) {
+    public FormClass getFormClass(ResourceId formId) {
         
         FormClass formClass = new FormClass(COLLECTION_ID);
         
@@ -57,7 +57,7 @@ public class MockFormCatalog implements FormCatalog {
 
         @Override
         public FormPermissions getPermissions(int userId) {
-            return FormPermissions.full();
+            return FormPermissions.readWrite();
         }
 
         @Override

@@ -1,0 +1,31 @@
+
+description = 'ActivityInfo Model'
+
+apply plugin: 'gwt-base'
+
+dependencies {
+    compile project(':tools:promises')
+    compile project(':tools:json')
+    compile project(':i18n')
+
+    gwt     libraries.gwt.user
+    runtime libraries.gwt.servlet
+    compile libraries.guava
+    compile libraries.rebar.time
+    compile libraries.jsr305
+    compile libraries.jackson.core
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from project.sourceSets.main.output.generatedSourcesDir
+}
+
+test {
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+        }
+    }
+}

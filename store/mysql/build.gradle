@@ -2,7 +2,7 @@
 
 
 dependencies {
-    compile project(':core:model')
+    compile project(':model')
     compile project(':store:query')
     compile project(':store:hrd')
     compile project(':store:spi')

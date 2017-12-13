@@ -132,7 +132,11 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return get(urlBuilder.toString(), new Function<JsonValue, List<FormHistoryEntry>>() {
             @Override
             public List<FormHistoryEntry> apply(JsonValue jsonElement) {
-                return FormHistoryEntry.fromJsonArray(jsonElement);
+                try {
+                    return Json.fromJsonArray(FormHistoryEntry.class, jsonElement);
+                } catch (JsonMappingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -239,8 +243,8 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
                 }
                 FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
                     @Override
-                    public FormClass getFormClass(ResourceId resourceId) {
-                        FormClass formClass = formMap.get(resourceId);
+                    public FormClass getFormClass(ResourceId formId) {
+                        FormClass formClass = formMap.get(formId);
                         assert formClass != null;
                         return formClass;
                     }

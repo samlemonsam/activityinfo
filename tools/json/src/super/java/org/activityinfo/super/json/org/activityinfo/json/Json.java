@@ -15,10 +15,15 @@
  */
 package org.activityinfo.json;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GwtScriptOnly;
 import org.activityinfo.json.impl.JsJsonFactory;
 import org.activityinfo.json.impl.JreJsonFactory;
+import org.activityinfo.json.JsonSerializable;
 
 /**
  * Vends out implementation of JsonFactory.
@@ -76,8 +81,24 @@ public class Json {
     return $wnd.JSON.stringify(jsonValue, indent);
   }-*/;
 
+  public static JsonValue toJson(Object value) {
+    if(value instanceof JsonSerializable) {
+      return ((JsonSerializable) value).toJson();
 
-  public static native JsonValue toJson(Object value) /*-{
+    } else if(value instanceof Collection) {
+      JsonValue array = createArray();
+      Collection<?> collection = (Collection)value;
+      for(Object element : collection) {
+        array.add(toJson(element));
+      }
+      return array;
+
+    } else {
+      return toJsonMagic(value);
+    }
+  }
+
+  private static native JsonValue toJsonMagic(Object value) /*-{
     // value *must* be either JsonValue or a type annotated with @JsType or
     // the result will be gibberish.
     return value;
@@ -87,5 +108,15 @@ public class Json {
     // value *must* be either JsonValue or a type annotated with @JsType or
     // the result will be gibberish.
     return object;
+  }-*/;
+
+  public static <T> List<T> fromJsonArray(Class<T> clazz, JsonValue array) throws JsonMappingException {
+    return (List)Arrays.asList(fromJsonArray(array));
+  }
+
+  private static native <T> T[] fromJsonArray(JsonValue array) throws JsonMappingException /*-{
+      // value *must* be either JsonValue or a type annotated with @JsType or
+      // the result will be gibberish.
+      return array;
   }-*/;
 }

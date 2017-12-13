@@ -193,7 +193,7 @@ public class FieldConverters {
         return new FieldConverter<FieldValue>() {
             @Override
             public Object toHrdProperty(FieldValue value) {
-                return FormConverter.toPropertyValue(value.toJsonElement());
+                return FormConverter.toPropertyValue(value.toJson());
             }
 
             @Override

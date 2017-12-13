@@ -3,14 +3,15 @@
 apply plugin: 'gwt-base'
 
 dependencies {
-    compile libraries.gwt.user
+
+    gwt libraries.gwt.user
+
     compile libraries.gwt.jsinterop
     compile libraries.guava
+    compile libraries.jersey.core
     compile "com.fasterxml.jackson.core:jackson-annotations:2.4.5"
 
     gwtSdk libraries.gwt.dev
-
-
 
     testCompile libraries.gson
 }
@@ -18,7 +19,6 @@ dependencies {
 test {
     exclude '**/*GwtTest*'
 }
-
 
 jar {
     from project.sourceSets.main.allSource

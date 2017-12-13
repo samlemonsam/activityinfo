@@ -25,6 +25,13 @@ task explodedWar(type: Copy) {
 }
 
 
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from project.sourceSets.main.output.generatedSourcesDir
+}
+
+
 test {
     // Browser tests that require special handling
     include '**GwtTest'
@@ -33,32 +40,33 @@ test {
 dependencies {
     compile "com.google.guava:guava:21.0"
 
-    gwt libraries.immutables.annotations
+    compile libraries.immutables.annotations
 
-    gwt "com.google.gwt:gwt-user:2.8.0"
-    gwt 'com.google.guava:guava-gwt:21.0'
-    gwt libraries.gwt.gson
+    compile "com.google.gwt:gwt-user:2.8.0"
+    compile 'com.google.guava:guava-gwt:21.0'
+    compile libraries.gwt.gson
 
-    gwt project(':core:model')
-    gwt project(':store:query');
-    gwt project(':i18n')
-    gwt project(':clients:gwtrest')
-    gwt project(':io:match')
-    gwt project(':analysis')
-    gwt project(':ui:icons')
+    compile project(':model')
+    compile project(':store:query');
+    compile project(':i18n')
+    compile project(':clients:gwtrest')
+    compile project(':io:match')
+    compile project(':analysis')
+    compile project(':ui:icons')
+    compile project(':ui:core')
 
+    compile project(':tools:codemirror')
+    compile project(':tools:indexeddb')
 
-    gwt project(':ui:codemirror')
+    compile libraries.rebar.appcache
 
-    gwt libraries.rebar.appcache
-
-    gwt group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
-    gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
-    gwt group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
+    compile group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
+    compile group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
+    compile group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
 
 
     testCompile project(':store:testing')
-
+    testCompile project(':tools:indexeddb').sourceSets.test.output
 }
 
 configurations.all {
@@ -80,8 +88,10 @@ task codeserver(type: JavaExec) {
     // Java sources first, so that changes get picked up on refresh
     classpath project(":i18n").sourceSets.main.java.srcDirs
     classpath project(":i18n").sourceSets.main.resources.srcDirs
-    classpath project(":core:promises").sourceSets.main.java.srcDirs
-    classpath project(":core:model").sourceSets.main.java.srcDirs
+    classpath project(":ui:core").sourceSets.main.java.srcDirs
+    classpath project(":ui:core").sourceSets.main.resources.srcDirs
+    classpath project(":tools:promises").sourceSets.main.java.srcDirs
+    classpath project(":tools:promises").sourceSets.main.java.srcDirs
     classpath project(":analysis").sourceSets.main.java.srcDirs
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs

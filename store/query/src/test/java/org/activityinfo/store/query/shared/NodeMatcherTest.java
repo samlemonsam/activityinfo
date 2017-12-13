@@ -276,13 +276,13 @@ public class NodeMatcherTest {
         FormClassProvider provider = new FormClassProvider() {
 
             @Override
-            public FormClass getFormClass(ResourceId resourceId) {
-                if(rootFormClass.getId().equals(resourceId)) {
+            public FormClass getFormClass(ResourceId formId) {
+                if(rootFormClass.getId().equals(formId)) {
                     return rootFormClass;
                 }
-                FormClass formClass = formClasses.get(resourceId);
+                FormClass formClass = formClasses.get(formId);
                 if(formClass == null) {
-                    throw new IllegalArgumentException(resourceId.toString());
+                    throw new IllegalArgumentException(formId.toString());
                 }
                 return formClass;
             }

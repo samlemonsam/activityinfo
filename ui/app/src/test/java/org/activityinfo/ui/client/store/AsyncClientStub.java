@@ -2,7 +2,10 @@ package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
-import org.activityinfo.api.client.*;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.api.client.FormRecordUpdateBuilder;
+import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.*;
@@ -133,7 +136,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return Promise.resolved(FormMetadata.of(
                 form.get().cacheVersion(),
                 form.get().getFormClass(),
-                FormPermissions.full()));
+                FormPermissions.readWrite()));
         }
     }
 
