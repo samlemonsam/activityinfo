@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
+import org.activityinfo.api.client.FormHistoryEntry;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.CatalogEntry;
@@ -26,10 +27,7 @@ import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -161,6 +159,11 @@ public class TestingFormStore implements FormStore {
     @Override
     public Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId) {
         return Observable.just(new FormOfflineStatus(false, false));
+    }
+
+    @Override
+    public Observable<List<FormHistoryEntry>> getFormRecordHistory(RecordRef ref) {
+        return Observable.just(Collections.emptyList());
     }
 
     @Override
