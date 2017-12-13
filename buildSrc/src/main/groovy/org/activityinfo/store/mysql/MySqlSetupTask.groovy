@@ -60,6 +60,11 @@ class MySqlSetupTask extends DefaultTask {
                 new FileSystemResourceAccessor(project.file('src/main/resources').absolutePath),
                 new JdbcConnection(connection));
 
+        if(project.hasProperty("clearChecksums")) {
+            logger.lifecycle("Clearing database checksums...");
+            liquibase.clearCheckSums();
+        }
+
         liquibase.log.logLevel = LiquibaseLogging.get(project)
         liquibase.update(new Contexts())
     }

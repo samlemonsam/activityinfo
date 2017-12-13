@@ -32,6 +32,10 @@ class MySqlReleaseTask extends DefaultTask {
         liquibase.log.logLevel = LiquibaseLogging.get(project)
 
         try {
+            if(project.hasProperty("clearChecksums")) {
+                liquibase.clearCheckSums();
+            }
+
             logger.info("Validating Changesets...")
             liquibase.validate()
 
