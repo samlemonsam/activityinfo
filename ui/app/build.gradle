@@ -13,6 +13,10 @@ gwt {
 
 ext {
     outputDir = "$buildDir/gwt-out"
+    deployDir = "$buildDir/deploy"
+    sourceMapDir = "$buildDir/deploy/App/symbolMaps/"
+    sourcesDir = "$buildDir/sources"
+
 }
 
 repositories {
@@ -129,9 +133,10 @@ task compileApp(type: JavaExec) {
 
     args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
-    args '-saveSource'
-    args '-saveSourceOutput', "$buildDir/sourceMaps"
     args '-war', outputDir
+    args '-saveSource'
+    args '-saveSourceOutput', sourcesDir
+    args '-deploy', deployDir
     args 'org.activityinfo.ui.AppProd'
 
 }

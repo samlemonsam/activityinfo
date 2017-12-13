@@ -49,6 +49,15 @@ war {
     from(project(':ui:app').outputDir) {
         exclude("**/*.symbolMap")
     }
+    // Copy Sourcemaps from UI 3.0
+    from(project(':ui:app').sourceMapDir) {
+        exclude("**/*.symbolMap")
+        into 'App/src'
+    }
+    // Copy the actual java source files referenced by the source maps
+    from(project(':ui:app').sourcesDir) {
+    }
+
     from(project(':ui:app2').outputDir) {
         exclude("**/*.symbolMap")
     }
