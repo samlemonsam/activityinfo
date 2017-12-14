@@ -67,6 +67,9 @@ dependencies {
 
     testCompile project(':store:testing')
     testCompile project(':tools:indexeddb').sourceSets.test.output
+
+    gwtSdk libraries.gwt.dev
+
 }
 
 configurations.all {
