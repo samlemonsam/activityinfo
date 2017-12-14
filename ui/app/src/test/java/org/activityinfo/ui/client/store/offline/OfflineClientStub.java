@@ -42,7 +42,7 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId) {
+    public Promise<RecordHistory> getRecordHistory(String formId, String recordId) {
         return offline();
     }
 

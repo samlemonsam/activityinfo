@@ -158,8 +158,8 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId) {
-        return Promise.resolved(Collections.<FormHistoryEntry>emptyList());
+    public Promise<RecordHistory> getRecordHistory(String formId, String recordId) {
+        return Promise.resolved(RecordHistory.create(Collections.<RecordHistoryEntry>emptyList()));
     }
 
     private int currentUserId() {

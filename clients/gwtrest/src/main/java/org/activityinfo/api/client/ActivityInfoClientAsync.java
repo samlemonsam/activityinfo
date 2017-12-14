@@ -49,7 +49,7 @@ public interface ActivityInfoClientAsync {
      * @param formId Id of the Form
      * @param recordId Id of the record
      */
-    Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId);
+    Promise<RecordHistory> getRecordHistory(String formId, String recordId);
 
     /**
      * Get All Records

@@ -111,7 +111,7 @@ public class Json {
   }-*/;
 
   public static <T> List<T> fromJsonArray(Class<T> clazz, JsonValue array) throws JsonMappingException {
-    return (List)Arrays.asList(fromJsonArray(array));
+    return Arrays.<T>asList(fromJsonArray(array));
   }
 
   private static native <T> T[] fromJsonArray(JsonValue array) throws JsonMappingException /*-{

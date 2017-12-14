@@ -1,10 +1,17 @@
 package org.activityinfo.model.form;
 
+import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsType;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 
-public final class FormValueChange implements JsonSerializable {
+import java.util.ArrayList;
+import java.util.List;
+
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
+public final class FieldValueChange {
     private String fieldId;
     private String fieldLabel;
     private String oldValueLabel;
@@ -12,60 +19,42 @@ public final class FormValueChange implements JsonSerializable {
     private String subFormKind;
     private String subFormKey;
 
-    public FormValueChange() {
+    public FieldValueChange() {
     }
 
+    @JsOverlay
     public String getFieldId() {
         return fieldId;
     }
 
+    @JsOverlay
     public String getFieldLabel() {
         return fieldLabel;
     }
 
+    @JsOverlay
     public String getOldValueLabel() {
         return oldValueLabel;
     }
 
+    @JsOverlay
     public String getNewValueLabel() {
         return newValueLabel;
     }
 
+    @JsOverlay
     public String getSubFormKind() {
         return subFormKind;
     }
 
+    @JsOverlay
     public String getSubFormKey() {
         return subFormKey;
     }
 
-    @Override
-    public JsonValue toJson() {
-        JsonValue object = Json.createObject();
-        object.put("fieldId", fieldId);
-        object.put("fieldLabel", fieldLabel);
-        object.put("oldValueLabel", oldValueLabel);
-        object.put("newValueLabel", newValueLabel);
-        object.put("subFormKind", subFormKind);
-        object.put("subFormKey", subFormKey);
-
-        return object;
-    }
-
-    public static FormValueChange fromJson(JsonValue object) {
-        FormValueChange change = new FormValueChange();
-        change.fieldId = object.getString("fieldId");
-        change.fieldLabel = object.getString("fieldLabel");
-        change.oldValueLabel = object.getString("oldValueLabel");
-        change.newValueLabel = object.getString("newValueLabel");
-        change.subFormKind = object.getString("subFormKind");
-        change.subFormKey = object.getString("subFormKey");
-        return change;
-    }
-
     public static class Builder {
 
-        private FormValueChange change = new FormValueChange();
+        private FieldValueChange change = new FieldValueChange();
 
         public Builder setFieldId(String fieldId) {
             change.fieldId = fieldId;
@@ -122,7 +111,7 @@ public final class FormValueChange implements JsonSerializable {
             return this;
         }
 
-        public FormValueChange build() {
+        public FieldValueChange build() {
             return change;
         }
     }

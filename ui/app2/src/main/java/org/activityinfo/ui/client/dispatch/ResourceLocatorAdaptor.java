@@ -102,7 +102,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<List<FormHistoryEntry>> getFormRecordHistory(ResourceId formId, ResourceId recordId) {
+    public Promise<RecordHistory> getFormRecordHistory(ResourceId formId, ResourceId recordId) {
         return client.getRecordHistory(formId.asString(), recordId.asString());
     }
 

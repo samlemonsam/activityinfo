@@ -1,10 +1,7 @@
 package org.activityinfo.ui.client.store;
 
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormHistoryEntry;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
@@ -38,7 +35,7 @@ public interface FormStore extends FormSource {
 
     Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId);
 
-    Observable<List<FormHistoryEntry>> getFormRecordHistory(RecordRef ref);
+    Observable<RecordHistory> getFormRecordHistory(RecordRef ref);
 
     /**
      * Applies an update transactionally to the Form store.

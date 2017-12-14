@@ -30,8 +30,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.model.form.FormHistoryEntry;
-import org.activityinfo.model.form.FormValueChange;
+import org.activityinfo.model.form.RecordHistory;
+import org.activityinfo.model.form.RecordHistoryEntry;
+import org.activityinfo.model.form.FieldValueChange;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 
@@ -62,15 +63,15 @@ public class SiteHistoryTab extends TabItem {
         renderStatus(I18N.CONSTANTS.loading());
 
         resourceLocator.getFormRecordHistory(site.getFormClassId(), site.getInstanceId())
-                .then(new AsyncCallback<List<FormHistoryEntry>>() {
+                .then(new AsyncCallback<RecordHistory>() {
                     @Override
                     public void onFailure(Throwable throwable) {
                         renderStatus(I18N.CONSTANTS.serverError());
                     }
 
                     @Override
-                    public void onSuccess(List<FormHistoryEntry> entries) {
-                        render(site, entries);
+                    public void onSuccess(RecordHistory history) {
+                        render(site, history.getEntries());
                     }
                 });
     }
@@ -81,7 +82,7 @@ public class SiteHistoryTab extends TabItem {
         content.setHtml(html.toSafeHtml());
     }
 
-    private void render(SiteDTO site, List<FormHistoryEntry> entries) {
+    private void render(SiteDTO site, List<RecordHistoryEntry> entries) {
 
         SafeHtmlBuilder html = new SafeHtmlBuilder();
 
@@ -91,7 +92,7 @@ public class SiteHistoryTab extends TabItem {
             html.appendEscaped(I18N.MESSAGES.siteHistoryAvailableFrom(HISTORY_AVAILABLE_FROM));
         }
 
-        for (FormHistoryEntry entry : entries) {
+        for (RecordHistoryEntry entry : entries) {
             appendTo(entry, html);
         }
         content.setHtml(html.toSafeHtml());
@@ -103,7 +104,7 @@ public class SiteHistoryTab extends TabItem {
         html.appendHtmlConstant("</span>");
     }
 
-    private void appendTo(FormHistoryEntry entry, SafeHtmlBuilder html) {
+    private void appendTo(RecordHistoryEntry entry, SafeHtmlBuilder html) {
         Date changeTime = new Date(entry.getTime() * 1000L);
 
         html.appendHtmlConstant("<p>");
@@ -132,7 +133,7 @@ public class SiteHistoryTab extends TabItem {
 
         if(!entry.getValues().isEmpty()) {
             html.appendHtmlConstant("<ul style='margin:0px 0px 10px 20px; font-size: 11px;'>");
-            for (FormValueChange change : entry.getValues()) {
+            for (FieldValueChange change : entry.getValues()) {
 
                 html.appendHtmlConstant("<li>");
 

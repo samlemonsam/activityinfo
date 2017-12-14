@@ -121,7 +121,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param formId Id of the Form
      * @param recordId Id of the record
      */
-    public Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId) {
+    public Promise<RecordHistory> getRecordHistory(String formId, String recordId) {
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         urlBuilder.append("/form");
         urlBuilder.append("/").append(formId);
@@ -129,11 +129,11 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         urlBuilder.append("/").append(recordId);
         urlBuilder.append("/history");
 
-        return get(urlBuilder.toString(), new Function<JsonValue, List<FormHistoryEntry>>() {
+        return get(urlBuilder.toString(), new Function<JsonValue, RecordHistory>() {
             @Override
-            public List<FormHistoryEntry> apply(JsonValue jsonElement) {
+            public RecordHistory apply(JsonValue jsonElement) {
                 try {
-                    return Json.fromJsonArray(FormHistoryEntry.class, jsonElement);
+                    return Json.fromJson(RecordHistory.class, jsonElement);
                 } catch (JsonMappingException e) {
                     throw new RuntimeException(e);
                 }

@@ -8,10 +8,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.FormHistoryEntry;
-import org.activityinfo.model.form.FormSyncSet;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
@@ -119,7 +116,7 @@ public class HttpStore {
         return get(new RecordRequest(ref), new FormChangeWatcher(eventBus, change -> change.isRecordChanged(ref)));
     }
 
-    public Observable<List<FormHistoryEntry>> getHistory(RecordRef ref) {
+    public Observable<RecordHistory> getHistory(RecordRef ref) {
         return get(new HistoryRequest(ref), new FormChangeWatcher(eventBus, change -> change.isRecordChanged(ref)));
     }
 

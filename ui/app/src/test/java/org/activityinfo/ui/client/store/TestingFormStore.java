@@ -158,8 +158,8 @@ public class TestingFormStore implements FormStore {
     }
 
     @Override
-    public Observable<List<FormHistoryEntry>> getFormRecordHistory(RecordRef ref) {
-        return Observable.just(Collections.emptyList());
+    public Observable<RecordHistory> getFormRecordHistory(RecordRef ref) {
+        return Observable.just(RecordHistory.create(Collections.emptyList()));
     }
 
     @Override

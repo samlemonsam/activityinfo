@@ -6,12 +6,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormHistoryEntry;
+import org.activityinfo.model.form.RecordHistory;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.Collections;
-import java.util.List;
 
 public class HistoryPane implements IsWidget {
 
@@ -22,11 +21,11 @@ public class HistoryPane implements IsWidget {
         this.panel = new HTML("Testing");
         this.panel.addStyleName(TableBundle.INSTANCE.style().detailPane());
 
-        Observable<List<FormHistoryEntry>> history = viewModel.getSelectedRecordRef().join(ref -> {
+        Observable<RecordHistory> history = viewModel.getSelectedRecordRef().join(ref -> {
             if (ref.isPresent()) {
                 return formStore.getFormRecordHistory(ref.get());
             } else {
-                return Observable.just(Collections.emptyList());
+                return Observable.just(RecordHistory.create(Collections.emptyList()));
             }
         });
         Observable<SafeHtml> html = history.transform((h) -> renderer.render(h));

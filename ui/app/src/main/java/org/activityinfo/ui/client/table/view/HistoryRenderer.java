@@ -5,8 +5,9 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormHistoryEntry;
-import org.activityinfo.model.form.FormValueChange;
+import org.activityinfo.model.form.RecordHistory;
+import org.activityinfo.model.form.RecordHistoryEntry;
+import org.activityinfo.model.form.FieldValueChange;
 
 import java.util.Date;
 import java.util.List;
@@ -21,7 +22,7 @@ public class HistoryRenderer {
         html.appendHtmlConstant("</h3>");
     }
 
-    private void appendTo(FormHistoryEntry entry, SafeHtmlBuilder html) {
+    private void appendTo(RecordHistoryEntry entry, SafeHtmlBuilder html) {
         Date changeTime = new Date(entry.getTime() * 1000L);
 
         html.appendHtmlConstant("<p>");
@@ -48,7 +49,7 @@ public class HistoryRenderer {
 
         if (!entry.getValues().isEmpty()) {
             html.appendHtmlConstant("<ul style='margin:0px 0px 10px 20px;'>");
-            for (FormValueChange change : entry.getValues()) {
+            for (FieldValueChange change : entry.getValues()) {
                 html.appendHtmlConstant("<li>");
 
                 if (!Strings.isNullOrEmpty(change.getSubFormKey())) {
@@ -73,14 +74,14 @@ public class HistoryRenderer {
         }
     }
 
-    public SafeHtml render(List<FormHistoryEntry> history) {
+    public SafeHtml render(RecordHistory history) {
         SafeHtmlBuilder html = new SafeHtmlBuilder();
 
-        if (history.isEmpty()) {
+        if (history.getEntries().isEmpty()) {
             return renderNoHistory();
         }
 
-        for (FormHistoryEntry historyEntry : history) {
+        for (RecordHistoryEntry historyEntry : history.getEntries()) {
             appendTo(historyEntry, html);
         }
 

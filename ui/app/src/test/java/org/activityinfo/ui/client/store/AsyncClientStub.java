@@ -74,7 +74,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId) {
+    public Promise<RecordHistory> getRecordHistory(String formId, String recordId) {
         return Promise.rejected(new UnsupportedOperationException());
     }
 

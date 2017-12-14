@@ -64,7 +64,7 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
 
 
     @Override
-    public List<FormHistoryEntry> build(RecordRef recordRef) throws SQLException {
+    public RecordHistory build(RecordRef recordRef) throws SQLException {
         Optional<FormStorage> form = catalog.getForm(recordRef.getFormId());
         if(!form.isPresent()) {
             throw new FormNotFoundException(recordRef.getFormId());
@@ -89,7 +89,7 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
         Map<Long, User> userMap = queryUsers(deltas);
 
         // Now render the complete object for the user
-        List<FormHistoryEntry> entries = new ArrayList<>();
+        List<RecordHistoryEntry> entries = new ArrayList<>();
         for (RecordDelta delta : deltas) {
 
             User user = userMap.get(delta.version.getUserId());
@@ -99,7 +99,7 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
                 user.name = "User " + delta.version.getUserId();
             }
 
-            FormHistoryEntry.Builder entry = new FormHistoryEntry.Builder();
+            RecordHistoryEntry.Builder entry = new RecordHistoryEntry.Builder();
             entry.setFormId(recordRef.getFormId().asString());
             entry.setRecordId(recordRef.getRecordId().asString());
 
@@ -118,7 +118,7 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
             }
             entries.add(entry.build());
         }
-        return entries;
+        return RecordHistory.create(entries);
     }
 
     private Map<ResourceId, String> getMonthlyFieldLabels(FormClass formClass) throws SQLException {
@@ -298,8 +298,8 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
         return userMap;
     }
 
-    private FormValueChange renderChange(FieldDelta delta) {
-        FormValueChange.Builder builder = new FormValueChange.Builder();
+    private FieldValueChange renderChange(FieldDelta delta) {
+        FieldValueChange.Builder builder = new FieldValueChange.Builder();
         builder.setFieldId(delta.field.getId().asString());
         builder.setFieldLabel(delta.field.getLabel());
         if(delta.subFormKey != null) {

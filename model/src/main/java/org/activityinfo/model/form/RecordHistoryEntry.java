@@ -1,5 +1,7 @@
 package org.activityinfo.model.form;
 
+import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
@@ -10,7 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class FormHistoryEntry implements JsonSerializable {
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
+public final class RecordHistoryEntry {
 
     private String formId;
     private String recordId;
@@ -22,89 +25,65 @@ public final class FormHistoryEntry implements JsonSerializable {
     private String userName;
     private String userEmail;
 
-    private List<FormValueChange> values;
+    private FieldValueChange[] values;
 
-    public FormHistoryEntry() {
+    public RecordHistoryEntry() {
     }
 
+    @JsOverlay
     public String getFormId() {
         return formId;
     }
 
+    @JsOverlay
     public String getRecordId() {
         return recordId;
     }
 
+    @JsOverlay
     public int getTime() {
         return time;
     }
 
+    @JsOverlay
     public String getSubFieldId() {
         return subFieldId;
     }
 
+    @JsOverlay
     public String getSubFieldLabel() {
         return subFieldLabel;
     }
 
+    @JsOverlay
     public String getSubRecordKey() {
         return subRecordKey;
     }
 
+    @JsOverlay
     public String getChangeType() {
         return changeType;
     }
 
+    @JsOverlay
     public String getUserName() {
         return userName;
     }
 
+    @JsOverlay
     public String getUserEmail() {
         return userEmail;
     }
 
-    public List<FormValueChange> getValues() {
-        return values;
-    }
-
-    @Override
-    public JsonValue toJson() {
-        JsonValue object = Json.createObject();
-        object.put("formId", formId);
-        object.put("recordId", recordId);
-        object.put("time", time);
-        if(subFieldId != null) {
-            object.put("subFieldId", subFieldId);
-            object.put("subFieldLabel", subFieldLabel);
-            object.put("subRecordKey", subRecordKey);
-        }
-        object.put("changeType", changeType);
-        object.put("userName", userName);
-        object.put("userEmail", userEmail);
-        object.put("values", Json.toJson(values));
-
-        return object;
-    }
-
-    public static FormHistoryEntry fromJson(JsonValue object) throws JsonMappingException {
-        FormHistoryEntry entry = new FormHistoryEntry();
-        entry.formId = object.getString("formId");
-        entry.recordId = object.getString("recordId");
-        entry.time = (int) object.getNumber("time");
-        entry.subFieldId = object.getString("subFieldId");
-        entry.subFieldLabel = object.getString("subFieldLabel");
-        entry.subRecordKey = object.getString("subRecordKey");
-        entry.changeType = object.getString("changeType");
-        entry.userName = object.getString("userName");
-        entry.userEmail = object.getString("userEmail");
-        entry.values = Json.fromJsonArray(FormValueChange.class, object.get("values"));
-        return entry;
+    @JsOverlay
+    public List<FieldValueChange> getValues() {
+        return Arrays.asList(values);
     }
 
     public static class Builder {
 
-        private FormHistoryEntry entry = new FormHistoryEntry();
-        private List<FormValueChange> changes = new ArrayList<>();
+        private RecordHistoryEntry entry = new RecordHistoryEntry();
+        private List<FieldValueChange> changes = new ArrayList<>();
 
 
         /**
@@ -200,13 +179,13 @@ public final class FormHistoryEntry implements JsonSerializable {
          * Adds a value.
          *
          */
-        public Builder addValue(FormValueChange value) {
+        public Builder addValue(FieldValueChange value) {
             changes.add(value);
             return this;
         }
 
-        public FormHistoryEntry build() {
-            entry.values = changes;
+        public RecordHistoryEntry build() {
+            entry.values = changes.toArray(new FieldValueChange[changes.size()]);
             return entry;
         }
     }

@@ -2,7 +2,8 @@ package org.activityinfo.store.mysql;
 
 
 import org.activityinfo.json.Json;
-import org.activityinfo.model.form.FormHistoryEntry;
+import org.activityinfo.model.form.RecordHistory;
+import org.activityinfo.model.form.RecordHistoryEntry;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.RecordRef;
 import org.junit.Before;
@@ -22,7 +23,7 @@ public class MySqlHistoryTest extends AbstractMySqlTest {
     @Test
     public void locationChange() throws SQLException {
         MySqlRecordHistoryBuilder builder = new MySqlRecordHistoryBuilder(catalog);
-        List<FormHistoryEntry> array = builder.build(new RecordRef(
+        RecordHistory array = builder.build(new RecordRef(
                 CuidAdapter.activityFormClass(33),
                 CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 968196924)));
 

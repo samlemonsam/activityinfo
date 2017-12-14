@@ -262,7 +262,7 @@ public class FormResource {
     @NoCache
     @Path("record/{recordId}/history")
     @Produces(JSON_CONTENT_TYPE)
-    public List<FormHistoryEntry> getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
+    public RecordHistory getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
 
         assertVisible(formId);
 
