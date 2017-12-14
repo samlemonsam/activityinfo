@@ -1,5 +1,11 @@
 
+configurations.all {
 
+    // Use the implementation provided by the JDK
+    // Outdated version of xerces will cause problems with JAXB
+    exclude group:'xerces', module: 'xercesImpl'
+
+}
 
 dependencies {
     compile project(':model')
