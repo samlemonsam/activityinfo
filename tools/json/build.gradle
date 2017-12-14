@@ -2,13 +2,17 @@
 
 apply plugin: 'gwt-base'
 
+gwt {
+    gwtVersion = gwtVersion
+    maxHeapSize "5g"
+}
+
 dependencies {
 
     gwt libraries.gwt.user
 
     compile libraries.gwt.jsinterop
     compile libraries.guava
-    compile libraries.jersey.core
     compile "com.fasterxml.jackson.core:jackson-annotations:2.4.5"
 
     gwtSdk libraries.gwt.dev

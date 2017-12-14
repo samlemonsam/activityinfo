@@ -30,11 +30,10 @@
   <ui:data field="gearImage" src="resources/gear.png"/>
   <ui:data field="helpImage" src="resources/help.png"/>
 
-  <ui:style>
-    @url backgroundUrl backgroundImage;
-    @url gearUrl gearImage;
-    @url helpUrl helpImage;
-    @url searchUrl searchImage;
+  <ui:style gss="true">
+    @def backgroundUrl resourceUrl("backgroundImage");
+    @def gearUrl resourceUrl("gearImage");
+    @def helpUrl resourceUrl("helpImage");
 
     .bar {
       background: #dfe8f6 repeat-x top;

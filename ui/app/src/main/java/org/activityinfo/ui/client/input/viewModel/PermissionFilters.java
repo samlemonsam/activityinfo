@@ -1,21 +1,21 @@
 package org.activityinfo.ui.client.input.viewModel;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Symbol;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.analysis.FieldReference;
 import org.activityinfo.analysis.FormulaValidator;
-import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.form.FormOperation;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.primitive.BooleanFieldValue;
-import org.activityinfo.model.type.primitive.BooleanType;
 
 import java.util.*;
 

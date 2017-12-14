@@ -26,19 +26,17 @@ dependencies {
     gwt libraries.gxt
     gwt libraries.gwt.gson
 
-    gwt libraries.gwt.dnd
     gwt libraries.gwt.guice
     gwt libraries.gwt.gson
     gwt libraries.gwt.leaflet
-    gwt libraries.gwt.gears
     gwt libraries.gwt.guava
 
     gwt libraries.rebar.style
     gwt libraries.rebar.appcache
 
     gwt 'com.allen-sauer.gwt.dnd:gwt-dnd:3.3.0'
-    gwt 'com.googlecode.gwtquery:gwtquery:1.4.2'
-    gwt 'com.github.jdramaix:gwtchosen:1.2.0'
+    gwt 'com.googlecode.gwtquery:gwtquery:1.5-beta1'
+    gwt 'com.arcbees:gwtchosen:3.0'
 
     gwtSdk libraries.gwt.dev
 
@@ -86,7 +84,7 @@ task compileApp(type: JavaExec) {
     } else if ("safari".equals(project.property("gwtMode"))) {
         args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
-        args '-logLevel', 'INFO'
+        args '-logLevel', 'ERROR'
         args 'org.activityinfo.ui.ActivityInfoRelease'
         args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }

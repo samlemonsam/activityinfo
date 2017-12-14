@@ -2,9 +2,9 @@
 // use.  In that respect it serves a role similar to <dependencyManagement> in Maven
 ext {
 
-    guavaVersion = '15.0'
+    guavaVersion = '20.0'
     rebarVersion = '2.5.31'
-    gwtVersion = '2.6.1'
+    gwtVersion = '2.8.2'
     jerseyVersion = '1.19.4'
     gaeVersion = '1.9.48'
     jacksonVersion = '1.9.2'
@@ -45,12 +45,10 @@ ext {
             servlet:        "com.google.gwt:gwt-servlet:${gwtVersion}",
             dev:            "com.google.gwt:gwt-dev:${gwtVersion}",
             i18nServer:     'net.lightoze.gwt-i18n-server:gwt-i18n-server:0.22',
-            dnd:            'com.allen-sauer.gwt.dnd:gwt-dnd:3.3.0',
-            leaflet:        'org.discotools.gwt.leaflet:gwtl-core:0.3-SNAPSHOT',
+            leaflet:        'org.discotools.gwt.leaflet:gwtl-core:0.4.15',
             guice:          "com.google.gwt.inject:gin:2.1.2",
             guava:          "com.google.guava:guava-gwt:${guavaVersion}",
             gson:           "gson-gwt:gson-gwt:2.1",
-            gears:          'com.google.gwt.google-apis:gwt-gears:1.2.1',
             jsinterop:      'com.google.jsinterop:jsinterop-annotations:1.0.1'
 
         ],
@@ -142,9 +140,6 @@ subprojects {
 
     configurations.all {
 
-        // Interferes with GWT-dev
-        exclude group:'xerces', module: 'xercesImpl'     
-
         // Required by Hibernate Spatial but not needed
         exclude group:'postgresql', module: 'postgresql' 
         exclude group:'org.postgresql', module: 'postgresql-jdbc'
@@ -157,7 +152,6 @@ subprojects {
 
         exclude group:'com.sun.xml.bind', module:'jaxb-impl'
 
-        exclude group:'xml-apis', module: 'xml-apis'
         exclude module: 'guava-jdk5'
         
         //  javax.servlet:servlet-api:2.5 is not generically typed
