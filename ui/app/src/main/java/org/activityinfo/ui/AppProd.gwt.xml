@@ -33,11 +33,6 @@
     <!-- Limit to supported browsers -->
     <set-property name="gxt.user.agent" value="safari5,chrome,ie9,ie10,ie11,gecko1_9"/>
 
-    <!-- Make source maps available in production -->
-    <set-property name="compiler.useSourceMaps" value="true"/>
-    <set-property name="compiler.useSymbolMaps" value="false"/>
-    <set-configuration-property name="includeSourceMapUrl" value="/App/src/__HASH___sourceMap__FRAGMENT__.json"/>
-
     <!-- Generate AppCache manifests -->
     <define-linker name="std" class="com.bedatadriven.rebar.appcache.linker.AppCacheIFrameLinker"/>
     <add-linker name="std"/>
