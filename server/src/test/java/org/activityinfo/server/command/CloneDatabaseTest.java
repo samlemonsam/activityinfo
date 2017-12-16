@@ -248,8 +248,9 @@ public class CloneDatabaseTest extends CommandTestCase2 {
         assertNotEquals(entity1.get("id"), entity2.get("id"));
 
         for (String property : propertyNames) {
-            assertEquals("Failed assert property: " + property + ", sourceId: " + entity1.get("id") + ", targetId: " + entity2.get("id"),
-                    entity1.get(property), entity2.get(property));
+            assertEquals("Failed assert property: " + property + ", sourceId: " + entity1.<Object>get("id") +
+                            ", targetId: " + entity2.<Object>get("id"),
+                                entity1.<Object>get(property), entity2.<Object>get(property));
         }
     }
 

@@ -2,9 +2,9 @@
 // use.  In that respect it serves a role similar to <dependencyManagement> in Maven
 ext {
 
-    guavaVersion = '20.0'
+    guavaVersion = '23.0'
     rebarVersion = '2.5.31'
-    gwtVersion = '2.8.1'
+    gwtVersion = '2.8.2'
     jerseyVersion = '1.19.4'
     gaeVersion = '1.9.48'
     jacksonVersion = '1.9.2'

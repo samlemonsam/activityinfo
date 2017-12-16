@@ -15,6 +15,7 @@
 
   <use-google-connector-j>true</use-google-connector-j>
 
+  <runtime>java8</runtime>
 
   <static-files>
     <include path="/robots.txt" expiration="1d"/>

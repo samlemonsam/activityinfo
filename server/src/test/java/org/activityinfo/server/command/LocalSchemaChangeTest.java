@@ -295,7 +295,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
             if(visited.contains(modelData)) {
                 sb.append(prefix).append(" = ")
                         .append(modelData.getClass().getSimpleName())
-                        .append("[").append(((ModelData) modelData).get("id")).append("]\n");
+                        .append("[").append(((ModelData) modelData).<Object>get("id")).append("]\n");
             } else {
                 visited.add(modelData);
                 BeanInfo beanInfo = Introspector.getBeanInfo(modelData.getClass());

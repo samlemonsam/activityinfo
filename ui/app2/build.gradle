@@ -38,6 +38,11 @@ dependencies {
     gwt 'com.googlecode.gwtquery:gwtquery:1.5-beta1'
     gwt 'com.arcbees:gwtchosen:3.0'
 
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0', classifier: 'sources'
+
+    gwt group: 'com.google.inject', name: 'guice', version: '3.0', classifier: 'sources'
+
     gwtSdk libraries.gwt.dev
 
 }
@@ -51,6 +56,8 @@ idea {
 
 task compileApp(type: JavaExec) {
 
+    dependsOn compileJava
+
     outputs.dir outputDir
     inputs.dir sourceSets.main.allSource.srcDirs
 
@@ -62,6 +69,9 @@ task compileApp(type: JavaExec) {
     classpath configurations.gwtSdk
 
     main = 'com.google.gwt.dev.Compiler'
+
+    jvmArgs "-Xdebug"
+    jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 
     args '-logLevel', 'INFO'
 
@@ -84,7 +94,7 @@ task compileApp(type: JavaExec) {
     } else if ("safari".equals(project.property("gwtMode"))) {
         args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
-        args '-logLevel', 'ERROR'
+//        args '-logLevel', 'ERROR'
         args 'org.activityinfo.ui.ActivityInfoRelease'
         args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }

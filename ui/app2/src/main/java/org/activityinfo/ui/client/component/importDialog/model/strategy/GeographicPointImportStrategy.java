@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.component.importDialog.model.strategy;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
@@ -44,8 +45,8 @@ public class GeographicPointImportStrategy implements FieldImportStrategy {
     @Override
     public FieldImporter createImporter(FormTree.Node node, Map<TargetSiteId, ColumnAccessor> mappings, ImportModel model) {
         ColumnAccessor sourceColumns[] = new ColumnAccessor[] {
-                Objects.firstNonNull(mappings.get(LATITUDE), MissingColumn.INSTANCE),
-                Objects.firstNonNull(mappings.get(LONGITUDE), MissingColumn.INSTANCE) };
+                MoreObjects.firstNonNull(mappings.get(LATITUDE), MissingColumn.INSTANCE),
+                MoreObjects.firstNonNull(mappings.get(LONGITUDE), MissingColumn.INSTANCE) };
 
         ImportTarget targets[] = new ImportTarget[] {
                 latitudeTarget(node),

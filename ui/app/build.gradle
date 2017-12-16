@@ -2,9 +2,6 @@
 
 apply plugin: 'gwt-base'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 gwt {
     gwtVersion = gwtVersion
     modules 'org.activityinfo.ui.AppProd'

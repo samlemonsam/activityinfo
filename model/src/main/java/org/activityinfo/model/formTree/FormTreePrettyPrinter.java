@@ -1,5 +1,6 @@
 package org.activityinfo.model.formTree;
 
+import com.google.common.annotations.GwtIncompatible;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -14,6 +15,7 @@ import java.util.Set;
 /**
  * Dumps a FormTree to the console for debugging purposes
  */
+@GwtIncompatible
 public class FormTreePrettyPrinter {
 
     private PrintWriter pw;

@@ -1,8 +1,4 @@
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-
 dependencies {
     compile "com.google.guava:guava:21.0"
     compile "com.google.gwt:gwt-user:2.8.0"
