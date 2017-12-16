@@ -38,9 +38,6 @@ dependencies {
     gwt 'com.googlecode.gwtquery:gwtquery:1.5-beta1'
     gwt 'com.arcbees:gwtchosen:3.0'
 
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0', classifier: 'sources'
-
     gwt group: 'com.google.inject', name: 'guice', version: '3.0', classifier: 'sources'
 
     gwtSdk libraries.gwt.dev
@@ -73,7 +70,7 @@ task compileApp(type: JavaExec) {
     jvmArgs "-Xdebug"
     jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 
-    args '-logLevel', 'INFO'
+    args '-logLevel', 'DEBUG'
 
     // Disable class metadata -- Class.getName() will not
     // be available to compiled code, but we save ~150k

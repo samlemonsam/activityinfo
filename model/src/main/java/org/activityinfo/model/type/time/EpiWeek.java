@@ -208,13 +208,6 @@ public class EpiWeek implements Serializable, PeriodValue {
         return new LocalDateInterval(firstDayOfWeek, lastDayOfWeek);
     }
 
-    public DateRange getDateRange() {
-        LocalDateInterval interval = asInterval();
-        return new DateRange(
-                interval.getStartDate().atMidnightInMyTimezone(),
-                interval.getEndDate().atMidnightInMyTimezone());
-    }
-
     @Override
     public FieldTypeClass getTypeClass() {
         return EpiWeekType.TYPE_CLASS;

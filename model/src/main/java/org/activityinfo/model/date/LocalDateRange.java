@@ -23,7 +23,6 @@ package org.activityinfo.model.date;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -69,7 +68,6 @@ public class LocalDateRange implements Serializable {
      * @return The minimum date in this range (inclusive) or <code>null</code>
      * if the range has no lower bound
      */
-    @XmlAttribute(name = "min")
     public Date getMinDate() {
         return minDate == null ? null : minDate.atMidnightInMyTimezone();
     }
@@ -98,12 +96,6 @@ public class LocalDateRange implements Serializable {
         return minDate == null && maxDate == null;
     }
 
-    public DateRange asDateRange() {
-        return new DateRange(
-                minDate != null ? minDate.atMidnightInMyTimezone() : null,
-                maxDate != null ? maxDate.atMidnightInMyTimezone() : null);
-    }
-
     /**
      * Sets the minimum date in this range (inclusive).
      *
@@ -124,7 +116,6 @@ public class LocalDateRange implements Serializable {
      * @return The maximum date in this range (inclusive) or <code>null</code>
      * if the range has no upper bound.
      */
-    @XmlAttribute(name = "max")
     public Date getMaxDate() {
         return maxDate == null ? null : maxDate.atMidnightInMyTimezone();
     }
