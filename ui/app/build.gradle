@@ -6,7 +6,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 gwt {
-    gwtVersion = "2.8.0"
+    gwtVersion = "2.8.0-bdd1"
     modules 'org.activityinfo.ui.AppProd'
     maxHeapSize "5g"
 }
@@ -35,7 +35,7 @@ dependencies {
 
     gwt libraries.immutables.annotations
 
-    gwt "com.google.gwt:gwt-user:2.8.0"
+    gwt "com.google.gwt:gwt-user:2.8.0-bdd1"
     gwt 'com.google.guava:guava-gwt:21.0'
     gwt libraries.gwt.gson
 
