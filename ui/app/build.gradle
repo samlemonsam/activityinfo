@@ -127,7 +127,7 @@ task compileApp(type: JavaExec) {
 
     main = 'com.google.gwt.dev.Compiler'
 
-    args '-logLevel', 'DEBUG'
+    args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
     args '-war', outputDir
     args 'org.activityinfo.ui.AppProd'

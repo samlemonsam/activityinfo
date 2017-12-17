@@ -70,7 +70,7 @@ task compileApp(type: JavaExec) {
     jvmArgs "-Xdebug"
     jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 
-    args '-logLevel', 'DEBUG'
+    args '-logLevel', 'INFO'
 
     // Disable class metadata -- Class.getName() will not
     // be available to compiled code, but we save ~150k
@@ -91,7 +91,7 @@ task compileApp(type: JavaExec) {
     } else if ("safari".equals(project.property("gwtMode"))) {
         args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
-//        args '-logLevel', 'ERROR'
+        args '-logLevel', 'ERROR'
         args 'org.activityinfo.ui.ActivityInfoRelease'
         args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }
