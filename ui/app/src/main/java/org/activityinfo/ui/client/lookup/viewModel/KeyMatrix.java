@@ -144,7 +144,9 @@ class KeyMatrix {
         return getKeyColumn(lookupKey).transform(column -> {
             Set<String> set = new HashSet<>();
             for (int i = 0; i < column.numRows(); i++) {
-                set.add(column.getString(i));
+                if(!column.isMissing(i)) {
+                    set.add(column.getString(i));
+                }
             }
             return sorted(set);
         });
@@ -162,7 +164,7 @@ class KeyMatrix {
 
             Set<String> set = new HashSet<>();
             for (int i = 0; i < column.numRows(); i++) {
-                if(matching.get(i)) {
+                if(matching.get(i) && !column.isMissing(i)) {
                     set.add(column.getString(i));
                 }
             }

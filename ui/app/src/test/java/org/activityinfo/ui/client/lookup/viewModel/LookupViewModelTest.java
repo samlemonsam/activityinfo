@@ -2,26 +2,44 @@ package org.activityinfo.ui.client.lookup.viewModel;
 
 import com.google.common.base.Optional;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formTree.FormMetadataProviderStub;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Connection;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.testing.IdpLocationForm;
 import org.activityinfo.store.testing.NfiForm;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.activityinfo.store.testing.VillageForm;
+import org.activityinfo.ui.client.input.viewModel.FormStructure;
 import org.activityinfo.ui.client.input.viewModel.PermissionFilters;
+import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.TestSetup;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -182,9 +200,52 @@ public class LookupViewModelTest {
     }
 
     @Test
-    public void partnerTest() {
+    public void nullKeys() {
 
+        FormClass keyForm = new FormClass(ResourceId.valueOf("FORM1"));
+        keyForm.addField(ResourceId.valueOf("PROVINCE"))
+                .setLabel("Province")
+                .setKey(true)
+                .setRequired(true)
+                .setType(TextType.SIMPLE);
+        keyForm.addField(ResourceId.valueOf("SCHOOL"))
+                .setLabel("School")
+                .setKey(true)
+                .setRequired(true)
+                .setType(TextType.SIMPLE);
+
+        FormClass form = new FormClass(ResourceId.valueOf("FORM2"));
+        ReferenceType referenceType = new ReferenceType(Cardinality.SINGLE, ResourceId.valueOf("FORM1"));
+        form.addField(ResourceId.valueOf("PROJECT"))
+                .setLabel("Project name")
+                .setType(referenceType);
+
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(new FormMetadataProviderStub(form, keyForm));
+        FormTree formTree = treeBuilder.queryTree(form.getId());
+
+        Map<String, ColumnView> columnSet = new HashMap<>();
+        columnSet.put("id", new StringArrayColumnView(Arrays.asList("R1", "R2", "R3", "R4")));
+        columnSet.put("k1", new StringArrayColumnView(Arrays.asList("PZ", null, "PA", "PA")));
+        columnSet.put("k2", new StringArrayColumnView(Arrays.asList("S1", "S2", null, "S3")));
+
+        FormSource formSource = EasyMock.createMock(FormSource.class);
+        EasyMock.expect(formSource.query(EasyMock.anyObject(QueryModel.class)))
+                .andReturn(Observable.just(new ColumnSet(3, columnSet)))
+                .anyTimes();
+        EasyMock.replay(formSource);
+
+        LookupViewModel viewModel = new LookupViewModel(formSource, formTree, referenceType);
+
+        LookupKeyViewModel provinceKey = viewModel.getLookupKeys().get(0);
+
+        assertThat(provinceKey.getChoices().get(), contains("PA", "PZ"));
+
+        viewModel.select(provinceKey.getLookupKey(), "PA");
+
+        LookupKeyViewModel schoolKey = viewModel.getLookupKeys().get(1);
+        Connection<List<String>> schoolChoices = new Connection<>(schoolKey.getChoices());
+
+        assertThat(schoolChoices.assertLoaded(), contains("S3"));
 
     }
-
 }
