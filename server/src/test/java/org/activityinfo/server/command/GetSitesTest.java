@@ -231,6 +231,14 @@ public class GetSitesTest extends CommandTestCase2 {
         Assert.assertNotNull("activityId", newResult.getData().get(0)
                 .getActivityId());
 
+        GetSites newMonthlyCmd = new GetSites();
+        newMonthlyCmd.filter().addRestriction(DimensionType.Database, 2);
+        newMonthlyCmd.setLegacyFetch(false);
+        newMonthlyCmd.setFetchAllReportingPeriods(true);
+
+        PagingLoadResult<SiteDTO> newMonthlyResult = execute(newMonthlyCmd);
+
+        Assert.assertEquals("rows", 5, newMonthlyResult.getData().size());
     }
 
     @Test

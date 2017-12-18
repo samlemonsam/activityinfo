@@ -141,6 +141,12 @@ public class QueryEvaluator {
         SortModel sortModel = sortModelStack.pop();
         ColumnView sortColumn = columnSet.getColumnView(sortModel.getField());
 
+        if (sortColumn == null) {
+            // SortColumn not returned from query - skip
+            sortModelStack.push(sortModel);
+            return;
+        }
+
         // Order on the current sort column
         // If there are further sort models on stack, categorize and then order within categories
         sortColumn.order(sortVector, sortModel.getDir(), range.getRange());

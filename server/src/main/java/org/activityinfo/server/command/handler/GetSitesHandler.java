@@ -31,7 +31,6 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.CountryInstance;
-import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.query.server.*;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
@@ -52,6 +51,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     @Inject
     private DispatcherSync dispatcher;
 
+    private GetSites command;
+
     private MySqlCatalog catalog;
     private ColumnSetBuilder builder;
     private BatchingFormTreeBuilder batchFormTreeBuilder;
@@ -65,35 +66,41 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private Map<ResourceId,List<ResourceId>> locationMap = new HashMap<>();
 
     private Map<Integer,Activity> activities;
+
     private int offset;
     private int limit;
     private int totalResultLength;
+
     private List<SiteDTO> siteList = Lists.newArrayList();
+    private List<SiteDTO> monthlySiteList = Lists.newArrayList();
+    private Map<ResourceId,SiteDTO> monthlyRootSiteMap = Maps.newHashMap();
 
     private final Stopwatch metadataTime = Stopwatch.createUnstarted();
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
     private final Stopwatch queryBuildTime = Stopwatch.createUnstarted();
     private final Stopwatch queryExecTime = Stopwatch.createUnstarted();
+    private final Stopwatch monthlyMergeTime = Stopwatch.createUnstarted();
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
 
     @Override
-    public SiteResult execute(GetSites command, User user) {
+    public SiteResult execute(GetSites cmd, User user) {
 
-        if (useLegacyMethod(command, user)) {
-            return dispatcher.execute(new OldGetSites(command));
+        if (useLegacyMethod(cmd, user)) {
+            return dispatcher.execute(new OldGetSites(cmd));
         }
         LOGGER.info("Entering execute()");
         aggregateTime.start();
         try {
-            initialiseHandler(command, user);
-            fetchActivityMetadata(command.getFilter());
-            queryFormTrees(command);
-            buildQueries(command);
+            initialiseHandler(cmd, user);
+            fetchActivityMetadata(cmd.getFilter());
+            queryFormTrees();
+            buildQueries();
             batchQueries();
             executeBatch();
+            mergeMonthlyRootSites();
         } catch (CommandException excp) {
             // If we catch a *Command* Exception, lets try the legacy method
-            return dispatcher.execute(new OldGetSites(command));
+            return dispatcher.execute(new OldGetSites(cmd));
         }
         aggregateTime.stop();
 
@@ -101,7 +108,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         LOGGER.info("Exiting execute()");
 
         SiteResult result = new SiteResult(siteList);
-        result.setOffset(command.getOffset());
+        result.setOffset(cmd.getOffset());
         result.setTotalLength(totalResultLength);
         return result;
     }
@@ -117,6 +124,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 "Form Tree Fetch: " + treeTime.toString() + "; " +
                 "Query Build: " + queryBuildTime.toString() + "; " +
                 "Query Execution : " + queryExecTime.toString() + "; " +
+                "Monthly Indicator Merge: " + monthlyMergeTime.toString() + "; " +
                 "Aggregate Time: " + aggregateTime.toString()
         + "}");
     }
@@ -124,6 +132,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private void initialiseHandler(GetSites command, User user) {
         catalog = catalogProvider.get();
         if (catalog != null) {
+            this.command = command;
             builder = new ColumnSetBuilder(catalog, new AppEngineFormScanCache(), new FormSupervisorAdapter(catalog, user.getId()));
             batchFormTreeBuilder = new BatchingFormTreeBuilder(catalog);
             batch = builder.createNewBatch();
@@ -157,18 +166,18 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
     }
 
-    private void queryFormTrees(GetSites command) {
+    private void queryFormTrees() {
         treeTime.start();
         Set<ResourceId> formIds = new HashSet<>();
+        ResourceId activityFormId;
         for (Activity activity : activities.values()) {
             if (reject(activity)) {
                 continue;
             }
-            formIds.add(activity.getSiteFormClassId());
-            if (command.isFetchLinks()) {
-                for (LinkedActivity linkedActivity : activity.getLinkedActivities()) {
-                    formIds.add(linkedActivity.getLeafFormClassId());
-                }
+            activityFormId = activity.getSiteFormClassId();
+            formIds.add(activityFormId);
+            if (activity.isMonthly() && command.isFetchAllReportingPeriods()) {
+                formIds.add(CuidAdapter.reportingPeriodFormClass(CuidAdapter.getLegacyIdFromCuid(activityFormId)));
             }
         }
         formTreeMap = batchFormTreeBuilder.queryTrees(formIds);
@@ -176,20 +185,16 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private boolean reject(Activity activity) {
-        return activity.isDeleted() || !activity.isClassicView(); //|| activity.isMonthly();
+        return activity.isDeleted() || !activity.isClassicView();
     }
 
-    private void buildQueries(GetSites command) {
+    private void buildQueries() {
         queryBuildTime.start();
-        for (Activity activity : activities.values()) {
-            if(reject(activity)) {
-                continue;
-            }
-            FormTree activityFormTree = formTreeMap.get(CuidAdapter.activityFormClass(activity.getId()));
-            QueryModel query = buildQuery(activity, activityFormTree, command);
-            query.setFilter(determineQueryFilter(command.getFilter(), activityFormTree));
-            setQuerySort(query, activityFormTree);
-            queryMap.put(CuidAdapter.activityFormClass(activity.getId()), query);
+        for (Map.Entry<ResourceId, FormTree> formTreeEntry : formTreeMap.entrySet()) {
+            QueryModel query = buildQuery(formTreeEntry.getValue());
+            query.setFilter(determineQueryFilter(command.getFilter(), formTreeEntry.getValue()));
+            setQuerySort(query, formTreeEntry.getValue());
+            queryMap.put(formTreeEntry.getKey(), query);
         }
         queryBuildTime.stop();
     }
@@ -245,17 +250,39 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 @Nullable
                 @Override
                 public Void apply(@Nullable ColumnSet columnSet) {
-                    totalResultLength = totalResultLength + columnSet.getNumRows();
                     List<FieldBinding> fieldBindings = fieldBindingMap.get(queryEntry.getKey());
 
-                    if (acceptResult(columnSet.getNumRows())) {
-                        SiteDTO[] sites = extractSiteData(fieldBindings, columnSet);
-                        siteList.addAll(Lists.newArrayList(sites));
+                    if (monthlyReportForm(queryEntry.getKey())) {
+                        extractMonthlySites(fieldBindings, columnSet);
+                    } else {
+                        extractSites(fieldBindings, columnSet);
                     }
 
                     return null;
                 }
             });
+        }
+    }
+
+    private void extractMonthlySites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
+        if (acceptResult(columnSet.getNumRows())) {
+            SiteDTO[] extractedSiteArray = extractSiteData(fieldBindings,  columnSet);
+            List<SiteDTO> extractedSiteList = Lists.newArrayList(extractedSiteArray);
+            siteList.addAll(extractedSiteList);
+            monthlySiteList.addAll(extractedSiteList);
+        }
+    }
+
+    private void extractSites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
+        if (acceptResult(columnSet.getNumRows())) {
+            if (command.isFetchAllReportingPeriods()) {
+                SiteDTO[] sites = extractSiteData(fieldBindings, columnSet);
+                addMonthlyRootSites(sites);
+            } else {
+                totalResultLength = totalResultLength + columnSet.getNumRows();
+                SiteDTO[] sites = extractSiteData(fieldBindings, columnSet);
+                siteList.addAll(Lists.newArrayList(sites));
+            }
         }
     }
 
@@ -268,6 +295,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             return false;
         }
         return true;
+    }
+
+    private void addMonthlyRootSites(SiteDTO[] sites) {
+        for (SiteDTO site : sites) {
+            monthlyRootSiteMap.put(site.getInstanceId(), site);
+        }
     }
 
     private SiteDTO[] initialiseSites(int length) {
@@ -348,8 +381,30 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         queryExecTime.stop();
     }
 
-    private QueryModel buildQuery(Activity activity, FormTree formTree, GetSites command) {
-        return buildQuery(activity, formTree, formTree.getRootFormClass(), command);
+    private void mergeMonthlyRootSites() {
+        monthlyMergeTime.start();
+        for (SiteDTO monthlySite : monthlySiteList) {
+            if (monthlyRootSiteMap.containsKey(monthlySite.getInstanceId())) {
+                SiteDTO rootSite = monthlyRootSiteMap.get(monthlySite.getInstanceId());
+                monthlySite.setLocation(rootSite.getLocation());
+                monthlySite.setProject(rootSite.getProject());
+                monthlySite.setPartner(rootSite.getPartner());
+            }
+        }
+        monthlyMergeTime.stop();
+    }
+
+    private QueryModel buildQuery(FormTree formTree) {
+        Activity activity = activities.get(CuidAdapter.getLegacyIdFromCuid(formTree.getRootFormId()));
+        if (monthlyReportForm(formTree.getRootFormId())) {
+            return buildMonthlyQuery(activity, formTree, formTree.getRootFormClass());
+        } else {
+            return buildQuery(activity, formTree, formTree.getRootFormClass());
+        }
+    }
+
+    private boolean monthlyReportForm(ResourceId formId) {
+        return formId.getDomain() == CuidAdapter.MONTHLY_REPORT_FORM_CLASS;
     }
 
     private ExprNode determineQueryFilter(Filter commandFilter, FormTree formTree) {
@@ -357,19 +412,30 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return queryFilter.composeFilter(formTree);
     }
 
-    private QueryModel buildQuery(Activity activity, FormTree formTree, FormClass activityForm, GetSites command) {
-        QueryModel query;
-        if (activity.isMonthly()){
-            query = new QueryModel(CuidAdapter.reportingPeriodFormClass(activity.getId()));
-        } else {
-            query = new QueryModel(activityForm.getId());
+    private QueryModel buildMonthlyQuery(Activity activity, FormTree formTree, FormClass form) {
+        QueryModel query = new QueryModel(form.getId());
+        fieldBindingMap.put(form.getId(), Lists.<FieldBinding>newLinkedList());
+
+        addBinding(new SiteDimBinding(), query, formTree);
+        addBinding(new ActivityIdFieldBinding(), query, formTree);
+        addBinding(new StartEndDateFieldBinding(), query, formTree);
+        if (command.fetchAnyIndicators()) {
+            query = buildIndicatorQuery(query, formTree, form);
         }
-        fieldBindingMap.put(activityForm.getId(), Lists.<FieldBinding>newLinkedList());
+        if (command.isFetchAttributes()) {
+            query = buildAttributeQuery(query, formTree, form);
+        }
+        return query;
+    }
+
+    private QueryModel buildQuery(Activity activity, FormTree formTree, FormClass form) {
+        QueryModel query = new QueryModel(form.getId());
+        fieldBindingMap.put(form.getId(), Lists.<FieldBinding>newLinkedList());
 
         addBinding(new SiteDimBinding(), query, formTree);
         addBinding(new ActivityIdFieldBinding(), query, formTree);
         addBinding(new ProjectDimBinding(), query, formTree);
-        if (command.isFetchDates()) {
+        if (command.isFetchDates() && activity != null && !activity.isMonthly()) {
             addBinding(new StartEndDateFieldBinding(), query, formTree);
         }
         if (command.isFetchPartner()) {
@@ -377,13 +443,13 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
         if (command.isFetchLocation()) {
             locationMap.put(formTree.getRootFormId(), new ArrayList<ResourceId>());
-            query = buildLocationQuery(query, formTree, activityForm);
+            query = buildLocationQuery(query, formTree, form);
         }
         if (command.isFetchAttributes()) {
-            query = buildAttributeQuery(query, formTree, activityForm);
+            query = buildAttributeQuery(query, formTree, form);
         }
         if (command.fetchAnyIndicators()) {
-            query = buildIndicatorQuery(query, formTree, command, activityForm);
+            query = buildIndicatorQuery(query, formTree, form);
         }
         if (command.isFetchComments()) {
             addBinding(new CommentFieldBinding(), query, formTree);
@@ -502,7 +568,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return query;
     }
 
-    private QueryModel buildIndicatorQuery(QueryModel query, FormTree formTree, GetSites command, FormClass activityForm) {
+    private QueryModel buildIndicatorQuery(QueryModel query, FormTree formTree, FormClass activityForm) {
         if (command.isFetchAllIndicators()) {
             for (FormField field : activityForm.getFields()) {
                 if (isDomain(field.getId(), CuidAdapter.INDICATOR_DOMAIN)) {
