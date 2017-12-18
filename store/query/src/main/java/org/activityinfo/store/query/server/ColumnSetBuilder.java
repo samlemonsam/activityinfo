@@ -8,8 +8,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
@@ -191,11 +190,23 @@ public class ColumnSetBuilder {
     }
 
 
-    public Slot<ColumnSet> enqueue(QueryModel table, FormScanBatch batch) {
-        ResourceId formId = table.getRowSources().get(0).getRootFormId();
+    public Slot<ColumnSet> enqueue(QueryModel queryModel, FormScanBatch batch) {
+        ResourceId formId = queryModel.getRowSources().get(0).getRootFormId();
         FormTree tree = formTreeBuilder.queryTree(formId);
 
-        return enqueue(tree, table, batch);
+        if (tree.getRootState() == FormTree.State.VALID) {
+            return enqueue(tree, queryModel, batch);
+        } else {
+            return emptySet(queryModel);
+        }
+    }
+
+    private Slot<ColumnSet> emptySet(QueryModel queryModel) {
+        Map<String, ColumnView> columns = new HashMap<>();
+        for (ColumnModel columnModel : queryModel.getColumns()) {
+            columns.put(columnModel.getId(), new EmptyColumnView(ColumnType.STRING, 0));
+        }
+        return new PendingSlot<>(new ColumnSet(0, columns));
     }
 
     public static Slot<ColumnSet> enqueue(FormTree tree, QueryModel model, FormScanBatch batch) {
