@@ -6,6 +6,13 @@ simplify reporting and allow for real time monitoring.
 
 Visit http://about.activityinfo.org to learn more.
 
+WE'RE HIRING!
+=============
+
+We are looking for a Junior Software Engineer to join the ActivityInfo team @ BeDataDriven.
+
+Info & Application here: http://jobs.bedatadriven.com/junior-software-engineer/en
+
 USING
 =====
 
