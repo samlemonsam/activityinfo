@@ -1,6 +1,12 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.formTree.FormMetadataProvider;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
@@ -9,14 +15,19 @@ import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
+import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.store.TestingFormStore;
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -382,6 +393,46 @@ public class FormInputViewModelTest {
 
         assertThat(viewModel.getSubForm(subFormFieldId).getActiveRecordRef(), equalTo(novemberId));
         assertThat(viewModel.getSubForm(subFormFieldId).isValid(), equalTo(true));
+    }
+
+    /**
+     * Test the ViewModel for when the user does not have access to a referenced sub form.
+     */
+    @Test
+    public void hiddenSubForm() {
+
+        FormClass parentForm = new FormClass(ResourceId.valueOf("PARENT_FORM"));
+        parentForm.addField(ResourceId.valueOf("F1"))
+                .setLabel("What is your name?")
+                .setType(TextType.SIMPLE);
+
+        parentForm.addField(ResourceId.valueOf("F2"))
+                .setLabel("What are your secrets?")
+                .setType(new SubFormReferenceType(ResourceId.valueOf("SECRET_FORM")));
+
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(new FormMetadataProvider() {
+            @Override
+            public FormMetadata getFormMetadata(ResourceId formId) {
+                if(formId.equals(parentForm.getId())) {
+                    return FormMetadata.of(1, parentForm, FormPermissions.full());
+                } else {
+                    return FormMetadata.forbidden(formId);
+                }
+            }
+        });
+
+        FormTree formTree = treeBuilder.queryTree(parentForm.getId());
+
+        FormStore formStore = EasyMock.createMock(FormStore.class);
+        EasyMock.replay(formStore);
+
+        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(formStore, formTree);
+
+        FormInputViewModel viewModel = viewModelBuilder.build(
+                new FormInputModel(new RecordRef(parentForm.getId(), ResourceId.valueOf("R1"))));
+
+
+
     }
 
 

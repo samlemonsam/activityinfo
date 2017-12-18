@@ -152,7 +152,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         if(parentId != null) {
             urlBuilder.append("?parentId=").append(UriUtils.encode(parentId));
         }
-        return getRecords(urlBuilder.toString());
+        return getRecords(ResourceId.valueOf(formId), urlBuilder.toString());
     }
 
     @Override
@@ -177,11 +177,21 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
 
-    private Promise<FormRecordSet> getRecords(final String url) {
-        return get(url, new Function<JsonValue, FormRecordSet>() {
+    private Promise<FormRecordSet> getRecords(final ResourceId formId, final String url) {
+        return getRaw(url, new Function<Response, FormRecordSet>() {
             @Override
-            public FormRecordSet apply(JsonValue jsonElement) {
-                return FormRecordSet.fromJson(jsonElement);
+            public FormRecordSet apply(Response response) {
+                if(response.getStatusCode() == Response.SC_NOT_FOUND ||
+                    response.getStatusCode() == Response.SC_FORBIDDEN) {
+
+                    return new FormRecordSet(formId.asString());
+
+                } else if(response.getStatusCode() == Response.SC_OK) {
+                    return FormRecordSet.fromJson(Json.parse(response.getText()));
+
+                } else {
+                    throw new ApiException(response.getStatusCode());
+                }
             }
         });
     }

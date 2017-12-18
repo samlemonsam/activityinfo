@@ -68,7 +68,9 @@ public class FormPanel implements IsWidget {
 
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.isSubForm()) {
-                addSubForm(formTree, node);
+                if(node.isSubFormVisible()) {
+                    addSubForm(formTree, node);
+                }
             } else if(node.isParentReference()) {
                 // ignore
             } else if(node.getField().isVisible() && !isSubFormKey(node)) {

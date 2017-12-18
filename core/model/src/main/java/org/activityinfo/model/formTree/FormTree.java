@@ -25,7 +25,7 @@ import java.util.*;
 /**
  * Contains a tree of fields based on references to other {@code FormClasses}
  */
-public class FormTree implements FormClassProvider {
+public class FormTree implements FormClassProvider, FormMetadataProvider {
 
     private ResourceId rootFormId;
 
@@ -281,6 +281,13 @@ public class FormTree implements FormClassProvider {
         public boolean isSubForm() {
             return getType() instanceof SubFormReferenceType;
         }
+
+        public boolean isSubFormVisible() {
+            assert isSubForm();
+            SubFormReferenceType type = (SubFormReferenceType) field.getType();
+            FormMetadata subForm = getFormMetadata(type.getClassId());
+            return subForm.isVisible();
+        }
     }
 
     public enum SearchOrder {
@@ -331,9 +338,9 @@ public class FormTree implements FormClassProvider {
     }
 
 
-    public boolean hasSubForms() {
+    public boolean hasVisibleSubForms() {
         for (Node node : getRootFields()) {
-            if(node.isSubForm()) {
+            if(node.isSubForm() && node.isSubFormVisible()) {
                 return true;
             }
         }
@@ -402,7 +409,7 @@ public class FormTree implements FormClassProvider {
     public FormMetadata getFormMetadata(ResourceId formId) {
         FormMetadata metadata = formMap.get(formId);
         if(metadata == null) {
-            throw new IllegalStateException("No such Form: " + formId);
+            return FormMetadata.notFound(formId);
         }
         return metadata;
     }
@@ -511,7 +518,7 @@ public class FormTree implements FormClassProvider {
         if (formId.equals(this.rootFormId)) {
             return this;
         }
-        FormTreeBuilder treeBuilder = new FormTreeBuilder(this);
+        FormTreeBuilder treeBuilder = new FormTreeBuilder((FormMetadataProvider)this);
         return treeBuilder.queryTree(formId);
     }
 

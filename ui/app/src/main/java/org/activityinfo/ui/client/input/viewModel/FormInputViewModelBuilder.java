@@ -51,7 +51,9 @@ public class FormInputViewModelBuilder {
 
         for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm()) {
-                subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node));
+                if(node.isSubFormVisible()) {
+                    subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node));
+                }
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);

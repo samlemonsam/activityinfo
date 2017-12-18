@@ -36,7 +36,7 @@ public class ColumnSetBuilder {
     public ColumnSetBuilder(ColumnFactory columnFactory, FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
         this.columnFactory = columnFactory;
         this.catalog = catalog;
-        this.formTreeBuilder = new FormTreeBuilder(catalog);
+        this.formTreeBuilder = new FormTreeBuilder(new FormMetadataProviderAdapter(catalog, supervisor));
         this.cache = cache;
         this.supervisor = supervisor;
     }

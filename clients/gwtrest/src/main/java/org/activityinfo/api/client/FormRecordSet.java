@@ -9,10 +9,13 @@ import java.util.List;
 
 public class FormRecordSet {
   private String formId;
-
   private List<FormRecord> records;
 
   public FormRecordSet() {
+  }
+
+  public FormRecordSet(String formId) {
+    this.formId = formId;
   }
 
   public FormRecordSet(List<FormRecord> records) {
