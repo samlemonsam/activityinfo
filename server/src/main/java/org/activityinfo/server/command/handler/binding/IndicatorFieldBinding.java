@@ -14,6 +14,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class IndicatorFieldBinding implements FieldBinding {
@@ -41,7 +42,7 @@ public class IndicatorFieldBinding implements FieldBinding {
         return dataArray;
     }
 
-    private void getQuantityIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
+    protected void getQuantityIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
         for (int i=0; i<indicatorColumn.numRows(); i++) {
             Double value = indicatorColumn.getDouble(i);
             if (value != null && !value.isNaN()) {
@@ -50,7 +51,7 @@ public class IndicatorFieldBinding implements FieldBinding {
         }
     }
 
-    private void getTextIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
+    protected void getTextIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
         for (int i=0; i<indicatorColumn.numRows(); i++) {
             String value = indicatorColumn.getString(i);
             if (value != null && !value.isEmpty()) {
@@ -61,11 +62,11 @@ public class IndicatorFieldBinding implements FieldBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        return Arrays.asList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
+        return Collections.singletonList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        return Arrays.asList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
+        return Collections.singletonList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
     }
 }

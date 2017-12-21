@@ -17,7 +17,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.util.*;
 
-// TODO: Expand out to other ModelData objects - currently using SiteDTO Generic
 public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
 
     private FormField attrField;
@@ -51,16 +50,14 @@ public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
         return attrColumnViews;
     }
 
-    private void setAttributeValues(SiteDTO[] dataArray, EnumItem item, BitSetColumnView attrColumn) {
+    protected void setAttributeValues(SiteDTO[] dataArray, EnumItem item, BitSetColumnView attrColumn) {
         int attrId = CuidAdapter.getLegacyIdFromCuid(item.getId());
 
         for (int i=0; i<attrColumn.numRows(); i++) {
-            boolean selected = attrColumn.getBoolean(i) == BitSetColumnView.TRUE ? true : false;
+            boolean selected = attrColumn.getBoolean(i) == BitSetColumnView.TRUE;
             dataArray[i].setAttributeValue(attrId, selected);
             if (selected) {
                 dataArray[i].addDisplayAttribute(attrField.getId().asString(), item.getId().asString());
-                // TODO: Determine whether to add display attributes by id or name/label
-                //dataArray[i].addDisplayAttribute(attrField.getName(), item.getLabel());
             }
         }
     }
