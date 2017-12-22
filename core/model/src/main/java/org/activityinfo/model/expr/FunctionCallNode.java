@@ -82,14 +82,21 @@ public class FunctionCallNode extends ExprNode {
         if(function.isInfix() && arguments.size() == 2) {
                 return arguments.get(0).asExpression() + " " + function.getId() + " " + arguments.get(1).asExpression();
         }
-        String argumentString = "";
+        StringBuilder expr = new StringBuilder();
+        expr.append(function.getId());
+        expr.append("(");
+
+        boolean needsComma = false;
         for (ExprNode arg : arguments) {
-            argumentString += arg.asExpression();
-            if (!arg.equals(arguments.get(arguments.size() - 1))) { // add comma if not last element
-                argumentString += ", ";
+            if(needsComma) {
+                expr.append(", ");
             }
+            expr.append(arg.asExpression());
+            needsComma = true;
         }
-        return function.getId() + "(" + argumentString + ")";
+        expr.append(")");
+
+        return expr.toString();
     }
     
     @Override
