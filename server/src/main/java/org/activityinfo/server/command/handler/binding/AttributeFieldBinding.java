@@ -7,10 +7,7 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.BitSetColumnView;
-import org.activityinfo.model.query.ColumnModel;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -41,13 +38,17 @@ public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
     }
 
     private ColumnView[] getAttributeColumnViews(ColumnSet columnSet) {
-        ColumnView[] attrColumnViews = new ColumnView[enumItems.length];
+        List<ColumnView> attrColumnViews = new ArrayList<>(enumItems.length);
 
         for (int i=0; i<enumItems.length; i++) {
-            attrColumnViews[i] = columnSet.getColumnView(enumItems[i].getId().asString());
+            ColumnView column = columnSet.getColumnView(enumItems[i].getId().asString());
+            if (!(column instanceof EmptyColumnView)) {
+                attrColumnViews.add(column);
+            }
         }
 
-        return attrColumnViews;
+        ColumnView[] attrColumnsArray = new ColumnView[attrColumnViews.size()];
+        return attrColumnViews.toArray(attrColumnsArray);
     }
 
     protected void setAttributeValues(SiteDTO[] dataArray, EnumItem item, BitSetColumnView attrColumn) {
