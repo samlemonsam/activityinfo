@@ -548,7 +548,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Manage time locks on databases, projects and activities")
     String lockPanelTitle();
 
-    @DefaultStringValue("Lock databases, activities or projects to prevent users to add or change data")
+    @DefaultStringValue("Lock databases, activities or projects to prevent users adding or changing data")
     String lockPeriodsDescription();
 
     @DefaultStringValue("Locked site")
