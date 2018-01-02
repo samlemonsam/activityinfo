@@ -18,6 +18,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.IncidentForm;
+import org.activityinfo.store.testing.LocaliteForm;
 import org.activityinfo.store.testing.ReferralSubForm;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.table.view.DeleteRecordAction;
@@ -203,6 +204,23 @@ public class TableViewModelTest {
         subTable.assertChanged();
 
         assertThat(subTable.assertLoaded().getNumRows(), equalTo(4));
+    }
+
+    @Test
+    public void testClassicAdminHierarchy() {
+
+        LocaliteForm localiteForm = setup.getCatalog().getLocaliteForm();
+
+
+        TableModel tableModel = ImmutableTableModel.builder().formId(localiteForm.getFormId()).build();
+        TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
+
+        EffectiveTableModel effectiveTable = setup.connect(viewModel.getEffectiveTable()).assertLoaded();
+
+        for (EffectiveTableColumn tableColumn : effectiveTable.getColumns()) {
+            System.out.println(tableColumn.getLabel() + " => " + tableColumn.getFormula().getFormula());
+        }
+
     }
 
 

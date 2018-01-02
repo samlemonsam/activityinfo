@@ -19,7 +19,6 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
-import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -103,7 +102,7 @@ public class FormInputViewModelTest {
         RecordRef recordRef = survey.getRecordRef(5);
 
         FormStructure stucture = fetchStructure(recordRef);
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, stucture.getFormTree());
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, stucture.getFormTree(), new TestingActivePeriodMemory());
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
@@ -121,7 +120,7 @@ public class FormInputViewModelTest {
         RecordRef recordRef = survey.getRecordRef(8);
 
         FormStructure structure = fetchStructure(recordRef);
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, structure.getFormTree());
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, structure.getFormTree(), new TestingActivePeriodMemory());
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
@@ -426,7 +425,7 @@ public class FormInputViewModelTest {
         FormStore formStore = EasyMock.createMock(FormStore.class);
         EasyMock.replay(formStore);
 
-        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(formStore, formTree);
+        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(formStore, formTree, new TestingActivePeriodMemory());
 
         FormInputViewModel viewModel = viewModelBuilder.build(
                 new FormInputModel(new RecordRef(parentForm.getId(), ResourceId.valueOf("R1"))));
@@ -437,11 +436,11 @@ public class FormInputViewModelTest {
 
 
     private FormInputViewModelBuilder builderFor(TestForm survey) {
-        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(survey.getFormId()).getFormTree());
+        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(survey.getFormId()).getFormTree(), new TestingActivePeriodMemory());
     }
 
     private FormInputViewModelBuilder builderFor(FormStructure structure) {
-        return new FormInputViewModelBuilder(setup.getFormStore(), structure.getFormTree());
+        return new FormInputViewModelBuilder(setup.getFormStore(), structure.getFormTree(), new TestingActivePeriodMemory());
     }
 
     private FormStructure fetchStructure(ResourceId formId) {

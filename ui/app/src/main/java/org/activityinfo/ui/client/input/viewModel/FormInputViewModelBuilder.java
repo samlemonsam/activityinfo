@@ -44,7 +44,7 @@ public class FormInputViewModelBuilder {
 
     private List<SubFormViewModelBuilder> subBuilders = new ArrayList<>();
 
-    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
+    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, ActivePeriodMemory memory) {
         this.formTree = formTree;
         this.filters = new PermissionFilters(formTree);
         this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
@@ -52,7 +52,7 @@ public class FormInputViewModelBuilder {
         for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm()) {
                 if(node.isSubFormVisible()) {
-                    subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node));
+                    subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node, memory));
                 }
             }
             if(node.getField().hasRelevanceCondition()) {

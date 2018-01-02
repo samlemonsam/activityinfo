@@ -19,9 +19,7 @@ import org.activityinfo.observable.Subscription;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
-import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
-import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
-import org.activityinfo.ui.client.input.viewModel.FormStructure;
+import org.activityinfo.ui.client.input.viewModel.*;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.logging.Logger;
@@ -86,7 +84,7 @@ public class FormInputView implements IsWidget, InputHandler {
         initialLoad = true;
         container.unmask();
 
-        viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure.getFormTree());
+        viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure.getFormTree(), new LiveActivePeriodMemory());
         existingRecord = formStructure.getExistingRecord();
 
         formPanel = new FormPanel(formStore, formStructure.getFormTree(), inputModel.getRecordRef(), this);
