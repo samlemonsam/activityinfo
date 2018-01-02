@@ -322,7 +322,7 @@ public class ExprParser {
 
     public static ExprNode parse(String expression) {
         if(Strings.isNullOrEmpty(expression)) {
-            return new ConstantExpr(NullFieldValue.INSTANCE, NullFieldType.INSTANCE);
+            return new ConstantExpr((String)null);
         }
         ExprLexer lexer = new ExprLexer(expression);
         ExprParser parser = new ExprParser(lexer);
