@@ -258,7 +258,7 @@ public class FormInputViewModelBuilder {
             if(node.getType() instanceof SerialNumberType) {
                 continue;
             }
-            if(node.getField().isRequired()) {
+            if(node.getField().isRequired() && node.getField().isVisible()) {
                 if(relevantSet.contains(node.getFieldId())) {
                     if(record.get(node.getFieldId()) == null) {
                         missing.add(node.getFieldId());
