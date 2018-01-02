@@ -1,5 +1,6 @@
 package org.activityinfo.ui.client.input.view;
 
+import com.google.common.base.Strings;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
@@ -163,6 +164,14 @@ public class FormPanel implements IsWidget {
         fieldPanel.add(fieldLabel, new CssFloatLayoutContainer.CssFloatData(1));
         fieldPanel.add(fieldWidget, new CssFloatLayoutContainer.CssFloatData(1,
                 new Margins(5, horizontalPadding, 5, horizontalPadding)));
+
+        if (!Strings.isNullOrEmpty(node.getField().getDescription())) {
+            Label descriptionLabel = new Label(node.getField().getDescription());
+            descriptionLabel.addStyleName(InputResources.INSTANCE.style().fieldDescription());
+            fieldPanel.add(descriptionLabel,
+                    new CssFloatLayoutContainer.CssFloatData(1));
+        }
+
         fieldPanel.add(validationMessage, new CssFloatLayoutContainer.CssFloatData(1));
         panel.add(fieldPanel, new CssFloatLayoutContainer.CssFloatData(1,
                 new Margins(10, horizontalPadding, 10, horizontalPadding)));
