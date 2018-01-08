@@ -554,6 +554,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 return query;
             case CuidAdapter.ADMIN_LEVEL_DOMAIN:
                 addBinding(new AdminEntityBinding(form), query, formTree);
+                addGeoField(query, formTree, form);
                 addAdminField(query, formTree, form, CuidAdapter.ADMIN_PARENT_FIELD);
                 return query;
             default:
