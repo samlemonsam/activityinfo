@@ -90,6 +90,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
     private final Stopwatch queryBuildTime = Stopwatch.createUnstarted();
     private final Stopwatch queryExecTime = Stopwatch.createUnstarted();
+    private final Stopwatch queryFetchTime = Stopwatch.createUnstarted();
+    private final Stopwatch queryExtractTime = Stopwatch.createUnstarted();
     private final Stopwatch monthlyMergeTime = Stopwatch.createUnstarted();
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
 
@@ -802,15 +804,23 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void executeBatch() {
+
         try {
             queryExecTime.start();
+
+            queryFetchTime.start();
             builder.execute(batch);
+            queryFetchTime.stop();
         } catch (Exception excp) {
             throw new RuntimeException("Failed to execute query batch", excp);
         }
+
+        queryExtractTime.start();
         for (Runnable handler : queryResultHandlers) {
             handler.run();
         }
+        queryExtractTime.stop();
+
         queryExecTime.stop();
     }
 
@@ -885,7 +895,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         LOGGER.info("GetSites timings: {" + "Metadata Fetch: " + metadataTime.toString() + "; " +
                 "Form Tree Fetch: " + treeTime.toString() + "; " +
                 "Query Build: " + queryBuildTime.toString() + "; " +
-                "Query Execution : " + queryExecTime.toString() + "; " +
+                "Query Execution (Total Time): " + queryExecTime.toString() + "; " +
+                "Column Fetch: " + queryFetchTime.toString() +
+                "Result Extraction: " + queryExtractTime.toString() +
                 "Monthly Indicator Merge: " + monthlyMergeTime.toString() + "; " +
                 "Aggregate Time: " + aggregateTime.toString()
         + "}");
