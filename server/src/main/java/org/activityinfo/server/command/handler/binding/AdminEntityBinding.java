@@ -65,10 +65,7 @@ public class AdminEntityBinding implements FieldBinding {
             extractedEntities.add(adminEntity);
         }
 
-        if (locationBinding != null) {
-            AdminEntityDTO[] extractedEntityArray = extractedEntities.toArray(new AdminEntityDTO[extractedEntities.size()]);
-            locationBinding.extractFieldData(extractedEntityArray, columnSet);
-        }
+        // TODO: Location extraction disabled until "ST_" functions corrected on QueryEngine
 
         return dataArray;
     }
@@ -90,10 +87,7 @@ public class AdminEntityBinding implements FieldBinding {
     private List<ColumnModel> buildAdminLocationQuery(FormTree formTree) {
         try {
             FormField geoField = adminForm.getField(CuidAdapter.field(adminForm.getId(), CuidAdapter.GEOMETRY_FIELD));
-            if (geoField.getType() instanceof GeoPointType) {
-                locationBinding = new GeoPointFieldBinding(geoField);
-                return locationBinding.getColumnQuery(formTree);
-            } else if (geoField.getType() instanceof GeoAreaType) {
+            if (geoField.getType() instanceof GeoAreaType) {
                 // TODO: Disabled until "ST_" functions corrected on QueryEngine
                 //locationBinding = new GeoAreaFieldBinding(adminForm);
                 //return locationBinding.getColumnQuery(formTree);
