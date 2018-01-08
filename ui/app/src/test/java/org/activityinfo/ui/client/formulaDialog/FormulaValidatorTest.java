@@ -5,8 +5,14 @@ import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.expr.FormulaError;
 import org.activityinfo.model.expr.SourcePos;
 import org.activityinfo.model.expr.SourceRange;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.TestBatchFormClassProvider;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.store.testing.TestingCatalog;
 import org.junit.Test;
@@ -77,6 +83,31 @@ public class FormulaValidatorTest {
 
         return validator;
     }
+
+
+    @Test
+    public void invalidFormSchema() {
+        FormClass formClass = new FormClass(ResourceId.valueOf("XYZ"));
+        formClass.addField(ResourceId.valueOf("F1"))
+                .setCode("A")
+                .setLabel("Field A1")
+                .setType(TextType.SIMPLE);
+        formClass.addField(ResourceId.valueOf("F2"))
+                .setCode("A")
+                .setLabel("Field A2")
+                .setType(TextType.SIMPLE);
+
+        TestBatchFormClassProvider formProvider = new TestBatchFormClassProvider();
+        formProvider.add(formClass);
+
+        FormTreeBuilder formTreeBuilder = new FormTreeBuilder(formProvider);
+        FormTree formTree = formTreeBuilder.queryTree(formClass.getId());
+
+        FormulaValidator validator = new FormulaValidator(formTree);
+        assertFalse(validator.validate(ExprParser.parse("A")));
+        assertThat(validator.getErrors(), hasSize(1));
+    }
+
 
 
 }
