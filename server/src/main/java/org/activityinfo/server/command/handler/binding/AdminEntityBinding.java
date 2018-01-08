@@ -66,8 +66,7 @@ public class AdminEntityBinding implements FieldBinding {
         }
 
         if (locationBinding != null) {
-            AdminEntityDTO[] extractedEntityArray = new AdminEntityDTO[extractedEntities.size()];
-            extractedEntities.toArray(extractedEntityArray);
+            AdminEntityDTO[] extractedEntityArray = extractedEntities.toArray(new AdminEntityDTO[extractedEntities.size()]);
             locationBinding.extractFieldData(extractedEntityArray, columnSet);
         }
 
