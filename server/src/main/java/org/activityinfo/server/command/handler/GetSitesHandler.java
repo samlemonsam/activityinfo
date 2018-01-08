@@ -554,7 +554,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 return query;
             case CuidAdapter.ADMIN_LEVEL_DOMAIN:
                 addBinding(new AdminEntityBinding(form), query, formTree);
-                addGeoPointField(query, formTree, form);
                 addAdminField(query, formTree, form, CuidAdapter.ADMIN_PARENT_FIELD);
                 return query;
             default:
@@ -599,13 +598,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             } else if (geoField.getType() instanceof GeoAreaType) {
                 addBinding(new GeoAreaFieldBinding(form), query, formTree);
             }
-        }
-    }
-
-    private void addGeoPointField(QueryModel query, FormTree formTree, FormClass form) {
-        FormField geoField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.GEOMETRY_FIELD));
-        if (geoField != null && geoField.getType() instanceof GeoPointType) {
-            addBinding(new GeoPointFieldBinding(geoField), query, formTree);
         }
     }
 
