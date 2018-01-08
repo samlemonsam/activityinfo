@@ -895,9 +895,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         LOGGER.info("GetSites timings: {" + "Metadata Fetch: " + metadataTime.toString() + "; " +
                 "Form Tree Fetch: " + treeTime.toString() + "; " +
                 "Query Build: " + queryBuildTime.toString() + "; " +
-                "Query Execution (Total Time): " + queryExecTime.toString() + "; " +
-                "Column Fetch: " + queryFetchTime.toString() +
-                "Result Extraction: " + queryExtractTime.toString() +
+                "Query Column Fetch: " + queryFetchTime.toString() + "; " +
+                "Query Result Extraction: " + queryExtractTime.toString() + "; " +
+                "Query Total Execution Time: " + queryExecTime.toString() + "; " +
                 "Monthly Indicator Merge: " + monthlyMergeTime.toString() + "; " +
                 "Aggregate Time: " + aggregateTime.toString()
         + "}");
