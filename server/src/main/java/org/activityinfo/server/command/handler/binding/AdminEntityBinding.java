@@ -15,6 +15,7 @@ import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +65,11 @@ public class AdminEntityBinding implements FieldBinding {
             extractedEntities.add(adminEntity);
         }
 
-        // TODO: Location extraction disabled until "ST_" functions corrected on QueryEngine
+        if (locationBinding != null) {
+            AdminEntityDTO[] extractedEntityArray = new AdminEntityDTO[extractedEntities.size()];
+            extractedEntities.toArray(extractedEntityArray);
+            locationBinding.extractFieldData(extractedEntityArray, columnSet);
+        }
 
         return dataArray;
     }
@@ -85,8 +90,11 @@ public class AdminEntityBinding implements FieldBinding {
 
     private List<ColumnModel> buildAdminLocationQuery(FormTree formTree) {
         try {
-            FormField geoField = adminForm.getField(CuidAdapter.field(adminForm.getId(),CuidAdapter.GEOMETRY_FIELD));
-            if (geoField.getType() instanceof GeoAreaType) {
+            FormField geoField = adminForm.getField(CuidAdapter.field(adminForm.getId(), CuidAdapter.GEOMETRY_FIELD));
+            if (geoField.getType() instanceof GeoPointType) {
+                locationBinding = new GeoPointFieldBinding(geoField);
+                return locationBinding.getColumnQuery(formTree);
+            } else if (geoField.getType() instanceof GeoAreaType) {
                 // TODO: Disabled until "ST_" functions corrected on QueryEngine
                 //locationBinding = new GeoAreaFieldBinding(adminForm);
                 //return locationBinding.getColumnQuery(formTree);
