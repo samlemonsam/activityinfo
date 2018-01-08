@@ -393,6 +393,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         QueryModel query = buildQuery(formTreeEntry.getValue(), activityLink);
         query.setFilter(determineQueryFilter(command.getFilter(), formTreeEntry.getValue()));
         queryMap.put(formTreeEntry.getKey(), query);
+        LOGGER.info(query.toString());
     }
 
     private ExprNode determineQueryFilter(Filter commandFilter, FormTree formTree) {
