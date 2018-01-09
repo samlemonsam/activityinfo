@@ -451,10 +451,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         if (command.isFetchAllIndicators()) {
             for (Map.Entry<Integer, List<Integer>> linkedIndicator : linkedIndicators.entrySet()) {
                 for (Integer destinationIndicator : linkedIndicator.getValue()) {
-                    addLinkedIndicatorBinding(query,
-                            formTree,
-                            destinationIndicator,
-                            form.getField(CuidAdapter.indicatorField(linkedIndicator.getKey())));
+                    FormField indicatorField = getField(form, CuidAdapter.indicatorField(linkedIndicator.getKey()));
+                    if (indicatorField != null) {
+                        addLinkedIndicatorBinding(query, formTree, destinationIndicator, indicatorField);
+                    }
                 }
             }
         } else {
