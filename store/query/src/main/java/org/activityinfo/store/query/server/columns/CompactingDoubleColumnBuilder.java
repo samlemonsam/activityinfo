@@ -78,7 +78,7 @@ public class CompactingDoubleColumnBuilder implements CursorObserver<FieldValue>
             return new SparseNumberColumnView(values.elements(), numRows, missingCount);
         }
 
-        if(integers) {
+        if(integers && (min > Integer.MIN_VALUE) && (max < Integer.MAX_VALUE)) {
             int minInt = (int)min;
             int maxInt = (int)max;
             int range = maxInt - minInt;
