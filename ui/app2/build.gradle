@@ -39,6 +39,7 @@ dependencies {
     gwt 'com.arcbees:gwtchosen:3.0'
 
     gwt group: 'com.google.inject', name: 'guice', version: '3.0', classifier: 'sources'
+    gwt 'javax.xml.bind:jaxb-api:2.3.0'
 
     gwtSdk libraries.gwt.dev
 
