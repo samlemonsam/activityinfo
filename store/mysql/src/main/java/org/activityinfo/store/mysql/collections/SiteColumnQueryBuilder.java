@@ -92,7 +92,9 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         ReferenceType referenceType = (ReferenceType) mapping.getFormField().getType();
         for (ResourceId resourceId : referenceType.getRange()) {
             if(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
-                return true;
+                if(CuidAdapter.getLegacyIdFromCuid(resourceId) == activity.getAdminLevelId()) {
+                    return true;
+                }
             }
         }
         return false;
