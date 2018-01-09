@@ -67,9 +67,6 @@ task compileApp(type: JavaExec) {
 
     main = 'com.google.gwt.dev.Compiler'
 
-    jvmArgs "-Xdebug"
-    jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
-
     args '-logLevel', 'INFO'
 
     // Disable class metadata -- Class.getName() will not

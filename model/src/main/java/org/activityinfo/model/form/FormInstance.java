@@ -28,8 +28,6 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.geo.AiLatLng;
-import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.HasStringValue;
@@ -168,11 +166,6 @@ public class FormInstance {
         return this;
     }
 
-    public FormInstance set(@Nonnull ResourceId fieldId, AiLatLng latLng) {
-        fieldMap.put(fieldId, new GeoPoint(latLng.getLat(), latLng.getLng()));
-        return this;
-    }
-
     public FieldValue get(ResourceId fieldId, FieldType fieldType) {
         FieldValue value = fieldMap.get(fieldId);
         if(value != null && value.getTypeClass() == fieldType.getTypeClass()) {
@@ -229,15 +222,6 @@ public class FormInstance {
         final FormInstance copy = new FormInstance(getId(), getFormId());
         copy.fieldMap.putAll(fieldMap);
         return copy;
-    }
-
-    public AiLatLng getPoint(ResourceId fieldId) {
-        FieldValue value = get(fieldId);
-        if(value instanceof GeoPoint) {
-            GeoPoint geoPoint = (GeoPoint) value;
-            return new AiLatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-        }
-        return null;
     }
 
     public int size() {
