@@ -51,7 +51,7 @@
                             ActivityInfo.org.</p>
 
                         <label>
-                            Name
+                            Your full name (ex: John Doe)
                             <input type="text" name="name" required>
                         </label>
 
