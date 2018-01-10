@@ -1493,12 +1493,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Upload failed")
     String uploadFailed();
 
-    @DefaultStringValue("Project since deleted")
-    String deletedProject();
-
-    @DefaultStringValue("Partner since removed")
-    String deletedPartner();
-
     @DefaultStringValue("Browse")
     String browse();
 
@@ -1805,6 +1799,4 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("All")
     String allRows();
 
-    @DefaultStringValue("Filtered Rows")
-    String filteredRows();
 }
