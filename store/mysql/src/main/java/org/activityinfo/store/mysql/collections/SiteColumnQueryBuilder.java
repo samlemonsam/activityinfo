@@ -19,6 +19,7 @@ import org.activityinfo.store.spi.Cursor;
 import org.activityinfo.store.spi.CursorObserver;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
@@ -91,8 +92,8 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
         }
         ReferenceType referenceType = (ReferenceType) mapping.getFormField().getType();
         for (ResourceId resourceId : referenceType.getRange()) {
-            if(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN && activity.getAdminLevelId() != null) {
-                if(CuidAdapter.getLegacyIdFromCuid(resourceId) == activity.getAdminLevelId()) {
+            if(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
+                if(Objects.equals(activity.getAdminLevelId(),CuidAdapter.getLegacyIdFromCuid(resourceId))) {
                     return true;
                 }
             }
