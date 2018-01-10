@@ -1103,12 +1103,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Values")
     String values();
 
-    @DefaultStringValue("home")
-    String home();
-
-    @DefaultStringValue("Range")
-    String range();
-
     @DefaultStringValue("« Previous")
     String previousButton();
 
