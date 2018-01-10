@@ -22,8 +22,12 @@ public class StartEndDateFieldBinding implements FieldBinding {
         ColumnView endDate = columnSet.getColumnView(END_DATE_COLUMN);
 
         for (int i=0; i<columnSet.getNumRows(); i++) {
-            dataArray[i].set(START_DATE_COLUMN, LocalDate.parse(startDate.getString(i)));
-            dataArray[i].set(END_DATE_COLUMN, LocalDate.parse(endDate.getString(i)));
+            if (!startDate.isMissing(i)) {
+                dataArray[i].set(START_DATE_COLUMN, LocalDate.parse(startDate.getString(i)));
+            }
+            if (!endDate.isMissing(i)) {
+                dataArray[i].set(END_DATE_COLUMN, LocalDate.parse(endDate.getString(i)));
+            }
         }
 
         return dataArray;
