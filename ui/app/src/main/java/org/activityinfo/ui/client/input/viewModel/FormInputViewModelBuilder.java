@@ -193,13 +193,22 @@ public class FormInputViewModelBuilder {
 
         LOGGER.info("fieldValues = " + record.getFieldValueMap());
 
+        if(placeholder) {
+            // if this is a placeholder subrecord, there may be a key
+            // field provided, but we won't consider it dirty because
+            // the user themselves hasn't entered any information.
+            dirty = false;
+        }
+
         return new FormInputViewModel(formTree,
                 existingValues,
                 inputModel,
                 record.getFieldValueMap(),
                 subFormMap,
                 relevantSet,
-                missing, validationErrors, valid, dirty, placeholder);
+                missing, validationErrors, valid,
+                dirty,
+                placeholder);
     }
 
     private Set<ResourceId> computeRelevance(FormInstance record) {

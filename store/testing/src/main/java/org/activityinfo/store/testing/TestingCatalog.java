@@ -2,6 +2,7 @@ package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.shared.GwtIncompatible;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
@@ -26,6 +27,10 @@ import java.util.*;
 
 @GwtIncompatible
 public class TestingCatalog implements FormCatalog {
+
+    static {
+        LocaleProxy.initialize();
+    }
 
     private final LocaliteForm localiteForm;
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
@@ -109,7 +114,11 @@ public class TestingCatalog implements FormCatalog {
 
     private void add(TestForm... testForms) {
         for (TestForm testForm : testForms) {
+            assert !formMap.containsKey(testForm.getFormId()) :
+                    testForm.getClass().getName() + " has duplicate form id: " + testForm.getFormId();
+
             assert testForm.getFormClass().getLabel() != null : testForm.getFormId() + " is missing label";
+
             formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
         }
     }

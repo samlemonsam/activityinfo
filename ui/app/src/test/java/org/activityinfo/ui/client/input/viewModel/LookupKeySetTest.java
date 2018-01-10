@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -54,7 +55,7 @@ public class LookupKeySetTest {
         ExprNode territoryProvince = new CompoundExpr(villageTerritory, territoryForm.getParentFieldId());
         ExprNode provinceName = new CompoundExpr(territoryProvince, provinceForm.getNameFieldId());
 
-        assertThat(lookupKeySet.getLeafKeys().get(0).getKeyFormulas().values(), contains(
+        assertThat(lookupKeySet.getLeafKeys().get(0).getKeyFormulas().values(), containsInAnyOrder(
             villageName,
             territoryName,
             provinceName));

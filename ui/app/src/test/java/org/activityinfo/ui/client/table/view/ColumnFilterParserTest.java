@@ -44,12 +44,11 @@ public class ColumnFilterParserTest {
     @Test
     public void string() {
         FilterConfig cfg = new FilterConfigBean();
-        cfg.setField("Q");
         cfg.setType("string");
         cfg.setComparison("contains");
         cfg.setValue("Bar");
 
-        assertThat(toFormula(A, cfg).asExpression(), equalTo("ISNUMBER(SEARCH(\"Bar\", Q))"));
+        assertThat(toFormula(A, cfg).asExpression(), equalTo("ISNUMBER(SEARCH(\"Bar\", A))"));
     }
 
     @Test
@@ -64,12 +63,11 @@ public class ColumnFilterParserTest {
     @Test
     public void test() {
         FilterConfig c = new FilterConfigBean();
-        c.setField("DOB");
         c.setComparison("on");
         c.setType("date");
         c.setValue("1505779200000");
 
-        assertThat(toFormula(A, c).asExpression(), equalTo("DOB == DATE(2017, 9, 19)"));
+        assertThat(toFormula(A, c).asExpression(), equalTo("A == DATE(2017, 9, 19)"));
     }
 
     @Test

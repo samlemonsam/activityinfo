@@ -27,7 +27,7 @@ public class LocaliteForm implements TestForm {
     private final LazyRecordList records;
 
     public LocaliteForm(Ids ids, int count, AdminLevelForm... adminLevels) {
-        formClass = new FormClass(ids.formId("VILLAGE"));
+        formClass = new FormClass(ids.formId("LOCALITE"));
         this.adminLevels = Arrays.asList(adminLevels);
         formClass.setLabel("Village");
         formClass.setDatabaseId(ids.databaseId());

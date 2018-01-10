@@ -64,7 +64,7 @@ public class RecordTreeLoaderTest {
         ReferenceValue referenceValue = (ReferenceValue) tree.getRoot().get(BioDataForm.PROTECTION_CODE_FIELD_ID);
         RecordRef ref = referenceValue.getOnlyReference();
 
-        assertThat(lookupKeySet.label(tree, ref), equalTo("00667"));
+        assertThat(lookupKeySet.label(tree, ref), equalTo(Maybe.of("00667")));
 
     }
 
