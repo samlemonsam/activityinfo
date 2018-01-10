@@ -2,20 +2,22 @@ package org.activityinfo.ui.client.table.viewModel;
 
 import com.google.common.base.Optional;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.analysis.table.EffectiveTableColumn;
-import org.activityinfo.analysis.table.EffectiveTableModel;
-import org.activityinfo.analysis.table.SelectionViewModel;
-import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.analysis.table.*;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Connection;
+import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.IncidentForm;
 import org.activityinfo.store.testing.LocaliteForm;
@@ -174,7 +176,6 @@ public class TableViewModelTest {
 
         IncidentForm incidentForm = setup.getCatalog().getIncidentForm();
 
-
         TableModel tableModel = ImmutableTableModel.builder().formId(incidentForm.getFormId()).build();
         TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
 
@@ -207,6 +208,36 @@ public class TableViewModelTest {
     }
 
     @Test
+    public void testSubFormExport() {
+
+        IncidentForm incidentForm = setup.getCatalog().getIncidentForm();
+
+        TableModel tableModel = ImmutableTableModel.builder().formId(incidentForm.getFormId())
+                .addColumns(ImmutableTableColumn.builder()
+                        .label("My PCODE")
+                        .formula(IncidentForm.PROTECTION_CODE_FIELD_ID.asString())
+                        .build())
+                .build();
+        TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
+
+        Connection<TableModel> exportModel = setup.connect(
+                viewModel.computeExportModel(
+                    Observable.just(ReferralSubForm.FORM_ID),
+                    Observable.just(ExportScope.SELECTED)));
+
+        System.out.println(Json.stringify(exportModel.assertLoaded().toJson(), 2));
+
+        assertThat(exportModel.assertLoaded().getFormId(), equalTo(ReferralSubForm.FORM_ID));
+        assertThat(exportModel.assertLoaded().getColumns(), hasSize(3));
+
+        TableColumn firstColumn = exportModel.assertLoaded().getColumns().get(0);
+        assertThat(firstColumn.getLabel(), equalTo(Optional.of("My PCODE")));
+        assertThat(firstColumn.getFormula(), equalTo(
+                new CompoundExpr(new SymbolExpr(ColumnModel.PARENT_SYMBOL),
+                        IncidentForm.PROTECTION_CODE_FIELD_ID).asExpression()));
+    }
+
+    @Test
     public void testClassicAdminHierarchy() {
 
         LocaliteForm localiteForm = setup.getCatalog().getLocaliteForm();
@@ -222,7 +253,4 @@ public class TableViewModelTest {
         }
 
     }
-
-
-
 }

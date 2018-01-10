@@ -2,9 +2,9 @@ package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.core.client.GXT;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
-import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -13,9 +13,9 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.Radio;
+import org.activityinfo.analysis.table.ExportScope;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
@@ -25,7 +25,7 @@ import org.activityinfo.model.job.JobStatus;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Subscription;
+import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.ui.client.store.FormStore;
 
 /**
@@ -34,7 +34,6 @@ import org.activityinfo.ui.client.store.FormStore;
 public class ExportOptionsDialog {
 
 
-    private final Radio selectedColumnsRadio;
 
     private class Form {
         private ResourceId formId;
@@ -63,10 +62,12 @@ public class ExportOptionsDialog {
 
     private final ListStore<Form> formListStore;
     private final ComboBox<Form> formCombo;
-    private Subscription formSubscription;
-
 
     private final Dialog dialog;
+
+    private final Observable<FormTree> formTree;
+    private final Observable<TableModel> exportModel;
+    private final SubscriptionSet subscriptions = new SubscriptionSet();
 
 
     public ExportOptionsDialog(FormStore formStore, TableViewModel viewModel) {
@@ -76,7 +77,7 @@ public class ExportOptionsDialog {
         // Drop down to allow selecting either the parent form or one of the subforms
 
         formListStore = new ListStore<>(form -> form.formId.asString());
-        formCombo = new ComboBox<Form>(formListStore, item -> item.label);
+        formCombo = new ComboBox<>(formListStore, item -> item.label);
         formCombo.setEditable(false);
         formCombo.setForceSelection(true);
         formCombo.setAllowBlank(false);
@@ -86,7 +87,7 @@ public class ExportOptionsDialog {
         Radio allColumnsRadio = new Radio();
         allColumnsRadio.setBoxLabel(I18N.CONSTANTS.allColumns());
 
-        selectedColumnsRadio = new Radio();
+        Radio selectedColumnsRadio = new Radio();
         selectedColumnsRadio.setBoxLabel(I18N.CONSTANTS.selectedColumns());
         selectedColumnsRadio.setValue(true);
 
@@ -116,13 +117,21 @@ public class ExportOptionsDialog {
         dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(this::onOk);
         dialog.getButton(Dialog.PredefinedButton.CANCEL).addSelectHandler(this::onCancel);
         dialog.addDialogHideHandler(this::onDialogHide);
+
+        Observable<ResourceId> selectedForm = GxtObservables.of(formCombo).transform(form -> form.formId);
+        Observable<ExportScope> columnScope = GxtObservables.of(selectedColumnsRadio).transform(checked -> checked ? ExportScope.SELECTED : ExportScope.ALL);
+
+        this.formTree = viewModel.getFormTree();
+        this.exportModel = viewModel.computeExportModel(selectedForm, columnScope);
     }
 
 
     public void show() {
         dialog.show();
-        formSubscription = viewModel.getFormTree().subscribe(this::onFormTreeChanged);
+        subscriptions.add(formTree.subscribe(this::onFormTreeChanged));
+        subscriptions.add(exportModel.subscribe(this::onExportModelChanged));
     }
+
 
     private void onFormTreeChanged(Observable<FormTree> formTree) {
 
@@ -145,18 +154,22 @@ public class ExportOptionsDialog {
         }
     }
 
+
+    private void onExportModelChanged(Observable<TableModel> exportModel) {
+        dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(exportModel.isLoaded());
+    }
+
     private void onCancel(SelectEvent event) {
         dialog.hide();
     }
 
     private void onDialogHide(DialogHideEvent dialogHideEvent) {
-        formSubscription.unsubscribe();
-        formSubscription = null;
+        subscriptions.unsubscribeAll();
     }
 
     private void onOk(SelectEvent event) {
 
-        ExportFormJob exportFormJob = new ExportFormJob(buildModel());
+        ExportFormJob exportFormJob = new ExportFormJob(exportModel.get());
         dialog.hide();
 
         Observable<JobStatus<ExportFormJob, ExportResult>> jobStatus = formStore.startJob(exportFormJob);
@@ -164,23 +177,4 @@ public class ExportOptionsDialog {
         statusDialog.show();
     }
 
-    private TableModel buildModel() {
-        TableModel currentModel = viewModel.getTableModel().get();
-        Form selectedForm = formCombo.getValue();
-
-        if(selectedForm.isSubForm()) {
-            ImmutableTableModel.Builder model = ImmutableTableModel.builder();
-            model.formId(selectedForm.formId);
-
-            return model.build();
-
-        } else {
-            ImmutableTableModel.Builder model = ImmutableTableModel.builder();
-            model.formId(currentModel.getFormId());
-            if(selectedColumnsRadio.getValue() == Boolean.TRUE) {
-                model.columns(currentModel.getColumns());
-            }
-            return model.build();
-        }
-    }
 }
