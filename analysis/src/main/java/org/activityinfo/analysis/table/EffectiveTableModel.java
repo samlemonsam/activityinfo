@@ -153,7 +153,8 @@ public class EffectiveTableModel {
 
         // Now any non-reference key fields
         for (FormTree.Node childNode : node.getChildren()) {
-            if (childNode.getField().isKey() && !childNode.isReference()) {
+            if ((childNode.getField().isKey() || childNode.getField().getType() instanceof SerialNumberType)
+                    && !childNode.isReference()) {
                 columns.add(new EffectiveTableColumn(formTree, defaultColumnModel(childNode)));
             }
         }
