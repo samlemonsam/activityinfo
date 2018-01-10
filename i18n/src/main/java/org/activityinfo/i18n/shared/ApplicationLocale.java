@@ -13,13 +13,14 @@ public enum ApplicationLocale {
 
     EN("English"),
     ES("Español"),
+    EL("Ελληνικά"),
     FR("Français"),
     NL("Nederlands"),
     TR("Türkçe"),
     VI("Vietnamese"),
     AR("العربية"),
     FA("فارسی");
-    
+
     private String localizedName;
 
     ApplicationLocale(String localizedName) {

@@ -1769,7 +1769,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No matching records.")
     String noMatchingRecords();
 
-    @DefaultStringValue("Oops! Exception: ")
+    @DefaultStringValue("Oops! Exception:")
     String exception();
 
     @DefaultStringValue("Invalid form reference(s)")
@@ -1798,5 +1798,4 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("All")
     String allRows();
-
 }
