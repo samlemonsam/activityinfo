@@ -438,7 +438,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             query = buildLinkedIndicatorQuery(activityLink.getLinkedIndicators(), query, formTree, form);
         }
         if (command.isFetchAttributes()) {
-            query = buildLinkedAttributeQuery(activityLink.getLinkedAttributes(), query, formTree, form);
+            //query = buildLinkedAttributeQuery(activityLink.getLinkedAttributes(), query, formTree, form);
+            query = buildAttributeQuery(query, formTree, form);
         }
         if (command.isFetchComments()) {
             addBinding(new CommentFieldBinding(), query, formTree);
@@ -583,7 +584,14 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private CountryInstance getCountryInstance(ResourceId locationFormId) {
         try {
-            Activity activity = activities.get(CuidAdapter.getLegacyIdFromCuid(locationFormId));
+            Activity activity;
+            if (activities.containsKey(CuidAdapter.getLegacyIdFromCuid(locationFormId))) {
+                activity = activities.get(CuidAdapter.getLegacyIdFromCuid(locationFormId));
+            } else if (linkedActivities.containsKey(CuidAdapter.getLegacyIdFromCuid(locationFormId))){
+                activity = linkedActivities.get(CuidAdapter.getLegacyIdFromCuid(locationFormId));
+            } else {
+                return null;
+            }
             return catalog.getActivityLoader().loadCountryInstance(activity.getLocationTypeId());
         } catch (SQLException excp) {
             return null;
