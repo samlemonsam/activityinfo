@@ -167,17 +167,6 @@ public class EffectiveTableModel {
         return selectedParentRef.isPresent();
     }
 
-    private boolean shouldIncludeReference(FormTree.Node childNode) {
-        if(childNode.isParentReference()) {
-            if(isSubTable()) {
-                // Do not include parent fields when the sub form is displayed
-                // as a sub table linked to its parent.
-                return false;
-            }
-        }
-        return true;
-    }
-
     public ResourceId getFormId() {
         return formTree.getRootFormId();
     }
