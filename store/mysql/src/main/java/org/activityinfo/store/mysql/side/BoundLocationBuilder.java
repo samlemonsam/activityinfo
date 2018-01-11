@@ -126,11 +126,6 @@ public class BoundLocationBuilder {
      */
     private void executeMixedQuery(QueryExecutor executor) throws SQLException {
 
-        if(activity.getAdminLevelId() == null) {
-            LOGGER.severe("Activity " + activity.getId() + " is not bound to an admin level");
-            throw new IllegalStateException("Activity not bound to admin level");
-        }
-
         String sql = "SELECT " +
                 "s.siteId, " +                  // (1)
                 "s.locationId, " +              // (2)
