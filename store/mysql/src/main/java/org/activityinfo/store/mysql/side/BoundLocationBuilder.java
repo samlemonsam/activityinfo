@@ -148,9 +148,18 @@ public class BoundLocationBuilder {
         System.out.println(sql);
 
         int lastSiteId = -1;
+        boolean foundEntry = false;
         try(ResultSet rs = executor.query(sql)) {
             while(rs.next()) {
                 int siteId = rs.getInt(1);
+
+                if(lastSiteId > 0 && lastSiteId != siteId) {
+                    if(!foundEntry) {
+                        emit(null);
+                    }
+                    foundEntry = false;
+                }
+
                 int locationId = rs.getInt(2);
                 int locationTypeId = rs.getInt(3);
                 int boundAdminLevelId = rs.getInt(4);
@@ -158,6 +167,7 @@ public class BoundLocationBuilder {
                     // This location is not bound to an admin entity, just return this id
                     // if we haven't already
                     if(siteId != lastSiteId) {
+                        foundEntry = true;
                         emit(new ReferenceValue(
                                 new RecordRef(
                                         CuidAdapter.locationFormClass(locationTypeId),
@@ -167,6 +177,7 @@ public class BoundLocationBuilder {
                     int adminLevelId = rs.getInt(5);
                     if(boundAdminLevelId == adminLevelId) {
                         int adminEntityId = rs.getInt(6);
+                        foundEntry = true;
                         emit(new ReferenceValue(
                                 new RecordRef(
                                         CuidAdapter.adminLevelFormClass(adminLevelId),
@@ -175,6 +186,10 @@ public class BoundLocationBuilder {
                 }
                 lastSiteId = siteId;
             }
+        }
+
+        if(lastSiteId != -1 && !foundEntry) {
+            emit(null);
         }
 
         for (CursorObserver<FieldValue> observer : observers) {
