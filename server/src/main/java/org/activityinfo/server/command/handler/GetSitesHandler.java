@@ -226,7 +226,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
 
         LOGGER.info("Entering execute()");
-        TraceContext traceAll = Trace.startSpan("ai/cmd/GetSites/");
         aggregateTime.start();
 
         try {
@@ -247,8 +246,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
 
         aggregateTime.stop();
-        Trace.endSpan(traceAll);
-
         printTimes();
 
         SiteResult result = new SiteResult(siteList);
