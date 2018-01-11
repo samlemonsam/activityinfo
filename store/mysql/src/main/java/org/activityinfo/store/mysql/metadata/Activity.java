@@ -21,19 +21,30 @@ public class Activity implements Serializable {
     int databaseId;
     String databaseName;
     int reportingFrequency;
-    int locationTypeId;
-    
+
     int sortOrder;
+
+    /**
+     * The current locationTypeId of the activity.
+     */
+    int locationTypeId;
+
+
+    /**
+     * The id of the adminLevel to which this activity's current location type is bound, or {@code null} if
+     * this activity's current location type is not bound.
+     */
+    Integer adminLevelId;
 
     /**
      * Because it currently possible to change location type, it's possible that a single
      * activity references *multiple* location types
      */
-    Set<Integer> locationTypeIds = Sets.newHashSet();
     List<ResourceId> locationRange = new ArrayList<>();
+
     String category;
     String locationTypeName;
-    Integer adminLevelId;
+
     String name;
     int ownerUserId;
     boolean published;
@@ -168,10 +179,15 @@ public class Activity implements Serializable {
     }
 
     public Collection<ResourceId> getLocationFormClassIds() {
+        // If the activity is *currently* mapped to a bound admin level, then
+        // we maps this to a reference field only to the admin level. References to
+        // old, non-bound locations can be mapped to the correct admin entity transparently.
         if(adminLevelId != null) {
             return Collections.singleton(CuidAdapter.adminLevelFormClass(adminLevelId));
 
         } else {
+            // Otherwise, we need to explicitly model the location field as a reference
+            // to one more location forms and/or admin levels
             return locationRange;
         }
     }

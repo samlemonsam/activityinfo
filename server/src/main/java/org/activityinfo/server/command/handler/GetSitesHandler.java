@@ -2,6 +2,7 @@ package org.activityinfo.server.command.handler;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.SortInfo;
+import com.google.cloud.trace.core.TraceContext;
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.*;
@@ -31,6 +32,7 @@ import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.command.handler.binding.*;
 import org.activityinfo.server.command.handler.binding.dim.*;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.Trace;
 import org.activityinfo.store.mysql.MySqlCatalog;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
@@ -275,6 +277,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private void fetchActivityMetadata(Filter filter) {
         try {
+            TraceContext traceContext = Trace.startSpan("ai/cmd/GetSites/fetchActivityMetatda");
+
             metadataTime.start();
             activities = loadMetadata(filter);
         } catch (SQLException excp) {

@@ -66,13 +66,16 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void addField(ResourceId fieldId, CursorObserver<FieldValue> observer) {
+
+        if(boundLocation.accept(fieldId)) {
+            boundLocation.addObserver(observer);
+            return;
+        }
+
         FieldMapping mapping = tableMapping.getMapping(fieldId);
         if(mapping != null) {  
-            if(isBoundLocation(mapping)) {
-                boundLocation.addObserver(observer);
-            } else {
-                baseCursor.addField(fieldId, observer);
-            }
+            baseCursor.addField(fieldId, observer);
+
         } else {
             ActivityField field = fieldMap.get(fieldId);
             if(field == null) {
@@ -84,21 +87,6 @@ public class SiteColumnQueryBuilder implements ColumnQueryBuilder {
                 attributes.add(field, observer);
             }
         }
-    }
-
-    private boolean isBoundLocation(FieldMapping mapping) {
-        if(!mapping.getFormField().getId().equals(CuidAdapter.locationField(activity.getId()))) {
-            return false;
-        }
-        ReferenceType referenceType = (ReferenceType) mapping.getFormField().getType();
-        for (ResourceId resourceId : referenceType.getRange()) {
-            if(resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
-                if(Objects.equals(activity.getAdminLevelId(),CuidAdapter.getLegacyIdFromCuid(resourceId))) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override

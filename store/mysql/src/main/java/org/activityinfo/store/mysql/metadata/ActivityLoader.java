@@ -299,7 +299,6 @@ public class ActivityLoader {
                     activity.ownerUserId = rs.getInt(18);
 
 
-                    activity.locationTypeIds.add(activity.locationTypeId);
                     if(activity.adminLevelId == null) {
                         activity.locationRange.add(CuidAdapter.locationFormClass(activity.locationTypeId));
                     } else {
@@ -347,8 +346,6 @@ public class ActivityLoader {
                     Activity activity = activityMap.get(activityId);
 
                     int locationTypeId =  rs.getInt(2);
-                    activity.locationTypeIds.add(locationTypeId);
-
                     int adminLevelId = rs.getInt(3);
                     ResourceId formId;
                     if(rs.wasNull()) {
