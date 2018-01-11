@@ -88,6 +88,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private Map<Integer, List<ActivityLink>> activityLinkMap = Maps.newHashMap();
 
+    private TraceContext trace;
     private final Stopwatch metadataTime = Stopwatch.createUnstarted();
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
     private final Stopwatch queryBuildTime = Stopwatch.createUnstarted();
@@ -223,8 +224,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         if (useLegacyMethod(cmd, user)) {
             return dispatcher.execute(new OldGetSites(cmd));
         }
+
         LOGGER.info("Entering execute()");
+        TraceContext traceAll = Trace.startSpan("ai/cmd/GetSites/");
         aggregateTime.start();
+
         try {
             initialiseHandler(cmd, user);
             fetchActivityMetadata(cmd.getFilter());
@@ -241,7 +245,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             // old method at any point of execution and elongate the return time
             return dispatcher.execute(new OldGetSites(cmd));
         }
+
         aggregateTime.stop();
+        Trace.endSpan(traceAll);
 
         printTimes();
 
@@ -276,15 +282,15 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void fetchActivityMetadata(Filter filter) {
+        trace = Trace.startSpan("ai/cmd/GetSites/fetchActivityMetadata");
         try {
-            TraceContext traceContext = Trace.startSpan("ai/cmd/GetSites/fetchActivityMetatda");
-
             metadataTime.start();
             activities = loadMetadata(filter);
         } catch (SQLException excp) {
             throw new CommandException("Could not fetch metadata from server");
         } finally {
             metadataTime.stop();
+            Trace.endSpan(trace);
         }
     }
 
@@ -299,6 +305,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void fetchLinkedActivityMetadata(List<Integer> linkedActivitiesToFetch) {
+        trace = Trace.startSpan("ai/cmd/GetSites/fetchLinkedActivityMetadata");
         try {
             metadataTime.start();
             Filter linkedFilter = new Filter();
@@ -308,10 +315,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             throw new CommandException("Could not fetch linked activity metadata from server");
         } finally {
             metadataTime.stop();
+            Trace.endSpan(trace);
         }
     }
 
     private void queryFormTrees() {
+        trace = Trace.startSpan("ai/cmd/GetSites/queryFormTrees");
         treeTime.start();
 
         Set<ResourceId> formIds = new HashSet<>();
@@ -344,6 +353,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
 
         treeTime.stop();
+        Trace.endSpan(trace);
     }
 
     private boolean reject(Activity activity) {
@@ -379,6 +389,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void buildQueries() {
+        trace = Trace.startSpan("ai/cmd/GetSites/buildQuery");
         queryBuildTime.start();
         for (Map.Entry<ResourceId, FormTree> formTreeEntry : formTreeMap.entrySet()) {
             addToQueryMap(formTreeEntry, null);
@@ -391,6 +402,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             }
         }
         queryBuildTime.stop();
+        Trace.endSpan(trace);
     }
 
     private void addToQueryMap(Map.Entry<ResourceId, FormTree> formTreeEntry, ActivityLink activityLink) {
@@ -819,25 +831,32 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private void executeBatch() {
 
         try {
+            trace = Trace.startSpan("ai/cmd/GetSites/executeBatch");
             queryExecTime.start();
 
+            TraceContext fetchTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/fetchColumns");
             queryFetchTime.start();
             builder.execute(batch);
             queryFetchTime.stop();
+            Trace.endSpan(fetchTrace);
         } catch (Exception excp) {
             throw new RuntimeException("Failed to execute query batch", excp);
         }
 
+        TraceContext extractTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/extractColumnData");
         queryExtractTime.start();
         for (Runnable handler : queryResultHandlers) {
             handler.run();
         }
         queryExtractTime.stop();
+        Trace.endSpan(extractTrace);
 
         queryExecTime.stop();
+        Trace.endSpan(trace);
     }
 
     private void mergeMonthlyRootSites() {
+        trace = Trace.startSpan("ai/cmd/GetSites/executeBatch/mergeMonthlySites");
         monthlyMergeTime.start();
         for (SiteDTO monthlySite : monthlySiteList) {
             if (monthlyRootSiteMap.containsKey(monthlySite.getInstanceId())) {
@@ -848,12 +867,15 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             }
         }
         monthlyMergeTime.stop();
+        Trace.endSpan(trace);
     }
 
     private void sort() {
         if (sortInfo != null && !siteList.isEmpty()) {
+            trace = Trace.startSpan("ai/cmd/GetSites/executeBatch/sortSites");
             SiteComparator comparator = new SiteComparator(sortInfo);
             Collections.sort(siteList, comparator);
+            Trace.endSpan(trace);
         }
     }
 
