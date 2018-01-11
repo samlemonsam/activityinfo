@@ -19,6 +19,8 @@ public class ColumnModel {
 
     public static final String ID_SYMBOL = "_id";
     public static final String CLASS_SYMBOL = "_class";
+    public static final String PARENT_SYMBOL = "@parent";
+
 
     private String id;
     private ExprNode expression;
@@ -33,7 +35,7 @@ public class ColumnModel {
         return id;
     }
 
-    public ColumnModel setId(String id) {
+    public ColumnModel setId(String id) {   
         this.id = id;
         return this;
     }

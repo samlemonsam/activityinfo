@@ -136,14 +136,14 @@ public class JsonUtilGwtTest extends GWTTestCase {
 
     assertTrue(obj.get("a").isJsonPrimitive());
     assertTrue(obj.get("a").isNumber());
-    assertFalse(obj.get("a").isJsonString());
+    assertFalse(obj.get("a").isString());
     assertFalse(obj.get("a").isJsonObject());
     assertFalse(obj.get("a").isJsonArray());
     assertFalse(obj.get("a").isBoolean());
     assertFalse(obj.get("a").isJsonNull());
 
     assertTrue(obj.get("b").isJsonPrimitive());
-    assertTrue(obj.get("b").isJsonString());
+    assertTrue(obj.get("b").isString());
     assertFalse(obj.get("b").isNumber());
     assertFalse(obj.get("b").isJsonObject());
     assertFalse(obj.get("b").isJsonArray());
@@ -156,7 +156,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertFalse(obj.get("c").isNumber());
     assertFalse(obj.get("c").isJsonObject());
     assertFalse(obj.get("c").isJsonArray());
-    assertFalse(obj.get("c").isJsonString());
+    assertFalse(obj.get("c").isString());
     assertFalse(obj.get("c").isJsonNull());
 
     assertTrue(obj.get("d").isJsonNull());
@@ -165,7 +165,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertFalse(obj.get("d").isNumber());
     assertFalse(obj.get("d").isJsonObject());
     assertFalse(obj.get("d").isJsonArray());
-    assertFalse(obj.get("d").isJsonString());
+    assertFalse(obj.get("d").isString());
 
     assertTrue(obj.get("e").isJsonArray());
     assertFalse(obj.get("e").isJsonPrimitive());
@@ -173,7 +173,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertFalse(obj.get("e").isNumber());
     assertFalse(obj.get("e").isJsonNull());
     assertFalse(obj.get("e").isJsonObject());
-    assertFalse(obj.get("e").isJsonString());
+    assertFalse(obj.get("e").isString());
 
     assertTrue(obj.get("f").isJsonObject());
     assertFalse(obj.get("f").isJsonPrimitive());
@@ -181,7 +181,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
     assertFalse(obj.get("f").isNumber());
     assertFalse(obj.get("f").isJsonNull());
     assertFalse(obj.get("f").isJsonArray());
-    assertFalse(obj.get("f").isJsonString());
+    assertFalse(obj.get("f").isString());
   }
 
   public void testNative() {

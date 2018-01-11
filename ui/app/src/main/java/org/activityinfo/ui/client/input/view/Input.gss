@@ -29,6 +29,10 @@
     font-weight: bold;
 }
 
+.fieldDescription {
+    color: #999;
+}
+
 .fieldUnits {
     position: absolute;
     right: 0;

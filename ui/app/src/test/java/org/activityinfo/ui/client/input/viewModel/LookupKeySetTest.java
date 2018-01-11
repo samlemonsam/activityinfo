@@ -5,10 +5,13 @@ import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.formTree.*;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.testing.AdminLevelForm;
 import org.activityinfo.store.testing.NfiForm;
 import org.activityinfo.store.testing.TestingCatalog;
@@ -18,6 +21,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -51,7 +55,7 @@ public class LookupKeySetTest {
         ExprNode territoryProvince = new CompoundExpr(villageTerritory, territoryForm.getParentFieldId());
         ExprNode provinceName = new CompoundExpr(territoryProvince, provinceForm.getNameFieldId());
 
-        assertThat(lookupKeySet.getLeafKeys().get(0).getKeyFormulas().values(), contains(
+        assertThat(lookupKeySet.getLeafKeys().get(0).getKeyFormulas().values(), containsInAnyOrder(
             villageName,
             territoryName,
             provinceName));

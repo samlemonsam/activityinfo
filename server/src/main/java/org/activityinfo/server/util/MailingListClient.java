@@ -31,7 +31,6 @@ public class MailingListClient {
 
     private final String apiKey;
     private final String masterListId;
-    private final String newsletterListId;
 
     private final String subbed = "subscribed";
     private final String unsubbed = "unsubscribed";
@@ -41,16 +40,21 @@ public class MailingListClient {
     private final String unknownGroup;
     private final String noAccountGroup;
 
+    private final String newsletterGroup;
+    private final String supportGroup;
+
     @Inject
     public MailingListClient(DeploymentConfiguration config) {
         this.apiKey = config.getProperty("mailchimp.api.key");
         this.masterListId = config.getProperty("mailchimp.list.id", "9289430112");
-        this.newsletterListId = config.getProperty("mailchimp.newsletter.id", "f7714b4f5d");
 
         this.invitedGroup = config.getProperty("mailchimp.group.invited", "a39940fdf7");
         this.uninvitedGroup = config.getProperty("mailchimp.group.uninvited", "25ecbf7449");
         this.unknownGroup = config.getProperty("mailchimp.group.unknown", "cd58ffd8d6");
         this.noAccountGroup = config.getProperty("mailchimp.group.noaccount", "394e27b603");
+
+        this.newsletterGroup = config .getProperty("mailchimp.group.newsletter", "c3e12c0ba3");
+        this.supportGroup = config.getProperty("mailchimp.group.support", "ec789f4553");
     }
 
     public void subscribe(User user, boolean invited, boolean newsletter) {
@@ -60,17 +64,10 @@ public class MailingListClient {
         addToMasterList.status = subbed;
         addToMasterList.mergeVars.email = user.getEmail();
         addToMasterList.mergeVars.firstName = user.getName();
-        setInterests(addToMasterList, invited);
-
-        AddListMemberMethod addToNewsletter = new AddListMemberMethod();
-        addToNewsletter.emailAddress = user.getEmail();
-        addToNewsletter.status = newsletter ? subbed : unsubbed;
-        addToNewsletter.mergeVars.email = user.getEmail();
-        addToNewsletter.mergeVars.firstName = user.getName();
+        setInterests(addToMasterList, invited, newsletter);
 
         try {
             post(addToMasterList, masterListId);
-            post(addToNewsletter, newsletterListId);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to subscribe user", e);
         }
@@ -116,11 +113,14 @@ public class MailingListClient {
         reader.close();
     }
 
-    private void setInterests(AddListMemberMethod method, boolean invited) {
+    private void setInterests(AddListMemberMethod method, boolean invited, boolean newsletter) {
         method.interests.put(invitedGroup, invited);
         method.interests.put(uninvitedGroup, !invited);
         method.interests.put(unknownGroup, false);
         method.interests.put(noAccountGroup, false);
+
+        method.interests.put(newsletterGroup, newsletter);
+        method.interests.put(supportGroup, true);
     }
 
     // Holds a subscriber's merge_vars info (see http://apidocs.mailchimp.com/legacy/1.3/listsubscribe.func.php )

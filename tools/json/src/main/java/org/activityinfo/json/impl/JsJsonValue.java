@@ -39,7 +39,7 @@ public final class JsJsonValue extends JavaScriptObject implements JsonValue {
     }-*/;
 
     static native String getJsType(Object obj) /*-{
-        return typeof @org.activityinfo.json.impl.JsJsonValue::debox(Lorg/activityinfo/json/JsonValue;)(obj);
+        return typeof obj;
     }-*/;
 
     static native boolean isArray(Object obj) /*-{
@@ -78,7 +78,7 @@ public final class JsJsonValue extends JavaScriptObject implements JsonValue {
     }-*/;
 
     final public JsonType getType() {
-        if (isNull(this)) {
+        if (isJsonNull()) {
             return JsonType.NULL;
         }
         String jsType = getJsType(this);
@@ -94,11 +94,6 @@ public final class JsJsonValue extends JavaScriptObject implements JsonValue {
         assert false : "Unknown Json Type";
         return null;
     }
-
-    @Override
-    public final native JsonValue getAsJsonObject() /*-{
-        return this;
-    }-*/;
 
 
     @Override
@@ -129,29 +124,20 @@ public final class JsJsonValue extends JavaScriptObject implements JsonValue {
     }
 
     @Override
-    public final boolean isString() {
-        return getType() == JsonType.STRING;
-    }
-
-    @Override
-    public final native JsonValue getAsJsonArray() /*-{
-        return this;
+    public final native boolean isString() /*-{
+        return (typeof this) === "string";
     }-*/;
 
     @Override
-    public final boolean isJsonNull() {
-        return isNull(this);
-    }
+    public final native boolean isJsonNull() /*-{
+        return this === null;
+    }-*/;
 
     @Override
     public final boolean isJsonArray() {
         return isArray(this);
     }
 
-    @Override
-    public final boolean isJsonString() {
-        return getType() == JsonType.STRING;
-    }
 
     @Override
     public final boolean isJsonPrimitive() {

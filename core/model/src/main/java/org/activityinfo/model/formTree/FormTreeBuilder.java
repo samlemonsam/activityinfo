@@ -84,11 +84,7 @@ public class FormTreeBuilder {
     private void fetchChildren(List<ResourceId> stack, FormTree tree, FormTree.Node parent, Iterable<ResourceId> childFormIds)  {
         for(ResourceId childFormId : childFormIds) {
             if(!stack.contains(childFormId)) {
-                FormMetadata childMetadata =  metadataProvider.getFormMetadata(childFormId);
-                FormClass childSchema = childMetadata.getSchema();
-                assert childSchema != null;
-                assert childSchema.getId().equals(childFormId);
-                addChildren(stack, tree, parent, childMetadata);
+                addChildren(stack, tree, parent, metadataProvider.getFormMetadata(childFormId));
             }
         }
     }

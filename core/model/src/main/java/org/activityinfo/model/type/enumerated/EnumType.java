@@ -143,7 +143,7 @@ public class EnumType implements ParametrizedFieldType {
 
     @Override
     public EnumValue parseJsonValue(JsonValue value) {
-        if(value.isJsonString()) {
+        if(value.isString()) {
             ResourceId id = ResourceId.valueOf(value.asString());
             return new EnumValue(id);
         } else if(value.isJsonArray()) {

@@ -176,11 +176,6 @@ public class JreJsonObject extends JreJsonValue implements JsonValue {
     }
 
     @Override
-    public JsonValue getAsJsonObject() {
-        return this;
-    }
-
-    @Override
     public boolean isJsonObject() {
         return true;
     }

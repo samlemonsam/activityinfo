@@ -45,6 +45,7 @@ public final class ExprFunctions {
             register(MedianFunction.INSTANCE);
             register(MaxFunction.INSTANCE);
             register(MinFunction.INSTANCE);
+            register(CountFunction.INSTANCE);
 
             register(BoundingBoxFunction.XMIN);
             register(BoundingBoxFunction.YMIN);

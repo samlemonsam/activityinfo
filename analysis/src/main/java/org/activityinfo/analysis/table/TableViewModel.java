@@ -2,18 +2,23 @@ package org.activityinfo.analysis.table;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.promise.Function3;
 import org.activityinfo.store.query.shared.FormSource;
 
 import javax.annotation.Nullable;
@@ -164,5 +169,73 @@ public class TableViewModel implements TableUpdater {
                 .from(model)
                 .columns(updatedColumns)
                 .build());
+    }
+
+    public Observable<TableModel> computeExportModel(
+            Observable<ResourceId> selectedForm,
+            Observable<ExportScope> columnScope) {
+
+        Observable<EffectiveTableModel> parentFormModel = getEffectiveTable();
+        Observable<Optional<EffectiveTableModel>> subFormModel = selectedForm.join(formId -> {
+            if(formId.equals(tableModel.get().getFormId())) {
+                // Parent form has been selected, no sub form model
+                return Observable.just(Optional.absent());
+            } else {
+                return getEffectiveSubTable(formId).transform(Optional::of);
+            }
+        });
+
+        return Observable.transform(parentFormModel, subFormModel, columnScope, (parent, sub, columns) -> {
+            ImmutableTableModel.Builder model = ImmutableTableModel.builder();
+            if(sub.isPresent()) {
+                model.formId(sub.get().getFormId());
+                if(columns == ExportScope.SELECTED ) {
+                    for (EffectiveTableColumn tableColumn : parent.getColumns()) {
+                        model.addColumns(ImmutableTableColumn.builder()
+                                .label(tableColumn.getLabel())
+                                .formula(parentFormula(tableColumn.getFormula()))
+                                .build());
+
+                    }
+                    for (EffectiveTableColumn tableColumn : sub.get().getColumns()) {
+                        model.addColumns(ImmutableTableColumn.builder()
+                                .label(tableColumn.getLabel())
+                                .formula(tableColumn.getFormulaString())
+                                .build());
+                    }
+                }
+            } else {
+                model.formId(parent.getFormId());
+                if(columns == ExportScope.SELECTED) {
+                    for (EffectiveTableColumn tableColumn : parent.getColumns()) {
+                        model.addColumns(ImmutableTableColumn.builder()
+                                .label(tableColumn.getLabel())
+                                .formula(tableColumn.getFormulaString())
+                                .build());
+
+                    }
+                }
+            }
+            return model.build();
+        });
+
+    }
+
+    private String parentFormula(ParsedFormula formula) {
+
+        if(!formula.isValid()) {
+            return formula.getFormula();
+        }
+
+        SymbolExpr parentSymbol = new SymbolExpr(ColumnModel.PARENT_SYMBOL);
+        ExprNode transformed = formula.getRootNode().transform(node -> {
+           if(node instanceof SymbolExpr) {
+               // A -> parent.A
+               return new CompoundExpr(parentSymbol, (SymbolExpr) node);
+           } else {
+               return node;
+           }
+        });
+        return transformed.asExpression();
     }
 }

@@ -13,6 +13,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
@@ -276,7 +277,7 @@ public class FormStoreTest {
 
         // Create a new intake record
         FormInstance newRecord = intakeForm.getGenerator().get();
-        assertThat(newRecord.get(intakeForm.getProtectionCodeFieldId()), is(nullValue()));
+        newRecord.set(intakeForm.getProtectionCodeFieldId(), (FieldValue)null);
 
         Promise<Void> update = setup.getFormStore().updateRecords(new RecordTransactionBuilder().create(newRecord).build());
         assertThat(update.getState(), equalTo(Promise.State.FULFILLED));

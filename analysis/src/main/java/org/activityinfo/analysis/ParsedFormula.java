@@ -75,6 +75,7 @@ public class ParsedFormula {
     }
 
     public FieldType getResultType() {
+        assert resultType != null : "Formula " + formula + " is not valid, and has no type.";
         return resultType;
     }
 

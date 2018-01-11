@@ -50,15 +50,9 @@ public interface JsonValue extends Serializable {
      */
     JsonType getType();
 
-    JsonValue getAsJsonObject();
-
-    JsonValue getAsJsonArray();
-
     boolean isJsonNull();
 
     boolean isJsonArray();
-
-    boolean isJsonString();
 
     boolean isJsonPrimitive();
 

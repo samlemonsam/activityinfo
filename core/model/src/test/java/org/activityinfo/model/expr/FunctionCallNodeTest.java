@@ -4,6 +4,7 @@ import org.activityinfo.model.expr.functions.EqualFunction;
 import org.activityinfo.model.expr.functions.IfFunction;
 import org.activityinfo.model.expr.functions.MaxFunction;
 import org.activityinfo.model.expr.functions.PlusFunction;
+import org.activityinfo.model.expr.functions.date.DateFunction;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -36,6 +37,26 @@ public class FunctionCallNodeTest {
                 equalTo("if(true, 1, 0)")
         );
     }
+
+    @Test
+    public void dateCall() {
+        assertThat(
+                new FunctionCallNode(DateFunction.INSTANCE,
+                        new ConstantExpr(2017),
+                        new ConstantExpr(1),
+                        new ConstantExpr(2)).asExpression(),
+                equalTo("DATE(2017, 1, 2)")
+        );
+
+        assertThat(
+                new FunctionCallNode(DateFunction.INSTANCE,
+                        new ConstantExpr(2017),
+                        new ConstantExpr(1),
+                        new ConstantExpr(1)).asExpression(),
+                equalTo("DATE(2017, 1, 1)")
+        );
+    }
+
 
 
     @Test

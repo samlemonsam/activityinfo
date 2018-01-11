@@ -3,6 +3,7 @@ package org.activityinfo.model.query;
 import com.google.common.base.Joiner;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.Map;
 
 /**

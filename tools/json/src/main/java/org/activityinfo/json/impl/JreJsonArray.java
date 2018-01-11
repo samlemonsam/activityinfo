@@ -166,11 +166,6 @@ class JreJsonArray extends JreJsonValue {
         return true;
     }
 
-    @Override
-    public JsonValue getAsJsonArray() {
-        return this;
-    }
-
     @com.google.gwt.core.shared.GwtIncompatible
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
