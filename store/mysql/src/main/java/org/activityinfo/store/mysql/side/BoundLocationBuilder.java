@@ -48,7 +48,8 @@ public class BoundLocationBuilder {
      * True if this query builder should handle the given {@code fieldId}
      */
     public boolean accept(ResourceId fieldId) {
-        return hasBoundLocationTypes() && fieldId.equals(locationFieldId);
+        return fieldId.equals(locationFieldId) &&
+                (hasBoundLocationTypes() || activity.getLocationFormClassIds().size() > 1);
     }
 
     public void addObserver(CursorObserver<FieldValue> observer) {
