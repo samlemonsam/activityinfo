@@ -4,6 +4,7 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
@@ -72,7 +73,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private Map<ResourceId,QueryModel> queryMap = new HashMap<>();
     private Map<ResourceId,List<FieldBinding>> fieldBindingMap = new HashMap<>();
     private List<Runnable> queryResultHandlers = new ArrayList<>();
-    private Map<ResourceId,List<ResourceId>> locationMap = new HashMap<>();
 
     private Map<Integer,Activity> activities;
     private Map<Integer,Activity> linkedActivities;
@@ -444,7 +444,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             addBinding(new PartnerDimBinding(), query, formTree);
         }
         if (command.isFetchLocation()) {
-            locationMap.put(formTree.getRootFormId(), new ArrayList<ResourceId>());
             query = buildLocationQuery(query, formTree, form);
         }
         if (command.fetchAnyIndicators()) {
@@ -542,7 +541,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             addBinding(new PartnerDimBinding(), query, formTree);
         }
         if (command.isFetchLocation()) {
-            locationMap.put(formTree.getRootFormId(), new ArrayList<ResourceId>());
             query = buildLocationQuery(query, formTree, form);
         }
         if (command.isFetchAttributes()) {
@@ -559,32 +557,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private QueryModel buildLocationQuery(QueryModel query, FormTree formTree, FormClass form) {
-        switch (form.getId().getDomain()) {
-            case CuidAdapter.ACTIVITY_DOMAIN:
-                return addLocationField(query, formTree, form);
-            case CuidAdapter.LOCATION_TYPE_DOMAIN:
-                addGeoField(query, formTree, form);
-                addAdminField(query, formTree, form, CuidAdapter.ADMIN_FIELD);
-                return query;
-            case CuidAdapter.ADMIN_LEVEL_DOMAIN:
-                addBinding(new AdminEntityBinding(form), query, formTree);
-                addAdminField(query, formTree, form, CuidAdapter.ADMIN_PARENT_FIELD);
-                return query;
-            default:
-                // undefined location form...
-                return query;
-        }
-    }
-
-    private QueryModel addLocationField(QueryModel query, FormTree formTree, FormClass form) {
-        FormField locationField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.LOCATION_FIELD));
-        if (locationField != null) {
-            Iterator<ResourceId> locationReferences = getRange(locationField);
-            // Only build one location query
-            ResourceId locationRef = locationReferences.next();
-            addBinding(new LocationFieldBinding(locationRef), query, formTree);
-            locationMap.get(formTree.getRootFormId()).add(locationRef);
-            buildLocationQuery(query, formTree, formTree.getFormClass(locationRef));
+        Optional<FormField> potentialLocationField = form.getFieldIfPresent(CuidAdapter.field(form.getId(), CuidAdapter.LOCATION_FIELD));
+        if (potentialLocationField.isPresent()) {
+            FormField locationField = potentialLocationField.get();
+            // Location binding will take care of the details wrt geo fields/admin field
+            addBinding(new LocationFieldBinding(locationField), query, formTree);
         } else {
             // country form, get country instance from ActivityLoader
             CountryInstance country = getCountryInstance(form.getId());
@@ -608,31 +585,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             return catalog.getActivityLoader().loadCountryInstance(activity.getLocationTypeId());
         } catch (SQLException excp) {
             return null;
-        }
-    }
-
-    private void addGeoField(QueryModel query, FormTree formTree, FormClass form) {
-        FormField geoField = getField(form, CuidAdapter.field(form.getId(), CuidAdapter.GEOMETRY_FIELD));
-        if (geoField != null) {
-            if (geoField.getType() instanceof GeoPointType) {
-                addBinding(new GeoPointFieldBinding(geoField), query, formTree);
-            } else if (geoField.getType() instanceof GeoAreaType) {
-                addBinding(new GeoAreaFieldBinding(form), query, formTree);
-            }
-        }
-    }
-
-    private void addAdminField(QueryModel query, FormTree formTree, FormClass form, int fieldIndex) {
-        FormField adminField = getField(form, CuidAdapter.field(form.getId(), fieldIndex));
-        if (adminField != null) {
-            Iterator<ResourceId> adminRange = getRange(adminField);
-            while (adminRange.hasNext()) {
-                ResourceId adminEntityId = adminRange.next();
-                if (!locationMap.get(formTree.getRootFormId()).contains(adminEntityId)) {
-                    buildLocationQuery(query, formTree, formTree.getFormClass(adminEntityId));
-                    locationMap.get(formTree.getRootFormId()).add(adminEntityId);
-                }
-            }
         }
     }
 
@@ -672,7 +624,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
     }
 
-    private Iterator<ResourceId> getRange(FormField field) {
+    public static Iterator<ResourceId> getRange(FormField field) {
         Collection<ResourceId> range = getRange(field.getType());
         if (range.isEmpty()) {
             throw new IllegalStateException("No form referenced on given field");
@@ -680,7 +632,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return range.iterator();
     }
 
-    private Collection<ResourceId> getRange(FieldType type) {
+    public static Collection<ResourceId> getRange(FieldType type) {
         if (type instanceof ReferenceType) {
             ReferenceType refType = (ReferenceType) type;
             return refType.getRange();
