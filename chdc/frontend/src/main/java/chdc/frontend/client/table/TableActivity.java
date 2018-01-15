@@ -8,7 +8,6 @@ import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.store.FormStore;
-import org.activityinfo.ui.client.table.view.TableView;
 
 public class TableActivity implements Activity {
 
@@ -27,7 +26,7 @@ public class TableActivity implements Activity {
 
         TableViewModel viewModel = new TableViewModel(formStore, model);
 
-        TableView tableView = new TableView(formStore, viewModel);
+        IncidentTableView tableView = new IncidentTableView(formStore, viewModel);
 
         panel.setWidget(tableView);
     }

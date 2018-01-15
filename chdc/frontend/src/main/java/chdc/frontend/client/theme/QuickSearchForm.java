@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class QuickSearchForm extends Widget {
 
-    public QuickSearchForm() {
+    public  QuickSearchForm() {
         FormElement form = Document.get().createFormElement();
         form.setClassName("quicksearch");
         form.setInnerSafeHtml(ChdcTemplates.TEMPLATES.quickSearchForm(ChdcLabels.LABELS));

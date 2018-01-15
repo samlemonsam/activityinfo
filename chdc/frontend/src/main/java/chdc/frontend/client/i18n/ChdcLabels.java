@@ -25,4 +25,6 @@ public interface ChdcLabels extends Constants {
     @DefaultStringValue("Search")
     String search();
 
+    @DefaultStringValue("New Row")
+    String newRow();
 }

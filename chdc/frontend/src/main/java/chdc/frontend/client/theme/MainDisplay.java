@@ -1,5 +1,6 @@
 package chdc.frontend.client.theme;
 
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -24,6 +25,12 @@ public class MainDisplay implements AcceptsOneWidget {
                 rootPanel.add(w);
             }
             currentMainWidget = w;
+
+            if(w instanceof HasSidebar) {
+                Document.get().getBody().removeClassName("no-sidebar");
+            } else {
+                Document.get().getBody().addClassName("no-sidebar");
+            }
         }
     }
 }

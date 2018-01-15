@@ -1,6 +1,7 @@
 package chdc.frontend.client.dashboard;
 
 import chdc.frontend.client.theme.ActionBar;
+import chdc.frontend.client.theme.HasSidebar;
 import chdc.frontend.client.theme.MainContainer;
 import chdc.frontend.client.theme.QuickSearchForm;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -9,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Contains the data entry dashboard
  */
-public class DashboardWidget implements IsWidget {
+public class DashboardWidget implements IsWidget, HasSidebar {
 
     private MainContainer container;
 
