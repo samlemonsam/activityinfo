@@ -88,7 +88,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private Map<Integer, List<ActivityLink>> activityLinkMap = Maps.newHashMap();
 
-    private TraceContext trace;
     private final Stopwatch metadataTime = Stopwatch.createUnstarted();
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
     private final Stopwatch queryBuildTime = Stopwatch.createUnstarted();
@@ -279,7 +278,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void fetchActivityMetadata(Filter filter) {
-        trace = Trace.startSpan("ai/cmd/GetSites/fetchActivityMetadata");
+        TraceContext activityMetadataTrace = Trace.startSpan("ai/cmd/GetSites/fetchActivityMetadata");
         try {
             metadataTime.start();
             activities = loadMetadata(filter);
@@ -287,7 +286,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             throw new CommandException("Could not fetch metadata from server");
         } finally {
             metadataTime.stop();
-            Trace.endSpan(trace);
+            Trace.endSpan(activityMetadataTrace);
         }
     }
 
@@ -302,7 +301,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void fetchLinkedActivityMetadata(List<Integer> linkedActivitiesToFetch) {
-        trace = Trace.startSpan("ai/cmd/GetSites/fetchLinkedActivityMetadata");
+        TraceContext linkedActivityMetadataTrace = Trace.startSpan("ai/cmd/GetSites/fetchLinkedActivityMetadata");
         try {
             metadataTime.start();
             Filter linkedFilter = new Filter();
@@ -312,12 +311,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             throw new CommandException("Could not fetch linked activity metadata from server");
         } finally {
             metadataTime.stop();
-            Trace.endSpan(trace);
+            Trace.endSpan(linkedActivityMetadataTrace);
         }
     }
 
     private void queryFormTrees() {
-        trace = Trace.startSpan("ai/cmd/GetSites/queryFormTrees");
+        TraceContext formTreeQueryTrace = Trace.startSpan("ai/cmd/GetSites/queryFormTrees");
         treeTime.start();
 
         Set<ResourceId> formIds = new HashSet<>();
@@ -350,7 +349,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
 
         treeTime.stop();
-        Trace.endSpan(trace);
+        Trace.endSpan(formTreeQueryTrace);
     }
 
     private boolean reject(Activity activity) {
@@ -386,7 +385,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void buildQueries() {
-        trace = Trace.startSpan("ai/cmd/GetSites/buildQuery");
+        TraceContext queryBuildTrace = Trace.startSpan("ai/cmd/GetSites/buildQuery");
         queryBuildTime.start();
         for (Map.Entry<ResourceId, FormTree> formTreeEntry : formTreeMap.entrySet()) {
             addToQueryMap(formTreeEntry, null);
@@ -399,7 +398,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             }
         }
         queryBuildTime.stop();
-        Trace.endSpan(trace);
+        Trace.endSpan(queryBuildTrace);
     }
 
     private void addToQueryMap(Map.Entry<ResourceId, FormTree> formTreeEntry, ActivityLink activityLink) {
@@ -778,9 +777,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void executeBatch() {
-
+        TraceContext batchExecutionTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch");
         try {
-            trace = Trace.startSpan("ai/cmd/GetSites/executeBatch");
             queryExecTime.start();
 
             TraceContext fetchTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/fetchColumns");
@@ -792,20 +790,20 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             throw new RuntimeException("Failed to execute query batch", excp);
         }
 
-        TraceContext extractTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/extractColumnData");
+        TraceContext dataExtractionTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/extractColumnData");
         queryExtractTime.start();
         for (Runnable handler : queryResultHandlers) {
             handler.run();
         }
         queryExtractTime.stop();
-        Trace.endSpan(extractTrace);
+        Trace.endSpan(dataExtractionTrace);
 
         queryExecTime.stop();
-        Trace.endSpan(trace);
+        Trace.endSpan(batchExecutionTrace);
     }
 
     private void mergeMonthlyRootSites() {
-        trace = Trace.startSpan("ai/cmd/GetSites/executeBatch/mergeMonthlySites");
+        TraceContext monthlyMergeTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/mergeMonthlySites");
         monthlyMergeTime.start();
         for (SiteDTO monthlySite : monthlySiteList) {
             if (monthlyRootSiteMap.containsKey(monthlySite.getInstanceId())) {
@@ -816,15 +814,15 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             }
         }
         monthlyMergeTime.stop();
-        Trace.endSpan(trace);
+        Trace.endSpan(monthlyMergeTrace);
     }
 
     private void sort() {
         if (sortInfo != null && !siteList.isEmpty()) {
-            trace = Trace.startSpan("ai/cmd/GetSites/executeBatch/sortSites");
+            TraceContext sortTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/sortSites");
             SiteComparator comparator = new SiteComparator(sortInfo);
             Collections.sort(siteList, comparator);
-            Trace.endSpan(trace);
+            Trace.endSpan(sortTrace);
         }
     }
 
