@@ -7,9 +7,15 @@ import com.google.gwt.user.client.ui.Label;
 
 public class DataEntryActivity implements Activity {
 
+    private final DataEntryPlace place;
+
+    public DataEntryActivity(DataEntryPlace place) {
+        this.place = place;
+    }
+
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        panel.setWidget(new Label());
+        panel.setWidget(new DataEntryWidget(place.getRecordRef()));
     }
 
     @Override

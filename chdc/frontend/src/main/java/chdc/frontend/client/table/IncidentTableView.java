@@ -1,15 +1,17 @@
 package chdc.frontend.client.table;
 
+import chdc.frontend.client.entry.DataEntryPlace;
 import chdc.frontend.client.i18n.ChdcLabels;
 import chdc.frontend.client.theme.*;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
-import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.chrome.HasTitle;
@@ -51,7 +53,8 @@ public class IncidentTableView implements IsWidget, HasTitle {
         // Action bar
 
         FlowLayoutContainer tableActions = new FlowLayoutContainer();
-        tableActions.add(new IconLinkButton(Icon.PLUS, ChdcLabels.LABELS.newRow()));
+        tableActions.add(new IconLinkButton(Icon.PLUS, ChdcLabels.LABELS.newRow(),
+                new DataEntryPlace(viewModel.getFormId()).toUri()));
 
         ActionBar actionBar = new ActionBar();
         actionBar.addShortcut(new QuickSearchForm());
@@ -71,7 +74,6 @@ public class IncidentTableView implements IsWidget, HasTitle {
             this.gridContainer.mask();
         } else {
             this.gridContainer.unmask();
-
 
             switch (viewModel.getEffectiveTable().get().getRootFormState()) {
                 case FORBIDDEN:

@@ -30,7 +30,7 @@ public class ChdcActivityMapper implements ActivityMapper {
             return new DashboardActivity();
 
         } else if(place instanceof DataEntryPlace) {
-            return new DataEntryActivity();
+            return new DataEntryActivity((DataEntryPlace) place);
 
         } else if(place instanceof TablePlace) {
             return new TableActivity(formStore);

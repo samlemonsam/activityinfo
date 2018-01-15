@@ -27,4 +27,8 @@ public interface ChdcLabels extends Constants {
 
     @DefaultStringValue("New Row")
     String newRow();
+
+
+    @DefaultStringValue("Add another incident")
+    String addAnotherIncident();
 }

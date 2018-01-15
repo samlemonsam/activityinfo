@@ -8,22 +8,17 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.Widget;
 
-public class IconLinkButton extends Widget {
+/**
+ * A hyperlink styled as a button
+ */
+public class LinkButton extends Widget {
 
-
-    interface Templates extends SafeHtmlTemplates {
-        @Template("{0} <span>{1}</span>")
-        SafeHtml label(SafeHtml icon, String label);
-    }
-
-    public static final Templates TEMPLATES = GWT.create(Templates.class);
-
-    public IconLinkButton(Icon icon, String label, SafeUri href) {
+    public LinkButton(String label, SafeUri href) {
         AnchorElement link = Document.get().createAnchorElement();
         link.addClassName("button");
-        link.addClassName("button--icon");
         link.setHref(href);
-        link.setInnerSafeHtml(TEMPLATES.label(icon.svg(), label));
+        link.setInnerText(label);
         setElement(link);
     }
+
 }
