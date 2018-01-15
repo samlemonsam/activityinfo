@@ -4,7 +4,7 @@ ext {
 
     guavaVersion = '23.0'
     rebarVersion = '2.5.31'
-    gwtVersion = '2.8.2'
+    gwtVersion = '2.8.0-bdd1'
     jerseyVersion = '1.19.4'
     gaeVersion = '1.9.48'
     jacksonVersion = '1.9.2'
@@ -181,6 +181,8 @@ subprojects {
                     details.useVersion gaeVersion
                 } else if(details.requested.group == 'org.apache.poi' && details.requested.name == 'poi') {
                     details.useVersion '3.12-beta1'
+                } else if(details.requested.group == 'com.google.gwt') {
+                    details.useVersion gwtVersion
                 }
             }
         }
