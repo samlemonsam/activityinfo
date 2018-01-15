@@ -86,6 +86,7 @@ public class LocationFieldBinding implements FieldBinding {
                 break;
             case CuidAdapter.ADMIN_LEVEL_DOMAIN:
                 locationBindings.add(new AdminEntityBinding(locationForm));
+                buildGeoBindings(locationForm);
                 buildAdminBindings(locationForm, formTree, CuidAdapter.ADMIN_PARENT_FIELD);
                 break;
             default:
@@ -108,7 +109,8 @@ public class LocationFieldBinding implements FieldBinding {
             FormField geoField = potentialGeoField.get();
             if (geoField.getType() instanceof GeoPointType) {
                 locationBindings.add(new GeoPointFieldBinding(geoField.getId()));
-            } else if (geoField.getType() instanceof GeoAreaType) {
+            } else if (geoField.getType() instanceof GeoAreaType && (geoField.getId().getDomain() != CuidAdapter.ADMIN_LEVEL_DOMAIN)) {
+                // Do not add a geoarea query for an admin level form - query engine cannot support currently
                 locationBindings.add(new GeoAreaFieldBinding(locationForm.getId()));
             }
         }
