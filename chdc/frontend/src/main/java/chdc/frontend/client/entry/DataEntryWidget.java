@@ -8,18 +8,36 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.dom.ScrollSupport;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.ui.client.table.view.TableView;
+import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.StatefulValue;
+import org.activityinfo.ui.client.input.model.FormInputModel;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
+import org.activityinfo.ui.client.store.FormStore;
 
 public class DataEntryWidget implements IsWidget, HasSidebar {
 
     private final MainContainer container;
 
-    public DataEntryWidget(RecordRef recordRef) {
+    public DataEntryWidget(FormStore formStore, RecordRef recordRef) {
+
+        // Compute the view model
+
+        Observable<FormTree> formTree = formStore.getFormTree(recordRef.getFormId());
+        Observable<FormInputViewModelBuilder> builder = formTree.transform(tree -> new FormInputViewModelBuilder(formStore, tree));
+        Observable<FormInputModel> inputModel = new StatefulValue<>(new FormInputModel(recordRef));
+        Observable<FormInputViewModel> viewModel = Observable.transform(builder, inputModel, (b, m) -> b.build(m));
+
+        // Main content
+        // Form Panel
+        IncidentFormPanel formPanel = new IncidentFormPanel(viewModel);
 
         FlowLayoutContainer mainContent = new FlowLayoutContainer();
         mainContent.setScrollMode(ScrollSupport.ScrollMode.AUTOY);
         mainContent.setStyleName("maincontent");
+        mainContent.add(formPanel);
 
         // Action bar
         IconButton saveButton = new IconButton(Icon.SAVE, I18N.CONSTANTS.save());
@@ -41,6 +59,8 @@ public class DataEntryWidget implements IsWidget, HasSidebar {
         ActionBar actionBar = new ActionBar();
         actionBar.addShortcut(secondary);
         actionBar.addShortcut(primary);
+
+        // Side bar
 
         DataEntrySidebar sideBar = new DataEntrySidebar();
 
