@@ -292,8 +292,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private Map<Integer,Activity> loadMetadata(Filter filter) throws SQLException {
         if (filter.isRestricted(DimensionType.Database)) {
+            LOGGER.info("Fetching Activity Metadata for: " + Arrays.toString(filter.getRestrictions(DimensionType.Database).toArray()));
             return catalog.getActivityLoader().loadForDatabaseIds(filter.getRestrictions(DimensionType.Database));
         } else if (filter.isRestricted(DimensionType.Activity)) {
+            LOGGER.info("Fetching Activity Metadata for: " + Arrays.toString(filter.getRestrictions(DimensionType.Activity).toArray()));
             return catalog.getActivityLoader().load(filter.getRestrictions(DimensionType.Activity));
         } else {
             throw new CommandException("Request too broad: must filter by Database or Activity");
@@ -304,6 +306,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         TraceContext linkedActivityMetadataTrace = Trace.startSpan("ai/cmd/GetSites/fetchLinkedActivityMetadata");
         try {
             metadataTime.start();
+            LOGGER.info("Fetching Linked Activity Metadata for: " + Arrays.toString(linkedActivitiesToFetch.toArray()));
             Filter linkedFilter = new Filter();
             linkedFilter.addRestriction(DimensionType.Activity, linkedActivitiesToFetch);
             linkedActivities = loadMetadata(linkedFilter);
