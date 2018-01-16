@@ -153,7 +153,8 @@ public class EffectiveTableModel {
 
         // Now any non-reference key fields
         for (FormTree.Node childNode : node.getChildren()) {
-            if (childNode.getField().isKey() && !childNode.isReference()) {
+            if ((childNode.getField().isKey() || childNode.getField().getType() instanceof SerialNumberType)
+                    && !childNode.isReference()) {
                 columns.add(new EffectiveTableColumn(formTree, defaultColumnModel(childNode)));
             }
         }
@@ -164,17 +165,6 @@ public class EffectiveTableModel {
      */
     public boolean isSubTable() {
         return selectedParentRef.isPresent();
-    }
-
-    private boolean shouldIncludeReference(FormTree.Node childNode) {
-        if(childNode.isParentReference()) {
-            if(isSubTable()) {
-                // Do not include parent fields when the sub form is displayed
-                // as a sub table linked to its parent.
-                return false;
-            }
-        }
-        return true;
     }
 
     public ResourceId getFormId() {

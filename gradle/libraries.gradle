@@ -52,8 +52,8 @@ ext {
             jsinterop:      'com.google.jsinterop:jsinterop-annotations:1.0.1'
 
         ],
-
-        gxt:                'com.extjs:gxt:2.3.1-gwt26-bdd-73',
+            
+        gxt:                'com.extjs:gxt:2.3.1-gwt26-bdd-75',
             
         rebar: [
             time:           "com.bedatadriven.rebar:rebar-time:${rebarVersion}",

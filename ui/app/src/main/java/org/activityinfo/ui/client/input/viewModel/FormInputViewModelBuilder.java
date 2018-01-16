@@ -44,14 +44,16 @@ public class FormInputViewModelBuilder {
 
     private List<SubFormViewModelBuilder> subBuilders = new ArrayList<>();
 
-    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree) {
+    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, ActivePeriodMemory memory) {
         this.formTree = formTree;
         this.filters = new PermissionFilters(formTree);
         this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
         for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm()) {
-                subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node));
+                if(node.isSubFormVisible()) {
+                    subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node, memory));
+                }
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
@@ -191,13 +193,22 @@ public class FormInputViewModelBuilder {
 
         LOGGER.info("fieldValues = " + record.getFieldValueMap());
 
+        if(placeholder) {
+            // if this is a placeholder subrecord, there may be a key
+            // field provided, but we won't consider it dirty because
+            // the user themselves hasn't entered any information.
+            dirty = false;
+        }
+
         return new FormInputViewModel(formTree,
                 existingValues,
                 inputModel,
                 record.getFieldValueMap(),
                 subFormMap,
                 relevantSet,
-                missing, validationErrors, valid, dirty, placeholder);
+                missing, validationErrors, valid,
+                dirty,
+                placeholder);
     }
 
     private Set<ResourceId> computeRelevance(FormInstance record) {
@@ -256,7 +267,7 @@ public class FormInputViewModelBuilder {
             if(node.getType() instanceof SerialNumberType) {
                 continue;
             }
-            if(node.getField().isRequired()) {
+            if(node.getField().isRequired() && node.getField().isVisible()) {
                 if(relevantSet.contains(node.getFieldId())) {
                     if(record.get(node.getFieldId()) == null) {
                         missing.add(node.getFieldId());

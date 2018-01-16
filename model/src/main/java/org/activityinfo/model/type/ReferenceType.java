@@ -68,6 +68,12 @@ public class ReferenceType implements ParametrizedFieldType {
         this.range.add(rangeFormId);
     }
 
+    public ReferenceType(Cardinality cardinality, Collection<ResourceId> rangeFormIds) {
+        this.cardinality = cardinality;
+        this.range.addAll(rangeFormIds);
+    }
+
+
     @Override
     public ParametrizedFieldTypeClass getTypeClass() {
         return TYPE_CLASS;

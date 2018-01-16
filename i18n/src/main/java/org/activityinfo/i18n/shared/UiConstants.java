@@ -548,7 +548,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Manage time locks on databases, projects and activities")
     String lockPanelTitle();
 
-    @DefaultStringValue("Lock databases, activities or projects to prevent users to add or change data")
+    @DefaultStringValue("Lock databases, activities or projects to prevent users adding or changing data")
     String lockPeriodsDescription();
 
     @DefaultStringValue("Locked site")
@@ -1103,12 +1103,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Values")
     String values();
 
-    @DefaultStringValue("home")
-    String home();
-
-    @DefaultStringValue("Range")
-    String range();
-
     @DefaultStringValue("« Previous")
     String previousButton();
 
@@ -1499,12 +1493,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Upload failed")
     String uploadFailed();
 
-    @DefaultStringValue("Project since deleted")
-    String deletedProject();
-
-    @DefaultStringValue("Partner since removed")
-    String deletedPartner();
-
     @DefaultStringValue("Browse")
     String browse();
 
@@ -1781,7 +1769,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No matching records.")
     String noMatchingRecords();
 
-    @DefaultStringValue("Oops! Exception: ")
+    @DefaultStringValue("Oops! Exception:")
     String exception();
 
     @DefaultStringValue("Invalid form reference(s)")
@@ -1810,7 +1798,4 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("All")
     String allRows();
-
-    @DefaultStringValue("Filtered Rows")
-    String filteredRows();
 }

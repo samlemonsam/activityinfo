@@ -31,20 +31,22 @@ class SubFormViewModelBuilder {
     private final SubFormKind subFormKind;
     private final FormInputViewModelBuilder formBuilder;
     private final Optional<FormField> keyField;
-    private final ActivePeriodMemory memory = new SimpleActivePeriodMemory();
+    private final ActivePeriodMemory memory;
 
     private ResourceId placeholderRecordId;
 
     SubFormViewModelBuilder(FormStore formStore,
                             FormTree parentTree,
-                            FormTree.Node node) {
+                            FormTree.Node node,
+                            ActivePeriodMemory memory) {
         this.fieldId = node.getFieldId();
         this.subFormId = ((SubFormReferenceType) node.getType()).getClassId();
         this.subTree = parentTree.subTree(subFormId);
         this.subFormKind = subTree.getRootFormClass().getSubFormKind();
         this.placeholderRecordId = ResourceId.generateId();
-        this.formBuilder = new FormInputViewModelBuilder(formStore, subTree);
+        this.formBuilder = new FormInputViewModelBuilder(formStore, subTree, memory);
         this.keyField = findKeyField(subTree.getRootFormClass());
+        this.memory = memory;
 
         if(subFormKind.isPeriod()) {
             assert keyField.isPresent() : "missing period key field";

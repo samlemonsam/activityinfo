@@ -71,11 +71,6 @@ public class JreJsonString extends JreJsonValue implements JsonValue {
     }
 
     @Override
-    public boolean isJsonString() {
-        return true;
-    }
-
-    @Override
     public boolean isJsonPrimitive() {
         return true;
     }

@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ArgumentException;
 import org.activityinfo.model.expr.diagnostic.ExprException;
+import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldType;
@@ -82,12 +83,17 @@ public class FormulaValidator {
 
     private FieldType validateReference(ExprNode exprNode) {
         Collection<NodeMatch> matches;
-        if(exprNode instanceof SymbolExpr) {
-            matches = nodeMatcher.resolveSymbol((SymbolExpr) exprNode);
-        } else if(exprNode instanceof CompoundExpr) {
-            matches = nodeMatcher.resolveCompoundExpr((CompoundExpr) exprNode);
-        } else {
-            throw new IllegalArgumentException();
+        try {
+            if (exprNode instanceof SymbolExpr) {
+                matches = nodeMatcher.resolveSymbol((SymbolExpr) exprNode);
+            } else if (exprNode instanceof CompoundExpr) {
+                matches = nodeMatcher.resolveCompoundExpr((CompoundExpr) exprNode);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        } catch (ExprException e) {
+            errors.add(new FormulaError(exprNode, e.getMessage()));
+            throw new ValidationFailed();
         }
 
         if(matches.isEmpty()) {

@@ -48,7 +48,7 @@ public class SubFormPane extends TabPanel {
 
     private void updateTabs(FormTree formTree) {
         for (FormTree.Node node : formTree.getRootFields()) {
-            if(node.isSubForm()) {
+            if(node.isSubForm() && node.isSubFormVisible()) {
                 addOrUpdateTab(formTree, node);
             }
         }

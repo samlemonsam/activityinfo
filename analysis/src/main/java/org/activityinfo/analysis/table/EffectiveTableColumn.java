@@ -5,6 +5,7 @@ import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.primitive.TextType;
 
 import java.util.List;
 
@@ -38,7 +39,11 @@ public class EffectiveTableColumn {
     }
 
     public FieldType getType() {
-        return formula.getResultType();
+        if(formula.isValid()) {
+            return formula.getResultType();
+        } else {
+            return TextType.SIMPLE;
+        }
     }
 
     public String getId() {

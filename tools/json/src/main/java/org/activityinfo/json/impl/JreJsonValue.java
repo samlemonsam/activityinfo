@@ -74,27 +74,12 @@ public abstract class JreJsonValue implements JsonValue {
 
 
     @Override
-    public JsonValue getAsJsonObject() {
-        throw conversionException(JsonType.OBJECT);
-    }
-
-    @Override
-    public JsonValue getAsJsonArray() {
-        throw conversionException(JsonType.ARRAY);
-    }
-
-    @Override
     public boolean isJsonNull() {
         return false;
     }
 
     @Override
     public boolean isJsonArray() {
-        return false;
-    }
-
-    @Override
-    public boolean isJsonString() {
         return false;
     }
 

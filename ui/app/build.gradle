@@ -31,7 +31,7 @@ jar {
 
 test {
     // Browser tests that require special handling
-    include '**GwtTest'
+    exclude '**/*GwtTest.*'
 }
 
 dependencies {

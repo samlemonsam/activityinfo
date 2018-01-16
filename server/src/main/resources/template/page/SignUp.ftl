@@ -51,7 +51,7 @@
                             ActivityInfo.org.</p>
 
                         <label>
-                            Name
+                            Your full name (ex: John Doe)
                             <input type="text" name="name" required>
                         </label>
 
@@ -89,7 +89,7 @@
 
                                     <ul class="list--arrow">
                                         <li><a href="/about/faq.html">Frequently Asked Questions</a></li>
-                                        <li><a href="https://attendee.gotowebinar.com/rt/2895505976043289602">Register for our next webinar</a></li>
+                                        <li><a href="/about/webinar.html">Register for our next webinar</a></li>
                                     </ul>
 
                                     <a href="/about/subscribe.html" class="cta-link cta-link--secondary">Purchase a support package</a>
