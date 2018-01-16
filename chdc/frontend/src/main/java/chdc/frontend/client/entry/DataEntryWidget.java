@@ -13,11 +13,15 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.ui.client.input.model.FormInputModel;
+import org.activityinfo.ui.client.input.viewModel.ActivePeriodMemory;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
+import org.activityinfo.ui.client.input.viewModel.LiveActivePeriodMemory;
 import org.activityinfo.ui.client.store.FormStore;
 
 public class DataEntryWidget implements IsWidget, HasSidebar {
+
+    private final ActivePeriodMemory memory = new LiveActivePeriodMemory();
 
     private final MainContainer container;
 
@@ -26,7 +30,7 @@ public class DataEntryWidget implements IsWidget, HasSidebar {
         // Compute the view model
 
         Observable<FormTree> formTree = formStore.getFormTree(recordRef.getFormId());
-        Observable<FormInputViewModelBuilder> builder = formTree.transform(tree -> new FormInputViewModelBuilder(formStore, tree));
+        Observable<FormInputViewModelBuilder> builder = formTree.transform(tree -> new FormInputViewModelBuilder(formStore, tree, memory));
         Observable<FormInputModel> inputModel = new StatefulValue<>(new FormInputModel(recordRef));
         Observable<FormInputViewModel> viewModel = Observable.transform(builder, inputModel, (b, m) -> b.build(m));
 
