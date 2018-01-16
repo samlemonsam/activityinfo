@@ -413,7 +413,7 @@ public class FormInputViewModelTest {
             @Override
             public FormMetadata getFormMetadata(ResourceId formId) {
                 if(formId.equals(parentForm.getId())) {
-                    return FormMetadata.of(1, parentForm, FormPermissions.full());
+                    return FormMetadata.of(1, parentForm, FormPermissions.owner());
                 } else {
                     return FormMetadata.forbidden(formId);
                 }
