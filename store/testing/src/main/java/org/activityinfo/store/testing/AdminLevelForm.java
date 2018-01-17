@@ -7,6 +7,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.primitive.TextType;
 
@@ -72,6 +73,10 @@ public class AdminLevelForm implements TestForm {
     public ResourceId getParentFieldId() {
         assert parentField != null : "AdminLevel has no parent";
         return parentField.getId();
+    }
+
+    public RecordRef getRecordRef(int index) {
+        return getRecords().get(index).getRef();
     }
 
     public ResourceId getNameFieldId() {

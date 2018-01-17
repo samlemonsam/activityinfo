@@ -6,9 +6,7 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.store.testing.BioDataForm;
-import org.activityinfo.store.testing.Survey;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
@@ -82,6 +80,14 @@ public class TestSetup {
 
     public BioDataForm getBioDataForm() {
         return catalog.getBioDataForm();
+    }
+
+    public NfiForm getNfiForm() {
+        return catalog.getNfiForm();
+    }
+
+    public VillageForm getVillageForm() {
+        return catalog.getVillageForm();
     }
 
     public FormTree getFormTree(ResourceId formId) {

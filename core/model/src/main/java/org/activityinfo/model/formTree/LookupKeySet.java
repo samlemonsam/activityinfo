@@ -160,17 +160,16 @@ public class LookupKeySet {
      * Composes a human-readable label for a record reference.
      */
     public Maybe<String> label(RecordTree tree, RecordRef ref) {
-        if(lookupKeys.size() == 1) {
-            Maybe<FormInstance> record = tree.getRecord(ref);
-            return record.transform(new Function<FormInstance, String>() {
-                @Override
-                public String apply(FormInstance record) {
-                    return lookupKeys.get(0).label(record);
+        Optional<FormInstance> potentialRecord = tree.getRecord(ref).getIfVisible();
+        if (potentialRecord.isPresent()) {
+            FormInstance record = potentialRecord.get();
+            for (LookupKey lookupKey : lookupKeys) {
+                if (record.getFormId().equals(lookupKey.getFormId())) {
+                    return Maybe.of(lookupKey.label(record));
                 }
-            });
-        } else {
-            return Maybe.of("TODO");
+            }
         }
+        return Maybe.notFound();
     }
 
 }

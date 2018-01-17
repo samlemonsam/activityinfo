@@ -6,6 +6,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.time.LocalDateType;
 
@@ -44,11 +45,14 @@ public class NfiForm implements TestForm {
             .setRequired(true)
             .setVisible(true);
 
-        recordGenerator = new RecordGenerator(formClass);
-        recordGenerator.distribution(villageForm.getFormId(), new RefGenerator(villageForm));
+        recordGenerator = new RecordGenerator(formClass)
+                .distribution(villageField.getId(), new RefGenerator(villageForm));
         records = new LazyRecordList(recordGenerator, 821);
     }
 
+    public RecordRef getRecordRef(int index) {
+        return getRecords().get(index).getRef();
+    }
 
     @Override
     public ResourceId getFormId() {
