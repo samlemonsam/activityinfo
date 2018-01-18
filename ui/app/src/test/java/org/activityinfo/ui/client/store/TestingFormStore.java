@@ -20,7 +20,7 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 
 import java.util.*;
@@ -51,17 +51,17 @@ public class TestingFormStore implements FormStore {
 
     }
 
-    private TestingCatalog testingCatalog;
+    private TestingStorageProvider testingCatalog;
     private Set<ResourceId> deleted = new HashSet<>();
 
     private boolean delayLoading = false;
     private ArrayDeque<PendingTask<?>> pendingTasks = new ArrayDeque<>();
 
     public TestingFormStore() {
-        testingCatalog = new TestingCatalog();
+        testingCatalog = new TestingStorageProvider();
     }
 
-    public TestingCatalog getCatalog() {
+    public TestingStorageProvider getCatalog() {
         return testingCatalog;
     }
 

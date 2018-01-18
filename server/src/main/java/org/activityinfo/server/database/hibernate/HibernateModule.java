@@ -29,8 +29,9 @@ import com.google.inject.servlet.ServletModule;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
-import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.validator.HibernateValidator;
@@ -56,8 +57,9 @@ public class HibernateModule extends ServletModule {
         bind(HibernateSessionScope.class).toInstance(sessionScope);
         
         bind(EntityManager.class).toProvider(EntityManagerProvider.class).in(HibernateSessionScoped.class);
+        bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
         bind(FormCatalog.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
-        bind(MySqlCatalog.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
+        bind(MySqlStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
         
         /*
          * Important: the CloudSqlFilter must be listed before

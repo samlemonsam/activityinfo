@@ -26,7 +26,7 @@ import org.activityinfo.server.command.handler.binding.*;
 import org.activityinfo.server.command.handler.binding.dim.*;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
-import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
@@ -45,12 +45,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private static final Logger LOGGER = Logger.getLogger(GetSitesHandler.class.getName());
 
     @Inject
-    private Provider<MySqlCatalog> catalogProvider;
+    private Provider<MySqlStorageProvider> catalogProvider;
 
     @Inject
     private DispatcherSync dispatcher;
 
-    private MySqlCatalog catalog;
+    private MySqlStorageProvider catalog;
     private ColumnSetBuilder builder;
     private BatchingFormTreeBuilder batchFormTreeBuilder;
     private FormScanBatch batch;

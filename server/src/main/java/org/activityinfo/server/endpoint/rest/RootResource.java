@@ -49,7 +49,7 @@ import org.activityinfo.store.server.ApiBackend;
 import org.activityinfo.store.server.CatalogResource;
 import org.activityinfo.store.server.FormResource;
 import org.activityinfo.store.server.QueryResource;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
@@ -65,7 +65,7 @@ public class RootResource {
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
-    private Provider<FormCatalog> catalog;
+    private Provider<FormStorageProvider> catalog;
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
     private PermissionOracle permissionOracle;
@@ -74,7 +74,7 @@ public class RootResource {
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
-                        Provider<FormCatalog> catalog,
+                        Provider<FormStorageProvider> catalog,
                         DispatcherSync dispatcher,
                         DeploymentConfiguration config,
                         Provider<AuthenticatedUser> userProvider,

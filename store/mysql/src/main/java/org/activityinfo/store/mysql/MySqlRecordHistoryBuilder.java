@@ -36,7 +36,7 @@ import java.util.*;
  */
 public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
 
-    private MySqlCatalog catalog;
+    private MySqlStorageProvider catalog;
 
     private static class FieldDelta {
         private FormField field;
@@ -58,7 +58,7 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
         private String email;
     }
 
-    public MySqlRecordHistoryBuilder(MySqlCatalog catalog) {
+    public MySqlRecordHistoryBuilder(MySqlStorageProvider catalog) {
         this.catalog = catalog;
     }
 

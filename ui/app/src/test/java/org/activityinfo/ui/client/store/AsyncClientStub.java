@@ -24,20 +24,20 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 
 import java.util.List;
 
 public class AsyncClientStub implements ActivityInfoClientAsync {
 
-    private TestingCatalog catalog;
+    private TestingStorageProvider catalog;
     private boolean connected = true;
 
     public AsyncClientStub() {
-        this.catalog = new TestingCatalog();
+        this.catalog = new TestingStorageProvider();
     }
 
-    public AsyncClientStub(TestingCatalog testingCatalog) {
+    public AsyncClientStub(TestingStorageProvider testingCatalog) {
         this.catalog = testingCatalog;
     }
 
@@ -50,7 +50,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         return Promise.rejected(new UnsupportedOperationException());
     }
 
-    public TestingCatalog getCatalog() {
+    public TestingStorageProvider getCatalog() {
         return catalog;
     }
 

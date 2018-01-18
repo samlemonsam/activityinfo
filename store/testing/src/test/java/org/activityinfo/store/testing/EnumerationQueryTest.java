@@ -7,7 +7,6 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
-import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -19,7 +18,7 @@ public class EnumerationQueryTest {
 
     @Test
     public void enumRefTests() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
         IntakeForm intakeForm = catalog.getIntakeForm();
@@ -45,7 +44,7 @@ public class EnumerationQueryTest {
 
     @Test
     public void enumIdTests() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
         QueryModel queryModel = new QueryModel(EmptyForm.FORM_ID);

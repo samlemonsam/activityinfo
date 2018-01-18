@@ -20,7 +20,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.testing.IdpLocationForm;
 import org.activityinfo.store.testing.NfiForm;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.activityinfo.store.testing.VillageForm;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.easymock.EasyMock;
@@ -42,7 +42,7 @@ import static org.junit.Assert.assertThat;
 public class LookupViewModelTest {
 
     private TestSetup setup = new TestSetup();
-    private TestingCatalog catalog;
+    private TestingStorageProvider catalog;
     private NfiForm nfiForm;
     private VillageForm villageForm;
 
@@ -179,7 +179,7 @@ public class LookupViewModelTest {
     @Test
     public void noKeysTest() {
 
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
 
         FormTree formTree = catalog.getFormTree(nfiForm.getFormId());

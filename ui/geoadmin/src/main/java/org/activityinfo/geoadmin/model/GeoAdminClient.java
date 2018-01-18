@@ -17,7 +17,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.client.ActivityInfoClient;
-import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
+import org.activityinfo.geoadmin.source.FeatureSourceStorageProvider;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -55,7 +55,7 @@ public class GeoAdminClient implements FormClassProvider {
 
     private ActivityInfoClient remote;
     
-    private FeatureSourceCatalog localCatalog = new FeatureSourceCatalog();
+    private FeatureSourceStorageProvider localCatalog = new FeatureSourceStorageProvider();
 
     @Override
     public FormClass getFormClass(ResourceId formId) {

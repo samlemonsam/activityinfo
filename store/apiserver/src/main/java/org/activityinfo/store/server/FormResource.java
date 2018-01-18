@@ -65,7 +65,7 @@ public class FormResource {
     @Produces(JSON_CONTENT_TYPE)
     public FormMetadata getMetadataResponse(@QueryParam("localVersion") Long localVersion) {
 
-        Optional<FormStorage> storage = backend.getCatalog().getForm(formId);
+        Optional<FormStorage> storage = backend.getStorage().getForm(formId);
         if(!storage.isPresent()) {
             return FormMetadata.notFound(formId);
         }
@@ -107,7 +107,7 @@ public class FormResource {
     public Response updateFormSchema(FormClass updatedFormClass) {
 
         // Check first to see if this collection exists
-        Optional<FormStorage> form = backend.getCatalog().getForm(updatedFormClass.getId());
+        Optional<FormStorage> form = backend.getStorage().getForm(updatedFormClass.getId());
         if(form.isPresent()) {
             if(!backend.getFormSupervisor().getFormPermissions(formId).isSchemaUpdateAllowed()) {
                 return Response.status(Response.Status.FORBIDDEN).build();
@@ -220,7 +220,7 @@ public class FormResource {
         }
 
         // Check first to see if this form exists
-        Optional<FormStorage> storage = backend.getCatalog().getForm(formId);
+        Optional<FormStorage> storage = backend.getStorage().getForm(formId);
         if(!storage.isPresent()) {
             return Response
                     .status(Response.Status.NOT_FOUND)
@@ -319,7 +319,7 @@ public class FormResource {
     public Response getXlsForm() {
         assertVisible(formId);
 
-        final XlsFormBuilder xlsForm = new XlsFormBuilder(backend.getCatalog());
+        final XlsFormBuilder xlsForm = new XlsFormBuilder(backend.getStorage());
         xlsForm.build(formId);
 
         StreamingOutput output = new StreamingOutput() {
@@ -363,7 +363,7 @@ public class FormResource {
     private FormTree fetchTree() {
         assertVisible(formId);
 
-        FormTreeBuilder builder = new FormTreeBuilder(backend.getCatalog());
+        FormTreeBuilder builder = new FormTreeBuilder(backend.getStorage());
         return builder.queryTree(formId);
     }
 
@@ -450,7 +450,7 @@ public class FormResource {
 
     private QueryModel buildDefaultQueryModel() {
         QueryModel queryModel;
-        FormTreeBuilder treeBuilder = new FormTreeBuilder(backend.getCatalog());
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(backend.getStorage());
         FormTree tree = treeBuilder.queryTree(formId);
 
         queryModel = new DefaultQueryBuilder(tree).build();
@@ -459,7 +459,7 @@ public class FormResource {
 
 
     private FormStorage assertVisible(ResourceId formId) {
-        Optional<FormStorage> storage = this.backend.getCatalog().getForm(this.formId);
+        Optional<FormStorage> storage = this.backend.getStorage().getForm(this.formId);
         if(!storage.isPresent()) {
             throw new WebApplicationException(
                     Response.status(Response.Status.NOT_FOUND)

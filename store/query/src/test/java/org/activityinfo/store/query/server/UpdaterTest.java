@@ -32,7 +32,7 @@ public class UpdaterTest {
 
     @Before
     public void setUp() {
-        MockFormCatalog catalog = new MockFormCatalog();
+        MockFormStorageProvider catalog = new MockFormStorageProvider();
         updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new SerialNumberProviderStub());
     }
 

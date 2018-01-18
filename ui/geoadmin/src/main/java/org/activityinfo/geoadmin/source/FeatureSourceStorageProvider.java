@@ -2,24 +2,22 @@ package org.activityinfo.geoadmin.source;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.query.RowSource;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.geotools.data.shapefile.ShapefileDataStore;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
-public class FeatureSourceCatalog implements FormCatalog {
+public class FeatureSourceStorageProvider implements FormStorageProvider {
 
     public static final String FILE_PREFIX = "file://";
     private Map<ResourceId, FeatureSourceStorage> sources = new HashMap<>();
@@ -75,16 +73,6 @@ public class FeatureSourceCatalog implements FormCatalog {
             }
         }
         return map;
-    }
-
-    @Override
-    public List<CatalogEntry> getRootEntries() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<CatalogEntry> getChildren(String parentId, int userId) {
-        return null;
     }
 
     @Override

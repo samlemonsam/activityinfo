@@ -25,12 +25,12 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
 import org.activityinfo.store.hrd.HrdFormStorage;
-import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import javax.inject.Provider;
@@ -53,7 +53,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         this.blobAuthorizer = blobAuthorizer;
     }
 
-    private FormCatalog newCatalog() {
+    private FormStorageProvider newCatalog() {
 
         // Reset the current transaction
         if(entityManager.get().getTransaction().isActive()) {
@@ -61,12 +61,12 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         }
 
         // Create a fresh catalog to simulate a new request
-        return new MySqlCatalog(new HibernateQueryExecutor(entityManager));
+        return new MySqlStorageProvider(new HibernateQueryExecutor(entityManager));
     }
 
     @Override
     public Promise<FormClass> getFormSchema(String formId) {
-        FormCatalog catalog = newCatalog();
+        FormStorageProvider catalog = newCatalog();
 
         FormClass formClass;
         try {
@@ -84,7 +84,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormTree> getFormTree(ResourceId formId) {
-        FormCatalog newCatalog = newCatalog();
+        FormStorageProvider newCatalog = newCatalog();
         FormTreeBuilder treeBuilder = new FormTreeBuilder(newCatalog);
         return Promise.resolved(treeBuilder.queryTree(formId));
     }
@@ -92,7 +92,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Void> updateFormSchema(String formId, FormClass updatedSchema) {
-        FormCatalog catalog = newCatalog();
+        FormStorageProvider catalog = newCatalog();
 
         try {
             EntityTransaction tx = entityManager.get().getTransaction();
@@ -102,7 +102,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
             if(collection.isPresent()) {
                 collection.get().updateFormClass(updatedSchema);
             } else {
-                ((MySqlCatalog) catalog).createOrUpdateFormSchema(updatedSchema);
+                ((MySqlStorageProvider) catalog).createOrUpdateFormSchema(updatedSchema);
             }
 
             tx.commit();
@@ -127,7 +127,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<Maybe<FormRecord>> getRecord(String formId, String recordId) {
         try {
-            FormCatalog catalog = newCatalog();
+            FormStorageProvider catalog = newCatalog();
             Optional<FormStorage> storage = catalog.getForm(ResourceId.valueOf(formId));
             if(!storage.isPresent()) {
                 return Promise.resolved(Maybe.<FormRecord>notFound());
@@ -146,7 +146,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
-            FormCatalog catalog = newCatalog();
+            FormStorageProvider catalog = newCatalog();
             Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer, new SerialNumberProviderStub());
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
@@ -169,7 +169,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
-            FormCatalog catalog = newCatalog();
+            FormStorageProvider catalog = newCatalog();
             Updater updater = new Updater(catalog, currentUserId(), blobAuthorizer,  new SerialNumberProviderStub());
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
@@ -182,7 +182,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormRecordSet> getRecords(String formId, String parentId) {
-        FormCatalog catalog = newCatalog();
+        FormStorageProvider catalog = newCatalog();
         Optional<FormStorage> collection = catalog.getForm(ResourceId.valueOf(formId));
 
         JsonValue recordArray = Json.createArray();
@@ -211,7 +211,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     @Override
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
         try {
-            FormCatalog catalog = newCatalog();
+            FormStorageProvider catalog = newCatalog();
             ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
 
             return Promise.resolved(builder.build(query));

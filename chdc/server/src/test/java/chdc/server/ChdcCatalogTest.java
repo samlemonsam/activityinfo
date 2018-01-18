@@ -20,7 +20,7 @@ public class ChdcCatalogTest {
     @Ignore("WIP")
     public void test() throws SQLException {
 
-        ChdcCatalog catalog = new ChdcCatalog();
+        ChdcStorageProvider catalog = new ChdcStorageProvider();
         FormStorage storage = catalog.getForm(ResourceId.valueOf("country")).get();
 
 //        assertThat(storage.cacheVersion(), equalTo(2L));

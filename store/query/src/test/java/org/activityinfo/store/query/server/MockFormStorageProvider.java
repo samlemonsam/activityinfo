@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MockFormCatalog implements FormCatalog {
+public class MockFormStorageProvider implements FormStorageProvider {
     
     private static final ResourceId COLLECTION_ID = ResourceId.valueOf("XYZ123");
     
@@ -32,16 +32,6 @@ public class MockFormCatalog implements FormCatalog {
 
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<CatalogEntry> getRootEntries() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<CatalogEntry> getChildren(String parentId, int userId) {
         throw new UnsupportedOperationException();
     }
 

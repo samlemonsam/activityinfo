@@ -1,23 +1,16 @@
 package org.activityinfo.store.spi;
 
-import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.formTree.BatchFormClassProvider;
-import org.activityinfo.model.formTree.FormClassProvider;
-import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
 
 /**
- * Contract for obtaining a {@link FormStorage}
- * for a given {@code formId}
+ * Interface to a provider of a hierarchy of folders and forms.
  */
-public interface FormCatalog extends FormClassProvider, BatchFormClassProvider {
-
-    Optional<FormStorage> getForm(ResourceId formId);
+public interface FormCatalog {
 
     List<CatalogEntry> getRootEntries();
-    
+
     List<CatalogEntry> getChildren(String parentId, int userId);
 
 }

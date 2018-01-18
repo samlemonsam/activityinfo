@@ -17,7 +17,7 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.query.shared.NullFormScanCache;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
@@ -27,17 +27,17 @@ import org.activityinfo.store.spi.FormStorage;
  */
 public class FormSourceSyncImpl implements FormSource {
 
-    private FormCatalog formCatalog;
+    private FormStorageProvider formCatalog;
     private int userId;
     private FormScanCache formScanCache;
 
-    public FormSourceSyncImpl(FormCatalog formCatalog, FormScanCache cache, int userId) {
+    public FormSourceSyncImpl(FormStorageProvider formCatalog, FormScanCache cache, int userId) {
         this.formCatalog = formCatalog;
         this.userId = userId;
         this.formScanCache = cache;
     }
 
-    public FormSourceSyncImpl(FormCatalog formCatalog, int userId) {
+    public FormSourceSyncImpl(FormStorageProvider formCatalog, int userId) {
         this(formCatalog, new NullFormScanCache(), userId);
     }
 

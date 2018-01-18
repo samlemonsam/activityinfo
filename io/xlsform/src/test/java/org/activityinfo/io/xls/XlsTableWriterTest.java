@@ -9,8 +9,7 @@ import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.store.query.server.FormSourceSyncImpl;
-import org.activityinfo.store.testing.Survey;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Before;
@@ -27,13 +26,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class XlsTableWriterTest {
 
     private FormSourceSyncImpl formSource;
-    private TestingCatalog catalog;
+    private TestingStorageProvider catalog;
 
     @Before
     public void setup() {
         LocaleProxy.initialize();
 
-        catalog = new TestingCatalog();
+        catalog = new TestingStorageProvider();
         formSource = new FormSourceSyncImpl(catalog, 1);
     }
 

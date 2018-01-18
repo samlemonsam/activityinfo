@@ -21,7 +21,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.util.Collection;
@@ -32,13 +32,13 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     //private static final Logger LOGGER = Logger.getLogger(ResourceLocatorSyncImpl.class.getName());
 
-    private Provider<FormCatalog> catalog;
+    private Provider<FormStorageProvider> catalog;
     private Provider<AuthenticatedUser> authenticatedUser;
     private PermissionOracle permissionOracle;
     private BlobAuthorizer blobAuthorizer;
 
     @Inject
-    public ResourceLocatorSyncImpl(Provider<FormCatalog> catalog, Provider<AuthenticatedUser> authenticatedUser,
+    public ResourceLocatorSyncImpl(Provider<FormStorageProvider> catalog, Provider<AuthenticatedUser> authenticatedUser,
                                    PermissionOracle permissionOracle, BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
         this.authenticatedUser = authenticatedUser;

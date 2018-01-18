@@ -18,11 +18,11 @@ import static org.junit.Assert.assertThat;
 
 public class SubFormDeletionTest {
 
-    private TestingCatalog testingCatalog;
+    private TestingStorageProvider testingCatalog;
 
     @Before
     public void setup() {
-        testingCatalog = new TestingCatalog();
+        testingCatalog = new TestingStorageProvider();
     }
 
 

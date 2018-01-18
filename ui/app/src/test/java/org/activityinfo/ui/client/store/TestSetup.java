@@ -8,12 +8,11 @@ import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.testing.BioDataForm;
 import org.activityinfo.store.testing.Survey;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
-import org.activityinfo.ui.client.store.offline.UpdateSynchronizer;
 
 /**
  * Wires together a FormStoreImpl along with stubbed or mocked out components
@@ -26,7 +25,7 @@ public class TestSetup {
     private final OfflineStore offlineStore;
     private final FormStore formStore;
     private final StubScheduler scheduler;
-    private final TestingCatalog catalog;
+    private final TestingStorageProvider catalog;
     private final RecordSynchronizer synchronizer;
 
     public TestSetup() {
@@ -34,7 +33,7 @@ public class TestSetup {
     }
 
     public TestSetup(IDBFactoryStub database, boolean connected) {
-        catalog = new TestingCatalog();
+        catalog = new TestingStorageProvider();
         client = new AsyncClientStub(catalog);
         client.setConnected(connected);
 
@@ -89,7 +88,7 @@ public class TestSetup {
         return builder.queryTree(formId);
     }
 
-    public TestingCatalog getCatalog() {
+    public TestingStorageProvider getCatalog() {
         return catalog;
     }
 }

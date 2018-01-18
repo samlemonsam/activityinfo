@@ -15,7 +15,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
-import org.activityinfo.store.query.server.ServerColumnFactory;
 import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.junit.After;
@@ -38,7 +37,7 @@ public abstract class AbstractMySqlTest {
 
     public static DbUnit dbunit;
     public ColumnSet columnSet;
-    public static MySqlCatalog catalog;
+    public static MySqlStorageProvider catalog;
     
     private Closeable objectify;
 

@@ -7,13 +7,14 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
-import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.mysql.MySqlRecordHistoryBuilder;
 import org.activityinfo.store.query.server.*;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.server.ApiBackend;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.RecordHistoryProvider;
 
 public class ActivityInfoApiBackend implements ApiBackend {
@@ -26,13 +27,18 @@ public class ActivityInfoApiBackend implements ApiBackend {
     }
 
     @Override
+    public FormStorageProvider getStorage() {
+        return injector.getInstance(FormStorageProvider.class);
+    }
+
+    @Override
     public FormCatalog getCatalog() {
         return injector.getInstance(FormCatalog.class);
     }
 
     @Override
     public FormSupervisor getFormSupervisor() {
-        return new FormSupervisorAdapter(getCatalog(), getAuthenticatedUserId());
+        return new FormSupervisorAdapter(getStorage(), getAuthenticatedUserId());
     }
 
     @Override
@@ -50,28 +56,28 @@ public class ActivityInfoApiBackend implements ApiBackend {
         PermissionOracle permissionOracle = injector.getInstance(PermissionOracle.class);
         permissionOracle.assertDesignPrivileges(formClass, getAuthenticatedUser());
 
-        ((MySqlCatalog)getCatalog()).createOrUpdateFormSchema(formClass);
+        ((MySqlStorageProvider) getStorage()).createOrUpdateFormSchema(formClass);
     }
 
     @Override
     public Updater newUpdater() {
-        return new Updater(getCatalog(), getAuthenticatedUser().getUserId(),
+        return new Updater(getStorage(), getAuthenticatedUser().getUserId(),
                 injector.getInstance(BlobAuthorizer.class),
                 new HrdSerialNumberProvider());
     }
 
     @Override
     public ColumnSetBuilder newQueryBuilder() {
-        return new ColumnSetBuilder(getCatalog(), new AppEngineFormScanCache(), getFormSupervisor());
+        return new ColumnSetBuilder(getStorage(), new AppEngineFormScanCache(), getFormSupervisor());
     }
 
     @Override
     public PermissionsEnforcer newPermissionsEnforcer() {
-        return new PermissionsEnforcer(injector.getInstance(FormCatalog.class), getAuthenticatedUser().getUserId());
+        return new PermissionsEnforcer(injector.getInstance(FormStorageProvider.class), getAuthenticatedUser().getUserId());
     }
 
     @Override
     public RecordHistoryProvider getRecordHistoryProvider() {
-        return new MySqlRecordHistoryBuilder((MySqlCatalog) getCatalog());
+        return new MySqlRecordHistoryBuilder((MySqlStorageProvider) getStorage());
     }
 }

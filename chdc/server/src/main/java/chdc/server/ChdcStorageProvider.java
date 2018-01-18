@@ -8,19 +8,20 @@ import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class ChdcCatalog implements FormCatalog {
+public class ChdcStorageProvider implements FormStorageProvider, FormCatalog {
 
-    private static final Logger LOGGER = Logger.getLogger(ChdcCatalog.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ChdcStorageProvider.class.getName());
 
     private Map<ResourceId, FormClass> schemas = new HashMap<>();
 
-    public ChdcCatalog() {
+    public ChdcStorageProvider() {
         loadSchema("schema/act.json");
         loadSchema("schema/actor.json");
         loadSchema("schema/actor_category.json");

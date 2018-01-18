@@ -85,7 +85,7 @@ public class HrdCatalogTest {
                 .setType(new QuantityType("Beneficiaries"));
         
         
-        HrdCatalog catalog = new HrdCatalog();
+        HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(formClass);
 
         Optional<FormStorage> collection = catalog.getForm(collectionId);
@@ -149,7 +149,7 @@ public class HrdCatalogTest {
                 .setLabel("Favorite color")
                 .setType(new EnumType(Cardinality.SINGLE, EnumType.Presentation.AUTOMATIC, Collections.<EnumItem>emptyList()));
 
-        HrdCatalog catalog = new HrdCatalog();
+        HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(formClass);
 
         // Avoid cache
@@ -159,7 +159,7 @@ public class HrdCatalogTest {
             @Override
             public void vrun() {
 
-                HrdCatalog catalog = new HrdCatalog();
+                HrdStorageProvider catalog = new HrdStorageProvider();
                 Optional<FormStorage> storage = catalog.getForm(formId);
 
                 FormClass deserializedSchema = storage.get().getFormClass();
@@ -182,7 +182,7 @@ public class HrdCatalogTest {
                 .setCode("VILLAGE")
                 .setType(TextType.SIMPLE);
 
-        HrdCatalog catalog = new HrdCatalog();
+        HrdStorageProvider catalog = new HrdStorageProvider();
         Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
                 new HrdSerialNumberProvider());
 
@@ -243,7 +243,7 @@ public class HrdCatalogTest {
                 .setType(new QuantityType("years"));
 
 
-        HrdCatalog catalog = new HrdCatalog();
+        HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(hhForm);
         catalog.create(memberForm);
 
@@ -319,7 +319,7 @@ public class HrdCatalogTest {
                 .setType(new QuantityType("Beneficiaries"));
 
 
-        HrdCatalog catalog = new HrdCatalog();
+        HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(formClass);
 
         VersionedFormStorage formStorage = (VersionedFormStorage) catalog.getForm(collectionId).get();

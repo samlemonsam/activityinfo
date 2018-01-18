@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class FormCatalogStub implements FormCatalog {
+class FormStorageProviderStub implements FormStorageProvider {
 
     private Map<ResourceId, StorageStub> formMap = new HashMap<>();
 
@@ -41,16 +41,6 @@ class FormCatalogStub implements FormCatalog {
 
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<CatalogEntry> getRootEntries() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<CatalogEntry> getChildren(String parentId, int userId) {
         throw new UnsupportedOperationException();
     }
 

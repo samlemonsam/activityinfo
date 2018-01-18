@@ -19,14 +19,14 @@ import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.SerialNumberProvider;
 
 import java.util.*;
 
 @GwtIncompatible
-public class TestingCatalog implements FormCatalog {
+public class TestingStorageProvider implements FormStorageProvider {
 
     static {
         LocaleProxy.initialize();
@@ -63,7 +63,7 @@ public class TestingCatalog implements FormCatalog {
     private final IdpLocationForm idpLocationForm;
 
 
-    public TestingCatalog() {
+    public TestingStorageProvider() {
 
         // Survey Use case
         survey = new Survey();
@@ -145,16 +145,6 @@ public class TestingCatalog implements FormCatalog {
     @Override
     public Optional<FormStorage> getForm(ResourceId formId) {
         return Optional.<FormStorage>fromNullable(formMap.get(formId));
-    }
-
-    @Override
-    public List<CatalogEntry> getRootEntries() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<CatalogEntry> getChildren(String parentId, int userId) {
-        return Collections.emptyList();
     }
 
     public ColumnSet query(QueryModel queryModel) {

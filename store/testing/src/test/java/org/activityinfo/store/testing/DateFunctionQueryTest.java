@@ -18,7 +18,7 @@ public class DateFunctionQueryTest {
 
     @Test
     public void testFloorToday() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         IntakeForm intakeForm = catalog.getIntakeForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
@@ -43,7 +43,7 @@ public class DateFunctionQueryTest {
 
     @Test
     public void testToday() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         IntakeForm intakeForm = catalog.getIntakeForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
@@ -73,7 +73,7 @@ public class DateFunctionQueryTest {
 
     @Test
     public void invalidArityTest() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         IntakeForm intakeForm = catalog.getIntakeForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 

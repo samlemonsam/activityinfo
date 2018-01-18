@@ -10,17 +10,17 @@ import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.hrd.HrdCatalog;
+import org.activityinfo.store.hrd.HrdStorageProvider;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.DatabaseCacheImpl;
 import org.activityinfo.store.mysql.update.ActivityUpdater;
 import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.FormVersionProvider;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -29,9 +29,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class MySqlCatalog implements FormCatalog {
+public class MySqlStorageProvider implements FormStorageProvider, FormCatalog {
 
-    private static Logger LOGGER = Logger.getLogger(MySqlCatalog.class.getName());
+    private static Logger LOGGER = Logger.getLogger(MySqlStorageProvider.class.getName());
 
     private List<FormProvider> providers = new ArrayList<>();
     private final QueryExecutor executor;
@@ -42,7 +42,7 @@ public class MySqlCatalog implements FormCatalog {
     private DatabasesFolder databasesFolder;
     private final FormFolder formFolder;
 
-    public MySqlCatalog(final QueryExecutor executor) {
+    public MySqlStorageProvider(final QueryExecutor executor) {
 
         activityLoader = new ActivityLoader(executor);
         DatabaseCacheImpl databaseCache = new DatabaseCacheImpl(executor);
@@ -198,7 +198,7 @@ public class MySqlCatalog implements FormCatalog {
                 createFormSchema(formClass);
             }
         } else {
-            HrdCatalog catalog = new HrdCatalog();
+            HrdStorageProvider catalog = new HrdStorageProvider();
             catalog.create(formClass);
         }
     }

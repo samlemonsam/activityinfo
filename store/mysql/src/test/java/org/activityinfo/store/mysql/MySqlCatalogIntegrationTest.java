@@ -35,7 +35,7 @@ public class MySqlCatalogIntegrationTest {
 
     private static DbUnit dbunit;
     private static ColumnSetBuilder columnSetBuilder;
-    private static MySqlCatalog catalog;
+    private static MySqlStorageProvider catalog;
 
     @BeforeClass
     public static void setup() throws Throwable {

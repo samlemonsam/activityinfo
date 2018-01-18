@@ -4,13 +4,13 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.io.IOException;
 import java.util.*;
 
-public class FormCatalogStub implements FormCatalog {
+public class FormStorageProviderStub implements FormStorageProvider {
     
     private Map<ResourceId, JsonFormStorage> map = new HashMap<>();
     
@@ -23,16 +23,6 @@ public class FormCatalogStub implements FormCatalog {
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<CatalogEntry> getRootEntries() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<CatalogEntry> getChildren(String parentId, int userId) {
-        return null;
     }
 
     @Override

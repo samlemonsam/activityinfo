@@ -2,14 +2,14 @@ package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormVersionProvider;
 
 public class FormVersionProviderAdapter implements FormVersionProvider {
-    private final FormCatalog catalog;
+    private final FormStorageProvider catalog;
 
-    public FormVersionProviderAdapter(FormCatalog catalog) {
+    public FormVersionProviderAdapter(FormStorageProvider catalog) {
         this.catalog = catalog;
     }
 

@@ -12,7 +12,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
@@ -24,12 +24,12 @@ public class ColumnSetBuilder {
     public static final Logger LOGGER = Logger.getLogger(ColumnSetBuilder.class.getName());
 
     private ColumnFactory columnFactory;
-    private final FormCatalog catalog;
+    private final FormStorageProvider catalog;
     private final FormTreeBuilder formTreeBuilder;
     private final FormSupervisor supervisor;
     private final FormScanCache cache;
 
-    public ColumnSetBuilder(ColumnFactory columnFactory, FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
+    public ColumnSetBuilder(ColumnFactory columnFactory, FormStorageProvider catalog, FormScanCache cache, FormSupervisor supervisor) {
         this.columnFactory = columnFactory;
         this.catalog = catalog;
         this.formTreeBuilder = new FormTreeBuilder(new FormMetadataProviderAdapter(catalog, supervisor));
@@ -38,12 +38,12 @@ public class ColumnSetBuilder {
     }
 
     @GwtIncompatible
-    public ColumnSetBuilder(FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
+    public ColumnSetBuilder(FormStorageProvider catalog, FormScanCache cache, FormSupervisor supervisor) {
         this(ServerColumnFactory.INSTANCE, catalog, cache, supervisor);
     }
 
     @GwtIncompatible
-    public ColumnSetBuilder(FormCatalog catalog, FormSupervisor supervisor) {
+    public ColumnSetBuilder(FormStorageProvider catalog, FormSupervisor supervisor) {
         this(ServerColumnFactory.INSTANCE, catalog, new NullFormScanCache(), supervisor);
     }
 

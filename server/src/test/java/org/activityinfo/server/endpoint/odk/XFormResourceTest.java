@@ -23,7 +23,7 @@ import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +79,7 @@ public class XFormResourceTest extends CommandTestCase2 {
         objectifyService = ObjectifyService.begin();
 
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
-        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormCatalog.class),
+        resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormStorageProvider.class),
                 authProvider, new PermissionOracle(injector.getProvider(EntityManager.class)), new BlobAuthorizerStub());
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);

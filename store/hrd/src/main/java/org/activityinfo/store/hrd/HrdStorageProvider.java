@@ -8,7 +8,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * Catalog of Collection hosted in the AppEngine High Replication Datastore
  */
-public class HrdCatalog implements FormCatalog {
+public class HrdStorageProvider implements FormStorageProvider {
 
 
     public HrdFormStorage create(FormClass formClass) {
@@ -53,16 +53,6 @@ public class HrdCatalog implements FormCatalog {
         }
         
         return formClassMap;
-    }
-
-    @Override
-    public List<CatalogEntry> getRootEntries() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<CatalogEntry> getChildren(String parentId, int userId) {
-        return Collections.emptyList();
     }
 
     @Override

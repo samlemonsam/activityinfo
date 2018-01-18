@@ -47,14 +47,14 @@ public class Updater {
 
     private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
 
-    private final FormCatalog catalog;
+    private final FormStorageProvider catalog;
     private int userId;
     private BlobAuthorizer blobAuthorizer;
     private SerialNumberProvider serialNumberProvider;
 
     private boolean enforcePermissions = true;
 
-    public Updater(FormCatalog catalog, int userId,
+    public Updater(FormStorageProvider catalog, int userId,
                    BlobAuthorizer blobAuthorizer,
                    SerialNumberProvider serialNumberProvider) {
         this.catalog = catalog;

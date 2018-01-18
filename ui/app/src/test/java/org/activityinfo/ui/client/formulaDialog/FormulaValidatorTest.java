@@ -14,7 +14,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.testing.Survey;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 
 public class FormulaValidatorTest {
 
-    private TestingCatalog catalog = new TestingCatalog();
+    private TestingStorageProvider catalog = new TestingStorageProvider();
 
     @Test
     public void badSymbols() {

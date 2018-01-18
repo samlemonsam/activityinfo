@@ -10,7 +10,7 @@ import org.activityinfo.geoadmin.merge2.view.profile.FieldProfile;
 import org.activityinfo.geoadmin.merge2.view.profile.FormProfile;
 import org.activityinfo.geoadmin.merge2.view.swing.SwingSchedulers;
 import org.activityinfo.geoadmin.model.GeoAdminClient;
-import org.activityinfo.geoadmin.source.FeatureSourceCatalog;
+import org.activityinfo.geoadmin.source.FeatureSourceStorageProvider;
 import org.activityinfo.geoadmin.source.FeatureSourceStorage;
 import org.activityinfo.geoadmin.source.GeometryConverter;
 import org.activityinfo.model.formTree.FormTree;
@@ -163,7 +163,7 @@ public class ImportView {
     }
 
     private void updateGeometry(GeoAdminClient client, Map<ResourceId, ResourceId> idMap) throws IOException {
-        FeatureSourceCatalog catalog = new FeatureSourceCatalog();
+        FeatureSourceStorageProvider catalog = new FeatureSourceStorageProvider();
         FeatureSourceStorage formStorage = (FeatureSourceStorage) catalog.getForm(getModel().getSourceFormId().get()).get();
 
         ResourceId targetFormId = getModel().getTargetFormId().get();

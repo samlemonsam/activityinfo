@@ -16,7 +16,7 @@ import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
-import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import javax.servlet.ServletException;
@@ -71,7 +71,7 @@ public class FixSubForm extends HttpServlet {
     private boolean maybeFixForm(final PrintWriter logger, MySqlQueryExecutor executor, ResourceId parentFormId) {
         logger.println("Fixing " + parentFormId + "...");
 
-        final MySqlCatalog catalog = new MySqlCatalog(executor);
+        final MySqlStorageProvider catalog = new MySqlStorageProvider(executor);
         FormStorage parentForm = catalog.getForm(parentFormId).get();
         final FormClass formClass = parentForm.getFormClass();
 

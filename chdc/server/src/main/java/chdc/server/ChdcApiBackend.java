@@ -9,14 +9,20 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.server.ApiBackend;
 import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.RecordHistoryProvider;
 
 public class ChdcApiBackend implements ApiBackend {
 
 
     @Override
+    public FormStorageProvider getStorage() {
+        return new ChdcStorageProvider();
+    }
+
+    @Override
     public FormCatalog getCatalog() {
-        return new ChdcCatalog();
+        return new ChdcStorageProvider();
     }
 
     @Override
@@ -41,7 +47,7 @@ public class ChdcApiBackend implements ApiBackend {
 
     @Override
     public ColumnSetBuilder newQueryBuilder() {
-        return new ColumnSetBuilder(getCatalog(), new NullFormScanCache(), new NullFormSupervisor());
+        return new ColumnSetBuilder(getStorage(), new NullFormScanCache(), new NullFormSupervisor());
     }
 
     @Override

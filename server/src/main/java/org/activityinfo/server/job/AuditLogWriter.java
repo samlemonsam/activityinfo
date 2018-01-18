@@ -13,7 +13,7 @@ import org.activityinfo.server.endpoint.rest.CsvWriter;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import javax.persistence.EntityManager;
@@ -54,7 +54,7 @@ public class AuditLogWriter {
                 "Form ID", "Form Name", "Field ID", "Field Name", "Record ID", "Record Partner");
     }
 
-    public void writeForm(FormCatalog catalog, ResourceId formId) throws IOException {
+    public void writeForm(FormStorageProvider catalog, ResourceId formId) throws IOException {
 
         FormStorage formStorage = catalog.getForm(formId).get();
         FormClass formClass = formStorage.getFormClass();

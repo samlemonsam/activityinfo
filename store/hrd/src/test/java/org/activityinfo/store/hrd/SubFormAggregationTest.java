@@ -94,7 +94,7 @@ public class SubFormAggregationTest {
                 .setType(new QuantityType("households"));
 
 
-        HrdCatalog catalog = new HrdCatalog();
+        HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(siteForm);
         catalog.create(monthlyForm);
 

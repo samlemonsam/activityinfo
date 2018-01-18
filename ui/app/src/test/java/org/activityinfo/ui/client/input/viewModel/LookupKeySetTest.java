@@ -5,16 +5,12 @@ import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.*;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.testing.AdminLevelForm;
 import org.activityinfo.store.testing.NfiForm;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.activityinfo.store.testing.VillageForm;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,7 +30,7 @@ public class LookupKeySetTest {
 
     @Test
     public void hierarchyTest() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
         VillageForm villageForm = catalog.getVillageForm();
         AdminLevelForm territoryForm = catalog.getVillageForm().getParentForm();
@@ -64,7 +60,7 @@ public class LookupKeySetTest {
     @Test
     public void noKeysTest() {
 
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
 
         ReferenceType type = new ReferenceType(Cardinality.SINGLE, nfiForm.getFormId());
