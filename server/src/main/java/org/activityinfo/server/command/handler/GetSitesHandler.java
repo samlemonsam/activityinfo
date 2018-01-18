@@ -1,7 +1,6 @@
 package org.activityinfo.server.command.handler;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
-import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.common.base.Function;
@@ -27,6 +26,8 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.command.handler.binding.*;
@@ -820,13 +821,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void sort() {
-        if (siteList.isEmpty()) {
-            return;
+        if (sortInfo != null && !siteList.isEmpty()) {
+            TraceContext sortTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/sortSites");
+            SiteComparator comparator = new SiteComparator(sortInfo);
+            Collections.sort(siteList, comparator);
+            Trace.endSpan(sortTrace);
         }
-        TraceContext sortTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/sortSites");
-        SiteComparator comparator = new SiteComparator(sortInfo != null ? sortInfo : new SortInfo("id", Style.SortDir.ASC));
-        Collections.sort(siteList, comparator);
-        Trace.endSpan(sortTrace);
     }
 
     // Sorting on QueryEngine level
