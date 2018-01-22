@@ -61,6 +61,7 @@ task appengineDevMode(type: JavaExec) {
     dependsOn appengineDownloadSdk
     dependsOn appengineExplodeDevMode
     dependsOn compileJava
+    dependsOn project(':ui:app').tasks.getByName("compileJava")
     dependsOn project(':ui:app2').tasks.getByName("compileJava")
 
     main = 'com.google.gwt.dev.DevMode'
@@ -70,11 +71,16 @@ task appengineDevMode(type: JavaExec) {
 
     // Java sources first, so that changes get picked up on refresh
     def sourceProjects = [":ui:app", ":ui:app2", ":i18n", ":clients:gwtrest", ":tools:json", ":model"];
-
     for(sourceProject in sourceProjects) {
         classpath project(sourceProject).sourceSets.main.java.srcDirs
         classpath project(sourceProject).sourceSets.main.resources.srcDirs
     }
+
+    classpath project(':ui:app').sourceSets.main.runtimeClasspath
+    classpath project(':ui:app2').sourceSets.main.runtimeClasspath
+
+    // APT Generated sources
+    classpath project(':ui:app').sourceSets.main.output.generatedSourcesDir
 
     for(sourceProject in sourceProjects) {
         classpath project(sourceProject).sourceSets.main.runtimeClasspath
