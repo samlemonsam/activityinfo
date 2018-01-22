@@ -1,27 +1,15 @@
 
 description = 'ActivityInfo Promise Implementation'
 
-apply plugin: 'gwt-base'
-
-gwt {
-    gwtVersion = project.gwtVersion
-}
 
 dependencies {
-    gwt     libraries.gwt.user
-    gwt     libraries.gwt.guava
+    compileOnly libraries.gwt.user
     compile libraries.guava
     compile libraries.jsr305
 }
-
 
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
 }
 
-idea {
-    module {
-        scopes.PROVIDED.plus += [ configurations.gwt ]
-    }
-}

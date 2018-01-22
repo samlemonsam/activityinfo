@@ -1,19 +1,14 @@
 
-
-apply plugin: 'gwt-base'
-
-gwt {
-    gwtVersion = gwtVersion
-    maxHeapSize "5g"
+configurations {
+    gwtSdk
 }
 
 dependencies {
 
-    gwt libraries.gwt.user
-
-    compile libraries.gwt.jsinterop
-    compile libraries.guava
-    compile "com.fasterxml.jackson.core:jackson-annotations:2.4.5"
+    compileOnly libraries.gwt.user
+    compile     libraries.gwt.jsinterop
+    compile     libraries.guava
+    compile     "com.fasterxml.jackson.core:jackson-annotations:2.4.5"
 
     gwtSdk libraries.gwt.dev
 
@@ -38,7 +33,6 @@ task testGwt(type: JavaExec) {
     outputs.upToDateWhen { true }
 
     classpath configurations.gwtSdk
-    classpath configurations.gwt
 
     classpath "$projectDir/src/super/java"
     classpath sourceSets.main.java.srcDirs

@@ -183,6 +183,8 @@ subprojects {
                     details.useVersion '3.12-beta1'
                 } else if(details.requested.group == 'com.google.gwt') {
                     details.useVersion gwtVersion
+                } else if(details.requested.group == 'com.sun.jersey') {
+                    details.useVersion jerseyVersion
                 }
             }
         }

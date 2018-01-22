@@ -1,11 +1,8 @@
 
 
-apply plugin: 'gwt-base'
-
 dependencies {
     compile project(':model')
     compile libraries.guava
-    gwt     libraries.gwt.guava
 }
 
 test {

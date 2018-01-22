@@ -75,14 +75,16 @@ public class NavigationHandler {
                 });
         Log.debug("PageManager: connected to EventBus and listening.");
 
-        Window.addWindowClosingHandler(new Window.ClosingHandler() {
-            @Override
-            public void onWindowClosing(Window.ClosingEvent event) {
-                if (activeNavigation != null && activeNavigation.currentPage != null) {
-                    event.setMessage(activeNavigation.currentPage.beforeWindowCloses());
+        if(GWT.isClient()) {
+            Window.addWindowClosingHandler(new Window.ClosingHandler() {
+                @Override
+                public void onWindowClosing(Window.ClosingEvent event) {
+                    if (activeNavigation != null && activeNavigation.currentPage != null) {
+                        event.setMessage(activeNavigation.currentPage.beforeWindowCloses());
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public EventBus getEventBus() {

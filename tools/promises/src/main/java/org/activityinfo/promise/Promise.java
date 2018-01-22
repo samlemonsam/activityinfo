@@ -6,13 +6,14 @@ import com.google.common.base.Functions;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -25,6 +26,7 @@ import java.util.List;
  */
 public final class Promise<T> implements AsyncCallback<T> {
 
+    private static final Logger LOGGER = Logger.getLogger(Promise.class.getName());
 
     public enum State {
 
@@ -251,7 +253,7 @@ public final class Promise<T> implements AsyncCallback<T> {
 
     public final void reject(Throwable caught) {
 
-        GWT.log("Promise rejected", caught);
+        LOGGER.log(Level.WARNING, "Promise rejected", caught);
         
         if (state != State.PENDING) {
             return;
