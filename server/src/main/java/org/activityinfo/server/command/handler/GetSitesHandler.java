@@ -63,8 +63,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private MySqlCatalog catalog;
     private ColumnSetBuilder builder;
+    private ColumnSetBuilder linkedBuilder;
     private BatchingFormTreeBuilder batchFormTreeBuilder;
     private FormScanBatch batch;
+    private FormScanBatch linkedBatch;
     private SortInfo sortInfo;
 
     private Map<ResourceId,FormTree> formTreeMap;
@@ -265,9 +267,14 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         catalog = catalogProvider.get();
         if (catalog != null) {
             this.command = command;
+
             builder = new ColumnSetBuilder(catalog, new AppEngineFormScanCache(), new FormSupervisorAdapter(catalog, user.getId()));
+            linkedBuilder = new ColumnSetBuilder(catalog, new AppEngineFormScanCache(), new NullFormSupervisor());
             batchFormTreeBuilder = new BatchingFormTreeBuilder(catalog);
+
             batch = builder.createNewBatch();
+            linkedBatch = linkedBuilder.createNewBatch();
+
             sortInfo = command.getSortInfo();
             offset = command.getOffset();
             limit = command.getLimit();
@@ -650,7 +657,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private void batchQueries() {
         for (final Map.Entry<ResourceId,QueryModel> queryEntry : queryMap.entrySet()) {
-            enqueueQuery(queryEntry.getValue(), new Function<ColumnSet, Void>() {
+            enqueueQuery(
+                    linkedForm(queryEntry.getKey()),
+                    queryEntry.getValue(),
+                    new Function<ColumnSet, Void>() {
                 @Nullable
                 @Override
                 public Void apply(@Nullable ColumnSet columnSet) {
@@ -674,8 +684,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return linkedFormTreeMap != null && linkedFormTreeMap.containsKey(formId);
     }
 
-    private void enqueueQuery(QueryModel query, final Function<ColumnSet,Void> handler) {
-        final Slot<ColumnSet> result = builder.enqueue(query, batch);
+    private void enqueueQuery(boolean linked, QueryModel query, final Function<ColumnSet,Void> handler) {
+        final Slot<ColumnSet> result = linked ? linkedBuilder.enqueue(query,linkedBatch) : builder.enqueue(query,batch);
         queryResultHandlers.add(new Runnable() {
             @Override
             public void run() {
@@ -787,6 +797,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             TraceContext fetchTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/fetchColumns");
             queryFetchTime.start();
             builder.execute(batch);
+            linkedBuilder.execute(linkedBatch);
             queryFetchTime.stop();
             Trace.endSpan(fetchTrace);
         } catch (Exception excp) {
