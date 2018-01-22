@@ -57,10 +57,12 @@ task devMode(type: JavaExec) {
     dependsOn classes
     dependsOn ":chdc:database:update"
 
+    classpath project(':ui:app').sourceSets.main.java.srcDirs
     classpath project(':chdc:frontend').buildDir.absolutePath + "/theme"
     classpath project(':chdc:frontend').sourceSets.main.java.srcDirs
     classpath project(':chdc:frontend').sourceSets.main.resources.srcDirs
     classpath project(':chdc:frontend').sourceSets.main.runtimeClasspath
+
 
     classpath sourceSets.main.runtimeClasspath
 

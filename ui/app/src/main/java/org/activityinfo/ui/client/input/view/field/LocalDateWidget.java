@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.form.DateCell;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.form.DateField;
 import org.activityinfo.model.type.FieldValue;

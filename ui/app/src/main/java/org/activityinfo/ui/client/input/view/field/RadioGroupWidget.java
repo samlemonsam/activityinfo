@@ -1,8 +1,11 @@
 package org.activityinfo.ui.client.input.view.field;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.form.RadioCell;
 import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.InsertContainer;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.Radio;
 import org.activityinfo.model.resource.ResourceId;
@@ -21,19 +24,43 @@ import java.util.Map;
  */
 public class RadioGroupWidget implements FieldWidget {
 
-    private final FlowLayoutContainer container;
+    public interface Appearance {
+
+        InsertContainer createContainer();
+
+        RadioCell.RadioAppearance getRadioAppearance();
+    }
+
+    private static class DefaultApperance implements Appearance {
+
+        @Override
+        public InsertContainer createContainer() {
+            return new FlowLayoutContainer();
+        }
+
+        @Override
+        public RadioCell.RadioAppearance getRadioAppearance() {
+            return GWT.create(RadioCell.RadioAppearance.class);
+        }
+    }
+
+    private final InsertContainer container;
     private final ToggleGroup group;
     private final Map<ResourceId, CheckBox> radios = new HashMap<>();
 
     private boolean relevant = true;
 
     public RadioGroupWidget(EnumType type, FieldUpdater updater) {
+        this(type, new DefaultApperance(), updater);
+    }
 
-        container = new FlowLayoutContainer();
+    public RadioGroupWidget(EnumType type, Appearance appearance, FieldUpdater updater) {
+
+        container = appearance.createContainer();
         group = new ToggleGroup();
 
         for (EnumItem enumItem : type.getValues()) {
-            Radio radio = new Radio();
+            Radio radio = new Radio(new RadioCell(appearance.getRadioAppearance()));
             radio.setBoxLabel(enumItem.getLabel());
 
             group.add(radio);

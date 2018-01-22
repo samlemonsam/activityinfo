@@ -174,11 +174,11 @@ public class LocalDate implements FieldValue, PeriodValue {
     public static LocalDate parse(String text) {
         int dash1 = text.indexOf('-', 1);
         if(dash1 == -1) {
-            throw new CalendricalException("Cannot parse '" + text + "'");
+            throw new NumberFormatException("Cannot parse '" + text + "'");
         }
         int dash2 = text.indexOf('-', dash1+1);
         if(dash2 == -1) {
-            throw new CalendricalException("Cannot parse '" + text + "'");
+            throw new NumberFormatException("Cannot parse '" + text + "'");
         }
         int year = Integer.parseInt(text.substring(0, dash1));
         int month = Integer.parseInt(text.substring(dash1+1, dash2));
