@@ -215,7 +215,7 @@ public class DefaultQueryBuilder {
     }
 
     private ResourceId fieldFormula(FormField field) {
-        if(field.hasCode()) {
+        if(field.hasCode() && !field.getCode().isEmpty()) {
             return ResourceId.valueOf(field.getCode());
         } else {
             return field.getId();
@@ -223,7 +223,7 @@ public class DefaultQueryBuilder {
     }
 
     private String formatFieldAlias(FormField field) {
-        if (field.hasCode()) {
+        if (field.hasCode() && !field.getCode().isEmpty()) {
             return field.getCode();
         } else {
             return field.getLabel();
