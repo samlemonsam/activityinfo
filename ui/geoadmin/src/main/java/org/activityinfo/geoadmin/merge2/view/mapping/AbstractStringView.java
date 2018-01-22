@@ -3,6 +3,7 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
+import org.activityinfo.model.query.SortModel;
 
 public abstract class AbstractStringView implements ColumnView {
 
@@ -34,5 +35,10 @@ public abstract class AbstractStringView implements ColumnView {
     @Override
     public ColumnView select(int[] selectedRows) {
         return new FilteredColumnView(this, selectedRows);
+    }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        return sortVector;
     }
 }

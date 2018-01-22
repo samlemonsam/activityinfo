@@ -1,6 +1,8 @@
 package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.util.HeapsortColumn;
 
 /**
  * Compact ColumnView for numbers are all integers and have a range of less than 255
@@ -63,5 +65,27 @@ class IntColumnView16 extends AbstractNumberColumn {
             }
         }
         return new IntColumnView16(selectedValues, delta);
+    }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        int numRows = values.length;
+        switch(direction) {
+            case ASC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortAscending(values, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortAscending(values, sortVector, range.length, range);
+                }
+                break;
+            case DESC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortDescending(values, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
+                }
+                break;
+        }
+        return sortVector;
     }
 }

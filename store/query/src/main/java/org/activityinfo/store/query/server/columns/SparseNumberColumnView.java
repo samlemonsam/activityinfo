@@ -4,6 +4,7 @@ package org.activityinfo.store.query.server.columns;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
+import org.activityinfo.model.query.SortModel;
 
 class SparseNumberColumnView extends AbstractNumberColumn {
 
@@ -43,4 +44,12 @@ class SparseNumberColumnView extends AbstractNumberColumn {
     public ColumnView select(int[] rows) {
         return new FilteredColumnView(this, rows);
     }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        // TODO: SpareseNumberColumnView Sorting
+        // Do not sort on column
+        return sortVector;
+    }
+
 }

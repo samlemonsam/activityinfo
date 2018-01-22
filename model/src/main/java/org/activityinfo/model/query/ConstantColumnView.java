@@ -166,4 +166,9 @@ public class ConstantColumnView implements ColumnView, Serializable {
     public String toString() {
         return "[ " + get(0) + " x " + numRows + " rows ]";
     }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        return sortVector;
+    }
 }

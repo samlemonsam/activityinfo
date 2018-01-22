@@ -21,6 +21,20 @@ public class CompactingDoubleColumnBuilderTest {
     };
 
     @Test
+    public void intOverflow() {
+
+        // construct column which has absolute values greater than an int32, but within a range of int32 of each other
+        CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
+        builder.onNext(10316050152d);
+        builder.onNext(10316050151d);
+
+        ColumnView result = builder.build();
+        ColumnView doubleResult = builder.buildDouble();
+
+        assertEquivalent(result, doubleResult);
+    }
+
+    @Test
     public void number8() {
 
         CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
