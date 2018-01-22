@@ -1,14 +1,14 @@
 
 
-apply plugin: 'gwt-base'
-
 dependencies {
     compile     project(':model')
     compile     project(':store:query')
     testCompile project(':store:testing')
 
-    compile libraries.guava
-    gwt     libraries.gwt.guava
+    compile     libraries.guava
+
+    compileOnly libraries.gwt.user
+    testCompile libraries.gwt.user
 }
 
 test {

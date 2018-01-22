@@ -80,15 +80,11 @@ subprojects {
 buildscript {
   repositories {
     maven {
-      url 'http://dl.bintray.com/steffenschaefer/maven'
-    }
-    maven {
       url "https://plugins.gradle.org/m2/"
     }
     jcenter()
   }
   dependencies {
-    classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
     classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
     classpath 'com.moowork.gradle:gradle-grunt-plugin:0.12'
     classpath "com.moowork.gradle:gradle-node-plugin:0.12"

@@ -1,56 +1,49 @@
-apply plugin: 'gwt-base'
 
 
-gwt {
-    gwtVersion = gwtVersion
-    modules 'org.activityinfo.ui.ActivityInfoRelease'
-    maxHeapSize "5g"
-}
+
 
 ext {
     outputDir = "$buildDir/gwt-out"
 }
 
+
+configurations {
+    gwtSdk
+}
+
 dependencies {
 
-    gwt libraries.immutables.annotations
+    compile libraries.immutables.annotations
 
-    gwt project(':i18n')
-    gwt project(':model')
-    gwt project(':clients:gwtrpc')
-    gwt project(':clients:gwtrest')
-    gwt project(':io:match')
-    gwt project(':ui:icons')
+    compile project(':i18n')
+    compile project(':model')
+    compile project(':clients:gwtrpc')
+    compile project(':clients:gwtrest')
+    compile project(':io:match')
+    compile project(':ui:icons')
 
-    gwt libraries.gwt.user
-    gwt libraries.gxt
-    gwt libraries.gwt.gson
+    compile libraries.gwt.user
+    compile libraries.gxt
+    compile libraries.gwt.gson
 
-    gwt libraries.gwt.guice
-    gwt libraries.gwt.gson
-    gwt libraries.gwt.leaflet
-    gwt libraries.gwt.guava
+    compile libraries.gwt.guice
+    compile libraries.gwt.gson
+    compile libraries.gwt.leaflet
+    compile libraries.gwt.guava
 
-    gwt libraries.rebar.style
-    gwt libraries.rebar.appcache
+    compile libraries.rebar.style
+    compile libraries.rebar.appcache
 
-    gwt 'com.allen-sauer.gwt.dnd:gwt-dnd:3.3.0'
-    gwt 'com.googlecode.gwtquery:gwtquery:1.5-beta1'
-    gwt 'com.arcbees:gwtchosen:3.0'
+    compile 'com.allen-sauer.gwt.dnd:gwt-dnd:3.3.0'
+    compile 'com.googlecode.gwtquery:gwtquery:1.5-beta1'
+    compile 'com.arcbees:gwtchosen:3.0'
 
-    gwt group: 'com.google.inject', name: 'guice', version: '3.0', classifier: 'sources'
-    gwt 'javax.xml.bind:jaxb-api:2.3.0'
+    compile group: 'com.google.inject', name: 'guice', version: '3.0', classifier: 'sources'
+    compile 'javax.xml.bind:jaxb-api:2.3.0'
 
     gwtSdk libraries.gwt.dev
 
 }
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [ configurations.gwt ]
-    }
-}
-
 
 task compileApp(type: JavaExec) {
 
@@ -63,7 +56,6 @@ task compileApp(type: JavaExec) {
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs
     classpath sourceSets.main.runtimeClasspath
-    classpath configurations.gwt
     classpath configurations.gwtSdk
 
     main = 'com.google.gwt.dev.Compiler'

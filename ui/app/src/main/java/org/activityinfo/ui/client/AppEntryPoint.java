@@ -49,7 +49,7 @@ public class AppEntryPoint implements EntryPoint {
         Icons.INSTANCE.ensureInjected();
 
         AppCache appCache = new AppCache();
-        AppCacheMonitor monitor = new AppCacheMonitor(appCache);
+        AppCacheMonitor3 monitor = new AppCacheMonitor3(appCache);
         monitor.start();
 
         EventBus eventBus = new SimpleEventBus();

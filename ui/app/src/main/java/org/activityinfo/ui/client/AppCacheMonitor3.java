@@ -11,9 +11,9 @@ import java.util.logging.Logger;
  * Monitors for changes and the prompts the user to update when a new version
  * is available
  */
-public class AppCacheMonitor {
+public class AppCacheMonitor3 {
 
-    private static final Logger LOGGER = Logger.getLogger(AppCacheMonitor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AppCacheMonitor3.class.getName());
 
 
     private static final int EVERY_FIVE_MINUTES = 5 * 60 * 1000;
@@ -26,7 +26,7 @@ public class AppCacheMonitor {
      */
     private boolean userPrompted;
 
-    public AppCacheMonitor(AppCache appCache) {
+    public AppCacheMonitor3(AppCache appCache) {
         this.appCache = appCache;
     }
 

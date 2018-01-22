@@ -1,11 +1,11 @@
 
 dependencies {
-    compile "com.google.guava:guava:21.0"
-    compile "com.google.gwt:gwt-user:2.8.0"
-    compile project(':tools:promises')
+    compile libraries.guava
+    compileOnly libraries.gwt.user
     compile project(':tools:promises')
 
     testCompile project(':tools:json')
+    testCompile libraries.gwt.servlet
 
 }
 

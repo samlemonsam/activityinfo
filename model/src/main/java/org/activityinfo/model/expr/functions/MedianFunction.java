@@ -1,6 +1,7 @@
 package org.activityinfo.model.expr.functions;
 
-import com.google.gwt.core.client.GWT;
+
+import com.google.gwt.core.shared.GWT;
 
 import java.util.Arrays;
 
@@ -23,8 +24,6 @@ public class MedianFunction extends StatFunction {
 
     @Override
     public double compute(double[] values, int start, int end) {
-
-
 
         if(GWT.isScript()) {
             // Work-around for bug in GWT's Arrays.sort() implementation:

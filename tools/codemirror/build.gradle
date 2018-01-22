@@ -7,13 +7,13 @@ ext {
 
 dependencies {
     compile "net.codemirror:codemirror:${codemirrorVersion}@zip"
-    compile "com.google.gwt:gwt-user:2.8.0"
 }
 
 configurations {
     closureCompiler
 }
 dependencies {
+    compileOnly libraries.gwt.user
     closureCompiler 'com.google.javascript:closure-compiler:v20150609'
 }
 

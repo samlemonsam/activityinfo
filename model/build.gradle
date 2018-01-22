@@ -1,15 +1,14 @@
 
 description = 'ActivityInfo Model'
 
-apply plugin: 'gwt-base'
-
 dependencies {
     compile project(':tools:promises')
     compile project(':tools:json')
     compile project(':i18n')
 
-    gwt     libraries.gwt.user
+    compileOnly libraries.gwt.user
     runtime libraries.gwt.servlet
+
     compile libraries.guava
     compile libraries.rebar.time
     compile libraries.jsr305

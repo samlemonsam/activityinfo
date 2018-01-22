@@ -1,11 +1,9 @@
 
 apply plugin: 'com.moowork.grunt'
-apply plugin: 'gwt-base'
 
 dependencies {
-    compile project(':tools:promises')
-
-    gwt     libraries.gwt.user
+    compile  project(':tools:promises')
+    compileOnly libraries.gwt.user
 }
 
 node {
