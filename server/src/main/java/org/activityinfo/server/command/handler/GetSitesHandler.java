@@ -238,6 +238,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             batchQueries();
             executeBatch();
             mergeMonthlyRootSites();
+            setSitesLinkedStatus();
             sort();
         } catch (CommandException excp) {
             // If we catch a *Command* Exception, lets try the legacy method
@@ -829,6 +830,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         }
         monthlyMergeTime.stop();
         Trace.endSpan(monthlyMergeTrace);
+    }
+
+    private void setSitesLinkedStatus() {
+        for (SiteDTO linkedSite : linkedSiteList) {
+            linkedSite.setLinked(true);
+        }
     }
 
     private void sort() {
