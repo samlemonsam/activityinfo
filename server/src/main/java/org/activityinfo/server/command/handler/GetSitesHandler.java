@@ -12,10 +12,7 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.impl.OldGetSitesHandler;
-import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.legacy.shared.model.ProjectDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -72,12 +69,13 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private Map<ResourceId,FormTree> formTreeMap;
     private Map<ResourceId,FormTree> linkedFormTreeMap;
 
-    private Map<ResourceId,QueryModel> queryMap = new HashMap<>();
+    private Map<ResourceId,QueryModel> queryMap = new LinkedHashMap<>();
     private Map<ResourceId,List<FieldBinding>> fieldBindingMap = new HashMap<>();
     private List<Runnable> queryResultHandlers = new ArrayList<>();
 
     private Map<Integer,Activity> activities;
     private Map<Integer,Activity> linkedActivities;
+    private Map<Integer,Activity> selfLinkedActivities;
 
     private int offset;
     private int limit;
@@ -276,6 +274,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             batch = builder.createNewBatch();
             linkedBatch = linkedBuilder.createNewBatch();
 
+            selfLinkedActivities = Maps.newHashMap();
+
             sortInfo = command.getSortInfo();
             offset = command.getOffset();
             limit = command.getLimit();
@@ -372,19 +372,27 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             return;
         }
         for (Activity activity : activities.values()) {
-            if (activity.getLinkedActivities().isEmpty()) {
-                continue;
-            }
-            Iterator<LinkedActivity> links = activity.getLinkedActivities().iterator();
-            while (links.hasNext()) {
-                ActivityLink activityLink = new ActivityLink(activity.getId());
-                LinkedActivity linkedActivity = links.next();
+            addSelfLink(activity);
+            addExternalLinks(activity);
+        }
+    }
 
-                activityLink.buildIndicatorMap(activity, linkedActivity);
-                activityLink.buildAttributeMap(activity, linkedActivities.get(linkedActivity.getActivityId()));
+    private void addSelfLink(Activity activity) {
+        if (!activity.getSelfLinkedIndicators().isEmpty()) {
+            selfLinkedActivities.put(activity.getId(), activity);
+        }
+    }
 
-                addToLinkMap(activityLink, linkedActivity);
-            }
+    private void addExternalLinks(Activity activity) {
+        Iterator<LinkedActivity> links = activity.getLinkedActivities().iterator();
+        while (links.hasNext()) {
+            ActivityLink activityLink = new ActivityLink(activity.getId());
+            LinkedActivity linkedActivity = links.next();
+
+            activityLink.buildIndicatorMap(activity, linkedActivity);
+            activityLink.buildAttributeMap(activity, linkedActivities.get(linkedActivity.getActivityId()));
+
+            addToLinkMap(activityLink, linkedActivity);
         }
     }
 
@@ -665,16 +673,26 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 @Nullable
                 @Override
                 public Void apply(@Nullable ColumnSet columnSet) {
-                    List<FieldBinding> fieldBindings = fieldBindingMap.get(queryEntry.getKey());
+                    ResourceId activityId = queryEntry.getKey();
+                    List<FieldBinding> fieldBindings = fieldBindingMap.get(activityId);
+                    List<SiteDTO> extractedSites;
 
-                    if (linkedForm(queryEntry.getKey())) {
-                        linkedSiteList.addAll(extractLinkedSites(fieldBindings, columnSet));
-                    } else if (monthlyReportForm(queryEntry.getKey())) {
-                        monthlySiteList.addAll(extractLinkedSites(fieldBindings, columnSet));
+                    if (linkedForm(activityId)) {
+                        extractedSites = extractLinkedSites(fieldBindings, columnSet);
+                        linkedSiteList.addAll(extractedSites);
                     } else {
-                        extractSites(fieldBindings, columnSet);
-                    }
+                        if (monthlyReportForm(activityId)) {
+                            extractedSites = extractLinkedSites(fieldBindings, columnSet);
+                            monthlySiteList.addAll(extractedSites);
+                        } else {
+                            extractedSites = extractSites(fieldBindings, columnSet);
+                            siteList.addAll(extractedSites);
+                        }
 
+                        if (selfLinkedActivities.containsKey(CuidAdapter.getLegacyIdFromCuid(activityId))) {
+                            siteList.addAll(copySelfLinkedSites(extractedSites));
+                        }
+                    }
                     return null;
                 }
             });
@@ -696,17 +714,39 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         });
     }
 
-    private void extractSites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
+    private List<SiteDTO> extractSites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
         if (acceptResult(columnSet.getNumRows())) {
+            SiteDTO[] sites;
             if (command.isFetchAllReportingPeriods()) {
-                SiteDTO[] sites = extractSiteData(fieldBindings, columnSet);
+                sites = extractSiteData(fieldBindings, columnSet);
                 addMonthlyRootSites(sites);
+                return Collections.emptyList();
             } else {
                 totalResultLength = totalResultLength + columnSet.getNumRows();
-                SiteDTO[] sites = extractSiteData(fieldBindings, columnSet);
-                siteList.addAll(Lists.newArrayList(sites));
+                sites = extractSiteData(fieldBindings, columnSet);
+                return Lists.newArrayList(sites);
             }
         }
+        return Collections.emptyList();
+    }
+
+    private List<SiteDTO> copySelfLinkedSites(List<SiteDTO> sites) {
+        List<SiteDTO> selfLinkedSites = new ArrayList<SiteDTO>(sites.size());
+
+        for (SiteDTO site : sites) {
+            SiteDTO selfLinkCopy = new SiteDTO(site);
+
+            // Strip of indicator and attribute properties - except for linked indicators
+            for (String property : site.getPropertyNames()) {
+                if (property.startsWith(AttributeDTO.PROPERTY_PREFIX) || property.startsWith(IndicatorDTO.PROPERTY_PREFIX)) {
+                    selfLinkCopy.remove(property);
+                }
+            }
+
+            linkedSiteList.add(selfLinkCopy);
+            selfLinkedSites.add(selfLinkCopy);
+        }
+        return selfLinkedSites;
     }
 
     private List<SiteDTO> extractLinkedSites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {

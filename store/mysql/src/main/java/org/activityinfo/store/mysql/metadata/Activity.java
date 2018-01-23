@@ -64,10 +64,13 @@ public class Activity implements Serializable {
     Map<ResourceId, Integer> fieldsOrder = Maps.newHashMap();
 
     /**
-     * Map from destination indicator to it source indicators
+     * Map from destination indicator to source indicators, within the same activity
      */
-    Multimap<Integer, Integer> linkedIndicators = HashMultimap.create();
-    
+    Multimap<Integer, Integer> selfLinkedIndicators = HashMultimap.create();
+
+    /**
+     * Map from destination indicator to source indicators, from an external activity form
+     */
     Map<Integer, LinkedActivity> linkedActivities = Maps.newHashMap();
 
     public int getId() {
@@ -243,7 +246,7 @@ public class Activity implements Serializable {
     
     void addLink(int destinationIndicatorId, int sourceActivityId, int sourceReportingFrequency, int sourceIndicatorId) {
         if(sourceActivityId == this.activityId) {
-            linkedIndicators.put(destinationIndicatorId, sourceIndicatorId);
+            selfLinkedIndicators.put(destinationIndicatorId, sourceIndicatorId);
         } else {
             LinkedActivity linkedActivity = linkedActivities.get(sourceActivityId);
             if(linkedActivity == null) {
@@ -268,8 +271,12 @@ public class Activity implements Serializable {
         for (ActivityField indicatorField : getIndicatorFields()) {
             linked.linkMap.put(indicatorField.getId(), indicatorField.getId());
         }
-        linked.linkMap.putAll(linkedIndicators);
+        linked.linkMap.putAll(selfLinkedIndicators);
         return linked;
+    }
+
+    public Multimap<Integer, Integer> getSelfLinkedIndicators() {
+        return selfLinkedIndicators;
     }
 
     public FormClass getSerializedFormClass() {
