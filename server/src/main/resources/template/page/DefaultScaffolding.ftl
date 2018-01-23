@@ -11,21 +11,15 @@
     <link rel="stylesheet" href="/about/assets/css/style.css">
     <link rel="icon" href="/about/assets/images/logo-activityinfo.png">
 
-    <script type="text/javascript">
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-11567120-1']);
-        _gaq.push(['_setDomainName', 'activityinfo.org']);
-        _gaq.push(['_trackPageview']);
-
-        (function () {
-            var ga = document.createElement('script');
-            ga.type = 'text/javascript';
-            ga.async = true;
-            ga.src = 'https://ssl.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(ga, s);
-        })();
-    </script>
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-11567120-1', 'auto');
+      ga('set', 'anonymizeIp', true);
+      ga('send', 'pageview');
+  </script>
 </head>
 <body>
 <nav class="skiplinks">
@@ -36,18 +30,20 @@
 
 <header role="banner">
 
-    <nav role="navigation" id="navigation">
-        <h1 class="logo"><img src="/about/assets/images/logo-activityinfo.png" alt=""><a href="/">ActivityInfo</a></h1>
+    <div class="fixednav">
+        <nav role="navigation" id="navigation">
+            <h1 class="logo"><a href="/"><img src="/about/assets/images/logo-activityinfo.png" alt="">ActivityInfo</a></h1>
 
-        <ul>
-            <li><a href="/about/benefits.html">Benefits</a></li>
-            <li><a href="/about/features.html">Features</a></li>
-            <li><a href="/about/pricing.html">Pricing</a></li>
-            <li><a href="/blog/index.html">Blog</a></li>
-            <li class="cta cta-signup"><a href="/signUp">Get Free Account</a></li>
-            <li class="cta"><a href="/login">Log In</a></li>
-        </ul>
-    </nav>
+            <ul>
+                <li><a href="/about/benefits.html">Benefits</a></li>
+                <li><a href="/about/features.html">Features</a></li>
+                <li><a href="/about/pricing.html">Pricing</a></li>
+                <li><a href="/blog/index.html">Blog</a></li>
+                <li class="cta cta-login"><a href="/login">Log In</a></li>
+                <li class="cta cta-signup"><a href="/signUp">Get Free Account</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
 
 <main role="main" id="main">
@@ -104,7 +100,7 @@
 
             <li>
                 <img src="/about/assets/images/bdd-logo.svg" alt="BeDataDriven logo">
-                <p>&copy; 2017 BeDataDriven</p>
+                <p itemprop="publisher" itemscope itemtype="http://schema.org/Organization">&copy; 2017 <span itemprop="name">BeDataDriven B.V.</span></p>
             </li>
         </ul>
     </nav>
