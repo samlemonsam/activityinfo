@@ -55,7 +55,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         private final List<CountryDTO> countryList = new ArrayList<CountryDTO>();
 
         private final Map<Integer, UserDatabaseDTO> databaseMap = new HashMap<Integer, UserDatabaseDTO>();
-
+        private final Map<Integer, FolderDTO> folders = new HashMap<>();
         private final Map<Integer, CountryDTO> countries = new HashMap<Integer, CountryDTO>();
         private final Map<Integer, PartnerDTO> partners = new HashMap<Integer, PartnerDTO>();
         private final Map<Integer, ActivityDTO> activities = new HashMap<>();

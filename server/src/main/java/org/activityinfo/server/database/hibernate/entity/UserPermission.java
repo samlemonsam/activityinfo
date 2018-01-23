@@ -54,6 +54,7 @@ public class UserPermission implements Serializable {
     private boolean allowDesign;
     private boolean allowManageUsers;
     private boolean allowManageAllUsers;
+    private String activityCategory;
     private long version;
 
     public UserPermission() {
@@ -279,6 +280,18 @@ public class UserPermission implements Serializable {
 
     public void setAllowManageAllUsers(boolean allowManageAllUsers) {
         this.allowManageAllUsers = allowManageAllUsers;
+    }
+
+    /**
+     *
+     * @return a JSON-encoded array of activity categories to which this user's permissions are restricted.
+     */
+    public String getActivityCategory() {
+        return activityCategory;
+    }
+
+    public void setActivityCategory(String activityCategory) {
+        this.activityCategory = activityCategory;
     }
 
     /**

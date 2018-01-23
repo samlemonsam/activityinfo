@@ -36,6 +36,8 @@ import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -62,7 +64,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DbUserEditor extends ContentPanel implements DbPage, ActionListener {
+
+
     public static final PageId PAGE_ID = new PageId("dbusers");
+
+    private static final SafeHtml ALL_CATEGORIES = new SafeHtmlBuilder()
+            .appendHtmlConstant("<i>").appendEscaped(I18N.CONSTANTS.all()).appendHtmlConstant("</i>").toSafeHtml();
 
     private final EventBus eventBus;
     private final Dispatcher dispatcher;
@@ -152,6 +159,30 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         columns.add(new ColumnConfig("email", I18N.CONSTANTS.email(), 150));
         columns.add(new ColumnConfig("partner", I18N.CONSTANTS.partner(), 150));
 
+        ColumnConfig categoryColumn = new ColumnConfig("category", I18N.CONSTANTS.category(), 150);
+        categoryColumn.setRenderer(new GridCellRenderer() {
+            @Override
+            public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
+                if (modelData instanceof UserPermissionDTO) {
+                    UserPermissionDTO permission = new UserPermissionDTO();
+                    if (permission.hasCategoryRestriction()) {
+                        SafeHtmlBuilder html = new SafeHtmlBuilder();
+                        boolean needsComma = false;
+                        for (String category : permission.getActivityCategories()) {
+                            if (needsComma) {
+                                html.appendHtmlConstant(", ");
+                            }
+                            html.appendEscaped(category);
+                            needsComma = true;
+                        }
+                        return html.toSafeHtml();
+                    }
+                }
+                return ALL_CATEGORIES;
+            }
+        });
+        columns.add(categoryColumn);
+
         PermissionCheckConfig allowView = new PermissionCheckConfig("allowViewSimple", I18N.CONSTANTS.allowView(), 75);
         allowView.setDataIndex("allowView");
         allowView.setToolTip(I18N.CONSTANTS.allowViewLong());
@@ -189,7 +220,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         allowDesign.setToolTip(I18N.CONSTANTS.allowDesignLong());
         columns.add(allowDesign);
 
-        grid = new Grid<UserPermissionDTO>(store, new ColumnModel(columns));
+        grid = new Grid<>(store, new ColumnModel(columns));
         grid.setLoadMask(true);
         grid.setSelectionModel(new GridSelectionModel<UserPermissionDTO>());
         grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<UserPermissionDTO>() {
@@ -394,7 +425,17 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             command.setOffset(config.getOffset());
             command.setLimit(config.getLimit());
             command.setSortInfo(config.getSortInfo());
-            dispatcher.execute(command, callback);
+            dispatcher.execute(command, new AsyncCallback<UserResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(caught);
+                }
+
+                @Override
+                public void onSuccess(UserResult result) {
+                    callback.onSuccess(result);
+                }
+            });
         }
     }
 }

@@ -31,6 +31,8 @@ import org.codehaus.jackson.annotate.JsonSetter;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.List;
+
 /**
  * Projection DTO of the
  * {@link org.activityinfo.server.database.hibernate.entity.UserPermission
@@ -40,6 +42,9 @@ import org.hibernate.validator.constraints.Length;
  */
 @JsonAutoDetect(JsonMethod.NONE)
 public final class UserPermissionDTO extends BaseModelData implements DTO {
+
+    private List<String> activityCategories;
+
 
     public UserPermissionDTO() {
         setAllowView(true);
@@ -175,7 +180,14 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
     public void setPartner(PartnerDTO value) {
         set("partner", value);
     }
-    
+
+    public List<String> getActivityCategories() {
+        return activityCategories;
+    }
+
+    public void setActivityCategories(List<String> activityCategories) {
+        this.activityCategories = activityCategories;
+    }
 
     @JsonSetter
     public void setPartnerId(int partnerId) {
@@ -196,5 +208,8 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
                 ",manageAllUsers=" + getAllowManageAllUsers() +
                 "}";
     }
-    
+
+    public boolean hasCategoryRestriction() {
+        return activityCategories != null && !activityCategories.isEmpty();
+    }
 }

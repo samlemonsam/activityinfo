@@ -29,15 +29,15 @@ import java.util.List;
 /**
  * @author yuriyz on 10/07/2014.
  */
-public class ActivityCategory extends BaseModelData implements ProvidesKey {
+public class FolderDTO extends BaseModelData implements ProvidesKey {
 
     private List<ActivityDTO> activities = new ArrayList<ActivityDTO>();
     private int databaseId;
 
-    public ActivityCategory() {
+    public FolderDTO() {
     }
 
-    public ActivityCategory(int databaseId, String name) {
+    public FolderDTO(int databaseId, String name) {
         this.databaseId = databaseId;
         set("name", name);
     }
@@ -56,7 +56,7 @@ public class ActivityCategory extends BaseModelData implements ProvidesKey {
         return activities;
     }
 
-    public ActivityCategory addActivity(ActivityDTO activityDTO) {
+    public FolderDTO addActivity(ActivityDTO activityDTO) {
         activities.add(activityDTO);
         return this;
     }
@@ -67,7 +67,7 @@ public class ActivityCategory extends BaseModelData implements ProvidesKey {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ActivityCategory that = (ActivityCategory) o;
+        FolderDTO that = (FolderDTO) o;
 
         if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
 
