@@ -37,7 +37,9 @@ import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.grid.EditorSupport;
+import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
+import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.extjs.gxt.ui.client.widget.menu.SeparatorMenuItem;
@@ -79,6 +81,7 @@ import org.activityinfo.ui.client.page.config.DbPageState;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImportDialog;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporterV2;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporterV3;
+import org.activityinfo.ui.client.page.config.form.FolderForm;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
@@ -135,6 +138,7 @@ public class DesignPresenter implements DbPage, IsWidget {
 
         treeStore = new TreeStore<>();
         tree = new TreePanel<>(treeStore);
+        tree.setDisplayProperty("name");
         tree.setIconProvider(model -> {
             if (model instanceof IsActivityDTO) {
                 IsActivityDTO activity = (IsActivityDTO) model;
@@ -191,9 +195,15 @@ public class DesignPresenter implements DbPage, IsWidget {
         target.addDNDListener(new DragDropListener(treeStore));
 
         toolBar = new ActionToolBar(this::onUIAction);
+        initToolBar();
 
+        ContentPanel treeContainer = new ContentPanel();
+        treeContainer.setHeaderVisible(false);
+        treeContainer.setLayout(new FitLayout());
+        treeContainer.add(tree);
 
         formContainer = new ContentPanel();
+        formContainer.setHeadingText("Testing");
         formContainer.setHeaderVisible(false);
         formContainer.setBorders(false);
         formContainer.setFrame(false);
@@ -206,7 +216,9 @@ public class DesignPresenter implements DbPage, IsWidget {
         formLayout.setMargins(new Margins(0, 0, 0, 5));
 
         container = new ContentPanel();
-        container.add(tree, new BorderLayoutData(Style.LayoutRegion.CENTER));
+        container.setLayout(new BorderLayout());
+        container.setTopComponent(toolBar);
+        container.add(treeContainer, new BorderLayoutData(Style.LayoutRegion.CENTER));
         container.add(formContainer, formLayout);
     }
 
@@ -214,6 +226,8 @@ public class DesignPresenter implements DbPage, IsWidget {
     public void go(UserDatabaseDTO db) {
 
         this.db = db;
+
+        container.setHeadingText(I18N.CONSTANTS.design() + " - "  + db.getName());
 
         fillStore(messages);
 
@@ -282,7 +296,7 @@ public class DesignPresenter implements DbPage, IsWidget {
 
             ActivityDTO activityNode = new ActivityDTO(activity);
             if(activity.getFolder() != null) {
-                treeStore.add(activity.getFolder(), activity, false);
+                treeStore.add(activity.getFolder(), activityNode, false);
             } else {
                 treeStore.add(activityNode, false);
             }
@@ -649,7 +663,7 @@ public class DesignPresenter implements DbPage, IsWidget {
 
         Button newButtonMenu = new Button(I18N.CONSTANTS.newText(), IconImageBundle.ICONS.add());
         newButtonMenu.setMenu(newMenu);
-        newButtonMenu.setEnabled(db.isDesignAllowed());
+//        newButtonMenu.setEnabled(db.isDesignAllowed());
         toolBar.add(newButtonMenu);
 
         toolBar.add(new SeparatorMenuItem());
@@ -757,6 +771,8 @@ public class DesignPresenter implements DbPage, IsWidget {
             return AttributeForm.class;
         } else if (sel instanceof LocationTypeDTO) {
             return LocationTypeForm.class;
+        } else if (sel instanceof FolderDTO) {
+            return FolderForm.class;
         }
 
         return null;
@@ -766,6 +782,8 @@ public class DesignPresenter implements DbPage, IsWidget {
     protected AbstractDesignForm createForm(ModelData sel) {
         if (sel instanceof IsActivityDTO) {
             return new ActivityForm(service, db);
+        } else if (sel instanceof FolderDTO) {
+            return new FolderForm();
         } else if (sel instanceof AttributeGroupDTO) {
             return new AttributeGroupForm();
         } else if (sel instanceof AttributeDTO) {
