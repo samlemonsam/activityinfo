@@ -475,6 +475,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     activity.setPublished(row.getInt("published"));
                     activity.setClassicView(row.getBoolean("classicView"));
 
+
                     int databaseId = row.getInt("databaseId");
                     UserDatabaseDTO database = databaseMap.get(databaseId);
                     activity.setDatabase(database);
@@ -494,6 +495,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         int folderId = row.getInt("folderId");
                         FolderDTO folder = folders.get(folderId);
                         if(folder != null) {
+                            activity.setFolder(folder);
                             folder.getActivities().add(activity);
                         }
                     }

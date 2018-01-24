@@ -28,8 +28,6 @@ package org.activityinfo.ui.client.page.config;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.LockedPeriodListEditor;
-import org.activityinfo.ui.client.page.config.design.DesignPresenter;
-import org.activityinfo.ui.client.page.config.design.DesignView;
 
 /**
  * @author Alex Bertram
@@ -43,7 +41,6 @@ public class ConfigModule extends AbstractGinModule {
         bind(DbListPresenter.View.class).to(DbListPage.class);
         bind(DbPartnerEditor.View.class).to(DbPartnerGrid.class);
         bind(DbProjectEditor.View.class).to(DbProjectGrid.class);
-        bind(DesignPresenter.View.class).to(DesignView.class);
         bind(LockedPeriodListEditor.class).to(LockedPeriodGrid.class);
         bind(DbTargetEditor.View.class).to(DbTargetGrid.class);
     }

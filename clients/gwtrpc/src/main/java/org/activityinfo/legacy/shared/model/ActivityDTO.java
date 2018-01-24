@@ -25,6 +25,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     public static final String ENTITY_NAME = "Activity";
 
     private UserDatabaseDTO database;
+    private FolderDTO folder;
 
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
     private List<PartnerDTO> partnerRange = Lists.newArrayList();
@@ -159,6 +160,13 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         return get("classicView");
     }
 
+    public FolderDTO getFolder() {
+        return folder;
+    }
+
+    public void setFolder(FolderDTO folder) {
+        this.folder = folder;
+    }
 
     /**
      * Sets the ReportingFrequency of this Activity, either
