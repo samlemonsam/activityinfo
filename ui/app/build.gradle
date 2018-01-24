@@ -21,34 +21,25 @@ jar {
     from project.sourceSets.main.output.generatedSourcesDir
 }
 
-sourceSets {
 
-    // Define a seperate sourceSet for GWT test cases that
-    // are actually compiled to JavaScript and then executed.
-    // These require a different classpath than our normal Junit tests
-    gwtTest {
-        java {
-            srcDir 'src/testgwt/java'
-            compileClasspath += main.output
-            runtimeClasspath += main.output
-        }
-    }
+test {
+    // Browser tests that require special handling
+    exclude '**/*GwtTest.*'
 }
 
+
 configurations {
-    gwt
     gwtSdk
 }
 
-
-
 dependencies {
-
-    compile libraries.gwt.user
-
     compile "com.google.guava:guava:21.0"
 
     compile libraries.immutables.annotations
+
+    compile libraries.gwt.user
+    compile 'com.google.guava:guava-gwt:21.0'
+    compile libraries.gwt.gson
 
     compile project(':model')
     compile project(':store:query');
@@ -72,17 +63,14 @@ dependencies {
     testCompile project(':store:testing')
     testCompile project(':tools:indexeddb').sourceSets.test.output
 
-    // Sources need for compiling to JavaScript
-    gwt 'com.google.guava:guava-gwt:21.0'
-    gwt libraries.gwt.gson
-
-    // Sources need for compiling tests to JavaScript
-    gwtTestCompile libraries.gwt.user
-
-    // Toolkit that includes Java->JavaScript compiler
     gwtSdk libraries.gwt.dev
 
+}
 
+configurations.all {
+
+    // Interferes with GWT-dev
+    exclude module: 'gwt-servlet'
 }
 
 
@@ -96,7 +84,6 @@ task compileApp(type: JavaExec) {
     classpath sourceSets.main.resources.srcDirs
     classpath sourceSets.main.runtimeClasspath
     classpath sourceSets.main.output.generatedSourcesDir
-    classpath configurations.gwt
     classpath configurations.gwtSdk
 
     main = 'com.google.gwt.dev.Compiler'

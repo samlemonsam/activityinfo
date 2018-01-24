@@ -6,9 +6,6 @@ dependencies {
     testCompile project(':store:testing')
 
     compile     libraries.guava
-
-    compileOnly libraries.gwt.user
-    testCompile libraries.gwt.user
 }
 
 test {
@@ -23,5 +20,4 @@ test {
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output
-    from project.sourceSets.main.output.generatedSourcesDir
 }

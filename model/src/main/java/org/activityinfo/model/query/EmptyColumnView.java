@@ -59,4 +59,9 @@ public class EmptyColumnView implements ColumnView, Serializable {
     public String toString() {
         return "[ " + numRows() + " empty values ]";
     }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        return sortVector;
+    }
 }

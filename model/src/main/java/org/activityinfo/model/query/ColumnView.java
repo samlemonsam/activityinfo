@@ -35,4 +35,16 @@ public interface ColumnView extends Serializable {
      * @return a new ColumnView containing the selected rows.
      */
     ColumnView select(int[] rows);
+
+    /**
+     * Order the column rows in the given {@code direction},
+     * within the given row {@code range}
+     *
+     * @param sortVector int array of sorted row indices
+     * @param direction of ordering
+     * @param range of rows to order
+     * @return int array of the reordered row index
+     */
+    int[] order(int[] sortVector, SortModel.Dir direction, int[] range);
+
 }

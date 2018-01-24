@@ -1,20 +1,24 @@
 package org.activityinfo.server.command.handler.binding;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.model.expr.CompoundExpr;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
 
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+
+import static org.activityinfo.server.command.handler.GetSitesHandler.getRange;
 
 public class LocationFieldBinding implements FieldBinding {
 
@@ -30,50 +34,116 @@ public class LocationFieldBinding implements FieldBinding {
 
     private static final ConstantExpr ZEROED_ID = new ConstantExpr(0);
 
-    private FormClass locationForm;
-    private boolean isAdminLevelDomain;
+    private final FormField locationField;
+    private List<ResourceId> bound = Lists.newArrayList();
+    private List<FieldBinding> locationBindings = Lists.newArrayList();
 
-    public LocationFieldBinding(FormClass locationForm) {
-        this.locationForm = locationForm;
-        Character domain = locationForm.getId().getDomain();
-        this.isAdminLevelDomain = domain.equals(CuidAdapter.ADMIN_LEVEL_DOMAIN);
+    public LocationFieldBinding(FormField locationField) {
+        this.locationField = locationField;
     }
 
     @Override
     public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {
-        ColumnView id = columnSet.getColumnView(LOCATION_ID_COLUMN);
-        ColumnView name = columnSet.getColumnView(LOCATION_NAME_COLUMN);
-        ColumnView code = columnSet.getColumnView(LOCATION_CODE_COLUMN);
-
-        for (int i=0; i<columnSet.getNumRows(); i++) {
-            if (isAdminLevelDomain) {
-                Double idVal = id.getDouble(i);
-                dataArray[i].set(LOCATION_ID_COLUMN, idVal.intValue());
-            } else {
-                String idVal = id.getString(i);
-                dataArray[i].set(LOCATION_ID_COLUMN, CuidAdapter.getLegacyIdFromCuid(idVal));
-            }
-            dataArray[i].set(LOCATION_NAME_COLUMN, name.getString(i));
-            dataArray[i].set(LOCATION_CODE_COLUMN, code.getString(i));
+        for (FieldBinding locationBinding : locationBindings) {
+            locationBinding.extractFieldData(dataArray, columnSet);
         }
-
         return dataArray;
     }
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        return getTargetColumnQuery(locationForm.getId());
+        locationBindings.clear();
+
+        // Query for generic location info - exists regardless of location range or type
+        locationBindings.add(new GenericLocationFieldBinding());
+
+        Iterator<ResourceId> locationRange = getRange(locationField);
+        while (locationRange.hasNext()) {
+            ResourceId locationReference = locationRange.next();
+            FormClass locationForm = formTree.getFormClass(locationReference);
+            buildLocationBindings(locationForm, formTree);
+        }
+
+        return buildColumnQuery(formTree);
+    }
+
+    private List<ColumnModel> buildColumnQuery(FormTree formTree) {
+        List<ColumnModel> columnQuery = Lists.newArrayList();
+        for (FieldBinding locationBinding : locationBindings) {
+            columnQuery.addAll(locationBinding.getColumnQuery(formTree));
+        }
+        return columnQuery;
+    }
+
+    private void buildLocationBindings(FormClass locationForm, FormTree formTree) {
+        if (alreadyBound(locationForm.getId())) {
+            return;
+        }
+        switch(locationForm.getId().getDomain()) {
+            case CuidAdapter.LOCATION_TYPE_DOMAIN:
+                buildGeoBindings(locationForm);
+                buildAdminBindings(locationForm, formTree, CuidAdapter.ADMIN_FIELD);
+                break;
+            case CuidAdapter.ADMIN_LEVEL_DOMAIN:
+                locationBindings.add(new AdminEntityBinding(locationForm));
+                buildGeoBindings(locationForm);
+                buildAdminBindings(locationForm, formTree, CuidAdapter.ADMIN_PARENT_FIELD);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private boolean alreadyBound(ResourceId locationFormId) {
+        if (!bound.contains(locationFormId)) {
+            bound.add(locationFormId);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void buildGeoBindings(FormClass locationForm) {
+        Optional<FormField> potentialGeoField = locationForm.getFieldIfPresent(CuidAdapter.field(locationForm.getId(),CuidAdapter.GEOMETRY_FIELD));
+        if (potentialGeoField.isPresent()) {
+            FormField geoField = potentialGeoField.get();
+            if (geoField.getType() instanceof GeoPointType) {
+                locationBindings.add(new GeoPointFieldBinding(geoField.getId()));
+            } else if (geoField.getType() instanceof GeoAreaType && (geoField.getId().getDomain() != CuidAdapter.ADMIN_LEVEL_DOMAIN)) {
+                // Do not add a geoarea query for an admin level form - query engine cannot support currently
+                locationBindings.add(new GeoAreaFieldBinding(locationForm.getId()));
+            }
+        }
+    }
+
+    private void buildAdminBindings(FormClass locationForm, FormTree formTree, int adminFieldIndex) {
+        Optional<FormField> potentialAdminField = locationForm.getFieldIfPresent(CuidAdapter.field(locationForm.getId(), adminFieldIndex));
+        if (potentialAdminField.isPresent()) {
+            FormField adminField = potentialAdminField.get();
+            Iterator<ResourceId> adminLevelRange = getRange(adminField);
+            while (adminLevelRange.hasNext()) {
+                ResourceId adminLevelId = adminLevelRange.next();
+                buildLocationBindings(formTree.getFormClass(adminLevelId), formTree);
+            }
+        }
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        ExprNode idExpr;
-        idExpr = isAdminLevelDomain ? ZEROED_ID : LOCATION_SYMBOL;
-        return Arrays.asList(
-                new ColumnModel().setExpression(idExpr).as(LOCATION_ID_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,NAME_SYMBOL)).as(LOCATION_NAME_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,CODE_SYMBOL)).as(LOCATION_CODE_COLUMN)
-        );
+        locationBindings.clear();
+
+        // Query for generic location info - exists regardless of location range or type
+        locationBindings.add(new GenericLocationFieldBinding());
+
+        return buildColumnQuery(targetFormId);
+    }
+
+    private List<ColumnModel> buildColumnQuery(ResourceId targetFormId) {
+        List<ColumnModel> columnQuery = Lists.newArrayList();
+        for (FieldBinding locationBinding : locationBindings) {
+            columnQuery.addAll(locationBinding.getTargetColumnQuery(targetFormId));
+        }
+        return columnQuery;
     }
 
 }

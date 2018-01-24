@@ -28,8 +28,8 @@ public class QueryModel implements JsonSerializable {
     private final List<RowSource> rowSources = Lists.newArrayList();
     private final List<ColumnModel> columns = Lists.newArrayList();
 
+    private List<SortModel> sortModels = Lists.newArrayList();
     private ExprNode filter;
-
 
     public QueryModel() {
     }
@@ -40,6 +40,18 @@ public class QueryModel implements JsonSerializable {
      */
     public QueryModel(ResourceId formId) {
         rowSources.add(new RowSource(formId));
+    }
+
+    public List<SortModel> getSortModels() {
+        return sortModels;
+    }
+
+    public void setSortModels(List<SortModel> sortModels) {
+        this.sortModels = sortModels;
+    }
+
+    public void addSortModel(SortModel sortModel) {
+        this.sortModels.add(sortModel);
     }
 
     public List<RowSource> getRowSources() {

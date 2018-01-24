@@ -23,9 +23,9 @@ sourceSets {
 dependencies {
     compile libraries.guava
     compile group: 'net.lightoze.gwt-i18n-server', name: 'gwt-i18n-server', version: '0.22', classifier: 'original'
-
-    compileOnly libraries.gwt.user
-
+    compile libraries.gwt.user
+    compile libraries.gwt.guava
+    
     toolCompile   libraries.jersey.client
     toolCompile   libraries.jersey.json
     toolCompile   libraries.jersey.multipart

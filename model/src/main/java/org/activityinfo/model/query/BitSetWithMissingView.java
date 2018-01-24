@@ -96,4 +96,11 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
             return new BitSetWithMissingView(selectedRows.length, filtered, filteredMissing);
         }
     }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        // TODO: BitSet Sorting
+        // Do not sort on column
+        return sortVector;
+    }
 }

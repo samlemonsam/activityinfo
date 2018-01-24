@@ -1,5 +1,7 @@
 package org.activityinfo.model.query;
 
+import org.activityinfo.model.util.HeapsortColumn;
+
 import java.io.Serializable;
 
 public class DoubleArrayColumnView implements ColumnView, Serializable {
@@ -100,4 +102,26 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
         sb.append(" ]");
         return sb.toString();
     }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        switch(direction) {
+            case ASC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortAscending(values, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortAscending(values, sortVector, range.length, range);
+                }
+                break;
+            case DESC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortDescending(values, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
+                }
+                break;
+        }
+        return sortVector;
+    }
+
 }

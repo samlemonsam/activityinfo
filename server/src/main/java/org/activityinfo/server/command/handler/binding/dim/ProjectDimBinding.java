@@ -22,8 +22,8 @@ import java.util.List;
 public class ProjectDimBinding extends DimBinding {
 
 
-    private static final String PROJECT_ID_COLUMN = "ProjectId";
-    private static final String PROJECT_LABEL_COLUMN = "ProjectLabel";
+    public static final String PROJECT_ID_COLUMN = "ProjectId";
+    public static final String PROJECT_LABEL_COLUMN = "ProjectLabel";
 
     private static final String PROJECT_FIELD = "project";
 
@@ -38,7 +38,7 @@ public class ProjectDimBinding extends DimBinding {
             String projectId = id.getString(i);
             String projectLabel = Strings.nullToEmpty(label.getString(i));
 
-            if (projectId != null) {
+            if (projectId != null && !Strings.isNullOrEmpty(projectLabel)) {
                 ProjectDTO project = new ProjectDTO(CuidAdapter.getLegacyIdFromCuid(projectId), projectLabel);
                 dataArray[i].set(PROJECT_FIELD, project);
             }
@@ -49,17 +49,12 @@ public class ProjectDimBinding extends DimBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        return getColumnQuery(formTree.getRootFormId());
+        return getTargetColumnQuery(formTree.getRootFormId());
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        return getColumnQuery(targetFormId);
-    }
-
-    private List<ColumnModel> getColumnQuery(ResourceId formId) {
-
-        SymbolExpr projectField = new SymbolExpr(CuidAdapter.field(formId, CuidAdapter.PROJECT_FIELD));
+        SymbolExpr projectField = new SymbolExpr(CuidAdapter.field(targetFormId, CuidAdapter.PROJECT_FIELD));
 
         ColumnModel projectId = new ColumnModel();
         projectId.setExpression(projectField);

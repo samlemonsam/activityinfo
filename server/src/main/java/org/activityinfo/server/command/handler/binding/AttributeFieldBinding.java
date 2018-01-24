@@ -7,17 +7,13 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.BitSetColumnView;
-import org.activityinfo.model.query.ColumnModel;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.util.*;
 
-// TODO: Expand out to other ModelData objects - currently using SiteDTO Generic
 public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
 
     private FormField attrField;
@@ -42,25 +38,27 @@ public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
     }
 
     private ColumnView[] getAttributeColumnViews(ColumnSet columnSet) {
-        ColumnView[] attrColumnViews = new ColumnView[enumItems.length];
+        List<ColumnView> attrColumnViews = new ArrayList<>(enumItems.length);
 
         for (int i=0; i<enumItems.length; i++) {
-            attrColumnViews[i] = columnSet.getColumnView(enumItems[i].getId().asString());
+            ColumnView column = columnSet.getColumnView(enumItems[i].getId().asString());
+            if (!(column instanceof EmptyColumnView)) {
+                attrColumnViews.add(column);
+            }
         }
 
-        return attrColumnViews;
+        ColumnView[] attrColumnsArray = new ColumnView[attrColumnViews.size()];
+        return attrColumnViews.toArray(attrColumnsArray);
     }
 
-    private void setAttributeValues(SiteDTO[] dataArray, EnumItem item, BitSetColumnView attrColumn) {
+    protected void setAttributeValues(SiteDTO[] dataArray, EnumItem item, BitSetColumnView attrColumn) {
         int attrId = CuidAdapter.getLegacyIdFromCuid(item.getId());
 
         for (int i=0; i<attrColumn.numRows(); i++) {
-            boolean selected = attrColumn.getBoolean(i) == BitSetColumnView.TRUE ? true : false;
+            boolean selected = attrColumn.getBoolean(i) == BitSetColumnView.TRUE;
             dataArray[i].setAttributeValue(attrId, selected);
             if (selected) {
                 dataArray[i].addDisplayAttribute(attrField.getId().asString(), item.getId().asString());
-                // TODO: Determine whether to add display attributes by id or name/label
-                //dataArray[i].addDisplayAttribute(attrField.getName(), item.getLabel());
             }
         }
     }
