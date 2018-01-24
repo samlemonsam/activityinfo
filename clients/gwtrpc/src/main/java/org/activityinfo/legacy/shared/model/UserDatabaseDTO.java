@@ -52,6 +52,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     private List<ActivityDTO> activities = new ArrayList<>(0);
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
     private List<ProjectDTO> projects = new ArrayList<>(0);
+    private List<FolderDTO> folders = new ArrayList<>(0);
 
     public final static String ENTITY_NAME = "UserDatabase";
 
@@ -179,6 +180,10 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public List<PartnerDTO> getPartners() {
         return partners;
+    }
+
+    public List<FolderDTO> getFolders() {
+        return folders;
     }
 
     /**

@@ -52,6 +52,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     private LocationType locationType;
 
     private UserDatabase database;
+    private Folder folder;
     private String name;
     private String category;
 
@@ -135,6 +136,17 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     @Offline
     @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "FolderId", nullable = true)
+    public Folder getFolder() {
+        return this.folder;
+    }
+
+    public void setFolder(Folder folder) {
+        this.folder = folder;
+    }
+
+    @Offline
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DatabaseId", nullable = false)
     public UserDatabase getDatabase() {
         return this.database;

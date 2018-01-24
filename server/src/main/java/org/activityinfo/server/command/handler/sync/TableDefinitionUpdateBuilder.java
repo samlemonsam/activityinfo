@@ -42,6 +42,7 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
             AdminEntity.class,
             LocationType.class,
             UserDatabase.class,
+            Folder.class,
             Partner.class,
             Activity.class,
             Indicator.class,

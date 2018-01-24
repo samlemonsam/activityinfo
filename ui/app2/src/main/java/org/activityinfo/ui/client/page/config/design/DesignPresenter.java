@@ -86,8 +86,6 @@ public class DesignPresenter extends AbstractEditorGridPresenter<ModelData> impl
     public static final PageId PAGE_ID = new PageId("design");
 
 
-
-
     @ImplementedBy(DesignView.class)
     public interface View extends TreeGridView<DesignPresenter, ModelData> {
         public void init(DesignPresenter presenter, UserDatabaseDTO db, TreeStore store);

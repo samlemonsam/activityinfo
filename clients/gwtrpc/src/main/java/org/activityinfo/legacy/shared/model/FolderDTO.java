@@ -31,8 +31,10 @@ import java.util.List;
  */
 public class FolderDTO extends BaseModelData implements ProvidesKey {
 
-    private List<ActivityDTO> activities = new ArrayList<ActivityDTO>();
+    private int id;
     private int databaseId;
+
+    private List<ActivityDTO> activities = new ArrayList<ActivityDTO>();
 
     public FolderDTO() {
     }
@@ -42,6 +44,13 @@ public class FolderDTO extends BaseModelData implements ProvidesKey {
         set("name", name);
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     /**
      * Returns the name of the ActivityCategory;
@@ -50,6 +59,15 @@ public class FolderDTO extends BaseModelData implements ProvidesKey {
      */
     public String getName() {
         return get("name");
+    }
+
+
+    public void setName(String name) {
+        set("name", name);
+    }
+
+    public void setDatabaseId(int databaseId) {
+        this.databaseId = databaseId;
     }
 
     public List<ActivityDTO> getActivities() {

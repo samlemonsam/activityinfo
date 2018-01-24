@@ -69,7 +69,9 @@ public class SchemaMigration {
             "ALTER TABLE AttributeGroup ADD COLUMN defaultValue",
             "ALTER TABLE AttributeGroup ADD COLUMN workflow",
             "UPDATE location SET workflowStatusId='validated' WHERE workflowStatusId is null ",
-            "ALTER TABLE indicator ADD COLUMN visible bit(1) NOT null DEFAULT 1"
+            "ALTER TABLE indicator ADD COLUMN visible bit(1) NOT null DEFAULT 1",
+            "CREATE TABLE IF NOT EXISTS folder (folderId INT, databaseId INT, name TEXT)",
+            "ALTER TABLE activity ADD COLUMN folderId INT"
     };
 
     @Inject
