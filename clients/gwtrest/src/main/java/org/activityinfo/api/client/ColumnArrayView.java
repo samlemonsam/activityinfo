@@ -4,6 +4,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EnumColumnView;
+import org.activityinfo.model.query.SortModel;
 
 
 @SuppressWarnings("GwtInconsistentSerializableClass")
@@ -99,5 +100,12 @@ class ColumnArrayView implements EnumColumnView, ColumnView {
     private static native String getId(JavaScriptObject array, int index) /*-{
         return array[index];
     }-*/;
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        // TODO: Enum Sorting
+        // Do not sort on column
+        return sortVector;
+    }
 
 }

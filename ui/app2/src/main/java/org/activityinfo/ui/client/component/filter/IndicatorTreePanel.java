@@ -257,9 +257,9 @@ public class IndicatorTreePanel extends ContentPanel {
 
                 callback.onSuccess(new ArrayList<ModelData>(createDatabaseChildren((UserDatabaseDTO) parent)));
 
-            } else if (parent instanceof ActivityCategory) {
+            } else if (parent instanceof FolderDTO) {
 
-                callback.onSuccess(new ArrayList<ModelData>(((ActivityCategory) parent).getActivities()));
+                callback.onSuccess(new ArrayList<ModelData>(((FolderDTO) parent).getActivities()));
 
             } else if (parent instanceof ActivityDTO) {
 
@@ -276,14 +276,14 @@ public class IndicatorTreePanel extends ContentPanel {
 
         List<ModelData> children = new ArrayList<ModelData>();
 
-        Set<ActivityCategory> categories = new HashSet<ActivityCategory>();
+        Set<FolderDTO> categories = new HashSet<FolderDTO>();
 
         for (ActivityDTO activityDTO : databaseDTO.getActivities()) {
             if (activityDTO.hasCategory()) {
-                ActivityCategory activityCategory = new ActivityCategory(databaseDTO.getId(), activityDTO.getCategory());
-                categories.add(activityCategory);
-                if (!children.contains(activityCategory)) {
-                    children.add(activityCategory);
+                FolderDTO folder = new FolderDTO(databaseDTO.getId(), activityDTO.getCategory());
+                categories.add(folder);
+                if (!children.contains(folder)) {
+                    children.add(folder);
                 }
             } else {
                 children.add(activityDTO);
@@ -291,7 +291,7 @@ public class IndicatorTreePanel extends ContentPanel {
         }
 
         // fill category with activities
-        for (ActivityCategory category : categories) {
+        for (FolderDTO category : categories) {
             for (ActivityDTO activityDTO : databaseDTO.getActivities()) {
                 if (category.getName().equals(activityDTO.getCategory())) {
                     category.addActivity(activityDTO);

@@ -1,0 +1,92 @@
+
+
+
+ext {
+    codemirrorVersion = "5.23.0"
+}
+
+dependencies {
+    compile "net.codemirror:codemirror:${codemirrorVersion}@zip"
+}
+
+configurations {
+    closureCompiler
+}
+dependencies {
+    compileOnly libraries.gwt.user
+    closureCompiler 'com.google.javascript:closure-compiler:v20150609'
+}
+
+task unzip(type: Copy) {
+
+    def zipPath = project.configurations.compile.find {it.name.startsWith("codemirror") }
+    def zipFile = file(zipPath)
+    def outputDir = file("${buildDir}/unpacked")
+
+    from zipTree(zipFile)
+    into outputDir
+}
+
+
+task concatenateCss {
+
+    dependsOn unzip
+
+    def dist = new File("${buildDir}/unpacked/codemirror-5.23.0");
+    def codemirrorCss = new File("${dist}/lib/codemirror.css")
+    def lintCss = new File("${dist}/addon/lint/lint.css")
+
+    def outputDir = new File("${buildDir}/combined/org/activityinfo/ui/codemirror/client");
+    def outputCss = new File(outputDir, "codemirror.css")
+
+    inputs.file codemirrorCss
+    inputs.file lintCss
+    outputs.file outputCss
+
+    doFirst {
+        outputDir.mkdirs()
+        outputCss.text = codemirrorCss.text + lintCss.text
+    }
+}
+
+
+task minifyJs(type: JavaExec){
+
+
+    dependsOn unzip
+
+    classpath configurations.closureCompiler
+    main = 'com.google.javascript.jscomp.CommandLineRunner'
+
+    def dist = new File("${buildDir}/unpacked/codemirror-5.23.0");
+    def outputDir = new File("${buildDir}/combined/org/activityinfo/ui/codemirror/client");
+    def outputFile = "${outputDir}/codemirror.js"
+
+    inputs.dir "${dist}"
+    inputs.dir "${projectDir}/src/main/js";
+    outputs.file outputFile
+
+    def closureArgs = []
+    //append all your command line options here
+    closureArgs << "--compilation_level=SIMPLE_OPTIMIZATIONS"
+    closureArgs << "--js_output_file=${outputFile}"
+    closureArgs << "${dist}/lib/codemirror.js"
+    closureArgs << "${dist}/addon/lint/lint.js"
+    closureArgs << "${dist}/addon/edit/matchbrackets.js"
+    closureArgs << "${projectDir}/src/main/js/mode/activityinfo/activityinfo.js"
+
+    args closureArgs
+
+    doFirst {
+        outputDir.mkdirs();
+    }
+}
+
+jar {
+    dependsOn concatenateCss
+    dependsOn minifyJs
+
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from "$buildDir/combined"
+}

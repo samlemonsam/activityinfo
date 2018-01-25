@@ -32,7 +32,7 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.page.*;
-import org.activityinfo.ui.client.page.config.design.DesignPresenter;
+import org.activityinfo.ui.client.page.config.design.DbEditor;
 import org.activityinfo.ui.client.page.config.link.IndicatorLinkPage;
 import org.activityinfo.ui.client.page.config.link.IndicatorLinkPlace;
 
@@ -53,7 +53,7 @@ public class ConfigLoader implements PageLoader {
                         Provider<DbPartnerEditor> partnerPage,
                         Provider<DbProjectEditor> projectPage,
                         Provider<LockedPeriodsPresenter> lockPage,
-                        Provider<DesignPresenter> designPage,
+                        Provider<DbEditor> designPage,
                         Provider<DbTargetEditor> targetPage,
                         Provider<IndicatorLinkPage> linkPage,
                         NavigationHandler navigationHandler,
@@ -69,7 +69,7 @@ public class ConfigLoader implements PageLoader {
         register(DbPartnerEditor.PAGE_ID, partnerPage);
         register(DbProjectEditor.PAGE_ID, projectPage);
         register(LockedPeriodsPresenter.PAGE_ID, lockPage);
-        register(DesignPresenter.PAGE_ID, designPage);
+        register(DbEditor.PAGE_ID, designPage);
         register(DbTargetEditor.PAGE_ID, targetPage);
         register(IndicatorLinkPage.PAGE_ID, linkPage);
 
@@ -80,7 +80,7 @@ public class ConfigLoader implements PageLoader {
         placeSerializer.registerParser(DbProjectEditor.PAGE_ID, new DbPageState.Parser(DbProjectEditor.PAGE_ID));
         placeSerializer.registerParser(LockedPeriodsPresenter.PAGE_ID,
                 new DbPageState.Parser(LockedPeriodsPresenter.PAGE_ID));
-        placeSerializer.registerParser(DesignPresenter.PAGE_ID, new DbPageState.Parser(DesignPresenter.PAGE_ID));
+        placeSerializer.registerParser(DbEditor.PAGE_ID, new DbPageState.Parser(DbEditor.PAGE_ID));
         placeSerializer.registerParser(DbTargetEditor.PAGE_ID, new DbPageState.Parser(DbTargetEditor.PAGE_ID));
         placeSerializer.registerStatelessPlace(IndicatorLinkPage.PAGE_ID, new IndicatorLinkPlace());
     }

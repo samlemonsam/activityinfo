@@ -27,6 +27,6 @@ import com.google.gwt.resources.client.ClientBundle;
 
 public interface AppFrameResources extends ClientBundle {
 
-    static AppFrameResources INSTANCE = GWT.create(AppFrameResources.class);
+    AppFrameResources INSTANCE = GWT.create(AppFrameResources.class);
 
 }

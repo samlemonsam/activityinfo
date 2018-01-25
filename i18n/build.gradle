@@ -1,13 +1,6 @@
 
 description = 'ActivityInfo Internationalization Resources'
 
-apply plugin: 'gwt-base'
-
-
-gwt {
-    gwtVersion = project.gwtVersion
-}
-
 // Define an addition 'tool' source set that includes
 // the java code to verify i18n resources and merge
 // translations from PoEditor at build time
@@ -30,9 +23,9 @@ sourceSets {
 dependencies {
     compile libraries.guava
     compile group: 'net.lightoze.gwt-i18n-server', name: 'gwt-i18n-server', version: '0.22', classifier: 'original'
-    gwt     libraries.gwt.user
-    gwt     libraries.gwt.guava
-    
+
+    compileOnly libraries.gwt.user
+
     toolCompile   libraries.jersey.client
     toolCompile   libraries.jersey.json
     toolCompile   libraries.jersey.multipart
@@ -45,8 +38,6 @@ dependencies {
 idea {
     module {
         testSourceDirs += file('src/tool/java')
-
-        scopes.PROVIDED.plus += [ configurations.gwt ]
         scopes.TEST.plus += [ configurations.toolCompile ]
     }
 }

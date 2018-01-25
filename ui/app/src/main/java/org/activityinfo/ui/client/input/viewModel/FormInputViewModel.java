@@ -61,6 +61,10 @@ public class FormInputViewModel {
         this.placeholder = placeholder;
     }
 
+    public FormTree getFormTree() {
+        return formTree;
+    }
+
     public FormInputModel getInputModel() {
         return inputModel;
     }

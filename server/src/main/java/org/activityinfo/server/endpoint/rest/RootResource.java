@@ -42,12 +42,14 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
-import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.query.server.Updater;
-import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.server.ApiBackend;
+import org.activityinfo.store.server.CatalogResource;
+import org.activityinfo.store.server.FormResource;
+import org.activityinfo.store.server.QueryResource;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
@@ -63,21 +65,22 @@ public class RootResource {
     private Provider<EntityManager> entityManager;
     private DispatcherSync dispatcher;
     private DeploymentConfiguration config;
-    private Provider<FormCatalog> catalog;
+    private Provider<FormStorageProvider> catalog;
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
     private PermissionOracle permissionOracle;
-    private BlobAuthorizer blobAuthorizer;
+
+    private ApiBackend backend;
     
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
-                        Provider<FormCatalog> catalog,
+                        Provider<FormStorageProvider> catalog,
                         DispatcherSync dispatcher,
                         DeploymentConfiguration config,
                         Provider<AuthenticatedUser> userProvider,
                         ServerSideAuthProvider authProvider,
                         PermissionOracle permissionOracle,
-                        BlobAuthorizer blobAuthorizer) {
+                        ApiBackend backend) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -86,7 +89,7 @@ public class RootResource {
         this.userProvider = userProvider;
         this.authProvider = authProvider;
         this.permissionOracle = permissionOracle;
-        this.blobAuthorizer = blobAuthorizer;
+        this.backend = backend;
     }
 
     @Path("/adminEntity/{id}")
@@ -143,13 +146,13 @@ public class RootResource {
 
     @Path("/database/{id}")
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
-        return new DatabaseResource(catalog, entityManager, dispatcher, id);
+        return new DatabaseResource(catalog, dispatcher, id);
     }
 
     @Path("/adminLevel/{id}")
     public AdminLevelResource getAdminLevel(@PathParam("id") int id) {
-        return new AdminLevelResource(catalog, entityManager, userProvider, blobAuthorizer,
-                entityManager.get().find(AdminLevel.class, id));
+        return new AdminLevelResource(
+                backend, entityManager.get().find(AdminLevel.class, id));
     }
 
     @Path("/sites")
@@ -169,12 +172,12 @@ public class RootResource {
 
     @Path("/form/{id}")
     public FormResource getForm(@PathParam("id") ResourceId id) {
-        return new FormResource(id, catalog, userProvider, new PermissionOracle(entityManager.get()), blobAuthorizer);
+        return new FormResource(backend, id);
     }
     
     @Path("/query")
     public QueryResource query() {
-        return new QueryResource(catalog, userProvider);
+        return new QueryResource(backend);
     }
     
     @POST
@@ -184,9 +187,7 @@ public class RootResource {
 
         final JsonValue jsonElement = Json.parse(json);
 
-        Updater updater = new Updater(catalog.get(), userProvider.get().getUserId(),
-                blobAuthorizer,
-                new HrdSerialNumberProvider());
+        Updater updater = backend.newUpdater();
         try {
             updater.execute(jsonElement);
         } catch (InvalidUpdateException e) {
@@ -215,7 +216,7 @@ public class RootResource {
     
     @Path("/catalog")
     public CatalogResource getFormCatalog(@QueryParam("parent") String parentId) {
-        return new CatalogResource(catalog, userProvider);
+        return new CatalogResource(backend);
     }
 
     @Path("/analysis")

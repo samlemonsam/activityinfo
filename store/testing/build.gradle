@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':core:model')
+    compile project(':model')
     compile project(':store:spi')
     compile project(':store:query')
     compile libraries.appengine.api

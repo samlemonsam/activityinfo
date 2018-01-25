@@ -11,11 +11,10 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.store.mysql.MySqlCatalog;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
-import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -25,14 +24,12 @@ import java.io.IOException;
 
 public class DatabaseResource {
 
-    private Provider<FormCatalog> catalog;
-    private Provider<EntityManager> entityManager;
+    private Provider<FormStorageProvider> catalog;
     private final DispatcherSync dispatcher;
     private final int databaseId;
 
-    public DatabaseResource(Provider<FormCatalog> catalog, Provider<EntityManager> entityManager, DispatcherSync dispatcher, int databaseId) {
+    public DatabaseResource(Provider<FormStorageProvider> catalog, DispatcherSync dispatcher, int databaseId) {
         this.catalog = catalog;
-        this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.databaseId = databaseId;
     }
@@ -112,7 +109,7 @@ public class DatabaseResource {
         formClass.setId(CuidAdapter.activityFormClass(activityId));
         formClass.setDatabaseId(CuidAdapter.databaseId(databaseId));
 
-        MySqlCatalog formCatalog = (MySqlCatalog) catalog.get();
+        MySqlStorageProvider formCatalog = (MySqlStorageProvider) catalog.get();
         formCatalog.createOrUpdateFormSchema(formClass);
         
         return Response.created(uri.getAbsolutePathBuilder()

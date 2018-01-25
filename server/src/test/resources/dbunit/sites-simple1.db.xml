@@ -130,7 +130,9 @@
 
   <!-- PEAR Activity 1 : NFI Distribution -->
 
-  <activity activityId="1" databaseId="1" name="NFI" category="NFI Cluster"
+  <folder folderId="1" databaseId="1" name="NFI Cluster"/>
+
+  <activity activityId="1" databaseId="1" name="NFI" category="NFI Cluster" folderId="1"
             reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"
             published="0"/>
 

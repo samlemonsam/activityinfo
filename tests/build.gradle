@@ -34,7 +34,7 @@ dependencies {
 
     compile 'io.appium:java-client:2.2.0'
     
-    compile project(':core:model')
+    compile project(':model')
     compile project(':i18n')
     compile project(':store:testing')
     compile project(':clients:javarest')

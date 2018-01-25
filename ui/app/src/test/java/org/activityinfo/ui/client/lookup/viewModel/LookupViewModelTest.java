@@ -6,7 +6,6 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormMetadataProviderStub;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
-import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -21,11 +20,8 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.testing.IdpLocationForm;
 import org.activityinfo.store.testing.NfiForm;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.activityinfo.store.testing.VillageForm;
-import org.activityinfo.ui.client.input.viewModel.FormStructure;
-import org.activityinfo.ui.client.input.viewModel.PermissionFilters;
-import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.easymock.EasyMock;
 import org.junit.Before;
@@ -46,7 +42,7 @@ import static org.junit.Assert.assertThat;
 public class LookupViewModelTest {
 
     private TestSetup setup = new TestSetup();
-    private TestingCatalog catalog;
+    private TestingStorageProvider catalog;
     private NfiForm nfiForm;
     private VillageForm villageForm;
 
@@ -183,7 +179,7 @@ public class LookupViewModelTest {
     @Test
     public void noKeysTest() {
 
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
 
         FormTree formTree = catalog.getFormTree(nfiForm.getFormId());

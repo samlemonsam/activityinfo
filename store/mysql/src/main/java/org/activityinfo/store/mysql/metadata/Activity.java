@@ -21,19 +21,30 @@ public class Activity implements Serializable {
     int databaseId;
     String databaseName;
     int reportingFrequency;
-    int locationTypeId;
-    
+
     int sortOrder;
+
+    /**
+     * The current locationTypeId of the activity.
+     */
+    int locationTypeId;
+
+
+    /**
+     * The id of the adminLevel to which this activity's current location type is bound, or {@code null} if
+     * this activity's current location type is not bound.
+     */
+    Integer adminLevelId;
 
     /**
      * Because it currently possible to change location type, it's possible that a single
      * activity references *multiple* location types
      */
-    Set<Integer> locationTypeIds = Sets.newHashSet();
     List<ResourceId> locationRange = new ArrayList<>();
+
     String category;
     String locationTypeName;
-    Integer adminLevelId;
+
     String name;
     int ownerUserId;
     boolean published;
@@ -53,10 +64,13 @@ public class Activity implements Serializable {
     Map<ResourceId, Integer> fieldsOrder = Maps.newHashMap();
 
     /**
-     * Map from destination indicator to it source indicators
+     * Map from destination indicator to source indicators, within the same activity
      */
-    Multimap<Integer, Integer> linkedIndicators = HashMultimap.create();
-    
+    Multimap<Integer, Integer> selfLinkedIndicators = HashMultimap.create();
+
+    /**
+     * Map from destination indicator to source indicators, from an external activity form
+     */
     Map<Integer, LinkedActivity> linkedActivities = Maps.newHashMap();
 
     public int getId() {
@@ -168,10 +182,15 @@ public class Activity implements Serializable {
     }
 
     public Collection<ResourceId> getLocationFormClassIds() {
+        // If the activity is *currently* mapped to a bound admin level, then
+        // we maps this to a reference field only to the admin level. References to
+        // old, non-bound locations can be mapped to the correct admin entity transparently.
         if(adminLevelId != null) {
             return Collections.singleton(CuidAdapter.adminLevelFormClass(adminLevelId));
 
         } else {
+            // Otherwise, we need to explicitly model the location field as a reference
+            // to one more location forms and/or admin levels
             return locationRange;
         }
     }
@@ -227,7 +246,7 @@ public class Activity implements Serializable {
     
     void addLink(int destinationIndicatorId, int sourceActivityId, int sourceReportingFrequency, int sourceIndicatorId) {
         if(sourceActivityId == this.activityId) {
-            linkedIndicators.put(destinationIndicatorId, sourceIndicatorId);
+            selfLinkedIndicators.put(destinationIndicatorId, sourceIndicatorId);
         } else {
             LinkedActivity linkedActivity = linkedActivities.get(sourceActivityId);
             if(linkedActivity == null) {
@@ -252,8 +271,12 @@ public class Activity implements Serializable {
         for (ActivityField indicatorField : getIndicatorFields()) {
             linked.linkMap.put(indicatorField.getId(), indicatorField.getId());
         }
-        linked.linkMap.putAll(linkedIndicators);
+        linked.linkMap.putAll(selfLinkedIndicators);
         return linked;
+    }
+
+    public Multimap<Integer, Integer> getSelfLinkedIndicators() {
+        return selfLinkedIndicators;
     }
 
     public FormClass getSerializedFormClass() {

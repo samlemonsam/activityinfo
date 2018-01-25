@@ -1,7 +1,6 @@
 package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Constants;
-import com.google.gwt.safehtml.shared.SafeHtml;
 
 /**
  *
@@ -1798,4 +1797,13 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("All")
     String allRows();
+
+    @DefaultStringValue("Folders")
+    String folders();
+
+    @DefaultStringValue("Folder")
+    String folder();
+
+
+
 }

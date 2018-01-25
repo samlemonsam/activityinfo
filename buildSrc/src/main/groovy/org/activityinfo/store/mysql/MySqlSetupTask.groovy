@@ -1,5 +1,6 @@
 package org.activityinfo.store.mysql
 
+import liquibase.Contexts
 import liquibase.Liquibase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.FileSystemResourceAccessor
@@ -59,8 +60,13 @@ class MySqlSetupTask extends DefaultTask {
                 new FileSystemResourceAccessor(project.file('src/main/resources').absolutePath),
                 new JdbcConnection(connection));
 
+        if(project.hasProperty("clearChecksums")) {
+            logger.lifecycle("Clearing database checksums...");
+            liquibase.clearCheckSums();
+        }
+
         liquibase.log.logLevel = LiquibaseLogging.get(project)
-        liquibase.update(null)
+        liquibase.update(new Contexts())
     }
 
     def populateData(connection) {

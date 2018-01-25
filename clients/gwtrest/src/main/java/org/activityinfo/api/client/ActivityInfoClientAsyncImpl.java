@@ -121,7 +121,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param formId Id of the Form
      * @param recordId Id of the record
      */
-    public Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId) {
+    public Promise<RecordHistory> getRecordHistory(String formId, String recordId) {
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         urlBuilder.append("/form");
         urlBuilder.append("/").append(formId);
@@ -129,10 +129,14 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         urlBuilder.append("/").append(recordId);
         urlBuilder.append("/history");
 
-        return get(urlBuilder.toString(), new Function<JsonValue, List<FormHistoryEntry>>() {
+        return get(urlBuilder.toString(), new Function<JsonValue, RecordHistory>() {
             @Override
-            public List<FormHistoryEntry> apply(JsonValue jsonElement) {
-                return FormHistoryEntry.fromJsonArray(jsonElement);
+            public RecordHistory apply(JsonValue jsonElement) {
+                try {
+                    return Json.fromJson(RecordHistory.class, jsonElement);
+                } catch (JsonMappingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -249,8 +253,8 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
                 }
                 FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
                     @Override
-                    public FormClass getFormClass(ResourceId resourceId) {
-                        FormClass formClass = formMap.get(resourceId);
+                    public FormClass getFormClass(ResourceId formId) {
+                        FormClass formClass = formMap.get(formId);
                         assert formClass != null;
                         return formClass;
                     }

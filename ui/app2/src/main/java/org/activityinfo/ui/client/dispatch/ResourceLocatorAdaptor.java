@@ -5,10 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
 import org.activityinfo.api.client.*;
 import org.activityinfo.json.Json;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -105,7 +102,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<List<FormHistoryEntry>> getFormRecordHistory(ResourceId formId, ResourceId recordId) {
+    public Promise<RecordHistory> getFormRecordHistory(ResourceId formId, ResourceId recordId) {
         return client.getRecordHistory(formId.asString(), recordId.asString());
     }
 
@@ -134,7 +131,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
                 if(entry.getValue() == null) {
                     update.setFieldValue(field, Json.createNull());
                 } else if(isSaveable(entry.getValue())){
-                    update.setFieldValue(field, entry.getValue().toJsonElement());
+                    update.setFieldValue(field, entry.getValue().toJson());
                 }
             }
         }

@@ -11,7 +11,7 @@ public class AdminAuthorizer implements Authorizer {
     @Override
     public FormPermissions getPermissions(int userId) {
         if(userId == 3) {
-            return FormPermissions.full();
+            return FormPermissions.readWrite();
         } else {
             return FormPermissions.readonly();
         }

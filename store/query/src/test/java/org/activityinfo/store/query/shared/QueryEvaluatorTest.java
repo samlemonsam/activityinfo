@@ -30,7 +30,7 @@ public class QueryEvaluatorTest {
                 .setLabel("Field B")
                 .setType(new CalculatedFieldType("A"));
 
-        FormCatalogStub catalog = new FormCatalogStub();
+        FormStorageProviderStub catalog = new FormStorageProviderStub();
         catalog.addForm(formClass).withRowCount(10);
 
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());

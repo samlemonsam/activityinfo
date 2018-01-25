@@ -20,12 +20,9 @@
   #L%
   -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    >
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
 
-  <ui:style type="org.activityinfo.ui.client.page.app.SectionTabStrip.MyStyle">
-    @url backgroundUrl backgroundImage;
-
+  <ui:style type="org.activityinfo.ui.client.page.app.SectionTabStrip.MyStyle" gss="true">
     .sections {
       height: 35px;
       float: left;
@@ -47,7 +44,6 @@
     }
 
     .activeSection {
-      background: white;
       border-left: 1px solid #99BBE8;
       border-top: 1px solid #99BBE8;
       border-right: 1px solid #99BBE8;

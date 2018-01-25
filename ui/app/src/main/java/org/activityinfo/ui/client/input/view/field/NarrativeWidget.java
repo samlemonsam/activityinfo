@@ -1,6 +1,8 @@
 package org.activityinfo.ui.client.input.view.field;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.form.TextAreaInputCell;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeValue;
@@ -14,8 +16,13 @@ public class NarrativeWidget implements FieldWidget {
     private TextArea textArea;
 
     public NarrativeWidget(FieldUpdater updater) {
-        textArea = new TextArea();
+        this(GWT.create(TextAreaInputCell.TextAreaAppearance.class), updater);
+    }
+
+    public NarrativeWidget(TextAreaInputCell.TextAreaAppearance appearance, FieldUpdater updater) {
+        textArea = new TextArea(new TextAreaInputCell(appearance));
         textArea.addKeyUpHandler(event -> updater.update(input()));
+        textArea.setWidth(-1);
     }
 
     private FieldInput input() {

@@ -3,10 +3,7 @@ package org.activityinfo.ui.client.store;
 import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.CatalogEntry;
-import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormPermissions;
-import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
@@ -23,13 +20,10 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -57,17 +51,17 @@ public class TestingFormStore implements FormStore {
 
     }
 
-    private TestingCatalog testingCatalog;
+    private TestingStorageProvider testingCatalog;
     private Set<ResourceId> deleted = new HashSet<>();
 
     private boolean delayLoading = false;
     private ArrayDeque<PendingTask<?>> pendingTasks = new ArrayDeque<>();
 
     public TestingFormStore() {
-        testingCatalog = new TestingCatalog();
+        testingCatalog = new TestingStorageProvider();
     }
 
-    public TestingCatalog getCatalog() {
+    public TestingStorageProvider getCatalog() {
         return testingCatalog;
     }
 
@@ -98,7 +92,7 @@ public class TestingFormStore implements FormStore {
             return FormMetadata.forbidden(formId);
 
         } else {
-            return FormMetadata.of(1L, testingCatalog.getFormClass(formId), FormPermissions.full());
+            return FormMetadata.of(1L, testingCatalog.getFormClass(formId), FormPermissions.readWrite());
         }
     }
 
@@ -161,6 +155,11 @@ public class TestingFormStore implements FormStore {
     @Override
     public Observable<FormOfflineStatus> getOfflineStatus(ResourceId formId) {
         return Observable.just(new FormOfflineStatus(false, false));
+    }
+
+    @Override
+    public Observable<RecordHistory> getFormRecordHistory(RecordRef ref) {
+        return Observable.just(RecordHistory.create(Collections.emptyList()));
     }
 
     @Override

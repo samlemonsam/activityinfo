@@ -31,7 +31,7 @@ public class SubFormSummaryTest {
 
     @Test
     public void matchNodes() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         ClinicForm clinicForm = catalog.getClinicForm();
 
         FormTree formTree = catalog.getFormTree(clinicForm.getFormId());
@@ -49,7 +49,7 @@ public class SubFormSummaryTest {
 
     @Test
     public void minMaxFunction() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         ClinicForm clinicForm = catalog.getClinicForm();
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 

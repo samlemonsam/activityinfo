@@ -24,23 +24,22 @@ package org.activityinfo.ui.client.page.config;
 
 import com.extjs.gxt.ui.client.core.El;
 import com.extjs.gxt.ui.client.data.*;
-import com.extjs.gxt.ui.client.event.GridEvent;
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
-import com.extjs.gxt.ui.client.event.SelectionChangedListener;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
-import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
+import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
@@ -62,7 +61,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DbUserEditor extends ContentPanel implements DbPage, ActionListener {
+
+
     public static final PageId PAGE_ID = new PageId("dbusers");
+
+    private static final SafeHtml ALL_CATEGORIES = new SafeHtmlBuilder()
+            .appendHtmlConstant("<i>").appendEscaped(I18N.CONSTANTS.all()).appendHtmlConstant("</i>").toSafeHtml();
 
     private final EventBus eventBus;
     private final Dispatcher dispatcher;
@@ -117,6 +121,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         toolBar = new ActionToolBar(this);
         toolBar.addSaveButton();
         toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.addUser(), IconImageBundle.ICONS.addUser());
+        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.edit(), IconImageBundle.ICONS.edit());
         toolBar.addButton(UIActions.DELETE, I18N.CONSTANTS.delete(), IconImageBundle.ICONS.deleteUser());
         toolBar.addButton(UIActions.EXPORT, I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
         toolBar.addButton(UIActions.MAILING_LIST,
@@ -127,23 +132,14 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
     private void createGrid() {
 
-        loader = new BasePagingLoader<UserResult>(new UserProxy());
+        loader = new BasePagingLoader<>(new UserProxy());
         loader.setRemoteSort(true);
         
-        store = new ListStore<UserPermissionDTO>(loader);
-        store.setKeyProvider(new ModelKeyProvider<UserPermissionDTO>() {
-            @Override
-            public String getKey(UserPermissionDTO model) {
-                return model.getEmail();
-            }
-        });
-        store.addListener(Store.Update, new Listener<StoreEvent<UserPermissionDTO>>() {
-
-            @Override
-            public void handleEvent(StoreEvent<UserPermissionDTO> event) {
-                modified = !store.getModifiedRecords().isEmpty();
-                toolBar.setDirty(modified);
-            }
+        store = new ListStore<>(loader);
+        store.setKeyProvider(model -> model.getEmail());
+        store.addListener(Store.Update, event -> {
+            modified = !store.getModifiedRecords().isEmpty();
+            toolBar.setDirty(modified);
         });
 
         final List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
@@ -151,6 +147,31 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 100));
         columns.add(new ColumnConfig("email", I18N.CONSTANTS.email(), 150));
         columns.add(new ColumnConfig("partner", I18N.CONSTANTS.partner(), 150));
+
+        ColumnConfig folderColumn = new ColumnConfig("category", I18N.CONSTANTS.folders(), 150);
+        folderColumn.setSortable(false);
+        folderColumn.setRenderer(new GridCellRenderer() {
+            @Override
+            public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
+                if (modelData instanceof UserPermissionDTO) {
+                    UserPermissionDTO permission = (UserPermissionDTO) modelData;
+                    if (permission.hasFolderLimitation()) {
+                        SafeHtmlBuilder html = new SafeHtmlBuilder();
+                        boolean needsComma = false;
+                        for (FolderDTO folder : permission.getFolders()) {
+                            if (needsComma) {
+                                html.appendHtmlConstant(", ");
+                            }
+                            html.appendEscaped(folder.getName());
+                            needsComma = true;
+                        }
+                        return html.toSafeHtml();
+                    }
+                }
+                return ALL_CATEGORIES;
+            }
+        });
+        columns.add(folderColumn);
 
         PermissionCheckConfig allowView = new PermissionCheckConfig("allowViewSimple", I18N.CONSTANTS.allowView(), 75);
         allowView.setDataIndex("allowView");
@@ -189,14 +210,21 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         allowDesign.setToolTip(I18N.CONSTANTS.allowDesignLong());
         columns.add(allowDesign);
 
-        grid = new Grid<UserPermissionDTO>(store, new ColumnModel(columns));
+        grid = new Grid<>(store, new ColumnModel(columns));
         grid.setLoadMask(true);
-        grid.setSelectionModel(new GridSelectionModel<UserPermissionDTO>());
+        grid.setSelectionModel(new GridSelectionModel<>());
         grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<UserPermissionDTO>() {
 
             @Override
             public void selectionChanged(SelectionChangedEvent<UserPermissionDTO> se) {
                 onSelectionChanged(se.getSelectedItem());
+            }
+        });
+        grid.addListener(Events.DoubleClick, new Listener<GridEvent<UserPermissionDTO>>() {
+
+            @Override
+            public void handleEvent(GridEvent<UserPermissionDTO> event) {
+                actions.edit(event.getModel());
             }
         });
         grid.addPlugin(allowEdit);
@@ -307,6 +335,12 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                     (db.isManageUsersAllowed() && db.getMyPartnerId() == selectedPartner.getId()));
         }
         toolBar.setActionEnabled(UIActions.DELETE, selectedItem != null);
+        toolBar.setActionEnabled(UIActions.DELETE, selectedItem != null);
+    }
+
+
+    private void edit(UserPermissionDTO model) {
+        actions.edit(model);
     }
 
     @Override
@@ -316,6 +350,9 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             modified = false;
         } else if (actionId.equals(UIActions.ADD)) {
             actions.add();
+            modified = true;
+        } else if (actionId.equals(UIActions.EDIT)) {
+            actions.edit(grid.getSelectionModel().getSelectedItem());
             modified = true;
         } else if (actionId.equals(UIActions.DELETE)) {
             actions.delete();
@@ -374,7 +411,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                 UserPermissionDTO m = (UserPermissionDTO) ge.getModel();
                 String property = grid.getColumnModel().getColumnId(ge.getColIndex());
                 Record r = store.getRecord(m);
-                Boolean b = (Boolean) m.get(getDataIndex());
+                Boolean b = m.get(getDataIndex());
                 if (validateChange(m, property)) {
                     boolean newValue = b == null ? true : !b;
                     r.set(getDataIndex(), newValue);
@@ -394,7 +431,17 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             command.setOffset(config.getOffset());
             command.setLimit(config.getLimit());
             command.setSortInfo(config.getSortInfo());
-            dispatcher.execute(command, callback);
+            dispatcher.execute(command, new AsyncCallback<UserResult>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(caught);
+                }
+
+                @Override
+                public void onSuccess(UserResult result) {
+                    callback.onSuccess(result);
+                }
+            });
         }
     }
 }

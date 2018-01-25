@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.component.importDialog;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.promise.Promise;

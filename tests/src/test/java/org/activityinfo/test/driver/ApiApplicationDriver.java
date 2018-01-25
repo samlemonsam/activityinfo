@@ -7,6 +7,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
@@ -617,7 +618,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
         InputStream inputStream = root().path("resources").path("database").path(Integer.toString(aliases.getId(databaseName))).path("schema.csv").get(InputStream.class);
         File file = File.createTempFile("exportSchema", ".csv");
         try {
-            ByteStreams.copy(inputStream, Files.asByteSink(file));
+            Files.asByteSink(file).writeFrom(inputStream);
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
@@ -693,7 +694,7 @@ public class ApiApplicationDriver extends ApplicationDriver {
     private File downloadFile(String downloadUri, String fileName) throws Exception {
         File file = File.createTempFile(fileName, ".xls");
         try(InputStream inputStream = new URI(downloadUri).toURL().openStream()) {
-            ByteStreams.copy(inputStream, Files.asByteSink(file));
+            Files.asByteSink(file).writeFrom(inputStream);
         }
         return file;
     }

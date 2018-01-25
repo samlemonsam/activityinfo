@@ -4,10 +4,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.testing.StubScheduler;
-import com.google.gwt.junit.GWTMockUtilities;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.activityinfo.promise.Promise;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.ui.client.component.importDialog.model.ColumnAction;
 import org.activityinfo.ui.client.component.importDialog.model.ImportModel;
@@ -19,14 +17,11 @@ import org.activityinfo.ui.client.component.importDialog.model.strategy.ImportTa
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidatedRow;
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidatedRowTable;
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidationResult;
-import org.junit.After;
 import org.junit.Before;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-
-import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 
 public class AbstractImporterTest extends CommandTestCase2 {
     public static final int COLUMN_WIDTH = 30;
@@ -45,11 +40,6 @@ public class AbstractImporterTest extends CommandTestCase2 {
         System.out.println("Database url: " + databaseUrl());
 
         scheduler = new StubScheduler();
-
-        // disable GWT.create so that references in static initializers
-        // don't sink our test
-
-        GWTMockUtilities.disarm();
     }
 
     private String databaseUrl() {
@@ -58,20 +48,6 @@ public class AbstractImporterTest extends CommandTestCase2 {
         } catch (SQLException e) {
             return "unknown";
         }
-    }
-
-    @After
-    public void after() {
-        GWTMockUtilities.restore();
-    }
-
-    protected <T> T runScheduledAndAssertResolves(Promise<T> promise) {
-        runAll();
-        return assertResolves(promise);
-    }
-
-    private void runAll() {
-        while(scheduler.executeCommands()) {}
     }
 
     protected void dumpHeaders(List<FieldImporterColumn> importColumns) {
@@ -165,16 +141,6 @@ public class AbstractImporterTest extends CommandTestCase2 {
     protected void showValidationGrid(ValidatedRowTable rowTable) {
         dumpHeaders(rowTable.getColumns());
         dumpRows(rowTable);
-    }
-
-    protected void validateRows() {
-//        Integer validCount = runScheduledAndAssertResolves(importer.countValidRows());
-//        System.out.println("VALID ROWS: " + validCount);
-    }
-
-    protected void matchReferences() {
-//        importer = new Importer2(importModel.getFormTree(), locator);
-//        runScheduledAndAssertResolves(importer.matchReferences());
     }
 
 }

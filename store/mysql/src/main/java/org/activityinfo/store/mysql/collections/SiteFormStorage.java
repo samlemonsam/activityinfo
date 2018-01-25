@@ -57,7 +57,7 @@ public class SiteFormStorage implements VersionedFormStorage {
     @Override
     public FormPermissions getPermissions(int userId) {
         if(activity.getOwnerUserId() == userId) {
-           return FormPermissions.full();
+           return FormPermissions.owner();
         } else {
 
             UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());
@@ -84,7 +84,11 @@ public class SiteFormStorage implements VersionedFormStorage {
             } else if(databasePermission.isEdit()) {
                 permissions.allowFilteredEdit(partnerFilter.asExpression());
             }
-       
+
+            if(databasePermission.isDesign()) {
+                permissions.allowSchemaUpdate();
+            }
+
             // published property of activity overrides user permissions
             if(activity.isPublished()) {
                 permissions.allowUnfilteredView();
@@ -133,8 +137,7 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public FormClass getFormClass() {
-        FormClass formClass = baseMapping.getFormClass();
-        return formClass;
+        return baseMapping.getFormClass();
     }
 
     @Override

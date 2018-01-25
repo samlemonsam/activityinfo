@@ -25,7 +25,6 @@ package org.activityinfo.ui.client.page.entry.form;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.widget.MessageBox;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
@@ -35,22 +34,14 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.component.form.FormDialog;
-import org.activityinfo.ui.client.component.form.FormDialogCallback;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
-import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.entry.location.LocationDialog;
-
-import java.util.List;
 
 public class SiteDialogLauncher {
 
@@ -96,12 +87,6 @@ public class SiteDialogLauncher {
                         return;
                     }
 
-                    if (!activity.getClassicView()) {// modern view
-                        final ResourceId instanceId = CuidAdapter.newLegacyFormInstanceId(activity.getFormClassId());
-                        FormInstance newInstance = new FormInstance(instanceId, activity.getFormClassId());
-                        showModernFormDialog(activity.getName(), newInstance, callback, true);
-                        return;
-                    }
                     dispatcher.execute(new GetActivityForm(activityId)).then(new AsyncCallback<ActivityFormDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -133,23 +118,6 @@ public class SiteDialogLauncher {
         Log.error("Error launching site dialog", caught);
     }
 
-    public void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback, boolean isNew) {
-        showModernFormDialog(formName, instance, callback, isNew, resourceLocator, stateProvider);
-    }
-
-    public static void showModernFormDialog(String formName, FormInstance instance, final SiteDialogCallback callback,
-                                            boolean isNew, ResourceLocator resourceLocator, StateProvider stateProvider) {
-        String subtitle = isNew ? I18N.CONSTANTS.newSubmission() : I18N.CONSTANTS.editSubmission();
-        FormDialog dialog = new FormDialog(resourceLocator, stateProvider);
-        dialog.setDialogTitle(formName, subtitle);
-        dialog.show(instance, new FormDialogCallback() {
-            @Override
-            public void onPersisted(List<FormInstance> instance) {
-                callback.onSaved();
-            }
-        });
-    }
-
 
     public void editSite(final SiteDTO site, final SiteDialogCallback callback) {
         dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
@@ -177,17 +145,6 @@ public class SiteDialogLauncher {
                         MessageBox.alert(I18N.CONSTANTS.lockedSiteTitle(), I18N.CONSTANTS.siteIsLocked(), null);
                         return;
                     }
-                }
-
-                if (!activity.getClassicView()) {// modern view
-                    resourceLocator.getFormInstance(activity.getFormClassId(), site.getInstanceId()).then(new SuccessCallback<FormInstance>() {
-                        @Override
-                        public void onSuccess(FormInstance result) {
-                            showModernFormDialog(activity.getName(), result, callback, false);
-                        }
-                    });
-
-                    return;
                 }
 
                 dispatcher.execute(new GetActivityForm(activity.getId())).then(new AsyncCallback<ActivityFormDTO>() {

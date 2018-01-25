@@ -73,12 +73,6 @@ class ActivityForm extends AbstractDesignForm {
         binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
         this.add(nameField);
 
-        TextField<String> categoryField = new TextField<String>();
-        categoryField.setFieldLabel(I18N.CONSTANTS.category());
-        categoryField.setMaxLength(ActivityFormDTO.CATEGORY_MAX_LENGTH);
-        binding.addFieldBinding(new OnlyValidFieldBinding(categoryField, "category"));
-        add(categoryField);
-
         final LocationTypeComboBox locationTypeCombo = new LocationTypeComboBox(service, database.getCountry());
         this.add(locationTypeCombo);
 

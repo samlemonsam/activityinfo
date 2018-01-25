@@ -1,13 +1,6 @@
 
 description = 'ActivityInfo API Client for GWT'
 
-apply plugin: 'gwt-base'
-
-
-gwt {
-    gwtVersion = project.gwtVersion
-}
-
 
 sourceSets {
     // This source set *generates* the client code for GWT
@@ -27,13 +20,12 @@ dependencies {
     generatorCompile libraries.guava
     generatorCompile 'com.squareup:javapoet:1.7.0'
     generatorCompile 'io.swagger:swagger-parser:1.0.19'
-    generatorCompile project(":core:model")
+    generatorCompile project(":model")
 
-    compile project(":core:model")
+    compile project(":model")
     compile libraries.guava
     compile libraries.gwt.i18nServer
-    gwt     libraries.gwt.user
-    gwt     libraries.gwt.guava
+    compileOnly libraries.gwt.user
 }
 
 

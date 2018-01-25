@@ -3,7 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:f="urn:import:org.activityinfo.ui.client.widget.form"
              xmlns:a="urn:import:org.activityinfo.ui.client.widget"
-             xmlns:chzn="urn:import:com.watopi.chosen.client.gwt"
+             xmlns:chzn="urn:import:com.arcbees.chosen.client.gwt"
         >
 
   <ui:with field="i18n" type="org.activityinfo.i18n.shared.UiConstants"/>

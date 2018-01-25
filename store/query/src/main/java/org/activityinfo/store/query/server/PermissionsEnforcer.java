@@ -11,7 +11,7 @@ import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.store.query.shared.FormSupervisor;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +23,7 @@ public class PermissionsEnforcer {
     private final FormSupervisor supervisor;
     private final FormClassProvider formClassProvider;
 
-    public PermissionsEnforcer(FormCatalog catalog, int userId) {
+    public PermissionsEnforcer(FormStorageProvider catalog, int userId) {
         this(new FormSupervisorAdapter(catalog, userId), catalog);
     }
 

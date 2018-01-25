@@ -22,8 +22,7 @@ package org.activityinfo.test.ui;
  */
 
 import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.ByteStreams;
 import org.activityinfo.test.driver.UiApplicationDriver;
 import org.junit.Test;
 
@@ -51,12 +50,7 @@ public class ImportSchemaUiTest {
 
     private String cvsString() throws IOException {
         final InputStream inputStream = ImportSchemaUiTest.class.getResourceAsStream(CVS_FILE_NAME);
-        return CharStreams.toString(CharStreams.newReaderSupplier(new InputSupplier<InputStream>() {
-            @Override
-            public InputStream getInput() throws IOException {
-                return inputStream;
-            }
-        }, Charsets.UTF_8));
+        return new String(ByteStreams.toByteArray(inputStream), Charsets.UTF_8);
     }
 
     @Test

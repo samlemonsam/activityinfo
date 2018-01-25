@@ -1,6 +1,7 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.TextInputCell;
 import com.sencha.gxt.widget.core.client.form.TextField;
@@ -17,7 +18,11 @@ public class TextWidget implements FieldWidget {
     private final TextField field;
 
     public TextWidget(TextType textType, FieldUpdater updater) {
-        field = new TextField(new TextInputCell());
+        this(textType, GWT.create(TextInputCell.TextFieldAppearance.class), updater);
+    }
+
+    public TextWidget(TextType textType, TextInputCell.TextFieldAppearance appearance, FieldUpdater updater) {
+        field = new TextField(new TextInputCell(appearance));
         field.addKeyUpHandler(event -> updater.update(input()));
 
         if(textType.hasInputMask()) {

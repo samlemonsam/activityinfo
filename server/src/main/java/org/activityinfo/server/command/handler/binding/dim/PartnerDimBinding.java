@@ -1,6 +1,7 @@
 package org.activityinfo.server.command.handler.binding.dim;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
+import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
@@ -20,8 +21,8 @@ import java.util.List;
 
 public class PartnerDimBinding extends DimBinding {
 
-    private static final String PARTNER_ID_COLUMN = "PartnerId";
-    private static final String PARTNER_LABEL_COLUMN = "PartnerLabel";
+    public static final String PARTNER_ID_COLUMN = "PartnerId";
+    public static final String PARTNER_LABEL_COLUMN = "PartnerLabel";
 
     private static final String PARTNER_FIELD = "partner";
 
@@ -36,9 +37,10 @@ public class PartnerDimBinding extends DimBinding {
             String partnerId = id.getString(i);
             String partnerLabel = label.getString(i);
 
-            PartnerDTO partner = new PartnerDTO(CuidAdapter.getLegacyIdFromCuid(partnerId), partnerLabel);
-
-            dataArray[i].set(PARTNER_FIELD, partner);
+            if (partnerId != null && !Strings.isNullOrEmpty(partnerLabel)) {
+                PartnerDTO partner = new PartnerDTO(CuidAdapter.getLegacyIdFromCuid(partnerId), partnerLabel);
+                dataArray[i].set(PARTNER_FIELD, partner);
+            }
         }
 
         return dataArray;

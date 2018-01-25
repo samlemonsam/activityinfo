@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="forms-01" author="alex">
+        <createTable tableName="form_version">
+
+            <column name="form_id" type="varchar(25)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="version" type="bigint" defaultValueNumeric="1"/>
+        </createTable>
+
+        <createTable tableName="record">
+            <column name="form_id" type="varchar(25)"/>
+            <column name="record_id" type="varchar(25)"/>
+            <column name="version" type="bigint" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fields" type="json"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

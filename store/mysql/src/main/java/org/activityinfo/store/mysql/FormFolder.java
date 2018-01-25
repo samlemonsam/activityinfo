@@ -7,7 +7,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.util.ArrayList;
@@ -15,9 +15,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class FormFolder {
-    private FormCatalog catalog;
+    private FormStorageProvider catalog;
 
-    public FormFolder(FormCatalog catalog) {
+    public FormFolder(FormStorageProvider catalog) {
         this.catalog = catalog;
     }
 

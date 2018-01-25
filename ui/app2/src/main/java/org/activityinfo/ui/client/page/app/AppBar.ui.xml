@@ -26,16 +26,10 @@
   <ui:with field="resources" type="org.activityinfo.ui.client.page.app.resources.AppFrameResources"/>
   <ui:with field="clientContext" type="org.activityinfo.ui.client.ClientContext"/>
 
-  <ui:data field="backgroundImage" src="resources/background.gif"/>
   <ui:data field="gearImage" src="resources/gear.png"/>
   <ui:data field="helpImage" src="resources/help.png"/>
 
-  <ui:style>
-    @url backgroundUrl backgroundImage;
-    @url gearUrl gearImage;
-    @url helpUrl helpImage;
-    @url searchUrl searchImage;
-
+  <ui:style gss="true">
     .bar {
       background: #dfe8f6 repeat-x top;
       position: relative;
@@ -77,12 +71,12 @@
     }
 
     .settingsIcon {
-      background-image: gearUrl;
+      background-image: resourceUrl("gearImage");
       width: 17px;
     }
 
     .helpIcon {
-      background-image: helpUrl;
+      background-image: resourceUrl("helpImage");
     }
     
     .locale {

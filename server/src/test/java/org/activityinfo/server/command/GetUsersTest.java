@@ -22,14 +22,18 @@ package org.activityinfo.server.command;
  * #L%
  */
 
+import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.server.database.OnDataSet;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -44,7 +48,7 @@ public class GetUsersTest extends CommandTestCase {
         GetUsers cmd = new GetUsers(1);
         UserResult result = execute(cmd);
 
-        Assert.assertEquals(3, result.getData().size());
+        assertThat(result.getData(), hasSize(3));
     }
 
     /**
@@ -63,9 +67,11 @@ public class GetUsersTest extends CommandTestCase {
         // VERIFY that we have 1 result:
         // - the one other solidarites user
 
-        Assert.assertEquals("number of results", 1, result.getTotalLength());
-        Assert.assertEquals("user name", "Marlene", result.getData().get(0)
-                .getName());
+        assertThat(result.getTotalLength(), equalTo(1));
+
+        UserPermissionDTO marlene = result.getData().get(0);
+        assertThat(marlene.getName(), equalTo("Marlene"));
+        assertThat(marlene.hasFolderLimitation(), equalTo(false));
     }
 
     @Test
@@ -77,6 +83,6 @@ public class GetUsersTest extends CommandTestCase {
         UserResult result = execute(new GetUsers(1));
 
         // VERIFY that we can get can see the two other users from NRC
-        Assert.assertEquals("number of results", 2, result.getTotalLength());
+        assertThat(result.getTotalLength(), equalTo(2));
     }
 }

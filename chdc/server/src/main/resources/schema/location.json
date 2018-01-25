@@ -1,0 +1,33 @@
+{
+  "id": "location",
+  "schemaVersion": 1,
+  "label": "Location",
+  "elements": [
+    {
+      "id": "name",
+      "label": "Name",
+      "required": true,
+      "type": "FREE_TEXT",
+      "key": true
+    },
+    {
+      "id": "province",
+      "label": "Province",
+      "required": true,
+      "type": "FREE_TEXT",
+      "key": true
+    },
+    {
+      "id": "district",
+      "label": "District",
+      "required": true,
+      "type": "FREE_TEXT",
+      "key": true
+    },
+    {
+      "id": "point",
+      "label": "Location",
+      "type": "geopoint"
+    }
+  ]
+}

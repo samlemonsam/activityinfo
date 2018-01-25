@@ -77,6 +77,17 @@ public class DbUserEditorActions {
     public void add() {
         final UserForm form = new UserForm(db);
 
+        showDialog(form, true);
+    }
+
+    public void edit(UserPermissionDTO user) {
+        final UserForm form = new UserForm(db);
+        form.edit(user);
+
+        showDialog(form, false);
+    }
+
+    private void showDialog(final UserForm form, final boolean newUser) {
         final FormDialogImpl dlg = new FormDialogImpl(form);
         dlg.setHeadingText(I18N.CONSTANTS.newUser());
         dlg.setWidth(400);
@@ -89,7 +100,7 @@ public class DbUserEditorActions {
             @Override
             public void onValidated() {
                 UpdateUserPermissions command = new UpdateUserPermissions(db, form.getUser(), host);
-                command.setNewUser(true);
+                command.setNewUser(newUser);
                 dispatcher.execute(command,
                         new AsyncCallback<VoidResult>() {
 

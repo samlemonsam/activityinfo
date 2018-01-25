@@ -155,7 +155,7 @@ public class DataEntryTab {
 
         try {
             File file = File.createTempFile("export", ".xls");
-            ByteStreams.copy(Resources.asByteSource(url), Files.asByteSink(file));
+            Resources.asByteSource(url).copyTo(Files.asByteSink(file));
             return file;
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -84,7 +84,7 @@ public class HostController {
         if("3dev".equals(ui)) {
             model.setBootstrapScript("/App/App.nocache.js");
 
-        } else if(!Strings.isNullOrEmpty(codeServer)) {
+        } else if("dev".equals(ui)) {
             // Running in development mode
             // Use the default bootstrap script
             model.setBootstrapScript("/ActivityInfo/ActivityInfo.nocache.js");

@@ -34,9 +34,8 @@ subprojects {
   apply plugin: 'java'
   apply plugin: "net.ltgt.apt"
 
-
-  sourceCompatibility = 1.7
-  targetCompatibility = 1.7
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
 
   /**
    * Keep the version out of the jars to avoid unnecessary rebuilds
@@ -81,20 +80,15 @@ subprojects {
 buildscript {
   repositories {
     maven {
-      url 'http://dl.bintray.com/steffenschaefer/maven'
-    }
-    maven {
       url "https://plugins.gradle.org/m2/"
     }
     jcenter()
   }
   dependencies {
-    classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
     classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
     classpath 'com.moowork.gradle:gradle-grunt-plugin:0.12'
     classpath "com.moowork.gradle:gradle-node-plugin:0.12"
     classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
     classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
-    classpath 'me.tatarka:gradle-retrolambda:3.7.0'
   }
 }

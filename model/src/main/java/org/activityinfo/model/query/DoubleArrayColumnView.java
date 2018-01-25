@@ -1,0 +1,127 @@
+package org.activityinfo.model.query;
+
+import org.activityinfo.model.util.HeapsortColumn;
+
+import java.io.Serializable;
+
+public class DoubleArrayColumnView implements ColumnView, Serializable {
+    private double[] values;
+    private int numRows;
+
+    protected DoubleArrayColumnView() {
+    }
+
+    public DoubleArrayColumnView(double[] values) {
+        this(values, values.length);
+    }
+
+    public DoubleArrayColumnView(double[] values, int numRows) {
+        this.values = values;
+        this.numRows = numRows;
+    }
+
+    @Override
+    public ColumnType getType() {
+        return ColumnType.NUMBER;
+    }
+
+    @Override
+    public int numRows() {
+        return numRows;
+    }
+
+    @Override
+    public Object get(int row) {
+        double value = values[row];
+        if(Double.isNaN(value)) {
+            return null;
+        } else {
+            return value;
+        }
+    }
+
+    @Override
+    public double getDouble(int row) {
+        return values[row];
+    }
+
+    @Override
+    public String getString(int row) {
+        return null;
+    }
+
+    @Override
+    public int getBoolean(int row) {
+        double x = getDouble(row);
+        if(Double.isNaN(x)) {
+            return NA;
+        } else if(x == 0) {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    }
+
+    @Override
+    public boolean isMissing(int row) {
+        return Double.isNaN(values[row]);
+    }
+
+    @Override
+    public ColumnView select(int[] selectedRows) {
+        double filteredValues[] = new double[selectedRows.length];
+        for (int i = 0; i < filteredValues.length; i++) {
+
+            int selectedRow = selectedRows[i];
+            if(selectedRow == -1) {
+                filteredValues[i] = Double.NaN;
+            } else {
+                filteredValues[i] = values[selectedRow];
+            }
+        }
+        return new DoubleArrayColumnView(filteredValues);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for(int i=0;i!=Math.min(10, values.length);++i) {
+            if(i > 0) {
+                sb.append(", ");
+            }
+            if(Double.isNaN(values[i])) {
+                sb.append("NaN");
+            } else {
+                sb.append(values[i]);
+            }
+        }
+        if(numRows() > 10) {
+            sb.append("... total rows = ").append(numRows());
+        }
+        sb.append(" ]");
+        return sb.toString();
+    }
+
+    @Override
+    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        switch(direction) {
+            case ASC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortAscending(values, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortAscending(values, sortVector, range.length, range);
+                }
+                break;
+            case DESC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortDescending(values, sortVector, numRows);
+                } else {
+                    HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
+                }
+                break;
+        }
+        return sortVector;
+    }
+
+}

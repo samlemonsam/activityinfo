@@ -55,6 +55,7 @@ public class UserPermission implements Serializable {
     private boolean allowManageUsers;
     private boolean allowManageAllUsers;
     private long version;
+    private String model;
 
     public UserPermission() {
     }
@@ -316,5 +317,16 @@ public class UserPermission implements Serializable {
 
     public void setVersion(long version) {
         this.version = version;
+    }
+
+    @Lob
+    @Column
+    @Offline
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 }

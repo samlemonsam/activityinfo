@@ -1,0 +1,70 @@
+{
+  "id": "means",
+  "schemaVersion": 1,
+  "label": "Means",
+  "elements": [
+    {
+      "id": "name",
+      "label": "Means",
+      "required": true,
+      "type": "FREE_TEXT",
+      "key": true
+    },
+    {
+      "id": "type",
+      "label": "Type",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "mele",
+            "label": "Melee weapon/CQC"
+          },
+          {
+            "id": "firearm",
+            "label": "Firearms"
+          },
+          {
+            "id": "explosive",
+            "label": "Explosives"
+          },
+          {
+            "id": "missiles",
+            "label": "Missiles, rockets, artillery, aerial bombs"
+          },
+          {
+            "id": "other",
+            "label": "Other"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scale",
+      "label": "Scale",
+      "required": true,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "t1853018850",
+            "label": "Small and light weapons"
+          },
+          {
+            "id": "t1853595974",
+            "label": "Heavy weapons"
+          },
+          {
+            "id": "t0877843733",
+            "label": "Other"
+          }
+        ]
+      }
+    }
+  ]
+}

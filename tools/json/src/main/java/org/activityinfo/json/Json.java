@@ -19,6 +19,10 @@ import org.activityinfo.json.impl.JreJsonFactory;
 import org.activityinfo.json.impl.JsonReflection;
 import org.activityinfo.json.impl.JsonUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Vends out implementation of JsonFactory.
  */
@@ -73,10 +77,32 @@ public class Json {
     }
 
     public static JsonValue toJson(Object value) {
-        return JsonReflection.toJson(value);
+        if(value instanceof JsonSerializable) {
+            return ((JsonSerializable) value).toJson();
+
+        } else if(value instanceof Collection) {
+            JsonValue array = Json.createArray();
+            for (Object element : ((Collection) value)) {
+                array.add(Json.toJson(element));
+            }
+            return array;
+
+        } else {
+            return JsonReflection.toJson(value);
+        }
     }
 
     public static <T> T fromJson(Class<T> clazz, JsonValue object) throws JsonMappingException {
         return JsonReflection.fromJson(clazz, object);
     }
+
+    public static <T> List<T> fromJsonArray(Class<T> componentClass, JsonValue array) throws JsonMappingException {
+        List<T> list = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            list.add(Json.fromJson(componentClass, array.get(i)));
+        }
+        return list;
+    }
+
+
 }

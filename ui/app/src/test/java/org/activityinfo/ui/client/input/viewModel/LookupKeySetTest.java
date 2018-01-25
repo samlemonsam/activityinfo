@@ -15,6 +15,10 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.TestSetup;
+import org.activityinfo.store.testing.AdminLevelForm;
+import org.activityinfo.store.testing.NfiForm;
+import org.activityinfo.store.testing.TestingStorageProvider;
+import org.activityinfo.store.testing.VillageForm;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -34,7 +38,7 @@ public class LookupKeySetTest {
 
     @Test
     public void hierarchyTest() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
         VillageForm villageForm = catalog.getVillageForm();
         AdminLevelForm territoryForm = catalog.getVillageForm().getParentForm();
@@ -104,7 +108,7 @@ public class LookupKeySetTest {
     @Test
     public void noKeysTest() {
 
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
 
         ReferenceType type = new ReferenceType(Cardinality.SINGLE, nfiForm.getFormId());

@@ -28,7 +28,11 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.UserExistsException;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.GrantModel;
+import org.activityinfo.model.permission.UserPermissionModel;
 import org.activityinfo.server.database.hibernate.dao.*;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserDatabase;
@@ -37,7 +41,9 @@ import org.activityinfo.server.mail.InvitationMessage;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -201,6 +207,14 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         perm.setAllowEdit(dto.getAllowEdit());
         perm.setAllowManageUsers(dto.getAllowManageUsers());
 
+        if(dto.hasFolderLimitation()) {
+            perm.setModel(constructModel(perm, dto).toJson().toJson());
+        } else {
+            // If there are no folders specified, then revert back to the
+            // the simple model
+            perm.setModel(null);
+        }
+
         // If currentUser does not have the manageAllUsers permission, then
         // careful not to overwrite permissions that may have been granted by
         // other users with greater permissions
@@ -232,5 +246,14 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         }
 
         perm.setLastSchemaUpdate(new Date());
+    }
+
+    private UserPermissionModel constructModel(UserPermission perm, UserPermissionDTO dto) {
+        List<GrantModel> grants = new ArrayList<>();
+        for (FolderDTO folderDTO : dto.getFolders()) {
+            GrantModel grant = new GrantModel(CuidAdapter.folderId(folderDTO.getId()));
+            grants.add(grant);
+        }
+        return new UserPermissionModel(perm.getUser().getId(), perm.getDatabase().getId(), grants);
     }
 }

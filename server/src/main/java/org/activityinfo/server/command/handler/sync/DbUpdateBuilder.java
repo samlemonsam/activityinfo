@@ -97,6 +97,10 @@ public class DbUpdateBuilder implements UpdateBuilder {
         delete(Project.class, inDatabase());
         insert(Project.class, notDeletedAnd(inDatabase()));
 
+        // Folders
+        delete(Folder.class, inDatabase());
+        insert(Folder.class, inDatabase());
+
         delete(Activity.class, inDatabase());
         insert(Activity.class, notDeletedAnd(inDatabase()));
 

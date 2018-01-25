@@ -6,15 +6,15 @@ import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
 
 class FormMetadataProviderAdapter implements FormMetadataProvider {
 
-    private FormCatalog catalog;
+    private FormStorageProvider catalog;
     private FormSupervisor supervisor;
 
-    public FormMetadataProviderAdapter(FormCatalog catalog, FormSupervisor supervisor) {
+    public FormMetadataProviderAdapter(FormStorageProvider catalog, FormSupervisor supervisor) {
         this.catalog = catalog;
         this.supervisor = supervisor;
     }

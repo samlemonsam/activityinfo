@@ -76,6 +76,12 @@ public class GetSchemaTest extends CommandTestCase2 {
                 schema.getDatabaseById(1).getCountry() ==
                 schema.getDatabaseById(2).getCountry());
 
+        assertThat(schema.getDatabaseById(1).getFolders(), hasSize(1));
+
+        FolderDTO nfiFolder = schema.getDatabaseById(1).getFolders().get(0);
+        assertThat(nfiFolder.getName(), equalTo("NFI Cluster"));
+        assertThat(nfiFolder.getActivities(), hasSize(1));
+
 
         ActivityDTO nfi = schema.getDatabaseById(1).getActivities().get(0);
         assertThat(nfi.getLocationTypeId(), equalTo(1));

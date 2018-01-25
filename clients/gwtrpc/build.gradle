@@ -1,9 +1,8 @@
-apply plugin: 'gwt-base'
 
 dependencies {
-    compile project(':core:promises')
+    compile project(':tools:promises')
     compile project(':i18n')
-    compile project(':core:model')
+    compile project(':model')
 
     compile libraries.jersey.core
     compile libraries.jackson.mapper
@@ -18,8 +17,7 @@ dependencies {
 
     compile libraries.hibernate.validator
 
-    gwt libraries.gwt.user
-    compile libraries.gwt.guava
+    compileOnly libraries.gwt.user
 
 }
 

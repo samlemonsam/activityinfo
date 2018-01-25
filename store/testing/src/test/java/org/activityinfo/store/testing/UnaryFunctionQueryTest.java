@@ -15,13 +15,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class UnaryFunctionQueryTest {
 
-    private TestingCatalog catalog;
+    private TestingStorageProvider catalog;
     private ColumnSetBuilder builder;
     private IntakeForm intakeForm;
 
     @Before
     public void setup() {
-        catalog = new TestingCatalog();
+        catalog = new TestingStorageProvider();
         builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
         intakeForm = catalog.getIntakeForm();
     }

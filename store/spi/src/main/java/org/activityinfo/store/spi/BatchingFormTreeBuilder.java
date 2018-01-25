@@ -18,11 +18,11 @@ public class BatchingFormTreeBuilder {
 
     private static final Logger LOGGER = Logger.getLogger(BatchingFormTreeBuilder.class.getName());
 
-    private final FormCatalog catalog;
+    private final FormStorageProvider catalog;
 
     private final Map<ResourceId, FormClass> formCache = new HashMap<>();
 
-    public BatchingFormTreeBuilder(FormCatalog catalog) {
+    public BatchingFormTreeBuilder(FormStorageProvider catalog) {
         this.catalog = catalog;
     }
 

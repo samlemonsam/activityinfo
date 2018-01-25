@@ -1,0 +1,16 @@
+
+dependencies {
+    compile libraries.guava
+    compileOnly libraries.gwt.user
+    compile project(':tools:promises')
+
+    testCompile project(':tools:json')
+    testCompile libraries.gwt.servlet
+
+}
+
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}

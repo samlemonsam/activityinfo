@@ -43,12 +43,7 @@ import java.util.List;
 
 public class DetailsRenderer {
 
-    private static int id = 1;
-
-    interface Templates extends SafeHtmlTemplates {
-        @Template("<h3 class=\"{0}\">{1}</h3>")
-        SafeHtml fieldLabel(String className, String label);
-
+    public interface Templates extends SafeHtmlTemplates {
         @Template("<a href=\"{0}\">{1}</a>")
         SafeHtml attachmentLink(SafeUri uri, String name);
     }

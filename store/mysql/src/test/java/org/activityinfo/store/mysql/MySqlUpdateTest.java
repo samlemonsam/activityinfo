@@ -391,7 +391,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         // Now update the record's name
         JsonValue fieldValues = createObject();
-        fieldValues.put(nameField.getName(), TextValue.valueOf("Sue").toJsonElement());
+        fieldValues.put(nameField.getName(), TextValue.valueOf("Sue").toJson());
 
         // the UI may send null values
         fieldValues.put(serialNumField.getName(), Json.createNull());

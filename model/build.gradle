@@ -1,0 +1,29 @@
+
+description = 'ActivityInfo Model'
+
+dependencies {
+    compile project(':tools:promises')
+    compile project(':tools:json')
+    compile project(':i18n')
+
+    compile libraries.gwt.user
+
+    compile libraries.guava
+    compile libraries.rebar.time
+    compile libraries.jsr305
+    compile libraries.jackson.core
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from project.sourceSets.main.output.generatedSourcesDir
+}
+
+test {
+    doFirst {
+        testLogging {
+            showStandardStreams = false
+        }
+    }
+}

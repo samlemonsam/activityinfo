@@ -55,7 +55,7 @@ public class TestingFormStorage implements VersionedFormStorage {
 
     @Override
     public FormPermissions getPermissions(int userId) {
-        return FormPermissions.full();
+        return FormPermissions.readWrite();
     }
 
     @Override

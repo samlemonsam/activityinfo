@@ -10,10 +10,11 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class IndicatorFieldBinding implements FieldBinding {
@@ -32,7 +33,7 @@ public class IndicatorFieldBinding implements FieldBinding {
     public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {
         ColumnView indicator = columnSet.getColumnView(indicatorId.toString());
 
-        if (indicatorField.getType() instanceof QuantityType) {
+        if (indicatorField.getType() instanceof QuantityType || indicatorField.getType() instanceof CalculatedFieldType) {
             getQuantityIndicator(dataArray, indicator);
         } else if (indicatorField.getType() instanceof TextType || indicatorField.getType() instanceof NarrativeType) {
             getTextIndicator(dataArray, indicator);
@@ -41,7 +42,7 @@ public class IndicatorFieldBinding implements FieldBinding {
         return dataArray;
     }
 
-    private void getQuantityIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
+    protected void getQuantityIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
         for (int i=0; i<indicatorColumn.numRows(); i++) {
             Double value = indicatorColumn.getDouble(i);
             if (value != null && !value.isNaN()) {
@@ -50,7 +51,7 @@ public class IndicatorFieldBinding implements FieldBinding {
         }
     }
 
-    private void getTextIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
+    protected void getTextIndicator(BaseModelData[] dataArray, ColumnView indicatorColumn) {
         for (int i=0; i<indicatorColumn.numRows(); i++) {
             String value = indicatorColumn.getString(i);
             if (value != null && !value.isEmpty()) {
@@ -61,11 +62,20 @@ public class IndicatorFieldBinding implements FieldBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        return Arrays.asList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
+        return getIndicatorColumnQuery();
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        return Arrays.asList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
+        return getIndicatorColumnQuery();
+    }
+
+    private List<ColumnModel> getIndicatorColumnQuery() {
+        if (indicatorField.getType() instanceof CalculatedFieldType) {
+            CalculatedFieldType calcType = (CalculatedFieldType) indicatorField.getType();
+            return Collections.singletonList(new ColumnModel().setExpression(calcType.getExpression()).as(indicatorId.toString()));
+        } else {
+            return Collections.singletonList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
+        }
     }
 }

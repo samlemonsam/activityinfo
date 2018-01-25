@@ -6,7 +6,7 @@ import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
 import org.activityinfo.server.command.handler.pivot.PivotAdapter;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -19,7 +19,7 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
     private static final Logger LOGGER = Logger.getLogger(PivotSitesHandler.class.getName());
 
     @Inject
-    private Provider<MySqlCatalog> catalog;
+    private Provider<MySqlStorageProvider> catalog;
 
     @Override
     public CommandResult execute(final PivotSites cmd, final User user) throws CommandException {

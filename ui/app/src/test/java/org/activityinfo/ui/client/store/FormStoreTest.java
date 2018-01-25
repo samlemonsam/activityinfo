@@ -186,7 +186,7 @@ public class FormStoreTest {
 
     @Test
     public void newRecordHitsQuery() {
-        TestingCatalog catalog = new TestingCatalog();
+        TestingStorageProvider catalog = new TestingStorageProvider();
         Survey survey = catalog.getSurvey();
 
         AsyncClientStub client = new AsyncClientStub(catalog);

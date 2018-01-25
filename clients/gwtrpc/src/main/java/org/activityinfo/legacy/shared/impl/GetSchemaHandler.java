@@ -55,7 +55,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         private final List<CountryDTO> countryList = new ArrayList<CountryDTO>();
 
         private final Map<Integer, UserDatabaseDTO> databaseMap = new HashMap<Integer, UserDatabaseDTO>();
-
+        private final Map<Integer, FolderDTO> folders = new HashMap<>();
         private final Map<Integer, CountryDTO> countries = new HashMap<Integer, CountryDTO>();
         private final Map<Integer, PartnerDTO> partners = new HashMap<Integer, PartnerDTO>();
         private final Map<Integer, ActivityDTO> activities = new HashMap<>();
@@ -276,16 +276,40 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         Promise.waitAll(
                                 joinPartnersToDatabases(),
                                 loadProjects(),
+                                loadFolders(),
                                 loadActivities(),
-//                                loadIndicators(),
-//                                loadAttributeGroups(),
-//                                loadAttributes(),
-//                                joinAttributesToActivities(),
                                 loadLockedPeriods())
                                 .then(promise);
                     }
                 }
             });
+            return promise;
+        }
+
+
+        protected Promise<Void> loadFolders() {
+            final Promise<Void> promise = new Promise<>();
+            SqlQuery.select("name", "folderId", "databaseId")
+                    .from("folder")
+                    .where("databaseId").in(databaseMap.keySet())
+                    .execute(tx, new SqlResultCallback() {
+                        @Override
+                        public void onSuccess(SqlTransaction tx, SqlResultSet results) {
+                            for (SqlResultSetRow row : results.getRows()) {
+                                int databaseId = row.getInt("databaseId");
+
+                                FolderDTO folder = new FolderDTO();
+                                folder.setId(row.getInt("folderId"));
+                                folder.setName(row.getString("name"));
+                                folder.setDatabaseId(databaseId);
+
+                                UserDatabaseDTO database = databaseMap.get(databaseId);
+                                database.getFolders().add(folder);
+                                folders.put(folder.getId(), folder);
+                            }
+                            promise.resolve(null);
+                        }
+                    });
             return promise;
         }
 
@@ -430,6 +454,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     "locationTypeId",
                     "reportingFrequency",
                     "databaseId",
+                    "folderId",
                     "classicView",
                     "published").from("activity").orderBy("SortOrder");
 
@@ -450,6 +475,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     activity.setPublished(row.getInt("published"));
                     activity.setClassicView(row.getBoolean("classicView"));
 
+
                     int databaseId = row.getInt("databaseId");
                     UserDatabaseDTO database = databaseMap.get(databaseId);
                     activity.setDatabase(database);
@@ -464,6 +490,15 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     }
                     activity.setLocationType(locationType);
                     activity.set("locationTypeId", locationType.getId());
+
+                    if(!row.isNull("folderId")) {
+                        int folderId = row.getInt("folderId");
+                        FolderDTO folder = folders.get(folderId);
+                        if(folder != null) {
+                            activity.setFolder(folder);
+                            folder.getActivities().add(activity);
+                        }
+                    }
 
                     activities.put(activity.getId(), activity);
                 }

@@ -2,7 +2,7 @@ package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.hrd.HrdCatalog;
+import org.activityinfo.store.hrd.HrdStorageProvider;
 import org.activityinfo.store.mysql.collections.FormProvider;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.spi.FormNotFoundException;
@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class HrdProvider implements FormProvider {
     
-    private HrdCatalog catalog = new HrdCatalog();
+    private HrdStorageProvider catalog = new HrdStorageProvider();
     
     @Override
     public boolean accept(ResourceId formId) {

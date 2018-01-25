@@ -56,7 +56,7 @@ public class TestReportWriter {
             for (TestResult.Attachment attachment : testResult.getAttachments()) {
                 File attachmentFile = new File(attachmentDir, testName(testResult) + "-" + attachment.getFilename());
                 try {
-                    Files.copy(attachment.getByteSource(), attachmentFile);
+                    attachment.getByteSource().copyTo(Files.asByteSink(attachmentFile));
                 } catch (IOException e) {
                     throw new ConfigurationError("Could not write attachment file " + attachmentFile.getAbsolutePath());
                 }

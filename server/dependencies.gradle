@@ -1,8 +1,14 @@
 
+configurations.all {
 
+    // Use the implementation provided by the JDK
+    // Outdated version of xerces will cause problems with JAXB
+    exclude group:'xerces', module: 'xercesImpl'
+
+}
 
 dependencies {
-    compile project(':core:model')
+    compile project(':model')
     compile project(':clients:gwtrpc')
     compile project(':clients:gwtrest')
 
@@ -14,8 +20,9 @@ dependencies {
 
     compile project(':store:mysql')
     compile project(':store:hrd')
+    compile project(':store:apiserver')
 
-    testCompile project(':core:model').sourceSets.test.output
+    testCompile project(':model').sourceSets.test.output
 
     // AppEngine
     appengineSdk libraries.appengine.sdk
@@ -73,7 +80,7 @@ dependencies {
     compile libraries.appengine.export.emf
     compile libraries.prettytime
 
-    testCompile project(':core:promises').sourceSets.test.output
+    testCompile project(':tools:promises').sourceSets.test.output
 
     // For humanitarian iD
     compile "com.google.oauth-client:google-oauth-client-appengine:1.20.0";

@@ -1,13 +1,16 @@
 package org.activityinfo.store.mysql;
 
 
-import com.google.gson.GsonBuilder;
-import org.activityinfo.json.JsonValue;
+import org.activityinfo.json.Json;
+import org.activityinfo.model.form.RecordHistory;
+import org.activityinfo.model.form.RecordHistoryEntry;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.type.RecordRef;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public class MySqlHistoryTest extends AbstractMySqlTest {
 
@@ -19,17 +22,12 @@ public class MySqlHistoryTest extends AbstractMySqlTest {
 
     @Test
     public void locationChange() throws SQLException {
-        RecordHistoryBuilder builder = new RecordHistoryBuilder(catalog);
-        JsonValue array = builder.build(CuidAdapter.activityFormClass(33), CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 968196924));
+        MySqlRecordHistoryBuilder builder = new MySqlRecordHistoryBuilder(catalog);
+        RecordHistory array = builder.build(new RecordRef(
+                CuidAdapter.activityFormClass(33),
+                CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 968196924)));
 
-        prettyPrint(array);
-    }
-
-    private void prettyPrint(JsonValue array) {
-        System.out.println(new GsonBuilder()
-                .setPrettyPrinting()
-                .create()
-                .toJson(array));
+        System.out.println(Json.stringify(Json.toJson(array), 2));
     }
 
 }

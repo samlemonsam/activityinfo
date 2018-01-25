@@ -7,7 +7,10 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.RecordVersion;
+import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryType;
@@ -31,7 +34,7 @@ public class FeatureSourceStorage implements FormStorage {
 
     @Override
     public FormPermissions getPermissions(int userId) {
-        return FormPermissions.full();
+        return FormPermissions.readWrite();
     }
 
     @Override

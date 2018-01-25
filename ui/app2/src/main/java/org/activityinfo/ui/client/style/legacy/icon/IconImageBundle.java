@@ -10,16 +10,16 @@ package org.activityinfo.ui.client.style.legacy.icon;
  * Copyright (C) 2009 - 2013 UNICEF
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
+ * it under the terms of the GNU General License as
  * published by the Free Software Foundation, either version 3 of the 
  * License, or (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU General License for more details.
  * 
- * You should have received a copy of the GNU General Public 
+ * You should have received a copy of the GNU General 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
@@ -35,7 +35,8 @@ import com.google.gwt.user.client.ui.ImageBundle;
  */
 @SuppressWarnings("deprecation")
 public interface IconImageBundle extends ImageBundle {
-    IconImageBundle ICONS = (IconImageBundle) GWT.create(IconImageBundle.class);
+    
+    IconImageBundle ICONS = GWT.create(IconImageBundle.class);
 
     AbstractImagePrototype add();
 
@@ -62,14 +63,7 @@ public interface IconImageBundle extends ImageBundle {
 
     AbstractImagePrototype addActivity();
 
-    AbstractImagePrototype deleteActivity();
-
-    @Resource(value = "editPage.png")
-    AbstractImagePrototype editActivity();
-
     AbstractImagePrototype user();
-
-    AbstractImagePrototype editUser();
 
     AbstractImagePrototype addUser();
 
@@ -81,10 +75,7 @@ public interface IconImageBundle extends ImageBundle {
     AbstractImagePrototype group();
 
     AbstractImagePrototype table();
-
     AbstractImagePrototype report();
-
-    AbstractImagePrototype sum();
 
     AbstractImagePrototype curveChart();
 
@@ -98,9 +89,6 @@ public interface IconImageBundle extends ImageBundle {
     AbstractImagePrototype cancel();
 
     AbstractImagePrototype barChart();
-
-    @Resource(value = "barChart.png")
-    AbstractImagePrototype analysis();
 
     @Resource(value = "keyboard.png")
     AbstractImagePrototype dataEntry();
@@ -129,37 +117,17 @@ public interface IconImageBundle extends ImageBundle {
 
     AbstractImagePrototype pieChart();
 
-    AbstractImagePrototype checked();
-
     AbstractImagePrototype unchecked();
 
     AbstractImagePrototype offline();
 
-    AbstractImagePrototype onlineSynced();
-
     AbstractImagePrototype sync();
-
-    AbstractImagePrototype syncing();
 
     AbstractImagePrototype up();
 
     AbstractImagePrototype down();
 
-    AbstractImagePrototype attach();
-
     AbstractImagePrototype remove();
-
-    @Resource(value = "bullet_green.png")
-    AbstractImagePrototype elementCompleted();
-
-    @Resource(value = "bullet_red.png")
-    AbstractImagePrototype elementUncompleted();
-
-    @Resource(value = "bullet_star_new.png")
-    AbstractImagePrototype activate();
-
-    @Resource(value = "bullet_star_black.png")
-    AbstractImagePrototype close();
 
     @Resource(value = "cog.png")
     AbstractImagePrototype create();
@@ -173,38 +141,8 @@ public interface IconImageBundle extends ImageBundle {
     @Resource(value = "information.png")
     AbstractImagePrototype info();
 
-    AbstractImagePrototype expand();
-
     AbstractImagePrototype collapse();
 
-    @Resource(value = "filter-check.png")
-    AbstractImagePrototype checkboxChecked();
-
-    @Resource(value = "filter-uncheck.png")
-    AbstractImagePrototype checkboxUnchecked();
-
-    @Resource(value = "hourglass.png")
-    AbstractImagePrototype history();
-
-    @Resource(value = "points2.png")
-    AbstractImagePrototype openedPoint();
-
-    @Resource(value = "points3.png")
-    AbstractImagePrototype overduePoint();
-
-    @Resource(value = "points1.png")
-    AbstractImagePrototype closedPoint();
-
-    @Resource(value = "rappels2.png")
-    AbstractImagePrototype openedReminder();
-
-    @Resource(value = "rappels3.png")
-    AbstractImagePrototype overdueReminder();
-
-    @Resource(value = "rappels1.png")
-    AbstractImagePrototype closedReminder();
-
-    @Resource(value = "project.png")
     AbstractImagePrototype project();
 
     @Resource(value = "LockedPeriod.png")
@@ -213,44 +151,25 @@ public interface IconImageBundle extends ImageBundle {
     @Resource(value = "lockSmall.png")
     AbstractImagePrototype lockedPeriodSmall();
 
-    @Resource(value = "adminlevel1.png")
-    AbstractImagePrototype adminlevel1();
-
-    @Resource(value = "partner.png")
     AbstractImagePrototype partner();
 
-    @Resource(value = "empty.png")
     AbstractImagePrototype empty();
 
-    @Resource(value = "applyFilter.png")
     AbstractImagePrototype applyFilter();
 
-    @Resource(value = "site.png")
     AbstractImagePrototype site();
 
-    @Resource(value = "none.png")
     AbstractImagePrototype none();
 
-    @Resource(value = "indicators.png")
     AbstractImagePrototype indicators();
 
     AbstractImagePrototype location();
 
-    AbstractImagePrototype logo48();
-
     AbstractImagePrototype edit();
-
-    AbstractImagePrototype edit32();
-
-    AbstractImagePrototype add32();
 
     AbstractImagePrototype time();
 
     AbstractImagePrototype note();
-
-    AbstractImagePrototype favorite();
-
-    AbstractImagePrototype emptyFavorite();
 
     AbstractImagePrototype csv();
 
@@ -258,21 +177,10 @@ public interface IconImageBundle extends ImageBundle {
 
     AbstractImagePrototype marker();
 
-    AbstractImagePrototype selectedMarker();
-
     @Resource(value = "useLocation16.png")
     AbstractImagePrototype useLocation();
 
-    @Resource(value = "editLocation16.png")
-    AbstractImagePrototype editLocation();
-
-    AbstractImagePrototype treeviewAdmin();
-
-    AbstractImagePrototype treeviewTime();
-
     AbstractImagePrototype list();
-
-    AbstractImagePrototype drilldown();
 
     AbstractImagePrototype folder();
 
@@ -293,15 +201,7 @@ public interface IconImageBundle extends ImageBundle {
 
     AbstractImagePrototype text();
 
-    @Resource(value = "application_form_add.png")
-    AbstractImagePrototype addForm();
-
     @Resource(value = "application_form.png")
     AbstractImagePrototype form();
 
-    @Resource(value = "application_form_delete.png")
-    AbstractImagePrototype deleteForm();
-
-    @Resource(value = "application_form_edit.png")
-    AbstractImagePrototype editForm();
 }

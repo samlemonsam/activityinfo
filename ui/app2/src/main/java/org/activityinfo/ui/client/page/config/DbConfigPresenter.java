@@ -31,7 +31,7 @@ import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.PageId;
 import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.page.common.GalleryView;
-import org.activityinfo.ui.client.page.config.design.DesignPresenter;
+import org.activityinfo.ui.client.page.config.design.DbEditor;
 
 public class DbConfigPresenter implements DbPage {
 
@@ -55,7 +55,7 @@ public class DbConfigPresenter implements DbPage {
             view.add(I18N.CONSTANTS.design(),
                     I18N.CONSTANTS.designDescription(),
                     "db-design.png",
-                    new DbPageState(DesignPresenter.PAGE_ID, db.getId()));
+                    new DbPageState(DbEditor.PAGE_ID, db.getId()));
         }
         if (db.isManageAllUsersAllowed()) {
             view.add(I18N.CONSTANTS.partner(),

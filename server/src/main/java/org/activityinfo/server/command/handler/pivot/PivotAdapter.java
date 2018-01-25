@@ -18,10 +18,6 @@ import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.*;
 import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.functions.GreaterOrEqualFunction;
-import org.activityinfo.model.expr.functions.LessOrEqualFunction;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
@@ -36,17 +32,17 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.command.handler.binding.dim.*;
-import org.activityinfo.store.mysql.MySqlCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
-import org.activityinfo.store.query.server.AppEngineFormScanCache;
+import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
 import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;
@@ -61,7 +57,7 @@ public class PivotAdapter {
     private static final Logger LOGGER = Logger.getLogger(PivotAdapter.class.getName());
     public static final String SITE_ID_KEY = "__site_id";
 
-    private final MySqlCatalog catalog;
+    private final MySqlStorageProvider catalog;
     private final PivotSites command;
     private final Filter filter;
     private final int userId;
@@ -95,8 +91,8 @@ public class PivotAdapter {
 
 
 
-    public PivotAdapter(FormCatalog catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
-        this.catalog = (MySqlCatalog) catalog;
+    public PivotAdapter(FormStorageProvider catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
+        this.catalog = (MySqlStorageProvider) catalog;
         this.command = command;
         this.filter = command.getFilter();
         this.userId = userId;

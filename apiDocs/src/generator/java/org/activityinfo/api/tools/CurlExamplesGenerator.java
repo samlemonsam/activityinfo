@@ -87,7 +87,7 @@ public class CurlExamplesGenerator {
         return new Example(
                 "curl https://www.activityinfo.org/form/" + exampleForm.getId() + "/schema",
                 exampleForm
-                    .toJsonObject()
+                    .toJson()
         );
 
     }
@@ -109,7 +109,7 @@ public class CurlExamplesGenerator {
         return new Example(
                 String.format("curl https://www.activityinfo.org/resources/form/%s/record/%s",
                         formId, recordId),
-                record.build().toJsonElement()
+                record.build().toJson()
         );
     }
 

@@ -1,15 +1,5 @@
 
 
-apply plugin: 'gwt-base'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-gwt {
-    gwtVersion = "2.8.0-bdd1"
-    modules 'org.activityinfo.ui.AppProd'
-    maxHeapSize "5g"
-}
 
 ext {
     outputDir = "$buildDir/gwt-out"
@@ -25,81 +15,75 @@ task explodedWar(type: Copy) {
 }
 
 
-test {
-    // Browser tests that require special handling
-    exclude '**/*GwtTest.*'
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    from project.sourceSets.main.output.generatedSourcesDir
 }
 
-dependencies {
-    compile "com.google.guava:guava:21.0"
-    compile "com.google.gwt:gwt-user:2.8.0-bdd1"
+sourceSets {
 
-    gwt libraries.immutables.annotations
-
-    gwt 'com.google.guava:guava-gwt:21.0'
-    gwt libraries.gwt.gson
-
-    gwt project(':core:model')
-    gwt project(':store:query');
-    gwt project(':i18n')
-    gwt project(':clients:gwtrest')
-    gwt project(':io:match')
-    gwt project(':analysis')
-    gwt project(':ui:icons')
-
-
-    gwt project(':ui:codemirror')
-
-    gwt libraries.rebar.appcache
-
-    gwt group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
-    gwt group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
-    gwt group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
-
-
-    testCompile project(':store:testing')
-
-}
-
-configurations.all {
-
-    // Interferes with GWT-dev
-    exclude module: 'gwt-servlet'
-}
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [ configurations.gwt ]
+    // Define a seperate sourceSet for GWT test cases that
+    // are actually compiled to JavaScript and then executed.
+    // These require a different classpath than our normal Junit tests
+    gwtTest {
+        java {
+            srcDir 'src/testgwt/java'
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+        }
     }
 }
 
-task codeserver(type: JavaExec) {
-
-    main = 'com.google.gwt.dev.codeserver.CodeServer'
-
-    // Java sources first, so that changes get picked up on refresh
-    classpath project(":i18n").sourceSets.main.java.srcDirs
-    classpath project(":i18n").sourceSets.main.resources.srcDirs
-    classpath project(":core:promises").sourceSets.main.java.srcDirs
-    classpath project(":core:model").sourceSets.main.java.srcDirs
-    classpath project(":analysis").sourceSets.main.java.srcDirs
-    classpath sourceSets.main.java.srcDirs
-    classpath sourceSets.main.resources.srcDirs
-
-    // Generated sources from Annotation processors
-    classpath sourceSets.main.output.generatedSourcesDir
-
-
-    // Compiled java classes and libraries second
-    classpath sourceSets.main.runtimeClasspath
-    classpath configurations.gwt
-    classpath configurations.gwtSdk
-
-    args '-launcherDir', project(':server').buildDir.absolutePath + "/explodedDevMode"
-    args 'org.activityinfo.ui.AppDev'
-
+configurations {
+    gwt
+    gwtSdk
 }
 
+
+
+dependencies {
+
+    compile libraries.gwt.user
+
+    compile "com.google.guava:guava:21.0"
+
+    compile libraries.immutables.annotations
+
+    compile project(':model')
+    compile project(':store:query');
+    compile project(':i18n')
+    compile project(':clients:gwtrest')
+    compile project(':io:match')
+    compile project(':analysis')
+    compile project(':ui:icons')
+    compile project(':ui:core')
+
+    compile project(':tools:codemirror')
+    compile project(':tools:indexeddb')
+
+    compile libraries.rebar.appcache
+
+    compile group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
+    compile group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
+    compile group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
+
+
+    testCompile project(':store:testing')
+    testCompile project(':tools:indexeddb').sourceSets.test.output
+
+    // Sources need for compiling to JavaScript
+    gwt 'com.google.guava:guava-gwt:21.0'
+    gwt libraries.gwt.gson
+
+    // Sources need for compiling tests to JavaScript
+    gwtTestCompile libraries.gwt.user
+
+    // Toolkit that includes Java->JavaScript compiler
+    gwtSdk libraries.gwt.dev
+
+
+}
 
 
 task compileApp(type: JavaExec) {
@@ -131,8 +115,6 @@ task testOffline(type: JavaExec) {
     dependsOn compileTestJava
 
     classpath configurations.gwtSdk
-    classpath configurations.gwt
-
 
     classpath sourceSets.main.java.srcDirs
     classpath sourceSets.main.resources.srcDirs
@@ -146,30 +128,5 @@ task testOffline(type: JavaExec) {
 
     jvmArgs "-Dgwt.args=-runStyle Manual:1 -style pretty -war ${buildDir}/testWar -workDir ${buildDir}/testGwtWork"
     args 'org.activityinfo.ui.client.store.offline.OfflineStoreGwtTest'
-
-}
-
-
-task soyc(type: JavaExec) {
-
-    outputs.dir outputDir
-    inputs.dir sourceSets.main.allSource.srcDirs
-
-    // Compiled java classes and libraries second
-    classpath sourceSets.main.java.srcDirs
-    classpath sourceSets.main.resources.srcDirs
-    classpath sourceSets.main.runtimeClasspath
-    classpath sourceSets.main.output.generatedSourcesDir
-    classpath configurations.gwt
-    classpath configurations.gwtSdk
-
-    main = 'com.google.gwt.dev.Compiler'
-
-    args '-logLevel', 'INFO'
-    args '-sourceLevel', '1.8'
-    args '-war', outputDir
-    args '-compileReport'
-    args '-extra', "${buildDir}/gwt-extra"
-    args 'org.activityinfo.ui.AppProd'
 
 }

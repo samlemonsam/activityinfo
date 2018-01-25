@@ -2,7 +2,10 @@ package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
-import org.activityinfo.api.client.*;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.FormRecordSet;
+import org.activityinfo.api.client.FormRecordUpdateBuilder;
+import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.form.*;
@@ -21,20 +24,20 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 
 import java.util.List;
 
 public class AsyncClientStub implements ActivityInfoClientAsync {
 
-    private TestingCatalog catalog;
+    private TestingStorageProvider catalog;
     private boolean connected = true;
 
     public AsyncClientStub() {
-        this.catalog = new TestingCatalog();
+        this.catalog = new TestingStorageProvider();
     }
 
-    public AsyncClientStub(TestingCatalog testingCatalog) {
+    public AsyncClientStub(TestingStorageProvider testingCatalog) {
         this.catalog = testingCatalog;
     }
 
@@ -47,7 +50,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         return Promise.rejected(new UnsupportedOperationException());
     }
 
-    public TestingCatalog getCatalog() {
+    public TestingStorageProvider getCatalog() {
         return catalog;
     }
 
@@ -71,7 +74,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<List<FormHistoryEntry>> getRecordHistory(String formId, String recordId) {
+    public Promise<RecordHistory> getRecordHistory(String formId, String recordId) {
         return Promise.rejected(new UnsupportedOperationException());
     }
 
@@ -133,7 +136,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return Promise.resolved(FormMetadata.of(
                 form.get().cacheVersion(),
                 form.get().getFormClass(),
-                FormPermissions.full()));
+                FormPermissions.readWrite()));
         }
     }
 

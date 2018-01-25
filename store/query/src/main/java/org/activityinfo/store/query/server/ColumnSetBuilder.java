@@ -1,6 +1,5 @@
 package org.activityinfo.store.query.server;
 
-import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
@@ -12,14 +11,12 @@ import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.FormStorage;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ColumnSetBuilder {
@@ -27,12 +24,12 @@ public class ColumnSetBuilder {
     public static final Logger LOGGER = Logger.getLogger(ColumnSetBuilder.class.getName());
 
     private ColumnFactory columnFactory;
-    private final FormCatalog catalog;
+    private final FormStorageProvider catalog;
     private final FormTreeBuilder formTreeBuilder;
     private final FormSupervisor supervisor;
     private final FormScanCache cache;
 
-    public ColumnSetBuilder(ColumnFactory columnFactory, FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
+    public ColumnSetBuilder(ColumnFactory columnFactory, FormStorageProvider catalog, FormScanCache cache, FormSupervisor supervisor) {
         this.columnFactory = columnFactory;
         this.catalog = catalog;
         this.formTreeBuilder = new FormTreeBuilder(new FormMetadataProviderAdapter(catalog, supervisor));
@@ -41,13 +38,13 @@ public class ColumnSetBuilder {
     }
 
     @GwtIncompatible
-    public ColumnSetBuilder(FormCatalog catalog, FormScanCache cache, FormSupervisor supervisor) {
+    public ColumnSetBuilder(FormStorageProvider catalog, FormScanCache cache, FormSupervisor supervisor) {
         this(ServerColumnFactory.INSTANCE, catalog, cache, supervisor);
     }
 
     @GwtIncompatible
-    public ColumnSetBuilder(FormCatalog catalog, FormSupervisor supervisor) {
-        this(ServerColumnFactory.INSTANCE, catalog, new AppEngineFormScanCache(), supervisor);
+    public ColumnSetBuilder(FormStorageProvider catalog, FormSupervisor supervisor) {
+        this(ServerColumnFactory.INSTANCE, catalog, new NullFormScanCache(), supervisor);
     }
 
     public FormScanBatch createNewBatch() {
@@ -94,7 +91,7 @@ public class ColumnSetBuilder {
             pendingCachePuts.addAll(cache(scan));
         }
 
-        waitForCachingToFinish(pendingCachePuts);
+        cache.waitForCachingToFinish(pendingCachePuts);
 
     }
 
@@ -157,36 +154,6 @@ public class ColumnSetBuilder {
         }
 
         return Collections.emptyList();
-    }
-
-    /**
-     * Wait for caching to finish, if there is time left in this request.
-     */
-    public void waitForCachingToFinish(List<Future<Integer>> pendingCachePuts) {
-
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        int columnCount = 0;
-        for (Future<Integer> future : pendingCachePuts) {
-            if (!future.isDone()) {
-                long remainingMillis = ApiProxy.getCurrentEnvironment().getRemainingMillis();
-                if (remainingMillis > 100) {
-                    try {
-                        Integer cachedCount = future.get(remainingMillis - 50, TimeUnit.MILLISECONDS);
-                        columnCount += cachedCount;
-
-                    } catch (InterruptedException | TimeoutException e) {
-                        LOGGER.warning("Ran out of time while waiting for caching of results to complete.");
-                        return;
-
-                    } catch (ExecutionException e) {
-                        LOGGER.log(Level.WARNING, "Exception caching results of query", e);
-                    }
-                }
-            }
-        }
-
-        LOGGER.info("Waited " + stopwatch + " for " + columnCount + " columns to finish caching.");
     }
 
 

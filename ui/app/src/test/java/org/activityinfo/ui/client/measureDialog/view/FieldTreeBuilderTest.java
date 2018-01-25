@@ -7,7 +7,7 @@ import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.store.query.server.FormSourceSyncImpl;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.testing.ReferralSubForm;
-import org.activityinfo.store.testing.TestingCatalog;
+import org.activityinfo.store.testing.TestingStorageProvider;
 import org.junit.Test;
 
 public class FieldTreeBuilderTest {
@@ -15,7 +15,7 @@ public class FieldTreeBuilderTest {
     @Test
     public void subForms() {
 
-        FormSource formStore = new FormSourceSyncImpl(new TestingCatalog(), 1);
+        FormSource formStore = new FormSourceSyncImpl(new TestingStorageProvider(), 1);
         FormTree tree = formStore.getFormTree(ReferralSubForm.FORM_ID).waitFor();
 
         TreeStore<MeasureTreeNode> treeStore = new TreeStore<>(MeasureTreeNode::getId);

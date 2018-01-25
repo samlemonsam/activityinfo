@@ -104,7 +104,7 @@ public class JobTaskServlet extends HttpServlet {
                 if(updatedEntity.getState() != JobState.STARTED) {
                     return;
                 }
-                updatedEntity.setResult(result.toJsonObject().toJson());
+                updatedEntity.setResult(result.toJson().toJson());
                 updatedEntity.setState(JobState.COMPLETED);
                 updatedEntity.setCompletionTime(new Date());
                 JobStore.ofy().save().entity(updatedEntity).now();

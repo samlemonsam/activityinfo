@@ -136,7 +136,7 @@ public class LocationFormStorage implements FormStorage {
     @Override
     public FormPermissions getPermissions(int userId) {
         if(openWorkflow) {
-            return FormPermissions.full();
+            return FormPermissions.readWrite();
         }
         if(databaseId != null) {
             UserPermission permission = permissionsCache.getPermission(userId, databaseId);

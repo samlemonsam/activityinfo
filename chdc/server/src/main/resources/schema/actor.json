@@ -1,0 +1,69 @@
+{
+  "id": "actor",
+  "schemaVersion": 1,
+  "label": "Actor",
+  "elements": [
+    {
+      "id": "name",
+      "label": "Name",
+      "required": true,
+      "type": "FREE_TEXT",
+      "key": true
+    },
+    {
+      "id": "category",
+      "label": "Actor Category",
+      "required": true,
+      "type": "reference",
+      "typeParameters": {
+        "cardinality": "single",
+        "range": [
+          {
+            "formId": "actor_category"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_country",
+      "label": "NGO Country of Origin",
+      "visible": true,
+      "required": false,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "t0195068761",
+            "label": "Sweden"
+          },
+          {
+            "id": "t0194876387",
+            "label": "Switzerland"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ngo_sector",
+      "code": null,
+      "label": "NGO Sector",
+      "visible": true,
+      "required": false,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "values": [
+          {
+            "id": "demining",
+            "label": "Demining"
+          },
+          {
+            "id": "health",
+            "label": "Health"
+          }
+        ]
+      }
+    }
+  ]
+}

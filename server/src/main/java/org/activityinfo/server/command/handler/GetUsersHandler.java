@@ -23,14 +23,21 @@ package org.activityinfo.server.command.handler;
  */
 
 import com.extjs.gxt.ui.client.Style;
+import com.google.appengine.labs.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
+import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.GrantModel;
+import org.activityinfo.model.permission.UserPermissionModel;
+import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
@@ -38,13 +45,19 @@ import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Alex Bertram
  * @see org.activityinfo.legacy.shared.command.GetUsers
  */
 public class GetUsersHandler implements CommandHandler<GetUsers> {
+
+    private static final Logger LOGGER = Logger.getLogger(GetUsersHandler.class.getName());
 
     private EntityManager em;
 
@@ -76,6 +89,15 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                                              .setParameter("dbId", cmd.getDatabaseId())
                                              .setParameter("currentUserId", currentUser.getId());
 
+        List<Folder> folders = em.createQuery("select f from Folder f where f.database.id = :dbId", Folder.class)
+                .setParameter("dbId", cmd.getDatabaseId())
+                .getResultList();
+
+        Map<String, Folder> folderMap = new HashMap<>();
+        for (Folder folder : folders) {
+            folderMap.put(CuidAdapter.folderId(folder.getId()), folder);
+        }
+
         if (cmd.getOffset() > 0) {
             query.setFirstResult(cmd.getOffset());
         }
@@ -98,10 +120,35 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowManageUsers(perm.isAllowManageUsers());
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setPartner(new PartnerDTO(perm.getPartner().getId(), perm.getPartner().getName()));
+            dto.setFolders(folderList(folderMap, perm));
             models.add(dto);
         }
 
         return new UserResult(models, cmd.getOffset(), queryTotalCount(cmd, currentUser, whereClause));
+    }
+
+    private List<FolderDTO> folderList(Map<String, Folder> folderMap, UserPermission perm) {
+
+        if(Strings.isNullOrEmpty(perm.getModel())) {
+            return null;
+        }
+
+        try {
+            UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(perm.getModel()));
+            List<FolderDTO> folderList = new ArrayList<>();
+            for (GrantModel grantModel : model.getGrants()) {
+                Folder folder = folderMap.get(grantModel.getFolderId());
+                if(folder != null) {
+                    folderList.add(new FolderDTO(folder.getDatabase().getId(), folder.getName()));
+                }
+            }
+            return folderList;
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Permissions model: " + perm.getModel());
+            LOGGER.log(Level.SEVERE, "Failed to parse permissions model", e);
+            return null;
+        }
     }
 
     private void assertAuthorized(UserPermission currentUserPermission) {

@@ -1,16 +1,16 @@
 
 
 dependencies {
-    compile project(':core:model')
+    compile project(':model')
     compile project(':store:query')
     compile project(':store:spi')
     compile project(':i18n')
 
+    compile libraries.appengine.api
     compile 'com.googlecode.objectify:objectify:5.1.13'
     
     testCompile libraries.dbunit
 
-    testCompile libraries.appengine.api
     testCompile libraries.appengine.testing
     testCompile libraries.appengine.stubs
 

@@ -12,7 +12,7 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.endpoint.rest.CsvWriter;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -26,10 +26,10 @@ public class ExportAuditLogExecutor implements JobExecutor<ExportAuditLog, Expor
     private final DispatcherSync dispatcher;
     private final Provider<EntityManager> entityManager;
     private final StorageProvider storageProvider;
-    private final FormCatalog catalog;
+    private final FormStorageProvider catalog;
 
     @Inject
-    public ExportAuditLogExecutor(DispatcherSync dispatcher, Provider<EntityManager> entityManager, StorageProvider storageProvider, FormCatalog catalog) {
+    public ExportAuditLogExecutor(DispatcherSync dispatcher, Provider<EntityManager> entityManager, StorageProvider storageProvider, FormStorageProvider catalog) {
         this.dispatcher = dispatcher;
         this.entityManager = entityManager;
         this.storageProvider = storageProvider;

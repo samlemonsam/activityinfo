@@ -25,12 +25,12 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
-import com.watopi.chosen.client.ChosenOptions;
+import com.arcbees.chosen.client.ChosenOptions;
 
 /**
  * @author yuriyz on 12/30/2015.
  */
-public class ChosenListBox extends com.watopi.chosen.client.gwt.ChosenListBox {
+public class ChosenListBox extends com.arcbees.chosen.client.gwt.ChosenListBox {
 
     public static final int DEFAULT_WIDTH = 250;
 
@@ -60,7 +60,7 @@ public class ChosenListBox extends com.watopi.chosen.client.gwt.ChosenListBox {
         forceRedrawLater(true);
     }
 
-    // Workaround for ugly fix in com.watopi.chosen.client.ChosenImpl.setup(), line 1207 :
+    // Workaround for ugly fix in com.arcbees.chosen.client.ChosenImpl.setup(), line 1207 :
     // Temporary fix. IIf the select element is inside a hidden container
     // GQuery cannot get the size of the select element.
     private void forceRedrawLater(final boolean allowRecursiveCall) {
@@ -81,7 +81,7 @@ public class ChosenListBox extends com.watopi.chosen.client.gwt.ChosenListBox {
         makeWidthIsNotCorrupted(link, allowRecursiveCall);
     }
 
-    // Workaround for ugly fix in com.watopi.chosen.client.ChosenImpl.setup(), line 1207 :
+    // Workaround for ugly fix in com.arcbees.chosen.client.ChosenImpl.setup(), line 1207 :
     // Temporary fix. IIf the select element is inside a hidden container
     // GQuery cannot get the size of the select element.
     private void makeWidthIsNotCorrupted(Element link, boolean allowRecursiveCall) {

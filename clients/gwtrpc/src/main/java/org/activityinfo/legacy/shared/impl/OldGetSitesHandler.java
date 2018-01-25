@@ -439,7 +439,7 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
             }  else if (field.equals("DateEdited")) {
                 query.orderBy("DateEdited", ascending);
             } else {
-                Log.error("Unimplemented sort on GetSites: '" + field + "");
+                Log.error("Unimplemented sort on OldGetSites: '" + field + "");
             }
         }
     }
@@ -908,6 +908,7 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
                 .leftJoin(Tables.ATTRIBUTE_GROUP, "g")
                 .on("a.AttributeGroupId=g.AttributeGroupId")
                 .whereTrue("v.Value=1")
+                .and("g.dateDeleted IS NULL")
                 .orderBy("groupName, attributeName");
 
         if(weAreFetchingAllSitesForAnActivityAndThereAreNoLinkedSites(command, siteMap)) {

@@ -61,26 +61,42 @@ task appengineDevMode(type: JavaExec) {
     dependsOn appengineDownloadSdk
     dependsOn appengineExplodeDevMode
     dependsOn compileJava
+    dependsOn project(':ui:app').tasks.getByName("compileJava")
+    dependsOn project(':ui:app2').tasks.getByName("compileJava")
 
     main = 'com.google.gwt.dev.DevMode'
-    
-    // Java sources first, so that changes get picked up on refresh
-    classpath project(':ui:app2').sourceSets.main.java.srcDirs
-    classpath project(':ui:app2').sourceSets.main.resources.srcDirs
-    classpath project(":i18n").sourceSets.main.java.srcDirs
-    classpath project(":i18n").sourceSets.main.resources.srcDirs
-    classpath project(":clients:gwtrest").sourceSets.main.java.srcDirs
-    classpath project(":tools:json").sourceSets.main.java.srcDirs
-    classpath project(":core:model").sourceSets.main.java.srcDirs
-    classpath project(":core:model").sourceSets.main.resources.srcDirs
-    classpath project(":ui:app2").configurations.gwt
+
+
     classpath project(":ui:app2").configurations.gwtSdk
 
+    // Java sources first, so that changes get picked up on refresh
+    def sourceProjects = [":ui:app", ":ui:app2", ":i18n", ":clients:gwtrest", ":tools:json", ":model"];
+    for(sourceProject in sourceProjects) {
+        classpath project(sourceProject).sourceSets.main.java.srcDirs
+        classpath project(sourceProject).sourceSets.main.resources.srcDirs
+    }
+
+    classpath project(':ui:app').sourceSets.main.runtimeClasspath
+    classpath project(':ui:app2').sourceSets.main.runtimeClasspath
+
+    // APT Generated sources
+    classpath project(':ui:app').sourceSets.main.output.generatedSourcesDir
+
+    for(sourceProject in sourceProjects) {
+        classpath project(sourceProject).sourceSets.main.runtimeClasspath
+    }
+
+
+    // Server classes
+    classpath sourceSets.main.runtimeClasspath
+
+    args '-logLevel', 'WARN'
     args '-server', 'com.google.appengine.tools.development.gwt.AppEngineLauncher'
     args '-war', "${buildDir}/explodedDevMode"
     args '-startupUrl', 'login'
     args '-port', devServerPort
-    args 'org.activityinfo.ui.ActivityInfoFFTest'
+    args 'org.activityinfo.ui.ActivityInfoDevMode'
+    args 'org.activityinfo.ui.AppDev'
 
     doFirst {
         // The SDK root is only available after appengineDownloadSdk runs
@@ -93,6 +109,11 @@ task appengineDevMode(type: JavaExec) {
         jvmArgs "-Dactivityinfo.config=${configFile}"
         jvmArgs "-Xdebug"
         jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
+
+        for(File classpathEntry : classpath) {
+            logger.lifecycle("Classpath: " + classpathEntry)
+        }
+
     }
 }
 

@@ -1,0 +1,17 @@
+
+description = 'ActivityInfo Promise Implementation'
+
+
+dependencies {
+    compileOnly libraries.gwt.user
+    testCompile libraries.gwt.user
+
+    compile libraries.guava
+    compile libraries.jsr305
+}
+
+jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+}
+

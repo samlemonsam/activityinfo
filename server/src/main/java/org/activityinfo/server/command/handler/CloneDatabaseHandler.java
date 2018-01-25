@@ -52,8 +52,8 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.mysql.MySqlCatalog;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.mysql.MySqlStorageProvider;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -73,7 +73,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     private final EntityManager em;
     private final PermissionOracle permissionOracle;
     private final KeyGenerator generator = new KeyGenerator();
-    private final Provider<FormCatalog> formCatalog;
+    private final Provider<FormStorageProvider> formCatalog;
 
     // Mappings old id (source db) -> new id (target/newly created db)
     private final Map<Integer, Activity> activityMapping = Maps.newHashMap();
@@ -84,7 +84,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     private UserDatabase sourceDb;
 
     @Inject
-    public CloneDatabaseHandler(Injector injector, Provider<FormCatalog> formCatalog) {
+    public CloneDatabaseHandler(Injector injector, Provider<FormStorageProvider> formCatalog) {
         this.em = injector.getInstance(EntityManager.class);
         this.permissionOracle = injector.getInstance(PermissionOracle.class);
         this.formCatalog = formCatalog;
@@ -467,7 +467,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         FormClass targetFormClass = copyFormClass(oldSubFormId, newSubFormId);
 
-        MySqlCatalog formCatalog = (MySqlCatalog) this.formCatalog.get();
+        MySqlStorageProvider formCatalog = (MySqlStorageProvider) this.formCatalog.get();
         formCatalog.createOrUpdateFormSchema(targetFormClass);
 
         return new SubFormReferenceType(newSubFormId);

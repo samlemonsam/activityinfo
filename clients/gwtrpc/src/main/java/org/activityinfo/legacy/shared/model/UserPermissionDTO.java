@@ -31,15 +31,17 @@ import org.codehaus.jackson.annotate.JsonSetter;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.List;
+
 /**
- * Projection DTO of the
- * {@link org.activityinfo.server.database.hibernate.entity.UserPermission
- * UserPermission} domain object
+ * Data Transfer Object (DTO) for a single user's permission on a database.
  *
  * @author Alex Bertram
  */
 @JsonAutoDetect(JsonMethod.NONE)
 public final class UserPermissionDTO extends BaseModelData implements DTO {
+
+    private List<FolderDTO> folders;
 
     public UserPermissionDTO() {
         setAllowView(true);
@@ -175,7 +177,23 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
     public void setPartner(PartnerDTO value) {
         set("partner", value);
     }
-    
+
+    /**
+     *
+     * @return a list of folders to which the user is limited. If the list is empty,
+     * the user has access to all folders.
+     */
+    public List<FolderDTO> getFolders() {
+        return folders;
+    }
+
+    public void setFolders(List<FolderDTO> folders) {
+        this.folders = folders;
+    }
+
+    public boolean hasFolderLimitation() {
+        return folders != null && !folders.isEmpty();
+    }
 
     @JsonSetter
     public void setPartnerId(int partnerId) {
@@ -196,5 +214,4 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
                 ",manageAllUsers=" + getAllowManageAllUsers() +
                 "}";
     }
-    
 }
