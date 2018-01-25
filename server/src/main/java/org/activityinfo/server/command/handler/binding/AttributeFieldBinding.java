@@ -58,7 +58,7 @@ public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
             boolean selected = attrColumn.getBoolean(i) == BitSetColumnView.TRUE;
             dataArray[i].setAttributeValue(attrId, selected);
             if (selected) {
-                dataArray[i].addDisplayAttribute(attrField.getId().asString(), item.getId().asString());
+                dataArray[i].addDisplayAttribute(attrField.getLabel(), item.getLabel());
             }
         }
     }
