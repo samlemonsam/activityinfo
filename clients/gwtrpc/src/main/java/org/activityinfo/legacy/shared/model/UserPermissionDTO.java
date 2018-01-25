@@ -192,7 +192,7 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
     }
 
     public boolean hasFolderLimitation() {
-        return folders == null || folders.isEmpty();
+        return folders != null && !folders.isEmpty();
     }
 
     @JsonSetter

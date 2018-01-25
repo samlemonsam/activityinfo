@@ -41,7 +41,7 @@
     <changeSet author="alex" id="042-11">
         <sql>
             INSERT IGNORE INTO folder (databaseid, name)
-            SELECT DISTINCT databaseid, category name FROM activity WHERE category IS NOT NULL
+            SELECT DISTINCT databaseid, category name FROM activity WHERE category IS NOT NULL AND dateDeleted IS NULL
         </sql>
     </changeSet>
     <changeSet author="alex" id="042-14">
@@ -59,7 +59,7 @@
             a.folderId = f.folderId
         </sql>
     </changeSet>
-    <changeSet author="alex" id="042-14">
+    <changeSet author="alex" id="042-15">
         <comment>Add a JSON-encoded permissions model that can be more flexible.</comment>
         <addColumn tableName="userpermission">
             <column name="model" type="longtext"/>

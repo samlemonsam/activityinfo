@@ -34,6 +34,7 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.UserPermissionModel;
 import org.activityinfo.server.database.hibernate.entity.Folder;
@@ -88,13 +89,13 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                                              .setParameter("dbId", cmd.getDatabaseId())
                                              .setParameter("currentUserId", currentUser.getId());
 
-        List<Folder> folders = em.createQuery("select f from Folder where f.database.id = :dbId", Folder.class)
+        List<Folder> folders = em.createQuery("select f from Folder f where f.database.id = :dbId", Folder.class)
                 .setParameter("dbId", cmd.getDatabaseId())
                 .getResultList();
 
         Map<String, Folder> folderMap = new HashMap<>();
         for (Folder folder : folders) {
-            folderMap.put("f" + folder.getId(), folder);
+            folderMap.put(CuidAdapter.folderId(folder.getId()), folder);
         }
 
         if (cmd.getOffset() > 0) {
@@ -138,7 +139,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             for (GrantModel grantModel : model.getGrants()) {
                 Folder folder = folderMap.get(grantModel.getFolderId());
                 if(folder != null) {
-                    folderList.add(new FolderDTO(folder.getUserDatabase().getId(), folder.getName()));
+                    folderList.add(new FolderDTO(folder.getDatabase().getId(), folder.getName()));
                 }
             }
             return folderList;

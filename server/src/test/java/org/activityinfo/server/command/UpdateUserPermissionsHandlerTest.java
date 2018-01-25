@@ -24,18 +24,17 @@ package org.activityinfo.server.command;
 
 import com.google.inject.util.Providers;
 import freemarker.template.TemplateModelException;
-import org.activityinfo.legacy.shared.command.AddPartner;
-import org.activityinfo.legacy.shared.command.GetUsers;
-import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
-import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.command.result.UserResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
-import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.MockDb;
 import org.activityinfo.fixtures.Modules;
+import org.activityinfo.legacy.shared.command.GetUsers;
+import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
+import org.activityinfo.legacy.shared.command.result.UserResult;
+import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.legacy.shared.model.FolderDTO;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.server.command.handler.UpdateUserPermissionsHandler;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.dao.PartnerDAO;
@@ -46,10 +45,11 @@ import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.mail.MailSenderStub;
 import org.activityinfo.server.mail.MailSenderStubModule;
 import org.activityinfo.server.util.TemplateModule;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -201,7 +201,6 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
     /**
      * Verifies that a user with the manageUsers permission can add another user to the UserDatabase
      *
-     * @throws CommandException
      */
     @Test
     @OnDataSet("/dbunit/schema1.db.xml")
@@ -220,16 +219,17 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         execute(cmd);
 
         UserResult result = execute(new GetUsers(1));
-        Assert.assertEquals(1, result.getTotalLength());
-        Assert.assertEquals("ralph@lauren.com", result.getData().get(0).getEmail());
-        Assert.assertTrue("edit permissions", result.getData().get(0).getAllowEdit());
+        assertThat(result.getTotalLength(), equalTo(1));
+
+        UserPermissionDTO ralph = result.getData().get(0);
+        assertThat(ralph.getEmail(), equalTo("ralph@lauren.com"));
+        assertThat(ralph.getAllowEdit(), equalTo(true));
+        assertThat(ralph.hasFolderLimitation(), equalTo(false));
     }
 
 
     /**
      * Verifies that the owner of a database can update an existing users permission
-     *
-     * @throws CommandException
      */
     @Test
     @OnDataSet("/dbunit/schema1.db.xml")
@@ -248,8 +248,40 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         execute(new UpdateUserPermissions(1, user));
 
         UserResult result = execute(new GetUsers(1));
+
         UserPermissionDTO reUser = result.getData().get(0);
-        Assert.assertEquals("bavon@nrcdrc.org", reUser.getEmail());
-        Assert.assertTrue("design rights", user.getAllowDesign());
+        assertThat(reUser.getEmail(), equalTo("bavon@nrcdrc.org"));
+        assertThat(reUser.getAllowDesign(), equalTo(true));
+    }
+
+    @Test
+    @OnDataSet("/dbunit/schema3.db.xml")
+    public void testFolderLevelUpdate() {
+        setUser(1);
+
+        UserPermissionDTO newUser = new UserPermissionDTO();
+        newUser.setName("Bavon");
+        newUser.setEmail("bavon@nrcdrc.org");
+        newUser.setPartner(new PartnerDTO(1, "NRC"));
+        newUser.setAllowView(true);
+        newUser.setAllowViewAll(false);
+        newUser.setAllowEdit(true);
+        newUser.setAllowEdit(false);
+        newUser.setAllowDesign(true);
+
+        FolderDTO health = new FolderDTO();
+        health.setId(3);
+
+        newUser.setFolders(Arrays.asList(health));
+
+        execute(new UpdateUserPermissions(1, newUser));
+
+        UserResult users = execute(new GetUsers(1));
+        UserPermissionDTO bavon = users.getData().get(0);
+
+        assertThat(bavon.hasFolderLimitation(), equalTo(true));
+
+
+
     }
 }

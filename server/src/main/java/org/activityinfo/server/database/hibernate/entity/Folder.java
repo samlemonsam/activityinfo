@@ -11,7 +11,7 @@ public class Folder implements SchemaElement, Serializable  {
 
     private int id;
     private String name;
-    private UserDatabase userDatabase;
+    private UserDatabase database;
 
     public Folder() {
     }
@@ -25,8 +25,8 @@ public class Folder implements SchemaElement, Serializable  {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DatabaseId") @NotNull
-    public UserDatabase getUserDatabase() {
-        return userDatabase;
+    public UserDatabase getDatabase() {
+        return database;
     }
 
     public void setId(int id) {
@@ -44,13 +44,13 @@ public class Folder implements SchemaElement, Serializable  {
         this.name = name;
     }
 
-    public void setUserDatabase(UserDatabase userDatabase) {
-        this.userDatabase = userDatabase;
+    public void setDatabase(UserDatabase database) {
+        this.database = database;
     }
 
     @Override
     public UserDatabase findOwningDatabase() {
-        return userDatabase;
+        return database;
     }
 
 

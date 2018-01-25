@@ -56,6 +56,8 @@ public class CuidAdapter {
 
     public static final char ACTIVITY_CATEGORY_DOMAIN = 'C';
 
+    public static final char FOLDER_DOMAIN = 'f';
+
     public static final char USER_DOMAIN = 'U';
 
     public static final char LOCK_DOMAIN = 'k';
@@ -252,6 +254,11 @@ public class CuidAdapter {
 
     public static ResourceId attributeGroupFormClass(int attributeGroupId) {
         return cuid(ATTRIBUTE_GROUP_DOMAIN, attributeGroupId);
+    }
+
+
+    public static String folderId(int folderId) {
+        return cuid(FOLDER_DOMAIN, folderId).asString();
     }
 
     public static ResourceId userId(int userId) {

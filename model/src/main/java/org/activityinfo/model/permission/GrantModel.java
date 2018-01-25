@@ -11,6 +11,13 @@ public class GrantModel implements JsonSerializable {
 
     private String folderId;
 
+    private GrantModel() {
+    }
+
+    public GrantModel(String folderId) {
+        this.folderId = folderId;
+    }
+
     public String getFolderId() {
         return folderId;
     }
