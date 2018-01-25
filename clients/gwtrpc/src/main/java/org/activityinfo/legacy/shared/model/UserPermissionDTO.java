@@ -34,17 +34,14 @@ import org.hibernate.validator.constraints.Length;
 import java.util.List;
 
 /**
- * Projection DTO of the
- * {@link org.activityinfo.server.database.hibernate.entity.UserPermission
- * UserPermission} domain object
+ * Data Transfer Object (DTO) for a single user's permission on a database.
  *
  * @author Alex Bertram
  */
 @JsonAutoDetect(JsonMethod.NONE)
 public final class UserPermissionDTO extends BaseModelData implements DTO {
 
-    private List<String> activityCategories;
-
+    private List<FolderDTO> folders;
 
     public UserPermissionDTO() {
         setAllowView(true);
@@ -181,12 +178,21 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         set("partner", value);
     }
 
-    public List<String> getActivityCategories() {
-        return activityCategories;
+    /**
+     *
+     * @return a list of folders to which the user is limited. If the list is empty,
+     * the user has access to all folders.
+     */
+    public List<FolderDTO> getFolders() {
+        return folders;
     }
 
-    public void setActivityCategories(List<String> activityCategories) {
-        this.activityCategories = activityCategories;
+    public void setFolders(List<FolderDTO> folders) {
+        this.folders = folders;
+    }
+
+    public boolean hasFolderLimitation() {
+        return folders == null || folders.isEmpty();
     }
 
     @JsonSetter
@@ -207,9 +213,5 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
                 ",manageUsers=" + getAllowManageUsers() +
                 ",manageAllUsers=" + getAllowManageAllUsers() +
                 "}";
-    }
-
-    public boolean hasCategoryRestriction() {
-        return activityCategories != null && !activityCategories.isEmpty();
     }
 }

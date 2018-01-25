@@ -96,9 +96,8 @@ import java.util.Objects;
  * Presenter for the Design Page, which enables the user to define UserDatabases
  * and their Activities, Attributes, and Indicators.
  *
- * @author Alex Bertram
  */
-public class DesignPresenter implements DbPage, IsWidget {
+public class DbEditor implements DbPage, IsWidget {
 
     public static final PageId PAGE_ID = new PageId("design");
 
@@ -125,11 +124,11 @@ public class DesignPresenter implements DbPage, IsWidget {
 
 
     @Inject
-    public DesignPresenter(EventBus eventBus,
-                           Dispatcher service,
-                           ResourceLocator locator,
-                           StateProvider stateMgr,
-                           UiConstants messages) {
+    public DbEditor(EventBus eventBus,
+                    Dispatcher service,
+                    ResourceLocator locator,
+                    StateProvider stateMgr,
+                    UiConstants messages) {
 
         this.eventBus = eventBus;
         this.service = service;
@@ -252,7 +251,7 @@ public class DesignPresenter implements DbPage, IsWidget {
             public void handleEvent(BaseEvent be) {
 
                 ModelData sel = tree.getSelectionModel().getSelectedItem();
-                IsActivityDTO activity = DesignPresenter.this.getSelectedActivity(sel);
+                IsActivityDTO activity = DbEditor.this.getSelectedActivity(sel);
 
                 newAttributeGroup.setEnabled(activity != null && activity.getClassicView());
                 newAttribute.setEnabled(activity != null && (sel instanceof AttributeGroupDTO || sel instanceof AttributeDTO) && activity.getClassicView());
@@ -620,7 +619,7 @@ public class DesignPresenter implements DbPage, IsWidget {
 
     @Override
     public String beforeWindowCloses() {
-        throw new UnsupportedOperationException("TODO");
+        return null;
     }
 
     @Override

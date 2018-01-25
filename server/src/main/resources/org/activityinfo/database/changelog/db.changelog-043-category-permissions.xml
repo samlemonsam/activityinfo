@@ -59,5 +59,10 @@
             a.folderId = f.folderId
         </sql>
     </changeSet>
-
+    <changeSet author="alex" id="042-14">
+        <comment>Add a JSON-encoded permissions model that can be more flexible.</comment>
+        <addColumn tableName="userpermission">
+            <column name="model" type="longtext"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

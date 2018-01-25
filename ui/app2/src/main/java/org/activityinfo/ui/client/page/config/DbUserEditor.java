@@ -25,13 +25,11 @@ package org.activityinfo.ui.client.page.config;
 import com.extjs.gxt.ui.client.core.El;
 import com.extjs.gxt.ui.client.data.*;
 import com.extjs.gxt.ui.client.event.GridEvent;
-import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
 import com.extjs.gxt.ui.client.event.SelectionChangedListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
-import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
@@ -43,6 +41,7 @@ import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
+import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
@@ -134,23 +133,14 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
     private void createGrid() {
 
-        loader = new BasePagingLoader<UserResult>(new UserProxy());
+        loader = new BasePagingLoader<>(new UserProxy());
         loader.setRemoteSort(true);
         
-        store = new ListStore<UserPermissionDTO>(loader);
-        store.setKeyProvider(new ModelKeyProvider<UserPermissionDTO>() {
-            @Override
-            public String getKey(UserPermissionDTO model) {
-                return model.getEmail();
-            }
-        });
-        store.addListener(Store.Update, new Listener<StoreEvent<UserPermissionDTO>>() {
-
-            @Override
-            public void handleEvent(StoreEvent<UserPermissionDTO> event) {
-                modified = !store.getModifiedRecords().isEmpty();
-                toolBar.setDirty(modified);
-            }
+        store = new ListStore<>(loader);
+        store.setKeyProvider(model -> model.getEmail());
+        store.addListener(Store.Update, event -> {
+            modified = !store.getModifiedRecords().isEmpty();
+            toolBar.setDirty(modified);
         });
 
         final List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
@@ -165,14 +155,14 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
                 if (modelData instanceof UserPermissionDTO) {
                     UserPermissionDTO permission = new UserPermissionDTO();
-                    if (permission.hasCategoryRestriction()) {
+                    if (permission.hasFolderLimitation()) {
                         SafeHtmlBuilder html = new SafeHtmlBuilder();
                         boolean needsComma = false;
-                        for (String category : permission.getActivityCategories()) {
+                        for (FolderDTO folder : permission.getFolders()) {
                             if (needsComma) {
                                 html.appendHtmlConstant(", ");
                             }
-                            html.appendEscaped(category);
+                            html.appendEscaped(folder.getName());
                             needsComma = true;
                         }
                         return html.toSafeHtml();
@@ -222,7 +212,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
         grid = new Grid<>(store, new ColumnModel(columns));
         grid.setLoadMask(true);
-        grid.setSelectionModel(new GridSelectionModel<UserPermissionDTO>());
+        grid.setSelectionModel(new GridSelectionModel<>());
         grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<UserPermissionDTO>() {
 
             @Override
@@ -405,7 +395,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                 UserPermissionDTO m = (UserPermissionDTO) ge.getModel();
                 String property = grid.getColumnModel().getColumnId(ge.getColIndex());
                 Record r = store.getRecord(m);
-                Boolean b = (Boolean) m.get(getDataIndex());
+                Boolean b = m.get(getDataIndex());
                 if (validateChange(m, property)) {
                     boolean newValue = b == null ? true : !b;
                     r.set(getDataIndex(), newValue);
