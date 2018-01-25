@@ -615,7 +615,7 @@ public class DesignPresenter implements DbPage, IsWidget {
 
     @Override
     public void requestToNavigateAway(PageState place, NavigationCallback callback) {
-        throw new UnsupportedOperationException("TODO");
+        callback.onDecided(true);
     }
 
     @Override

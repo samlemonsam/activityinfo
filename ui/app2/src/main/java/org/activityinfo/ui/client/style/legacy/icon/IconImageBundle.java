@@ -77,7 +77,6 @@ public class IconImageBundle  {
     public AbstractImagePrototype group() { return AbstractImagePrototype.create(bundle.group()); }
 
     public AbstractImagePrototype table() { return AbstractImagePrototype.create(bundle.table()); }
-
     public AbstractImagePrototype report() { return AbstractImagePrototype.create(bundle.report()); }
 
     public AbstractImagePrototype curveChart() { return AbstractImagePrototype.create(bundle.curveChart()); }
