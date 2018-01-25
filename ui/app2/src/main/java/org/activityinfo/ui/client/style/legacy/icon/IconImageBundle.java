@@ -10,16 +10,16 @@ package org.activityinfo.ui.client.style.legacy.icon;
  * Copyright (C) 2009 - 2013 UNICEF
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
+ * it under the terms of the GNU General License as
  * published by the Free Software Foundation, either version 3 of the 
  * License, or (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU General License for more details.
  * 
- * You should have received a copy of the GNU General Public 
+ * You should have received a copy of the GNU General 
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
@@ -27,170 +27,181 @@ package org.activityinfo.ui.client.style.legacy.icon;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.ImageBundle;
 
 /**
  * Provides access to the application's icons through GWT's magic ImageBundle
  * generator.
  */
-public class IconImageBundle  {
-    public static final IconImageBundle ICONS = new IconImageBundle();
+@SuppressWarnings("deprecation")
+public interface IconImageBundle extends ImageBundle {
+    
+    IconImageBundle ICONS = GWT.create(IconImageBundle.class);
 
-    private final IconBundle bundle;
+    AbstractImagePrototype add();
 
-    public IconImageBundle() {
-        bundle = GWT.create(IconBundle.class);
-    }
+    AbstractImagePrototype delete();
 
-    public AbstractImagePrototype add() { return AbstractImagePrototype.create(bundle.add()); }
+    AbstractImagePrototype editPage();
 
-    public AbstractImagePrototype delete() { return AbstractImagePrototype.create(bundle.delete()); }
+    AbstractImagePrototype save();
 
-    public AbstractImagePrototype editPage() { return AbstractImagePrototype.create(bundle.editPage()); }
+    @Resource("arrow_merge.png")
+    AbstractImagePrototype importIcon();
 
-    public AbstractImagePrototype save() { return AbstractImagePrototype.create(bundle.save()); }
+    AbstractImagePrototype database();
 
-    public AbstractImagePrototype importIcon() { return AbstractImagePrototype.create(bundle.importIcon()); }
+    AbstractImagePrototype design();
 
-    public AbstractImagePrototype database() { return AbstractImagePrototype.create(bundle.database()); }
+    AbstractImagePrototype addDatabase();
 
-    public AbstractImagePrototype design() { return AbstractImagePrototype.create(bundle.design()); }
+    AbstractImagePrototype editDatabase();
 
-    public AbstractImagePrototype addDatabase() { return AbstractImagePrototype.create(bundle.addDatabase()); }
+    AbstractImagePrototype excel();
 
-    public AbstractImagePrototype editDatabase() { return AbstractImagePrototype.create(bundle.editDatabase()); }
+    AbstractImagePrototype activity();
 
-    public AbstractImagePrototype excel() { return AbstractImagePrototype.create(bundle.excel()); }
+    AbstractImagePrototype addActivity();
 
-    public AbstractImagePrototype activity() { return AbstractImagePrototype.create(bundle.activity()); }
+    AbstractImagePrototype user();
 
-    public AbstractImagePrototype addActivity() { return AbstractImagePrototype.create(bundle.addActivity()); }
+    AbstractImagePrototype addUser();
 
-    public AbstractImagePrototype user() { return AbstractImagePrototype.create(bundle.user()); }
-
-    public AbstractImagePrototype addUser() { return AbstractImagePrototype.create(bundle.addUser()); }
-
-    public AbstractImagePrototype deleteUser() { return AbstractImagePrototype.create(bundle.deleteUser()); }
+    AbstractImagePrototype deleteUser();
 
     /*
      * @return Icon for a user group
      */
-    public AbstractImagePrototype group() { return AbstractImagePrototype.create(bundle.group()); }
+    AbstractImagePrototype group();
 
-    public AbstractImagePrototype table() { return AbstractImagePrototype.create(bundle.table()); }
-    public AbstractImagePrototype report() { return AbstractImagePrototype.create(bundle.report()); }
+    AbstractImagePrototype table();
+    AbstractImagePrototype report();
 
-    public AbstractImagePrototype curveChart() { return AbstractImagePrototype.create(bundle.curveChart()); }
+    AbstractImagePrototype curveChart();
 
-    public AbstractImagePrototype map() { return AbstractImagePrototype.create(bundle.map()); }
+    AbstractImagePrototype map();
 
-    public AbstractImagePrototype filter() { return AbstractImagePrototype.create(bundle.filter()); }
+    AbstractImagePrototype filter();
 
-    public AbstractImagePrototype login() { return AbstractImagePrototype.create(bundle.login()); }
+    @Resource(value = "key.png")
+    AbstractImagePrototype login();
 
-    public AbstractImagePrototype cancel() { return AbstractImagePrototype.create(bundle.cancel()); }
+    AbstractImagePrototype cancel();
 
-    public AbstractImagePrototype barChart() { return AbstractImagePrototype.create(bundle.barChart()); }
+    AbstractImagePrototype barChart();
 
-    public AbstractImagePrototype dataEntry() { return AbstractImagePrototype.create(bundle.dataEntry()); }
+    @Resource(value = "keyboard.png")
+    AbstractImagePrototype dataEntry();
 
-    public AbstractImagePrototype indicator() { return AbstractImagePrototype.create(bundle.indicator()); }
+    @Resource(value = "ruler.png")
+    AbstractImagePrototype indicator();
 
-    public AbstractImagePrototype attributeGroup() { return AbstractImagePrototype.create(bundle.attributeGroup()); }
+    AbstractImagePrototype attributeGroup();
 
-    public AbstractImagePrototype attribute() { return AbstractImagePrototype.create(bundle.attribute()); }
+    AbstractImagePrototype attribute();
 
-    public AbstractImagePrototype refresh() { return AbstractImagePrototype.create(bundle.refresh()); }
+    AbstractImagePrototype refresh();
 
-    public AbstractImagePrototype setup() { return AbstractImagePrototype.create(bundle.setup()); }
+    @Resource(value = "wrench_orange.png")
+    AbstractImagePrototype setup();
 
-    public AbstractImagePrototype mapped() { return AbstractImagePrototype.create(bundle.mapped()); }
+    AbstractImagePrototype mapped();
 
-    public AbstractImagePrototype unmapped() { return AbstractImagePrototype.create(bundle.unmapped()); }
+    AbstractImagePrototype unmapped();
 
-    public AbstractImagePrototype image() { return AbstractImagePrototype.create(bundle.image()); }
+    AbstractImagePrototype image();
 
-    public AbstractImagePrototype msword() { return AbstractImagePrototype.create(bundle.msword()); }
+    AbstractImagePrototype msword();
 
-    public AbstractImagePrototype pdf() { return AbstractImagePrototype.create(bundle.pdf()); }
+    AbstractImagePrototype pdf();
 
-    public AbstractImagePrototype pieChart() { return AbstractImagePrototype.create(bundle.pieChart()); }
+    AbstractImagePrototype pieChart();
 
-    public AbstractImagePrototype unchecked() { return AbstractImagePrototype.create(bundle.unchecked()); }
+    AbstractImagePrototype unchecked();
 
-    public AbstractImagePrototype offline() { return AbstractImagePrototype.create(bundle.offline()); }
+    AbstractImagePrototype offline();
 
-    public AbstractImagePrototype sync() { return AbstractImagePrototype.create(bundle.sync()); }
+    AbstractImagePrototype sync();
 
-    public AbstractImagePrototype up() { return AbstractImagePrototype.create(bundle.up()); }
+    AbstractImagePrototype up();
 
-    public AbstractImagePrototype down() { return AbstractImagePrototype.create(bundle.down()); }
+    AbstractImagePrototype down();
 
-    public AbstractImagePrototype remove() { return AbstractImagePrototype.create(bundle.remove()); }
+    AbstractImagePrototype remove();
 
-    public AbstractImagePrototype create() { return AbstractImagePrototype.create(bundle.create()); }
+    @Resource(value = "cog.png")
+    AbstractImagePrototype create();
 
-    public AbstractImagePrototype rename() { return AbstractImagePrototype.create(bundle.rename()); }
+    @Resource(value = "page_edit.png")
+    AbstractImagePrototype rename();
 
-    public AbstractImagePrototype select() { return AbstractImagePrototype.create(bundle.select()); }
+    @Resource(value = "table_edit.png")
+    AbstractImagePrototype select();
 
-    public AbstractImagePrototype info() { return AbstractImagePrototype.create(bundle.info()); }
+    @Resource(value = "information.png")
+    AbstractImagePrototype info();
 
-    public AbstractImagePrototype collapse() { return AbstractImagePrototype.create(bundle.collapse()); }
+    AbstractImagePrototype collapse();
 
-    public AbstractImagePrototype project() { return AbstractImagePrototype.create(bundle.project()); }
+    AbstractImagePrototype project();
 
-    public AbstractImagePrototype lockedPeriod() { return AbstractImagePrototype.create(bundle.lockedPeriod()); }
+    @Resource(value = "LockedPeriod.png")
+    AbstractImagePrototype lockedPeriod();
 
-    public AbstractImagePrototype lockedPeriodSmall() { return AbstractImagePrototype.create(bundle.lockedPeriodSmall()); }
+    @Resource(value = "lockSmall.png")
+    AbstractImagePrototype lockedPeriodSmall();
 
-    public AbstractImagePrototype partner() { return AbstractImagePrototype.create(bundle.partner()); }
+    AbstractImagePrototype partner();
 
-    public AbstractImagePrototype empty() { return AbstractImagePrototype.create(bundle.empty()); }
+    AbstractImagePrototype empty();
 
-    public AbstractImagePrototype applyFilter() { return AbstractImagePrototype.create(bundle.applyFilter()); }
+    AbstractImagePrototype applyFilter();
 
-    public AbstractImagePrototype site() { return AbstractImagePrototype.create(bundle.site()); }
+    AbstractImagePrototype site();
 
-    public AbstractImagePrototype none() { return AbstractImagePrototype.create(bundle.none()); }
+    AbstractImagePrototype none();
 
-    public AbstractImagePrototype indicators() { return AbstractImagePrototype.create(bundle.indicators()); }
+    AbstractImagePrototype indicators();
 
-    public AbstractImagePrototype location() { return AbstractImagePrototype.create(bundle.location()); }
+    AbstractImagePrototype location();
 
-    public AbstractImagePrototype edit() { return AbstractImagePrototype.create(bundle.edit()); }
+    AbstractImagePrototype edit();
 
-    public AbstractImagePrototype time() { return AbstractImagePrototype.create(bundle.time()); }
+    AbstractImagePrototype time();
 
-    public AbstractImagePrototype note() { return AbstractImagePrototype.create(bundle.note()); }
+    AbstractImagePrototype note();
 
-    public AbstractImagePrototype csv() { return AbstractImagePrototype.create(bundle.csv()); }
+    AbstractImagePrototype csv();
 
-    public AbstractImagePrototype dashboard() { return AbstractImagePrototype.create(bundle.dashboard()); }
+    AbstractImagePrototype dashboard();
 
-    public AbstractImagePrototype marker() { return AbstractImagePrototype.create(bundle.marker()); }
+    AbstractImagePrototype marker();
 
-    public AbstractImagePrototype useLocation() { return AbstractImagePrototype.create(bundle.useLocation()); }
+    @Resource(value = "useLocation16.png")
+    AbstractImagePrototype useLocation();
 
-    public AbstractImagePrototype list() { return AbstractImagePrototype.create(bundle.list()); }
+    AbstractImagePrototype list();
 
-    public AbstractImagePrototype folder() { return AbstractImagePrototype.create(bundle.folder()); }
+    AbstractImagePrototype folder();
 
-    public AbstractImagePrototype printer() { return AbstractImagePrototype.create(bundle.printer()); }
+    AbstractImagePrototype printer();
 
-    public AbstractImagePrototype email() { return AbstractImagePrototype.create(bundle.email()); }
+    AbstractImagePrototype email();
 
-    public AbstractImagePrototype star() { return AbstractImagePrototype.create(bundle.star()); }
+    AbstractImagePrototype star();
 
-    public AbstractImagePrototype starWhite() { return AbstractImagePrototype.create(bundle.starWhite()); }
+    AbstractImagePrototype starWhite();
 
-    public AbstractImagePrototype link() { return AbstractImagePrototype.create(bundle.link()); }
+    AbstractImagePrototype link();
 
-    public AbstractImagePrototype page() { return AbstractImagePrototype.create(bundle.page()); }
+    AbstractImagePrototype page();
 
-    public AbstractImagePrototype embed() { return AbstractImagePrototype.create(bundle.embed()); }
+    @Resource(value = "html_add.png")
+    AbstractImagePrototype embed();
 
-    public AbstractImagePrototype text() { return AbstractImagePrototype.create(bundle.text()); }
+    AbstractImagePrototype text();
 
-    public AbstractImagePrototype form() { return AbstractImagePrototype.create(bundle.form()); }
+    @Resource(value = "application_form.png")
+    AbstractImagePrototype form();
 
 }
