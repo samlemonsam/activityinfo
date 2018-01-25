@@ -3,7 +3,7 @@ apply plugin: 'com.moowork.grunt'
 
 dependencies {
     compile  project(':tools:promises')
-    compile  libraries.gwt.user
+    compileOnly libraries.gwt.user
 }
 
 node {

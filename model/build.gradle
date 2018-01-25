@@ -6,8 +6,7 @@ dependencies {
     compile project(':tools:json')
     compile project(':i18n')
 
-    compileOnly libraries.gwt.user
-    runtime libraries.gwt.servlet
+    compile libraries.gwt.user
 
     compile libraries.guava
     compile libraries.rebar.time
