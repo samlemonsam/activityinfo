@@ -36,10 +36,12 @@
 
   <locationType locationTypeId="2" countryId="1" name="Country" reuse="1"/>
   <location locationTypeId="2" locationId="2" name="RDC"/>
-  
 
 
   <userLogin userId="1" name="Alex" email="user1@user.com"
+             locale="fr" emailnotification="1" organization="" jobtitle=""/>
+
+  <userLogin userId="2" name="Bavon" email="bavon@nrc.org"
              locale="fr" emailnotification="1" organization="" jobtitle=""/>
 
   <userDatabase databaseId="1" name="IRAQ" countryId="1"

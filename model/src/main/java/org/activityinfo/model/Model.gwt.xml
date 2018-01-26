@@ -42,5 +42,6 @@
   <source path="query"/>
   <source path="resource"/>
   <source path="type"/>
+  <source path="permission"/>
   <source path="util"/>
 </module>

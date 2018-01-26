@@ -50,7 +50,6 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     /**
      * Creates a shallow clone
      *
-     * @param model
      */
     public ActivityDTO(ActivityDTO model) {
         super(model.getProperties());

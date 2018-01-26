@@ -29,18 +29,20 @@ import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.bedatadriven.rebar.sql.client.util.RowHandler;
 import com.google.common.base.Functions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.GrantModel;
+import org.activityinfo.model.permission.UserPermissionModel;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.promise.Promise;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDTO> {
 
@@ -48,6 +50,53 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
     public void execute(GetSchema command, ExecutionContext context, AsyncCallback<SchemaDTO> callback) {
 
         new SchemaBuilder().build(context, callback);
+    }
+
+    private interface SchemaFilter {
+
+        boolean isVisible(FolderDTO folder);
+
+        boolean isVisible(ActivityDTO activity);
+    }
+
+    private static final SchemaFilter UNFILTERED = new SchemaFilter() {
+        @Override
+        public boolean isVisible(FolderDTO folder) {
+            return true;
+        }
+
+        @Override
+        public boolean isVisible(ActivityDTO activity) {
+            return true;
+        }
+    };
+
+    private static class FolderFilter implements SchemaFilter {
+
+        private Set<Integer> folders = new HashSet<>();
+
+        private FolderFilter(String modelJson) {
+            UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(modelJson));
+            for (GrantModel grantModel : model.getGrants()) {
+                if(grantModel.getFolderId().charAt(0) == CuidAdapter.FOLDER_DOMAIN) {
+                    int folderId = CuidAdapter.getLegacyIdFromCuid(grantModel.getFolderId());
+                    folders.add(folderId);
+                }
+            }
+        }
+
+        @Override
+        public boolean isVisible(FolderDTO folder) {
+            return folders.contains(folder.getId());
+        }
+
+        @Override
+        public boolean isVisible(ActivityDTO activity) {
+            if(activity.getFolder() == null) {
+                return false;
+            }
+            return folders.contains(activity.getFolder().getId());
+        }
     }
 
     private class SchemaBuilder {
@@ -62,6 +111,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<Integer, AttributeGroupDTO>();
         private final Map<Integer, ProjectDTO> projects = new HashMap<Integer, ProjectDTO>();
         private final Map<Integer, LocationTypeDTO> locationTypes = new HashMap<>();
+
+        private final Map<Integer, SchemaFilter> databaseFilters = new HashMap<>();
 
         private SqlTransaction tx;
         private ExecutionContext context;
@@ -191,6 +242,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
                     .appendColumn("p.AllowDesign", "allowDesign")
                     .appendColumn("p.PartnerId", "partnerId")
+                    .appendColumn("p.model", "permissionsModel")
                     .from("userdatabase d")
                     .leftJoin(SqlQuery.selectAll()
                             .from("userpermission")
@@ -260,6 +312,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             db.setMyPartnerId(row.getInt("partnerId"));
                         }
 
+                        databaseFilters.put(db.getId(), buildFilter(db, row.getString("permissionsModel")));
+
                         // todo fix query !!! sometimes it returns duplicates
                         if (!databaseMap.containsKey(db.getId())) {
                             databaseMap.put(db.getId(), db);
@@ -282,10 +336,21 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                 .then(promise);
                     }
                 }
+
+
             });
             return promise;
         }
 
+        private SchemaFilter buildFilter(UserDatabaseDTO db, String permissionModel) {
+            if(db.getAmOwner()) {
+                return UNFILTERED;
+            }
+            if(Strings.isNullOrEmpty(permissionModel)) {
+                return UNFILTERED;
+            }
+            return new FolderFilter(permissionModel);
+        }
 
         protected Promise<Void> loadFolders() {
             final Promise<Void> promise = new Promise<>();
@@ -297,15 +362,19 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         public void onSuccess(SqlTransaction tx, SqlResultSet results) {
                             for (SqlResultSetRow row : results.getRows()) {
                                 int databaseId = row.getInt("databaseId");
+                                SchemaFilter filter = databaseFilters.get(databaseId);
 
                                 FolderDTO folder = new FolderDTO();
                                 folder.setId(row.getInt("folderId"));
                                 folder.setName(row.getString("name"));
                                 folder.setDatabaseId(databaseId);
 
-                                UserDatabaseDTO database = databaseMap.get(databaseId);
-                                database.getFolders().add(folder);
+                                if(filter.isVisible(folder)) {
+                                    UserDatabaseDTO database = databaseMap.get(databaseId);
+                                    database.getFolders().add(folder);
+                                }
                                 folders.put(folder.getId(), folder);
+
                             }
                             promise.resolve(null);
                         }
@@ -467,6 +536,9 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
                 @Override
                 public void handleRow(SqlResultSetRow row) {
+
+                    int databaseId = row.getInt("databaseId");
+
                     ActivityDTO activity = new ActivityDTO();
                     activity.setId(row.getInt("activityId"));
                     activity.setName(row.getString("name"));
@@ -474,22 +546,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     activity.setReportingFrequency(row.getInt("reportingFrequency"));
                     activity.setPublished(row.getInt("published"));
                     activity.setClassicView(row.getBoolean("classicView"));
-
-
-                    int databaseId = row.getInt("databaseId");
-                    UserDatabaseDTO database = databaseMap.get(databaseId);
-                    activity.setDatabase(database);
-                    activity.setPartnerRange(database.getAllowablePartners());
-                    database.getActivities().add(activity);
-
-                    int locationTypeId = row.getInt("locationTypeId");
-                    LocationTypeDTO locationType = locationTypes.get(locationTypeId);
-
-                    if (locationType == null) {
-                        throw new IllegalStateException("No location type for " + locationTypeId);
-                    }
-                    activity.setLocationType(locationType);
-                    activity.set("locationTypeId", locationType.getId());
 
                     if(!row.isNull("folderId")) {
                         int folderId = row.getInt("folderId");
@@ -500,7 +556,26 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         }
                     }
 
-                    activities.put(activity.getId(), activity);
+                    SchemaFilter filter = databaseFilters.get(databaseId);
+                    if(filter.isVisible(activity)) {
+
+                        UserDatabaseDTO database = databaseMap.get(databaseId);
+                        activity.setDatabase(database);
+                        activity.setPartnerRange(database.getAllowablePartners());
+                        database.getActivities().add(activity);
+
+                        int locationTypeId = row.getInt("locationTypeId");
+                        LocationTypeDTO locationType = locationTypes.get(locationTypeId);
+
+                        if (locationType == null) {
+                            throw new IllegalStateException("No location type for " + locationTypeId);
+                        }
+                        activity.setLocationType(locationType);
+                        activity.set("locationTypeId", locationType.getId());
+
+
+                        activities.put(activity.getId(), activity);
+                    }
                 }
             });
         }

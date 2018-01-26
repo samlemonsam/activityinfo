@@ -25,10 +25,7 @@ package org.activityinfo.server.command;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.fixtures.InjectionSupport;
-import org.activityinfo.legacy.shared.command.CreateEntity;
-import org.activityinfo.legacy.shared.command.GetActivityForm;
-import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.command.UpdateEntity;
+import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
@@ -43,6 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -227,6 +225,32 @@ public class GetSchemaTest extends CommandTestCase2 {
         FolderDTO folder = schema.getDatabaseById(1).getFolderById(result.getNewId());
 
         assertThat(folder.getName(), equalTo("NFI"));
+    }
+
+    @Test
+    @OnDataSet("/dbunit/schema3.db.xml")
+    public void folderLimitedPermissions() {
+        setUser(1);
+
+        int databaseId = 1;
+        int healthFolderId = 3;
+        int bavonUserId = 2;
+
+        // Add bavon, but only give him access to the education folder
+        UserPermissionDTO bavon = new UserPermissionDTO();
+        bavon.setEmail("bavon@nrc.org");
+        bavon.setPartner(new PartnerDTO(1, "NRC"));
+        bavon.setAllowView(true);
+        bavon.setFolders(Arrays.asList(new FolderDTO(databaseId, healthFolderId, "Health")));
+
+        execute(new UpdateUserPermissions(databaseId, bavon));
+
+        setUser(bavonUserId);
+
+        SchemaDTO schema = execute(new GetSchema());
+        UserDatabaseDTO database = schema.getDatabaseById(databaseId);
+        assertThat(database.getFolders(), hasSize(1));
+        assertThat(database.getActivities(), hasSize(1));
     }
 
     @Test

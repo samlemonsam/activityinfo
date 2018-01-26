@@ -42,6 +42,12 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO {
         setName(name);
     }
 
+    public FolderDTO(int databaseId, int folderId, String name) {
+        setId(folderId);
+        setDatabaseId(databaseId);
+        setName(name);
+    }
+
     public int getId() {
         return get("id");
     }

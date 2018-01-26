@@ -42,6 +42,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.gwtrpc.CommandServlet2;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.endpoint.gwtrpc.RemoteExecutionContext;
+import org.activityinfo.server.mail.MailSenderStubModule;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.store.mysql.collections.AdminEntityTable;
@@ -69,6 +70,7 @@ import java.io.IOException;
         GwtRpcModule.class,
         AuthenticationModuleStub.class,
         ConfigModuleStub.class,
+        MailSenderStubModule.class,
         GcsBlobFieldStorageServiceModule.class
 })
 public class CommandTestCase2 {
