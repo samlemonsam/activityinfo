@@ -60,6 +60,9 @@ task compileApp(type: JavaExec) {
 
     main = 'com.google.gwt.dev.Compiler'
 
+    jvmArgs "-Dgwt.persistentunitcache=true"
+    jvmArgs "-Dgwt.persistentunitcachedir=${buildDir}/gwtCache"
+
     args '-logLevel', 'INFO'
 
     // Disable class metadata -- Class.getName() will not
@@ -81,7 +84,6 @@ task compileApp(type: JavaExec) {
     } else if ("safari".equals(project.property("gwtMode"))) {
         args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
-        args '-logLevel', 'ERROR'
         args 'org.activityinfo.ui.ActivityInfoRelease'
         args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }

@@ -101,6 +101,9 @@ task compileApp(type: JavaExec) {
 
     main = 'com.google.gwt.dev.Compiler'
 
+    jvmArgs "-Dgwt.persistentunitcache=true"
+    jvmArgs "-Dgwt.persistentunitcachedir=${buildDir}/gwtCache"
+
     args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
     args '-war', outputDir
