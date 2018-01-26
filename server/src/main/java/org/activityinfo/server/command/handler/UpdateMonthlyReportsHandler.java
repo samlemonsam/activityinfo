@@ -52,7 +52,7 @@ import static org.activityinfo.legacy.shared.model.IndicatorDTO.getPropertyName;
 public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthlyReports> {
 
     private final String lockKeyRoot = "site";
-    private final double lockTimeout = 0.5;
+    private final double lockTimeout = 1;
 
     private final EntityManager em;
     private final KeyGenerator keyGenerator;
@@ -76,74 +76,77 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
         // To prevent this, we introduce a locking mechanism to prevent simultaneous insertions into table which result
         // in duplicate reporting periods on the given site.
         // Once we have acquired a lock, we can then safely execute the command
+
+
         if (!acquireLock(cmd.getSiteId())) {
             throw new LockAcquisitionException("Cannot acquire lock for site " + cmd.getSiteId());
         }
 
-        Site site = em.find(Site.class, cmd.getSiteId());
-        if (site == null) {
-            throw new CommandException(cmd, "site " + cmd.getSiteId() + " not found for user " + user.getEmail());
-        }
+        try {
 
-        if (!permissionOracle.isEditAllowed(site, user)) {
-            throw new IllegalAccessCommandException("Not authorized to modify sites");
-        }
-
-        Map<Month, ReportingPeriod> periods = Maps.newHashMap();
-        Map<String, Object> siteHistoryChangeMap = createChangeMap();
-
-
-        for (ReportingPeriod period : site.getReportingPeriods()) {
-            periods.put(HandlerUtil.monthFromRange(period.getDate1(), period.getDate2()), period);
-        }
-
-        // update tables in consistent order to avoid deadlocks
-
-        // First create any new reporting periods needed
-
-        for (UpdateMonthlyReports.Change change : cmd.getChanges()) {
-            if (!periods.containsKey(change.getMonth())) {
-
-                ReportingPeriod period = new ReportingPeriod(site);
-                period.setId(keyGenerator.generateInt());
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.YEAR, change.getMonth().getYear());
-                calendar.set(Calendar.MONTH, change.getMonth().getMonth() - 1);
-                calendar.set(Calendar.DATE, 1);
-                period.setDate1(calendar.getTime());
-
-                calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
-                period.setDate2(calendar.getTime());
-
-                em.persist(period);
-
-                periods.put(change.getMonth(), period);
+            Site site = em.find(Site.class, cmd.getSiteId());
+            if (site == null) {
+                throw new CommandException(cmd, "site " + cmd.getSiteId() + " not found for user " + user.getEmail());
             }
+
+            if (!permissionOracle.isEditAllowed(site, user)) {
+                throw new IllegalAccessCommandException("Not authorized to modify sites");
+            }
+
+            Map<Month, ReportingPeriod> periods = Maps.newHashMap();
+            Map<String, Object> siteHistoryChangeMap = createChangeMap();
+
+
+            for (ReportingPeriod period : site.getReportingPeriods()) {
+                periods.put(HandlerUtil.monthFromRange(period.getDate1(), period.getDate2()), period);
+            }
+
+            // update tables in consistent order to avoid deadlocks
+
+            // First create any new reporting periods needed
+
+            for (UpdateMonthlyReports.Change change : cmd.getChanges()) {
+                if (!periods.containsKey(change.getMonth())) {
+
+                    ReportingPeriod period = new ReportingPeriod(site);
+                    period.setId(keyGenerator.generateInt());
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(Calendar.YEAR, change.getMonth().getYear());
+                    calendar.set(Calendar.MONTH, change.getMonth().getMonth() - 1);
+                    calendar.set(Calendar.DATE, 1);
+                    period.setDate1(calendar.getTime());
+
+                    calendar.set(Calendar.DATE, calendar.getActualMaximum(Calendar.DATE));
+                    period.setDate2(calendar.getTime());
+
+                    em.persist(period);
+
+                    periods.put(change.getMonth(), period);
+                }
+            }
+
+            // Now update indicator values
+
+            for (UpdateMonthlyReports.Change change : cmd.getChanges()) {
+
+                updateIndicatorValue(em,
+                        periods.get(change.getMonth()),
+                        change.getIndicatorId(),
+                        change.getValue(), false);
+
+                siteHistoryChangeMap.put(getPropertyName(change.getIndicatorId(), change.getMonth()), change.getValue());
+            }
+
+            // update the timestamp on the site entity so changes get picked up
+            // by the synchro mechanism
+            site.setVersion(site.getActivity().incrementSiteVersion());
+
+            siteHistoryProcessor.persistHistory(site, user, ChangeType.UPDATE, siteHistoryChangeMap);
+
+        } finally {
+            releaseLock(cmd.getSiteId());
         }
-
-        // Now update indicator values
-
-        for (UpdateMonthlyReports.Change change : cmd.getChanges()) {
-
-            updateIndicatorValue(em,
-                periods.get(change.getMonth()),
-                change.getIndicatorId(),
-                change.getValue(), false);
-
-            siteHistoryChangeMap.put(getPropertyName(change.getIndicatorId(), change.getMonth()), change.getValue());
-        }
-
-        // update the timestamp on the site entity so changes get picked up
-        // by the synchro mechanism
-        site.setVersion(site.getActivity().incrementSiteVersion());
-
-        siteHistoryProcessor.persistHistory(site, user, ChangeType.UPDATE, siteHistoryChangeMap);
-
-        // Release the lock we acquired above. This is not strictly needed, as the lock implicitly releases
-        // once the session terminates nominally or in error. We release here for completeness, and to
-        // minimise temporary locking for other transactions.
-        releaseLock(site.getId());
 
         return new VoidResult();
     }
