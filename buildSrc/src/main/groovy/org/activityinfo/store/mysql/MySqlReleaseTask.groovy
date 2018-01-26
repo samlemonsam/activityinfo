@@ -55,7 +55,7 @@ class MySqlReleaseTask extends DefaultTask {
                 }
                 def sqlFile = project.file("${project.buildDir}/migration-b${project.buildNumber}.sql")
                 sqlFile.withWriter { writer ->
-                    liquibase.update(null, writer)
+                    liquibase.update((String)null, writer)
                 }
                 throw new RuntimeException("Database requires migrations, apply migrations in" +
                         " ${project.rootProject.relativePath(sqlFile)} before continuing.")
