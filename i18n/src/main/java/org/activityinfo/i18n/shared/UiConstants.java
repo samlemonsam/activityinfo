@@ -1804,6 +1804,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Folder")
     String folder();
 
-
-
+    @DefaultStringValue("New Folder")
+    String newFolder();
 }

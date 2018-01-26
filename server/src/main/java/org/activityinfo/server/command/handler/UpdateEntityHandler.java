@@ -51,7 +51,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
     @Inject
     public UpdateEntityHandler(EntityManager em, Injector injector) {
-        super(em, injector);
+        super(em);
         this.injector = injector;
     }
 
@@ -66,9 +66,13 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         if ("UserDatabase".equals(cmd.getEntityName())) {
             UserDatabasePolicy policy = injector.getInstance(UserDatabasePolicy.class);
             policy.update(user, cmd.getId(), changeMap);
+
         } else if ("Activity".equals(cmd.getEntityName())) {
             ActivityPolicy policy = injector.getInstance(ActivityPolicy.class);
             policy.update(user, cmd.getId(), changeMap);
+
+        } else if ("Folder".equals(cmd.getEntityName())) {
+            updateFolder(user, cmd.getId(), changeMap);
 
         } else if ("AttributeGroup".equals(cmd.getEntityName())) {
             updateAttributeGroup(cmd, changes);
@@ -94,6 +98,26 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         }
 
         return null;
+    }
+
+    private void updateFolder(User user, int id, PropertyMap changeMap) {
+
+        Folder folder = entityManager().find(Folder.class, id);
+
+        assertDesignPrivileges(user, folder.getDatabase());
+
+        if(changeMap.containsKey("name")) {
+            String newName = changeMap.get("name");
+
+            folder.setName(newName);
+
+            entityManager().createNativeQuery("UPDATE activity a SET category = :name WHERE a.folderId = :folderId")
+                    .setParameter("name", newName)
+                    .setParameter("folderId", folder.getId())
+                    .executeUpdate();
+
+        }
+
     }
 
     private void updateIndicator(User user,

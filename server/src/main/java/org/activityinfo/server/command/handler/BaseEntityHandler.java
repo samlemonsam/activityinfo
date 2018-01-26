@@ -25,7 +25,6 @@ package org.activityinfo.server.command.handler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
@@ -48,11 +47,11 @@ import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
  */
 public class BaseEntityHandler {
 
-    private final EntityManager em;
-    private final PermissionOracle permissionsOracle;
+    protected final EntityManager em;
+    protected final PermissionOracle permissionsOracle;
 
 
-    public BaseEntityHandler(EntityManager em, Injector injector) {
+    public BaseEntityHandler(EntityManager em) {
         this.em = em;
         this.permissionsOracle = new PermissionOracle(Providers.of(em));
     }

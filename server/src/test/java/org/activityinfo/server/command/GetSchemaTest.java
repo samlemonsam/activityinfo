@@ -25,8 +25,11 @@ package org.activityinfo.server.command;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.command.UpdateEntity;
+import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.form.FormClass;
@@ -40,6 +43,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.activityinfo.promise.PromiseMatchers.resolvesTo;
 import static org.hamcrest.CoreMatchers.*;
@@ -189,6 +194,39 @@ public class GetSchemaTest extends CommandTestCase2 {
         AttributeDTO test = nfi.getAttributeById(1);
 
         assertThat(test, hasProperty("name", equalTo("Catastrophe Naturelle")));
+    }
+
+    @Test
+    @OnDataSet("/dbunit/schema3.db.xml")
+    public void updateFolderName() {
+        setUser(1);
+
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("name", "New Name");
+
+        UpdateEntity update = new UpdateEntity("Folder", 1, changes);
+
+        execute(update);
+
+        SchemaDTO schema = execute(new GetSchema());
+
+        FolderDTO folder = schema.getDatabaseById(1).getFolderById(1);
+
+        assertThat(folder.getName(), equalTo("New Name"));
+    }
+
+    @Test
+    @OnDataSet("/dbunit/schema3.db.xml")
+    public void createFolder() {
+        setUser(1);
+
+        CreateResult result = execute(new CreateEntity(new FolderDTO(1, "NFI")));
+
+        SchemaDTO schema = execute(new GetSchema());
+
+        FolderDTO folder = schema.getDatabaseById(1).getFolderById(result.getNewId());
+
+        assertThat(folder.getName(), equalTo("NFI"));
     }
 
     @Test

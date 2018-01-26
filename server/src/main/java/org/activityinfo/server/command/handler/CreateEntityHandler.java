@@ -52,7 +52,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
     @Inject
     public CreateEntityHandler(EntityManager em, Injector injector) {
-        super(em, injector);
+        super(em);
         this.injector = injector;
     }
 
@@ -65,6 +65,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         if ("UserDatabase".equals(cmd.getEntityName())) {
             UserDatabasePolicy policy = injector.getInstance(UserDatabasePolicy.class);
             return new CreateResult((Integer) policy.create(user, propertyMap));
+        } else if ("Folder".equals(cmd.getEntityName())) {
+            return createFolder(user, cmd, properties);
         } else if ("Activity".equals(cmd.getEntityName())) {
             ActivityPolicy policy = injector.getInstance(ActivityPolicy.class);
             return new CreateResult((Integer) policy.create(user, propertyMap));
@@ -80,6 +82,22 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         } else {
             throw new CommandException("Invalid entity class " + cmd.getEntityName());
         }
+    }
+
+    private CommandResult createFolder(User user, CreateEntity cmd, Map<String, Object> properties) {
+        Integer databaseId = (Integer) properties.get("databaseId");
+        String name = (String) properties.get("name");
+
+        UserDatabase database = entityManager().find(UserDatabase.class, databaseId);
+        assertDesignPrivileges(user, database);
+
+        Folder folder = new Folder();
+        folder.setDatabase(database);
+        folder.setName(name);
+
+        entityManager().persist(folder);
+
+        return new CreateResult(folder.getId());
     }
 
     private CommandResult createAttributeGroup(CreateEntity cmd, Map<String, Object> properties) {

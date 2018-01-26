@@ -36,7 +36,6 @@ import com.extjs.gxt.ui.client.store.TreeStore;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
-import com.extjs.gxt.ui.client.widget.grid.EditorSupport;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
@@ -47,6 +46,7 @@ import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.extjs.gxt.ui.client.widget.treepanel.TreePanel;
 import com.google.common.base.Function;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -57,6 +57,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.job.ExportAuditLog;
@@ -89,8 +90,8 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 /**
  * Presenter for the Design Page, which enables the user to define UserDatabases
@@ -101,6 +102,7 @@ public class DbEditor implements DbPage, IsWidget {
 
     public static final PageId PAGE_ID = new PageId("design");
 
+    private static final Logger LOGGER = Logger.getLogger(DbEditor.class.getName());
 
     private final EventBus eventBus;
     private final Dispatcher service;
@@ -187,7 +189,13 @@ public class DbEditor implements DbPage, IsWidget {
             }
         });
 
-        TreePanelDropTarget target = new TreePanelDropTarget(tree);
+        TreePanelDropTarget target = new TreePanelDropTarget(tree) {
+            @Override
+            protected void handleAppendDrop(DNDEvent event, TreePanel.TreeNode item) {
+                LOGGER.info("Append drop");
+                event.setCancelled(true);
+            }
+        };
         target.setAllowSelfAsSource(true);
         target.setFeedback(DND.Feedback.BOTH);
         target.setAutoExpand(false);
@@ -229,9 +237,6 @@ public class DbEditor implements DbPage, IsWidget {
         container.setHeadingText(I18N.CONSTANTS.design() + " - "  + db.getName());
 
         fillStore(messages);
-
-        // TODO:
-        // initListeners(treeStore, null);
 
         toolBar.setActionEnabled(UIActions.DELETE, false);
         toolBar.setActionEnabled(UIActions.EDIT, false);
@@ -371,8 +376,10 @@ public class DbEditor implements DbPage, IsWidget {
 
     private void onUIAction(String actionId) {
 
-        if (UIActions.IMPORT.equals(actionId)) {
-            SchemaImporterV2 importer = new SchemaImporterV2(service, db);
+        if (UIActions.SAVE.equals(actionId)) {
+            save();
+
+        } else if (UIActions.IMPORT.equals(actionId)) {
             SchemaImportDialog dialog = new SchemaImportDialog(
                     new SchemaImporterV2(service, db),
                     new SchemaImporterV3(db.getId(), locator));
@@ -438,6 +445,10 @@ public class DbEditor implements DbPage, IsWidget {
             newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
             newEntity.set("locationTypeId", db.getCountry().getNullLocationType().getId());
             newEntity.set("published", Published.NOT_PUBLISHED);
+            parent = null;
+
+        } else if("Folder".equals(entityName)) {
+            newEntity = new FolderDTO(db.getId(), null);
             parent = null;
 
         } else if ("LocationType".equals(entityName)) {
@@ -544,30 +555,34 @@ public class DbEditor implements DbPage, IsWidget {
     }
 
 
-    protected Command createSaveCommand() {
-        BatchCommand batch = new BatchCommand();
+    private void save() {
+        // Schedule the save at the end of the event loop so we can
+        // handle any blur events from the form
 
-        for (ModelData model : treeStore.getRootItems()) {
-            prepareBatch(batch, model);
-        }
-        return batch;
-    }
+        Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                BatchCommand batch = new BatchCommand();
 
-    protected void prepareBatch(BatchCommand batch, ModelData model) {
-        if (model instanceof EntityDTO) {
-            Record record = treeStore.getRecord(model);
-            if (record.isDirty()) {
-                batch.add(new UpdateEntity((EntityDTO) model, getChangedProperties(record)));
+                for (Record record : treeStore.getModifiedRecords()) {
+                    EntityDTO entity = (EntityDTO) record.getModel();
+                    batch.add(new UpdateEntity(entity.getEntityName(), entity.getId(), record.getChanges()));
+                }
+
+                service.execute(batch, new MaskingAsyncMonitor(container, I18N.CONSTANTS.saving()), new AsyncCallback<BatchResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+
+                    @Override
+                    public void onSuccess(BatchResult result) {
+                        treeStore.commitChanges();
+                        eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
+                    }
+                });
             }
-        }
+        });
 
-        for (ModelData child : treeStore.getChildren(model)) {
-            prepareBatch(batch, child);
-        }
-    }
-
-    private Map<String, Object> getChangedProperties(Record record) {
-        throw new UnsupportedOperationException("TODO");
     }
 
     private void onSelectionChanged(ModelData selectedItem) {
@@ -627,24 +642,6 @@ public class DbEditor implements DbPage, IsWidget {
         return container;
     }
 
-    protected void onSaved() {
-        eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
-        refresh();
-    }
-
-    private EditorSupport<ModelData> editorSupport() {
-        return new EditorSupport<ModelData>() {
-            @Override
-            public void startEditing(int row, int col) {
-                final ModelData m = store.getAt(row);
-                if (m instanceof AttributeGroupFolder || m instanceof IndicatorFolder) {
-                    return;
-                }
-                super.startEditing(row, col);
-            }
-        };
-    }
-
     private void initToolBar() {
 
         toolBar.addSaveSplitButton();
@@ -652,7 +649,6 @@ public class DbEditor implements DbPage, IsWidget {
         SelectionListener<MenuEvent> listener = new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent ce) {
-
                 onNew(ce.getItem().getItemId());
             }
         };
@@ -662,7 +658,6 @@ public class DbEditor implements DbPage, IsWidget {
 
         Button newButtonMenu = new Button(I18N.CONSTANTS.newText(), IconImageBundle.ICONS.add());
         newButtonMenu.setMenu(newMenu);
-//        newButtonMenu.setEnabled(db.isDesignAllowed());
         toolBar.add(newButtonMenu);
 
         toolBar.add(new SeparatorMenuItem());
@@ -713,6 +708,11 @@ public class DbEditor implements DbPage, IsWidget {
     }
 
     protected void initNewMenu(Menu menu, SelectionListener<MenuEvent> listener) {
+
+
+        MenuItem newFolder = new MenuItem(I18N.CONSTANTS.newFolder(), IconImageBundle.ICONS.folder(), listener);
+        newFolder.setItemId("Folder");
+        menu.add(newFolder);
 
         MenuItem newActivity = new MenuItem(I18N.CONSTANTS.newClassicActivity(), IconImageBundle.ICONS.addActivity(), listener);
         newActivity.setItemId("Activity");
@@ -846,10 +846,12 @@ public class DbEditor implements DbPage, IsWidget {
         public void dragMove(DNDEvent e) {
             List<TreeModel> sourceData = e.getData();
             ModelData source = sourceData.get(0).get("model");
-            TreePanel.TreeNode target = tree.findNode(e.getTarget());
 
-            if (treeStore.getParent(target.getModel()) != treeStore.getParent(source)) {
+            TreePanel.TreeNode targetModel = tree.findNode(e.getTarget());
 
+            LOGGER.info("feedback = " + e.getDropTarget().getFeedback());
+
+            if (treeStore.getParent(targetModel.getModel()) != treeStore.getParent(source)) {
                 e.setCancelled(true);
                 e.getStatus().setStatus(false);
             }
@@ -859,7 +861,14 @@ public class DbEditor implements DbPage, IsWidget {
         public void dragDrop(DNDEvent e) {
             List<TreeModel> sourceData = e.getData();
             ModelData source = sourceData.get(0).get("model");
-            onNodeDropped(source);
+            TreePanel.TreeNode target = tree.findNode(e.getTarget());
+
+            if (treeStore.getParent(target.getModel()) != treeStore.getParent(source)) {
+                e.setCancelled(true);
+                e.getStatus().setStatus(false);
+            } else {
+                onNodeDropped(source);
+            }
         }
     }
 

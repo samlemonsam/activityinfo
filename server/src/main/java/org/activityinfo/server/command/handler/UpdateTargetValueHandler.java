@@ -39,7 +39,7 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
 
     @Inject
     public UpdateTargetValueHandler(EntityManager em, Injector injector) {
-        super(em, injector);
+        super(em);
     }
 
     @Override

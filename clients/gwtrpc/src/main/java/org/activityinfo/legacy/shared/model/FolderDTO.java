@@ -29,10 +29,8 @@ import java.util.List;
 /**
  * @author yuriyz on 10/07/2014.
  */
-public class FolderDTO extends BaseModelData implements ProvidesKey {
+public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO {
 
-    private int id;
-    private int databaseId;
 
     private List<ActivityDTO> activities = new ArrayList<ActivityDTO>();
 
@@ -40,16 +38,16 @@ public class FolderDTO extends BaseModelData implements ProvidesKey {
     }
 
     public FolderDTO(int databaseId, String name) {
-        this.databaseId = databaseId;
-        set("name", name);
+        setDatabaseId(databaseId);
+        setName(name);
     }
 
     public int getId() {
-        return id;
+        return get("id");
     }
 
     public void setId(int id) {
-        this.id = id;
+        set("id", id);
     }
 
     /**
@@ -67,7 +65,11 @@ public class FolderDTO extends BaseModelData implements ProvidesKey {
     }
 
     public void setDatabaseId(int databaseId) {
-        this.databaseId = databaseId;
+        set("databaseId", databaseId);
+    }
+
+    public int getDatabaseId() {
+        return get("databaseId");
     }
 
     public List<ActivityDTO> getActivities() {
@@ -79,6 +81,11 @@ public class FolderDTO extends BaseModelData implements ProvidesKey {
         return this;
     }
 
+
+    @Override
+    public String getEntityName() {
+        return "Folder";
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -99,6 +106,6 @@ public class FolderDTO extends BaseModelData implements ProvidesKey {
 
     @Override
     public String getKey() {
-        return "activity_category_" + databaseId + "_" + getName();
+        return "activity_category_" + getDatabaseId() + "_" + getName();
     }
 }

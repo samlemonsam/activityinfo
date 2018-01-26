@@ -421,6 +421,16 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return null;
     }
 
+
+    public FolderDTO getFolderById(int folderId) {
+        for (FolderDTO folder : folders) {
+            if(folder.getId() == folderId) {
+                return folder;
+            }
+        }
+        return null;
+    }
+
     public boolean isAllowedToEdit(SiteDTO site) {
         if (isEditAllAllowed()) {
             return true;
@@ -465,4 +475,5 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         }
         return Lists.newArrayList(result);
     }
+
 }
