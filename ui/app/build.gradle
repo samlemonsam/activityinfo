@@ -106,6 +106,7 @@ task compileApp(type: JavaExec) {
 
     args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
+    args '-localWorkers', Integer.toString(Runtime.runtime.availableProcessors())
     args '-war', outputDir
     args 'org.activityinfo.ui.AppProd'
 
