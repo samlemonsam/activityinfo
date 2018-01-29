@@ -26,8 +26,6 @@ import com.extjs.gxt.ui.client.GXT;
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.binding.FieldBinding;
 import com.extjs.gxt.ui.client.data.ModelData;
-import com.extjs.gxt.ui.client.data.TreeModel;
-import com.extjs.gxt.ui.client.dnd.DND;
 import com.extjs.gxt.ui.client.dnd.TreePanelDragSource;
 import com.extjs.gxt.ui.client.dnd.TreePanelDropTarget;
 import com.extjs.gxt.ui.client.event.*;
@@ -187,19 +185,10 @@ public class DbEditor implements DbPage, IsWidget {
                 }
                 super.dragStart(e);
             }
+
         });
 
-        TreePanelDropTarget target = new TreePanelDropTarget(tree) {
-            @Override
-            protected void handleAppendDrop(DNDEvent event, TreePanel.TreeNode item) {
-                LOGGER.info("Append drop");
-                event.setCancelled(true);
-            }
-        };
-        target.setAllowSelfAsSource(true);
-        target.setFeedback(DND.Feedback.BOTH);
-        target.setAutoExpand(false);
-        target.addDNDListener(new DragDropListener(treeStore));
+        TreePanelDropTarget target = new DesignTreeDropTarget(tree);
 
         toolBar = new ActionToolBar(this::onUIAction);
         initToolBar();
@@ -835,42 +824,6 @@ public class DbEditor implements DbPage, IsWidget {
     }
 
 
-    private final class DragDropListener extends DNDListener {
-        private final TreeStore treeStore;
-
-        private DragDropListener(TreeStore treeStore) {
-            this.treeStore = treeStore;
-        }
-
-        @Override
-        public void dragMove(DNDEvent e) {
-            List<TreeModel> sourceData = e.getData();
-            ModelData source = sourceData.get(0).get("model");
-
-            TreePanel.TreeNode targetModel = tree.findNode(e.getTarget());
-
-            LOGGER.info("feedback = " + e.getDropTarget().getFeedback());
-
-            if (treeStore.getParent(targetModel.getModel()) != treeStore.getParent(source)) {
-                e.setCancelled(true);
-                e.getStatus().setStatus(false);
-            }
-        }
-
-        @Override
-        public void dragDrop(DNDEvent e) {
-            List<TreeModel> sourceData = e.getData();
-            ModelData source = sourceData.get(0).get("model");
-            TreePanel.TreeNode target = tree.findNode(e.getTarget());
-
-            if (treeStore.getParent(target.getModel()) != treeStore.getParent(source)) {
-                e.setCancelled(true);
-                e.getStatus().setStatus(false);
-            } else {
-                onNodeDropped(source);
-            }
-        }
-    }
 
     public FormDialogTether showNewForm(EntityDTO entity, FormDialogCallback callback) {
 
