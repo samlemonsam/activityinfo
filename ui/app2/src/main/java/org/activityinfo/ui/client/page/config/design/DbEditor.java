@@ -35,6 +35,8 @@ import com.extjs.gxt.ui.client.store.TreeStore;
 import com.extjs.gxt.ui.client.store.TreeStoreModel;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Dialog;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
@@ -47,6 +49,8 @@ import com.extjs.gxt.ui.client.widget.treepanel.TreePanel;
 import com.google.common.base.Function;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -381,6 +385,8 @@ public class DbEditor implements DbPage, IsWidget {
 
         if (UIActions.SAVE.equals(actionId)) {
             save();
+        } else if (UIActions.DELETE.equals(actionId)) {
+            promptDeleteSelection();
 
         } else if (UIActions.IMPORT.equals(actionId)) {
             SchemaImportDialog dialog = new SchemaImportDialog(
@@ -587,19 +593,9 @@ public class DbEditor implements DbPage, IsWidget {
         });
     }
 
+
     private void executeSave(AsyncMonitor monitor, AsyncCallback<Void> outerCallback) {
-        BatchCommand batch = new BatchCommand();
-
-        for (Record record : treeStore.getModifiedRecords()) {
-            EntityDTO entity = (EntityDTO) record.getModel();
-            Map<String, Object> changes = new HashMap<>();
-            for (String property : record.getChanges().keySet()) {
-                changes.put(property, entity.get(property));
-            }
-            batch.add(new UpdateEntity(entity.getEntityName(), entity.getId(), changes));
-        }
-
-        service.execute(batch, monitor, new AsyncCallback<BatchResult>() {
+        service.execute(unsavedChanges(), monitor, new AsyncCallback<BatchResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 outerCallback.onFailure(caught);
@@ -613,6 +609,78 @@ public class DbEditor implements DbPage, IsWidget {
             }
         });
     }
+
+    private BatchCommand unsavedChanges() {
+        BatchCommand batch = new BatchCommand();
+
+        for (Record record : treeStore.getModifiedRecords()) {
+            EntityDTO entity = (EntityDTO) record.getModel();
+            Map<String, Object> changes = new HashMap<>();
+            for (String property : record.getChanges().keySet()) {
+                changes.put(property, entity.get(property));
+            }
+            batch.add(new UpdateEntity(entity.getEntityName(), entity.getId(), changes));
+        }
+        return batch;
+    }
+
+    private void promptDeleteSelection() {
+
+        ModelData selected = tree.getSelectionModel().getSelectedItem();
+        if(!(selected instanceof EntityDTO)) {
+            return;
+        }
+
+        EntityDTO selectedEntity = (EntityDTO) selected;
+
+        if(selectedEntity instanceof FolderDTO) {
+            if(treeStore.getChildCount(selectedEntity) != 0) {
+                MessageBox.alert(I18N.CONSTANTS.delete(), I18N.CONSTANTS.folderNotEmpty(), null);
+                return;
+            }
+        }
+
+        SafeHtml message = confirmationMessage(selectedEntity);
+        if(message == null) {
+            deleteEntity(selectedEntity);
+        } else {
+            MessageBox.confirm(SafeHtmlUtils.fromString(I18N.CONSTANTS.confirmDeletion()), message, event -> {
+                if (event.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                    deleteEntity(selectedEntity);
+                }
+            });
+        }
+    }
+
+    private void deleteEntity(EntityDTO selectedEntity) {
+
+        BatchCommand batchCommand = unsavedChanges();
+        batchCommand.add(new Delete(selectedEntity));
+
+        service.execute(batchCommand, new MaskingAsyncMonitor(container, I18N.CONSTANTS.saving()), new AsyncCallback<BatchResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(BatchResult result) {
+                treeStore.commitChanges();
+                treeStore.remove(selectedEntity);
+                eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
+            }
+        });
+    }
+
+    private SafeHtml confirmationMessage(EntityDTO selectedEntity) {
+        if(selectedEntity instanceof ActivityDTO) {
+            return I18N.MESSAGES.confirmDeleteForm(selectedEntity.getName());
+        } else if(selectedEntity instanceof IndicatorDTO || selectedEntity instanceof AttributeGroupDTO) {
+            return SafeHtmlUtils.fromString(I18N.CONSTANTS.deleteFormFieldConfirmation());
+        } else {
+            return null;
+        }
+    }
+
 
     private void onSelectionChanged(ModelData selectedItem) {
         toolBar.setActionEnabled(UIActions.EDIT, this.db.isDesignAllowed() && canEditWithFormDesigner(selectedItem));
@@ -710,7 +778,7 @@ public class DbEditor implements DbPage, IsWidget {
 
     private void initToolBar() {
 
-        toolBar.addSaveSplitButton();
+        toolBar.addSaveButton();
 
         SelectionListener<MenuEvent> listener = new SelectionListener<MenuEvent>() {
             @Override

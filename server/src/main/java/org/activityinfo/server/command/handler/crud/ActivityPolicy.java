@@ -36,6 +36,7 @@ import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.List;
 
 import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 
@@ -132,6 +133,28 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
                     activity.setFolder(folder);
                     activity.setCategory(folder.getName());
                 }
+            }
+        }
+
+        if (changes.containsKey("category")) {
+            String category = changes.get("category");
+            if(category == null) {
+                activity.setFolder(null);
+            } else if(activity.getFolder() == null || !activity.getFolder().getName().equalsIgnoreCase(category)) {
+                List<Folder> existingFolders = em.createQuery("SELECT f FROM Folder f WHERE f.database.id = :dbId AND f.name = :category", Folder.class)
+                        .setParameter("dbId", activity.getDatabase().getId())
+                        .setParameter("category", category)
+                        .getResultList();
+                Folder folder;
+                if(!existingFolders.isEmpty()) {
+                    folder = existingFolders.get(0);
+                } else {
+                    folder = new Folder();
+                    folder.setDatabase(activity.getDatabase());
+                    folder.setName(category);
+                    em.persist(folder);
+                }
+                activity.setFolder(folder);
             }
         }
 

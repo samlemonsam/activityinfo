@@ -143,6 +143,11 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     public void setFolder(Folder folder) {
         this.folder = folder;
+        if(this.folder == null) {
+            this.category = null;
+        } else {
+            this.category = folder.getName();
+        }
     }
 
     @Offline

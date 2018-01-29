@@ -56,6 +56,7 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     private int ownerUserId;
     private int databaseId;
     private String databaseName;
+    private FolderDTO folder;
 
     private List<IndicatorDTO> indicators = new ArrayList<IndicatorDTO>(0);
     private List<AttributeGroupDTO> attributeGroups = new ArrayList<AttributeGroupDTO>(0);
@@ -174,6 +175,13 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         this.databaseName = database.getName();
     }
 
+    public FolderDTO getFolder() {
+        return folder;
+    }
+
+    public void setFolder(FolderDTO folder) {
+        this.folder = folder;
+    }
 
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public int getPublished() {
@@ -339,10 +347,6 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
             category = null;
         }
         set("category", category);
-    }
-
-    public boolean hasCategory() {
-        return !Strings.isNullOrEmpty(getCategory());
     }
 
     public List<IndicatorGroup> groupIndicators() {

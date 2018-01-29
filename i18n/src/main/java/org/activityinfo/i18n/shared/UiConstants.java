@@ -1806,4 +1806,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("New Folder")
     String newFolder();
+
+    @DefaultStringValue("The folder is not empty. Please remove all forms before deleting.")
+    String folderNotEmpty();
 }

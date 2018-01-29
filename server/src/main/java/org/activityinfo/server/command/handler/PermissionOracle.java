@@ -244,6 +244,9 @@ public class PermissionOracle {
         } else if(entity instanceof LocationType) {
             assertDesignPrivileges(((LocationType) entity).getDatabase(), user);
 
+        } else if(entity instanceof Folder) {
+            assertDesignPrivileges(((Folder) entity).getDatabase(), user);
+
         } else {
             LOGGER.log(Level.SEVERE, "Unable to determine permissions for deleting entity of type " + 
                     entity.getClass().getName());

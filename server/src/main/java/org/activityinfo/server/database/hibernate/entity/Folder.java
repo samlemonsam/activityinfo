@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 @Entity
 @EntityListeners(SchemaChangeListener.class)
-public class Folder implements SchemaElement, Serializable  {
+public class Folder implements SchemaElement, Serializable, ReallyDeleteable  {
 
     private int id;
     private String name;
@@ -65,4 +65,7 @@ public class Folder implements SchemaElement, Serializable  {
     }
 
 
+    @Override
+    public void deleteReferences() {
+    }
 }

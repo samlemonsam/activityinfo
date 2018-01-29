@@ -441,10 +441,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         }
     }
 
-    public void addActivity(ActivityFormDTO dist) {
-        activities.add(new ActivityDTO(this, dist));
-    }
-
     @JsonIgnore
     @Override
     public Map<String, Object> getProperties() {
