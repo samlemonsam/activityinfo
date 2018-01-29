@@ -139,7 +139,11 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             for (GrantModel grantModel : model.getGrants()) {
                 Folder folder = folderMap.get(grantModel.getFolderId());
                 if(folder != null) {
-                    folderList.add(new FolderDTO(folder.getDatabase().getId(), folder.getName()));
+                    FolderDTO dto = new FolderDTO();
+                    dto.setId(CuidAdapter.getLegacyIdFromCuid(grantModel.getFolderId()));
+                    dto.setDatabaseId(folder.getDatabase().getId());
+                    dto.setName(folder.getName());
+                    folderList.add(dto);
                 }
             }
             return folderList;
