@@ -5,7 +5,6 @@ import com.extjs.gxt.ui.client.binding.FormBinding;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.core.client.GWT;
 import org.activityinfo.i18n.shared.UiConstants;
-import org.activityinfo.ui.client.page.config.design.AbstractDesignForm;
 import org.activityinfo.ui.client.page.config.design.BlankValidator;
 
 public class FolderForm extends AbstractDesignForm {

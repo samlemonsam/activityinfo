@@ -34,6 +34,7 @@ import com.extjs.gxt.ui.client.widget.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
+import org.activityinfo.ui.client.page.config.form.AbstractDesignForm;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;

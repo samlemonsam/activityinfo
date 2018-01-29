@@ -23,7 +23,6 @@ package org.activityinfo.ui.client.page.config.design;
  */
 
 import com.bedatadriven.rebar.async.NullCallback;
-import com.extjs.gxt.ui.client.GXT;
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.binding.FieldBinding;
 import com.extjs.gxt.ui.client.data.ModelData;
@@ -85,6 +84,7 @@ import org.activityinfo.ui.client.page.config.DbPageState;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImportDialog;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporterV2;
 import org.activityinfo.ui.client.page.config.design.importer.SchemaImporterV3;
+import org.activityinfo.ui.client.page.config.form.AbstractDesignForm;
 import org.activityinfo.ui.client.page.config.form.FolderForm;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
@@ -128,6 +128,10 @@ public class DbEditor implements DbPage, IsWidget {
     private MenuItem newIndicator;
     private Menu newMenu;
     private AbstractDesignForm currentForm;
+    private MenuItem newFolder;
+    private MenuItem newActivity;
+    private MenuItem newForm;
+    private MenuItem newLocationType;
 
 
     @Inject
@@ -146,32 +150,7 @@ public class DbEditor implements DbPage, IsWidget {
         tree = new TreePanel<>(treeStore);
         tree.setDisplayProperty("name");
         tree.setStateful(true);
-        tree.setIconProvider(model -> {
-            if (model instanceof IsActivityDTO) {
-                IsActivityDTO activity = (IsActivityDTO) model;
-                if(activity.getClassicView()) {
-                    return IconImageBundle.ICONS.activity();
-                } else {
-                    return IconImageBundle.ICONS.form();
-                }
-            } else if (model instanceof FieldGroup || model instanceof FolderDTO) {
-                return GXT.IMAGES.tree_folder_closed();
-
-            } else if (model instanceof AttributeGroupDTO) {
-                return IconImageBundle.ICONS.attributeGroup();
-
-            } else if (model instanceof AttributeDTO) {
-                return IconImageBundle.ICONS.attribute();
-
-            } else if (model instanceof IndicatorDTO) {
-                return IconImageBundle.ICONS.indicator();
-
-            } else if (model instanceof LocationTypeDTO) {
-                return IconImageBundle.ICONS.marker();
-            } else {
-                return null;
-            }
-        });
+        tree.setIconProvider(new DesignIconProvider());
         tree.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<ModelData>() {
             @Override
             public void selectionChanged(SelectionChangedEvent<ModelData> event) {
@@ -186,7 +165,8 @@ public class DbEditor implements DbPage, IsWidget {
             public void dragStart(DNDEvent e) {
 
                 ModelData sel = tree.getSelectionModel().getSelectedItem();
-                if (!db.isDesignAllowed() || sel == null || cannotBeReordered(sel)) {
+
+                if (sel == null || !hasPermissionToMove(sel)) {
                     e.setCancelled(true);
                     e.getStatus().setStatus(false);
                     return;
@@ -194,9 +174,10 @@ public class DbEditor implements DbPage, IsWidget {
                 super.dragStart(e);
             }
 
+
         });
 
-        TreePanelDropTarget target = new DesignTreeDropTarget(tree);
+        TreePanelDropTarget target = new DesignTreeDropTarget(db, tree);
         target.addDNDListener(new DNDListener() {
             @Override
             public void dragDrop(DNDEvent e) {
@@ -232,8 +213,17 @@ public class DbEditor implements DbPage, IsWidget {
         container.add(formContainer, formLayout);
     }
 
-    private boolean cannotBeReordered(ModelData sel) {
-        return sel instanceof FieldGroup || sel instanceof LocationTypeDTO;
+    /**
+     * Return true if the user has permission to move the selected item.
+     */
+    private boolean hasPermissionToMove(ModelData model) {
+        if(db.isDesignAllowed() && (model instanceof IndicatorDTO || model instanceof AttributeGroupDTO)) {
+            return true;
+        }
+        if(db.isDatabaseDesignAllowed()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -248,16 +238,12 @@ public class DbEditor implements DbPage, IsWidget {
         toolBar.setActionEnabled(UIActions.DELETE, false);
         toolBar.setActionEnabled(UIActions.EDIT, false);
         toolBar.setActionEnabled(UIActions.OPEN_TABLE, false);
+        toolBar.setActionEnabled(UIActions.IMPORT, db.isDatabaseDesignAllowed());
 
-        initMenu(db.isDesignAllowed());
-    }
-
-    private void initMenu(boolean isDesignAllowed) {
-        if (newMenu == null) {
-            return;
-        }
-
-        newMenu.setEnabled(isDesignAllowed);
+        newFolder.setEnabled(db.isDatabaseDesignAllowed());
+        newActivity.setEnabled(db.isDatabaseDesignAllowed());
+        newForm.setEnabled(db.isDatabaseDesignAllowed());
+        newLocationType.setEnabled(db.isDatabaseDesignAllowed());
         newMenu.addListener(Events.BeforeShow, new Listener<BaseEvent>() {
             @Override
             public void handleEvent(BaseEvent be) {
@@ -348,9 +334,11 @@ public class DbEditor implements DbPage, IsWidget {
 
         }
 
-        for (LocationTypeDTO locationType : db.getCountry().getLocationTypes()) {
-            if (Objects.equals(locationType.getDatabaseId(), db.getId()) && !locationType.isDeleted()) {
-                treeStore.add(locationType, false);
+        if(db.isDatabaseDesignAllowed()) {
+            for (LocationTypeDTO locationType : db.getCountry().getLocationTypes()) {
+                if (Objects.equals(locationType.getDatabaseId(), db.getId()) && !locationType.isDeleted()) {
+                    treeStore.add(locationType, false);
+                }
             }
         }
     }
@@ -363,19 +351,19 @@ public class DbEditor implements DbPage, IsWidget {
     }
 
 
-    public void exportFullDatabase() {
+    private void exportFullDatabase() {
         Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
     }
 
-    public void exportFullDatabaseBeta() {
+    private void exportFullDatabaseBeta() {
         Window.open("/resources/database/" + db.getId() + "/schema-v3.csv", "_blank", null);
     }
     
-    public void exportFormAsXlsForm() {
+    private void exportFormAsXlsForm() {
         Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
     }
 
-    public void exportAuditLog() {
+    private void exportAuditLog() {
         ExportDialog dialog = new ExportDialog();
         dialog.start(new ExportJobTask(new ExportAuditLog(db.getId())));
     }
@@ -420,7 +408,7 @@ public class DbEditor implements DbPage, IsWidget {
         }
     }
 
-    public void onNodeDropped(List<TreeStoreModel> data) {
+    private void onNodeDropped(List<TreeStoreModel> data) {
 
         if(data.isEmpty()) {
             return;
@@ -449,7 +437,7 @@ public class DbEditor implements DbPage, IsWidget {
         }
     }
 
-    public void onNew(String entityName) {
+    private void onNew(String entityName) {
 
         final EntityDTO newEntity;
         ModelData parent;
@@ -559,7 +547,7 @@ public class DbEditor implements DbPage, IsWidget {
         });
     }
 
-    protected IsActivityDTO findActivityFolder(ModelData selected) {
+    private IsActivityDTO findActivityFolder(ModelData selected) {
 
         while (!(selected instanceof IsActivityDTO)) {
             selected = treeStore.getParent(selected);
@@ -568,7 +556,7 @@ public class DbEditor implements DbPage, IsWidget {
         return (IsActivityDTO) selected;
     }
 
-    protected AttributeGroupDTO findAttributeGroupNode(ModelData selected) {
+    private AttributeGroupDTO findAttributeGroupNode(ModelData selected) {
         if (selected instanceof AttributeGroupDTO) {
             return (AttributeGroupDTO) selected;
         }
@@ -578,7 +566,6 @@ public class DbEditor implements DbPage, IsWidget {
         throw new AssertionError("not a valid selection to add an attribute !");
 
     }
-
 
     private void save() {
         // Schedule the save at the end of the event loop so we can
@@ -592,7 +579,6 @@ public class DbEditor implements DbPage, IsWidget {
             }
         });
     }
-
 
     private void executeSave(AsyncMonitor monitor, AsyncCallback<Void> outerCallback) {
         service.execute(unsavedChanges(), monitor, new AsyncCallback<BatchResult>() {
@@ -787,8 +773,45 @@ public class DbEditor implements DbPage, IsWidget {
             }
         };
 
+
+        newFolder = new MenuItem(I18N.CONSTANTS.newFolder(), IconImageBundle.ICONS.folder(), listener);
+        newFolder.setItemId("Folder");
+
+        newActivity = new MenuItem(I18N.CONSTANTS.newClassicActivity(), IconImageBundle.ICONS.addActivity(), listener);
+        newActivity.setItemId("Activity");
+
+        newForm = new MenuItem(I18N.CONSTANTS.newForm(), IconImageBundle.ICONS.form(), listener);
+        newForm.setItemId("Form");
+
+        newLocationType = new MenuItem(
+                I18N.CONSTANTS.newLocationType(),
+                IconImageBundle.ICONS.marker(), listener);
+        newLocationType.setItemId("LocationType");
+
+        newAttributeGroup = newMenuItem("AttributeGroup",
+                I18N.CONSTANTS.newAttributeGroup(),
+                IconImageBundle.ICONS.attribute(),
+                listener);
+
+        newAttribute = newMenuItem("Attribute",
+                I18N.CONSTANTS.newAttribute(),
+                IconImageBundle.ICONS.attribute(),
+                listener);
+
+        newIndicator = new MenuItem(I18N.CONSTANTS.newIndicator(),
+                IconImageBundle.ICONS.indicator(),
+                listener);
+        newIndicator.setItemId("Indicator");
+
         newMenu = new Menu();
-        initNewMenu(newMenu, listener);
+        newMenu.add(newFolder);
+        newMenu.add(newActivity);
+        newMenu.add(newForm);
+        newMenu.add(newLocationType);
+        newMenu.add(newAttributeGroup);
+        newMenu.add(newAttribute);
+        newMenu.add(newIndicator);
+
 
         Button newButtonMenu = new Button(I18N.CONSTANTS.newText(), IconImageBundle.ICONS.add());
         newButtonMenu.setMenu(newMenu);
@@ -804,31 +827,31 @@ public class DbEditor implements DbPage, IsWidget {
 
         toolBar.addImportButton();
 
-        Menu menu = new Menu();
-        menu.add(new MenuItem("Export complete database (classic)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+        Menu exportMenu = new Menu();
+        exportMenu.add(new MenuItem("Export complete database (classic)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent menuEvent) {
                 exportFullDatabase();
             }
         }));
-        menu.add(new MenuItem("Export complete database (beta)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+        exportMenu.add(new MenuItem("Export complete database (beta)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent menuEvent) {
                 exportFullDatabaseBeta();
             }
         }));
-        menu.add(new SeparatorMenuItem());
+        exportMenu.add(new SeparatorMenuItem());
 
-        menu.add(new MenuItem("Export selected form as XLSForm", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+        exportMenu.add(new MenuItem("Export selected form as XLSForm", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent menuEvent) {
                 exportFormAsXlsForm();
             }
         }));
 
-        menu.add(new SeparatorMenuItem());
+        exportMenu.add(new SeparatorMenuItem());
 
-        menu.add(new MenuItem("Export audit log", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+        exportMenu.add(new MenuItem("Export audit log", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent menuEvent) {
                 exportAuditLog();
@@ -836,51 +859,11 @@ public class DbEditor implements DbPage, IsWidget {
         }));
 
         Button exportButton = new Button(I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
-        exportButton.setMenu(menu);
+        exportButton.setMenu(exportMenu);
 
         toolBar.add(exportButton);
     }
 
-    protected void initNewMenu(Menu menu, SelectionListener<MenuEvent> listener) {
-
-
-        MenuItem newFolder = new MenuItem(I18N.CONSTANTS.newFolder(), IconImageBundle.ICONS.folder(), listener);
-        newFolder.setItemId("Folder");
-        menu.add(newFolder);
-
-        MenuItem newActivity = new MenuItem(I18N.CONSTANTS.newClassicActivity(), IconImageBundle.ICONS.addActivity(), listener);
-        newActivity.setItemId("Activity");
-        menu.add(newActivity);
-
-        MenuItem newForm = new MenuItem(I18N.CONSTANTS.newForm(), IconImageBundle.ICONS.form(), listener);
-        newForm.setItemId("Form");
-        menu.add(newForm);
-
-        MenuItem newLocationType = new MenuItem(
-                I18N.CONSTANTS.newLocationType(),
-                IconImageBundle.ICONS.marker(), listener);
-        newLocationType.setItemId("LocationType");
-        menu.add(newLocationType);
-
-        newAttributeGroup = newMenuItem("AttributeGroup",
-                I18N.CONSTANTS.newAttributeGroup(),
-                IconImageBundle.ICONS.attribute(),
-                listener);
-        menu.add(newAttributeGroup);
-
-        newAttribute = newMenuItem("Attribute",
-                I18N.CONSTANTS.newAttribute(),
-                IconImageBundle.ICONS.attribute(),
-                listener);
-        menu.add(newAttribute);
-
-        newIndicator = new MenuItem(I18N.CONSTANTS.newIndicator(),
-                IconImageBundle.ICONS.indicator(),
-                listener);
-        newIndicator.setItemId("Indicator");
-        menu.add(newIndicator);
-
-    }
 
     private MenuItem newMenuItem(String itemId,
                                  String label,
@@ -892,7 +875,7 @@ public class DbEditor implements DbPage, IsWidget {
     }
 
 
-    protected Class formClassForSelection(ModelData sel) {
+    private Class formClassForSelection(ModelData sel) {
 
         if (sel instanceof IsActivityDTO) {
             return ActivityForm.class;
@@ -912,7 +895,7 @@ public class DbEditor implements DbPage, IsWidget {
 
     }
 
-    protected AbstractDesignForm createForm(ModelData sel) {
+    private AbstractDesignForm createForm(ModelData sel) {
         if (sel instanceof IsActivityDTO) {
             return new ActivityForm(service, db);
         } else if (sel instanceof FolderDTO) {
@@ -930,7 +913,7 @@ public class DbEditor implements DbPage, IsWidget {
         return null;
     }
 
-    public void showForm(ModelData model) {
+    private void showForm(ModelData model) {
 
         // do we have the right form?
         Class formClass = formClassForSelection(model);
@@ -956,7 +939,7 @@ public class DbEditor implements DbPage, IsWidget {
                 }
 
                 currentForm = createForm(model);
-                currentForm.setReadOnly(!db.isDesignAllowed());
+                currentForm.setReadOnly(!isDesignAllowed(model));
                 currentForm.setHeaderVisible(false);
                 currentForm.setBorders(false);
                 currentForm.setFrame(false);
@@ -968,9 +951,19 @@ public class DbEditor implements DbPage, IsWidget {
         currentForm.getBinding().bind(model);
     }
 
+    private boolean isDesignAllowed(ModelData model) {
+        if(db.isDatabaseDesignAllowed()) {
+            return true;
+        }
+        if(db.isDesignAllowed()) {
+            return model instanceof IsFormField;
+        }
+
+        return false;
+    }
 
 
-    public FormDialogTether showNewForm(EntityDTO entity, FormDialogCallback callback) {
+    private FormDialogTether showNewForm(EntityDTO entity, FormDialogCallback callback) {
 
         AbstractDesignForm form = createForm(entity);
         form.getBinding().bind(entity);
@@ -1000,10 +993,6 @@ public class DbEditor implements DbPage, IsWidget {
         dlg.show(callback);
 
         return dlg;
-    }
-
-    public AbstractDesignForm getCurrentForm() {
-        return currentForm;
     }
 
 }

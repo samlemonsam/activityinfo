@@ -8,6 +8,7 @@ import com.extjs.gxt.ui.client.event.DNDEvent;
 import com.extjs.gxt.ui.client.widget.treepanel.TreePanel;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.FolderDTO;
+import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -21,8 +22,11 @@ class DesignTreeDropTarget extends TreePanelDropTarget {
 
     private static final Logger LOGGER = Logger.getLogger(DesignTreeDropTarget.class.getName());
 
-    public DesignTreeDropTarget(TreePanel tree) {
+    private final UserDatabaseDTO database;
+
+    public DesignTreeDropTarget(UserDatabaseDTO database, TreePanel tree) {
         super(tree);
+        this.database = database;
         setAllowSelfAsSource(true);
         setAllowDropOnLeaf(true);
         setFeedback(DND.Feedback.BOTH);

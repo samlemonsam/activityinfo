@@ -1,4 +1,4 @@
-package org.activityinfo.ui.client.page.config.design;
+package org.activityinfo.ui.client.page.config.form;
 
 /*
  * #%L
@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.page.config.design;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.binding.FormBinding;
 import com.extjs.gxt.ui.client.event.BindingEvent;
 import com.extjs.gxt.ui.client.event.Events;
@@ -37,8 +36,13 @@ import com.extjs.gxt.ui.client.widget.form.FormPanel;
  */
 public abstract class AbstractDesignForm extends FormPanel {
 
-    protected AbstractDesignForm() {
-        setScrollMode(Style.Scroll.AUTOY);
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        for (Field<?> f : getFields()) {
+            f.setEnabled(!readOnly);
+            f.setReadOnly(readOnly);
+        }
     }
 
     public abstract FormBinding getBinding();

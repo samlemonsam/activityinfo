@@ -28,6 +28,7 @@ import com.extjs.gxt.ui.client.widget.form.NumberField;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.AttributeDTO;
+import org.activityinfo.ui.client.page.config.form.AbstractDesignForm;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
 
 class AttributeForm extends AbstractDesignForm {

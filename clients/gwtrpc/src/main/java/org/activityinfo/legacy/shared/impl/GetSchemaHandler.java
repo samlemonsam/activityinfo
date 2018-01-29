@@ -57,6 +57,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         boolean isVisible(FolderDTO folder);
 
         boolean isVisible(ActivityDTO activity);
+
+        boolean hasFolderLimitations();
     }
 
     private static final SchemaFilter UNFILTERED = new SchemaFilter() {
@@ -68,6 +70,11 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         @Override
         public boolean isVisible(ActivityDTO activity) {
             return true;
+        }
+
+        @Override
+        public boolean hasFolderLimitations() {
+            return false;
         }
     };
 
@@ -97,6 +104,13 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             }
             return folders.contains(activity.getFolder().getId());
         }
+
+        @Override
+        public boolean hasFolderLimitations() {
+            return true;
+        }
+
+
     }
 
     private class SchemaBuilder {
@@ -312,7 +326,13 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             db.setMyPartnerId(row.getInt("partnerId"));
                         }
 
-                        databaseFilters.put(db.getId(), buildFilter(db, row.getString("permissionsModel")));
+
+                        SchemaFilter schemaFilter = buildFilter(db, row.getString("permissionsModel"));
+                        if(db.isDesignAllowed() && !schemaFilter.hasFolderLimitations()) {
+                            db.setDatabaseDesignAllowed(true);
+                        }
+
+                        databaseFilters.put(db.getId(), schemaFilter);
 
                         // todo fix query !!! sometimes it returns duplicates
                         if (!databaseMap.containsKey(db.getId())) {

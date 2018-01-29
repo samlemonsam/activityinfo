@@ -244,11 +244,19 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
 
     /**
      * @return true if the client receiving the DTO is authorized to design
-     * (change indicators, etc) this UserDatabase
+     * at least some forms in this database.
      */
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public boolean isDesignAllowed() {
         return get("designAllowed", false);
+    }
+
+    public boolean isDatabaseDesignAllowed() {
+        return get("databaseDesignAllowed", false);
+    }
+
+    public void setDatabaseDesignAllowed(boolean value) {
+        set("databaseDesignAllowed", value);
     }
 
     /**

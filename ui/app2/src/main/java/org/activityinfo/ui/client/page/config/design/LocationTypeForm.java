@@ -11,6 +11,7 @@ import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
+import org.activityinfo.ui.client.page.config.form.AbstractDesignForm;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
 
 public class LocationTypeForm extends AbstractDesignForm {

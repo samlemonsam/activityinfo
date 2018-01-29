@@ -57,7 +57,7 @@ public class DbConfigPresenter implements DbPage {
                     "db-design.png",
                     new DbPageState(DbEditor.PAGE_ID, db.getId()));
         }
-        if (db.isManageAllUsersAllowed()) {
+        if (db.isDatabaseDesignAllowed()) {
             view.add(I18N.CONSTANTS.partner(),
                     I18N.CONSTANTS.partnerEditorDescription(),
                     "db-partners.png",
@@ -69,7 +69,7 @@ public class DbConfigPresenter implements DbPage {
                     "db-users.png",
                     new DbPageState(DbUserEditor.PAGE_ID, db.getId()));
         }
-        if (db.isDesignAllowed()) {
+        if (db.isDatabaseDesignAllowed()) {
             view.add(I18N.CONSTANTS.timeLocks(),
                     I18N.CONSTANTS.lockPeriodsDescription(),
                     "db-lockedperiods.png",
