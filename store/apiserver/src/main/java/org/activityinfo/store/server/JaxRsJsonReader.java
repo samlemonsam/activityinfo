@@ -44,7 +44,7 @@ public class JaxRsJsonReader
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return type.equals(JsonValue.class) || isJsType(type) || getFactoryMethod(type).isPresent();
+        return JsonValue.class.isAssignableFrom(type)  || isJsType(type) || getFactoryMethod(type).isPresent();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class JaxRsJsonReader
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return type.equals(JsonValue.class) || isJsType(type) || JsonSerializable.class.isAssignableFrom(type);
+        return JsonValue.class.isAssignableFrom(type) || isJsType(type) || JsonSerializable.class.isAssignableFrom(type);
     }
 
     @Override
