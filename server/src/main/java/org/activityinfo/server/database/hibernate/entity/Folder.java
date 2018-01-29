@@ -12,6 +12,7 @@ public class Folder implements SchemaElement, Serializable  {
     private int id;
     private String name;
     private UserDatabase database;
+    private int sortOrder;
 
     public Folder() {
     }
@@ -42,6 +43,16 @@ public class Folder implements SchemaElement, Serializable  {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Offline
+    @Column(nullable = false)
+    public int getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(int sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public void setDatabase(UserDatabase database) {

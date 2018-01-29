@@ -165,6 +165,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
 
     public void setFolder(FolderDTO folder) {
         this.folder = folder;
+        set("folderId", folder.getId());
     }
 
     /**

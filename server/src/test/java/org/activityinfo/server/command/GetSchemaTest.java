@@ -254,6 +254,31 @@ public class GetSchemaTest extends CommandTestCase2 {
     }
 
     @Test
+    @OnDataSet("/dbunit/schema3.db.xml")
+    public void moveActivityToFolder() {
+        setUser(1);
+
+        int legalActivityId = 1;
+        int educationFolderId = 3;
+
+
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("folderId", educationFolderId);
+
+        execute(new UpdateEntity(ActivityDTO.ENTITY_NAME, legalActivityId, changes));
+
+
+        SchemaDTO schema = execute(new GetSchema());
+        FolderDTO folder = schema.getDatabaseById(1).getFolderById(educationFolderId);
+
+        assertThat(folder.getActivities(), hasSize(2));
+
+        ActivityDTO activity = schema.getActivityById(legalActivityId);
+        assertThat(activity.getFolder().getName(), equalTo("Education"));
+
+    }
+
+    @Test
     public void toCSV() throws IOException {
         int databaseId = 1;
 

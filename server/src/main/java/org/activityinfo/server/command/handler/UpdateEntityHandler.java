@@ -118,6 +118,9 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
         }
 
+        if(changeMap.containsKey("sortOrder")) {
+            folder.setSortOrder(changeMap.get("sortOrder"));
+        }
     }
 
     private void updateIndicator(User user,

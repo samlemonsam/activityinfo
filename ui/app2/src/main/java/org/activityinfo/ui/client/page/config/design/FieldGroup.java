@@ -22,9 +22,12 @@ package org.activityinfo.ui.client.page.config.design;
  * #L%
  */
 
-class IndicatorFolder extends Folder {
+import com.extjs.gxt.ui.client.data.BaseModelData;
 
-    public IndicatorFolder(String name) {
-        super(name);
+class FieldGroup extends BaseModelData {
+
+    public FieldGroup(String name) {
+        super();
+        set("name", name);
     }
 }

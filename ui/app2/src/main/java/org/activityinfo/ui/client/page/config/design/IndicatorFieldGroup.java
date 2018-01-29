@@ -22,9 +22,9 @@ package org.activityinfo.ui.client.page.config.design;
  * #L%
  */
 
-public class AttributeGroupFolder extends Folder {
+class IndicatorFieldGroup extends FieldGroup {
 
-    public AttributeGroupFolder(String name) {
+    public IndicatorFieldGroup(String name) {
         super(name);
     }
 }

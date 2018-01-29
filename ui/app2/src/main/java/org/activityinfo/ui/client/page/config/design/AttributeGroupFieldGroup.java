@@ -22,12 +22,9 @@ package org.activityinfo.ui.client.page.config.design;
  * #L%
  */
 
-import com.extjs.gxt.ui.client.data.BaseModelData;
+public class AttributeGroupFieldGroup extends FieldGroup {
 
-class Folder extends BaseModelData {
-
-    public Folder(String name) {
-        super();
-        set("name", name);
+    public AttributeGroupFieldGroup(String name) {
+        super(name);
     }
 }

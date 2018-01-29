@@ -22,6 +22,7 @@ package org.activityinfo.ui.client.page.config.design;
  * #L%
  */
 
+import com.bedatadriven.rebar.async.NullCallback;
 import com.extjs.gxt.ui.client.GXT;
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.binding.FieldBinding;
@@ -31,6 +32,7 @@ import com.extjs.gxt.ui.client.dnd.TreePanelDropTarget;
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.TreeStore;
+import com.extjs.gxt.ui.client.store.TreeStoreModel;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.button.Button;
@@ -64,15 +66,14 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.*;
-import org.activityinfo.ui.client.page.common.dialog.FormDialogCallback;
-import org.activityinfo.ui.client.page.common.dialog.FormDialogImpl;
-import org.activityinfo.ui.client.page.common.dialog.FormDialogTether;
+import org.activityinfo.ui.client.page.common.dialog.*;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.DbPage;
@@ -87,7 +88,9 @@ import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -138,6 +141,7 @@ public class DbEditor implements DbPage, IsWidget {
         treeStore = new TreeStore<>();
         tree = new TreePanel<>(treeStore);
         tree.setDisplayProperty("name");
+        tree.setStateful(true);
         tree.setIconProvider(model -> {
             if (model instanceof IsActivityDTO) {
                 IsActivityDTO activity = (IsActivityDTO) model;
@@ -146,7 +150,7 @@ public class DbEditor implements DbPage, IsWidget {
                 } else {
                     return IconImageBundle.ICONS.form();
                 }
-            } else if (model instanceof Folder || model instanceof FolderDTO) {
+            } else if (model instanceof FieldGroup || model instanceof FolderDTO) {
                 return GXT.IMAGES.tree_folder_closed();
 
             } else if (model instanceof AttributeGroupDTO) {
@@ -178,7 +182,7 @@ public class DbEditor implements DbPage, IsWidget {
             public void dragStart(DNDEvent e) {
 
                 ModelData sel = tree.getSelectionModel().getSelectedItem();
-                if (!db.isDesignAllowed() || sel == null || sel instanceof Folder) {
+                if (!db.isDesignAllowed() || sel == null || cannotBeReordered(sel)) {
                     e.setCancelled(true);
                     e.getStatus().setStatus(false);
                     return;
@@ -189,6 +193,12 @@ public class DbEditor implements DbPage, IsWidget {
         });
 
         TreePanelDropTarget target = new DesignTreeDropTarget(tree);
+        target.addDNDListener(new DNDListener() {
+            @Override
+            public void dragDrop(DNDEvent e) {
+                onNodeDropped(e.getData());
+            }
+        });
 
         toolBar = new ActionToolBar(this::onUIAction);
         initToolBar();
@@ -216,6 +226,10 @@ public class DbEditor implements DbPage, IsWidget {
         container.setTopComponent(toolBar);
         container.add(treeContainer, new BorderLayoutData(Style.LayoutRegion.CENTER));
         container.add(formContainer, formLayout);
+    }
+
+    private boolean cannotBeReordered(ModelData sel) {
+        return sel instanceof FieldGroup || sel instanceof LocationTypeDTO;
     }
 
     @Override
@@ -298,10 +312,10 @@ public class DbEditor implements DbPage, IsWidget {
                 continue; // skip indicators and attributes in tree if activity is not classicView=true
             }
 
-            final AttributeGroupFolder attributeFolder = new AttributeGroupFolder(messages.attributes());
+            final AttributeGroupFieldGroup attributeFolder = new AttributeGroupFieldGroup(messages.attributes());
             treeStore.add(activityNode, attributeFolder, false);
 
-            final IndicatorFolder indicatorFolder = new IndicatorFolder(messages.indicators());
+            final IndicatorFieldGroup indicatorFolder = new IndicatorFieldGroup(messages.indicators());
             treeStore.add(activityNode, indicatorFolder, false);
 
             service.execute(new GetActivityForm(activity.getId())).then(new SuccessCallback<ActivityFormDTO>() {
@@ -400,16 +414,32 @@ public class DbEditor implements DbPage, IsWidget {
         }
     }
 
-    public void onNodeDropped(ModelData source) {
+    public void onNodeDropped(List<TreeStoreModel> data) {
 
-        // update sortOrder
+        if(data.isEmpty()) {
+            return;
+        }
 
+        // update sortOrder and folder membership
+        ModelData source = data.get(0).getModel();
         ModelData parent = treeStore.getParent(source);
+
+        LOGGER.info("source = " + source);
+
         List<ModelData> children = parent == null ? treeStore.getRootItems() : treeStore.getChildren(parent);
 
         for (int i = 0; i != children.size(); ++i) {
             Record record = treeStore.getRecord(children.get(i));
             record.set("sortOrder", i);
+        }
+
+        if(source instanceof ActivityDTO) {
+            Record record = treeStore.getRecord(source);
+            if(parent instanceof FolderDTO) {
+                record.set("folderId", ((FolderDTO) parent).getId());
+            } else {
+                record.set("folderId", null);
+            }
         }
     }
 
@@ -509,8 +539,8 @@ public class DbEditor implements DbPage, IsWidget {
                         }
 
                         if (newEntity instanceof IsActivityDTO && ((IsActivityDTO) newEntity).getClassicView()) {
-                            treeStore.add(newEntity, new AttributeGroupFolder(messages.attributes()), false);
-                            treeStore.add(newEntity, new IndicatorFolder(messages.indicators()), false);
+                            treeStore.add(newEntity, new AttributeGroupFieldGroup(messages.attributes()), false);
+                            treeStore.add(newEntity, new IndicatorFieldGroup(messages.indicators()), false);
                         }
 
                         tether.hide();
@@ -551,27 +581,37 @@ public class DbEditor implements DbPage, IsWidget {
         Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                BatchCommand batch = new BatchCommand();
-
-                for (Record record : treeStore.getModifiedRecords()) {
-                    EntityDTO entity = (EntityDTO) record.getModel();
-                    batch.add(new UpdateEntity(entity.getEntityName(), entity.getId(), record.getChanges()));
-                }
-
-                service.execute(batch, new MaskingAsyncMonitor(container, I18N.CONSTANTS.saving()), new AsyncCallback<BatchResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-
-                    @Override
-                    public void onSuccess(BatchResult result) {
-                        treeStore.commitChanges();
-                        eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
-                    }
-                });
+                executeSave(new MaskingAsyncMonitor(DbEditor.this.container, I18N.CONSTANTS.saving()),
+                        new NullCallback<>());
             }
         });
+    }
 
+    private void executeSave(AsyncMonitor monitor, AsyncCallback<Void> outerCallback) {
+        BatchCommand batch = new BatchCommand();
+
+        for (Record record : treeStore.getModifiedRecords()) {
+            EntityDTO entity = (EntityDTO) record.getModel();
+            Map<String, Object> changes = new HashMap<>();
+            for (String property : record.getChanges().keySet()) {
+                changes.put(property, entity.get(property));
+            }
+            batch.add(new UpdateEntity(entity.getEntityName(), entity.getId(), changes));
+        }
+
+        service.execute(batch, monitor, new AsyncCallback<BatchResult>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                outerCallback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(BatchResult result) {
+                treeStore.commitChanges();
+                eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
+                outerCallback.onSuccess(null);
+            }
+        });
     }
 
     private void onSelectionChanged(ModelData selectedItem) {
@@ -595,8 +635,8 @@ public class DbEditor implements DbPage, IsWidget {
     private IsActivityDTO getSelectedActivity(ModelData selectedItem) {
         if (selectedItem instanceof IsActivityDTO) {
             return (IsActivityDTO) selectedItem;
-        } else if (selectedItem instanceof AttributeGroupFolder ||
-                selectedItem instanceof IndicatorFolder ||
+        } else if (selectedItem instanceof AttributeGroupFieldGroup ||
+                selectedItem instanceof IndicatorFieldGroup ||
                 selectedItem instanceof AttributeGroupDTO ||
                 selectedItem instanceof IndicatorDTO ||
                 selectedItem instanceof LocationTypeDTO ||
@@ -618,12 +658,49 @@ public class DbEditor implements DbPage, IsWidget {
 
     @Override
     public void requestToNavigateAway(PageState place, NavigationCallback callback) {
-        callback.onDecided(true);
+        if(treeStore.getModifiedRecords().isEmpty()) {
+            callback.onDecided(true);
+        } else {
+            final SavePromptMessageBox box = new SavePromptMessageBox();
+            box.show(new SaveChangesCallback() {
+                @Override
+                public void save(AsyncMonitor monitor) {
+                    executeSave(monitor, new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            box.hide();
+                            callback.onDecided(true);
+                        }
+                    });
+                }
+
+                @Override
+                public void cancel() {
+                    box.hide();
+                    callback.onDecided(false);
+                }
+
+                @Override
+                public void discard() {
+                    box.hide();
+                    callback.onDecided(true);
+                }
+            });
+        }
     }
 
     @Override
     public String beforeWindowCloses() {
-        return null;
+        if(treeStore.getModifiedRecords().isEmpty()) {
+            return null;
+        } else {
+            return I18N.CONSTANTS.unsavedChangesWarning();
+        }
     }
 
     @Override

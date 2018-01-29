@@ -32,10 +32,7 @@ import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
-import org.activityinfo.server.database.hibernate.entity.Activity;
-import org.activityinfo.server.database.hibernate.entity.LocationType;
-import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
+import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -109,7 +106,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
 
     private void applyProperties(Activity activity, PropertyMap changes) {
         if (changes.containsKey("name")) {
-            String name = truncate((String) changes.get("name"));
+            String name = truncate(changes.get("name"));
 
             activity.setName(name);
 
@@ -125,34 +122,42 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
             }
         }
 
+        if (changes.containsKey("folderId")) {
+            if(changes.get("folderId") == null) {
+                activity.setFolder(null);
+                activity.setCategory(null);
+            } else {
+                Folder folder = em.find(Folder.class, changes.get("folderId"));
+                if (folder != null && folder.getDatabase().getId() == activity.getDatabase().getId()) {
+                    activity.setFolder(folder);
+                    activity.setCategory(folder.getName());
+                }
+            }
+        }
+
         if (changes.containsKey("locationType")) {
             activity.setLocationType(em.getReference(LocationType.class,
                     ((LocationTypeDTO) changes.get("locationType")).getId()));
         }
 
-        if (changes.containsKey("category")) {
-            String category = Strings.nullToEmpty((String) changes.get("category")).trim();
-            activity.setCategory(truncate(Strings.emptyToNull(category)));
-        }
-
         if (changes.containsKey("mapIcon")) {
-            activity.setMapIcon((String) changes.get("mapIcon"));
+            activity.setMapIcon(changes.get("mapIcon"));
         }
 
         if (changes.containsKey("reportingFrequency")) {
-            activity.setReportingFrequency((Integer) changes.get("reportingFrequency"));
+            activity.setReportingFrequency(changes.get("reportingFrequency"));
         }
 
         if (changes.containsKey("published")) {
-            activity.setPublished((Integer) changes.get("published"));
+            activity.setPublished(changes.get("published"));
         }
 
         if (changes.containsKey("classicView")) {
-            activity.setClassicView((Boolean) changes.get("classicView"));
+            activity.setClassicView(changes.get("classicView"));
         }
 
         if (changes.containsKey("sortOrder")) {
-            activity.setSortOrder((Integer) changes.get("sortOrder"));
+            activity.setSortOrder(changes.get("sortOrder"));
         }
 
         activity.getDatabase().setLastSchemaUpdate(new Date());

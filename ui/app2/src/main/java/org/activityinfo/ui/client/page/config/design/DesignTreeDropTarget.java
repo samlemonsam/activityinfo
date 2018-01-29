@@ -24,6 +24,7 @@ class DesignTreeDropTarget extends TreePanelDropTarget {
     public DesignTreeDropTarget(TreePanel tree) {
         super(tree);
         setAllowSelfAsSource(true);
+        setAllowDropOnLeaf(true);
         setFeedback(DND.Feedback.BOTH);
         setAutoExpand(false);
     }
@@ -56,6 +57,8 @@ class DesignTreeDropTarget extends TreePanelDropTarget {
         }
 
         // Now decide whether this move is legal
+        // insert = insert after the overItem as a sibling
+        // append = append to the overItem's children
         boolean insert = false;
         boolean append = false;
 
@@ -78,9 +81,9 @@ class DesignTreeDropTarget extends TreePanelDropTarget {
             }
         }
 
-        LOGGER.info("source = " + sourceModel + ", overModel = " + overModel +
-                (append ? " append" : "") + (insert ? " insert" : ""));
-
+        // Update the feedback member, which is used
+        // by other methods in the superclass to determine
+        // which operation is allowed.
         if(append) {
             setFeedback(DND.Feedback.BOTH);
         } else {

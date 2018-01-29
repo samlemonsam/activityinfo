@@ -357,6 +357,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             SqlQuery.select("name", "folderId", "databaseId")
                     .from("folder")
                     .where("databaseId").in(databaseMap.keySet())
+                    .orderBy("sortOrder")
+                    .orderBy("name")
                     .execute(tx, new SqlResultCallback() {
                         @Override
                         public void onSuccess(SqlTransaction tx, SqlResultSet results) {
