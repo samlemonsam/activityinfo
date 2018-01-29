@@ -238,6 +238,7 @@ public class DbEditor implements DbPage, IsWidget {
         toolBar.setActionEnabled(UIActions.DELETE, false);
         toolBar.setActionEnabled(UIActions.EDIT, false);
         toolBar.setActionEnabled(UIActions.OPEN_TABLE, false);
+        toolBar.setActionEnabled(UIActions.DELETE, db.isDatabaseDesignAllowed());
         toolBar.setActionEnabled(UIActions.IMPORT, db.isDatabaseDesignAllowed());
 
         newFolder.setEnabled(db.isDatabaseDesignAllowed());
