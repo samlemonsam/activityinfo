@@ -91,14 +91,22 @@ public class RelevanceRow implements IsWidget {
         }
 
 
-        if(condition.isPresent()) {
-            init(condition.get());
+        if(condition.isPresent() && !fields.isEmpty()) {
+            try {
+                init(condition.get());
+            } catch (IllegalStateException excp) {
+                // Must catch state exception for missing references, to allow users to remove corrupt conditions
+                setDefaultSelection(fields);
+            }
         } else if(!fields.isEmpty()) {
-            fieldListBox.setSelectedIndex(0);
-            updateOperators(fields.get(0), null);
-            updateOperandChoices(fields.get(0), null);
-        } else {
+            setDefaultSelection(fields);
         }
+    }
+
+    private void setDefaultSelection(List<FormField> fields) {
+        fieldListBox.setSelectedIndex(0);
+        updateOperators(fields.get(0), null);
+        updateOperandChoices(fields.get(0), null);
     }
 
     private void init(SimpleCondition simpleCondition) {
