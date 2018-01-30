@@ -172,10 +172,57 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             final ResourceId sourceFormId = activityFormClass(activity.getId());
             final ResourceId targetFormId = activityFormClass(activityMapping.get(activity.getId()).getId());
 
-            FormClass targetFormClass = copyFormClass(sourceFormId, targetFormId);
-            formCatalog.get().getForm(targetFormId).get().updateFormClass(targetFormClass);
-
+            if (activity.isClassicView()) {
+                copyClassicActivity(activity, activityMapping.get(activity.getId()));
+            } else {
+                FormClass targetFormClass = copyFormClass(sourceFormId, targetFormId);
+                formCatalog.get().getForm(targetFormId).get().updateFormClass(targetFormClass);
+            }
         }
+    }
+
+    private Activity copyClassicActivity(final Activity sourceActivity,
+                                          final Activity targetActivity) {
+
+        // copy attribute groups
+        for (AttributeGroup sourceGroup : sourceActivity.getAttributeGroups()) {
+            copyAttributeGroup(sourceGroup, targetActivity);
+        }
+
+        // copy indicators
+        for (Indicator sourceIndicator : sourceActivity.getIndicators()) {
+            copyIndicator(sourceIndicator, targetActivity);
+        }
+
+        return targetActivity;
+    }
+
+    private void copyAttributeGroup(AttributeGroup sourceGroup, Activity targetActivity) {
+        AttributeGroup targetGroup = new AttributeGroup(sourceGroup);
+        targetGroup.setId(generator.generateInt());
+
+        em.persist(targetGroup);
+        targetActivity.getAttributeGroups().add(targetGroup);
+
+        for (Attribute sourceAttribute : sourceGroup.getAttributes()) {
+            copyAttribute(sourceAttribute, targetGroup);
+        }
+    }
+
+    private void copyAttribute(Attribute sourceAttribute, AttributeGroup targetGroup) {
+        Attribute targetAttribute = new Attribute(sourceAttribute);
+        targetAttribute.setId(generator.generateInt());
+        targetAttribute.setGroup(targetGroup);
+
+        em.persist(targetAttribute);
+    }
+
+    private void copyIndicator(Indicator sourceIndicator, Activity targetActivity) {
+        Indicator targetIndicator = new Indicator(sourceIndicator);
+        targetIndicator.setId(generator.generateInt());
+        targetIndicator.setActivity(targetActivity);
+
+        em.persist(targetIndicator);
     }
 
     private FormClass copyFormClass(final ResourceId sourceFormId,
