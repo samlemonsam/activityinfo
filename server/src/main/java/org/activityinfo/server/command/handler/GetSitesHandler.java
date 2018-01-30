@@ -6,39 +6,52 @@ import com.google.cloud.trace.core.TraceContext;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.command.DimensionType;
+import org.activityinfo.legacy.shared.command.Filter;
+import org.activityinfo.legacy.shared.command.GetSites;
+import org.activityinfo.legacy.shared.command.OldGetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.impl.OldGetSitesHandler;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.expr.*;
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.*;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.geo.GeoAreaType;
-import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.command.handler.binding.*;
-import org.activityinfo.server.command.handler.binding.dim.*;
+import org.activityinfo.server.command.handler.binding.dim.PartnerDimBinding;
+import org.activityinfo.server.command.handler.binding.dim.ProjectDimBinding;
+import org.activityinfo.server.command.handler.binding.dim.SiteDimBinding;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.util.Trace;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.server.util.Trace;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
-import org.activityinfo.store.query.server.*;
-import org.activityinfo.store.query.shared.*;
+import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.query.server.FormSupervisorAdapter;
+import org.activityinfo.store.query.shared.FormScanBatch;
+import org.activityinfo.store.query.shared.NullFormSupervisor;
+import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 
 import javax.annotation.Nullable;
@@ -221,7 +234,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     @Override
     public SiteResult execute(GetSites cmd, User user) {
 
-        if (useLegacyMethod(cmd, user)) {
+        if (true || useLegacyMethod(cmd, user)) {
             return dispatcher.execute(new OldGetSites(cmd));
         }
 
