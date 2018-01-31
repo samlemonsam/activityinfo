@@ -38,7 +38,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -273,8 +272,9 @@ public class FormResource {
     @NoCache
     @Path("records")
     @Produces(JSON_CONTENT_TYPE)
-    public List<FormRecord> getRecords(@QueryParam("parentId") String parentId) {
-        return assertVisible(formId).getSubRecords(ResourceId.valueOf(parentId));
+    public FormRecordSet getRecords(@QueryParam("parentId") String parentId) {
+        return new FormRecordSet(formId.asString(),
+                assertVisible(formId).getSubRecords(ResourceId.valueOf(parentId)));
     }
 
     @POST

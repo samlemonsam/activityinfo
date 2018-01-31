@@ -3,7 +3,6 @@ package org.activityinfo.legacy.shared.adapter;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.json.Json;
@@ -30,8 +29,8 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
