@@ -121,11 +121,7 @@ public final class RecordUpdate {
         if(fields == null) {
             fields = Json.createObject();
         }
-        if(value == null) {
-            fields.put(fieldId, Json.createNull());
-        } else {
-            fields.put(fieldId, value);
-        }
+        fields.put(fieldId, value);
     }
 
     @JsOverlay

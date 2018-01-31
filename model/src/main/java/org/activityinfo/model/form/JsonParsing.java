@@ -8,7 +8,7 @@ import org.activityinfo.json.JsonValue;
 public class JsonParsing {
     
     public static String toNullableString(JsonValue value) {
-        if(value == null || value.isJsonNull()) {
+        if(value.isJsonNull()) {
             return null;
         } else {
             return value.asString();

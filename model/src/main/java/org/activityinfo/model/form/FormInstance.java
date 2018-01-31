@@ -82,10 +82,13 @@ public class FormInstance {
             instance.setParentRecordId(ResourceId.valueOf(record.getParentRecordId()));
         }
 
+        JsonValue fieldsObject = record.getFields();
         for (FormField field : formClass.getFields()) {
-            JsonValue fieldValue = record.getFields().get(field.getName());
-            if(fieldValue != null && !fieldValue.isJsonNull()) {
-                instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+            if(fieldsObject.hasKey(field.getName())) {
+                JsonValue fieldValue = fieldsObject.get(field.getName());
+                if (!fieldValue.isJsonNull()) {
+                    instance.set(field.getId(), field.getType().parseJsonValue(fieldValue));
+                }
             }
         }
         return instance;

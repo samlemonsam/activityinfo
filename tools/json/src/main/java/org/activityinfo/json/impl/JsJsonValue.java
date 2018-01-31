@@ -130,7 +130,7 @@ public final class JsJsonValue extends JavaScriptObject implements JsonValue {
 
     @Override
     public final native boolean isJsonNull() /*-{
-        return this === null;
+        return this == null;
     }-*/;
 
     @Override

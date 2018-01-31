@@ -1,7 +1,6 @@
 package org.activityinfo.model.type.expr;
 
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.form.JsonParsing;
 import org.activityinfo.model.type.*;
 
 import javax.annotation.Nullable;
@@ -28,16 +27,15 @@ public class CalculatedFieldType implements ParametrizedFieldType {
         @Override
         public FieldType deserializeType(JsonValue parametersObject) {
             JsonValue exprElement = parametersObject.get("formula");
-            if(exprElement == null) {
+            if(exprElement.isJsonNull()) {
                 exprElement = parametersObject.get("expression");
             }
-            if(exprElement == null) {
+            if(exprElement.isJsonNull()) {
                 return new CalculatedFieldType();
             } else if(exprElement.isJsonObject()) {
-                JsonValue exprObject = exprElement;
-                return new CalculatedFieldType(JsonParsing.toNullableString(exprObject.get("value")));
+                return new CalculatedFieldType(exprElement.getString("value"));
             } else {
-                return new CalculatedFieldType(JsonParsing.toNullableString(exprElement));
+                return new CalculatedFieldType(exprElement.asString());
             }
         }
     };

@@ -89,7 +89,7 @@ public interface JsonValue extends Serializable {
 
 
     /**
-     * Return the element (uncoerced) as a JsonValue or {@code null} if
+     * Return the element (uncoerced) as a JsonValue or {@code Json.createNull()} if
      * this object has no value for the given key.
      *
      */
@@ -107,7 +107,6 @@ public interface JsonValue extends Serializable {
      * can result in runtime errors.
      */
     double getNumber(String key);
-
 
 
     /**

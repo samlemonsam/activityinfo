@@ -70,7 +70,11 @@ public class JreJsonObject extends JreJsonValue implements JsonValue {
     }
 
     public JsonValue get(String key) {
-        return map.get(key);
+        JsonValue value = map.get(key);
+        if(value == null) {
+            return JreJsonNull.NULL_INSTANCE;
+        }
+        return value;
     }
 
     public boolean getBoolean(String key) {

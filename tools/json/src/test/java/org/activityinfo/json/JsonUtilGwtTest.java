@@ -113,6 +113,36 @@ public class JsonUtilGwtTest extends GWTTestCase {
   }
 
 
+  public void testZero() {
+    JsonValue zero = Json.create(0);
+    assertTrue(zero.isNumber());
+    assertTrue(zero.isJsonPrimitive());
+    assertFalse(zero.isJsonNull());
+
+    JsonValue object = Json.createObject();
+    object.put("zero", zero);
+
+    assertEquals(0.0, object.getNumber("zero"));
+    assertTrue(object.get("zero").isNumber());
+    assertFalse(object.get("zero").isJsonNull());
+  }
+
+  public void toBeFixedTestZeroNull() {
+    JsonValue one = Json.create(1);
+    JsonValue zero = Json.create(0);
+
+    // GWT is compiling both expressions "one == null" and "zero == null" to
+    // "one" and "zero" respectively. Somewhere there is an assumption that
+    // if a value of interface type points to a JavaScript object, then we can rely
+    // on an implicit conversion from object to boolean, which is equivalent to (object != null)
+
+    // But this DOESN'T work if Json.create() returns an unboxed JS number.
+    // In this case, a zero value will also be implicitly converted to a FALSE boolean value.
+
+    assertFalse("one", one == null);
+    assertFalse("zero", zero == null);
+  }
+
   public void testIllegalParse() {
     try {
       Json.parse("{ \"a\": new String() }");
@@ -289,7 +319,7 @@ public class JsonUtilGwtTest extends GWTTestCase {
 
     assertTrue(object.get("a").isJsonNull());
     assertTrue(object.get("b").isJsonNull());
-    assertTrue(object.get("c") == null);
+    assertTrue(object.get("c").isJsonNull());
   }
 
   public void testArrayParse() {
@@ -319,7 +349,6 @@ public class JsonUtilGwtTest extends GWTTestCase {
     }
     assertEquals("ab", concat);
   }
-
 
 
 
