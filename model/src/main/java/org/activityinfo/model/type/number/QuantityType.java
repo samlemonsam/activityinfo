@@ -35,7 +35,7 @@ public class QuantityType implements ParametrizedFieldType {
 
             // handling for legacy QuantityType fields (w/ null aggregation) - default to SUM
             String aggregationString = Aggregation.SUM.name();
-            if(parametersObject.get("aggregation") != null) {
+            if(!parametersObject.get("aggregation").isJsonNull()) {
                 aggregationString = parametersObject.getString("aggregation");
             }
             Aggregation aggregation = Aggregation.valueOf(aggregationString);
