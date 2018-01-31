@@ -354,11 +354,11 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
                             labelValue = record.get().getFields().get(labelFieldId.get().asString());
                         }
 
-                        if (labelValue == null) {
+                        if (labelValue.isJsonNull()) {
                             labelValue = record.get().getFields().get(CuidAdapter.field(formId, CuidAdapter.NAME_FIELD).asString());
                         }
 
-                        if (labelValue != null && labelValue.isJsonPrimitive()) {
+                        if (labelValue.isJsonPrimitive()) {
                             labelMap.put(ref.getRecordId(), labelValue.asString());
                         }
                     }

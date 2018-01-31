@@ -476,7 +476,7 @@ public class Updater {
         Set<String> existingBlobIds = new HashSet<>();
         if(existingResource.isPresent()) {
             JsonValue existingFieldValue = existingResource.get().getFields().get(field.getId().asString());
-            if(existingFieldValue != null) {
+            if(!existingFieldValue.isJsonNull()) {
                 AttachmentValue existingValue = fieldType.parseJsonValue(existingFieldValue);
                 for (Attachment attachment : existingValue.getValues()) {
                     existingBlobIds.add(attachment.getBlobId());

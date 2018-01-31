@@ -268,7 +268,7 @@ public class FormField extends FormElement {
         }
         
         String type;
-        JsonValue typeParameters ;
+        JsonValue typeParameters;
         JsonValue typeElement = jsonObject.get("type");
         
         if(typeElement.isJsonPrimitive()) {
@@ -281,7 +281,7 @@ public class FormField extends FormElement {
         }
         
         FieldTypeClass typeClass = TypeRegistry.get().getTypeClass(type);
-        if(typeClass instanceof ParametrizedFieldTypeClass && typeParameters != null) {
+        if(typeClass instanceof ParametrizedFieldTypeClass && !typeParameters.isJsonNull()) {
             field.setType(((ParametrizedFieldTypeClass) typeClass).deserializeType(typeParameters));
         } else {
             field.setType(typeClass.createType());
