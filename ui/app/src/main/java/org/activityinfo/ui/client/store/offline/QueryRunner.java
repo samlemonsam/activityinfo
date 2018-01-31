@@ -36,7 +36,7 @@ public class QueryRunner implements ColumnQueryBuilder {
 
         public void onNext(RecordObject record) {
             JsonValue jsonValue = record.getField(fieldName);
-            if(jsonValue == null) {
+            if(jsonValue.isJsonNull()) {
                 observer.onNext(null);
             } else {
                 FieldValue value = fieldType.parseJsonValue(jsonValue);
