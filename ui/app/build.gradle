@@ -68,7 +68,7 @@ dependencies {
     compile group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
     compile group: 'com.sencha.gxt', name: 'gxt-theme-triton', version: '4.0.0'
 
-
+    testCompile libraries.gwt.servlet
     testCompile project(':store:testing')
     testCompile project(':tools:indexeddb').sourceSets.test.output
 
