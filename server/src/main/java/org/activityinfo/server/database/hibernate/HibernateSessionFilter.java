@@ -56,11 +56,6 @@ public final class HibernateSessionFilter implements Filter {
         try {
             sessionScope.enter();
             filterChain.doFilter(servletRequest, servletResponse);
-            HibernateQueryExecutor.commitIfOpen();
-
-        } catch(Exception e) {
-            HibernateQueryExecutor.rollbackIfOpen();
-            throw e;
         } finally {
             sessionScope.exit();
         }
