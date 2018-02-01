@@ -3,7 +3,6 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Optional;
 import com.google.gwt.core.shared.GwtIncompatible;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
@@ -14,19 +13,22 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
-import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.SerialNumberProvider;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @GwtIncompatible
-public class TestingStorageProvider implements FormStorageProvider {
+public class TestingStorageProvider implements FormStorageProvider, TransactionalStorageProvider {
 
     static {
         LocaleProxy.initialize();
@@ -223,5 +225,18 @@ public class TestingStorageProvider implements FormStorageProvider {
 
     public LocaliteForm getLocaliteForm() {
         return localiteForm;
+    }
+
+    @Override
+    public void begin() {
+
+    }
+
+    @Override
+    public void commit() {
+    }
+
+    @Override
+    public void rollback() {
     }
 }
