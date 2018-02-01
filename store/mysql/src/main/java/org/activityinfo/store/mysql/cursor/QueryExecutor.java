@@ -15,5 +15,10 @@ public interface QueryExecutor {
 
     int update(String sql, List<?> parameters);
 
+    void begin();
+
+    void commit();
+
+    void rollback();
 
 }

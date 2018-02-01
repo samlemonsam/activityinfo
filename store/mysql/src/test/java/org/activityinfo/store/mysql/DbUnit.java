@@ -97,6 +97,36 @@ public class DbUnit {
                 }
             }
 
+            @Override
+            public void rollback() {
+                try {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void begin() {
+                try {
+                    connection.setAutoCommit(false);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+
+            @Override
+            public void commit() {
+                try {
+                    connection.commit();
+                    connection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             private PreparedStatement prepare(String sql, List<?> parameters) throws SQLException {
                 System.out.println("SQL: " + sql);
                 PreparedStatement statement = connection.prepareStatement(sql);

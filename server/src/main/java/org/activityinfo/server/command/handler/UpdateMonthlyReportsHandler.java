@@ -52,7 +52,7 @@ import static org.activityinfo.legacy.shared.model.IndicatorDTO.getPropertyName;
 public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthlyReports> {
 
     private final String lockKeyRoot = "site";
-    private final double lockTimeout = 1;
+    private final double lockTimeout = 7;
 
     private final EntityManager em;
     private final KeyGenerator keyGenerator;

@@ -8,8 +8,10 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.hrd.HrdStorageProvider;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -17,10 +19,9 @@ import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.DatabaseCacheImpl;
 import org.activityinfo.store.mysql.update.ActivityUpdater;
 import org.activityinfo.store.spi.FormCatalog;
-import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormNotFoundException;
-import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -29,7 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class MySqlStorageProvider implements FormStorageProvider, FormCatalog {
+public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, TransactionalStorageProvider {
 
     private static Logger LOGGER = Logger.getLogger(MySqlStorageProvider.class.getName());
 
@@ -206,8 +207,30 @@ public class MySqlStorageProvider implements FormStorageProvider, FormCatalog {
     private void createFormSchema(FormClass formClass) {
         int activityId = CuidAdapter.getLegacyIdFromCuid(formClass.getId());
         int databaseId = CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId());
-        ActivityUpdater updater = new ActivityUpdater(activityId, databaseId, executor);
-        updater.insert(formClass);
+        begin();
+        try {
+            ActivityUpdater updater = new ActivityUpdater(activityId, databaseId, executor);
+            updater.insert(formClass);
+            commit();
+        } catch (Exception e) {
+            rollback();
+            throw e;
+        }
 
+    }
+
+    @Override
+    public void begin() {
+        executor.begin();
+    }
+
+    @Override
+    public void commit() {
+        executor.commit();
+    }
+
+    @Override
+    public void rollback() {
+        executor.rollback();
     }
 }

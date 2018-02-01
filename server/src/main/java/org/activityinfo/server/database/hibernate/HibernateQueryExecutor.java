@@ -66,6 +66,21 @@ public class HibernateQueryExecutor implements QueryExecutor {
         });
     }
 
+    @Override
+    public void begin() {
+        entityManager.get().getTransaction().begin();
+    }
+
+    @Override
+    public void commit() {
+        entityManager.get().getTransaction().commit();
+    }
+
+    @Override
+    public void rollback() {
+        entityManager.get().getTransaction().rollback();
+    }
+
     private PreparedStatement prepare(Connection connection, String sql, List<?> parameters) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sql);
         for (int i = 0; i < parameters.size(); i++) {

@@ -2,11 +2,11 @@ package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
-import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.spi.*;
 
 import java.util.Collection;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MockFormStorageProvider implements FormStorageProvider {
+public class MockFormStorageProvider implements FormStorageProvider, TransactionalStorageProvider {
     
     private static final ResourceId COLLECTION_ID = ResourceId.valueOf("XYZ123");
     
@@ -42,7 +42,20 @@ public class MockFormStorageProvider implements FormStorageProvider {
         
         return formClass;
     }
-    
+
+    @Override
+    public void begin() {
+
+    }
+
+    @Override
+    public void commit() {
+    }
+
+    @Override
+    public void rollback() {
+    }
+
     private class MockFormStorage implements FormStorage {
 
         @Override

@@ -29,6 +29,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.spi.*;
 
 import java.util.*;
@@ -83,8 +84,16 @@ public class Updater {
     }
 
     public void execute(RecordTransaction tx) {
-        for (RecordUpdate change : tx.getChanges()) {
-            executeChange(change);
+        TransactionalStorageProvider txStorageProvider = (TransactionalStorageProvider) catalog;
+        txStorageProvider.begin();
+        try {
+            for (RecordUpdate change : tx.getChanges()) {
+                executeChange(change);
+            }
+            txStorageProvider.commit();
+        } catch (Exception e) {
+            txStorageProvider.rollback();
+            throw e;
         }
     }
 
