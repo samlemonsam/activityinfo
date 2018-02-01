@@ -93,11 +93,6 @@ public class HibernateQueryExecutor implements QueryExecutor {
         return doWork(new AbstractReturningWork<Integer>() {
             @Override
             public Integer execute(Connection connection) throws SQLException {
-
-                if(connection.getAutoCommit()) {
-                    throw new RuntimeException("AUTOCOMMITT!!!");
-                }
-
                 LOGGER.info("Isolation = " + connection.getTransactionIsolation());
 
                 PreparedStatement statement = prepare(connection, sql, parameters);
