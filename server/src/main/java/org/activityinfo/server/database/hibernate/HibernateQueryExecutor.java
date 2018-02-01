@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -23,14 +24,46 @@ public class HibernateQueryExecutor implements QueryExecutor {
     
     private final Provider<EntityManager> entityManager;
 
+    /**
+     * Holds the entity manager for this request, if one has been needed.
+     */
+    private static final ThreadLocal<HibernateEntityManager> REQUEST_ENTITY_MANAGER = new ThreadLocal<>();
+
     @Inject
     public HibernateQueryExecutor(Provider<EntityManager> entityManager) {
         this.entityManager = entityManager;
     }
 
     private <T> T doWork(ReturningWork<T> worker) {
-        HibernateEntityManager hibernateEntityManager = (HibernateEntityManager) entityManager.get();
-        return hibernateEntityManager.getSession().doReturningWork(worker);
+
+        HibernateEntityManager entityManager = REQUEST_ENTITY_MANAGER.get();
+        if(entityManager == null) {
+            entityManager = (HibernateEntityManager) this.entityManager.get();
+            entityManager.getTransaction().begin();
+            REQUEST_ENTITY_MANAGER.set(entityManager);
+        }
+
+        return entityManager.getSession().doReturningWork(worker);
+    }
+
+    public static void commitIfOpen() {
+        HibernateEntityManager entityManager = REQUEST_ENTITY_MANAGER.get();
+        if(entityManager != null) {
+            REQUEST_ENTITY_MANAGER.remove();
+            entityManager.getTransaction().commit();
+        }
+    }
+
+    public static void rollbackIfOpen() {
+        HibernateEntityManager entityManager = REQUEST_ENTITY_MANAGER.get();
+        if(entityManager != null) {
+            REQUEST_ENTITY_MANAGER.remove();
+            try {
+                entityManager.getTransaction().rollback();
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Exception thrown while rolling back transaction", e);
+            }
+        }
     }
 
     @Override
@@ -60,6 +93,13 @@ public class HibernateQueryExecutor implements QueryExecutor {
         return doWork(new AbstractReturningWork<Integer>() {
             @Override
             public Integer execute(Connection connection) throws SQLException {
+
+                if(connection.getAutoCommit()) {
+                    throw new RuntimeException("AUTOCOMMITT!!!");
+                }
+
+                LOGGER.info("Isolation = " + connection.getTransactionIsolation());
+
                 PreparedStatement statement = prepare(connection, sql, parameters);
                 return statement.executeUpdate();
             }
