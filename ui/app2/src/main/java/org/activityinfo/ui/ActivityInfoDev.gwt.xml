@@ -30,8 +30,6 @@
 
     <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 
-    <add-linker name="std"/>
-
     <set-property name="gwt.logging.enabled" value="FALSE"/>
 
 </module>

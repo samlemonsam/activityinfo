@@ -86,7 +86,6 @@ task compileApp(type: JavaExec) {
         args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
         args 'org.activityinfo.ui.ActivityInfoRelease'
-        args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }
 }
 
