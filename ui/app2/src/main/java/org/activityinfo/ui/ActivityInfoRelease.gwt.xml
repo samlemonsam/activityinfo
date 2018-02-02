@@ -25,8 +25,7 @@
 
   <inherits name="org.activityinfo.ui.ActivityInfo"/>
 
-  <set-property name="gwt.logging.enabled" value="TRUE"/>
-  <set-property name="gwt.logging.logLevel" value="FINEST"/>
+  <set-property name="gwt.logging.enabled" value="FALSE"/>
 
   <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 
