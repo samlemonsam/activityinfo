@@ -44,10 +44,6 @@ import org.activityinfo.ui.client.page.NavigationHandler;
 @Singleton
 public class UsageTracker {
 
-    private static final int VISITOR_SCOPE = 1;
-    private static final int SESSION_SCOPE = 2;
-    private static final int PAGE_SCOPE = 3;
-
     @Inject
     public UsageTracker(EventBus eventBus,
                         DispatchEventSource commandEventSource) {
@@ -100,20 +96,7 @@ public class UsageTracker {
     }
 
     private native void doTrackPageView(String pageName) /*-{
-        $wnd._gaq.push([ '_trackPageview', pageName ]);
+        $wnd.ga('send', 'pageview', pageName);
     }-*/;
 
-    private void setCustomVar(int slot, String variableName, String value,
-                              int scope) {
-        try {
-            doSetCustomVar(slot, variableName, value, scope);
-        } catch (JavaScriptException e) {
-            Log.error("pageTracker.setCustomVar() threw exception", e);
-        }
-    }
-
-    private native void doSetCustomVar(int slot, String variableName,
-                                       String value, int scope) /*-{
-        $wnd._gaq.push([ '_setCustomVar', slot, variableName, value, scope ]);
-    }-*/;
 }
