@@ -96,7 +96,7 @@ public class UsageTracker {
     }
 
     private native void doTrackPageView(String pageName) /*-{
-        $wnd.ga('send', 'pageview', pageName);
+        $wnd.ga('set', 'page', pageName);
+        $wnd.ga('send', 'pageview');
     }-*/;
-
 }
