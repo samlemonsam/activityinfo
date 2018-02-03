@@ -47,22 +47,6 @@ public class PermissionOracle {
         return permission.isAllowView() || permission.isAllowViewAll();
     }
 
-    public boolean isManageUsersAllowed(UserDatabase database, User user) {
-        return getPermissionByUser(database, user).isAllowDesign() ||
-               getPermissionByUser(database, user).isAllowManageUsers();
-    }
-
-    public boolean isVisible(ReportDefinition definition, User user) {
-        if(definition.getOwner().getId() == user.getId()) {
-            return true;
-        }
-        if(definition.getVisibility() == 1) {
-            UserPermission databasePermission = getPermissionByUser(definition.getDatabase(), user);
-            return databasePermission.isAllowView();
-        }
-        return false;
-    }
-
     public boolean isManagePartnersAllowed(UserDatabase db, User user) {
         UserPermission perm = getPermissionByUser(db, user);
         return perm.isAllowDesign() || perm.isAllowManageAllUsers();
@@ -70,10 +54,11 @@ public class PermissionOracle {
 
     public void assertDesignPrivileges(UserDatabase database, User user) {
         if (!isDesignAllowed(database, user)) {
-            throw new IllegalAccessCommandException(String.format(
+            LOGGER.severe(String.format(
                     "User %d does not have design privileges on database %d",
                     user.getId(),
                     database.getId()));
+            throw new IllegalAccessCommandException();
         }
     }
     
@@ -87,16 +72,18 @@ public class PermissionOracle {
         if(databaseId.getDomain() == DATABASE_DOMAIN) {
             return em.get().getReference(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
         }
-        throw new IllegalArgumentException(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
+        LOGGER.severe(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
                 "a database", formClass.getLabel(), formClass.getId(), formClass.getDatabaseId()));
+        throw new IllegalArgumentException();
     }
 
     public void assertManagePartnerAllowed(UserDatabase database, User user) {
         if (!isManagePartnersAllowed(database, user)) {
-            throw new IllegalAccessCommandException(String.format(
+            LOGGER.severe(String.format(
                     "User %d does not have design or manageAllUsers privileges on database %d",
                     user.getId(),
                     database.getId()));
+            throw new IllegalAccessCommandException();
         }
     }
 
@@ -122,8 +109,9 @@ public class PermissionOracle {
 
     public void assertEditAllowed(Site site, User user) {
         if(!isEditAllowed(site, user)) {
-            throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +
+            LOGGER.severe(String.format("User %d does not have permission to edit" +
                     " site %d", user.getId(), site.getId()));
+            throw new IllegalAccessCommandException();
         }
     }
 
@@ -141,8 +129,9 @@ public class PermissionOracle {
 
     public void assertEditSiteAllowed(User user, Activity activity, Partner partner) {
         if(!isEditSiteAllowed(user, activity, partner)) {
-            throw new IllegalAccessCommandException(String.format("User %d does not have permission to edit" +
+            LOGGER.severe(String.format("User %d does not have permission to edit" +
                     " sites in activity %d and partner %d", user.getId(), activity.getId(), partner.getId()));
+            throw new IllegalAccessCommandException();
         }
     }
 
@@ -257,8 +246,9 @@ public class PermissionOracle {
 
     public void assertDatabaseDeletionAuthorized(UserDatabase entity, User user) {
         if(entity.getOwner().getId() != user.getId()) {
-            throw new IllegalAccessCommandException(String.format("User %d is not authorized to delete " +
+            LOGGER.severe(String.format("User %d is not authorized to delete " +
                     "database %d: it is owned by user %d", user.getId(), entity.getId(), entity.getOwner().getId()));
+            throw new IllegalAccessCommandException();
         }
     }
     
@@ -289,28 +279,6 @@ public class PermissionOracle {
         return new PermissionOracle(em);
     }
 
-    public boolean isViewAllowed(Activity activity, User user) {
-        if(activity.getPublished() > 0) {
-            return true;
-        }
-        return isViewAllowed(activity.getDatabase(), user);
-    }
-
-
-    public void assertViewAllowed(Activity activity, User user) {
-        if (!isViewAllowed(activity, user)) {
-            throw new IllegalAccessCommandException("User " + user.getId() + " does not have permission to " +
-                    "view activity " + activity.getId());
-        }
-    }
-    
-    public void assertViewAllowed(FormClass formClass, User user) {
-        UserDatabase database = lookupDatabase(formClass);
-        if(!isViewAllowed(database, user)) {
-            throw new IllegalAccessCommandException("User " + user.getId() + " does not have permission to " +
-                    "view form class " + formClass.getId() + " in database " + database.getId());
-        }
-    }
 
     public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {
         assertDesignPrivileges(formClass, em.get().getReference(User.class, user.getId()));
