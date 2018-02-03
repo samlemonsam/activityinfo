@@ -21,12 +21,14 @@ package org.activityinfo.server.endpoint.odk;
  * #L%
  */
 
-import com.google.cloud.sql.jdbc.internal.Charsets;
+import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.io.xform.form.Bind;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.io.xform.util.XFormNavigator;
+import org.activityinfo.io.xform.xpath.XPathBuilder;
+import org.activityinfo.io.xform.xpath.XPathBuilderException;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.simple.SimpleConditionList;
 import org.activityinfo.model.form.FormClass;
@@ -41,15 +43,16 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
-import org.activityinfo.io.xform.xpath.XPathBuilder;
-import org.activityinfo.io.xform.xpath.XPathBuilderException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.*;
-import java.util.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
