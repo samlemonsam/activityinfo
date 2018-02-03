@@ -3,6 +3,7 @@ package org.activityinfo.store.mysql;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -348,7 +349,7 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
                 for (RecordRef ref : value.getReferences()) {
                     Optional<FormRecord> record = form.get().get(ref.getRecordId());
                     if (record.isPresent()) {
-                        JsonValue labelValue = null;
+                        JsonValue labelValue = Json.createNull();
 
                         if (labelFieldId.isPresent()) {
                             labelValue = record.get().getFields().get(labelFieldId.get().asString());
