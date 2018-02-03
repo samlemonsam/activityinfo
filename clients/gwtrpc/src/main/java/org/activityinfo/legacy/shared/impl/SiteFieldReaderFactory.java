@@ -19,7 +19,20 @@ public class SiteFieldReaderFactory implements FieldReaderFactory<SiteDTO> {
         if(field.getType() instanceof QuantityType) {
             return new QuantityReader(field);
         } else {
-            throw new UnsupportedOperationException("type: " + field.getType());
+            return new NullReader();
+        }
+    }
+
+    private static class NullReader implements FieldReader<SiteDTO> {
+
+        @Override
+        public FieldValue readField(SiteDTO record) {
+            return NullFieldValue.INSTANCE;
+        }
+
+        @Override
+        public FieldType getType() {
+            return new QuantityType();
         }
     }
 
