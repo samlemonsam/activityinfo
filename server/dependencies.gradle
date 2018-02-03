@@ -74,10 +74,10 @@ dependencies {
 
     // Report Rendering
     compile libraries.poi
-    compile libraries.appengine.export.itext
-    compile libraries.appengine.export.awt
-    compile libraries.appengine.export.jcharts
-    compile libraries.appengine.export.emf
+    compile 'net.sf.jcharts:krysalis-jCharts:1.0.0-alpha-1'
+    compile 'com.lowagie:itext:2.1.7'
+    compile 'com.lowagie:itext-rtf:2.1.7'
+    compile 'org.freehep:freehep-graphicsio-emf:2.1.2'
     compile libraries.prettytime
 
     testCompile project(':tools:promises').sourceSets.test.output

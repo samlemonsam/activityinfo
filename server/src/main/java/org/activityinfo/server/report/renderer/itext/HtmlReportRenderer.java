@@ -22,13 +22,9 @@ package org.activityinfo.server.report.renderer.itext;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
-import com.google.code.appengine.awt.Graphics2D;
-import com.google.code.appengine.awt.color.ColorSpace;
-import com.google.code.appengine.awt.image.BufferedImage;
-import com.google.code.appengine.imageio.ImageIO;
 import com.google.inject.Inject;
 import com.lowagie.text.*;
+import com.lowagie.text.Image;
 import com.lowagie.text.html.HtmlWriter;
 import org.activityinfo.legacy.shared.reports.model.ReportElement;
 import org.activityinfo.server.generated.GeneratedResource;
@@ -38,6 +34,10 @@ import org.activityinfo.server.report.generator.MapIconPath;
 import org.activityinfo.server.report.renderer.image.ImageCreator;
 import org.activityinfo.server.report.renderer.image.ItextGraphic;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

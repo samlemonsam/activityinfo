@@ -22,12 +22,9 @@ package org.activityinfo.server.report.renderer.itext;
  * #L%
  */
 
-import com.google.code.appengine.awt.Dimension;
-import com.google.code.appengine.awt.Graphics2D;
-import com.google.code.appengine.awt.image.BufferedImage;
-import com.google.code.appengine.imageio.ImageIO;
 import com.google.inject.Inject;
 import com.lowagie.text.*;
+import com.lowagie.text.Image;
 import com.lowagie.text.rtf.RtfWriter2;
 import org.activityinfo.server.geo.AdminGeometryProvider;
 import org.activityinfo.server.report.generator.MapIconPath;
@@ -35,6 +32,9 @@ import org.activityinfo.server.report.renderer.image.ImageCreator;
 import org.activityinfo.server.report.renderer.image.ItextGraphic;
 import org.freehep.graphicsio.emf.EMFGraphics2D;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

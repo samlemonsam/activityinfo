@@ -22,9 +22,9 @@ package org.activityinfo.server.report.renderer.itext;
  * #L%
  */
 
-import com.google.code.appengine.awt.Graphics2D;
 import com.google.inject.Inject;
 import com.lowagie.text.*;
+import com.lowagie.text.Image;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
@@ -33,6 +33,7 @@ import org.activityinfo.server.report.generator.MapIconPath;
 import org.activityinfo.server.report.renderer.image.ImageCreator;
 import org.activityinfo.server.report.renderer.image.ItextGraphic;
 
+import java.awt.*;
 import java.io.OutputStream;
 import java.net.URL;
 

@@ -22,10 +22,9 @@ package org.activityinfo.server.report.renderer.image;
  * #L%
  */
 
-import com.google.code.appengine.awt.Graphics2D;
-import com.google.code.appengine.awt.image.BufferedImage;
-import com.google.code.appengine.imageio.ImageIO;
-
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 

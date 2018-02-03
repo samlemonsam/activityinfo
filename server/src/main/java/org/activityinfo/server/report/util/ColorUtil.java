@@ -22,7 +22,7 @@ package org.activityinfo.server.report.util;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
+import java.awt.*;
 
 public final class ColorUtil {
 

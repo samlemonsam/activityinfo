@@ -1,13 +1,12 @@
 package org.activityinfo.server.report.renderer.image;
 
-import com.google.code.appengine.awt.Color;
-import com.google.code.appengine.awt.Graphics2D;
-import com.google.code.appengine.awt.image.BufferedImage;
-import com.google.code.appengine.imageio.ImageIO;
 import org.activityinfo.legacy.shared.reports.content.PieMapMarker;
 import org.activityinfo.legacy.shared.reports.content.PieMapMarker.SliceValue;
 import org.junit.Test;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

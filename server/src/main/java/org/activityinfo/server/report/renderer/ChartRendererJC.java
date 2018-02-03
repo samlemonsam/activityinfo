@@ -22,10 +22,6 @@ package org.activityinfo.server.report.renderer;
  * #L%
  */
 
-import com.google.code.appengine.awt.*;
-import com.google.code.appengine.awt.geom.Rectangle2D;
-import com.google.code.appengine.awt.image.BufferedImage;
-import com.google.code.appengine.imageio.ImageIO;
 import org.activityinfo.legacy.shared.exception.ReportModelException;
 import org.activityinfo.legacy.shared.reports.Theme;
 import org.activityinfo.legacy.shared.reports.content.PivotChartContent;
@@ -51,6 +47,10 @@ import org.krysalis.jcharts.properties.util.ChartStroke;
 import org.krysalis.jcharts.types.ChartType;
 import org.krysalis.jcharts.types.PieLabelType;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;

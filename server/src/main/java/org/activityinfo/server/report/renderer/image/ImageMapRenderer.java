@@ -22,20 +22,12 @@ package org.activityinfo.server.report.renderer.image;
  * #L%
  */
 
-import com.google.code.appengine.awt.*;
-import com.google.code.appengine.awt.color.ColorSpace;
-import com.google.code.appengine.awt.font.LineMetrics;
-import com.google.code.appengine.awt.geom.Ellipse2D;
-import com.google.code.appengine.awt.geom.GeneralPath;
-import com.google.code.appengine.awt.geom.Rectangle2D;
-import com.google.code.appengine.awt.image.BufferedImage;
-import com.google.code.appengine.imageio.ImageIO;
 import com.google.inject.Inject;
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.BaseMap;
 import org.activityinfo.legacy.shared.model.TileBaseMap;
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.server.geo.AdminGeo;
 import org.activityinfo.server.geo.AdminGeometryProvider;
 import org.activityinfo.server.report.generator.MapIconPath;
@@ -44,6 +36,14 @@ import org.activityinfo.server.report.generator.map.TiledMap;
 import org.activityinfo.server.report.util.ColorUtil;
 import org.activityinfo.server.util.monitoring.Timed;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.color.ColorSpace;
+import java.awt.font.LineMetrics;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

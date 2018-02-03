@@ -22,9 +22,10 @@ package org.activityinfo.server.report.renderer.image;
  * #L%
  */
 
-import com.google.code.appengine.awt.Graphics2D;
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Image;
+
+import java.awt.*;
 
 public interface ItextGraphic {
 

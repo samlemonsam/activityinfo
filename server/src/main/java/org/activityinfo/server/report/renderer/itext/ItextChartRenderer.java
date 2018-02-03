@@ -22,13 +22,15 @@ package org.activityinfo.server.report.renderer.itext;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
 import com.lowagie.text.*;
+import com.lowagie.text.Font;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.reports.model.PivotChartReportElement;
 import org.activityinfo.server.report.renderer.ChartRendererJC;
 import org.activityinfo.server.report.renderer.image.ImageCreator;
 import org.activityinfo.server.report.renderer.image.ItextGraphic;
+
+import java.awt.*;
 
 public class ItextChartRenderer implements ItextRenderer<PivotChartReportElement> {
 

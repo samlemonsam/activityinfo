@@ -22,10 +22,10 @@ package org.activityinfo.server.report.renderer.itext;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
-import com.google.code.appengine.awt.Graphics2D;
 import com.google.inject.Inject;
 import com.lowagie.text.*;
+import com.lowagie.text.Image;
+import com.lowagie.text.List;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.*;
@@ -38,6 +38,7 @@ import org.activityinfo.server.report.generator.MapIconPath;
 import org.activityinfo.server.report.renderer.image.*;
 import org.activityinfo.server.report.util.ColorUtil;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 

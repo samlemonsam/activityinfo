@@ -22,7 +22,7 @@ package org.activityinfo.server.report.generator.map;
  * #L%
  */
 
-import com.google.code.appengine.awt.Image;
+import java.awt.*;
 
 public interface TileDrawer {
 

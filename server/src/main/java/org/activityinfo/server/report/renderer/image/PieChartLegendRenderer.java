@@ -22,10 +22,11 @@ package org.activityinfo.server.report.renderer.image;
  * #L%
  */
 
-import com.google.code.appengine.awt.Graphics2D;
 import org.activityinfo.legacy.shared.reports.content.PieChartLegend;
 import org.activityinfo.legacy.shared.reports.content.PieMapMarker;
 import org.activityinfo.legacy.shared.reports.model.layers.PiechartMapLayer;
+
+import java.awt.*;
 
 public class PieChartLegendRenderer {
 

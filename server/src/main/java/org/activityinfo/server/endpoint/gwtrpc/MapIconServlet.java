@@ -22,10 +22,6 @@ package org.activityinfo.server.endpoint.gwtrpc;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
-import com.google.code.appengine.awt.Graphics2D;
-import com.google.code.appengine.awt.image.BufferedImage;
-import com.google.code.appengine.imageio.ImageIO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.reports.content.PieMapMarker;
@@ -33,10 +29,13 @@ import org.activityinfo.legacy.shared.reports.content.PieMapMarker.SliceValue;
 import org.activityinfo.server.report.renderer.image.ImageMapRenderer;
 import org.activityinfo.server.report.util.ColorUtil;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**

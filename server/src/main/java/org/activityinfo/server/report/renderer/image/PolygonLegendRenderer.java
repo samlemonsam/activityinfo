@@ -22,14 +22,12 @@ package org.activityinfo.server.report.renderer.image;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
-import com.google.code.appengine.awt.Font;
-import com.google.code.appengine.awt.Graphics2D;
 import org.activityinfo.legacy.shared.reports.content.PolygonLegend;
 import org.activityinfo.legacy.shared.reports.content.PolygonLegend.ColorClass;
 import org.activityinfo.legacy.shared.reports.model.layers.PolygonMapLayer;
 import org.activityinfo.server.report.util.ColorUtil;
 
+import java.awt.*;
 import java.text.DecimalFormat;
 
 public class PolygonLegendRenderer {

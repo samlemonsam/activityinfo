@@ -22,11 +22,12 @@ package org.activityinfo.server.report.renderer.itext;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Cell;
 import com.lowagie.text.Font;
 import com.lowagie.text.Paragraph;
+
+import java.awt.*;
 
 /**
  * Centralizes all style-specific code. At the present, there is a single theme

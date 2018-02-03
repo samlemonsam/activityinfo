@@ -22,15 +22,13 @@ package org.activityinfo.server.report.renderer.image;
  * #L%
  */
 
-import com.google.code.appengine.awt.Color;
-import com.google.code.appengine.awt.Font;
-import com.google.code.appengine.awt.Graphics2D;
-import com.google.code.appengine.awt.font.LineMetrics;
-import com.google.code.appengine.awt.geom.Rectangle2D;
 import org.activityinfo.legacy.shared.reports.content.BubbleLayerLegend;
 import org.activityinfo.legacy.shared.reports.model.layers.BubbleMapLayer;
 import org.activityinfo.server.report.util.ColorUtil;
 
+import java.awt.*;
+import java.awt.font.LineMetrics;
+import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 
 public class BubbleLegendRenderer {
