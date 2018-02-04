@@ -41,7 +41,7 @@ public class HrdFormStorage implements VersionedFormStorage {
 
     @Override
     public FormPermissions getPermissions(int userId) {
-        return FormPermissions.readWrite();
+        return FormPermissions.owner();
     }
 
     @Override
