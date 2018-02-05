@@ -36,6 +36,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
+import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.component.filter.FilterPanel;
@@ -48,9 +49,7 @@ import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ActivityFilterPanel extends ContentPanel implements FilterPanel {
 
@@ -152,26 +151,22 @@ public class ActivityFilterPanel extends ContentPanel implements FilterPanel {
                                       .withIcon(IconImageBundle.ICONS.database())
                                       .build();
 
-                    Map<String, Link> categories = new HashMap<String, Link>();
+
+                    for (FolderDTO folder : db.getFolders()) {
+                        Link folderLink = Link.folderLabelled(folder.getName())
+                                .usingKey(folderKey(folder))
+                                .build();
+
+                        dbLink.add(folderLink);
+
+                        for (ActivityDTO activity : folder.getActivities()) {
+                            folderLink.add(activityLink(activity));
+                        }
+                    }
+
                     for (ActivityDTO activity : db.getActivities()) {
-
-                        Link actLink = Link.to(new DataEntryPlace(activity))
-                                           .labeled(activity.getName())
-                                           .withIcon(IconImageBundle.ICONS.table())
-                                           .build();
-
-                        if (activity.getCategory() != null) {
-                            Link category = categories.get(activity.getCategory());
-                            if (category == null) {
-                                category = Link.folderLabelled(activity.getCategory())
-                                               .usingKey(categoryKey(activity, categories))
-                                               .build();
-                                categories.put(activity.getCategory(), category);
-                                dbLink.add(category);
-                            }
-                            category.add(actLink);
-                        } else {
-                            dbLink.add(actLink);
+                        if(activity.getFolder() == null) {
+                            dbLink.add(activityLink(activity));
                         }
                     }
                     list.add(dbLink);
@@ -180,8 +175,15 @@ public class ActivityFilterPanel extends ContentPanel implements FilterPanel {
             return list;
         }
 
-        private String categoryKey(ActivityDTO activity, Map<String, Link> categories) {
-            return "category" + activity.getDatabaseId() + activity.getCategory() + categories.size();
+        private Link activityLink(ActivityDTO activity) {
+            return Link.to(new DataEntryPlace(activity))
+                                            .labeled(activity.getName())
+                                            .withIcon(IconImageBundle.ICONS.table())
+                                            .build();
+        }
+
+        private String folderKey(FolderDTO folder) {
+            return "folder" + folder.getId();
         }
 
         private String databaseKey(UserDatabaseDTO db) {
