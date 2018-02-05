@@ -3,7 +3,6 @@ package org.activityinfo.store.query.shared;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Geometry;
-import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
@@ -79,16 +78,6 @@ class FormStorageProviderStub implements FormStorageProvider {
 
         @Override
         public List<FormRecord> getSubRecords(ResourceId resourceId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<RecordVersion> getVersions(ResourceId recordId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
             throw new UnsupportedOperationException();
         }
 

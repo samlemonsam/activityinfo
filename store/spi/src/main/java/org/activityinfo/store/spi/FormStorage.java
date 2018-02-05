@@ -29,13 +29,6 @@ public interface FormStorage {
     List<FormRecord> getSubRecords(ResourceId resourceId);
 
 
-    /**
-     * Retrieves a list of versions of this record.
-     */
-    List<RecordVersion> getVersions(ResourceId recordId);
-    
-    List<RecordVersion> getVersionsForParent(ResourceId parentRecordId);
-
 
     /**
      * @return this collection's schema

@@ -88,9 +88,9 @@ public class HrdCatalogTest {
         HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(formClass);
 
-        Optional<FormStorage> collection = catalog.getForm(collectionId);
+        Optional<FormStorage> storage = catalog.getForm(collectionId);
         
-        assertTrue(collection.isPresent());
+        assertTrue(storage.isPresent());
 
         TypedRecordUpdate village1 = new TypedRecordUpdate();
         village1.setUserId(userId);
@@ -104,8 +104,8 @@ public class HrdCatalogTest {
         village2.set(villageField, TextValue.valueOf("Beni"));
         village2.set(countField, new Quantity(230));
 
-        collection.get().add(village1);
-        collection.get().add(village2);
+        storage.get().add(village1);
+        storage.get().add(village2);
 
         QueryModel queryModel = new QueryModel(collectionId);
         queryModel.selectResourceId().as("id");
@@ -120,7 +120,7 @@ public class HrdCatalogTest {
 
         assertThat(columnSet.getNumRows(), equalTo(2));
 
-        List<RecordVersion> versions1 = collection.get().getVersions(village1.getRecordId());
+        List<RecordVersion> versions1 = ((VersionedFormStorage) storage.get()).getVersions(village1.getRecordId());
         
         assertThat(versions1, hasSize(1));
 

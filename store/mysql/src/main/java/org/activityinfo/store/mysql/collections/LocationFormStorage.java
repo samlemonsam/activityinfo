@@ -27,7 +27,10 @@ import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.SqlInsert;
 import org.activityinfo.store.mysql.update.SqlUpdate;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.FormNotFoundException;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.TypedRecordUpdate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -158,15 +161,6 @@ public class LocationFormStorage implements FormStorage {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public List<RecordVersion> getVersions(ResourceId recordId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public FormClass getFormClass() {

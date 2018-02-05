@@ -23,10 +23,7 @@ import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
-import org.activityinfo.store.spi.FormNotFoundException;
-import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.RecordHistoryProvider;
-import org.activityinfo.store.spi.RecordVersion;
+import org.activityinfo.store.spi.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -71,11 +68,22 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
             throw new FormNotFoundException(recordRef.getFormId());
         }
 
-        FormClass formClass = form.get().getFormClass();
+        FormStorage formStorage = form.get();
+        if(formStorage instanceof VersionedFormStorage) {
+            return getRecordHistory2((VersionedFormStorage) formStorage, recordRef);
+        } else {
+            return RecordHistory.unavailable();
+        }
+    }
+
+    private RecordHistory getRecordHistory2(VersionedFormStorage storage, RecordRef recordRef) throws SQLException {
+
+
+        FormClass formClass = storage.getFormClass();
         Map<ResourceId, String> monthlyFieldLabels = getMonthlyFieldLabels(formClass);
 
         List<RecordDelta> deltas = computeDeltas(formClass, null,
-                form.get().getVersions(recordRef.getRecordId()), monthlyFieldLabels);
+                storage.getVersions(recordRef.getRecordId()), monthlyFieldLabels);
 
         // Now add deltas from sub forms...
         for (FormField field : formClass.getFields()) {
@@ -156,11 +164,14 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
     private Collection<RecordDelta> computeSubFormDeltas(ResourceId parentRecordId, FormField subFormField, Map<ResourceId,String> monthlyFieldLabels) {
         SubFormReferenceType subFormType = (SubFormReferenceType) subFormField.getType();
         Optional<FormStorage> subForm = catalog.getForm(subFormType.getClassId());
-        FormClass subFormClass = subForm.get().getFormClass();
-
-        List<RecordVersion> versions = subForm.get().getVersionsForParent(parentRecordId);
-
-        return computeDeltas(subFormClass, subFormField, versions, monthlyFieldLabels);
+        if(subForm.isPresent() && subForm.get() instanceof VersionedFormStorage) {
+            VersionedFormStorage subFormStorage = (VersionedFormStorage) subForm.get();
+            FormClass subFormClass = subFormStorage.getFormClass();
+            List<RecordVersion> versions = subFormStorage.getVersionsForParent(parentRecordId);
+            return computeDeltas(subFormClass, subFormField, versions, monthlyFieldLabels);
+        } else {
+            return Collections.emptySet();
+        }
     }
 
 

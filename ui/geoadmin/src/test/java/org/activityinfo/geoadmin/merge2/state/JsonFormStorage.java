@@ -21,7 +21,10 @@ import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.TypedRecordUpdate;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -85,16 +88,6 @@ public class JsonFormStorage implements FormStorage {
 
     @Override
     public List<FormRecord> getSubRecords(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<RecordVersion> getVersions(ResourceId recordId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 

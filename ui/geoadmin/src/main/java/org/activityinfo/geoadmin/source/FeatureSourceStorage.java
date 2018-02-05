@@ -9,7 +9,6 @@ import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.RecordVersion;
 import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -44,16 +43,6 @@ public class FeatureSourceStorage implements FormStorage {
 
     @Override
     public List<FormRecord> getSubRecords(ResourceId resourceId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<RecordVersion> getVersions(ResourceId recordId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException();
     }
 

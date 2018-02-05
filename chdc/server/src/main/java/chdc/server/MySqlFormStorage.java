@@ -11,7 +11,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.RecordVersion;
 import org.activityinfo.store.spi.TypedRecordUpdate;
 
 import java.sql.PreparedStatement;
@@ -58,16 +57,6 @@ public class MySqlFormStorage implements FormStorage {
 
     @Override
     public List<FormRecord> getSubRecords(ResourceId resourceId) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public List<RecordVersion> getVersions(ResourceId recordId) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
         throw new UnsupportedOperationException("TODO");
     }
 

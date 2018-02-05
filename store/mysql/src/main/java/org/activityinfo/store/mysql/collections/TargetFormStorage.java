@@ -10,7 +10,9 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.TypedRecordUpdate;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,15 +45,6 @@ public class TargetFormStorage implements FormStorage {
         return Collections.emptyList();
     }
 
-    @Override
-    public List<RecordVersion> getVersions(ResourceId recordId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<RecordVersion> getVersionsForParent(ResourceId parentRecordId) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public FormClass getFormClass() {

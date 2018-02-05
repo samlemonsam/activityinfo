@@ -5,12 +5,11 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.form.FieldValueChange;
 import org.activityinfo.model.form.RecordHistory;
 import org.activityinfo.model.form.RecordHistoryEntry;
-import org.activityinfo.model.form.FieldValueChange;
 
 import java.util.Date;
-import java.util.List;
 
 public class HistoryRenderer {
 
@@ -90,10 +89,6 @@ public class HistoryRenderer {
 
     public SafeHtml renderNoHistory() {
         return SafeHtmlUtils.fromTrustedString(I18N.MESSAGES.siteHistoryNotAvailable());
-    }
-
-    public SafeHtml renderNoSelection() {
-        return SafeHtmlUtils.fromTrustedString("No selection.");
     }
 
 }
