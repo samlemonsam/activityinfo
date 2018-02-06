@@ -17,6 +17,11 @@ public class Folder implements SchemaElement, Serializable, ReallyDeleteable  {
     public Folder() {
     }
 
+    public Folder(Folder folder) {
+        this.name = folder.name;
+        this.sortOrder = folder.sortOrder;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "FolderId", unique = true, nullable = false)

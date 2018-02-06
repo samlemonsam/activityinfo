@@ -79,6 +79,9 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     private final Map<Integer, Activity> activityMapping = Maps.newHashMap();
     private final Map<ResourceId, ResourceId> typeIdMapping = Maps.newHashMap();
 
+    // Maps old folder id -> new folder object
+    private final Map<Integer, Folder> folderMapping = Maps.newHashMap();
+
     private CloneDatabase command;
     private UserDatabase targetDb;
     private UserDatabase sourceDb;
@@ -529,6 +532,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         // target db
         newActivity.setDatabase(targetDb);
 
+        copyFolder(sourceActivity, newActivity);
         setLocationTypeForNewActivity(sourceActivity, newActivity);
 
         em.persist(newActivity); // persist to get id of new activity
@@ -538,6 +542,27 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             CuidAdapter.activityFormClass(newActivity.getId()));
 
         return newActivity;
+    }
+
+    private void copyFolder(Activity sourceActivity, Activity newActivity) {
+        Folder sourceFolder = sourceActivity.getFolder();
+        Folder destinationFolder;
+
+        if (sourceFolder == null) {
+            return;
+        }
+
+        if (folderMapping.containsKey(sourceFolder.getId())) {
+            destinationFolder = folderMapping.get(sourceFolder.getId());
+        } else {
+            destinationFolder = new Folder(sourceFolder);
+            destinationFolder.setDatabase(targetDb);
+            em.persist(destinationFolder);
+
+            folderMapping.put(sourceFolder.getId(),destinationFolder);
+        }
+
+        newActivity.setFolder(destinationFolder);
     }
 
     private void setLocationTypeForNewActivity(Activity sourceActivity, Activity newActivity) {
