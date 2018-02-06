@@ -77,6 +77,7 @@ public class UserPermission implements Serializable {
         this.allowManageUsers = sourcePermission.allowManageUsers;
         this.allowManageAllUsers = sourcePermission.allowManageAllUsers;
         this.version = sourcePermission.version;
+        this.model = sourcePermission.model;
     }
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)

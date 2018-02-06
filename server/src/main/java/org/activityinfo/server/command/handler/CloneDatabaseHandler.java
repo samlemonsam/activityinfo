@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -37,6 +38,8 @@ import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.permission.GrantModel;
+import org.activityinfo.model.permission.UserPermissionModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -118,6 +121,11 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         // 3. copy forms and form data
         copyForms();
+
+        // 4. Map old folder ids to new folder ids on permission model
+        if (this.command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
+            mapFolderPermissions();
+        }
         
         return new CreateResult(targetDb.getId());
     }
@@ -141,7 +149,35 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             newPermission.setPartner(sourcePermission.getPartner());
 
             em.persist(newPermission);
+            targetDb.getUserPermissions().add(newPermission);
+        }
+    }
 
+    private void mapFolderPermissions() {
+
+        for (UserPermission permission : targetDb.getUserPermissions()) {
+            if (Strings.isNullOrEmpty(permission.getModel())) {
+                continue;
+            }
+
+            UserPermissionModel sourceModel = UserPermissionModel.fromJson(Json.parse(permission.getModel()));
+            List<GrantModel> destinationGrants = new ArrayList<>();
+
+            for (GrantModel sourceGrant : sourceModel.getGrants()) {
+                int folderId = CuidAdapter.getLegacyIdFromCuid(sourceGrant.getFolderId());
+                if (!folderMapping.containsKey(folderId)) {
+                    // folder not copied - do not add grant to new permission model
+                    continue;
+                }
+                Folder destinationFolder = folderMapping.get(folderId);
+                destinationGrants.add(new GrantModel(CuidAdapter.folderId(destinationFolder.getId())));
+            }
+
+            UserPermissionModel destinationModel = new UserPermissionModel(
+                    permission.getUser().getId(),
+                    targetDb.getId(),
+                    destinationGrants);
+            permission.setModel(destinationModel.toJson().toJson());
         }
     }
 
