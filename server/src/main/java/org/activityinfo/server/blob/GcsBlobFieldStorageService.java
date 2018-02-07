@@ -60,21 +60,14 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
 
-        try {
-            if (Strings.isNullOrEmpty(bucketName)) {
-                LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property "
-                        + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
-                return;
-            }
-            this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
-                    new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
-            LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
-        } catch (Exception e) {
-            // ignore: fails in local tests, bug in LocalServiceTestHelper?
-
-            // also we want to prevent situation when exception in storage leads to server start failure
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+        if (Strings.isNullOrEmpty(bucketName)) {
+            LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property "
+                    + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
+            return;
         }
+        this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
+                new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
+        LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
     }
 
     @GET
