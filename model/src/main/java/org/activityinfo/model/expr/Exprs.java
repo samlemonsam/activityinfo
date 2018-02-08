@@ -1,16 +1,12 @@
 package org.activityinfo.model.expr;
 
-import org.activityinfo.model.expr.functions.AndFunction;
-import org.activityinfo.model.expr.functions.EqualFunction;
-import org.activityinfo.model.expr.functions.ExprFunction;
-import org.activityinfo.model.expr.functions.OrFunction;
+import com.google.common.collect.Lists;
+import org.activityinfo.model.expr.functions.*;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.number.Quantity;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Functions for programatically building expressions
@@ -117,5 +113,15 @@ public class Exprs {
                    callNode.getFunction() == operator;
         }
         return false;
+    }
+
+    public static ExprNode coalesce(Collection<ExprNode> nodes) {
+        if(nodes.isEmpty()) {
+            return new ConstantExpr((Quantity)null);
+        } else if (nodes.size() == 1) {
+            return nodes.iterator().next();
+        } else {
+            return new FunctionCallNode(CoalesceFunction.INSTANCE, Lists.newArrayList(nodes));
+        }
     }
 }

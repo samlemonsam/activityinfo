@@ -56,6 +56,7 @@ public class ColumnModelBuilder {
 
                 @Override
                 public Void visitErrorColumn(EffectiveTableColumn columnModel, ErrorFormat errorFormat) {
+                    addErrorColumn(tableColumn, errorFormat);
                     return null;
                 }
 
@@ -91,6 +92,7 @@ public class ColumnModelBuilder {
 
         }
     }
+
 
 
     private void addTextColumn(EffectiveTableColumn tableColumn, TextFormat textFormat) {
@@ -192,6 +194,32 @@ public class ColumnModelBuilder {
         headerGroupConfigs.add(groupConfig);
     }
 
+    private void addErrorColumn(EffectiveTableColumn tableColumn, ErrorFormat errorFormat) {
+        ValueProvider<Integer, String> valueProvider = new ValueProvider<Integer, String>() {
+            @Override
+            public String getValue(Integer object) {
+                return null;
+            }
+
+            @Override
+            public void setValue(Integer object, String value) {
+            }
+
+            @Override
+            public String getPath() {
+                return tableColumn.getId();
+            }
+        };
+
+        ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
+        config.setHeader(tableColumn.getLabel());
+        config.setCell(new ErrorCell());
+        config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
+        columnConfigs.add(config);
+
+        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
+        filters.add(new ColumnView(tableColumn.getFormula(), filter));
+    }
 
 
     public ColumnModel<Integer> buildColumnModel() {

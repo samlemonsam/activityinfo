@@ -175,10 +175,15 @@ public class LookupKey {
     }
 
     public Map<LookupKey, ExprNode> getKeyFormulas() {
+        return getKeyFormulas(null);
+    }
+
+    public Map<LookupKey, ExprNode> getKeyFormulas(ExprNode baseField) {
         Map<LookupKey, ExprNode> keys = new HashMap<>();
-        collectKeys(null, keys);
+        collectKeys(baseField, keys);
         return keys;
     }
+
 
     public ExprNode getParentKey() {
         return join(parentFieldId, parentLevel.getKeyField());

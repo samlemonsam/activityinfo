@@ -5,6 +5,9 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import org.activityinfo.model.expr.CompoundExpr;
+import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -257,5 +260,27 @@ public class LookupKeySet {
             set.addAll(parents);
             collectAncestors(parents, set);
         }
+    }
+
+    public Map<LookupKey, ExprNode> getKeyFormulas(ExprNode baseField) {
+
+        if(leafKeyMap.size() == 1) {
+            return Iterables.getOnlyElement(getLeafKeys()).getKeyFormulas(baseField);
+
+        } else {
+            // For the case where a field can refer to one of several different forms,
+            // query the keys using the syntax [formId].[keyFieldId]
+
+            Map<LookupKey, ExprNode> keyMap = new HashMap<>();
+            for (LookupKey lookupKey : lookupKeys) {
+                keyMap.put(lookupKey, new CompoundExpr(new SymbolExpr(lookupKey.getFormId()), lookupKey.getKeyField()));
+            }
+
+            return keyMap;
+        }
+    }
+
+    public Map<LookupKey, ExprNode> getKeyFormulas(ResourceId fieldId) {
+        return getKeyFormulas(new SymbolExpr(fieldId));
     }
 }

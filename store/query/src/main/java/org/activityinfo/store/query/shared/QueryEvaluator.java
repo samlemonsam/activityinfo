@@ -6,13 +6,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ExprException;
+import org.activityinfo.model.expr.functions.CoalesceFunction;
 import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.query.SortModel.Range;
 import org.activityinfo.promise.BiFunction;
-import org.activityinfo.store.query.shared.columns.ColumnCombiner;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
 import org.activityinfo.store.query.shared.columns.RelevanceViewMask;
 
@@ -304,7 +304,7 @@ public class QueryEvaluator {
 
         }
 
-        private Slot<ColumnView> createFunctionCall(final FunctionCallNode call) {
+        private FunctionCallSlot createFunctionCall(final FunctionCallNode call) {
 
             resolver.enterFunction(call.getFunction());
 
@@ -315,25 +315,8 @@ public class QueryEvaluator {
                     argumentSlots.add(argument.accept(this));
                 }
 
-                return new Slot<ColumnView>() {
-                    @Override
-                    public ColumnView get() {
-                        List<ColumnView> arguments = Lists.newArrayList();
-                        for (Slot<ColumnView> argument : argumentSlots) {
-                            ColumnView view = argument.get();
-                            if(view == null) {
-                                throw new IllegalStateException();
-                            }
-                            arguments.add(view);
-                        }
-                        try {
-                            return ((ColumnFunction) call.getFunction()).columnApply(arguments.get(0).numRows(), arguments);
-                        } catch (ExprException e) {
-                            int numRows = arguments.get(0).numRows();
-                            return new EmptyColumnView(ColumnType.STRING, numRows);
-                        }
-                    }
-                };
+                return new FunctionCallSlot((ColumnFunction)call.getFunction(), argumentSlots);
+
             } finally {
                 resolver.exitFunction(call.getFunction());
             }
@@ -364,7 +347,7 @@ public class QueryEvaluator {
             } else if(expandedNodes.size() == 1) {
                 return expandedNodes.get(0);
             } else {
-                return new ColumnCombiner(expandedNodes);
+                return new FunctionCallSlot(CoalesceFunction.INSTANCE, expandedNodes);
             }
         }
 
@@ -405,5 +388,7 @@ public class QueryEvaluator {
                 return null;
             }
         }
+
     }
+
 }

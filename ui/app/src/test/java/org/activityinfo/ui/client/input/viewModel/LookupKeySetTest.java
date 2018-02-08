@@ -2,6 +2,7 @@ package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
@@ -10,11 +11,15 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Maybe;
@@ -23,7 +28,11 @@ import org.activityinfo.ui.client.store.TestSetup;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -112,7 +121,7 @@ public class LookupKeySetTest {
      *
      */
     @Test
-    public void variableHierarchyTest() {
+    public void overlappingHierarchies() {
 
         TestingStorageProvider catalog = setup.getCatalog();
         LocaliteForm localiteForm = catalog.getLocaliteForm();
@@ -140,6 +149,69 @@ public class LookupKeySetTest {
         for (LookupKey lookupKey : lookupKeySet.getLeafKeys()) {
             System.out.println(lookupKey.getKeyLabel() + " => " + lookupKey.getKeyFormulas());
         }
+    }
+
+
+    @Test
+    public void overlappingHierarchiesParse() {
+
+        TestingStorageProvider catalog = setup.getCatalog();
+        LocaliteForm localiteForm = catalog.getLocaliteForm();
+        FormTree formTree = setup.getFormTree(localiteForm.getFormId());
+
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminFieldType());
+
+        Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
+
+        ParsedFormula province = new ParsedFormula(formTree, formulas.get(lookupKeySet.getKey(0)).asExpression());
+        assertThat(province.isValid(), equalTo(true));
+        assertThat(province.getResultType(), instanceOf(TextType.class));
+    }
+
+    @Test
+    public void overlappingHierarchiesKeyQuery() {
+
+        TestingStorageProvider catalog = setup.getCatalog();
+        LocaliteForm localiteForm = catalog.getLocaliteForm();
+        FormTree formTree = setup.getFormTree(localiteForm.getFormId());
+
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminFieldType());
+
+        Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
+
+        QueryModel queryModel = new QueryModel(localiteForm.getFormId());
+        queryModel.selectResourceId().as("id");
+        queryModel.selectExpr(formulas.get(lookupKeySet.getKey(0))).as("province");
+        queryModel.selectExpr(formulas.get(lookupKeySet.getKey(1))).as("territory");
+        queryModel.selectExpr(formulas.get(lookupKeySet.getKey(2))).as("zs");
+
+        Connection<ColumnSet> table = setup.connect(setup.getFormStore().query(queryModel));
+
+        ColumnSet columnSet = table.assertLoaded();
+
+        ColumnView id = columnSet.getColumnView("id");
+        ColumnView province = columnSet.getColumnView("province");
+        ColumnView territory = columnSet.getColumnView("territory");
+        ColumnView zs = columnSet.getColumnView("zs");
+
+        // First row references a Zone de Sante
+        assertThat(id.getString(0),         equalTo("c0"));
+        assertThat(province.getString(0),   equalTo("Province 14"));
+        assertThat(territory.getString(0),  nullValue());
+        assertThat(zs.getString(0),         equalTo("Zone de Sante 56"));
+
+        // Second row references only a Province
+        assertThat(id.getString(1),         equalTo("c1"));
+        assertThat(province.getString(1),   equalTo("Province 8"));
+        assertThat(territory.getString(1),  nullValue());
+        assertThat(zs.getString(1),         nullValue());
+
+        // Fifth row references a territory
+        assertThat(id.getString(4),         equalTo("c4"));
+        assertThat(province.getString(4),   equalTo("Province 15"));
+        assertThat(territory.getString(4),  equalTo("Territory 42"));
+        assertThat(zs.getString(4),         nullValue());
+
 
     }
 

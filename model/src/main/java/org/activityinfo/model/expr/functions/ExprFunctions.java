@@ -68,6 +68,8 @@ public final class ExprFunctions {
             register(IsNumberFunction.INSTANCE);
 
             register(AddDateFunction.INSTANCE);
+
+            register(CoalesceFunction.INSTANCE);
         }
         
         public ExprFunction get(String name) {

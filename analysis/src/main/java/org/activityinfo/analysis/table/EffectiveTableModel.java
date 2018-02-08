@@ -5,9 +5,12 @@ import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.LookupKey;
+import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -129,7 +132,11 @@ public class EffectiveTableModel {
     }
 
     private ImmutableTableColumn defaultColumnModel(FormTree.Node node) {
-        String formulaString = node.getPath().toExpr().asExpression();
+        return defaultColumnModel(node.getPath().toExpr());
+    }
+
+    private ImmutableTableColumn defaultColumnModel(ExprNode exprNode) {
+        String formulaString = exprNode.asExpression();
 
         // We need stable ids for our default columns, otherwise
         // the views will get confused and refresh unnecessarily
@@ -143,20 +150,18 @@ public class EffectiveTableModel {
 
     private void addKeyColumns(List<EffectiveTableColumn> columns, FormTree.Node node) {
 
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, node.getField());
+        Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(node.getFieldId());
 
-        // First add reference key fields
-        for (FormTree.Node childNode : node.getChildren()) {
-            if(childNode.getField().isKey() && childNode.isReference()) {
-                addKeyColumns(columns, childNode);
-            }
-        }
+        for (LookupKey lookupKey : lookupKeySet.getLookupKeys()) {
 
-        // Now any non-reference key fields
-        for (FormTree.Node childNode : node.getChildren()) {
-            if ((childNode.getField().isKey() || childNode.getField().getType() instanceof SerialNumberType)
-                    && !childNode.isReference()) {
-                columns.add(new EffectiveTableColumn(formTree, defaultColumnModel(childNode)));
-            }
+            ImmutableTableColumn tableColumn = ImmutableTableColumn.builder()
+                .id(node.getFieldId().asString() + "_k" + lookupKey.getKeyIndex())
+                .formula(formulas.get(lookupKey).toString())
+                .label(lookupKey.getKeyLabel())
+                .build();
+
+            columns.add(new EffectiveTableColumn(formTree, tableColumn));
         }
     }
 

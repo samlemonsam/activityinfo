@@ -1,44 +1,61 @@
-package org.activityinfo.store.query.shared.columns;
+package org.activityinfo.model.expr.functions;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import org.activityinfo.model.query.*;
-import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NullFieldValue;
+import org.activityinfo.model.type.number.QuantityType;
 
 import java.util.List;
 
 /**
- * Supplies a Column that is combined from several source columns.
- *
+ * Takes the first non-null value of its arguments
  */
-public class ColumnCombiner implements Slot<ColumnView> {
+public class CoalesceFunction extends ExprFunction implements ColumnFunction {
 
-    private List<Slot<ColumnView>> sources;
+    public static final CoalesceFunction INSTANCE = new CoalesceFunction();
 
-    private ColumnView result;
-
-    public ColumnCombiner(List<Slot<ColumnView>> sources) {
-        Preconditions.checkArgument(sources.size() > 1, "source.size() > 1");
-        this.sources = sources;
+    private CoalesceFunction() {
     }
 
     @Override
-    public ColumnView get() {
-        if(result == null) {
-            result = combine();
-        }
-        return result;
+    public String getId() {
+        return "coalesce";
     }
 
-    private ColumnView combine() {
-        ColumnView[] cols = new ColumnView[sources.size()];
-        for(int j=0;j<cols.length;++j) {
-            cols[j] = sources.get(j).get();
+    @Override
+    public String getLabel() {
+        return "coalesce";
+    }
+
+    @Override
+    public FieldValue apply(List<FieldValue> arguments) {
+        for (FieldValue argument : arguments) {
+            if(argument != null && argument != NullFieldValue.INSTANCE) {
+                return argument;
+            }
         }
-        ColumnType columnType = sources.get(0).get().getType();
+        return NullFieldValue.INSTANCE;
+    }
+
+    @Override
+    public FieldType resolveResultType(List<FieldType> argumentTypes) {
+        if(argumentTypes.isEmpty()) {
+            return new QuantityType();
+        }
+        return argumentTypes.get(0);
+    }
+
+    @Override
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
+        if(arguments.isEmpty()) {
+            return new EmptyColumnView(ColumnType.NUMBER, numRows);
+        }
+        ColumnView[] cols = arguments.toArray(new ColumnView[arguments.size()]);
+        ColumnType columnType = cols[0].getType();
 
         switch(columnType) {
-
             case STRING:
                 return combineString(cols);
             case NUMBER:

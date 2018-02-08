@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.shared.columns;
+package org.activityinfo.model.expr.functions;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
@@ -9,14 +9,14 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 
-public class ColumnCombinerTest {
+public class CoalesceFunctionTest {
 
     @Test
     public void combineDouble() {
         DoubleArrayColumnView x = new DoubleArrayColumnView(new double[] { 80, NaN, 82, NaN,  84});
         DoubleArrayColumnView y = new DoubleArrayColumnView(new double[] { 90, NaN, 92,  93, NaN });
 
-        ColumnView z = ColumnCombiner.combineDouble(new ColumnView[]{x, y});
+        ColumnView z = CoalesceFunction.combineDouble(new ColumnView[]{x, y});
         
         assertThat(z.getDouble(0), equalTo(80.0));
         assertThat(z.getDouble(1), equalTo(NaN));

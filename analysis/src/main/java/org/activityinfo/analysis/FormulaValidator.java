@@ -1,10 +1,8 @@
 package org.activityinfo.analysis;
 
-import com.google.common.collect.Iterables;
 import org.activityinfo.model.expr.*;
 import org.activityinfo.model.expr.diagnostic.ArgumentException;
 import org.activityinfo.model.expr.diagnostic.ExprException;
-import org.activityinfo.model.expr.functions.ExprFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldType;
@@ -100,14 +98,12 @@ public class FormulaValidator {
             errors.add(new FormulaError(exprNode, "Invalid field reference"));
             throw new ValidationFailed();
         }
-        if(matches.size() > 1) {
-            errors.add(new FormulaError(exprNode, "Ambiguous field reference"));
-            throw new ValidationFailed();
+
+        for (NodeMatch match : matches) {
+            references.add(new FieldReference(exprNode.getSourceRange(), match));
         }
 
-        NodeMatch match = Iterables.getOnlyElement(matches);
-
-        references.add(new FieldReference(exprNode.getSourceRange(), match));
+        NodeMatch match = matches.iterator().next();
 
         if(match.isEnumBoolean()) {
             return BooleanType.INSTANCE;
