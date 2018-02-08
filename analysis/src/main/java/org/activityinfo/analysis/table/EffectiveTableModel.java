@@ -101,7 +101,7 @@ public class EffectiveTableModel {
                 if (isSimple(node.getType())) {
                     columns.add(new EffectiveTableColumn(formTree, defaultColumnModel(node)));
 
-                } else if (node.getType() instanceof ReferenceType) {
+                } else if (node.getType() instanceof ReferenceType && !node.isParentReference()) {
                     addKeyColumns(columns, node);
                 }
             }
