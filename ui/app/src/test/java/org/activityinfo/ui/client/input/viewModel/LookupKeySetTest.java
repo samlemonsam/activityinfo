@@ -1,11 +1,16 @@
 package org.activityinfo.ui.client.input.viewModel;
 
+import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.formTree.*;
+import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.LookupKey;
+import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
@@ -15,16 +20,11 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.TestSetup;
-import org.activityinfo.store.testing.AdminLevelForm;
-import org.activityinfo.store.testing.NfiForm;
-import org.activityinfo.store.testing.TestingStorageProvider;
-import org.activityinfo.store.testing.VillageForm;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class LookupKeySetTest {
@@ -36,8 +36,26 @@ public class LookupKeySetTest {
         LocaleProxy.initialize();
     }
 
+    /**
+     * In the case of a simple hierarchy, we are referencing a single form that
+     * in turn has key reference fields.
+     *
+     * For example, if the field references a Village form, this should yield:
+     *
+     * <pre>
+     *     Province.Name
+     *        ^
+     *        |
+     *     District.Name
+     *        ^
+     *        |
+     *     Village.Name
+     * </pre>
+     *
+     * All fields are required because we ultimately need the reference to the village record.
+     */
     @Test
-    public void hierarchyTest() {
+    public void simpleHierarchyTest() {
         TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
         VillageForm villageForm = catalog.getVillageForm();
@@ -49,9 +67,11 @@ public class LookupKeySetTest {
 
         LookupKeySet lookupKeySet = new LookupKeySet(formTree, referenceType);
 
-        assertThat(lookupKeySet.getLookupKeys().get(0).getLevelLabel(), equalTo("Province Name"));
-        assertThat(lookupKeySet.getLookupKeys().get(1).getLevelLabel(), equalTo("Territory Name"));
-        assertThat(lookupKeySet.getLookupKeys().get(2).getLevelLabel(), equalTo("Name"));
+        // Keys need to be topologically sorted,
+        // with parent keys preceding child keys in the list
+        assertThat(lookupKeySet.getKey(0).getKeyLabel(), equalTo("Province Name"));
+        assertThat(lookupKeySet.getKey(1).getKeyLabel(), equalTo("Territory Name"));
+        assertThat(lookupKeySet.getKey(2).getKeyLabel(), equalTo("Village Name"));
 
         SymbolExpr villageName = Exprs.symbol(villageForm.getNameField().getId());
         SymbolExpr villageTerritory = new SymbolExpr(villageForm.getAdminFieldId());
@@ -59,10 +79,68 @@ public class LookupKeySetTest {
         ExprNode territoryProvince = new CompoundExpr(villageTerritory, territoryForm.getParentFieldId());
         ExprNode provinceName = new CompoundExpr(territoryProvince, provinceForm.getNameFieldId());
 
-        assertThat(lookupKeySet.getLeafKeys().get(0).getKeyFormulas().values(), containsInAnyOrder(
+        assertThat(lookupKeySet.getLeafKeys(), hasSize(1));
+
+        LookupKey leafKey = Iterables.getOnlyElement(lookupKeySet.getLeafKeys());
+
+        assertThat(leafKey.getKeyFormulas().values(), containsInAnyOrder(
             villageName,
             territoryName,
             provinceName));
+    }
+
+    /**
+     * For classical location types especially, a reference field's range might include multiple forms,
+     * such as [province, territory, health zone].
+     *
+     * This means that the user can <i>either</i> select a province, <i>or</i> a territory, <i>or</i>
+     * a health zone.
+     *
+     * In this case, you also have a hierarchy
+     * <pre>
+     *               Province.Name
+     *                 ^         ^
+     *                 |         |
+     *     Territory.Name     Health Zone.Name
+     *        ^
+     *        |
+     *     Sector.Name
+     * </pre>
+     *
+     * But the record reference depends on which fields are completed. If only province is completed,
+     * then the selected record is from province. Otherwise from territory, etc.
+     *
+     */
+    @Test
+    public void variableHierarchyTest() {
+
+        TestingStorageProvider catalog = setup.getCatalog();
+        LocaliteForm localiteForm = catalog.getLocaliteForm();
+        FormTree formTree = setup.getFormTree(localiteForm.getFormId());
+
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminFieldType());
+
+        // The resulting key set should only include 3 keys, not 6
+        // because the three different forms in the range overlap
+
+        assertThat(lookupKeySet.getLookupKeys(), hasSize(3));
+
+        assertThat(lookupKeySet.getKey(0).getKeyLabel(), equalTo("Province Name"));
+        assertThat(lookupKeySet.getKey(1).getKeyLabel(), equalTo("Territory Name"));
+        assertThat(lookupKeySet.getKey(2).getKeyLabel(), equalTo("Zone de Sante Name"));
+
+        // We need the relationships between the forms
+        ResourceId provinceId = catalog.getProvince().getFormId();
+        ResourceId territoryId = catalog.getTerritory().getFormId();
+
+        assertThat(lookupKeySet.getAncestorForms(provinceId), hasSize(0));
+        assertThat(lookupKeySet.getAncestorForms(territoryId), contains(provinceId));
+
+        // Formulas...
+        for (LookupKey lookupKey : lookupKeySet.getLeafKeys()) {
+            System.out.println(lookupKey.getKeyLabel() + " => " + lookupKey.getKeyFormulas());
+        }
+
     }
 
     @Test

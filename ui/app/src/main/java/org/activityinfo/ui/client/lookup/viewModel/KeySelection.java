@@ -3,11 +3,15 @@ package org.activityinfo.ui.client.lookup.viewModel;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.formTree.LookupKey;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 
 import java.util.*;
 
+/**
+ *
+ */
 class KeySelection {
 
     private static final BitSet EMPTY_SET = new BitSet();
@@ -20,11 +24,13 @@ class KeySelection {
 
     private final Map<LookupKey, Observable<List<String>>> choices;
 
+    private final KeyMatrix keyMatrix;
     private final Map<LookupKey, Observable<Optional<String>>> selectedKeys;
 
     private final Observable<Optional<RecordRef>> selectedRef;
 
     KeySelection(KeyMatrix keyMatrix, Map<LookupKey, Observable<Optional<String>>> selectedKeys) {
+        this.keyMatrix = keyMatrix;
         this.selectedKeys = selectedKeys;
 
         /*
@@ -32,9 +38,11 @@ class KeySelection {
          */
         matchingRows = new HashMap<>();
         for (LookupKey lookupKey : selectedKeys.keySet()) {
-            Observable<Optional<String>> selectedKey = selectedKeys.get(lookupKey);
-            Observable<BitSet> matching = keyMatrix.getMatchingRows(lookupKey, selectedKey);
-            matchingRows.put(lookupKey, matching);
+            if(keyMatrix.containsLookupKey(lookupKey)) {
+                Observable<Optional<String>> selectedKey = selectedKeys.get(lookupKey);
+                Observable<BitSet> matching = keyMatrix.getMatchingRows(lookupKey, selectedKey);
+                matchingRows.put(lookupKey, matching);
+            }
         }
 
         /*
@@ -42,10 +50,12 @@ class KeySelection {
          */
         choices = new HashMap<>();
         for (LookupKey lookupKey : selectedKeys.keySet()) {
-            if (lookupKey.isRoot()) {
-                choices.put(lookupKey, keyMatrix.getDistinctKeys(lookupKey));
-            } else {
-                choices.put(lookupKey, keyMatrix.getDistinctKeys(lookupKey, matchingRows(lookupKey.getParentLevels())));
+            if(keyMatrix.containsLookupKey(lookupKey)) {
+                if (lookupKey.isRoot()) {
+                    choices.put(lookupKey, keyMatrix.getDistinctKeys(lookupKey));
+                } else {
+                    choices.put(lookupKey, keyMatrix.getDistinctKeys(lookupKey, matchingRows(lookupKey.getParentLevels())));
+                }
             }
         }
 
@@ -55,28 +65,28 @@ class KeySelection {
         selectedRef = keyMatrix.getMatchingRecordRef(matchingRows(selectedKeys.keySet()));
     }
 
+    public ResourceId getFormId() {
+        return keyMatrix.getFormId();
+    }
+
+    public boolean containsLookupKey(LookupKey lookupKey) {
+        return keyMatrix.containsLookupKey(lookupKey);
+    }
+
     /**
      * Computes the BitSet of the rows that match all of the given {@code keys}.
      */
     private Observable<BitSet> matchingRows(Iterable<LookupKey> keys) {
         List<Observable<BitSet>> parents = new ArrayList<>();
         for (LookupKey key : keys) {
-            parents.add(matchingRows.get(key));
+            if(matchingRows.containsKey(key)) {
+                parents.add(matchingRows.get(key));
+            }
         }
         return Observable.flatten(parents).transform(this::intersect);
     }
 
-    public Observable<Optional<String>> getSelectedKey(LookupKey key) {
-        return selectedKeys.get(key);
-    }
 
-    public Observable<Boolean> isEnabled(LookupKey key) {
-        if(key.isRoot()) {
-            return Observable.just(true);
-        } else {
-            return getSelectedKey(key.getParentLevel()).transform(pk -> pk.isPresent());
-        }
-    }
 
     public Observable<Optional<RecordRef>> getSelectedRef() {
         return selectedRef;
@@ -115,4 +125,5 @@ class KeySelection {
     public Observable<List<String>> getChoices(LookupKey lookupKey) {
         return choices.get(lookupKey);
     }
+
 }

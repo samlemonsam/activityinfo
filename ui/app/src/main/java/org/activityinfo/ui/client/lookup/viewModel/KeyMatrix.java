@@ -35,34 +35,31 @@ class KeyMatrix {
 
     private static final String ID_COLUMN = "id";
 
-    private final LookupKeySet lookupKeySet;
-    private final Observable<ColumnSet> keyColumns;
     private final ResourceId formId;
+    private final LookupKeySet lookupKeySet;
+    private final Map<LookupKey, ExprNode> keyFormulas;
+    private final Observable<ColumnSet> keyColumns;
 
-    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet, Observable<Optional<ExprNode>> filter) {
-        this.formId = lookupKeySet.getLeafKeys().get(0).getFormId();
+    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet, LookupKey leafKey, Observable<Optional<ExprNode>> filter) {
+        this.formId = leafKey.getFormId();
         this.lookupKeySet = lookupKeySet;
 
-        keyColumns = filter.join(f -> formSource.query(keyMatrixQuery(f)));
+        keyFormulas = leafKey.getKeyFormulas();
+
+        keyColumns = filter.join(f -> {
+
+            QueryModel queryModel = new QueryModel(formId);
+            queryModel.setFilter(f);
+            queryModel.selectResourceId().as(ID_COLUMN);
+            for (Map.Entry<LookupKey, ExprNode> entry : keyFormulas.entrySet()) {
+                queryModel.selectExpr(entry.getValue()).as(keyColumn(entry.getKey()));
+            }
+            return formSource.query(queryModel);
+        });
     }
 
-    /**
-     * Composes a query for all the records in the referenced form along with the full
-     * hierarchy of keys.
-     * @param filter
-     */
-    private QueryModel keyMatrixQuery(Optional<ExprNode> filter) {
-
-        LookupKey leafKey = lookupKeySet.getLeafKeys().get(0);
-        Map<LookupKey, ExprNode> keyFormulas = leafKey.getKeyFormulas();
-
-        QueryModel queryModel = new QueryModel(formId);
-        queryModel.setFilter(filter);
-        queryModel.selectResourceId().as(ID_COLUMN);
-        for (Map.Entry<LookupKey, ExprNode> entry : keyFormulas.entrySet()) {
-            queryModel.selectExpr(entry.getValue()).as(keyColumn(entry.getKey()));
-        }
-        return queryModel;
+    public ResourceId getFormId() {
+        return formId;
     }
 
     /**
@@ -72,17 +69,25 @@ class KeyMatrix {
         return "k" + lookupKey.getKeyIndex();
     }
 
+
+    /**
+     * Returns true if this matrix includes the given {@code lookupKey}
+     */
+    public boolean containsLookupKey(LookupKey lookupKey) {
+        return keyFormulas.containsKey(lookupKey);
+    }
+
     /**
      * For a given (observable) record reference, find the string labels for each of its
      * {@link LookupKey}s.
      *
      */
-    public Observable<Map<LookupKey, String>> findKeyLabels(Observable<RecordRef> recordRef) {
-        return Observable.transform(keyColumns, recordRef, (columns, ref) -> {
+    public Observable<Map<LookupKey, String>> findKeyLabels(RecordRef ref) {
+        return keyColumns.transform (columns -> {
             Map<LookupKey, String> labels = new HashMap<>();
             int rowIndex = findRowIndex(columns, ref);
             if(rowIndex != -1) {
-                for (LookupKey lookupKey : lookupKeySet.getLookupKeys()) {
+                for (LookupKey lookupKey : keyFormulas.keySet()) {
                     ColumnView keyColumn = columns.getColumnView(keyColumn(lookupKey));
                     labels.put(lookupKey, keyColumn.getString(rowIndex));
                 }
@@ -107,6 +112,9 @@ class KeyMatrix {
     }
 
     private Observable<ColumnView> getKeyColumn(LookupKey lookupKey) {
+
+        assert keyFormulas.containsKey(lookupKey) : "KeyMatrix for form " + formId + " has no lookup key " + lookupKey;
+
         return keyColumns.transform(columns -> columns.getColumnView(keyColumn(lookupKey)));
     }
 
@@ -192,5 +200,6 @@ class KeyMatrix {
         Collections.sort(sortedList);
         return sortedList;
     }
+
 
 }

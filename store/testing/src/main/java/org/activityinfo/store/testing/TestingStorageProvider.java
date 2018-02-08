@@ -57,7 +57,7 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
 
     private final AdminLevelForm province;
     private final AdminLevelForm territory;
-    private final AdminLevelForm sector;
+    private final AdminLevelForm healthZone;
 
     private final VillageForm villageForm;
     private final NfiForm nfiForm;
@@ -86,12 +86,12 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
         // Classic NFI use case
         province = new AdminLevelForm(new UnitTestingIds(), "Province", 16, Optional.<AdminLevelForm>absent());
         territory = new AdminLevelForm(new UnitTestingIds(), "Territory", 140, Optional.of(province));
-        sector = new AdminLevelForm(new UnitTestingIds(), "Sector", 500, Optional.of(territory));
+        healthZone = new AdminLevelForm(new UnitTestingIds(), "Zone de Sante", 200, Optional.of(province));
 
         villageForm = new VillageForm(new UnitTestingIds(), 140*10, territory);
-        localiteForm = new LocaliteForm(new UnitTestingIds(), 250, province, territory, sector);
+        localiteForm = new LocaliteForm(new UnitTestingIds(), 250, province, territory, healthZone);
         nfiForm = new NfiForm(new UnitTestingIds(), villageForm);
-        add(province, territory, sector, villageForm, localiteForm, nfiForm);
+        add(province, territory, healthZone, villageForm, localiteForm, nfiForm);
 
         // Empty form
         EmptyForm empty = new EmptyForm();
@@ -238,5 +238,9 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
 
     @Override
     public void rollback() {
+    }
+
+    public AdminLevelForm getHealthZone() {
+        return healthZone;
     }
 }

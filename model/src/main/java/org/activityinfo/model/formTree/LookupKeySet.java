@@ -1,12 +1,13 @@
 package org.activityinfo.model.formTree;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
@@ -15,8 +16,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.promise.Maybe;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Set of keys that can be used to lookup a value for a reference field.
@@ -37,29 +37,72 @@ import java.util.List;
 public class LookupKeySet {
 
     private List<LookupKey> lookupKeys = new ArrayList<>();
-    private List<LookupKey> leafKeys = new ArrayList<>();
+
+    /**
+     * Map from a referenced form to it's leaf lookup key.
+     *
+     * For example, if you have a reference field that includes [PROVINCE, TERRITORY, SECTOR]
+     * in its reference range, that means that _either_ a PROVINCE can be selected, _or_ a TERRITORY _or_ a SECTOR
+     * can be selected.
+     *
+     * If those three forms have the following keys:
+     *
+     * <pre>
+     *     PROVINCE:  k0[PROVINCE.name]
+     *     TERRITORY: k0[PROVINCE.name], k1[TERRITORY.name]
+     *     SECTOR:    k0[PROVINCE.name], k1[TERRITORY.name], k2[SECTOR.name]
+     * </pre>
+     *
+     * Then the "leaf key" of the PROVINCE form is k0, while the leaf key of TERRITORY is k1, and
+     * the leaf key of SECTOR is k2.
+     *
+     */
+    private Map<ResourceId, LookupKey> leafKeyMap = HashBiMap.create();
+
+    /**
+     * Maps each visited form to its leaf key.
+     *
+     * <p>For reference fields with multiple forms included in the range, the keys may overlap. We want
+     * to
+     *
+     */
+    private Map<ResourceId, LookupKey> formMap = new HashMap<>();
+
+    private Multimap<ResourceId, ResourceId> parentMap = HashMultimap.create();
+
     private FormTree formTree;
 
     public LookupKeySet(FormTree formTree, ReferenceType referenceType) {
         this.formTree = formTree;
 
         for (ResourceId referenceFormId : referenceType.getRange()) {
-            leafKeys.add(addLevels("", formTree.getFormClass(referenceFormId)));
+            leafKeyMap.put(referenceFormId, addLevels(formTree.getFormClass(referenceFormId)));
+        }
+
+        // Now that we know how many keys there are and from which forms,
+        // we can compose labels
+        for (LookupKey lookupKey : lookupKeys) {
+            composeLabel(lookupKey);
         }
     }
+
 
     public LookupKeySet(FormTree formTree, FormField field) {
         this(formTree, (ReferenceType)field.getType());
     }
 
-    private LookupKey addLevels(String labelPrefix, FormClass formClass) {
+    private LookupKey addLevels(FormClass formClass) {
 
         ResourceId formId = formClass.getId();
+
+        if(formMap.containsKey(formId)) {
+            return formMap.get(formId);
+        }
 
         // if serial number is present, we use that exclusively.
         Optional<FormField> serialNumberField = findSerialNumberField(formClass);
         if(serialNumberField.isPresent()) {
-            LookupKey lookupKey = serialNumberLevel(labelPrefix, formId, serialNumberField.get());
+            LookupKey lookupKey = serialNumberLevel(formClass, serialNumberField.get());
             lookupKeys.add(lookupKey);
             return lookupKey;
         }
@@ -73,14 +116,15 @@ public class LookupKeySet {
             ReferenceType referenceType = (ReferenceType) referenceKey.get().getType();
             ResourceId referencedFormId = Iterables.getOnlyElement(referenceType.getRange());
             FormClass referencedFormClass = formTree.getFormClass(referencedFormId);
-            parentLevel = addLevels(referencedFormClass.getLabel() + " ", referencedFormClass);
+            parentMap.put(formId, referencedFormId);
+            parentLevel = addLevels(referencedFormClass);
             parentFieldId = referenceKey.get().getId().asString();
         }
 
         // Now check for text key fields
         for (FormField formField : formClass.getFields()) {
             if(isTextLikeKey(formField)) {
-                LookupKey lookupKey = textKeyLevel(labelPrefix, formId, parentLevel, parentFieldId, formField);
+                LookupKey lookupKey = textKeyLevel(formClass, parentLevel, parentFieldId, formField);
                 lookupKeys.add(lookupKey);
                 parentLevel = lookupKey;
                 parentFieldId = null;
@@ -92,6 +136,8 @@ public class LookupKeySet {
             parentLevel = idLevel(formClass);
             lookupKeys.add(parentLevel);
         }
+
+        formMap.put(formId, parentLevel);
 
         return parentLevel;
     }
@@ -108,22 +154,20 @@ public class LookupKeySet {
     }
 
 
-    private LookupKey serialNumberLevel(String labelPrefix, ResourceId formId, FormField field) {
-        return new LookupKey(nextKeyIndex(), formId, labelPrefix + field.getLabel(), field.getId().asString());
+    private LookupKey serialNumberLevel(FormClass form, FormField field) {
+        return new LookupKey(nextKeyIndex(), form, field);
     }
 
-    private LookupKey textKeyLevel(String labelPrefix,
-                                   ResourceId formId,
+    private LookupKey textKeyLevel(FormClass form,
                                    LookupKey parentLevel,
                                    String parentFieldId,
                                    FormField formField) {
-        String levelLabel = labelPrefix + formField.getLabel();
 
-        return new LookupKey(nextKeyIndex(), parentFieldId, parentLevel, formId, levelLabel, formField.getId().asString());
+        return new LookupKey(nextKeyIndex(), parentFieldId, parentLevel, form, formField);
     }
 
     private LookupKey idLevel(FormClass formSchema) {
-        return new LookupKey(nextKeyIndex(), formSchema.getId(), formSchema.getLabel(), ColumnModel.ID_SYMBOL);
+        return new LookupKey(nextKeyIndex(), formSchema);
     }
 
     private Optional<FormField> findSerialNumberField(FormClass formClass) {
@@ -144,6 +188,25 @@ public class LookupKeySet {
         return Optional.absent();
     }
 
+
+    private void composeLabel(LookupKey lookupKey) {
+        StringBuilder label = new StringBuilder();
+
+        // If there are keys that live on multiple forms,
+        // we need to distinguish them by their form name
+        if(formMap.size() > 1) {
+            label.append(lookupKey.getFormLabel()).append(" ");
+        }
+
+        if(lookupKey.getFieldLabel() == null) {
+            label.append("ID");
+        } else {
+            label.append(lookupKey.getFieldLabel());
+        }
+
+        lookupKey.keyLabel = label.toString();
+    }
+
     public List<LookupKey> getLookupKeys() {
         return lookupKeys;
     }
@@ -151,8 +214,8 @@ public class LookupKeySet {
     /**
      * @return a List of LookupKeys with no children.
      */
-    public List<LookupKey> getLeafKeys() {
-        return leafKeys;
+    public Collection<LookupKey> getLeafKeys() {
+        return leafKeyMap.values();
     }
 
 
@@ -172,4 +235,27 @@ public class LookupKeySet {
         return Maybe.notFound();
     }
 
+    public LookupKey getKey(int i) {
+        return lookupKeys.get(i);
+    }
+
+    public LookupKey getLeafKey(ResourceId referencedFormId) {
+        LookupKey lookupKey = leafKeyMap.get(referencedFormId);
+        assert lookupKey != null : "No leaf key for " + referencedFormId;
+        return lookupKey;
+    }
+
+    public Set<ResourceId> getAncestorForms(ResourceId formId) {
+        Set<ResourceId> set = new HashSet<>();
+        collectAncestors(Collections.singletonList(formId), set);
+        return set;
+    }
+
+    private void collectAncestors(Collection<ResourceId> formIds, Set<ResourceId> set) {
+        for (ResourceId formId : formIds) {
+            Collection<ResourceId> parents = parentMap.get(formId);
+            set.addAll(parents);
+            collectAncestors(parents, set);
+        }
+    }
 }

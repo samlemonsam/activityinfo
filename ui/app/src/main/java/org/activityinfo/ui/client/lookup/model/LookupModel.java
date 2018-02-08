@@ -6,6 +6,7 @@ import org.activityinfo.model.type.RecordRef;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Models the interactive, hierarchical lookup of a reference value.
@@ -35,23 +36,29 @@ public class LookupModel {
     }
 
     private State state;
-    private RecordRef initialSelection;
+    private Set<RecordRef> initialSelection;
     private Map<LookupKey, String> selectedKeys;
 
     public LookupModel() {
         this.state = State.EMPTY;
         this.selectedKeys = Collections.emptyMap();
+        this.initialSelection = Collections.emptySet();
     }
 
-    public LookupModel(RecordRef initialSelection) {
+    public LookupModel(Set<RecordRef> initialSelection) {
         this.state = State.INITIAL;
         this.initialSelection = initialSelection;
         this.selectedKeys = Collections.emptyMap();
     }
 
+    public LookupModel(RecordRef initialSelection) {
+        this(Collections.singleton(initialSelection));
+    }
+
     public LookupModel(Map<LookupKey, String> selectedKeys) {
         this.state = State.SELECTION;
         this.selectedKeys = selectedKeys;
+        this.initialSelection = Collections.emptySet();
     }
 
     public State getState() {
@@ -67,8 +74,8 @@ public class LookupModel {
         }
     }
 
-    public Optional<RecordRef> getInitialSelection() {
-        return Optional.fromNullable(initialSelection);
+    public Set<RecordRef> getInitialSelection() {
+        return initialSelection;
     }
 
     public Optional<String> getSelectedKey(LookupKey level) {

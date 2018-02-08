@@ -1,12 +1,10 @@
 package org.activityinfo.ui.client.input.view.field;
 
-import com.google.common.base.Optional;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldValue;
@@ -23,6 +21,7 @@ import org.activityinfo.ui.client.lookup.viewModel.LookupViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class ReferenceFieldWidget implements FieldWidget {
@@ -68,17 +67,17 @@ public class ReferenceFieldWidget implements FieldWidget {
 
     private void onSelection(SelectionEvent<String> event) {
         LOGGER.info("onSelection: " + event.getSelectedItem());
-        viewModel.getSelectedRecord().once().then(new AsyncCallback<Optional<RecordRef>>() {
+        viewModel.getSelectedRecords().once().then(new AsyncCallback<Set<RecordRef>>() {
             @Override
             public void onFailure(Throwable caught) {
             }
 
             @Override
-            public void onSuccess(Optional<RecordRef> result) {
-                if(result.isPresent()) {
-                    fieldUpdater.update(new FieldInput(new ReferenceValue(result.get())));
-                } else {
+            public void onSuccess(Set<RecordRef> result) {
+                if (result.isEmpty()) {
                     fieldUpdater.update(FieldInput.EMPTY);
+                } else {
+                    fieldUpdater.update(new FieldInput(new ReferenceValue(result)));
                 }
             }
         });
@@ -88,9 +87,7 @@ public class ReferenceFieldWidget implements FieldWidget {
     public void init(FieldValue value) {
         ReferenceValue referenceValue = (ReferenceValue) value;
         RecordRef recordRef = referenceValue.getOnlyReference();
-        if(recordRef.getFormId().equals(viewModel.getReferencedFormId())) {
-            viewModel.setInitialSelection(recordRef);
-        }
+        viewModel.setInitialSelection(referenceValue.getReferences());
     }
 
     @Override

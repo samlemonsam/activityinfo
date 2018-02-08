@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.lookup.view;
 import com.google.common.base.Strings;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -114,5 +115,10 @@ class ChoiceCell extends ComboBoxCell<String> {
         if (selectByValue(getText(parent)) == null) {
             select(0);
         }
+    }
+
+    @Override
+    public void finishEditing(Element parent, String value, Object key, ValueUpdater<String> valueUpdater) {
+        // NOOP
     }
 }

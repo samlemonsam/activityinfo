@@ -40,8 +40,8 @@ public class LookupKeyViewModel {
         return choices;
     }
 
-    public String getLevelLabel() {
-        return lookupKey.getLevelLabel();
+    public String getKeyLabel() {
+        return lookupKey.getKeyLabel();
     }
 
     public LookupKey getLookupKey() {

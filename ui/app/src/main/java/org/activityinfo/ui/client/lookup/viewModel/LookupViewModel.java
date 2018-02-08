@@ -6,37 +6,35 @@ import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.ui.client.input.viewModel.PermissionFilters;
 import org.activityinfo.ui.client.lookup.model.LookupModel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class LookupViewModel {
 
     private static final Logger LOGGER = Logger.getLogger(LookupViewModel.class.getName());
 
-    private final ResourceId referencedFormId;
     private final LookupKeySet lookupKeySet;
 
     private final StatefulValue<LookupModel> model = new StatefulValue<>(new LookupModel());
     private final Map<LookupKey, Observable<Optional<String>>> selectedKeys;
 
-    private final KeyMatrix keyMatrix;
-    private final KeySelection keySelection;
+    /**
+     * Map from each referenced form to it's key matrix.
+     */
+    private final KeyMatrixSet keyMatrixSet;
+
+    private final KeySelectionSet keySelection;
 
     private final List<LookupKeyViewModel> levels = new ArrayList<>();
 
-    private final Observable<Optional<RecordRef>> selectedRef;
+    private final Observable<Set<RecordRef>> selectedRef;
 
     public LookupViewModel(FormSource formSource, FormTree formTree,
                            ReferenceType referenceType) {
@@ -48,20 +46,17 @@ public class LookupViewModel {
                            ReferenceType referenceType,
                            Observable<Optional<ExprNode>> filter) {
 
-        assert referenceType.getRange().size() == 1 : "Only single referenced form supported";
-
-        this.referencedFormId = Iterables.getOnlyElement(referenceType.getRange());
         this.lookupKeySet = new LookupKeySet(formTree, referenceType);
 
-        this.keyMatrix = new KeyMatrix(formSource, lookupKeySet, filter);
+        this.keyMatrixSet = new KeyMatrixSet(formSource, referenceType, lookupKeySet, filter);
 
         /*
          * The labels that we display for each of the labels come EITHER from the
          * initial selection OR the explicit selection of the user.
          */
-        Observable<RecordRef> initialSelection = model.transformIf(m -> m.getInitialSelection());
+        Observable<Set<RecordRef>> initialSelection = model.transform(m -> m.getInitialSelection());
 
-        Observable<Map<LookupKey, String>> initialSelectionLabels = keyMatrix.findKeyLabels(initialSelection);
+        Observable<Map<LookupKey, String>> initialSelectionLabels = keyMatrixSet.findKeyLabels(initialSelection);
 
         Observable<Map<LookupKey, String>> explicitSelection = model.transform(m -> m.getSelectedKeys());
 
@@ -83,17 +78,16 @@ public class LookupViewModel {
             selectedKeys.put(key, labels.transform(m -> Optional.fromNullable(m.get(key))));
         }
 
-        this.keySelection = new KeySelection(keyMatrix, selectedKeys);
+        this.keySelection = new KeySelectionSet(keyMatrixSet, selectedKeys);
 
         /*
          * Now add a view model for each level
          */
-        for (LookupKey lookupKey : lookupKeySet.getLookupKeys()) {
+        for (LookupKey lookupKey : lookupKeySet.getLookupKeys())
             levels.add(new LookupKeyViewModel(lookupKey,
                     keySelection.isEnabled(lookupKey),
                     keySelection.getSelectedKey(lookupKey),
                     keySelection.getChoices(lookupKey)));
-        }
 
         /*
          * Find the selected ref
@@ -108,14 +102,6 @@ public class LookupViewModel {
         });
     }
 
-    public ResourceId getReferencedFormId() {
-        return referencedFormId;
-    }
-
-    public LookupKey getLeafKey() {
-        return lookupKeySet.getLeafKeys().get(0);
-    }
-
     public List<LookupKeyViewModel> getLookupKeys() {
         return levels;
     }
@@ -123,27 +109,47 @@ public class LookupViewModel {
     public void select(LookupKey lookupKey, String keyChoice) {
 
         Map<LookupKey, String> newSelectedKeys = new HashMap<>();
+        for (Map.Entry<LookupKey, Observable<Optional<String>>> entry : selectedKeys.entrySet()) {
+            Optional<String> selectedKey = entry.getValue().get();
+            if(selectedKey.isPresent()) {
+                newSelectedKeys.put(entry.getKey(), selectedKey.get());
+            }
+        }
         newSelectedKeys.put(lookupKey, keyChoice);
 
-        LookupKey parentKey = lookupKey;
-        while(!parentKey.isRoot()) {
-            parentKey = parentKey.getParentLevel();
-            String selectedKey = selectedKeys.get(parentKey).get().get();
-            newSelectedKeys.put(parentKey, selectedKey);
-        }
+        // Clear the child choices
+        clearChildChoices(lookupKey, newSelectedKeys);
 
         model.updateIfNotEqual(new LookupModel(newSelectedKeys));
+    }
+
+    private void clearChildChoices(LookupKey lookupKey, Map<LookupKey, String> newSelectedKeys) {
+        for (LookupKey childKey : lookupKey.getChildLevels()) {
+            if(newSelectedKeys.remove(childKey) != null) {
+                clearChildChoices(childKey, newSelectedKeys);
+            }
+        }
     }
 
     public void select(RecordRef ref) {
         model.updateIfNotEqual(new LookupModel(ref));
     }
 
-    public Observable<Optional<RecordRef>> getSelectedRecord() {
+    public Observable<Set<RecordRef>> getSelectedRecords() {
         return selectedRef;
     }
 
-    public void setInitialSelection(RecordRef recordRef) {
+    public Observable<Optional<RecordRef>> getSelectedRecord() {
+        return selectedRef.transform(set -> {
+            if(set.isEmpty()) {
+                return Optional.absent();
+            } else {
+                return Optional.of(Iterables.getOnlyElement(set));
+            }
+        });
+    }
+
+    public void setInitialSelection(Set<RecordRef> recordRef) {
         model.updateIfNotEqual(new LookupModel(recordRef));
     }
 

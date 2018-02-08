@@ -218,6 +218,18 @@ public abstract class Observable<T> {
         });
     }
 
+    /**
+     * Given a list of inputs, apply the given {@code function} to each element, then flatten the resulting list
+     * of obserables into an observable list.
+     */
+    public static <T, R> Observable<List<R>> flatJoin(List<T> inputList, Function<T, Observable<R>> function) {
+        List<Observable<R>> applied = new ArrayList<>();
+        for (T t : inputList) {
+            applied.add(function.apply(t));
+        }
+        return flatten(applied);
+    }
+
     public static <T> Observable<T> flattenOptional(Observable<Optional<T>> observable) {
         return observable.join(new Function<Optional<T>, Observable<T>>() {
             @Override

@@ -18,25 +18,18 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.store.testing.IdpLocationForm;
-import org.activityinfo.store.testing.NfiForm;
-import org.activityinfo.store.testing.TestingStorageProvider;
-import org.activityinfo.store.testing.VillageForm;
+import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class LookupViewModelTest {
@@ -68,15 +61,15 @@ public class LookupViewModelTest {
         LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, referenceType);
 
         LookupKeyViewModel province = viewModel.getLookupKeys().get(0);
-        assertThat(province.getLevelLabel(), equalTo("Province Name"));
+        assertThat(province.getKeyLabel(), equalTo("Province Name"));
 
         // The second level should now reflect these choices
         LookupKeyViewModel territory = viewModel.getLookupKeys().get(1);
-        assertThat(territory.getLevelLabel(), equalTo("Territory Name"));
+        assertThat(territory.getKeyLabel(), equalTo("Territory Name"));
 
         // Finally the third level is where we choose the village
         LookupKeyViewModel village = viewModel.getLookupKeys().get(2);
-        assertThat(village.getLevelLabel(), equalTo("Name"));
+        assertThat(village.getKeyLabel(), equalTo("Village Name"));
 
         // Connect to the lists
         Connection<List<String>> provinceList = setup.connect(province.getChoices());
@@ -242,6 +235,104 @@ public class LookupViewModelTest {
         Connection<List<String>> schoolChoices = new Connection<>(schoolKey.getChoices());
 
         assertThat(schoolChoices.assertLoaded(), contains("S3"));
+    }
+
+    @Test
+    public void overlappingHierarchies() {
+
+        LocaliteForm locationForm = catalog.getLocaliteForm();
+        FormTree formTree = catalog.getFormTree(locationForm.getFormId());
+
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, locationForm.getAdminFieldType());
+
+        assertThat(viewModel.getLookupKeys(), hasSize(3));
+
+        LookupKeyViewModel province = viewModel.getLookupKeys().get(0);
+        assertThat(province.getKeyLabel(), equalTo("Province Name"));
+
+        // The second level should now reflect these choices
+        LookupKeyViewModel territory = viewModel.getLookupKeys().get(1);
+        assertThat(territory.getKeyLabel(), equalTo("Territory Name"));
+
+        // We also have a third level -- Health Zone or "Zone de Sante" which
+        // is related to province, but NOT territory.
+        LookupKeyViewModel healthZone = viewModel.getLookupKeys().get(2);
+        assertThat(healthZone.getKeyLabel(), equalTo("Zone de Sante Name"));
+
+        // Connect to the lists
+        Connection<List<String>> provinceList = setup.connect(province.getChoices());
+        Connection<List<String>> territoryList = setup.connect(territory.getChoices());
+        Connection<List<String>> zoneList = setup.connect(healthZone.getChoices());
+
+        // Connect to the selection
+        Connection<Set<RecordRef>> selection = setup.connect(viewModel.getSelectedRecords());
+
+        // Initially... no selection
+        assertThat(selection.assertLoaded().isEmpty(), equalTo(true));
+
+        // Initially the root level should have all choices (16)
+        assertThat(provinceList.assertLoaded(), hasSize(catalog.getProvince().getCount()));
+
+        // Select a province.
+        viewModel.select(province.getLookupKey(), province.getChoices().get().get(2));
+
+        // Choosing just a province is a valid selection, so we should now have a value
+        assertThat(selection.assertLoaded(), hasSize(1));
+
+        // ..and the options available to the second level
+        territoryList.assertChanged();
+
+        System.out.println(territoryList.assertLoaded());
+
+        assertThat(territoryList.assertLoaded(), hasSize(7));
+
+        System.out.println(territoryList.assertLoaded());
+
+        // Select a territory
+        viewModel.select(territory.getLookupKey(), territoryList.assertLoaded().get(2));
+        zoneList.assertChanged();
+
+        // No we should still have only one selected record, but this time
+        // territory and not province because province is a parent of territory.
+        RecordRef territoryRef = new RecordRef(catalog.getTerritory().getFormId(), ResourceId.valueOf("c23"));
+        assertThat(selection.assertLoaded(), contains(territoryRef));
+
+        // We should ALSO be able to select a Zone de Sante
+        viewModel.select(healthZone.getLookupKey(), zoneList.assertLoaded().get(5));
+
+        RecordRef zoneRef = new RecordRef(catalog.getHealthZone().getFormId(), ResourceId.valueOf("c165"));
+
+        assertThat(selection.assertLoaded(), containsInAnyOrder(territoryRef, zoneRef));
+
+
+    }
+
+    @Test
+    public void overlappingHierarchiesInitialSelection() {
+
+        LocaliteForm locationForm = catalog.getLocaliteForm();
+        FormTree formTree = catalog.getFormTree(locationForm.getFormId());
+
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, locationForm.getAdminFieldType());
+
+        RecordRef territoryRef = new RecordRef(catalog.getTerritory().getFormId(), ResourceId.valueOf("c23"));
+
+        Connection<Optional<String>> province = setup.connect(viewModel.getLookupKeys().get(0).getSelectedKey());
+        Connection<Optional<String>> territory = setup.connect(viewModel.getLookupKeys().get(1).getSelectedKey());
+        Connection<Optional<String>> healthZone = setup.connect(viewModel.getLookupKeys().get(2).getSelectedKey());
+
+        // Initially the key value labels should be empty
+        assertThat(province.assertLoaded().isPresent(), equalTo(false));
+        assertThat(territory.assertLoaded().isPresent(), equalTo(false));
+        assertThat(healthZone.assertLoaded().isPresent(), equalTo(false));
+
+
+        // If the initial selection is a territory then the province and territory labels should be loaded
+        viewModel.setInitialSelection(Collections.singleton(territoryRef));
+        assertThat(province.assertLoaded().get(), equalTo("Province 11"));
+        assertThat(territory.assertLoaded().get(), equalTo("Territory 24"));
+        assertThat(healthZone.assertLoaded().isPresent(), equalTo(false));
+
 
     }
 }

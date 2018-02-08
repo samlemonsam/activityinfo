@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.input.view.field;
 
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.*;
@@ -15,12 +14,8 @@ import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
-import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.viewModel.PermissionFilters;
-
-import java.util.Optional;
-import java.util.logging.Logger;
 
 /**
  * Constructs a {@link FieldWidget} for a given field.
@@ -63,10 +58,6 @@ public class FieldWidgetFactory  {
 
         @Override
         public FieldWidget visitReference(ReferenceType referenceType) {
-            if (referenceType.getRange().size() != 1) {
-                return null;
-            }
-
             return new ReferenceFieldWidget(formSource, formTree, field, permissionFilters, updater);
         }
 

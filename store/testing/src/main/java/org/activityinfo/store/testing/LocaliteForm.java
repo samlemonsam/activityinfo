@@ -65,6 +65,14 @@ public class LocaliteForm implements TestForm {
 
     }
 
+    public FormField getAdminField() {
+        return adminField;
+    }
+
+    public ReferenceType getAdminFieldType() {
+        return (ReferenceType) adminField.getType();
+    }
+
     @Override
     public ResourceId getFormId() {
         return formClass.getId();

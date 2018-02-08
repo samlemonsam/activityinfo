@@ -1789,12 +1789,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("New Activity (Classic Form)")
     String newClassicActivity();
 
-    @DefaultStringValue("Parent Form")
-    String parentForm();
-
-    @DefaultStringValue("Sub Form")
-    String subForm();
-
     @DefaultStringValue("Selected Columns")
     String selectedColumns();
 

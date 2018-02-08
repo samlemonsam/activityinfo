@@ -53,7 +53,7 @@ public class LevelWidget implements IsWidget {
             }
         });
 
-        this.fieldLabel = new FieldLabel(comboBox, level.getLevelLabel());
+        this.fieldLabel = new FieldLabel(comboBox, level.getKeyLabel());
     }
 
     public void addSelectionHandler(SelectionHandler<String> handler) {

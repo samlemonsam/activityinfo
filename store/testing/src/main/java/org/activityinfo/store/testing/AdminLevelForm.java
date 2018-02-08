@@ -66,6 +66,10 @@ public class AdminLevelForm implements TestForm {
         records = new LazyRecordList(recordGenerator, count);
     }
 
+    public int getCount() {
+        return count;
+    }
+
     public Optional<AdminLevelForm> getParentForm() {
         return parent;
     }

@@ -17,11 +17,12 @@ public abstract class ObservableFunction<T> extends Observable<T> {
         this.scheduler = scheduler;
         this.arguments = arguments;
         this.subscriptions = new Subscription[arguments.length];
-        computeValue();
 
         for (int i = 0; i < arguments.length; i++) {
             assert arguments[i] != null : "argument " + i + " is null.";
         }
+
+        computeValue();
     }
 
     public ObservableFunction(Scheduler scheduler, List<Observable<?>> arguments) {
