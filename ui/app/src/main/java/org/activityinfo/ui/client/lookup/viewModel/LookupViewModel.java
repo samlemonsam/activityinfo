@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.lookup.viewModel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
@@ -37,18 +38,18 @@ public class LookupViewModel {
     private final Observable<Set<RecordRef>> selectedRef;
 
     public LookupViewModel(FormSource formSource, FormTree formTree,
-                           ReferenceType referenceType) {
-        this(formSource, formTree, referenceType, Observable.just(Optional.absent()));
+                           FormField referenceField) {
+        this(formSource, formTree, referenceField, Observable.just(Optional.absent()));
     }
 
     public LookupViewModel(FormSource formSource,
                            FormTree formTree,
-                           ReferenceType referenceType,
+                           FormField referenceField,
                            Observable<Optional<ExprNode>> filter) {
 
-        this.lookupKeySet = new LookupKeySet(formTree, referenceType);
+        this.lookupKeySet = new LookupKeySet(formTree, referenceField);
 
-        this.keyMatrixSet = new KeyMatrixSet(formSource, referenceType, lookupKeySet, filter);
+        this.keyMatrixSet = new KeyMatrixSet(formSource, (ReferenceType) referenceField.getType(), lookupKeySet, filter);
 
         /*
          * The labels that we display for each of the labels come EITHER from the

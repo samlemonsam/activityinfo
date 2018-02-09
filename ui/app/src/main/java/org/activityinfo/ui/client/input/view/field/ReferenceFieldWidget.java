@@ -40,7 +40,7 @@ public class ReferenceFieldWidget implements FieldWidget {
                                 FieldUpdater fieldUpdater) {
 
         this.fieldUpdater = fieldUpdater;
-        this.viewModel = new LookupViewModel(formSource, formTree, (ReferenceType) field.getType(),
+        this.viewModel = new LookupViewModel(formSource, formTree, field,
                 Observable.just(filters.getReferenceBaseFilter(field.getId())));
 
         for (LookupKeyViewModel level : viewModel.getLookupKeys()) {

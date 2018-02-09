@@ -1,6 +1,7 @@
 package org.activityinfo.model.formTree;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
@@ -74,10 +75,13 @@ public class LookupKeySet {
     private Multimap<ResourceId, ResourceId> parentMap = HashMultimap.create();
 
     private FormTree formTree;
+    private String referenceFieldLabel;
 
-    public LookupKeySet(FormTree formTree, ReferenceType referenceType) {
+    public LookupKeySet(FormTree formTree, FormField referenceField) {
         this.formTree = formTree;
+        this.referenceFieldLabel = referenceField.getLabel();
 
+        ReferenceType referenceType = (ReferenceType) referenceField.getType();
         for (ResourceId referenceFormId : referenceType.getRange()) {
             leafKeyMap.put(referenceFormId, addLevels(formTree.getFormClass(referenceFormId)));
         }
@@ -87,11 +91,6 @@ public class LookupKeySet {
         for (LookupKey lookupKey : lookupKeys) {
             composeLabel(lookupKey);
         }
-    }
-
-
-    public LookupKeySet(FormTree formTree, FormField field) {
-        this(formTree, (ReferenceType)field.getType());
     }
 
     private LookupKey addLevels(FormClass formClass) {
@@ -195,10 +194,14 @@ public class LookupKeySet {
     private void composeLabel(LookupKey lookupKey) {
         StringBuilder label = new StringBuilder();
 
-        // If there are keys that live on multiple forms,
-        // we need to distinguish them by their form name
-        if(formMap.size() > 1) {
+        if (formMap.size() > 1) {
+            // If there are keys that live on multiple forms,
+            // we need to distinguish them by their form name
             label.append(lookupKey.getFormLabel()).append(" ");
+        } else {
+            // If there is only one form referenced,
+            // we always use the referencing field's label
+            label.append(Strings.nullToEmpty(referenceFieldLabel)).append(" ");
         }
 
         if(lookupKey.getFieldLabel() == null) {

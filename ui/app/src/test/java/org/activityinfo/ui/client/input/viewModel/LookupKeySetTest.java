@@ -7,6 +7,7 @@ import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.expr.Exprs;
 import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
@@ -72,9 +73,8 @@ public class LookupKeySetTest {
         AdminLevelForm provinceForm = territoryForm.getParentForm().get();
 
         FormTree formTree = catalog.getFormTree(nfiForm.getFormId());
-        ReferenceType referenceType = (ReferenceType) nfiForm.getVillageField().getType();
 
-        LookupKeySet lookupKeySet = new LookupKeySet(formTree, referenceType);
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, nfiForm.getVillageField());
 
         // Keys need to be topologically sorted,
         // with parent keys preceding child keys in the list
@@ -127,7 +127,7 @@ public class LookupKeySetTest {
         LocaliteForm localiteForm = catalog.getLocaliteForm();
         FormTree formTree = setup.getFormTree(localiteForm.getFormId());
 
-        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminFieldType());
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminField());
 
         // The resulting key set should only include 3 keys, not 6
         // because the three different forms in the range overlap
@@ -159,7 +159,7 @@ public class LookupKeySetTest {
         LocaliteForm localiteForm = catalog.getLocaliteForm();
         FormTree formTree = setup.getFormTree(localiteForm.getFormId());
 
-        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminFieldType());
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminField());
 
         Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
 
@@ -175,7 +175,7 @@ public class LookupKeySetTest {
         LocaliteForm localiteForm = catalog.getLocaliteForm();
         FormTree formTree = setup.getFormTree(localiteForm.getFormId());
 
-        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminFieldType());
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminField());
 
         Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
 
@@ -261,10 +261,11 @@ public class LookupKeySetTest {
         TestingStorageProvider catalog = new TestingStorageProvider();
         NfiForm nfiForm = catalog.getNfiForm();
 
-        ReferenceType type = new ReferenceType(Cardinality.SINGLE, nfiForm.getFormId());
+        FormField field = new FormField(ResourceId.generateFieldId(ReferenceType.TYPE_CLASS));
+        field.setType(new ReferenceType(Cardinality.SINGLE, nfiForm.getFormId()));
 
         FormTree formTree = catalog.getFormTree(nfiForm.getFormId());
-        LookupKeySet lookupKeySet = new LookupKeySet(formTree, type);
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, field);
 
         assertThat(lookupKeySet.getLookupKeys(), hasSize(1));
         assertThat(lookupKeySet.getLeafKeys(), hasSize(1));

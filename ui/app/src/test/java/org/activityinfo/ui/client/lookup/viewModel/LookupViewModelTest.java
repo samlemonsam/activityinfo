@@ -3,6 +3,7 @@ package org.activityinfo.ui.client.lookup.viewModel;
 import com.google.common.base.Optional;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormMetadataProviderStub;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -56,9 +57,8 @@ public class LookupViewModelTest {
     public void select() {
 
         FormTree formTree = catalog.getFormTree(nfiForm.getFormId());
-        ReferenceType referenceType = (ReferenceType) nfiForm.getVillageField().getType();
 
-        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, referenceType);
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, nfiForm.getVillageField());
 
         LookupKeyViewModel province = viewModel.getLookupKeys().get(0);
         assertThat(province.getKeyLabel(), equalTo("Province Name"));
@@ -110,9 +110,8 @@ public class LookupViewModelTest {
     public void initialSetup() {
 
         FormTree formTree = catalog.getFormTree(nfiForm.getFormId());
-        ReferenceType referenceType = (ReferenceType) nfiForm.getVillageField().getType();
 
-        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, referenceType);
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, nfiForm.getVillageField());
         viewModel.select(new RecordRef(villageForm.getFormId(), ResourceId.valueOf("c207")));
 
         Connection<Optional<String>> provinceLabel = setup.connect(viewModel.getLookupKeys().get(0).getSelectedKey());
@@ -140,9 +139,12 @@ public class LookupViewModelTest {
 
         IdpLocationForm locationForm = catalog.getIdpLocationForm();
         FormTree formTree = catalog.getFormTree(locationForm.getFormId());
+        FormField referenceField =
+                new FormField(ResourceId.generateFieldId(ReferenceType.TYPE_CLASS))
+                .setType(new ReferenceType(Cardinality.SINGLE, locationForm.getFormId()));
 
-        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree,
-                new ReferenceType(Cardinality.SINGLE, locationForm.getFormId()));
+
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, referenceField);
 
         assertThat(viewModel.getLookupKeys(), hasSize(3));
 
@@ -176,9 +178,11 @@ public class LookupViewModelTest {
         NfiForm nfiForm = catalog.getNfiForm();
 
         FormTree formTree = catalog.getFormTree(nfiForm.getFormId());
+        FormField referenceField =
+                new FormField(ResourceId.generateFieldId(ReferenceType.TYPE_CLASS))
+                .setType(new ReferenceType(Cardinality.SINGLE, nfiForm.getFormId()));
 
-        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree,
-                new ReferenceType(Cardinality.SINGLE, nfiForm.getFormId()));
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, referenceField);
 
         LookupKeyViewModel keyViewModel = viewModel.getLookupKeys().get(0);
 
@@ -204,7 +208,10 @@ public class LookupViewModelTest {
                 .setType(TextType.SIMPLE);
 
         FormClass form = new FormClass(ResourceId.valueOf("FORM2"));
+        FormField referenceField = new FormField(ResourceId.generateFieldId(ReferenceType.TYPE_CLASS));
         ReferenceType referenceType = new ReferenceType(Cardinality.SINGLE, ResourceId.valueOf("FORM1"));
+        referenceField.setType(referenceType);
+
         form.addField(ResourceId.valueOf("PROJECT"))
                 .setLabel("Project name")
                 .setType(referenceType);
@@ -223,7 +230,7 @@ public class LookupViewModelTest {
                 .anyTimes();
         EasyMock.replay(formSource);
 
-        LookupViewModel viewModel = new LookupViewModel(formSource, formTree, referenceType);
+        LookupViewModel viewModel = new LookupViewModel(formSource, formTree, referenceField);
 
         LookupKeyViewModel provinceKey = viewModel.getLookupKeys().get(0);
 
@@ -243,7 +250,7 @@ public class LookupViewModelTest {
         LocaliteForm locationForm = catalog.getLocaliteForm();
         FormTree formTree = catalog.getFormTree(locationForm.getFormId());
 
-        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, locationForm.getAdminFieldType());
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, locationForm.getAdminField());
 
         assertThat(viewModel.getLookupKeys(), hasSize(3));
 
@@ -313,7 +320,7 @@ public class LookupViewModelTest {
         LocaliteForm locationForm = catalog.getLocaliteForm();
         FormTree formTree = catalog.getFormTree(locationForm.getFormId());
 
-        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, locationForm.getAdminFieldType());
+        LookupViewModel viewModel = new LookupViewModel(setup.getFormStore(), formTree, locationForm.getAdminField());
 
         RecordRef territoryRef = new RecordRef(catalog.getTerritory().getFormId(), ResourceId.valueOf("c23"));
 
