@@ -628,6 +628,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("New user")
     String newUser();
 
+    @DefaultStringValue("Edit user")
+    String editUser();
+
     @DefaultStringValue("A new version of ActivityInfo has been downloaded. Do you want to reload now?")
     String newVersionChoice();
 

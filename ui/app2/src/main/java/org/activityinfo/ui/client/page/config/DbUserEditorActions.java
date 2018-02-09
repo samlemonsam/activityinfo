@@ -89,7 +89,7 @@ public class DbUserEditorActions {
 
     private void showDialog(final UserForm form, final boolean newUser) {
         final FormDialogImpl dlg = new FormDialogImpl(form);
-        dlg.setHeadingText(I18N.CONSTANTS.newUser());
+        dlg.setHeadingText(newUser ? I18N.CONSTANTS.newUser() : I18N.CONSTANTS.editUser());
         dlg.setWidth(400);
         dlg.setHeight(300);
 
