@@ -218,6 +218,11 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return (Boolean) get("viewAllAllowed", false);
     }
 
+    public boolean isViewAllAllowed(UserPermissionDTO user) {
+        return isViewAllAllowed()
+                && isFolderSubset(user.getFolders());
+    }
+
     /**
      * Sets the permission of the current user to edit data on behalf of the
      * Partner in this UserDatabase to which the current user belongs.
@@ -233,6 +238,12 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public boolean isEditAllowed() {
         return get("editAllowed", false);
+    }
+
+    public boolean isEditAllowed(UserPermissionDTO user) {
+        return isEditAllowed()
+                && getPartners().contains(user.getPartner())
+                && isFolderSubset(user.getFolders());
     }
 
     /**
@@ -259,6 +270,12 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         set("databaseDesignAllowed", value);
     }
 
+    public boolean isDesignAllowed(UserPermissionDTO user) {
+        return isDesignAllowed()
+                && getPartners().contains(user.getPartner())
+                && isFolderSubset(user.getFolders());
+    }
+
     /**
      * Sets the permission of the current user to edit data in this UserDatabase
      * on behalf of all partners.
@@ -276,12 +293,23 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return get("editAllAllowed", false);
     }
 
+    public boolean isEditAllAllowed(UserPermissionDTO user) {
+        return isEditAllAllowed()
+                && isFolderSubset(user.getFolders());
+    }
+
     /**
      * @return true if current user is allowed to make changes to user
      * permissions on behalf of the Partner to which they belong
      */
     public boolean isManageUsersAllowed() {
         return get("manageUsersAllowed", false);
+    }
+
+    public boolean isManageUsersAllowed(UserPermissionDTO user) {
+        return isManageUsersAllowed()
+                && getPartners().contains(user.getPartner())
+                && isFolderSubset(user.getFolders());
     }
 
     /**
@@ -299,6 +327,11 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      */
     public boolean isManageAllUsersAllowed() {
         return get("manageAllUsersAllowed", false);
+    }
+
+    public boolean isManageAllUsersAllowed(UserPermissionDTO user) {
+        return isManageAllUsersAllowed()
+                && isFolderSubset(user.getFolders());
     }
 
     /**
@@ -478,6 +511,41 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             // have any options to set the partner
         }
         return Lists.newArrayList(result);
+    }
+
+    public boolean isAllowed(String permissionType, UserPermissionDTO user) {
+        if (permissionType == null) {
+            return false;
+        }
+
+        switch (permissionType) {
+            case "allowView":
+            case "allowViewAll":
+                return isViewAllAllowed(user);
+            case "allowEdit":
+                return isEditAllowed(user);
+            case "allowEditAll":
+                return isEditAllAllowed(user);
+            case "allowManageUsers":
+                return isManageUsersAllowed(user);
+            case "allowManageAllUsers":
+                return isManageAllUsersAllowed(user);
+            case "allowDesign":
+                return isDesignAllowed(user);
+            default:
+                return false;
+        }
+    }
+
+    private boolean isFolderSubset(List<FolderDTO> folders) {
+        if (folders == null || folders.isEmpty()) {
+            // User has no folder limitations
+            // only return true if current user is database owner or can manage all users
+            return getAmOwner() || isManageAllUsersAllowed();
+        } else {
+            // Otherwise, check our folder list contains each member of given list
+            return getFolders().containsAll(folders);
+        }
     }
 
 }

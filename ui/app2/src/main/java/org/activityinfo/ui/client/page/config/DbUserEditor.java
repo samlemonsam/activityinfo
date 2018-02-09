@@ -173,12 +173,12 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         });
         columns.add(folderColumn);
 
-        PermissionCheckConfig allowView = new PermissionCheckConfig("allowViewSimple", I18N.CONSTANTS.allowView(), 75);
+        PermissionCheckConfig allowView = new PermissionCheckConfig("allowView", I18N.CONSTANTS.allowView(), 75);
         allowView.setDataIndex("allowView");
         allowView.setToolTip(I18N.CONSTANTS.allowViewLong());
         columns.add(allowView);
 
-        PermissionCheckConfig allowEdit = new PermissionCheckConfig("allowEditSimple", I18N.CONSTANTS.allowEdit(), 75);
+        PermissionCheckConfig allowEdit = new PermissionCheckConfig("allowEdit", I18N.CONSTANTS.allowEdit(), 75);
         allowEdit.setDataIndex("allowEdit");
         allowEdit.setToolTip(I18N.CONSTANTS.allowEditLong());
         columns.add(allowEdit);
@@ -266,26 +266,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         }
 
         // do not allow users to set rights they themselves do not have
-        if ("allowViewAll".equals(property) && !db.isViewAllAllowed()) {
-            return false;
-        }
-        if ("allowEdit".equals(property) && !db.isEditAllowed()) {
-            return false;
-        }
-        if ("allowEditAll".equals(property) && !db.isEditAllAllowed()) {
-            return false;
-        }
-        if ("allowDesign".equals(property) && !db.isDesignAllowed()) {
-            return false;
-        }
-        if ("allowManageUsers".equals(property) && !db.isManageUsersAllowed()) {
-            return false;
-        }
-        if ("allowManageAllUsers".equals(property) && !db.isManageAllUsersAllowed()) {
-            return false;
-        }
-
-        return true;
+        return db.isAllowed(property, user);
     }
 
     @Override

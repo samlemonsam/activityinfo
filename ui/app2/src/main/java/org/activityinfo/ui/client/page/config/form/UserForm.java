@@ -167,23 +167,40 @@ public class UserForm extends FormPanel {
         partnerCombo.setValue(user.getPartner());
         partnerCombo.setReadOnly(true);
 
+        editPermissionsGroup(user);
+        editFolderPermissions(user);
+    }
+
+    private void editPermissionsGroup(UserPermissionDTO user) {
         for (Field<?> field : permissionsGroup.getAll()) {
             CheckBox checkBox = (CheckBox) field;
+
             String permissionName = checkBox.getName();
             Boolean allowed = user.get(permissionName);
             checkBox.setValue(allowed == Boolean.TRUE);
-        }
 
-        if(!user.hasFolderLimitation()) {
-            allFolderCheckbox.setValue(true);
-        } else {
-            for (FolderDTO folder : user.getFolders()) {
+            checkBox.setEnabled(database.isAllowed(permissionName, user));
+        }
+    }
+
+    private void editFolderPermissions(UserPermissionDTO user) {
+        // set the value of overlapping folders
+        if (user.hasFolderLimitation()) {
+            user.getFolders().forEach(folder -> {
                 CheckBox checkBox = folderCheckBoxMap.get(folder.getId());
-                if(checkBox != null) {
+                if (checkBox != null) {
                     checkBox.setValue(true);
                 }
-            }
+            });
+        } else {
+            allFolderCheckbox.setValue(true);
         }
+
+        // enable/disable checkboxes depending on permissions
+        allFolderCheckbox.setEnabled(database.isManageUsersAllowed(user));
+        folderCheckBoxMap.forEach((i,checkBox) -> {
+            checkBox.setEnabled(database.isManageUsersAllowed(user));
+        });
     }
 
     public UserPermissionDTO getUser() {
