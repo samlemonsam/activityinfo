@@ -146,6 +146,7 @@ public class UserForm extends FormPanel {
         CheckBox checkBox = new CheckBox();
         checkBox.setBoxLabel(label);
         checkBox.setName(name);
+        checkBox.setEnabled(database.isAllowed(name,null));
         return checkBox;
     }
 
