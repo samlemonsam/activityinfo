@@ -520,6 +520,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
 
         switch (permissionType) {
             case "allowView":
+                return true;        // always allowed to view on partner/folder levels
             case "allowViewAll":
                 return user == null ? isViewAllAllowed() : isViewAllAllowed(user);
             case "allowEdit":
