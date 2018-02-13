@@ -538,6 +538,10 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         }
     }
 
+    public boolean hasFolderLimitation() {
+        return !folders.isEmpty();
+    }
+
     private boolean isFolderSubset(List<FolderDTO> folders) {
         if (folders == null || folders.isEmpty()) {
             // User has no folder limitations

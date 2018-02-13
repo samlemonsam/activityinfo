@@ -172,11 +172,11 @@ public class UserForm extends FormPanel {
         partnerCombo.setValue(user.getPartner());
         partnerCombo.setReadOnly(true);
 
-        editPermissionsGroup(user);
-        editFolderPermissions(user);
+        addEditPermissionsGroup(user);
+        addEditFolderPermissions(user);
     }
 
-    private void editPermissionsGroup(UserPermissionDTO user) {
+    private void addEditPermissionsGroup(UserPermissionDTO user) {
         for (Field<?> field : permissionsGroup.getAll()) {
             CheckBox checkBox = (CheckBox) field;
 
@@ -188,7 +188,7 @@ public class UserForm extends FormPanel {
         }
     }
 
-    private void editFolderPermissions(UserPermissionDTO user) {
+    private void addEditFolderPermissions(UserPermissionDTO user) {
         // set the value of overlapping folders
         if (user.hasFolderLimitation()) {
             user.getFolders().forEach(folder -> {
@@ -218,7 +218,7 @@ public class UserForm extends FormPanel {
             user.set(checkBox.getName(), checkBox.getValue());
         }
 
-        if(allFolderCheckbox.getValue() != Boolean.TRUE) {
+        if(allFolderCheckbox.getValue() != Boolean.TRUE || database.hasFolderLimitation()) {
             List<FolderDTO> folders = new ArrayList<>();
             for (Map.Entry<Integer, CheckBox> entry : folderCheckBoxMap.entrySet()) {
                 CheckBox checkBox = entry.getValue();
