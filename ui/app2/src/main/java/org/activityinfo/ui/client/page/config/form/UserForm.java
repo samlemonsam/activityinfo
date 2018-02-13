@@ -144,9 +144,13 @@ public class UserForm extends FormPanel {
 
     private Field<?> permissionsCheckBox(String name, String label) {
         CheckBox checkBox = new CheckBox();
+        boolean hasPermission = database.isAllowed(name, null);
+
         checkBox.setBoxLabel(label);
         checkBox.setName(name);
-        checkBox.setEnabled(database.isAllowed(name,null));
+        checkBox.setValue(hasPermission);
+        checkBox.setEnabled(hasPermission);
+
         return checkBox;
     }
 
