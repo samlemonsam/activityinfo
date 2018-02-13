@@ -266,7 +266,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         }
 
         // do not allow users to set rights they themselves do not have
-        return db.isAllowed(property, user);
+        return db.canGivePermission(property, user);
     }
 
     @Override

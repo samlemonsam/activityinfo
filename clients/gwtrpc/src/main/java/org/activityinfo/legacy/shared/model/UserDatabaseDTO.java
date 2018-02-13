@@ -219,8 +219,11 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean isViewAllAllowed(UserPermissionDTO user) {
-        return isViewAllAllowed()
-                && isFolderSubset(user.getFolders());
+        if (user == null) {
+            return isViewAllAllowed();
+        } else {
+            return isViewAllAllowed() && isFolderSubset(user.getFolders());
+        }
     }
 
     /**
@@ -241,9 +244,13 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean isEditAllowed(UserPermissionDTO user) {
-        return isEditAllowed()
-                && getPartners().contains(user.getPartner())
-                && isFolderSubset(user.getFolders());
+        if (user == null) {
+            return isEditAllowed();
+        } else {
+            return isEditAllowed()
+                    && getPartners().contains(user.getPartner())
+                    && isFolderSubset(user.getFolders());
+        }
     }
 
     /**
@@ -271,9 +278,13 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean isDesignAllowed(UserPermissionDTO user) {
-        return isDesignAllowed()
-                && getPartners().contains(user.getPartner())
-                && isFolderSubset(user.getFolders());
+        if (user == null) {
+            return isDesignAllowed();
+        } else {
+            return isDesignAllowed()
+                    && getPartners().contains(user.getPartner())
+                    && isFolderSubset(user.getFolders());
+        }
     }
 
     /**
@@ -294,8 +305,12 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean isEditAllAllowed(UserPermissionDTO user) {
-        return isEditAllAllowed()
-                && isFolderSubset(user.getFolders());
+        if (user == null) {
+            return isEditAllAllowed();
+        } else {
+            return isEditAllAllowed()
+                    && isFolderSubset(user.getFolders());
+        }
     }
 
     /**
@@ -307,9 +322,13 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean isManageUsersAllowed(UserPermissionDTO user) {
-        return isManageUsersAllowed()
-                && getPartners().contains(user.getPartner())
-                && isFolderSubset(user.getFolders());
+        if (user == null) {
+            return isManageUsersAllowed();
+        } else {
+            return isManageUsersAllowed()
+                    && getPartners().contains(user.getPartner())
+                    && isFolderSubset(user.getFolders());
+        }
     }
 
     /**
@@ -330,8 +349,12 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     public boolean isManageAllUsersAllowed(UserPermissionDTO user) {
-        return isManageAllUsersAllowed()
-                && isFolderSubset(user.getFolders());
+        if (user == null) {
+            return isManageAllUsersAllowed();
+        } else {
+            return isManageAllUsersAllowed()
+                    && isFolderSubset(user.getFolders());
+        }
     }
 
     /**
@@ -513,6 +536,28 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return Lists.newArrayList(result);
     }
 
+    public boolean canGivePermission(String permissionType, UserPermissionDTO user) {
+        if (permissionType == null) {
+            return false;
+        }
+
+        switch (permissionType) {
+            // Always allowed to give permissions on the same partner, provided the current user has them
+            case "allowView":
+            case "allowEdit":
+            case "allowManageUsers":
+            case "allowDesign":
+                return isAllowed(permissionType, user);
+            // Only allowed to give permissions on all partners, if current user can manage users for all partners
+            case "allowViewAll":
+            case "allowEditAll":
+            case "allowManageAllUsers":
+                return isAllowed(permissionType, user) && isManageAllUsersAllowed(user);
+            default:
+                return false;
+        }
+    }
+
     public boolean isAllowed(String permissionType, UserPermissionDTO user) {
         if (permissionType == null) {
             return false;
@@ -522,17 +567,17 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             case "allowView":
                 return true;        // always allowed to view on partner/folder levels
             case "allowViewAll":
-                return user == null ? isViewAllAllowed() : isViewAllAllowed(user);
+                return isViewAllAllowed(user);
             case "allowEdit":
-                return user == null ? isEditAllowed() : isEditAllowed(user);
+                return isEditAllowed(user);
             case "allowEditAll":
-                return user == null ? isEditAllAllowed() : isEditAllAllowed(user);
+                return isEditAllAllowed(user);
             case "allowManageUsers":
-                return user == null ? isManageUsersAllowed() : isManageUsersAllowed(user);
+                return isManageUsersAllowed(user);
             case "allowManageAllUsers":
-                return user == null ? isManageAllUsersAllowed() : isManageAllUsersAllowed(user);
+                return isManageAllUsersAllowed(user);
             case "allowDesign":
-                return user == null ? isDesignAllowed() : isDesignAllowed(user);
+                return isDesignAllowed(user);
             default:
                 return false;
         }
