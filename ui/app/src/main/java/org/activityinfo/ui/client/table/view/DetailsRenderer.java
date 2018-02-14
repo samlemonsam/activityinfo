@@ -39,6 +39,7 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.view.field.Blobs;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class DetailsRenderer {
@@ -264,10 +265,14 @@ public class DetailsRenderer {
                 html.appendEscaped(field.getLabel());
                 html.appendHtmlConstant("</h3>");
 
-                for (RecordRef recordRef : fieldValue.getReferences()) {
-                    Maybe<String> label = keySet.label(recordTree, recordRef);
+                Iterator<RecordRef> recordRefs = fieldValue.getReferences().iterator();
+                while (recordRefs.hasNext()) {
+                    Maybe<String> label = keySet.label(recordTree, recordRefs.next());
                     if(label.isVisible()) {
                         html.appendEscaped(label.get());
+                    }
+                    if(recordRefs.hasNext()) {
+                        html.appendHtmlConstant("<br>");
                     }
                 }
             }
