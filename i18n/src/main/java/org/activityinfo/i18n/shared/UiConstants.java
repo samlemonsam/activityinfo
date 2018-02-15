@@ -94,7 +94,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Manage all users")
     String allowManageAllUsers();
 
-    @DefaultStringValue("Manage users")
+    @DefaultStringValue("Manage Users")
     String allowManageUsers();
 
     @DefaultStringValue("View")
@@ -562,7 +562,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Mailing List")
     String mailingList();
 
-    @DefaultStringValue("Manage all users")
+    @DefaultStringValue("Manage All Users")
     String manageAllUsers();
 
     @DefaultStringValue("Mandatory")
