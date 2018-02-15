@@ -170,7 +170,7 @@ public class UserForm extends FormPanel {
         nameField.setReadOnly(true);
 
         partnerCombo.setValue(user.getPartner());
-        partnerCombo.setReadOnly(true);
+        partnerCombo.setReadOnly(!database.getAmOwner() && !database.isManageAllUsersAllowed(user));
 
         addEditPermissionsGroup(user);
         addEditFolderPermissions(user);
