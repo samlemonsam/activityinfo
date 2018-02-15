@@ -7,6 +7,9 @@ import com.google.gwt.i18n.client.Constants;
  */
 public interface UiConstants extends Constants {
 
+    @DefaultStringValue("Looking for Categories?")
+    String categoryInfo();
+
     @DefaultStringValue("Copy addresses to clipboard")
     String CopyAddressToClipBoard();
 

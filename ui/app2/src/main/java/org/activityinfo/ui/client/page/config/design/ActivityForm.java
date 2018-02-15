@@ -26,11 +26,12 @@ import com.extjs.gxt.ui.client.Style.Scroll;
 import com.extjs.gxt.ui.client.binding.FieldBinding;
 import com.extjs.gxt.ui.client.binding.FormBinding;
 import com.extjs.gxt.ui.client.data.ModelData;
-import com.extjs.gxt.ui.client.event.BindingEvent;
-import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.event.*;
+import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.NumberField;
 import com.extjs.gxt.ui.client.widget.form.TextField;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
@@ -38,6 +39,7 @@ import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.page.config.form.AbstractDesignForm;
+import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
@@ -48,6 +50,25 @@ import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
 class ActivityForm extends AbstractDesignForm {
 
     private FormBinding binding;
+    private String categoryLink = "http://help.activityinfo.org/m/28175/l/842935-folders-in-activityinfo";
+
+    /**
+     * Creates an info button (with icon) which navigates to a given hyperlink on press
+     */
+    private class HyperlinkInfoButton extends Button {
+
+        public HyperlinkInfoButton(String displayText, String link) {
+            this.setIcon(IconImageBundle.ICONS.info());
+            this.addListener(Events.OnClick, new Listener<BaseEvent>() {
+                @Override
+                public void handleEvent(BaseEvent baseEvent) {
+                    Window.open(link,"_blank",null);
+                }
+            });
+            this.setHtml(SafeHtmlUtils.fromString(displayText));
+        }
+
+    }
 
     public ActivityForm(Dispatcher service, UserDatabaseDTO database) {
         super();
@@ -117,6 +138,9 @@ class ActivityForm extends AbstractDesignForm {
                         I18N.CONSTANTS.newForm());
             }
         });
+
+        HyperlinkInfoButton categoryInfo = new HyperlinkInfoButton(I18N.CONSTANTS.categoryInfo(), categoryLink);
+        add(categoryInfo);
 
         hideFieldWhenNull(idField);
     }
