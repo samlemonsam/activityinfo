@@ -115,25 +115,29 @@ public class GeoDigestRenderer implements DigestRenderer {
                                                        .getSchemaDTO()
                                                        .getActivityById(siteDTO.getActivityId());
 
-                List<SiteHistory> histories = findSiteHistory(siteId, databaseModel.getModel().getUserDigest().getFrom());
-                for (SiteHistory history : histories) {
-                    html.append("<span class='geo-site' style='margin-left:10px;'>&bull; ");
-                    html.append(I18N.MESSAGES.geoDigestSiteMsg(history.getUser().getEmail(),
-                            history.getUser().getName(),
-                            activityDTO.getName(),
-                            siteDTO.getLocationName()));
+               // Check to see if this activity is visible to the user...
+                if(activityDTO != null) {
 
-                    Date targetDate = databaseModel.getModel().getUserDigest().getDate();
-                    Date creationDate = new Date(history.getTimeCreated());
-                    if (DateCalc.isOnToday(targetDate, creationDate)) {
-                        html.append(I18N.MESSAGES.geoDigestSiteMsgDateToday(creationDate));
-                    } else if (DateCalc.isOnYesterday(targetDate, creationDate)) {
-                        html.append(I18N.MESSAGES.geoDigestSiteMsgDateYesterday(creationDate));
-                    } else {
-                        html.append(I18N.MESSAGES.geoDigestSiteMsgDateOther(creationDate));
+                    List<SiteHistory> histories = findSiteHistory(siteId, databaseModel.getModel().getUserDigest().getFrom());
+                    for (SiteHistory history : histories) {
+                        html.append("<span class='geo-site' style='margin-left:10px;'>&bull; ");
+                        html.append(I18N.MESSAGES.geoDigestSiteMsg(history.getUser().getEmail(),
+                                history.getUser().getName(),
+                                activityDTO.getName(),
+                                siteDTO.getLocationName()));
+
+                        Date targetDate = databaseModel.getModel().getUserDigest().getDate();
+                        Date creationDate = new Date(history.getTimeCreated());
+                        if (DateCalc.isOnToday(targetDate, creationDate)) {
+                            html.append(I18N.MESSAGES.geoDigestSiteMsgDateToday(creationDate));
+                        } else if (DateCalc.isOnYesterday(targetDate, creationDate)) {
+                            html.append(I18N.MESSAGES.geoDigestSiteMsgDateYesterday(creationDate));
+                        } else {
+                            html.append(I18N.MESSAGES.geoDigestSiteMsgDateOther(creationDate));
+                        }
+
+                        html.append("</span><br>");
                     }
-
-                    html.append("</span><br>");
                 }
             }
         }
