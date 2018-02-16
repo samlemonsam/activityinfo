@@ -120,6 +120,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowManageUsers(perm.isAllowManageUsers());
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setPartner(new PartnerDTO(perm.getPartner().getId(), perm.getPartner().getName()));
+            dto.setFolderLimitation(!Strings.isNullOrEmpty(perm.getModel()));
             dto.setFolders(folderList(folderMap, perm));
             models.add(dto);
         }
@@ -130,7 +131,10 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
     private List<FolderDTO> folderList(Map<String, Folder> folderMap, UserPermission perm) {
 
         if(Strings.isNullOrEmpty(perm.getModel())) {
-            return null;
+            // Include all folders, as user has access to all
+            List<FolderDTO> folderList = new ArrayList<>(folderMap.size());
+            folderMap.values().forEach((folder) -> folderList.add(createFolderDTO(folder)));
+            return folderList;
         }
 
         try {
@@ -139,11 +143,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             for (GrantModel grantModel : model.getGrants()) {
                 Folder folder = folderMap.get(grantModel.getFolderId());
                 if(folder != null) {
-                    FolderDTO dto = new FolderDTO();
-                    dto.setId(CuidAdapter.getLegacyIdFromCuid(grantModel.getFolderId()));
-                    dto.setDatabaseId(folder.getDatabase().getId());
-                    dto.setName(folder.getName());
-                    folderList.add(dto);
+                    folderList.add(createFolderDTO(folder));
                 }
             }
             return folderList;
@@ -153,6 +153,14 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             LOGGER.log(Level.SEVERE, "Failed to parse permissions model", e);
             return null;
         }
+    }
+
+    private FolderDTO createFolderDTO(Folder folder) {
+        FolderDTO dto = new FolderDTO();
+        dto.setId(folder.getId());
+        dto.setDatabaseId(folder.getDatabase().getId());
+        dto.setName(folder.getName());
+        return dto;
     }
 
     private void assertAuthorized(UserPermission currentUserPermission) {

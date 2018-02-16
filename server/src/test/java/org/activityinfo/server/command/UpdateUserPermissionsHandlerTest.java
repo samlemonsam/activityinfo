@@ -273,6 +273,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         health.setId(3);
 
         newUser.setFolders(Arrays.asList(health));
+        newUser.setFolderLimitation(true);
 
         execute(new UpdateUserPermissions(1, newUser));
 

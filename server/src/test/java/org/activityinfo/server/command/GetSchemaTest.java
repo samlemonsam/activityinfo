@@ -242,6 +242,7 @@ public class GetSchemaTest extends CommandTestCase2 {
         bavon.setPartner(new PartnerDTO(1, "NRC"));
         bavon.setAllowView(true);
         bavon.setFolders(Arrays.asList(new FolderDTO(databaseId, healthFolderId, "Health")));
+        bavon.setFolderLimitation(true);
 
         execute(new UpdateUserPermissions(databaseId, bavon));
 

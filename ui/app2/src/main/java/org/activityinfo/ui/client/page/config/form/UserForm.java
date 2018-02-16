@@ -36,22 +36,19 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
-import org.activityinfo.legacy.shared.model.FolderDTO;
-import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.ui.client.page.common.toolbar.WarningBar;
 import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UserForm extends FormPanel {
 
     private final CheckBox allFolderCheckbox;
     private final CheckBoxGroup permissionsGroup;
+    private CheckBoxGroup folderGroup = new CheckBoxGroup();
+    private WarningBar permissionWarning  = new WarningBar();
 
     interface Templates extends SafeHtmlTemplates {
 
@@ -110,27 +107,33 @@ public class UserForm extends FormPanel {
         permissionsGroup = new CheckBoxGroup();
         permissionsGroup.setFieldLabel(I18N.CONSTANTS.permissions());
         permissionsGroup.setOrientation(Style.Orientation.VERTICAL);
-        permissionsGroup.add(permissionsCheckBox("allowView", I18N.CONSTANTS.allowView()));
-        permissionsGroup.add(permissionsCheckBox("allowEdit", I18N.CONSTANTS.allowEdit()));
-        permissionsGroup.add(permissionsCheckBox("allowViewAll", I18N.CONSTANTS.allowViewAll()));
-        permissionsGroup.add(permissionsCheckBox("allowEditAll", I18N.CONSTANTS.allowEditAll()));
-        permissionsGroup.add(permissionsCheckBox("allowManageUsers", I18N.CONSTANTS.allowManageUsers()));
-        permissionsGroup.add(permissionsCheckBox("allowManageAllUsers", I18N.CONSTANTS.allowManageAllUsers()));
-        permissionsGroup.add(permissionsCheckBox("allowDesign", I18N.CONSTANTS.allowDesign()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.VIEW, I18N.CONSTANTS.allowView()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.EDIT, I18N.CONSTANTS.allowEdit()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.VIEW_ALL, I18N.CONSTANTS.allowViewAll()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.EDIT_ALL, I18N.CONSTANTS.allowEditAll()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageAllUsers()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign()));
         this.add(permissionsGroup);
 
-        CheckBoxGroup folderGroup = new CheckBoxGroup();
         folderGroup.setFieldLabel(I18N.CONSTANTS.folders());
         folderGroup.setOrientation(Style.Orientation.VERTICAL);
 
-        allFolderCheckbox = new CheckBox();
-        allFolderCheckbox.setBoxLabel(TEMPLATES.allFoldersLabel(I18N.CONSTANTS.all()));
-        allFolderCheckbox.addListener(Events.Change, this::onAllFoldersChanged);
-        folderGroup.add(allFolderCheckbox);
+        // If a database user has *assigned* folders, do not show All checkbox
+        if (database.hasFolderLimitation()) {
+            allFolderCheckbox = null;
+        } else {
+            allFolderCheckbox = new CheckBox();
+            allFolderCheckbox.setValue(false);
+            allFolderCheckbox.setBoxLabel(TEMPLATES.allFoldersLabel(I18N.CONSTANTS.all()));
+            allFolderCheckbox.addListener(Events.Change, this::onAllFoldersChanged);
+            folderGroup.add(allFolderCheckbox);
+        }
 
         for (FolderDTO folder : database.getFolders()) {
             CheckBox folderCheckBox = new CheckBox();
             folderCheckBox.setBoxLabel(folder.getName());
+            folderCheckBox.setValue(false);
             folderGroup.add(folderCheckBox);
             folderCheckBoxMap.put(folder.getId(), folderCheckBox);
         }
@@ -140,14 +143,17 @@ public class UserForm extends FormPanel {
             partnerCombo.setValue(database.getMyPartner());
             partnerCombo.setReadOnly(true);
         }
+
+        permissionWarning.setWarning(I18N.CONSTANTS.permissionEditingLockedWarning());
+        this.add(permissionWarning);
     }
 
-    private Field<?> permissionsCheckBox(String name, String label) {
+    private Field<?> permissionsCheckBox(PermissionType permissionType, String label) {
         CheckBox checkBox = new CheckBox();
-        boolean hasPermission = database.canGivePermission(name, null);
+        boolean hasPermission = database.canGivePermission(permissionType, null);
 
         checkBox.setBoxLabel(label);
-        checkBox.setName(name);
+        checkBox.setName(permissionType.name());
         checkBox.setValue(hasPermission);
         checkBox.setEnabled(hasPermission);
 
@@ -170,67 +176,106 @@ public class UserForm extends FormPanel {
         nameField.setReadOnly(true);
 
         partnerCombo.setValue(user.getPartner());
-        partnerCombo.setReadOnly(!database.getAmOwner() && !database.isManageAllUsersAllowed(user));
+        partnerCombo.setReadOnly(!database.getAmOwner() && !database.isAllowed(PermissionType.MANAGE_ALL_USERS, user));
 
         addEditPermissionsGroup(user);
         addEditFolderPermissions(user);
+
+        if (database.hasGreaterPermissions(user)) {
+            permissionWarning.hide();
+        } else {
+            permissionWarning.show();
+        }
     }
 
     private void addEditPermissionsGroup(UserPermissionDTO user) {
         for (Field<?> field : permissionsGroup.getAll()) {
             CheckBox checkBox = (CheckBox) field;
-
-            String permissionName = checkBox.getName();
-            Boolean allowed = user.get(permissionName);
+            PermissionType permissionType = PermissionType.valueOf(checkBox.getName());
+            Boolean allowed = user.get(permissionType.getDtoPropertyName());
             checkBox.setValue(allowed == Boolean.TRUE);
-
-            checkBox.setEnabled(database.canGivePermission(permissionName, user));
+            checkBox.setEnabled(database.canGivePermission(permissionType, user));
         }
     }
 
     private void addEditFolderPermissions(UserPermissionDTO user) {
-        // set the value of overlapping folders
-        if (user.hasFolderLimitation()) {
-            user.getFolders().forEach(folder -> {
-                CheckBox checkBox = folderCheckBoxMap.get(folder.getId());
-                if (checkBox != null) {
-                    checkBox.setValue(true);
-                }
-            });
-        } else {
+        // If both database user and user have access to all, just set the allFolderCheckbox to true
+        if (!database.hasFolderLimitation() && !user.hasFolderLimitation()) {
             allFolderCheckbox.setValue(true);
+        // Else add any of the user folders not yet included, and set the values of overlapping folders
+        } else {
+            addUserFolders(user);
         }
 
-        // enable/disable checkboxes depending on permissions
-        allFolderCheckbox.setEnabled(database.isManageUsersAllowed(user));
-        folderCheckBoxMap.forEach((i,checkBox) -> {
-            checkBox.setEnabled(database.isManageUsersAllowed(user));
+        // Set checkbox enabled status if database user has permission to assign a given folder and the database user
+        // has an identical or greater set of permissions
+        if (allFolderCheckbox != null) {
+            allFolderCheckbox.setEnabled(database.hasGreaterPermissions(user));
+        }
+        folderCheckBoxMap.forEach((folderId, checkBox) -> {
+            boolean enabled = database.canAssignFolder(folderId) && database.hasGreaterPermissions(user);
+            checkBox.setEnabled(enabled);
         });
     }
 
-    public UserPermissionDTO getUser() {
+    private void addUserFolders(UserPermissionDTO user) {
+        user.getFolders().forEach(folder -> {
+            // only add folder checkbox if not currently assigned to database user
+            if (!folderCheckBoxMap.containsKey(folder.getId())) {
+                CheckBox folderCheckBox = new CheckBox();
+                folderCheckBox.setBoxLabel(folder.getName());
+                folderCheckBox.setValue(true);
+                folderCheckBoxMap.put(folder.getId(), folderCheckBox);
+                folderGroup.add(folderCheckBox);
+            // else set overlapping folder values to true
+            } else {
+                CheckBox folderCheckBox = folderCheckBoxMap.get(folder.getId());
+                folderCheckBox.setValue(true);
+            }
+        });
+    }
+
+    public UserPermissionDTO getUser() throws PermissionAssignmentException, FolderAssignmentException {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail(emailField.getValue());
         user.setName(nameField.getValue());
         user.setPartner(partnerCombo.getValue());
 
         for (CheckBox checkBox : permissionsGroup.getValues()) {
-            user.set(checkBox.getName(), checkBox.getValue());
-        }
-
-        if(allFolderCheckbox.getValue() != Boolean.TRUE || database.hasFolderLimitation()) {
-            List<FolderDTO> folders = new ArrayList<>();
-            for (Map.Entry<Integer, CheckBox> entry : folderCheckBoxMap.entrySet()) {
-                CheckBox checkBox = entry.getValue();
-                if(checkBox.getValue() == Boolean.TRUE) {
-                    FolderDTO folder = new FolderDTO();
-                    folder.setId(entry.getKey());
-                    folders.add(folder);
-                }
+            PermissionType permissionType = PermissionType.valueOf(checkBox.getName());
+            Boolean value = checkBox.getValue();
+            if (value == Boolean.TRUE && !database.isAllowed(permissionType, null)) {
+                // if the database user does not have this permission - throw error
+                throw new PermissionAssignmentException(I18N.CONSTANTS.permissionAssignmentErrorMessage());
             }
-            user.setFolders(folders);
+            user.set(permissionType.getDtoPropertyName(), checkBox.getValue());
         }
 
+        List<FolderDTO> folders = new ArrayList<>();
+
+        // Check if current database user has All folder access, and has assigned it to the user
+        if (allFolderCheckbox != null && allFolderCheckbox.getValue() == Boolean.TRUE) {
+            user.setFolderLimitation(false);
+            user.setFolders(database.getFolders());
+            return user;
+        }
+
+        // Otherwise, we set the list of folders user is given access to
+        folderCheckBoxMap.forEach((id,checkBox) -> {
+            if (checkBox.getValue() == Boolean.TRUE) {
+                FolderDTO folder = new FolderDTO();
+                folder.setId(id);
+                folders.add(folder);
+            }
+        });
+
+        // Database user must select a folder/folders for user
+        if (folders.isEmpty()) {
+            throw new FolderAssignmentException(I18N.CONSTANTS.noFolderAssignmentMessage());
+        }
+
+        user.setFolderLimitation(true);
+        user.setFolders(folders);
         return user;
     }
 }

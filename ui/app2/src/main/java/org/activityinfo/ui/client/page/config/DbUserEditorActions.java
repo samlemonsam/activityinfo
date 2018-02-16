@@ -22,6 +22,8 @@ import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
 import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogCallback;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogImpl;
+import org.activityinfo.ui.client.page.config.form.FolderAssignmentException;
+import org.activityinfo.ui.client.page.config.form.PermissionAssignmentException;
 import org.activityinfo.ui.client.page.config.form.UserForm;
 
 public class DbUserEditorActions {
@@ -99,26 +101,32 @@ public class DbUserEditorActions {
 
             @Override
             public void onValidated() {
-                UpdateUserPermissions command = new UpdateUserPermissions(db, form.getUser(), host);
-                command.setNewUser(newUser);
-                dispatcher.execute(command,
-                        new AsyncCallback<VoidResult>() {
+                try {
+                    UpdateUserPermissions command = new UpdateUserPermissions(db, form.getUser(), host);
+                    command.setNewUser(newUser);
+                    dispatcher.execute(command,
+                            new AsyncCallback<VoidResult>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                if(caught instanceof UserExistsException) {
-                                    MessageBox.alert(I18N.CONSTANTS.userExistsTitle(), I18N.CONSTANTS.userExistsMessage(), null);
-                                } else {
-                                    MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorUnexpectedOccured(), null);
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    if (caught instanceof UserExistsException) {
+                                        MessageBox.alert(I18N.CONSTANTS.userExistsTitle(), I18N.CONSTANTS.userExistsMessage(), null);
+                                    } else {
+                                        MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorUnexpectedOccured(), null);
+                                    }
                                 }
-                            }
 
-                            @Override
-                            public void onSuccess(VoidResult result) {
-                                loader.load();
-                                dlg.hide();
-                            }
-                        });
+                                @Override
+                                public void onSuccess(VoidResult result) {
+                                    loader.load();
+                                    dlg.hide();
+                                }
+                            });
+                } catch (FolderAssignmentException excp) {
+                    MessageBox.alert(I18N.CONSTANTS.noFolderAssignmentTitle(), excp.getMessage(), null);
+                } catch (PermissionAssignmentException excp) {
+                    MessageBox.alert(I18N.CONSTANTS.permissionAssignmentErrorTitle(), excp.getMessage(), null);
+                }
             }
         });
     }

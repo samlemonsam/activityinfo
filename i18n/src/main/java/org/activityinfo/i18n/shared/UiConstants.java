@@ -7,6 +7,21 @@ import com.google.gwt.i18n.client.Constants;
  */
 public interface UiConstants extends Constants {
 
+    @DefaultStringValue("Folder Assignment Error")
+    String noFolderAssignmentTitle();
+
+    @DefaultStringValue("User must be assigned to a Folder or Folders")
+    String noFolderAssignmentMessage();
+
+    @DefaultStringValue("Permission Assignment Error")
+    String permissionAssignmentErrorTitle();
+
+    @DefaultStringValue("Cannot give greater permissions than you currently have")
+    String permissionAssignmentErrorMessage();
+
+    @DefaultStringValue("Permission/Folder editing locked as user has greater permissions than you have")
+    String permissionEditingLockedWarning();
+
     @DefaultStringValue("Looking for Categories?")
     String categoryInfo();
 

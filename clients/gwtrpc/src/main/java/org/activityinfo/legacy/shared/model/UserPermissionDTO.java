@@ -31,6 +31,7 @@ import org.codehaus.jackson.annotate.JsonSetter;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,7 +42,8 @@ import java.util.List;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class UserPermissionDTO extends BaseModelData implements DTO {
 
-    private List<FolderDTO> folders;
+    private boolean hasFolderLimitation = false;
+    private List<FolderDTO> folders = new ArrayList<>(0);
 
     public UserPermissionDTO() {
         setAllowView(true);
@@ -180,8 +182,7 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
 
     /**
      *
-     * @return a list of folders to which the user is limited. If the list is empty,
-     * the user has access to all folders.
+     * @return a list of folders to which the user has access
      */
     public List<FolderDTO> getFolders() {
         return folders;
@@ -191,8 +192,13 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         this.folders = folders;
     }
 
+    public void setFolderLimitation(boolean folderLimitation) {
+        this.hasFolderLimitation = folderLimitation;
+    }
+
+    // Check to see whether validation flag is set
     public boolean hasFolderLimitation() {
-        return folders != null && !folders.isEmpty();
+        return hasFolderLimitation;
     }
 
     @JsonSetter

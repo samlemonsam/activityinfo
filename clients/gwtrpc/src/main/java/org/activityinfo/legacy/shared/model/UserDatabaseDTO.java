@@ -54,6 +54,8 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     private List<ProjectDTO> projects = new ArrayList<>(0);
     private List<FolderDTO> folders = new ArrayList<>(0);
 
+    private boolean hasFolderLimitation = false;
+
     public final static String ENTITY_NAME = "UserDatabase";
 
     public UserDatabaseDTO() {
@@ -218,14 +220,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return (Boolean) get("viewAllAllowed", false);
     }
 
-    public boolean isViewAllAllowed(UserPermissionDTO user) {
-        if (user == null) {
-            return isViewAllAllowed();
-        } else {
-            return isViewAllAllowed() && isFolderSubset(user.getFolders());
-        }
-    }
-
     /**
      * Sets the permission of the current user to edit data on behalf of the
      * Partner in this UserDatabase to which the current user belongs.
@@ -241,16 +235,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public boolean isEditAllowed() {
         return get("editAllowed", false);
-    }
-
-    public boolean isEditAllowed(UserPermissionDTO user) {
-        if (user == null) {
-            return isEditAllowed();
-        } else {
-            return isEditAllowed()
-                    && getPartners().contains(user.getPartner())
-                    && isFolderSubset(user.getFolders());
-        }
     }
 
     /**
@@ -277,16 +261,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         set("databaseDesignAllowed", value);
     }
 
-    public boolean isDesignAllowed(UserPermissionDTO user) {
-        if (user == null) {
-            return isDesignAllowed();
-        } else {
-            return isDesignAllowed()
-                    && getPartners().contains(user.getPartner())
-                    && isFolderSubset(user.getFolders());
-        }
-    }
-
     /**
      * Sets the permission of the current user to edit data in this UserDatabase
      * on behalf of all partners.
@@ -304,31 +278,12 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return get("editAllAllowed", false);
     }
 
-    public boolean isEditAllAllowed(UserPermissionDTO user) {
-        if (user == null) {
-            return isEditAllAllowed();
-        } else {
-            return isEditAllAllowed()
-                    && isFolderSubset(user.getFolders());
-        }
-    }
-
     /**
      * @return true if current user is allowed to make changes to user
      * permissions on behalf of the Partner to which they belong
      */
     public boolean isManageUsersAllowed() {
         return get("manageUsersAllowed", false);
-    }
-
-    public boolean isManageUsersAllowed(UserPermissionDTO user) {
-        if (user == null) {
-            return isManageUsersAllowed();
-        } else {
-            return isManageUsersAllowed()
-                    && getPartners().contains(user.getPartner())
-                    && isFolderSubset(user.getFolders());
-        }
     }
 
     /**
@@ -346,15 +301,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      */
     public boolean isManageAllUsersAllowed() {
         return get("manageAllUsersAllowed", false);
-    }
-
-    public boolean isManageAllUsersAllowed(UserPermissionDTO user) {
-        if (user == null) {
-            return isManageAllUsersAllowed();
-        } else {
-            return isManageAllUsersAllowed()
-                    && isFolderSubset(user.getFolders());
-        }
     }
 
     /**
@@ -536,66 +482,133 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return Lists.newArrayList(result);
     }
 
-    public boolean canGivePermission(String permissionType, UserPermissionDTO user) {
+    public boolean canAssignFolder(int folderId) {
+        // Check if database user can manage any other users
+        if (!isManageUsersAllowed() && !isManageAllUsersAllowed()) {
+            return false;
+        // Check if database user has any folder limitations - if none, can assign any folder
+        } else if (!hasFolderLimitation()) {
+            return true;
+        } else {
+            // Else, check if this folder is assignable by matching to a folder on the database user's list
+            for (FolderDTO folder : folders) {
+                if (folder.getId() == folderId) {
+                    return true;
+                }
+            }
+            // If no match - return false
+            return false;
+        }
+    }
+
+    /**
+     * Compare the set of permissions of the database user, and the given user.
+     * Will return false if the user has any one permission the database user doesn't, and return true otherwise
+     */
+    public boolean hasGreaterPermissions(UserPermissionDTO user) {
+        if (user.getAllowEdit() == Boolean.TRUE && !isEditAllowed()) {
+            return false;
+        } else if (user.getAllowViewAll() == Boolean.TRUE && !isViewAllAllowed()) {
+            return false;
+        } else if (user.getAllowEditAll() == Boolean.TRUE && !isEditAllAllowed()) {
+            return false;
+        } else if (user.getAllowDesign() == Boolean.TRUE && !isDesignAllowed()) {
+            return false;
+        } else if (user.getAllowManageUsers() == Boolean.TRUE && !isManageUsersAllowed()) {
+            return false;
+        } else if (user.getAllowManageAllUsers() == Boolean.TRUE && !isManageAllUsersAllowed()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public boolean canGivePermission(PermissionType permissionType, UserPermissionDTO user) {
         if (permissionType == null) {
             return false;
         }
 
+        // Check the database user has an identical or greater permission set than user
+        if (user != null && !this.hasGreaterPermissions(user)) {
+            return false;
+        }
+
         switch (permissionType) {
-            // Always allowed to give permissions on the same partner, provided the current user has them
-            case "allowView":
-            case "allowEdit":
-            case "allowManageUsers":
-            case "allowDesign":
+            // Always allowed to give permissions on the same partner, provided the database user has them
+            case VIEW:
+            case EDIT:
+            case MANAGE_USERS:
+            case DESIGN:
                 return isAllowed(permissionType, user);
-            // Only allowed to give permissions on all partners, if current user can manage users for all partners
-            case "allowViewAll":
-            case "allowEditAll":
-            case "allowManageAllUsers":
-                return isAllowed(permissionType, user) && isManageAllUsersAllowed(user);
+            // Only allowed to give permissions on all partners, if database user can manage users for all partners
+            case VIEW_ALL:
+            case EDIT_ALL:
+            case MANAGE_ALL_USERS:
+                return isAllowed(permissionType, user) && isManageAllUsersAllowed();
             default:
                 return false;
         }
     }
 
-    public boolean isAllowed(String permissionType, UserPermissionDTO user) {
+    public boolean isAllowed(PermissionType permissionType, UserPermissionDTO user) {
         if (permissionType == null) {
             return false;
         }
 
+        // If no user to check against - check basic permission
+        if (user == null) {
+            return checkBasicPermission(permissionType);
+        } else {
+            // Check if database user has basic permission
+            if (!checkBasicPermission(permissionType)) {
+                return false;
+            // Check if database user has partner permissions
+            } else if (!getAllowablePartners().contains(user.getPartner())) {
+                return false;
+            // Check if database user has any folder limitations - if none, then allowed
+            } else if (!hasFolderLimitation()) {
+                return true;
+            // Check if database user has identical or greater set of folder permissions - if true, then allowed
+            } else if (isFolderSubset(user.getFolders())) {
+                return true;
+            // Otherwise - false
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private boolean checkBasicPermission(PermissionType permissionType) {
         switch (permissionType) {
-            case "allowView":
-                return true;        // always allowed to view on partner/folder levels
-            case "allowViewAll":
-                return isViewAllAllowed(user);
-            case "allowEdit":
-                return isEditAllowed(user);
-            case "allowEditAll":
-                return isEditAllAllowed(user);
-            case "allowManageUsers":
-                return isManageUsersAllowed(user);
-            case "allowManageAllUsers":
-                return isManageAllUsersAllowed(user);
-            case "allowDesign":
-                return isDesignAllowed(user);
+            case VIEW:
+                return true;                    // always allowed to view on partner/folder levels
+            case VIEW_ALL:
+                return isViewAllAllowed();
+            case EDIT:
+                return isEditAllowed();
+            case EDIT_ALL:
+                return isEditAllAllowed();
+            case MANAGE_USERS:
+                return isManageUsersAllowed();
+            case MANAGE_ALL_USERS:
+                return isManageAllUsersAllowed();
+            case DESIGN:
+                return isDesignAllowed();
             default:
                 return false;
         }
     }
 
     public boolean hasFolderLimitation() {
-        return !folders.isEmpty();
+        return hasFolderLimitation;
     }
 
     private boolean isFolderSubset(List<FolderDTO> folders) {
-        if (folders == null || folders.isEmpty()) {
-            // User has no folder limitations
-            // only return true if current user is database owner or can manage all users
-            return getAmOwner() || isManageAllUsersAllowed();
-        } else {
-            // Otherwise, check our folder list contains each member of given list
-            return getFolders().containsAll(folders);
-        }
+        return getFolders().containsAll(folders);
     }
 
+
+    public void setFolderLimitation(boolean hasFolderLimitation) {
+        this.hasFolderLimitation = hasFolderLimitation;
+    }
 }

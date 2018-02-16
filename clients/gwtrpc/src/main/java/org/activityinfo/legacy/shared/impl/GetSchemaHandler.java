@@ -332,6 +332,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             db.setDatabaseDesignAllowed(true);
                         }
 
+                        db.setFolderLimitation(schemaFilter.hasFolderLimitations());
+
                         databaseFilters.put(db.getId(), schemaFilter);
 
                         // todo fix query !!! sometimes it returns duplicates

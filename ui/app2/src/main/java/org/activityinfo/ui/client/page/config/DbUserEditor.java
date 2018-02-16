@@ -39,10 +39,7 @@ import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
-import org.activityinfo.legacy.shared.model.FolderDTO;
-import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
@@ -107,11 +104,11 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         toolBar.setActionEnabled(UIActions.ADD, db.isManageUsersAllowed());
         toolBar.setActionEnabled(UIActions.DELETE, false);
 
-        grid.getColumnModel().getColumnById("allowViewAll").setHidden(!db.isManageUsersAllowed());
-        grid.getColumnModel().getColumnById("allowEditAll").setHidden(!db.isManageUsersAllowed());
-        grid.getColumnModel().getColumnById("allowManageUsers").setHidden(!db.isManageAllUsersAllowed());
-        grid.getColumnModel().getColumnById("allowManageAllUsers").setHidden(!db.isManageAllUsersAllowed());
-        grid.getColumnModel().getColumnById("allowDesign").setHidden(!db.isDesignAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.VIEW_ALL.name()).setHidden(!db.isManageUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.EDIT_ALL.name()).setHidden(!db.isManageUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.MANAGE_USERS.name()).setHidden(!db.isManageAllUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.MANAGE_ALL_USERS.name()).setHidden(!db.isManageAllUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.DESIGN.name()).setHidden(!db.isDesignAllowed());
 
         loader.load();
         modified = false;
@@ -173,40 +170,53 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         });
         columns.add(folderColumn);
 
-        PermissionCheckConfig allowView = new PermissionCheckConfig("allowView", I18N.CONSTANTS.allowView(), 75);
-        allowView.setDataIndex("allowView");
+        PermissionCheckConfig allowView = new PermissionCheckConfig(PermissionType.VIEW.name(),
+                I18N.CONSTANTS.allowView(),
+                75);
+        allowView.setDataIndex(PermissionType.VIEW.getDtoPropertyName());
         allowView.setToolTip(I18N.CONSTANTS.allowViewLong());
         columns.add(allowView);
 
-        PermissionCheckConfig allowEdit = new PermissionCheckConfig("allowEdit", I18N.CONSTANTS.allowEdit(), 75);
-        allowEdit.setDataIndex("allowEdit");
+        PermissionCheckConfig allowEdit = new PermissionCheckConfig(PermissionType.EDIT.name(),
+                I18N.CONSTANTS.allowEdit(),
+                75);
+        allowEdit.setDataIndex(PermissionType.EDIT.getDtoPropertyName());
         allowEdit.setToolTip(I18N.CONSTANTS.allowEditLong());
         columns.add(allowEdit);
 
-        PermissionCheckConfig allowViewAll = new PermissionCheckConfig("allowViewAll",
+        PermissionCheckConfig allowViewAll = new PermissionCheckConfig(PermissionType.VIEW_ALL.name(),
                 I18N.CONSTANTS.allowViewAll(),
                 75);
+        allowViewAll.setDataIndex(PermissionType.VIEW_ALL.getDtoPropertyName());
         allowViewAll.setToolTip(I18N.CONSTANTS.allowViewAllLong());
         columns.add(allowViewAll);
 
-        PermissionCheckConfig allowEditAll = new PermissionCheckConfig("allowEditAll",
+        PermissionCheckConfig allowEditAll = new PermissionCheckConfig(PermissionType.EDIT_ALL.name(),
                 I18N.CONSTANTS.allowEditAll(),
                 75);
+        allowEditAll.setDataIndex(PermissionType.EDIT_ALL.getDtoPropertyName());
         allowEditAll.setToolTip(I18N.CONSTANTS.allowEditAllLong());
         columns.add(allowEditAll);
 
         PermissionCheckConfig allowManageUsers = null;
-        allowManageUsers = new PermissionCheckConfig("allowManageUsers", I18N.CONSTANTS.allowManageUsers(), 150);
+        allowManageUsers = new PermissionCheckConfig(PermissionType.MANAGE_USERS.name(),
+                I18N.CONSTANTS.allowManageUsers(),
+                150);
+        allowManageUsers.setDataIndex(PermissionType.MANAGE_USERS.getDtoPropertyName());
         columns.add(allowManageUsers);
 
-        PermissionCheckConfig allowManageAllUsers = new PermissionCheckConfig("allowManageAllUsers",
+        PermissionCheckConfig allowManageAllUsers = new PermissionCheckConfig(PermissionType.MANAGE_ALL_USERS.name(),
                 I18N.CONSTANTS.manageAllUsers(),
                 150);
+        allowManageAllUsers.setDataIndex(PermissionType.MANAGE_ALL_USERS.getDtoPropertyName());
         columns.add(allowManageAllUsers);
 
         // only users with the right to design them selves can change the design
         // attribute
-        PermissionCheckConfig allowDesign = new PermissionCheckConfig("allowDesign", I18N.CONSTANTS.allowDesign(), 75);
+        PermissionCheckConfig allowDesign = new PermissionCheckConfig(PermissionType.DESIGN.name(),
+                I18N.CONSTANTS.allowDesign(),
+                75);
+        allowDesign.setDataIndex(PermissionType.DESIGN.getDtoPropertyName());
         allowDesign.setToolTip(I18N.CONSTANTS.allowDesignLong());
         columns.add(allowDesign);
 
@@ -251,7 +261,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         return false;
     }
 
-    private boolean validateChange(UserPermissionDTO user, String property) {
+    private boolean validateChange(UserPermissionDTO user, PermissionType permissionType) {
 
         // If the user doesn't have the manageUser permission, then it's
         // definitely a no.
@@ -265,8 +275,13 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             return false;
         }
 
+        // check if database user has a greater permission set than user - if not, then we cnanot change permissions
+        if (!db.hasGreaterPermissions(user)) {
+            return false;
+        }
+
         // do not allow users to set rights they themselves do not have
-        return db.canGivePermission(property, user);
+        return db.canGivePermission(permissionType, user);
     }
 
     @Override
@@ -284,20 +299,20 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         return null;
     }
 
-    private void onRowEdit(String property, boolean value, Record record) {
+    private void onRowEdit(PermissionType permissionType, boolean value, Record record) {
         record.beginEdit();
         if (!value) {
             // Cascade remove permissions
-            if ("allowViewAll".equals(property)) {
-                record.set("allowEditAll", false);
+            if (permissionType == PermissionType.VIEW_ALL) {
+                record.set(PermissionType.EDIT_ALL.getDtoPropertyName(), false);
             }
         } else {
             // cascade add permissions
-            if ("allowEditAll".equals(property)) {
-                record.set("allowEdit", true);
-                record.set("allowViewAll", true);
-            } else if ("allowManageAllUsers".equals(property)) {
-                record.set("allowManageUsers", true);
+            if (permissionType == PermissionType.EDIT_ALL) {
+                record.set(PermissionType.EDIT.getDtoPropertyName(), true);
+                record.set(PermissionType.VIEW_ALL.getDtoPropertyName(), true);
+            } else if (permissionType == PermissionType.MANAGE_ALL_USERS) {
+                record.set(PermissionType.MANAGE_USERS.getDtoPropertyName(), true);
             }
         }
 
@@ -390,13 +405,13 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                 !el.hasStyleName("x-grid3-check-col-disabled")) {
                 ge.stopEvent();
                 UserPermissionDTO m = (UserPermissionDTO) ge.getModel();
-                String property = grid.getColumnModel().getColumnId(ge.getColIndex());
+                PermissionType permission = PermissionType.valueOf(grid.getColumnModel().getColumnId(ge.getColIndex()));
                 Record r = store.getRecord(m);
                 Boolean b = m.get(getDataIndex());
-                if (validateChange(m, property)) {
+                if (validateChange(m, permission)) {
                     boolean newValue = b == null ? true : !b;
                     r.set(getDataIndex(), newValue);
-                    onRowEdit(property, newValue, r);
+                    onRowEdit(permission, newValue, r);
                 }
             }
         }
