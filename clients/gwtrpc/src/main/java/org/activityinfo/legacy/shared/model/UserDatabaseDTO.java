@@ -482,13 +482,16 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return Lists.newArrayList(result);
     }
 
-    public boolean canAssignFolder(int folderId) {
+    public boolean canAssignFolder(int folderId, UserPermissionDTO user) {
         // Check if database user can manage any other users
         if (!isManageUsersAllowed() && !isManageAllUsersAllowed()) {
             return false;
         // Check if database user has any folder limitations - if none, can assign any folder
         } else if (!hasFolderLimitation()) {
             return true;
+        // Check if user has "All" folder permissions - cannot change folder on root users if we are not one
+        } else if (!user.hasFolderLimitation()) {
+            return false;
         } else {
             // Else, check if this folder is assignable by matching to a folder on the database user's list
             for (FolderDTO folder : folders) {

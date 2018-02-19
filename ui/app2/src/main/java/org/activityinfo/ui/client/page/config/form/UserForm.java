@@ -213,7 +213,7 @@ public class UserForm extends FormPanel {
             allFolderCheckbox.setEnabled(database.hasGreaterPermissions(user));
         }
         folderCheckBoxMap.forEach((folderId, checkBox) -> {
-            boolean enabled = database.canAssignFolder(folderId) && database.hasGreaterPermissions(user);
+            boolean enabled = database.canAssignFolder(folderId, user) && database.hasGreaterPermissions(user);
             checkBox.setEnabled(enabled);
         });
     }
