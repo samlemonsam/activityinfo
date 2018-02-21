@@ -166,9 +166,13 @@ public class LookupKey {
         }
     }
 
-    private ExprNode join(@Nullable ExprNode base, SymbolExpr field) {
-        if(base == null) {
+    private ExprNode join(@Nullable ExprNode base, @Nullable SymbolExpr field) {
+        if(base == null && field == null) {
+            return null;
+        } else if (base == null) {
             return field;
+        } else if (field == null) {
+            return base;
         } else {
             return new CompoundExpr(base, field);
         }
