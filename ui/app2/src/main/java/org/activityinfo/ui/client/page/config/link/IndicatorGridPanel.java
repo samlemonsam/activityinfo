@@ -34,6 +34,7 @@ import com.extjs.gxt.ui.client.util.Point;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -240,7 +241,8 @@ public class IndicatorGridPanel extends ContentPanel {
                     html.append(";font-weight: bold;");
                 }
                 html.append("\">");
-                html.append(SafeHtmlUtils.htmlEscape(String.valueOf(model.get("name"))));
+                String modelName = Strings.nullToEmpty(model.get("name"));
+                html.append(SafeHtmlUtils.htmlEscape(modelName));
                 html.append("</div>");
                 return SafeHtmlUtils.fromTrustedString(html.toString());
             }
