@@ -270,4 +270,22 @@ public class LookupKeySetTest {
         assertThat(lookupKeySet.getLookupKeys(), hasSize(1));
         assertThat(lookupKeySet.getLeafKeys(), hasSize(1));
     }
+
+    @Test
+    public void multipleTextKeysTest() {
+        TestingStorageProvider catalog = setup.getCatalog();
+        SimpleReferenceForm refForm = catalog.getSimpleReferenceForm();
+        MultipleTextKeysForm multTextKeyForm = catalog.getMultipleTextKeysForm();
+
+        FormField refField = refForm.getRefField();
+        CompoundExpr pathToKey1 = new CompoundExpr(refField.getId(), MultipleTextKeysForm.FIRST_TEXT_KEY_ID.asString());
+        CompoundExpr pathToKey2 = new CompoundExpr(refField.getId(), MultipleTextKeysForm.SECOND_TEXT_KEY_ID.asString());
+
+        FormTree formTree = catalog.getFormTree(multTextKeyForm.getFormId());
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, refField);
+
+        Map<LookupKey,ExprNode> formulas = lookupKeySet.getKeyFormulas(refField.getId());
+
+        assertThat(formulas.values(), containsInAnyOrder(pathToKey1, pathToKey2));
+    }
 }

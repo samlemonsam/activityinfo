@@ -64,6 +64,9 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
     private final ClinicForm clinicForm;
     private final IdpLocationForm idpLocationForm;
 
+    private final SimpleReferenceForm simpleReferenceForm;
+    private final MultipleTextKeysForm multipleTextKeysForm;
+
 
     public TestingStorageProvider() {
 
@@ -104,6 +107,11 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
         // List of locations
         idpLocationForm = new IdpLocationForm(new UnitTestingIds(), 100, province);
         add(idpLocationForm);
+
+        // multiple text keys form
+        multipleTextKeysForm = new MultipleTextKeysForm(new UnitTestingIds());
+        simpleReferenceForm = new SimpleReferenceForm(new UnitTestingIds(), multipleTextKeysForm);
+        add(simpleReferenceForm, multipleTextKeysForm);
     }
 
     public Survey getSurvey() {
@@ -225,6 +233,14 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
 
     public LocaliteForm getLocaliteForm() {
         return localiteForm;
+    }
+
+    public SimpleReferenceForm getSimpleReferenceForm() {
+        return simpleReferenceForm;
+    }
+
+    public MultipleTextKeysForm getMultipleTextKeysForm() {
+        return multipleTextKeysForm;
     }
 
     @Override
