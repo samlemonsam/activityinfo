@@ -63,7 +63,7 @@ public class NewReportPanel extends ContentPanel {
 
         ListView<ReportTemplate> view = new ListView<ReportTemplate>();
         view.setStyleName("gallery");
-        view.setRenderer(new GalleryRenderer<ReportTemplate>("image/reports/"));
+        view.setRenderer(new GalleryRenderer<>("image/reports/"));
         view.setBorders(false);
         view.setStore(store);
         view.setItemSelector("dd");

@@ -24,10 +24,17 @@ package org.activityinfo.ui.client.page.report;
 
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
 import com.extjs.gxt.ui.client.util.Margins;
+import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
+import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
@@ -48,6 +55,19 @@ public class ReportsPage extends LayoutContainer implements Page {
     public ReportsPage(EventBus eventBus, Dispatcher dispatcher, ResourceLocator locator) {
 
         setLayout(new BorderLayout());
+
+        ContentPanel betaLinkPanel = new ContentPanel();
+        betaLinkPanel.setHeaderVisible(false);
+        betaLinkPanel.setLayout(new CenterLayout());
+        Anchor betaLink = new Anchor(I18N.CONSTANTS.tryNewReportingInterface());
+        betaLink.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                Window.open("/app?ui=3#analysis", "_blank", null);
+            }
+        });
+        betaLinkPanel.add(betaLink);
+        add(betaLink, new BorderLayoutData(LayoutRegion.NORTH, 32));
 
         BorderLayoutData newLayout = new BorderLayoutData(LayoutRegion.EAST);
         newLayout.setSize(0.40f);

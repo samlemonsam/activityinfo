@@ -1827,4 +1827,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("The folder is not empty. Please remove all forms before deleting.")
     String folderNotEmpty();
+
+    @DefaultStringValue("Try our new reporting interface! (BETA)")
+    String tryNewReportingInterface();
 }
