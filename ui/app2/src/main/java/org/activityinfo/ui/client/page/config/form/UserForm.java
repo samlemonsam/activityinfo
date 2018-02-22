@@ -145,6 +145,7 @@ public class UserForm extends FormPanel {
         }
 
         permissionWarning.setWarning(I18N.CONSTANTS.permissionEditingLockedWarning());
+        permissionWarning.hide();
         this.add(permissionWarning);
     }
 
