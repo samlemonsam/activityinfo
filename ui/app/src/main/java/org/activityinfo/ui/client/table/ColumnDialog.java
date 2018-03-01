@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.table;
 
-import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -17,7 +16,6 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.DualListField;
 import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
-import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
@@ -30,9 +28,7 @@ import org.activityinfo.ui.client.measureDialog.view.MeasureTreeNode;
 import org.activityinfo.ui.client.table.view.Dialogs;
 import org.activityinfo.ui.client.table.view.DoubleClickEditTextCell;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -125,7 +121,6 @@ public class ColumnDialog {
         IconButton up = new IconButton(APPEARANCE.up());
         up.addSelectHandler(this::onUp);
 
-
         IconButton addButton = new IconButton(APPEARANCE.right());
       //  right.setToolTip(getMessages().addSelected());
         addButton.addSelectHandler(this::addColumns);
@@ -133,20 +128,12 @@ public class ColumnDialog {
         IconButton removeButton = new IconButton(APPEARANCE.left());
         removeButton.addSelectHandler(this::removeColumns);
 
-
         IconButton removeAll = new IconButton(APPEARANCE.allLeft());
       //  removeAll.setToolTip(getMessages().removeAll());
         removeAll.addSelectHandler(this::clearColumns);
 
         IconButton down = new IconButton(APPEARANCE.down());
-        //down.setToolTip(getMessages().moveDown());
-//        down.addSelectHandler(new SelectEvent.SelectHandler() {
-//
-//            @Override
-//            public void onSelect(SelectEvent event) {
-//                onDown();
-//            }
-//        });
+        down.addSelectHandler(this::onDown);
 
         VerticalPanel buttonBar = new VerticalPanel();
         buttonBar.setSpacing(3);
@@ -200,9 +187,12 @@ public class ColumnDialog {
 
 
     private void onUp(SelectEvent event) {
-
+        selectedList.moveSelectedUp();
     }
 
+    private void onDown(SelectEvent event) {
+        selectedList.moveSelectedDown();
+    }
 
     public void show(Consumer<TableModel> updateHandler) {
         dialog.show();
