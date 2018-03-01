@@ -257,8 +257,10 @@ public class FieldEditor implements IsWidget {
 
     @UiHandler("code")
     void onCodeChanged(KeyUpEvent event) {
-        formField.setCode(code.getValue());
-        fireUpdate();
+        if(validateCode(this.fieldWidgetContainer)) {
+            formField.setCode(code.getValue());
+            fireUpdate();
+        }
     }
 
     @UiHandler("required")
