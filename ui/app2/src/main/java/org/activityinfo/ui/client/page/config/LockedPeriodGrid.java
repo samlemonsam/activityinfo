@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.page.config;
  */
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import com.extjs.gxt.ui.client.core.El;
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
@@ -31,9 +32,8 @@ import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
-import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
-import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
-import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
+import com.extjs.gxt.ui.client.widget.form.CheckBox;
+import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
@@ -46,7 +46,6 @@ import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.monitor.NullAsyncMonitor;
-import org.activityinfo.ui.client.page.common.columns.EditCheckColumnConfig;
 import org.activityinfo.ui.client.page.common.columns.EditableLocalDateColumn;
 import org.activityinfo.ui.client.page.common.columns.ReadLockedPeriodTypeColumn;
 import org.activityinfo.ui.client.page.common.columns.ReadTextColumn;
@@ -75,6 +74,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     private AsyncMonitor deletingMonitor = new NullAsyncMonitor();
     private AsyncMonitor loadingMonitor = new NullAsyncMonitor();
     private AsyncMonitor updatingMonitor = new NullAsyncMonitor();
+    private EditCheckColumnConfig columnEnabled;
 
     // Data
     private LockedPeriodDTO lockedPeriod;
@@ -84,6 +84,25 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     private AddLockedPeriodDialog addLockedPeriod;
     private ActionToolBar actionToolbar;
     private FormDialogImpl<AddLockedPeriodDialog> form;
+
+    public class EditCheckColumnConfig extends CheckColumnConfig {
+
+        public EditCheckColumnConfig(String id, String name, int width) {
+            super(id, name, width);
+            setToolTip(name);
+            setEditor(new CellEditor(new CheckBox()));
+        }
+
+        public void checkForSelection(ComponentEvent be) {
+            El el = be.getTargetEl();
+            if (el != null && el.hasStyleName("x-grid3-cc-" + getId()) && !el.hasStyleName("x-grid3-check-col-disabled")) {
+                Record r = lockedPeriodStore.getRecord(lockedPeriod);
+                Boolean b = lockedPeriod.get(this.getDataIndex());
+                r.set(this.getDataIndex(), b == null ? true : !b);
+            }
+        }
+    }
+
 
     public LockedPeriodGrid() {
         super();
@@ -99,7 +118,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     private void createGrid() {
         List<ColumnConfig> configs = new ArrayList<ColumnConfig>();
 
-        ColumnConfig columnEnabled = new EditCheckColumnConfig("enabled", I18N.CONSTANTS.enabledColumn(), 55);
+        columnEnabled = new EditCheckColumnConfig("enabled", I18N.CONSTANTS.enabledColumn(), 55);
         columnEnabled.setSortable(false);
 
         ColumnConfig columnPeriodType = new ReadLockedPeriodTypeColumn();
@@ -140,22 +159,23 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
         lockedPeriodGrid.addListener(Events.OnClick, new Listener<ComponentEvent>() {
             @Override
             public void handleEvent(ComponentEvent be) {
-                updateState();
+                updateState(be);
             }
         });
         add(lockedPeriodGrid);
     }
 
-    private void updateState() {
+    private void updateState(ComponentEvent be) {
         lockedPeriod = lockedPeriodGrid.getSelectionModel().getSelectedItem();
         setDeleteEnabled(lockedPeriodGrid.getSelectionModel().getSelectedItem() != null);
+        columnEnabled.checkForSelection(be);
     }
 
     private void updateStateLater() {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                updateState();
+                updateState(null);
             }
         });
     }
