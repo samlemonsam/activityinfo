@@ -93,6 +93,11 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         createPagingToolBar();
     }
 
+    public void setModified(boolean modified) {
+        this.modified = modified;
+        toolBar.setDirty(modified);
+    }
+
     @Override
     public void go(UserDatabaseDTO db) {
         this.db = db;
@@ -111,7 +116,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         grid.getColumnModel().getColumnById(PermissionType.DESIGN.name()).setHidden(!db.isDesignAllowed());
 
         loader.load();
-        modified = false;
+        setModified(false);
     }
 
     private void createToolBar() {
@@ -135,8 +140,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         store = new ListStore<>(loader);
         store.setKeyProvider(model -> model.getEmail());
         store.addListener(Store.Update, event -> {
-            modified = !store.getModifiedRecords().isEmpty();
-            toolBar.setDirty(modified);
+            setModified(!store.getModifiedRecords().isEmpty());
         });
 
         final List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
@@ -317,8 +321,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         }
 
         record.endEdit();
-        modified = store.getModifiedRecords().size() != 0;
-        toolBar.setDirty(modified);
+        setModified(!store.getModifiedRecords().isEmpty());
     }
 
     private void onSelectionChanged(UserPermissionDTO selectedItem) {
@@ -343,16 +346,12 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     public void onUIAction(String actionId) {
         if (actionId.equals(UIActions.SAVE)) {
             actions.save();
-            modified = false;
         } else if (actionId.equals(UIActions.ADD)) {
             actions.add();
-            modified = true;
         } else if (actionId.equals(UIActions.EDIT)) {
             actions.edit(grid.getSelectionModel().getSelectedItem());
-            modified = true;
         } else if (actionId.equals(UIActions.DELETE)) {
             actions.delete();
-            modified = true;
         } else if (actionId.equals(UIActions.EXPORT)) {
             actions.export();
         } else if (UIActions.MAILING_LIST.equals(actionId)) {

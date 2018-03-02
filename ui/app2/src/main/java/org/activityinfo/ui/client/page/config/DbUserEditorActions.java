@@ -1,9 +1,10 @@
 package org.activityinfo.ui.client.page.config;
 
 import com.extjs.gxt.ui.client.data.PagingLoader;
+import com.extjs.gxt.ui.client.event.ButtonEvent;
+import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
-import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.google.gwt.core.client.GWT;
@@ -28,14 +29,14 @@ import org.activityinfo.ui.client.page.config.form.UserForm;
 
 public class DbUserEditorActions {
 
-    private ContentPanel panel;
+    private DbUserEditor panel;
     private Dispatcher dispatcher;
     private PagingLoader loader;
     private ListStore<UserPermissionDTO> store;
     private Grid<UserPermissionDTO> grid;
     private UserDatabaseDTO db;
 
-    public DbUserEditorActions(ContentPanel panel, Dispatcher dispatcher, PagingLoader loader, ListStore<UserPermissionDTO> store, Grid<UserPermissionDTO> grid, UserDatabaseDTO db) {
+    public DbUserEditorActions(DbUserEditor panel, Dispatcher dispatcher, PagingLoader loader, ListStore<UserPermissionDTO> store, Grid<UserPermissionDTO> grid, UserDatabaseDTO db) {
         this.panel = panel;
         this.dispatcher = dispatcher;
         this.loader = loader;
@@ -69,6 +70,7 @@ public class DbUserEditorActions {
                     @Override
                     public void onSuccess(BatchResult result) {
                         store.commitChanges();
+                        panel.setModified(false);
                         if (callback != null) {
                             callback.onDecided(true);
                         }
@@ -78,14 +80,14 @@ public class DbUserEditorActions {
 
     public void add() {
         final UserForm form = new UserForm(db);
-
+        panel.setModified(true);
         showDialog(form, true);
     }
 
     public void edit(UserPermissionDTO user) {
         final UserForm form = new UserForm(db);
         form.edit(user);
-
+        panel.setModified(true);
         showDialog(form, false);
     }
 
@@ -94,6 +96,12 @@ public class DbUserEditorActions {
         dlg.setHeadingText(newUser ? I18N.CONSTANTS.newUser() : I18N.CONSTANTS.editUser());
         dlg.setWidth(400);
         dlg.setHeight(300);
+        dlg.getCancelButton().addSelectionListener(new SelectionListener<ButtonEvent>() {
+            @Override
+            public void componentSelected(ButtonEvent buttonEvent) {
+                panel.setModified(false);
+            }
+        });
 
         final String host = Window.Location.getHostName();
 
@@ -132,6 +140,7 @@ public class DbUserEditorActions {
     }
 
     public void delete() {
+        panel.setModified(true);
         final UserPermissionDTO model = grid.getSelectionModel().getSelectedItem();
         model.setAllowView(false);
         model.setAllowViewAll(false);
@@ -146,11 +155,13 @@ public class DbUserEditorActions {
                 new AsyncCallback<VoidResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        panel.setModified(false);
                     }
 
                     @Override
                     public void onSuccess(VoidResult result) {
                         store.remove(model);
+                        panel.setModified(false);
                     }
                 });
     }

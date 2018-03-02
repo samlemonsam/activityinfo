@@ -133,6 +133,10 @@ public class FormDialogImpl<FormT extends FormPanel> extends Window implements A
         return saveButton;
     }
 
+    public Button getCancelButton() {
+        return cancelButton;
+    }
+
     public void show(FormDialogCallback callback) {
         this.callback = callback;
 
