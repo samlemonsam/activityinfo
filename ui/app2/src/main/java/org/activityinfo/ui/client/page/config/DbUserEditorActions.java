@@ -127,6 +127,7 @@ public class DbUserEditorActions {
                                 @Override
                                 public void onSuccess(VoidResult result) {
                                     loader.load();
+                                    panel.setModified(false);
                                     dlg.hide();
                                 }
                             });
