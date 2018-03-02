@@ -293,19 +293,13 @@ public class FormDesignerPanel extends Composite implements ScrollHandler, HasNa
     private void calcSpacerHeight() {
         int verticalScrollPosition = scrollAncestor.getVerticalScrollPosition();
 
-        // properties spacer
+        // properties and palette spacer
         if (verticalScrollPosition > FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION) {
             int height = verticalScrollPosition - FormDesignerConstants.MAX_VERTICAL_SCROLL_POSITION;
             spacer.setHeight(height + "px");
-        } else {
-            spacer.setHeight("0px");
-        }
-
-        // palette spacer
-        if (verticalScrollPosition > FormDesignerConstants.MAX_VERTICAL_PALETTE_SCROLL_POSITION) {
-            int height = verticalScrollPosition - FormDesignerConstants.MAX_VERTICAL_PALETTE_SCROLL_POSITION;
             paletteSpacer.setHeight(height + "px");
         } else {
+            spacer.setHeight("0px");
             paletteSpacer.setHeight("0px");
         }
     }
