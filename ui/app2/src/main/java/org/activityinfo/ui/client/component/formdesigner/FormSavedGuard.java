@@ -46,6 +46,8 @@ public class FormSavedGuard implements HasNavigationCallback {
 
     public FormSavedGuard(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
+        // Disable save button until user edits the form
+        formDesigner.getFormDesignerPanel().getSaveButton().setEnabled(false);
     }
 
     @Override
@@ -88,6 +90,7 @@ public class FormSavedGuard implements HasNavigationCallback {
 
     public void setSaved(boolean saved) {
         this.saved = saved;
+        formDesigner.getFormDesignerPanel().getSaveButton().setEnabled(!saved);
     }
 
     public static FormSavedGuard getGuard(Widget widget) {
