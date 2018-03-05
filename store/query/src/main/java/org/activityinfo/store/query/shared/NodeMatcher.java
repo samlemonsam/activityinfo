@@ -154,6 +154,11 @@ public class NodeMatcher {
 
         List<NodeMatch> matches = Lists.newLinkedList();
 
+        // Check for a reference to a form record id or the form id
+        if (path.isLeaf() && path.head().equals(ColumnModel.ID_SYMBOL) || path.head().equals(ColumnModel.CLASS_SYMBOL)) {
+            matches.add(NodeMatch.forId(path.head(), tree.getRootFormClass()));
+        }
+
         // Check for a match of the query Path head to the set of fields
         for (FormTree.Node field : fields) {
             if(path.matches(field)) {

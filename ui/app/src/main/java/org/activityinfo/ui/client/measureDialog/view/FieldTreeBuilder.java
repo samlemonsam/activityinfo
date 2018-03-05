@@ -32,6 +32,7 @@ public class FieldTreeBuilder {
     public void build(FormTree tree) {
         addReferencedForms(tree, tree.getRootFields());
         addCount(tree);
+        addId(tree);
         addFields(Optional.absent(), tree.getRootFormClass());
     }
 
@@ -62,6 +63,9 @@ public class FieldTreeBuilder {
         }
     }
 
+    private void addId(FormTree tree) {
+        store.add(new IdNode(tree.getRootFormClass()));
+    }
 
     private void addCount(FormTree tree) {
         store.add(new CountNode(tree.getRootFormClass()));

@@ -69,6 +69,20 @@ public class NodeMatch {
         match.enumItem = item;
         return match;
     }
+
+    public static NodeMatch forId(String idSymbol, FormClass formClass) {
+        NodeMatch match = new NodeMatch();
+        match.formClass = formClass;
+        match.type = Type.ID;
+        match.fieldExpr = new SymbolExpr(idSymbol);
+        match.joins = Lists.newLinkedList();
+        return match;
+    }
+
+    public boolean isRootId() {
+        // only return true for unjoined ID types - i.e. root form/record ids
+        return type == Type.ID && joins.isEmpty() && fieldExpr != null;
+    }
     
     public static NodeMatch forId(FormTree.Node parent, FormClass formClass) {
 
@@ -185,7 +199,7 @@ public class NodeMatch {
     }
 
     public ExprNode getExpr() {
-        Preconditions.checkArgument(type == Type.FIELD, NodeMatch.class.getName() + " is of type " + type);
+        Preconditions.checkArgument(type == Type.FIELD || type == Type.ID, NodeMatch.class.getName() + " is of type " + type);
         return fieldExpr;
     }
 

@@ -8,6 +8,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.query.shared.NodeMatch;
 import org.activityinfo.store.query.shared.NodeMatcher;
 
@@ -107,8 +108,10 @@ public class FormulaValidator {
 
         if(match.isEnumBoolean()) {
             return BooleanType.INSTANCE;
-        } else if(match.getFieldNode().getType() instanceof CalculatedFieldType) {
+        } else if(match.isCalculated()) {
             return findCalculatedFieldType(match.getFieldNode());
+        } else if (match.isRootId()) {
+            return TextType.SIMPLE;
         } else {
             return match.getFieldNode().getType();
         }

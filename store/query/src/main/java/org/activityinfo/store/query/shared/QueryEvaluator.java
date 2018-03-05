@@ -249,14 +249,6 @@ public class QueryEvaluator {
             evaluationStack.push(symbolExpr);
 
             try {
-
-                if (symbolExpr.getName().equals(ColumnModel.ID_SYMBOL)) {
-                    return batch.addResourceIdColumn(filterLevel, rootFormClass.getId());
-
-                } else if (symbolExpr.getName().equals(ColumnModel.CLASS_SYMBOL)) {
-                    return batch.addConstantColumn(filterLevel, rootFormClass, rootFormClass.getId().asString());
-                }
-
                 Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolExpr);
                 LOGGER.finer(symbolExpr + " matched to " + nodes);
                 return addColumn(nodes);

@@ -12,6 +12,7 @@ import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -108,8 +109,24 @@ public class FormScanBatch {
             return addJoinedColumn(filterLevel, match);
 
         } else {
-            // simple root column or embedded form
-            return getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
+            // id column, simple root column or embedded form
+            if (match.isRootId()) {
+                return addIdColumn(filterLevel, match);
+            } else {
+                return getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
+            }
+        }
+    }
+
+    public Slot<ColumnView> addIdColumn(FilterLevel filterLevel, NodeMatch match) {
+        SymbolExpr matchExpr = (SymbolExpr) match.getExpr();
+        switch (matchExpr.getName()) {
+            case ColumnModel.ID_SYMBOL:
+                return addResourceIdColumn(filterLevel, match.getFormClass().getId());
+            case ColumnModel.CLASS_SYMBOL:
+                return addConstantColumn(filterLevel, match.getFormClass(), match.getFormClass().getId().asString());
+            default:
+                throw new UnsupportedOperationException("type: " + match.getType());
         }
     }
 
