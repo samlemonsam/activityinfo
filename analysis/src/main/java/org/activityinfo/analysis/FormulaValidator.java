@@ -67,7 +67,7 @@ public class FormulaValidator {
         if(exprNode instanceof ConstantExpr) {
             return ((ConstantExpr) exprNode).getType();
         } else if(exprNode instanceof GroupExpr) {
-            return validateExpr(exprNode);
+            return validateExpr(((GroupExpr) exprNode).getExpr());
         } else if(exprNode instanceof SymbolExpr) {
             return validateReference(exprNode);
         } else if(exprNode instanceof CompoundExpr) {

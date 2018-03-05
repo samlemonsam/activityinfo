@@ -96,7 +96,7 @@ public class Survey implements TestForm {
 
         calculatedField = formClass.addField(ids.fieldId("F5"))
                 .setLabel("Family Size")
-                .setType(new CalculatedFieldType("CHILDREN + 1"));
+                .setType(new CalculatedFieldType("(CHILDREN + 1)"));
 
 
         badCalculatedField = formClass.addField(ids.fieldId("F6"))
