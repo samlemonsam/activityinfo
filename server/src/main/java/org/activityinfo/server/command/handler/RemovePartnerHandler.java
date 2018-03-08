@@ -59,7 +59,7 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
         int siteCount = ((Number) em.createQuery("select count(s) " +
                                                  "from Site s " +
                                                  "where s.activity.id in (select a.id from Activity a where a" +
-                                                 ".database.id = :dbId) " +
+                                                 ".database.id = :dbId " + "AND a.dateDeleted is null" +") " +
                                                  "and s.partner.id = :partnerId " +
                                                  "and s.dateDeleted is null")
                                     .setParameter("dbId", cmd.getDatabaseId())
