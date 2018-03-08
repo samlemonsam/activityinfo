@@ -109,6 +109,13 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.mapIcon = sourceActivity.mapIcon;
         this.published = sourceActivity.published;
         this.classicView = sourceActivity.classicView;
+
+        this.folder = sourceActivity.getFolder();
+        if (this.folder == null) {
+            this.category = null;
+        } else {
+            this.category = folder.getName();
+        }
     }
 
     @Id
