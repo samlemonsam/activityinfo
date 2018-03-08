@@ -37,6 +37,7 @@
             <ul>
                 <li><a href="/about/benefits.html">Benefits</a></li>
                 <li><a href="/about/features.html">Features</a></li>
+                <li><a href="/about/case-studies.html">Case Studies</a></li>
                 <li><a href="/about/pricing.html">Pricing</a></li>
                 <li><a href="/blog/index.html">Blog</a></li>
                 <li class="cta cta-login"><a href="/login">Log In</a></li>
@@ -62,6 +63,7 @@
                 <ul>
                     <li><a href="/about/features.html">Features</a></li>
                     <li><a href="/about/benefits.html">Benefits</a></li>
+                    <li><a href="/about/case-studies.html">Case Studies</a></li>
                     <li><a href="/about/pricing.html">Pricing</a></li>
                     <li><a href="http://status.activityinfo.org">Status</a></li>
                     <li><a href="/about/releases.html">Releases</a></li>
