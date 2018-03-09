@@ -24,7 +24,6 @@ import org.activityinfo.store.query.shared.NodeMatch;
 public class FieldReference {
     private SourceRange sourceRange;
     private NodeMatch match;
-    private String description;
 
     public FieldReference(SourceRange sourceRange, NodeMatch match) {
         this.sourceRange = sourceRange;
