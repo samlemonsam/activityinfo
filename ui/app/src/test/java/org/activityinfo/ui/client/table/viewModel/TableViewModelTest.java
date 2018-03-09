@@ -9,9 +9,9 @@ import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
@@ -233,7 +233,7 @@ public class TableViewModelTest {
         TableColumn firstColumn = exportModel.assertLoaded().getColumns().get(0);
         assertThat(firstColumn.getLabel(), equalTo(Optional.of("My PCODE")));
         assertThat(firstColumn.getFormula(), equalTo(
-                new CompoundExpr(new SymbolExpr(ColumnModel.PARENT_SYMBOL),
+                new CompoundExpr(new SymbolNode(ColumnModel.PARENT_SYMBOL),
                         IncidentForm.PROTECTION_CODE_FIELD_ID).asExpression()));
     }
 

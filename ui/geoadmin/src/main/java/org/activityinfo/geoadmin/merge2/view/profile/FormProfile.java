@@ -1,10 +1,10 @@
 package org.activityinfo.geoadmin.merge2.view.profile;
 
 import com.google.common.base.Function;
-import org.activityinfo.model.expr.FunctionCallNode;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.functions.BoundingBoxFunction;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.FunctionCallNode;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.BoundingBoxFunction;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
@@ -126,7 +126,7 @@ public class FormProfile {
                 // Add only geometry from the root form
                 for (FormTree.Node node : tree.getRootFields()) {
                     if(node.getType() instanceof GeoAreaType) {
-                        SymbolExpr bounds = new SymbolExpr(node.getFieldId());
+                        SymbolNode bounds = new SymbolNode(node.getFieldId());
                         queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMIN, bounds)).as(node.getFieldId() + "_xmin");
                         queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.XMAX, bounds)).as(node.getFieldId() + "_xmax");
                         queryModel.selectExpr(new FunctionCallNode(BoundingBoxFunction.YMIN, bounds)).as(node.getFieldId() + "_ymin");

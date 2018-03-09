@@ -1,12 +1,12 @@
 package org.activityinfo.server.command.handler.binding;
 
+import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import com.bedatadriven.rebar.time.calendar.LocalDate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,8 +41,8 @@ public class StartEndDateFieldBinding implements FieldBinding {
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
         return Arrays.asList(
-                new ColumnModel().setExpression(START_DATE_COLUMN).as(START_DATE_COLUMN),
-                new ColumnModel().setExpression(END_DATE_COLUMN).as(END_DATE_COLUMN)
+                new ColumnModel().setFormula(START_DATE_COLUMN).as(START_DATE_COLUMN),
+                new ColumnModel().setFormula(END_DATE_COLUMN).as(END_DATE_COLUMN)
         );
     }
 

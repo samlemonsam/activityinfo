@@ -6,14 +6,14 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.analysis.FieldReference;
 import org.activityinfo.analysis.FormulaValidator;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.Exprs;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.functions.AndFunction;
 import org.activityinfo.model.form.FormOperation;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.AndFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -24,7 +24,7 @@ import java.util.*;
  */
 public class PermissionFilters {
 
-    private final Map<ResourceId, ExprNode> fieldFilters = new HashMap<>();
+    private final Map<ResourceId, FormulaNode> fieldFilters = new HashMap<>();
 
 
     public PermissionFilters(FormTree formTree) {
@@ -37,7 +37,7 @@ public class PermissionFilters {
         /*
          * Create a set of independent boolean permission criteria.
          */
-        Set<ExprNode> criteria = new HashSet<>();
+        Set<FormulaNode> criteria = new HashSet<>();
         if(permissions.hasVisibilityFilter()) {
             criteria.addAll(parsePermission(permissions.getViewFilter()));
         }
@@ -48,8 +48,8 @@ public class PermissionFilters {
         /*
          * Now map each of the criteria to a field, if possible
          */
-        Multimap<ResourceId, ExprNode> fieldCriteria = HashMultimap.create();
-        for (ExprNode criterium : criteria) {
+        Multimap<ResourceId, FormulaNode> fieldCriteria = HashMultimap.create();
+        for (FormulaNode criterium : criteria) {
             FormulaValidator validator = new FormulaValidator(formTree);
             validator.validate(criterium);
             if(validator.isValid()) {
@@ -64,13 +64,13 @@ public class PermissionFilters {
          * Finally combine all the separate filters into an expression per field.
          */
         for (ResourceId fieldId : fieldCriteria.keySet()) {
-            fieldFilters.put(fieldId, Exprs.allTrue(fieldCriteria.get(fieldId)));
+            fieldFilters.put(fieldId, Formulas.allTrue(fieldCriteria.get(fieldId)));
         }
     }
 
-    private List<ExprNode> parsePermission(String filter) {
-        ExprNode exprNode = ExprParser.parse(filter);
-        return Exprs.findBinaryTree(exprNode, AndFunction.INSTANCE);
+    private List<FormulaNode> parsePermission(String filter) {
+        FormulaNode formulaNode = FormulaParser.parse(filter);
+        return Formulas.findBinaryTree(formulaNode, AndFunction.INSTANCE);
     }
 
     private Optional<ResourceId> findUniqueFieldReference(List<FieldReference> references) {
@@ -101,17 +101,17 @@ public class PermissionFilters {
     /**
      * Returns a filter for records referenced by the given field.
      */
-    public Optional<ExprNode> getReferenceBaseFilter(ResourceId fieldId) {
-        ExprNode filter = fieldFilters.get(fieldId);
+    public Optional<FormulaNode> getReferenceBaseFilter(ResourceId fieldId) {
+        FormulaNode filter = fieldFilters.get(fieldId);
         if(filter == null) {
             return Optional.absent();
         }
 
-        SymbolExpr fieldExpr = new SymbolExpr(fieldId);
+        SymbolNode fieldExpr = new SymbolNode(fieldId);
 
         return Optional.of(filter.transform(x -> {
             if(x.equals(fieldExpr)) {
-                return new SymbolExpr(ColumnModel.ID_SYMBOL);
+                return new SymbolNode(ColumnModel.ID_SYMBOL);
             } else {
                 return x;
             }

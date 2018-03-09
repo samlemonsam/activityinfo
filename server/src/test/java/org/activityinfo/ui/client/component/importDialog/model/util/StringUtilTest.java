@@ -21,12 +21,10 @@ package org.activityinfo.ui.client.component.importDialog.model.util;
  * #L%
  */
 
-import org.activityinfo.model.expr.StringUtil;
+import org.activityinfo.model.formula.FormulaLexer;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.activityinfo.model.expr.StringUtil.getLevenshteinDistance;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -36,18 +34,12 @@ public class StringUtilTest {
 
     @Test
     public void isAlphabetic() {
-        assertThat(StringUtil.isAlphabetic('a'), Matchers.equalTo(true));
-        assertThat(StringUtil.isAlphabetic('A'), Matchers.equalTo(true));
-        assertThat(StringUtil.isAlphabetic('1'), Matchers.equalTo(true));
-        assertThat(StringUtil.isAlphabetic('4'), Matchers.equalTo(true));
-        assertThat(StringUtil.isAlphabetic('_'), Matchers.equalTo(false));
-        assertThat(StringUtil.isAlphabetic('*'), Matchers.equalTo(false));
+        assertThat(FormulaLexer.isAlphabetic('a'), Matchers.equalTo(true));
+        assertThat(FormulaLexer.isAlphabetic('A'), Matchers.equalTo(true));
+        assertThat(FormulaLexer.isAlphabetic('1'), Matchers.equalTo(true));
+        assertThat(FormulaLexer.isAlphabetic('4'), Matchers.equalTo(true));
+        assertThat(FormulaLexer.isAlphabetic('_'), Matchers.equalTo(false));
+        assertThat(FormulaLexer.isAlphabetic('*'), Matchers.equalTo(false));
     }
 
-    @Test
-    public void testLevenshteinDistance() {
-        assertThat(getLevenshteinDistance("a", "b"), equalTo(1));
-        assertThat(getLevenshteinDistance("ab", "bb"), equalTo(1));
-        assertThat(getLevenshteinDistance("ab ", " bb"), equalTo(2));
-    }
 }

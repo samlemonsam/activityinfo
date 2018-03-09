@@ -2,9 +2,9 @@ package org.activityinfo.ui.client.component.form.field;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -54,7 +54,7 @@ public class OptionSetProvider {
 
     }
 
-    private ExprNode findLabelExpression(Iterable<FormTree.Node> fieldNodes) {
+    private FormulaNode findLabelExpression(Iterable<FormTree.Node> fieldNodes) {
         for (FormTree.Node node : fieldNodes) {
             if(node.getField().isKey()) {
                 if(node.isReference()) {
@@ -83,7 +83,7 @@ public class OptionSetProvider {
         }
 
         // Otherwise fall back to the generated id
-        return new SymbolExpr(ColumnModel.ID_SYMBOL);
+        return new SymbolNode(ColumnModel.ID_SYMBOL);
     }
 
 

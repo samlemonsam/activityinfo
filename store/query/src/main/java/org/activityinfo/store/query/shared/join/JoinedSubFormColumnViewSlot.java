@@ -1,7 +1,7 @@
 package org.activityinfo.store.query.shared.join;
 
 import com.google.common.collect.Iterables;
-import org.activityinfo.model.expr.functions.StatFunction;
+import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.store.query.shared.Aggregation;

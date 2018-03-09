@@ -2,8 +2,8 @@ package org.activityinfo.ui.client.analysis.model;
 
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -48,7 +48,7 @@ public class DimensionMapping {
     private final String formula;
     private final Type type;
 
-    public DimensionMapping(ExprNode formula) {
+    public DimensionMapping(FormulaNode formula) {
         this.formId = null;
         this.formula = formula.asExpression();
         this.type = Type.VALUE;
@@ -62,7 +62,7 @@ public class DimensionMapping {
 
     public DimensionMapping(ResourceId formId, ResourceId fieldId) {
         this.formId = formId;
-        this.formula = new SymbolExpr(fieldId).asExpression();
+        this.formula = new SymbolNode(fieldId).asExpression();
         this.type = Type.VALUE;
     }
 

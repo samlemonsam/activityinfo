@@ -16,9 +16,13 @@ import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
-import org.activityinfo.legacy.shared.reports.model.*;
-import org.activityinfo.model.expr.*;
+import org.activityinfo.legacy.shared.reports.model.AdminDimension;
+import org.activityinfo.legacy.shared.reports.model.AttributeGroupDimension;
+import org.activityinfo.legacy.shared.reports.model.DateDimension;
+import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -32,11 +36,11 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.command.handler.binding.dim.*;
+import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityField;
 import org.activityinfo.store.mysql.metadata.LinkedActivity;
-import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
@@ -422,8 +426,8 @@ public class PivotAdapter {
         return "I" + indicator.getId();
     }
 
-    private ExprNode fieldExpression(int indicatorId) {
-        return new SymbolExpr(CuidAdapter.indicatorField(indicatorId));
+    private FormulaNode fieldExpression(int indicatorId) {
+        return new SymbolNode(CuidAdapter.indicatorField(indicatorId));
     }
 
     private void executeTargetValuesQuery(Integer databaseId) {
@@ -729,7 +733,7 @@ public class PivotAdapter {
         return list;
     }
 
-    private ExprNode composeFilter(FormTree formTree) {
+    private FormulaNode composeFilter(FormTree formTree) {
         QueryFilter queryFilter = new QueryFilter(filter, attributeFilters, LOGGER);
         return queryFilter.composeFilter(formTree);
     }

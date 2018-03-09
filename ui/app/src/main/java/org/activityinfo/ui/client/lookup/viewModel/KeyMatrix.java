@@ -2,9 +2,9 @@ package org.activityinfo.ui.client.lookup.viewModel;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -37,10 +37,10 @@ class KeyMatrix {
 
     private final ResourceId formId;
     private final LookupKeySet lookupKeySet;
-    private final Map<LookupKey, ExprNode> keyFormulas;
+    private final Map<LookupKey, FormulaNode> keyFormulas;
     private final Observable<ColumnSet> keyColumns;
 
-    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet, LookupKey leafKey, Observable<Optional<ExprNode>> filter) {
+    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet, LookupKey leafKey, Observable<Optional<FormulaNode>> filter) {
         this.formId = leafKey.getFormId();
         this.lookupKeySet = lookupKeySet;
 
@@ -51,7 +51,7 @@ class KeyMatrix {
             QueryModel queryModel = new QueryModel(formId);
             queryModel.setFilter(f);
             queryModel.selectResourceId().as(ID_COLUMN);
-            for (Map.Entry<LookupKey, ExprNode> entry : keyFormulas.entrySet()) {
+            for (Map.Entry<LookupKey, FormulaNode> entry : keyFormulas.entrySet()) {
                 queryModel.selectExpr(entry.getValue()).as(keyColumn(entry.getKey()));
             }
             return formSource.query(queryModel);

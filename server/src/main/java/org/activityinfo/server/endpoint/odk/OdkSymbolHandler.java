@@ -3,12 +3,8 @@ package org.activityinfo.server.endpoint.odk;
 import com.google.common.base.Preconditions;
 import org.activityinfo.io.xform.xpath.XSymbolException;
 import org.activityinfo.io.xform.xpath.XSymbolHandler;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.enumerated.EnumValue;
 
 import java.util.HashMap;
 import java.util.List;

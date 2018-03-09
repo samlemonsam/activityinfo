@@ -2,17 +2,16 @@ package org.activityinfo.store.query.shared;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
 import org.activityinfo.store.query.shared.columns.ForeignKey;
-import org.activityinfo.store.query.shared.join.ForeignKeyId;
 import org.activityinfo.store.query.shared.columns.IdColumnBuilder;
 import org.activityinfo.store.query.shared.columns.RowCountBuilder;
-import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
+import org.activityinfo.store.query.shared.join.ForeignKeyId;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 
 import java.util.*;
@@ -34,13 +33,13 @@ public class FormScan {
     private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
 
 
-    private static final SymbolExpr PK_COLUMN_KEY = new SymbolExpr("@id");
+    private static final SymbolNode PK_COLUMN_KEY = new SymbolNode("@id");
 
     private final ResourceId formId;
     private final long cacheVersion;
     private final FormClass formClass;
 
-    private Map<ExprNode, PendingSlot<ColumnView>> columnMap = Maps.newHashMap();
+    private Map<FormulaNode, PendingSlot<ColumnView>> columnMap = Maps.newHashMap();
     private Map<ForeignKeyId, PendingSlot<ForeignKey>> foreignKeyMap = Maps.newHashMap();
 
     private PendingSlot<Integer> rowCount = null;
@@ -90,7 +89,7 @@ public class FormScan {
      *
      * @return a slot where the value can be found after the query completes
      */
-    public Slot<ColumnView> addField(ExprNode fieldExpr) {
+    public Slot<ColumnView> addField(FormulaNode fieldExpr) {
 
         // if the column's already been added, just return
         if(columnMap.containsKey(fieldExpr)) {
@@ -120,9 +119,9 @@ public class FormScan {
     }
 
 
-    public Slot<ForeignKey> addForeignKey(ExprNode referenceField, ResourceId rightFormId) {
-        if(referenceField instanceof SymbolExpr) {
-            return addForeignKey(((SymbolExpr) referenceField).getName(), rightFormId);
+    public Slot<ForeignKey> addForeignKey(FormulaNode referenceField, ResourceId rightFormId) {
+        if(referenceField instanceof SymbolNode) {
+            return addForeignKey(((SymbolNode) referenceField).getName(), rightFormId);
         } else {
             throw new UnsupportedOperationException("TODO: " + referenceField);
         }
@@ -151,7 +150,7 @@ public class FormScan {
         // Otherwise, try to retrieve all of the ColumnView and ForeignKeyMaps we need 
         // from the Memcache service
         Set<String> toFetch = new HashSet<>();
-        for (ExprNode fieldId : columnMap.keySet()) {
+        for (FormulaNode fieldId : columnMap.keySet()) {
             toFetch.add(fieldCacheKey(fieldId));
         }
         for (ForeignKeyId fk : foreignKeyMap.keySet()) {
@@ -169,7 +168,7 @@ public class FormScan {
     public void updateFromCache(Map<String, Object> cached) {
 
         // See which columns we could retrieve from cache
-        for (ExprNode fieldId : Lists.newArrayList(columnMap.keySet())) {
+        for (FormulaNode fieldId : Lists.newArrayList(columnMap.keySet())) {
             ColumnView view = (ColumnView) cached.get(fieldCacheKey(fieldId));
             if (view != null) {
                 // populate the pending result slot with the view from the cache
@@ -220,7 +219,7 @@ public class FormScan {
         // Build the query
         ExprQueryBuilder queryBuilder = new ExprQueryBuilder(columnFactory, formClass, columnQueryBuilder);
 
-        for (Map.Entry<ExprNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
+        for (Map.Entry<FormulaNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
             if (column.getKey().equals(PK_COLUMN_KEY)) {
                 queryBuilder.addResourceId(new IdColumnBuilder(column.getValue()));
             } else {
@@ -244,7 +243,7 @@ public class FormScan {
 
     public Map<String, Object> getValuesToCache() {
         Map<String, Object> toPut = new HashMap<>();
-        for (Map.Entry<ExprNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
+        for (Map.Entry<FormulaNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
             ColumnView value;
             try {
                 value = column.getValue().get();
@@ -265,7 +264,7 @@ public class FormScan {
         return toPut;
     }
     
-    private int rowCountFromColumn(Map<ExprNode, PendingSlot<ColumnView>> columnMap) {
+    private int rowCountFromColumn(Map<FormulaNode, PendingSlot<ColumnView>> columnMap) {
         return columnMap.values().iterator().next().get().numRows();
     }
 
@@ -274,7 +273,7 @@ public class FormScan {
         return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + "#COUNT";
     }
 
-    private String fieldCacheKey(ExprNode fieldId) {
+    private String fieldCacheKey(FormulaNode fieldId) {
         return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + "." + fieldId;
     }
 

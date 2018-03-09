@@ -1,14 +1,14 @@
 package org.activityinfo.ui.client.formulaDialog;
 
 import org.activityinfo.analysis.FormulaValidator;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.FormulaError;
-import org.activityinfo.model.expr.SourcePos;
-import org.activityinfo.model.expr.SourceRange;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.TestBatchFormClassProvider;
+import org.activityinfo.model.formula.FormulaError;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.SourcePos;
+import org.activityinfo.model.formula.SourceRange;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
@@ -75,7 +75,7 @@ public class FormulaValidatorTest {
     private FormulaValidator validate(String formula) {
         Survey surveyForm = catalog.getSurvey();
         FormulaValidator validator = new FormulaValidator(catalog.getFormTree(surveyForm.getFormId()));
-        validator.validate(ExprParser.parse(formula));
+        validator.validate(FormulaParser.parse(formula));
 
         for (FormulaError error : validator.getErrors()) {
             System.out.println("Error at " + error.getSourceRange() + ": " + error.getMessage());
@@ -104,7 +104,7 @@ public class FormulaValidatorTest {
         FormTree formTree = formTreeBuilder.queryTree(formClass.getId());
 
         FormulaValidator validator = new FormulaValidator(formTree);
-        assertFalse(validator.validate(ExprParser.parse("A")));
+        assertFalse(validator.validate(FormulaParser.parse("A")));
         assertThat(validator.getErrors(), hasSize(1));
     }
 

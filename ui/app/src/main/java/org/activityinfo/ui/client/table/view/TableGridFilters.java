@@ -6,8 +6,8 @@ import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import com.sencha.gxt.widget.core.client.grid.filters.GridFilters;
 import org.activityinfo.analysis.table.TableUpdater;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.Formulas;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,8 +43,8 @@ public class TableGridFilters extends GridFilters<Integer> {
         filterParser.addColumn(filter.getColumnFormula());
     }
 
-    public Optional<ExprNode> buildFormula() {
-        List<ExprNode> nodes = new ArrayList<>();
+    public Optional<FormulaNode> buildFormula() {
+        List<FormulaNode> nodes = new ArrayList<>();
         for (ColumnView filter : columns) {
             if(filter.isFilterActive()) {
                 nodes.add(filter.getFilterFormula());
@@ -53,7 +53,7 @@ public class TableGridFilters extends GridFilters<Integer> {
         if(nodes.isEmpty()) {
             return Optional.absent();
         } else {
-            return Optional.of(Exprs.allTrue(nodes));
+            return Optional.of(Formulas.allTrue(nodes));
         }
     }
 
@@ -72,7 +72,7 @@ public class TableGridFilters extends GridFilters<Integer> {
     private void changeFilter(Filter<Integer, ?> filter) {
         super.onStateChange(filter);
 
-        Optional<ExprNode> filterFormula = buildFormula();
+        Optional<FormulaNode> filterFormula = buildFormula();
 
         LOGGER.info("Filter updated: " + filterFormula);
 

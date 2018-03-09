@@ -3,13 +3,13 @@ package org.activityinfo.store.query.shared;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
@@ -37,7 +37,7 @@ public class NodeMatch {
 
     private List<JoinNode> joins;
     private FormClass formClass;
-    private ExprNode fieldExpr;
+    private FormulaNode fieldExpr;
     private FormTree.Node fieldNode;
     private Type type;
     private EnumItem enumItem;
@@ -65,7 +65,7 @@ public class NodeMatch {
 
     public static NodeMatch forEnumItem(FormTree.Node fieldNode, EnumItem item) {
         NodeMatch match = forField(fieldNode, Optional.<StatFunction>absent());
-        match.fieldExpr = new CompoundExpr(match.fieldExpr, new SymbolExpr(item.getId()));
+        match.fieldExpr = new CompoundExpr(match.fieldExpr, new SymbolNode(item.getId()));
         match.enumItem = item;
         return match;
     }
@@ -74,7 +74,7 @@ public class NodeMatch {
         NodeMatch match = new NodeMatch();
         match.formClass = formClass;
         match.type = Type.ID;
-        match.fieldExpr = new SymbolExpr(idSymbol);
+        match.fieldExpr = new SymbolNode(idSymbol);
         match.joins = Lists.newLinkedList();
         return match;
     }
@@ -153,7 +153,7 @@ public class NodeMatch {
             List<FormTree.Node> left = partitions.get(i);
             FormField leftField = left.get(0).getField();
             ResourceId leftFormId = left.get(0).getDefiningFormClass().getId();
-            ExprNode leftFieldExpr = toExpr(left);
+            FormulaNode leftFieldExpr = toExpr(left);
 
             // "RIGHT" side
             // Joining fom left to right using resource ids (primary key)
@@ -169,7 +169,7 @@ public class NodeMatch {
                 joins.add(new JoinNode(
                         JoinType.SUBFORM,
                                 leftFormId,
-                                new SymbolExpr(ColumnModel.ID_SYMBOL),
+                                new SymbolNode(ColumnModel.ID_SYMBOL),
                                 rightFormId,
                                 aggregation));
 
@@ -181,11 +181,11 @@ public class NodeMatch {
         return joins;
     }
 
-    private static ExprNode toExpr(List<FormTree.Node> partition) {
+    private static FormulaNode toExpr(List<FormTree.Node> partition) {
         Iterator<FormTree.Node> it = partition.iterator();
-        ExprNode expr = new SymbolExpr(it.next().getFieldId());
+        FormulaNode expr = new SymbolNode(it.next().getFieldId());
         while(it.hasNext()) {
-            expr = new CompoundExpr(expr, new SymbolExpr(it.next().getFieldId()));
+            expr = new CompoundExpr(expr, new SymbolNode(it.next().getFieldId()));
         }
         return expr;
     }
@@ -198,7 +198,7 @@ public class NodeMatch {
         return fieldNode.isRoot();
     }
 
-    public ExprNode getExpr() {
+    public FormulaNode getExpr() {
         Preconditions.checkArgument(type == Type.FIELD || type == Type.ID, NodeMatch.class.getName() + " is of type " + type);
         return fieldExpr;
     }

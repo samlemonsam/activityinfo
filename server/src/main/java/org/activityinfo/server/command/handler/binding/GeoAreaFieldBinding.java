@@ -1,10 +1,10 @@
 package org.activityinfo.server.command.handler.binding;
 
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.FunctionCallNode;
-import org.activityinfo.model.expr.functions.BoundingBoxFunction;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FunctionCallNode;
+import org.activityinfo.model.formula.functions.BoundingBoxFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -73,10 +73,10 @@ public class GeoAreaFieldBinding implements FieldBinding<AdminEntityDTO> {
 
     private List<ColumnModel> getGeoAreaQuery() {
         return Arrays.asList(
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.XMIN, boundExpr)).as(XMIN_COLUMN.asExpression()),
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.XMAX, boundExpr)).as(XMAX_COLUMN.asExpression()),
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.YMIN, boundExpr)).as(YMIN_COLUMN.asExpression()),
-                new ColumnModel().setExpression(new FunctionCallNode(BoundingBoxFunction.YMAX, boundExpr)).as(YMAX_COLUMN.asExpression())
+                new ColumnModel().setFormula(new FunctionCallNode(BoundingBoxFunction.XMIN, boundExpr)).as(XMIN_COLUMN.asExpression()),
+                new ColumnModel().setFormula(new FunctionCallNode(BoundingBoxFunction.XMAX, boundExpr)).as(XMAX_COLUMN.asExpression()),
+                new ColumnModel().setFormula(new FunctionCallNode(BoundingBoxFunction.YMIN, boundExpr)).as(YMIN_COLUMN.asExpression()),
+                new ColumnModel().setFormula(new FunctionCallNode(BoundingBoxFunction.YMAX, boundExpr)).as(YMAX_COLUMN.asExpression())
         );
     }
 }

@@ -1,13 +1,13 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 
 /**
  * Simple column format for boolean field.
  */
 public class BooleanFormat extends SimpleColumnFormat<Boolean> {
 
-    public BooleanFormat(String id, ExprNode formula) {
+    public BooleanFormat(String id, FormulaNode formula) {
         super(id, formula);
     }
 

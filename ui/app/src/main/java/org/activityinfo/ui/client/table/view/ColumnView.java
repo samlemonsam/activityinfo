@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import org.activityinfo.analysis.ParsedFormula;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.Exprs;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.Formulas;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ColumnView {
 
-    private final ExprNode columnFormula;
+    private final FormulaNode columnFormula;
     private final Filter<Integer, ?> filterView;
 
     /**
@@ -29,7 +29,7 @@ public class ColumnView {
         this.filterView = filter;
     }
 
-    public ExprNode getColumnFormula() {
+    public FormulaNode getColumnFormula() {
         return columnFormula;
     }
 
@@ -41,16 +41,16 @@ public class ColumnView {
         return filterView.isActive();
     }
 
-    public ExprNode getFilterFormula() {
+    public FormulaNode getFilterFormula() {
         return toFormula(columnFormula, filterView.getFilterConfig());
     }
 
-    public static ExprNode toFormula(ExprNode field, List<FilterConfig> filters) {
-        List<ExprNode> filterExprs = new ArrayList<>();
+    public static FormulaNode toFormula(FormulaNode field, List<FilterConfig> filters) {
+        List<FormulaNode> filterExprs = new ArrayList<>();
         for (FilterConfig filter : filters) {
             filterExprs.add(ColumnFilterParser.toFormula(field, filter));
         }
-        return Exprs.allTrue(filterExprs);
+        return Formulas.allTrue(filterExprs);
     }
 
 

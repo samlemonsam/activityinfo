@@ -1,13 +1,13 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.type.enumerated.EnumType;
 
 public class SingleEnumFormat extends SimpleColumnFormat<String> {
 
     private final EnumType enumType;
 
-    protected SingleEnumFormat(String id, ExprNode formula, EnumType enumType) {
+    protected SingleEnumFormat(String id, FormulaNode formula, EnumType enumType) {
         super(id, formula);
         this.enumType = enumType;
     }

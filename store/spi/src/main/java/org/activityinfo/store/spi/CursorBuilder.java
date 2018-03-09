@@ -1,7 +1,7 @@
 package org.activityinfo.store.spi;
 
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
@@ -17,7 +17,7 @@ public interface CursorBuilder {
 
     void addResourceId(CursorObserver<ResourceId> observer);
 
-    void addField(ExprNode node, CursorObserver<FieldValue> observer);
+    void addField(FormulaNode node, CursorObserver<FieldValue> observer);
 
     void addField(FieldPath fieldPath, CursorObserver<FieldValue> observer);
 

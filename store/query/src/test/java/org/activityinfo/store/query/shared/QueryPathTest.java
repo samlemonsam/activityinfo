@@ -1,8 +1,8 @@
 package org.activityinfo.store.query.shared;
 
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.contains;
@@ -18,7 +18,7 @@ public class QueryPathTest {
     }
 
     private QueryPath newQueryPath(String expression) {
-        ExprNode expr = ExprParser.parse(expression);
+        FormulaNode expr = FormulaParser.parse(expression);
         return new QueryPath((CompoundExpr) expr);
     }
 

@@ -2,11 +2,11 @@ package org.activityinfo.analysis;
 
 import com.google.common.base.Strings;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.FormulaError;
-import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.FormulaError;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.store.query.shared.NodeMatch;
 
@@ -20,7 +20,7 @@ public class ParsedFormula {
 
     private String formula;
     private boolean valid;
-    private ExprNode rootNode;
+    private FormulaNode rootNode;
     private FieldType resultType;
 
     /**
@@ -41,8 +41,8 @@ public class ParsedFormula {
             valid = false;
         }
         try {
-            rootNode = ExprParser.parse(formula);
-        } catch (ExprException e) {
+            rootNode = FormulaParser.parse(formula);
+        } catch (FormulaException e) {
             errors.add(new FormulaError(e.getSourceRange(), e.getMessage()));
             valid = false;
         }
@@ -66,7 +66,7 @@ public class ParsedFormula {
         return formula;
     }
 
-    public ExprNode getRootNode() {
+    public FormulaNode getRootNode() {
         return rootNode;
     }
 

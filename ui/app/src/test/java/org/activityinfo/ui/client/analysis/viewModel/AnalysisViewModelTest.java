@@ -5,8 +5,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -739,7 +739,7 @@ public class AnalysisViewModelTest {
         return ImmutableDimensionModel.builder()
                 .id(ResourceId.generateCuid())
                 .label("Married")
-                .addMappings(new DimensionMapping(new SymbolExpr("MARRIED")))
+                .addMappings(new DimensionMapping(new SymbolNode("MARRIED")))
                 .missingIncluded(false)
                 .build();
     }

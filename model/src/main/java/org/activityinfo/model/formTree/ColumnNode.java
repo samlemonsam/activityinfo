@@ -1,9 +1,9 @@
 package org.activityinfo.model.formTree;
 
 import com.google.common.collect.Sets;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -16,19 +16,19 @@ public class ColumnNode {
     public static final String NON_BREAKING_SPACE = "\u00A0";
 
     private FormTree.Node node;
-    private ExprNode expr;
+    private FormulaNode expr;
     private String header;
-    private ExprNode filter;
+    private FormulaNode filter;
 
     public ColumnNode(FormTree.Node node) {
         this.node = node;
         this.header = composeHeader(node);
         if(node.isRoot()) {
-            this.expr = new SymbolExpr(node.getFieldId());
+            this.expr = new SymbolNode(node.getFieldId());
         } else {
             this.expr = new CompoundExpr(
-                    new SymbolExpr(node.getDefiningFormClass().getId()),
-                        new SymbolExpr(node.getFieldId()));
+                    new SymbolNode(node.getDefiningFormClass().getId()),
+                        new SymbolNode(node.getFieldId()));
         }
     }
 
@@ -45,7 +45,7 @@ public class ColumnNode {
         return node;
     }
 
-    public ExprNode getExpr() {
+    public FormulaNode getExpr() {
         return expr;
     }
 
@@ -61,11 +61,11 @@ public class ColumnNode {
         }
     }
 
-    public ExprNode getFilter() {
+    public FormulaNode getFilter() {
         return filter;
     }
 
-    public void setFilter(ExprNode filter) {
+    public void setFilter(FormulaNode filter) {
         this.filter = filter;
     }
 

@@ -2,17 +2,18 @@ package org.activityinfo.server.command.handler.binding;
 
 import com.google.common.collect.Lists;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
 
@@ -88,8 +89,8 @@ public class AttributeFieldBinding implements FieldBinding<SiteDTO> {
 
         for (int i=0; i<items.length; i++) {
             String itemId = items[i].getId().asString();
-            ExprNode expr = new CompoundExpr(attrField.getId(),itemId);
-            columns.add(new ColumnModel().setExpression(expr).as(itemId));
+            FormulaNode expr = new CompoundExpr(attrField.getId(),itemId);
+            columns.add(new ColumnModel().setFormula(expr).as(itemId));
         }
 
         return columns;

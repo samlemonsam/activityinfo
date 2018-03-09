@@ -1,12 +1,12 @@
 package org.activityinfo.store.mysql.cursor;
 
 import com.google.common.base.Preconditions;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.eval.FieldReader;
-import org.activityinfo.model.expr.eval.FieldReaderFactory;
-import org.activityinfo.model.expr.eval.PartialEvaluator;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.eval.FieldReader;
+import org.activityinfo.model.formula.eval.FieldReaderFactory;
+import org.activityinfo.model.formula.eval.PartialEvaluator;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -68,7 +68,7 @@ public class MySqlCursorBuilder implements CursorBuilder {
     }
 
     @Override
-    public void addField(ExprNode node, CursorObserver<FieldValue> observer) {
+    public void addField(FormulaNode node, CursorObserver<FieldValue> observer) {
         final FieldReader<ResultSet> reader = evaluator.partiallyEvaluate(node);
         addFieldObserver(reader, observer);
     }

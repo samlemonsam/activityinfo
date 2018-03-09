@@ -7,14 +7,13 @@ import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.server.command.handler.binding.FieldBinding;
 import org.activityinfo.store.mysql.metadata.Activity;
 
 import java.util.Arrays;
@@ -52,19 +51,19 @@ public class SiteDimBinding extends DimBinding {
         
         
         return Arrays.asList(
-                new ColumnModel().setExpression(siteId(formTree)).as(ID_COLUMN),
-                new ColumnModel().setExpression(
+                new ColumnModel().setFormula(siteId(formTree)).as(ID_COLUMN),
+                new ColumnModel().setFormula(
                         new CompoundExpr(
                                 CuidAdapter.locationField(activityIdOf(formTree)),
                                 "label"))
                         .as(LABEL_COLUMN));
     }
 
-    private SymbolExpr siteId(FormTree formTree) {
+    private SymbolNode siteId(FormTree formTree) {
         if(formTree.getRootFormId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-            return new SymbolExpr(ColumnModel.ID_SYMBOL);
+            return new SymbolNode(ColumnModel.ID_SYMBOL);
         } else {
-            return new SymbolExpr("site");
+            return new SymbolNode("site");
         }
     }
 

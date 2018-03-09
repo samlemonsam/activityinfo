@@ -1,8 +1,8 @@
 package org.activityinfo.store.query.shared;
 
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -38,8 +38,8 @@ public class QueryEvaluatorTest {
 
         QueryEvaluator evaluator = new QueryEvaluator(FilterLevel.BASE, catalog.getTree(formClass.getId()), batch);
 
-        Slot<ColumnView> a = evaluator.evaluateExpression(new SymbolExpr("A"));
-        Slot<ColumnView> aPlusOne = evaluator.evaluateExpression(ExprParser.parse("A+1"));
+        Slot<ColumnView> a = evaluator.evaluateExpression(new SymbolNode("A"));
+        Slot<ColumnView> aPlusOne = evaluator.evaluateExpression(FormulaParser.parse("A+1"));
 
         builder.execute(batch);
 

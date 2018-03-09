@@ -194,7 +194,7 @@ public class DefaultQueryBuilder {
     private List<ColumnModel> simpleColumnModel(String aliasPrefix, FieldPath pathPrefix, FormField formField) {
         ColumnModel column = new ColumnModel();
         column.setId(aliasPrefix + formatFieldAlias(formField));
-        column.setExpression(new FieldPath(pathPrefix, fieldFormula(formField)));
+        column.setFormula(new FieldPath(pathPrefix, fieldFormula(formField)));
 
         return Collections.singletonList(column);
     }
@@ -205,11 +205,11 @@ public class DefaultQueryBuilder {
 
         ColumnModel latitudeColumn = new ColumnModel();
         latitudeColumn.setId(fieldAlias + ".latitude");
-        latitudeColumn.setExpression(new FieldPath(fieldPath, ResourceId.valueOf(GeoPointType.LATITUDE)));
+        latitudeColumn.setFormula(new FieldPath(fieldPath, ResourceId.valueOf(GeoPointType.LATITUDE)));
 
         ColumnModel longitudeColumn = new ColumnModel();
         longitudeColumn.setId(fieldAlias + ".longitude");
-        longitudeColumn.setExpression(new FieldPath(fieldPath, ResourceId.valueOf(GeoPointType.LONGITUDE)));
+        longitudeColumn.setFormula(new FieldPath(fieldPath, ResourceId.valueOf(GeoPointType.LONGITUDE)));
 
         return Arrays.asList(latitudeColumn, longitudeColumn);
     }

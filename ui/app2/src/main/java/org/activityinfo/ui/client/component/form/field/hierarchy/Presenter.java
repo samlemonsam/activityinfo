@@ -6,8 +6,8 @@ import com.google.common.collect.Sets;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import org.activityinfo.model.expr.Exprs;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -149,7 +149,7 @@ class Presenter {
         if(!level.isRoot()) {
             Choice selectedParent = getSelection(level.getParent());
             queryModel.selectExpr("parent").as("parent");
-            queryModel.setFilter(Exprs.equals(new SymbolExpr("parent"), Exprs.idConstant(selectedParent.getRef().getRecordId())));
+            queryModel.setFilter(Formulas.equals(new SymbolNode("parent"), Formulas.idConstant(selectedParent.getRef().getRecordId())));
         }
 
         return new Supplier<Promise<List<Choice>>>() {

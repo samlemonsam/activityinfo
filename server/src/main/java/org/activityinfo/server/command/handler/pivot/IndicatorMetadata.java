@@ -1,9 +1,9 @@
 package org.activityinfo.server.command.handler.pivot;
 
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -37,12 +37,12 @@ public class IndicatorMetadata {
         return CuidAdapter.cuid(CuidAdapter.TARGET_INDICATOR_FIELD_DOMAIN, sourceId);
     }
 
-    public ExprNode getFieldExpression() {
+    public FormulaNode getFieldExpression() {
         switch (aggregation) {
             case IndicatorDTO.AGGREGATE_SITE_COUNT:
-                return new ConstantExpr(1);
+                return new ConstantNode(1);
             default:
-                return new SymbolExpr(CuidAdapter.indicatorField(sourceId));
+                return new SymbolNode(CuidAdapter.indicatorField(sourceId));
         }
     }
 

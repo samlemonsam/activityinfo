@@ -8,9 +8,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.data.shared.loader.FilterConfigBean;
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.functions.*;
-import org.activityinfo.model.expr.functions.date.DateFunction;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.functions.*;
+import org.activityinfo.model.formula.functions.date.DateFunction;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.HasStringValue;
@@ -25,18 +25,18 @@ public class ColumnFilterParser {
 
     private static final Multimap<Integer, FilterConfig> EMPTY = ImmutableMultimap.of();
 
-    private final Map<ExprNode, Integer> columnMap = new HashMap<>();
+    private final Map<FormulaNode, Integer> columnMap = new HashMap<>();
 
     public ColumnFilterParser() {
     }
 
-    public ColumnFilterParser(List<ExprNode> columns) {
-        for (ExprNode column : columns) {
+    public ColumnFilterParser(List<FormulaNode> columns) {
+        for (FormulaNode column : columns) {
             addColumn(column);
         }
     }
 
-    public void addColumn(ExprNode columnExpr) {
+    public void addColumn(FormulaNode columnExpr) {
         int columnIndex = columnMap.size();
         columnMap.put(columnExpr, columnIndex);
     }
@@ -44,16 +44,16 @@ public class ColumnFilterParser {
 
     public Multimap<Integer, FilterConfig> parseFilter(Optional<String> filterString) {
         if(filterString.isPresent()) {
-            return parseFilter(ExprParser.parse(filterString.get()));
+            return parseFilter(FormulaParser.parse(filterString.get()));
         } else {
             return EMPTY;
         }
     }
 
-    public Multimap<Integer, FilterConfig> parseFilter(ExprNode filter) {
+    public Multimap<Integer, FilterConfig> parseFilter(FormulaNode filter) {
         Multimap<Integer, FilterConfig> result = HashMultimap.create();
-        List<ExprNode> nodes = Exprs.findBinaryTree(filter, AndFunction.INSTANCE);
-        for (ExprNode node : nodes) {
+        List<FormulaNode> nodes = Formulas.findBinaryTree(filter, AndFunction.INSTANCE);
+        for (FormulaNode node : nodes) {
             if(!parseNode(node, result)) {
                 return EMPTY;
             }
@@ -61,13 +61,13 @@ public class ColumnFilterParser {
         return result;
     }
 
-    private boolean parseNode(ExprNode node, Multimap<Integer, FilterConfig> result) {
+    private boolean parseNode(FormulaNode node, Multimap<Integer, FilterConfig> result) {
         return parseComparison(node, result) ||
                parseStringContains(node, result) ||
                parseEnumList(node, result);
     }
 
-    private boolean parseComparison(ExprNode node, Multimap<Integer, FilterConfig> result) {
+    private boolean parseComparison(FormulaNode node, Multimap<Integer, FilterConfig> result) {
         if(!(node instanceof FunctionCallNode)) {
             return false;
         }
@@ -103,15 +103,15 @@ public class ColumnFilterParser {
         return true;
     }
 
-    private Integer findColumnIndex(ExprNode expr) {
-        ExprNode columnExpr = expr;
+    private Integer findColumnIndex(FormulaNode expr) {
+        FormulaNode columnExpr = expr;
         return columnMap.get(columnExpr);
     }
 
     /**
      * Tries to parse an expression in the form ISNUMBER(SEARCH(substring, string))
      */
-    private boolean parseStringContains(ExprNode node, Multimap<Integer, FilterConfig> result) {
+    private boolean parseStringContains(FormulaNode node, Multimap<Integer, FilterConfig> result) {
         if(!(node instanceof FunctionCallNode)) {
             return false;
         }
@@ -119,7 +119,7 @@ public class ColumnFilterParser {
         if(isNumberCall.getFunction() != IsNumberFunction.INSTANCE) {
             return false;
         }
-        ExprNode isNumberArgument = Exprs.simplify(isNumberCall.getArgument(0));
+        FormulaNode isNumberArgument = Formulas.simplify(isNumberCall.getArgument(0));
         if(!(isNumberArgument instanceof FunctionCallNode)) {
             return false;
         }
@@ -134,7 +134,7 @@ public class ColumnFilterParser {
         if(!(substring instanceof HasStringValue)) {
             return false;
         }
-        ExprNode columnExpr = searchCall.getArgument(1);
+        FormulaNode columnExpr = searchCall.getArgument(1);
         Integer columnIndex = columnMap.get(columnExpr);
         if(columnIndex == -1) {
             return false;
@@ -152,12 +152,12 @@ public class ColumnFilterParser {
     /**
      * Parse a list of enum item conditionals in the form (X.A || X.B || X.C)
      */
-    private boolean parseEnumList(ExprNode node, Multimap<Integer, FilterConfig> result) {
-        List<ExprNode> terms = Exprs.findBinaryTree(node, OrFunction.INSTANCE);
+    private boolean parseEnumList(FormulaNode node, Multimap<Integer, FilterConfig> result) {
+        List<FormulaNode> terms = Formulas.findBinaryTree(node, OrFunction.INSTANCE);
 
         // Ensure that each term is a compound expression in the form X.Y1, X.Y2, X.Y2
-        Iterator<ExprNode> termIt = terms.iterator();
-        ExprNode first = termIt.next();
+        Iterator<FormulaNode> termIt = terms.iterator();
+        FormulaNode first = termIt.next();
         if(!(first instanceof CompoundExpr)) {
             return false;
         }
@@ -172,7 +172,7 @@ public class ColumnFilterParser {
         // Now check that the remaining terms are also compound expressions with the
         // same field
         while(termIt.hasNext()) {
-            ExprNode term = termIt.next();
+            FormulaNode term = termIt.next();
             if(!(term instanceof CompoundExpr)) {
                 return false;
             }
@@ -239,9 +239,9 @@ public class ColumnFilterParser {
      * If this node is a literal value, for example "abc" or 42.0 or
      * DATE(2017, 1, 1), then return its value. Otherwise return {@code null}.
      */
-    private FieldValue parseLiteral(ExprNode node) {
-        if(node instanceof ConstantExpr) {
-            return ((ConstantExpr) node).getValue();
+    private FieldValue parseLiteral(FormulaNode node) {
+        if(node instanceof ConstantNode) {
+            return ((ConstantNode) node).getValue();
         } else if(node instanceof FunctionCallNode) {
             FunctionCallNode callNode = (FunctionCallNode) node;
             if(callNode.getFunction() == DateFunction.INSTANCE) {
@@ -259,7 +259,7 @@ public class ColumnFilterParser {
 
 
     @VisibleForTesting
-    static ExprNode toFormula(ExprNode field, FilterConfig filter) {
+    static FormulaNode toFormula(FormulaNode field, FilterConfig filter) {
         switch(filter.getType()) {
             case "numeric":
                 return toNumericFormula(field, filter);
@@ -274,11 +274,11 @@ public class ColumnFilterParser {
     }
 
 
-    private static ExprNode toNumericFormula(ExprNode field, FilterConfig filter) {
+    private static FormulaNode toNumericFormula(FormulaNode field, FilterConfig filter) {
         return new FunctionCallNode(comparisonFilter(filter), field, numericValue(filter));
     }
 
-    private static ExprNode toStringFormula(ExprNode field, FilterConfig filter) {
+    private static FormulaNode toStringFormula(FormulaNode field, FilterConfig filter) {
         switch (filter.getComparison()) {
             case "contains":
                 return stringContains(field, filter);
@@ -286,41 +286,41 @@ public class ColumnFilterParser {
         throw new UnsupportedOperationException("comparison: " + filter.getComparison());
     }
 
-    private static ExprNode toDateFormula(ExprNode field, FilterConfig filter) {
+    private static FormulaNode toDateFormula(FormulaNode field, FilterConfig filter) {
         return new FunctionCallNode(comparisonFilter(filter),
             field,
             dateValue(filter));
     }
 
 
-    private static ExprNode toListFormula(ExprNode field, FilterConfig filter) {
+    private static FormulaNode toListFormula(FormulaNode field, FilterConfig filter) {
         // Shockingly, the gxt filterconfig for list is generated by concatenating
         // ids together with "::"
 
         String[] enumItemIds = filter.getValue().split("::");
-        List<ExprNode> enumConditions = new ArrayList<>();
+        List<FormulaNode> enumConditions = new ArrayList<>();
         for (String enumItemId : enumItemIds) {
-            enumConditions.add(new CompoundExpr(field, new SymbolExpr(enumItemId)));
+            enumConditions.add(new CompoundExpr(field, new SymbolNode(enumItemId)));
         }
-        return Exprs.anyTrue(enumConditions);
+        return Formulas.anyTrue(enumConditions);
     }
 
-    private static ExprNode dateValue(FilterConfig filter) {
+    private static FormulaNode dateValue(FilterConfig filter) {
         // GXT serializes the date value as unix time value in milliseconds
         long time = Long.parseLong(filter.getValue());
         Date date = new Date(time);
         LocalDate localDate = new LocalDate(date);
 
         return new FunctionCallNode(DateFunction.INSTANCE,
-            new ConstantExpr(localDate.getYear()),
-            new ConstantExpr(localDate.getMonthOfYear()),
-            new ConstantExpr(localDate.getDayOfMonth()));
+            new ConstantNode(localDate.getYear()),
+            new ConstantNode(localDate.getMonthOfYear()),
+            new ConstantNode(localDate.getDayOfMonth()));
     }
 
-    private static ExprNode stringContains(ExprNode field, FilterConfig filter) {
+    private static FormulaNode stringContains(FormulaNode field, FilterConfig filter) {
 
-        ConstantExpr substring = new ConstantExpr(filter.getValue());
-        ExprNode string = field;
+        ConstantNode substring = new ConstantNode(filter.getValue());
+        FormulaNode string = field;
 
         return new FunctionCallNode(IsNumberFunction.INSTANCE,
             new FunctionCallNode(SearchFunction.INSTANCE,
@@ -328,7 +328,7 @@ public class ColumnFilterParser {
                 string));
     }
 
-    private static ExprFunction comparisonFilter(FilterConfig filter) {
+    private static FormulaFunction comparisonFilter(FilterConfig filter) {
         switch (filter.getComparison()) {
             case "eq":
             case "on":
@@ -343,8 +343,8 @@ public class ColumnFilterParser {
         throw new UnsupportedOperationException("comparison: " + filter.getComparison());
     }
 
-    private static ConstantExpr numericValue(FilterConfig filter) {
-        return new ConstantExpr(Double.parseDouble(filter.getValue()));
+    private static ConstantNode numericValue(FilterConfig filter) {
+        return new ConstantNode(Double.parseDouble(filter.getValue()));
     }
 
 }

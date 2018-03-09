@@ -4,12 +4,12 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.diagnostic.ExprException;
-import org.activityinfo.model.expr.functions.CoalesceFunction;
-import org.activityinfo.model.expr.functions.ColumnFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.diagnostic.FormulaException;
+import org.activityinfo.model.formula.functions.CoalesceFunction;
+import org.activityinfo.model.formula.functions.ColumnFunction;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.query.SortModel.Range;
 import org.activityinfo.promise.BiFunction;
@@ -33,11 +33,11 @@ public class QueryEvaluator {
     private FormTree tree;
     private FormClass rootFormClass;
 
-    private final ColumnExprVisitor columnVisitor = new ColumnExprVisitor();
+    private final ColumnFormulaVisitor columnVisitor = new ColumnFormulaVisitor();
 
     private NodeMatcher resolver;
 
-    private Deque<SymbolExpr> evaluationStack = new ArrayDeque<>();
+    private Deque<SymbolNode> evaluationStack = new ArrayDeque<>();
 
     public QueryEvaluator(FilterLevel filterLevel, FormTree formTree, FormScanBatch batch) {
         this.filterLevel = filterLevel;
@@ -47,13 +47,13 @@ public class QueryEvaluator {
         this.batch = batch;
     }
 
-    public Slot<ColumnView> evaluateExpression(ExprNode expr) {
+    public Slot<ColumnView> evaluateExpression(FormulaNode expr) {
         return expr.accept(columnVisitor);
     }
 
 
     private Slot<ColumnView> evaluateExpression(String expression) {
-        ExprNode parsed = ExprParser.parse(expression);
+        FormulaNode parsed = FormulaParser.parse(expression);
         return parsed.accept(columnVisitor);
     }
 
@@ -66,10 +66,10 @@ public class QueryEvaluator {
         for (ColumnModel column : model.getColumns()) {
             Slot<ColumnView> view;
             try {
-                view = evaluateExpression(column.getExpression());
-            } catch (ExprException e) {
+                view = evaluateExpression(column.getFormula());
+            } catch (FormulaException e) {
                 throw new QuerySyntaxException("Syntax error in column " + column.getId() +
-                        " '" + column.getExpression() + "' : " + e.getMessage(), e);
+                        " '" + column.getFormula() + "' : " + e.getMessage(), e);
             }
             columnViews.put(column.getId(), new FilteredSlot(filter, view));
         }
@@ -215,7 +215,7 @@ public class QueryEvaluator {
         LOGGER.severe(message.toString());
     }
 
-    public Slot<TableFilter> filter(ExprNode filter) {
+    public Slot<TableFilter> filter(FormulaNode filter) {
         if(filter == null) {
             return new PendingSlot<>(TableFilter.ALL_SELECTED);
         } else {
@@ -228,29 +228,29 @@ public class QueryEvaluator {
         }
     }
 
-    private class ColumnExprVisitor implements ExprVisitor<Slot<ColumnView>> {
+    private class ColumnFormulaVisitor implements FormulaVisitor<Slot<ColumnView>> {
 
         @Override
-        public Slot<ColumnView> visitConstant(ConstantExpr node) {
+        public Slot<ColumnView> visitConstant(ConstantNode node) {
             return batch.addConstantColumn(filterLevel, rootFormClass, node.getValue());
         }
 
         @Override
-        public Slot<ColumnView> visitSymbol(SymbolExpr symbolExpr) {
+        public Slot<ColumnView> visitSymbol(SymbolNode symbolNode) {
 
             // Check for recursion: are we in the process of evaluating
             // this symbol? Trying to do so again will lead to an infinite
             // loop and a StackOverflowException.
 
-            if(evaluationStack.contains(symbolExpr)) {
+            if(evaluationStack.contains(symbolNode)) {
                 return batch.addEmptyColumn(filterLevel, rootFormClass);
             }
 
-            evaluationStack.push(symbolExpr);
+            evaluationStack.push(symbolNode);
 
             try {
-                Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolExpr);
-                LOGGER.finer(symbolExpr + " matched to " + nodes);
+                Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolNode);
+                LOGGER.finer(symbolNode + " matched to " + nodes);
                 return addColumn(nodes);
 
             } finally {
@@ -259,7 +259,7 @@ public class QueryEvaluator {
         }
 
         @Override
-        public Slot<ColumnView> visitGroup(GroupExpr group) {
+        public Slot<ColumnView> visitGroup(GroupNode group) {
             return group.getExpr().accept(this);
         }
 
@@ -303,7 +303,7 @@ public class QueryEvaluator {
             try {
                 final List<Slot<ColumnView>> argumentSlots = Lists.newArrayList();
 
-                for (ExprNode argument : call.getArguments()) {
+                for (FormulaNode argument : call.getArguments()) {
                     argumentSlots.add(argument.accept(this));
                 }
 
@@ -347,7 +347,7 @@ public class QueryEvaluator {
             try {
                 Slot<ColumnView> calculation = evaluateExpression(node.getCalculation());
 
-                ExprNode relevanceFormula = tryParseRelevance(node);
+                FormulaNode relevanceFormula = tryParseRelevance(node);
                 if(relevanceFormula == null) {
                     return calculation;
 
@@ -359,7 +359,7 @@ public class QueryEvaluator {
                         }
                     });
                 }
-            } catch (ExprException e) {
+            } catch (FormulaException e) {
                 LOGGER.log(Level.WARNING, "Exception in calculated field " +
                         node.getFormClass().getId() + "." + node.getExpr() + " = " +
                         node.getCalculation() + ": " + e.getMessage(), e);
@@ -368,14 +368,14 @@ public class QueryEvaluator {
             }
         }
 
-        private ExprNode tryParseRelevance(NodeMatch node) {
+        private FormulaNode tryParseRelevance(NodeMatch node) {
             String formula = node.getFieldNode().getField().getRelevanceConditionExpression();
             if(Strings.isNullOrEmpty(formula)) {
                 return null;
             }
             try {
-                return ExprParser.parse(formula);
-            } catch (ExprException e) {
+                return FormulaParser.parse(formula);
+            } catch (FormulaException e) {
                 LOGGER.info("Failed to parse relevance condition " + formula);
                 return null;
             }

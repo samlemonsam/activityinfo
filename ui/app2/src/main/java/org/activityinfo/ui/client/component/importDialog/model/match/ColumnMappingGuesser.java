@@ -22,7 +22,6 @@ package org.activityinfo.ui.client.component.importDialog.model.match;
  */
 
 import com.google.common.collect.Maps;
-import org.activityinfo.model.expr.StringUtil;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.ui.client.component.importDialog.model.ImportModel;
@@ -124,7 +123,7 @@ public class ColumnMappingGuesser {
                 }
             }
 
-            final int distance = StringUtil.getLevenshteinDistance(sourceLabel, targetLabel);
+            final int distance = Levenshtein.getLevenshteinDistance(sourceLabel, targetLabel);
             distanceMap.put(distance, target);
         }
         return distanceMap;

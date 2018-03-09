@@ -2,9 +2,9 @@ package org.activityinfo.io.xform.xpath;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.diagnostic.ExprException;
-import org.activityinfo.model.expr.functions.ExprFunction;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.diagnostic.FormulaException;
+import org.activityinfo.model.formula.functions.FormulaFunction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -37,8 +37,8 @@ public class XPathBuilder {
             return null;
         }
         try {
-            return build(ExprParser.parse(expr));
-        } catch (ExprException e) {
+            return build(FormulaParser.parse(expr));
+        } catch (FormulaException e) {
             LOGGER.log(Level.WARNING, "Could not parse expression '" + expr + "': " + e.getMessage());
             return null;
         } catch (XPathBuilderException e) {
@@ -50,35 +50,35 @@ public class XPathBuilder {
         }
     }
 
-    public String build(ExprNode exprNode) {
-        if (exprNode == null) {
+    public String build(FormulaNode formulaNode) {
+        if (formulaNode == null) {
             return null;
         } else {
             StringBuilder xpath = new StringBuilder();
-            appendTo(exprNode, xpath);
+            appendTo(formulaNode, xpath);
             return xpath.toString();
         }
     }
 
-    private void appendTo(ExprNode exprNode, StringBuilder xpath) {
-        if (exprNode instanceof ConstantExpr) {
-            ConstantExpr constantExpr = (ConstantExpr) exprNode;
-            FieldValue value = constantExpr.getValue();
+    private void appendTo(FormulaNode formulaNode, StringBuilder xpath) {
+        if (formulaNode instanceof ConstantNode) {
+            ConstantNode constantNode = (ConstantNode) formulaNode;
+            FieldValue value = constantNode.getValue();
 
             if (value instanceof BooleanFieldValue) {
                 BooleanFieldValue booleanFieldValue = (BooleanFieldValue) value;
                 xpath.append(booleanFieldValue.asBoolean() ? TRUE : FALSE);
             } else if (value instanceof EnumValue) {
-                String xpathExpr = resolveSymbol(exprNode);
+                String xpathExpr = resolveSymbol(formulaNode);
                 xpath.append(xpathExpr);
             } else {
-                xpath.append(constantExpr.asExpression());
+                xpath.append(constantNode.asExpression());
             }
-        } else if (exprNode instanceof FunctionCallNode) {
+        } else if (formulaNode instanceof FunctionCallNode) {
 
-            FunctionCallNode functionCallNode = (FunctionCallNode) exprNode;
-            List<ExprNode> arguments = functionCallNode.getArguments();
-            ExprFunction function = functionCallNode.getFunction();
+            FunctionCallNode functionCallNode = (FunctionCallNode) formulaNode;
+            List<FormulaNode> arguments = functionCallNode.getArguments();
+            FormulaFunction function = functionCallNode.getFunction();
 
             switch (function.getId()) {
                 case "&&":
@@ -110,36 +110,36 @@ public class XPathBuilder {
                     throw new XPathBuilderException("Unsupported function " + function.getId());
             }
 
-        } else if (exprNode instanceof GroupExpr) {
-            GroupExpr groupExpr = (GroupExpr) exprNode;
-            ExprNode expr = groupExpr.getExpr();
+        } else if (formulaNode instanceof GroupNode) {
+            GroupNode groupNode = (GroupNode) formulaNode;
+            FormulaNode expr = groupNode.getExpr();
             xpath.append("(");
             appendTo(expr, xpath);
             xpath.append(")");
 
-        } else if (exprNode instanceof SymbolExpr) {
-            SymbolExpr symbolExpr = (SymbolExpr) exprNode;
+        } else if (formulaNode instanceof SymbolNode) {
+            SymbolNode symbolNode = (SymbolNode) formulaNode;
 
-            String xpathExpr = resolveSymbol(symbolExpr);
+            String xpathExpr = resolveSymbol(symbolNode);
 
             xpath.append(xpathExpr);
 
-        } else if (exprNode instanceof CompoundExpr) {
-            CompoundExpr compoundExpr = (CompoundExpr) exprNode;
+        } else if (formulaNode instanceof CompoundExpr) {
+            CompoundExpr compoundExpr = (CompoundExpr) formulaNode;
 
-            List<ExprNode> arguments = new ArrayList<>();
+            List<FormulaNode> arguments = new ArrayList<>();
             arguments.add(compoundExpr.getValue());
             arguments.add(compoundExpr.getField());
 
             appendBinaryInfixTo("=", arguments, xpath);
         } else {
-            throw new XPathBuilderException("Unknown expr node " + exprNode);
+            throw new XPathBuilderException("Unknown expr node " + formulaNode);
         }
     }
 
-    private void appendFunction(String functionName, List<ExprNode> arguments, StringBuilder xpath) {
+    private void appendFunction(String functionName, List<FormulaNode> arguments, StringBuilder xpath) {
         Preconditions.checkArgument(!arguments.isEmpty());
-        Preconditions.checkArgument(arguments.get(0) instanceof SymbolExpr || arguments.get(0) instanceof ConstantExpr);
+        Preconditions.checkArgument(arguments.get(0) instanceof SymbolNode || arguments.get(0) instanceof ConstantNode);
 
         switch (functionName) {
             case "containsAny":
@@ -162,18 +162,18 @@ public class XPathBuilder {
         throw new RuntimeException("Function is not supported, function name: " + functionName);
     }
 
-    private void appendSelectedFunction(String joinOperator, List<ExprNode> arguments, StringBuilder xpath) {
+    private void appendSelectedFunction(String joinOperator, List<FormulaNode> arguments, StringBuilder xpath) {
         Preconditions.checkArgument(arguments.size() >= 2);
         Preconditions.checkArgument(joinOperator.equals("or") || joinOperator.equals("and"));
 
         String firstArgXpath = resolveSymbol(arguments.get(0));
 
         for (int i = 1; i < arguments.size(); i++) {
-            ExprNode argument = arguments.get(i);
-            Preconditions.checkState(argument instanceof SymbolExpr || argument instanceof ConstantExpr, "Only symbol/constant expr nodes are supported.");
+            FormulaNode argument = arguments.get(i);
+            Preconditions.checkState(argument instanceof SymbolNode || argument instanceof ConstantNode, "Only symbol/constant expr nodes are supported.");
             String symbol = resolveSymbol(argument);
 
-            if (argument instanceof SymbolExpr) {
+            if (argument instanceof SymbolNode) {
                 xpath.append(String.format("selected(%s, %s)", firstArgXpath, symbol));
             } else {
                 xpath.append(String.format("selected(%s, %s)", firstArgXpath, symbol));
@@ -185,7 +185,7 @@ public class XPathBuilder {
         }
     }
 
-    private void appendBinaryInfixTo(String operatorName, List<ExprNode> arguments, StringBuilder xpath) {
+    private void appendBinaryInfixTo(String operatorName, List<FormulaNode> arguments, StringBuilder xpath) {
         Preconditions.checkArgument(arguments.size() == 2);
 
         if(isEnumSelectFunction(operatorName, arguments.get(0), arguments.get(1))) {
@@ -206,10 +206,10 @@ public class XPathBuilder {
         appendTo(arguments.get(1), xpath);
     }
 
-    private void appendUnaryFunction(String functionName, ExprNode argument, StringBuilder xpath) {
+    private void appendUnaryFunction(String functionName, FormulaNode argument, StringBuilder xpath) {
         Preconditions.checkArgument(argument != null);
 
-        if (argument instanceof GroupExpr) {
+        if (argument instanceof GroupNode) {
             xpath.append(functionName);
             appendTo(argument, xpath);
         } else {
@@ -219,7 +219,7 @@ public class XPathBuilder {
         }
     }
 
-    private boolean isEnumSelectFunction(String operatorName, ExprNode arg0, ExprNode arg1) {
+    private boolean isEnumSelectFunction(String operatorName, FormulaNode arg0, FormulaNode arg1) {
         if(!operatorName.equals("=")) {
             return false;
         }
@@ -234,26 +234,26 @@ public class XPathBuilder {
         return "field_" + fieldId.asString();
     }
 
-    private String resolveSymbol(ExprNode exprNode) throws XSymbolException {
-        if (exprNode instanceof SymbolExpr) {
-            return resolveSymbol((SymbolExpr) exprNode);
-        } else if (exprNode instanceof ConstantExpr) {
-            return resolveSymbol((ConstantExpr) exprNode);
+    private String resolveSymbol(FormulaNode formulaNode) throws XSymbolException {
+        if (formulaNode instanceof SymbolNode) {
+            return resolveSymbol((SymbolNode) formulaNode);
+        } else if (formulaNode instanceof ConstantNode) {
+            return resolveSymbol((ConstantNode) formulaNode);
         }
-        throw new XSymbolException(exprNode.asExpression());
+        throw new XSymbolException(formulaNode.asExpression());
     }
 
-    private String resolveSymbol(SymbolExpr symbolExpr) throws XSymbolException {
-        return symbolHandler.resolveSymbol(symbolExpr.getName());
+    private String resolveSymbol(SymbolNode symbolNode) throws XSymbolException {
+        return symbolHandler.resolveSymbol(symbolNode.getName());
     }
 
-    private String resolveSymbol(ConstantExpr constantExpr) throws XSymbolException {
+    private String resolveSymbol(ConstantNode constantNode) throws XSymbolException {
         String resolved;
-        if (constantExpr.getType() instanceof EnumType) {
-            EnumValue enumValue = (EnumValue) constantExpr.getValue();
+        if (constantNode.getType() instanceof EnumType) {
+            EnumValue enumValue = (EnumValue) constantNode.getValue();
             resolved = symbolHandler.resolveSymbol(enumValue.getValueId().asString());
         } else {
-            resolved = symbolHandler.resolveSymbol(constantExpr.getValue().toString());
+            resolved = symbolHandler.resolveSymbol(constantNode.getValue().toString());
         }
         return resolved;
     }

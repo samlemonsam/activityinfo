@@ -30,11 +30,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.expr.simple.Criteria;
-import org.activityinfo.model.expr.simple.SimpleCondition;
-import org.activityinfo.model.expr.simple.SimpleConditionList;
-import org.activityinfo.model.expr.simple.SimpleOperators;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formula.simple.Criteria;
+import org.activityinfo.model.formula.simple.SimpleCondition;
+import org.activityinfo.model.formula.simple.SimpleConditionList;
+import org.activityinfo.model.formula.simple.SimpleOperators;
 import org.activityinfo.ui.client.widget.Button;
 
 import java.util.ArrayList;

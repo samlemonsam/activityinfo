@@ -8,7 +8,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.ui.client.widget.TextBox;
@@ -77,7 +77,7 @@ public class SerialNumberTypeEditor extends TypeEditor<SerialNumberType> {
 
     private boolean isValid(String updatedFormula) {
         try {
-            ExprParser.parse(updatedFormula);
+            FormulaParser.parse(updatedFormula);
             return true;
         } catch (Exception e) {
             return false;

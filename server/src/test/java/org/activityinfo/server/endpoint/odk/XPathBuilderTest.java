@@ -29,11 +29,11 @@ import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.io.xform.util.XFormNavigator;
 import org.activityinfo.io.xform.xpath.XPathBuilder;
 import org.activityinfo.io.xform.xpath.XPathBuilderException;
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.simple.SimpleConditionList;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.TFormClass;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.simple.SimpleConditionList;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -70,7 +70,7 @@ public class XPathBuilderTest extends CommandTestCase2 {
 
     private OdkFormFieldBuilderFactory factory;
 
-    private List<ExprNode> exprList;
+    private List<FormulaNode> exprList;
     private List<ResourceId> fieldList;
 
     @Before
@@ -86,7 +86,7 @@ public class XPathBuilderTest extends CommandTestCase2 {
         exprList = new ArrayList<>();
 
         for(String formula : formulas) {
-            ExprNode node = ExprParser.parse(formula);
+            FormulaNode node = FormulaParser.parse(formula);
             exprList.add(node);
             List<ResourceId> fieldIds = getFieldIds(node);
             addToFieldList(fieldIds);
@@ -98,9 +98,9 @@ public class XPathBuilderTest extends CommandTestCase2 {
 
         try {
             String xpath;
-            Iterator<ExprNode> it = exprList.listIterator();
+            Iterator<FormulaNode> it = exprList.listIterator();
             while (it.hasNext()) {
-                ExprNode node = it.next();
+                FormulaNode node = it.next();
                 xpath = xPathBuilder.build(node);
                 stringBuilder.append(node.asExpression() + "\t" + xpath + System.lineSeparator());
             }
@@ -114,28 +114,28 @@ public class XPathBuilderTest extends CommandTestCase2 {
         }
     }
 
-    private List<ResourceId> getFieldIds(ExprNode exprNode) {
+    private List<ResourceId> getFieldIds(FormulaNode formulaNode) {
         List<ResourceId> fieldIds = new ArrayList<>();
-        if (exprNode instanceof FunctionCallNode) {
-            FunctionCallNode functionCall = (FunctionCallNode) exprNode;
-            for(ExprNode arg : functionCall.getArguments()) {
+        if (formulaNode instanceof FunctionCallNode) {
+            FunctionCallNode functionCall = (FunctionCallNode) formulaNode;
+            for(FormulaNode arg : functionCall.getArguments()) {
                 fieldIds.addAll(getFieldIds(arg));
             }
-        } else if (exprNode instanceof SymbolExpr) {
-            SymbolExpr symbolExpr = (SymbolExpr) exprNode;
-            fieldIds.add(ResourceId.valueOf(symbolExpr.getName()));
-        } else if (exprNode instanceof ConstantExpr) {
-            ConstantExpr constantExpr = (ConstantExpr) exprNode;
-            if (constantExpr.getType() instanceof EnumType) {
-                fieldIds.add(ResourceId.valueOf(constantExpr.toString()));
+        } else if (formulaNode instanceof SymbolNode) {
+            SymbolNode symbolNode = (SymbolNode) formulaNode;
+            fieldIds.add(ResourceId.valueOf(symbolNode.getName()));
+        } else if (formulaNode instanceof ConstantNode) {
+            ConstantNode constantNode = (ConstantNode) formulaNode;
+            if (constantNode.getType() instanceof EnumType) {
+                fieldIds.add(ResourceId.valueOf(constantNode.toString()));
             }
-        } else if (exprNode instanceof CompoundExpr) {
-            CompoundExpr compoundExpr = (CompoundExpr) exprNode;
+        } else if (formulaNode instanceof CompoundExpr) {
+            CompoundExpr compoundExpr = (CompoundExpr) formulaNode;
             fieldIds.addAll(getFieldIds(compoundExpr.getValue()));
             fieldIds.addAll(getFieldIds(compoundExpr.getField()));
-        } else if (exprNode instanceof GroupExpr) {
-            GroupExpr groupExpr = (GroupExpr) exprNode;
-            fieldIds.addAll(getFieldIds(groupExpr.getExpr()));
+        } else if (formulaNode instanceof GroupNode) {
+            GroupNode groupNode = (GroupNode) formulaNode;
+            fieldIds.addAll(getFieldIds(groupNode.getExpr()));
         }
         return fieldIds;
     }

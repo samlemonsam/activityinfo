@@ -2,8 +2,8 @@ package org.activityinfo.store.testing;
 
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -36,7 +36,7 @@ public class SubFormSummaryTest {
 
         FormTree formTree = catalog.getFormTree(clinicForm.getFormId());
         NodeMatcher nodeMatcher = new NodeMatcher(formTree);
-        Collection<NodeMatch> nodeMatches = nodeMatcher.resolveSymbol(new SymbolExpr("NUM_CONSULT"));
+        Collection<NodeMatch> nodeMatches = nodeMatcher.resolveSymbol(new SymbolNode("NUM_CONSULT"));
 
         assertThat(nodeMatches, hasSize(1));
 

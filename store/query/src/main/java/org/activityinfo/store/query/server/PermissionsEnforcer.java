@@ -1,13 +1,13 @@
 package org.activityinfo.store.query.server;
 
 import com.google.common.base.Strings;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.diagnostic.ExprException;
-import org.activityinfo.model.expr.eval.EvalContext;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.diagnostic.FormulaException;
+import org.activityinfo.model.formula.eval.EvalContext;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.store.query.shared.FormSupervisor;
@@ -54,30 +54,30 @@ public class PermissionsEnforcer {
         if(!formPermissions.isFiltered(operation)) {
             return true;
         }
-        ExprNode filter = parseFilter(record.getFormId(), formPermissions.getFilter(operation));
+        FormulaNode filter = parseFilter(record.getFormId(), formPermissions.getFilter(operation));
         return evalFilter(record, filter);
     }
 
-    private boolean evalFilter(FormInstance record, ExprNode filter) {
+    private boolean evalFilter(FormInstance record, FormulaNode filter) {
         FormClass formClass = formClassProvider.getFormClass(record.getFormId());
         EvalContext context = new FormEvalContext(formClass, record);
         return filter.evaluate(context) == BooleanFieldValue.TRUE;
     }
 
-    private ExprNode parseFilter(ResourceId formId, String filter) {
+    private FormulaNode parseFilter(ResourceId formId, String filter) {
         if(Strings.isNullOrEmpty(filter)) {
-            return new ConstantExpr(true);
+            return new ConstantNode(true);
         }
 
         try {
-            return ExprParser.parse(filter);
-        } catch (ExprException e) {
+            return FormulaParser.parse(filter);
+        } catch (FormulaException e) {
             LOGGER.log(Level.SEVERE,
                 String.format("Failed to parse filter '%s' for form %s, falling back to denied access",
                     formId.asString(),
                     formId), e);
 
-            return new ConstantExpr(false);
+            return new ConstantNode(false);
         }
     }
 

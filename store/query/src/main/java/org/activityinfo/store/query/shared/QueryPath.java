@@ -4,10 +4,10 @@ package org.activityinfo.store.query.shared;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.LinkedList;
@@ -21,7 +21,7 @@ public class QueryPath {
     @VisibleForTesting
     final List<String> path;
     
-    public QueryPath(SymbolExpr expr) {
+    public QueryPath(SymbolNode expr) {
         path = Lists.newArrayList(expr.getName());
     }
     
@@ -34,8 +34,8 @@ public class QueryPath {
             if(expr.getValue() instanceof CompoundExpr) {
                 expr = (CompoundExpr) expr.getValue();
         
-            } else if(expr.getValue() instanceof SymbolExpr) {
-                path.add(0, ((SymbolExpr) expr.getValue()).getName());
+            } else if(expr.getValue() instanceof SymbolNode) {
+                path.add(0, ((SymbolNode) expr.getValue()).getName());
                 break;
             }
         }

@@ -4,7 +4,7 @@ package org.activityinfo.model.formTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.junit.Test;
 
-import static org.activityinfo.model.expr.ExprParser.parse;
+import static org.activityinfo.model.formula.FormulaParser.parse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 

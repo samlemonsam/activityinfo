@@ -5,7 +5,7 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.analysis.table.TableViewModel;
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
@@ -39,7 +39,7 @@ public class SubFormGrid extends VerticalLayoutContainer {
             if(grid == null) {
                 grid = new TableGrid(model.get(), model.get().getColumnSet(), new TableUpdater() {
                     @Override
-                    public void updateFilter(Optional<ExprNode> filterFormula) {
+                    public void updateFilter(Optional<FormulaNode> filterFormula) {
                         // TODO
                     }
 

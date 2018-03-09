@@ -4,11 +4,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.Exprs;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -64,10 +64,10 @@ public class SiteFormStorage implements VersionedFormStorage {
 
             FormPermissions.Builder permissions = FormPermissions.builder();
 
-            ExprNode partnerFilter = Exprs.equals(
-                    new SymbolExpr(
+            FormulaNode partnerFilter = Formulas.equals(
+                    new SymbolNode(
                         CuidAdapter.partnerField(activity.getId())),
-                    new ConstantExpr(
+                    new ConstantNode(
                         CuidAdapter.partnerRecordId(databasePermission.getPartnerId()).asString()));
 
 

@@ -3,12 +3,12 @@ package org.activityinfo.ui.client.store;
 import com.google.gwt.core.client.testing.StubScheduler;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.indexedb.IDBFactoryStub;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.Exprs;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
@@ -26,7 +26,6 @@ import org.junit.Test;
 import static org.activityinfo.observable.ObservableTesting.connect;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
@@ -286,9 +285,9 @@ public class FormStoreTest {
         QueryModel queryModel = new QueryModel(intakeForm.getFormId());
         queryModel.selectResourceId().as("id");
         queryModel.selectField(intakeForm.getProtectionCodeFieldId()).as("serial");
-        queryModel.setFilter(Exprs.equals(
-            new SymbolExpr("_id"),
-            new ConstantExpr(newRecord.getId().asString())));
+        queryModel.setFilter(Formulas.equals(
+            new SymbolNode("_id"),
+            new ConstantNode(newRecord.getId().asString())));
 
         Connection<ColumnSet> view = setup.connect(setup.getFormStore().query(queryModel));
 

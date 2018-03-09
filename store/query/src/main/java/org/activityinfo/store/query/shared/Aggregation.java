@@ -1,6 +1,6 @@
 package org.activityinfo.store.query.shared;
 
-import org.activityinfo.model.expr.functions.StatFunction;
+import org.activityinfo.model.formula.functions.StatFunction;
 
 import java.util.Arrays;
 

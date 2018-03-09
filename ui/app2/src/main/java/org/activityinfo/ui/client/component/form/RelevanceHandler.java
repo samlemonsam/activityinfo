@@ -25,13 +25,13 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.expr.ExprLexer;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.formula.FormulaLexer;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
@@ -59,9 +59,9 @@ public class RelevanceHandler {
     private void applyRelevanceLogic(final FormField field) {
         if (field.hasRelevanceConditionExpression()) {
             try {
-                ExprLexer lexer = new ExprLexer(field.getRelevanceConditionExpression());
-                ExprParser parser = new ExprParser(lexer);
-                ExprNode expr = parser.parse();
+                FormulaLexer lexer = new FormulaLexer(field.getRelevanceConditionExpression());
+                FormulaParser parser = new FormulaParser(lexer);
+                FormulaNode expr = parser.parse();
                 FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
                 if (fieldContainer != null) {
                     FormModel model = simpleFormPanel.getModel();

@@ -21,7 +21,7 @@ package org.activityinfo.test.driver;
  * #L%
  */
 
-import org.activityinfo.model.expr.*;
+import org.activityinfo.model.formula.*;
 
 import java.util.List;
 
@@ -37,13 +37,13 @@ public class RelevanceTransformator {
     }
 
     public String transform(String relevanceExpression) {
-        ExprLexer lexer = new ExprLexer(relevanceExpression);
-        ExprParser parser = new ExprParser(lexer);
-        ExprNode expr = parser.parse();
+        FormulaLexer lexer = new FormulaLexer(relevanceExpression);
+        FormulaParser parser = new FormulaParser(lexer);
+        FormulaNode expr = parser.parse();
         return expr.accept(new TransformationVisitor(aliases)).asExpression();
     }
 
-    private static class TransformationVisitor implements ExprVisitor<ExprNode> {
+    private static class TransformationVisitor implements FormulaVisitor<FormulaNode> {
 
         private final AliasTable aliases;
 
@@ -52,32 +52,32 @@ public class RelevanceTransformator {
         }
 
         @Override
-        public ExprNode visitConstant(ConstantExpr node) {
+        public FormulaNode visitConstant(ConstantNode node) {
             return node;
         }
 
         @Override
-        public ExprNode visitSymbol(SymbolExpr symbolExpr) {
-            symbolExpr.setName(aliases.getAlias(symbolExpr.getName()));
-            return symbolExpr;
+        public FormulaNode visitSymbol(SymbolNode symbolNode) {
+            symbolNode.setName(aliases.getAlias(symbolNode.getName()));
+            return symbolNode;
         }
 
         @Override
-        public ExprNode visitGroup(GroupExpr expr) {
+        public FormulaNode visitGroup(GroupNode expr) {
             return expr;
         }
 
         @Override
-        public ExprNode visitCompoundExpr(CompoundExpr compoundExpr) {
+        public FormulaNode visitCompoundExpr(CompoundExpr compoundExpr) {
             return compoundExpr;
         }
 
         @Override
-        public ExprNode visitFunctionCall(FunctionCallNode functionCallNode) {
-            List<ExprNode> arguments = functionCallNode.getArguments();
-            for (ExprNode node : arguments) {
-                if (node instanceof SymbolExpr) {
-                    visitSymbol((SymbolExpr) node);
+        public FormulaNode visitFunctionCall(FunctionCallNode functionCallNode) {
+            List<FormulaNode> arguments = functionCallNode.getArguments();
+            for (FormulaNode node : arguments) {
+                if (node instanceof SymbolNode) {
+                    visitSymbol((SymbolNode) node);
                 }
             }
             return functionCallNode;

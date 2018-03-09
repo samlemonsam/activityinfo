@@ -1,6 +1,6 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 
 /**
  * Simple column format for a field that can be represented as single
@@ -8,7 +8,7 @@ import org.activityinfo.model.expr.ExprNode;
  */
 public class TextFormat extends SimpleColumnFormat<String> {
 
-    protected TextFormat(String id, ExprNode formula) {
+    protected TextFormat(String id, FormulaNode formula) {
         super(id, formula);
     }
 

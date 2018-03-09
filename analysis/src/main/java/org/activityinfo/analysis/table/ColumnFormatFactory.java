@@ -1,7 +1,7 @@
 package org.activityinfo.analysis.table;
 
 import org.activityinfo.analysis.ParsedFormula;
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -19,9 +19,9 @@ public class ColumnFormatFactory implements FieldTypeVisitor<ColumnFormat> {
 
 
     private String columnId;
-    private ExprNode formula;
+    private FormulaNode formula;
 
-    public ColumnFormatFactory(String columnId, ExprNode formula) {
+    public ColumnFormatFactory(String columnId, FormulaNode formula) {
         this.columnId = columnId;
         this.formula = formula;
     }

@@ -3,11 +3,11 @@ package org.activityinfo.server.command.handler.binding;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -22,17 +22,17 @@ import static org.activityinfo.server.command.handler.GetSitesHandler.getRange;
 
 public class LocationFieldBinding implements FieldBinding {
 
-    public static final SymbolExpr ID_SYMBOL = new SymbolExpr(ColumnModel.ID_SYMBOL);
-    public static final SymbolExpr LOCATION_SYMBOL = new SymbolExpr("location");
-    public static final SymbolExpr NAME_SYMBOL = new SymbolExpr("name");
-    public static final SymbolExpr CODE_SYMBOL = new SymbolExpr("axe");
+    public static final SymbolNode ID_SYMBOL = new SymbolNode(ColumnModel.ID_SYMBOL);
+    public static final SymbolNode LOCATION_SYMBOL = new SymbolNode("location");
+    public static final SymbolNode NAME_SYMBOL = new SymbolNode("name");
+    public static final SymbolNode CODE_SYMBOL = new SymbolNode("axe");
     public static final String PARENT_SYMBOL = "parent";
 
     public static final String LOCATION_ID_COLUMN = "locationId";
     public static final String LOCATION_NAME_COLUMN = "locationName";
     public static final String LOCATION_CODE_COLUMN = "locationAxe";
 
-    private static final ConstantExpr ZEROED_ID = new ConstantExpr(0);
+    private static final ConstantNode ZEROED_ID = new ConstantNode(0);
 
     private final FormField locationField;
     private List<ResourceId> bound = Lists.newArrayList();

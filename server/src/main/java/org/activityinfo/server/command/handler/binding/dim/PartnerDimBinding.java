@@ -6,9 +6,9 @@ import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -67,14 +67,14 @@ public class PartnerDimBinding extends DimBinding {
 
     private List<ColumnModel> getColumnQuery(ResourceId formId) {
 
-        SymbolExpr partnerField = new SymbolExpr(CuidAdapter.field(formId, CuidAdapter.PARTNER_FIELD));
+        SymbolNode partnerField = new SymbolNode(CuidAdapter.field(formId, CuidAdapter.PARTNER_FIELD));
 
         ColumnModel partnerId = new ColumnModel();
-        partnerId.setExpression(partnerField);
+        partnerId.setFormula(partnerField);
         partnerId.setId(PARTNER_ID_COLUMN);
 
         ColumnModel partnerLabel = new ColumnModel();
-        partnerLabel.setExpression(new CompoundExpr(partnerField, new SymbolExpr("label")));
+        partnerLabel.setFormula(new CompoundExpr(partnerField, new SymbolNode("label")));
         partnerLabel.setId(PARTNER_LABEL_COLUMN);
 
         return Arrays.asList(partnerId, partnerLabel);

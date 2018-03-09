@@ -4,13 +4,13 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
-import org.activityinfo.model.expr.ConstantExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.Exprs;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -135,8 +135,8 @@ public class EffectiveTableModel {
         return defaultColumnModel(node.getPath().toExpr());
     }
 
-    private ImmutableTableColumn defaultColumnModel(ExprNode exprNode) {
-        String formulaString = exprNode.asExpression();
+    private ImmutableTableColumn defaultColumnModel(FormulaNode formulaNode) {
+        String formulaString = formulaNode.asExpression();
 
         // We need stable ids for our default columns, otherwise
         // the views will get confused and refresh unnecessarily
@@ -151,7 +151,7 @@ public class EffectiveTableModel {
     private void addKeyColumns(List<EffectiveTableColumn> columns, FormTree.Node node) {
 
         LookupKeySet lookupKeySet = new LookupKeySet(formTree, node.getField());
-        Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(node.getFieldId());
+        Map<LookupKey, FormulaNode> formulas = lookupKeySet.getKeyFormulas(node.getFieldId());
 
         for (LookupKey lookupKey : lookupKeySet.getLookupKeys()) {
 
@@ -190,7 +190,7 @@ public class EffectiveTableModel {
 
     private QueryModel buildQuery(List<EffectiveTableColumn> columns, RecordRef recordRef) {
         QueryModel queryModel = buildQuery(columns);
-        queryModel.setFilter(Exprs.equals(new SymbolExpr("@parent"), new ConstantExpr(recordRef.getRecordId().asString())));
+        queryModel.setFilter(Formulas.equals(new SymbolNode("@parent"), new ConstantNode(recordRef.getRecordId().asString())));
 
         return queryModel;
     }

@@ -22,11 +22,11 @@ package org.activityinfo.ui.client.component.formdesigner.skip;
  */
 
 import com.google.common.base.Strings;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.simple.SimpleConditionList;
-import org.activityinfo.model.expr.simple.SimpleConditionParser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.simple.SimpleConditionList;
+import org.activityinfo.model.formula.simple.SimpleConditionParser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.component.form.field.OptionSetProvider;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -72,7 +72,7 @@ public class RelevancePanelPresenter {
         }
 
         try {
-            return SimpleConditionParser.parse(ExprParser.parse(formula));
+            return SimpleConditionParser.parse(FormulaParser.parse(formula));
         } catch (Exception e) {
             return new SimpleConditionList();
         }

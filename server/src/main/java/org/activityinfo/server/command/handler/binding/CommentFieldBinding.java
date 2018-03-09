@@ -33,6 +33,6 @@ public class CommentFieldBinding implements FieldBinding {
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        return Arrays.asList(new ColumnModel().setExpression(COMMENTS_COLUMN).as(COMMENTS_COLUMN));
+        return Arrays.asList(new ColumnModel().setFormula(COMMENTS_COLUMN).as(COMMENTS_COLUMN));
     }
 }

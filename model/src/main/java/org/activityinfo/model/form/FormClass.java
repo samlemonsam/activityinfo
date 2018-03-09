@@ -10,8 +10,8 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -373,30 +373,30 @@ public class FormClass implements FormElementContainer, JsonSerializable {
         return toJson().toJson();
     }
 
-    public ExprNode findLabelExpression() {
+    public FormulaNode findLabelExpression() {
         // Look for a field with the "label" tag or that is a key
         for (FormField field : getFields()) {
             if(field.getSuperProperties().contains(ResourceId.valueOf("label"))) {
-                return new SymbolExpr(field.getId());
+                return new SymbolNode(field.getId());
             }
         }
 
         // Then fall back to a serial number...
         for (FormField field : getFields()) {
             if(field.getType() instanceof SerialNumberType) {
-                return new SymbolExpr(field.getId());
+                return new SymbolNode(field.getId());
             }
         }
 
         // If no such field exists, pick the first text field
         for (FormField field : getFields()) {
             if(field.getType() instanceof TextType) {
-                return new SymbolExpr(field.getId());
+                return new SymbolNode(field.getId());
             }
         }
 
         // Otherwise fall back to the generated id
-        return new SymbolExpr(ColumnModel.ID_SYMBOL);
+        return new SymbolNode(ColumnModel.ID_SYMBOL);
     }
 
     public static FormClass fromJson(JsonValue object) {

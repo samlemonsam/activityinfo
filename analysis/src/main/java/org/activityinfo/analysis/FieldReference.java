@@ -1,6 +1,6 @@
 package org.activityinfo.analysis;
 
-import org.activityinfo.model.expr.SourceRange;
+import org.activityinfo.model.formula.SourceRange;
 import org.activityinfo.store.query.shared.NodeMatch;
 
 public class FieldReference {

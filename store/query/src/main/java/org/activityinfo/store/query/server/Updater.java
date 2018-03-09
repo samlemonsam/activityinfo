@@ -5,13 +5,16 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -24,7 +27,10 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.model.type.time.*;
+import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.LocalDateInterval;
+import org.activityinfo.model.type.time.PeriodType;
+import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.spi.*;
 
@@ -302,7 +308,7 @@ public class Updater {
             FormEvalContext evalContext = new FormEvalContext(formClass);
             evalContext.setInstance(effectiveRecord);
 
-            ExprNode formula = ExprParser.parse(type.getPrefixFormula());
+            FormulaNode formula = FormulaParser.parse(type.getPrefixFormula());
             FieldValue prefixValue = formula.evaluate(evalContext);
 
             if(prefixValue instanceof TextValue) {

@@ -5,10 +5,10 @@ import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.AdminDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -47,11 +47,11 @@ public class AdminDimBinding extends DimBinding {
         
         if(adminClass.isPresent()) {
             ColumnModel id = new ColumnModel();
-            id.setExpression(new CompoundExpr(levelClassId, ColumnModel.ID_SYMBOL));
+            id.setFormula(new CompoundExpr(levelClassId, ColumnModel.ID_SYMBOL));
             id.setId(idColumn);
             
             ColumnModel label = new ColumnModel();
-            label.setExpression(new FieldPath(levelClassId, field(levelClassId, NAME_FIELD)));
+            label.setFormula(new FieldPath(levelClassId, field(levelClassId, NAME_FIELD)));
             label.setId(labelColumn);
             
             return Arrays.asList(id, label);

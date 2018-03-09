@@ -1,8 +1,8 @@
 package org.activityinfo.server.command.handler.binding;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -56,8 +56,8 @@ public class GeoPointFieldBinding implements FieldBinding {
 
     private List<ColumnModel> getGeoPointQuery() {
         return Arrays.asList(
-                new ColumnModel().setExpression(latExpr).as(latExpr.asExpression()),
-                new ColumnModel().setExpression(lonExpr).as(lonExpr.asExpression())
+                new ColumnModel().setFormula(latExpr).as(latExpr.asExpression()),
+                new ColumnModel().setFormula(lonExpr).as(lonExpr.asExpression())
         );
     }
 }

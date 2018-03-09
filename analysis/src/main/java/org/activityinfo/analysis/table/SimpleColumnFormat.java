@@ -1,6 +1,6 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.query.ColumnModel;
 
 import java.util.Collections;
@@ -9,13 +9,13 @@ import java.util.List;
 public abstract class SimpleColumnFormat<T> implements ColumnFormat {
 
     private String id;
-    private ExprNode formula;
+    private FormulaNode formula;
 
     public String getId() {
         return id;
     }
 
-    protected SimpleColumnFormat(String id, ExprNode formula) {
+    protected SimpleColumnFormat(String id, FormulaNode formula) {
         this.id = id;
         this.formula = formula;
     }
@@ -27,7 +27,7 @@ public abstract class SimpleColumnFormat<T> implements ColumnFormat {
     public final List<ColumnModel> getColumnModels() {
         ColumnModel columnModel = new ColumnModel();
         columnModel.setId(id);
-        columnModel.setExpression(formula);
+        columnModel.setFormula(formula);
 
         return Collections.singletonList(columnModel);
     }

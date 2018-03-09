@@ -22,20 +22,14 @@ package org.activityinfo.ui.client.component.form.field;
  */
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.ColumnModel;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.NarrativeType;

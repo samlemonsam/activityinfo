@@ -7,18 +7,17 @@ import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.StatefulValue;
-import org.activityinfo.promise.Function3;
 import org.activityinfo.store.query.shared.FormSource;
 
 import javax.annotation.Nullable;
@@ -139,7 +138,7 @@ public class TableViewModel implements TableUpdater {
     }
 
     @Override
-    public void updateFilter(Optional<ExprNode> filterNode) {
+    public void updateFilter(Optional<FormulaNode> filterNode) {
 
         Optional<String> filter = filterNode.transform(n -> n.asExpression());
 
@@ -227,11 +226,11 @@ public class TableViewModel implements TableUpdater {
             return formula.getFormula();
         }
 
-        SymbolExpr parentSymbol = new SymbolExpr(ColumnModel.PARENT_SYMBOL);
-        ExprNode transformed = formula.getRootNode().transform(node -> {
-           if(node instanceof SymbolExpr) {
+        SymbolNode parentSymbol = new SymbolNode(ColumnModel.PARENT_SYMBOL);
+        FormulaNode transformed = formula.getRootNode().transform(node -> {
+           if(node instanceof SymbolNode) {
                // A -> parent.A
-               return new CompoundExpr(parentSymbol, (SymbolExpr) node);
+               return new CompoundExpr(parentSymbol, (SymbolNode) node);
            } else {
                return node;
            }

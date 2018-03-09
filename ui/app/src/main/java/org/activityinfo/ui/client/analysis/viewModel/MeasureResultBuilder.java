@@ -1,7 +1,7 @@
 package org.activityinfo.ui.client.analysis.viewModel;
 
 
-import org.activityinfo.model.expr.functions.*;
+import org.activityinfo.model.formula.functions.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.store.query.shared.Aggregation;
 import org.activityinfo.store.query.shared.HeapsortTandem;

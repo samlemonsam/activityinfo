@@ -4,10 +4,10 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.eval.FormSymbolTable;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.eval.FormSymbolTable;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -43,7 +43,7 @@ public class ExprQueryBuilder {
     }
 
 
-    public void addExpr(ExprNode expr, PendingSlot<ColumnView> target) {
+    public void addExpr(FormulaNode expr, PendingSlot<ColumnView> target) {
         
         FieldType fieldType = computeType(symbolTable, expr);
         CursorObserver<FieldValue> columnBuilder = ViewBuilderFactory.get(columnFactory, target, fieldType);
@@ -51,15 +51,15 @@ public class ExprQueryBuilder {
         addExpr(expr, columnBuilder);
     }
 
-    private FieldType computeType(FormSymbolTable parent, ExprNode expr) {
-        if(expr instanceof SymbolExpr) {
-            return parent.resolveSymbol((SymbolExpr) expr).getType();
+    private FieldType computeType(FormSymbolTable parent, FormulaNode expr) {
+        if(expr instanceof SymbolNode) {
+            return parent.resolveSymbol((SymbolNode) expr).getType();
 
         } else if(expr instanceof FunctionCallNode) {
             FunctionCallNode callNode = (FunctionCallNode) expr;
             List<FieldType> argumentTypes = Lists.newArrayList();
-            for (ExprNode exprNode : callNode.getArguments()) {
-                argumentTypes.add(computeType(parent, exprNode));
+            for (FormulaNode formulaNode : callNode.getArguments()) {
+                argumentTypes.add(computeType(parent, formulaNode));
             }
             return callNode.getFunction().resolveResultType(argumentTypes);
         
@@ -71,11 +71,11 @@ public class ExprQueryBuilder {
                 return computeType(computeFormClass(parent, compoundExpr.getValue()), compoundExpr.getField());
             }
             
-        } else if(expr instanceof ConstantExpr) {
-            return ((ConstantExpr) expr).getType();
+        } else if(expr instanceof ConstantNode) {
+            return ((ConstantNode) expr).getType();
      
-        } else if(expr instanceof GroupExpr) {
-            return computeType(parent, ((GroupExpr) expr).getExpr());
+        } else if(expr instanceof GroupNode) {
+            return computeType(parent, ((GroupNode) expr).getExpr());
         
         } else {
             throw new UnsupportedOperationException("expr: " + expr);    
@@ -83,8 +83,8 @@ public class ExprQueryBuilder {
     }
 
     private boolean isEnumItemReference(CompoundExpr compoundExpr) {
-        if(compoundExpr.getValue() instanceof SymbolExpr) {
-            Optional<FormField> field = symbolTable.tryResolveSymbol((SymbolExpr) compoundExpr.getValue());
+        if(compoundExpr.getValue() instanceof SymbolNode) {
+            Optional<FormField> field = symbolTable.tryResolveSymbol((SymbolNode) compoundExpr.getValue());
             if(field.isPresent() && field.get().getType() instanceof EnumType) {
                 return true;
             }
@@ -92,9 +92,9 @@ public class ExprQueryBuilder {
         return false;
     }
 
-    private FormSymbolTable computeFormClass(FormSymbolTable parent, ExprNode exprNode) {
-        if(exprNode instanceof SymbolExpr) {
-            FormField field = parent.resolveSymbol((SymbolExpr) exprNode);
+    private FormSymbolTable computeFormClass(FormSymbolTable parent, FormulaNode formulaNode) {
+        if(formulaNode instanceof SymbolNode) {
+            FormField field = parent.resolveSymbol((SymbolNode) formulaNode);
             if(field.getType() instanceof RecordFieldType) {
                 RecordFieldType recordFieldType = (RecordFieldType) field.getType();
                 FormClass recordFormClass = recordFieldType.getFormClass();
@@ -103,20 +103,20 @@ public class ExprQueryBuilder {
             } else {
                 throw new IllegalStateException(field.getName() + " is not a record type field.");
             }
-        } else if(exprNode instanceof CompoundExpr) {
-            CompoundExpr compoundExpr = (CompoundExpr) exprNode;
+        } else if(formulaNode instanceof CompoundExpr) {
+            CompoundExpr compoundExpr = (CompoundExpr) formulaNode;
             FormSymbolTable child = computeFormClass(parent, compoundExpr.getValue());
             return computeFormClass(child, compoundExpr.getValue());
         } else {
-            throw new UnsupportedOperationException("exprNode: " + exprNode);
+            throw new UnsupportedOperationException("exprNode: " + formulaNode);
         }
     }
     
-    private void addExpr(ExprNode expr, CursorObserver<FieldValue> target) {
+    private void addExpr(FormulaNode expr, CursorObserver<FieldValue> target) {
 
-        if (expr instanceof SymbolExpr) {
+        if (expr instanceof SymbolNode) {
 
-            SymbolExpr symbol = (SymbolExpr) expr;
+            SymbolNode symbol = (SymbolNode) expr;
             FormField field = symbolTable.resolveSymbol(symbol);
 
             queryBuilder.addField(field.getId(), target);
@@ -150,17 +150,17 @@ public class ExprQueryBuilder {
             CursorObserver<FieldValue> valueObserver = CursorObservers.transform(reader, target);
             addExpr(compoundExpr.getValue(), valueObserver);
 
-        } else if(expr instanceof ConstantExpr) {
+        } else if(expr instanceof ConstantNode) {
 
-            ConstantExpr constantExpr = (ConstantExpr) expr;
-            Function<Object, FieldValue> constantFunction = Functions.constant(constantExpr.getValue());
+            ConstantNode constantNode = (ConstantNode) expr;
+            Function<Object, FieldValue> constantFunction = Functions.constant(constantNode.getValue());
 
             CursorObserver<ResourceId> rowObserver = CursorObservers.transform(constantFunction, target);
 
             queryBuilder.addResourceId(rowObserver);
 
-        } else if(expr instanceof GroupExpr) {
-            addExpr(((GroupExpr) expr).getExpr(), target);
+        } else if(expr instanceof GroupNode) {
+            addExpr(((GroupNode) expr).getExpr(), target);
             
         } else {
             throw new UnsupportedOperationException("TODO: " + expr);

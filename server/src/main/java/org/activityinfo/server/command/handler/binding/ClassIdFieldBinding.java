@@ -25,7 +25,7 @@ public abstract class ClassIdFieldBinding implements FieldBinding {
 
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
         return Arrays.asList(
-                new ColumnModel().setExpression(CLASS_ID_COLUMN).as(CLASS_ID_COLUMN)
+                new ColumnModel().setFormula(CLASS_ID_COLUMN).as(CLASS_ID_COLUMN)
         );
     }
 

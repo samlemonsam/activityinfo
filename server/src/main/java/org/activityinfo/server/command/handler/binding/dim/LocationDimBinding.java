@@ -3,8 +3,8 @@ package org.activityinfo.server.command.handler.binding.dim;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -29,8 +29,8 @@ public class LocationDimBinding extends DimBinding {
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
         ResourceId locationFieldId = CuidAdapter.locationField(activityIdOf(formTree));
         return Arrays.asList(
-                new ColumnModel().setExpression(locationFieldId).as(ID_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(locationFieldId, "label")).as(LABEL_COLUMN));
+                new ColumnModel().setFormula(locationFieldId).as(ID_COLUMN),
+                new ColumnModel().setFormula(new CompoundExpr(locationFieldId, "label")).as(LABEL_COLUMN));
     }
 
     @Override

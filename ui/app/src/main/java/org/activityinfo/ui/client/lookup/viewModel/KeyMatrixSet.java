@@ -1,9 +1,9 @@
 package org.activityinfo.ui.client.lookup.viewModel;
 
 import com.google.common.base.Optional;
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
@@ -55,7 +55,7 @@ public class KeyMatrixSet {
             FormSource formSource,
             ReferenceType referenceType,
             LookupKeySet lookupKeySet,
-            Observable<Optional<ExprNode>> filter) {
+            Observable<Optional<FormulaNode>> filter) {
         this.referenceType = referenceType;
         this.lookupKeySet = lookupKeySet;
 

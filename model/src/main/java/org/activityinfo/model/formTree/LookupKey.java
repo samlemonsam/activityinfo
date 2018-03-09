@@ -1,11 +1,11 @@
 package org.activityinfo.model.formTree;
 
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -28,7 +28,7 @@ public class LookupKey {
 
     private LookupKey parentLevel;
 
-    private SymbolExpr parentFieldId;
+    private SymbolNode parentFieldId;
 
     private ResourceId formId;
 
@@ -43,7 +43,7 @@ public class LookupKey {
     /**
      * This key's field id.
      */
-    private SymbolExpr fieldId;
+    private SymbolNode fieldId;
 
     private List<LookupKey> childLevels = new ArrayList<>();
 
@@ -57,13 +57,13 @@ public class LookupKey {
               String parentFieldId,
               LookupKey parentLevel,
               FormClass formClass,
-              SymbolExpr keyFormula,
+              SymbolNode keyFormula,
               String fieldLabel) {
         this.keyIndex = keyIndex;
         if(parentFieldId == null) {
             this.parentFieldId = null;
         } else {
-            this.parentFieldId = new SymbolExpr(parentFieldId);
+            this.parentFieldId = new SymbolNode(parentFieldId);
         }
         this.parentLevel = parentLevel;
         this.formId = formClass.getId();
@@ -85,7 +85,7 @@ public class LookupKey {
               FormClass formClass,
               FormField formField) {
 
-        this(keyIndex, parentFieldId, parentLevel, formClass, new SymbolExpr(formField.getId()), formField.getLabel());
+        this(keyIndex, parentFieldId, parentLevel, formClass, new SymbolNode(formField.getId()), formField.getLabel());
     }
 
     /**
@@ -100,7 +100,7 @@ public class LookupKey {
      * Constructs a new LookupKey for the given form using the raw record id.
      */
     LookupKey(int keyIndex, FormClass formClass) {
-        this(keyIndex, null, null, formClass, new SymbolExpr(ColumnModel.ID_SYMBOL), "ID");
+        this(keyIndex, null, null, formClass, new SymbolNode(ColumnModel.ID_SYMBOL), "ID");
     }
 
     public int getKeyIndex() {
@@ -127,7 +127,7 @@ public class LookupKey {
         return formId;
     }
 
-    public SymbolExpr getKeyField() {
+    public SymbolNode getKeyField() {
         return fieldId;
     }
 
@@ -158,7 +158,7 @@ public class LookupKey {
         return "[" + formLabel + "." + fieldLabel + ": " +  formId + "." + fieldId + "]";
     }
 
-    private void collectKeys(@Nullable ExprNode baseField, Map<LookupKey, ExprNode> keys) {
+    private void collectKeys(@Nullable FormulaNode baseField, Map<LookupKey, FormulaNode> keys) {
         keys.put(this, join(baseField, fieldId));
 
         if(!isRoot()) {
@@ -166,7 +166,7 @@ public class LookupKey {
         }
     }
 
-    private ExprNode join(@Nullable ExprNode base, @Nullable SymbolExpr field) {
+    private FormulaNode join(@Nullable FormulaNode base, @Nullable SymbolNode field) {
         if(base == null && field == null) {
             return null;
         } else if (base == null) {
@@ -178,18 +178,18 @@ public class LookupKey {
         }
     }
 
-    public Map<LookupKey, ExprNode> getKeyFormulas() {
+    public Map<LookupKey, FormulaNode> getKeyFormulas() {
         return getKeyFormulas(null);
     }
 
-    public Map<LookupKey, ExprNode> getKeyFormulas(ExprNode baseField) {
-        Map<LookupKey, ExprNode> keys = new HashMap<>();
+    public Map<LookupKey, FormulaNode> getKeyFormulas(FormulaNode baseField) {
+        Map<LookupKey, FormulaNode> keys = new HashMap<>();
         collectKeys(baseField, keys);
         return keys;
     }
 
 
-    public ExprNode getParentKey() {
+    public FormulaNode getParentKey() {
         return join(parentFieldId, parentLevel.getKeyField());
     }
 

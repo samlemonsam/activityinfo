@@ -8,9 +8,9 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.expr.ExprLexer;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
+import org.activityinfo.model.formula.FormulaLexer;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.ui.client.widget.TextBox;
@@ -68,9 +68,9 @@ public class CalculatedTypeEditor extends TypeEditor<CalculatedFieldType> {
         }
 
         try {
-            ExprLexer lexer = new ExprLexer(expression);
-            ExprParser parser = new ExprParser(lexer);
-            ExprNode expr = parser.parse();
+            FormulaLexer lexer = new FormulaLexer(expression);
+            FormulaParser parser = new FormulaParser(lexer);
+            FormulaNode expr = parser.parse();
         } catch (Exception e) {
             expressionGroup.setShowValidationMessage(true);
             expressionGroup.setValidationMessage(I18N.CONSTANTS.calculationExpressionIsInvalid());

@@ -1,12 +1,12 @@
 package org.activityinfo.store.testing;
 
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ConstantExpr;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.ConstantNode;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
@@ -32,7 +32,7 @@ public class SubFormDeletionTest {
         QueryModel queryModel = new QueryModel(ReferralSubForm.FORM_ID);
         queryModel.selectResourceId().as("id");
         queryModel.selectExpr(new CompoundExpr(IncidentForm.FORM_ID, ColumnModel.ID_SYMBOL)).as("parent");
-        queryModel.selectExpr(new ConstantExpr(1)).as("count");
+        queryModel.selectExpr(new ConstantNode(1)).as("count");
 
         ColumnSet columnSet = query(queryModel);
         assertThat(columnSet.getNumRows(), equalTo(ReferralSubForm.ROW_COUNT));

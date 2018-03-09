@@ -4,13 +4,15 @@ import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Optional;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.*;
+import org.activityinfo.model.query.ColumnModel;
+import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 
@@ -31,8 +33,8 @@ public class AdminEntityBinding implements FieldBinding {
         this.adminLevelName = adminForm.getLabel();
         this.adminLevelParentId = getParentId(adminForm);
 
-        this.ADMIN_ENTITY_ID_COLUMN =new CompoundExpr(new SymbolExpr(adminForm.getId()), LocationFieldBinding.ID_SYMBOL);
-        this.ADMIN_ENTITY_NAME_COLUMN = new CompoundExpr(new SymbolExpr(adminForm.getId()), LocationFieldBinding.NAME_SYMBOL);
+        this.ADMIN_ENTITY_ID_COLUMN =new CompoundExpr(new SymbolNode(adminForm.getId()), LocationFieldBinding.ID_SYMBOL);
+        this.ADMIN_ENTITY_NAME_COLUMN = new CompoundExpr(new SymbolNode(adminForm.getId()), LocationFieldBinding.NAME_SYMBOL);
     }
 
     @Override
@@ -76,8 +78,8 @@ public class AdminEntityBinding implements FieldBinding {
     private List<ColumnModel> getAdminEntityQuery() {
         // TODO: AdminEntity location extraction disabled until "ST__" functions corrected on QueryEngine
         return Arrays.asList(
-                new ColumnModel().setExpression(ADMIN_ENTITY_ID_COLUMN).as(ADMIN_ENTITY_ID_COLUMN.asExpression()),
-                new ColumnModel().setExpression(ADMIN_ENTITY_NAME_COLUMN).as(ADMIN_ENTITY_NAME_COLUMN.asExpression())
+                new ColumnModel().setFormula(ADMIN_ENTITY_ID_COLUMN).as(ADMIN_ENTITY_ID_COLUMN.asExpression()),
+                new ColumnModel().setFormula(ADMIN_ENTITY_NAME_COLUMN).as(ADMIN_ENTITY_NAME_COLUMN.asExpression())
         );
     }
 

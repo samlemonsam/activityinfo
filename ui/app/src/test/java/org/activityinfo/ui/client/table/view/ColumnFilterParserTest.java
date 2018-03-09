@@ -3,10 +3,10 @@ package org.activityinfo.ui.client.table.view;
 import com.google.common.collect.Multimap;
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.data.shared.loader.FilterConfigBean;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.Exprs;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.functions.AndFunction;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.AndFunction;
 import org.activityinfo.model.type.time.LocalDate;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -15,7 +15,7 @@ import org.junit.Test;
 import java.util.Collection;
 
 import static java.util.Arrays.asList;
-import static org.activityinfo.model.expr.ExprParser.parse;
+import static org.activityinfo.model.formula.FormulaParser.parse;
 import static org.activityinfo.ui.client.table.view.ColumnFilterParser.toFormula;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
@@ -24,9 +24,9 @@ import static org.junit.Assert.assertThat;
 public class ColumnFilterParserTest {
 
 
-    public static final SymbolExpr A = new SymbolExpr("A");
-    public static final SymbolExpr B = new SymbolExpr("B");
-    public static final SymbolExpr C = new SymbolExpr("C");
+    public static final SymbolNode A = new SymbolNode("A");
+    public static final SymbolNode B = new SymbolNode("B");
+    public static final SymbolNode C = new SymbolNode("C");
     public static final AndFunction AND = AndFunction.INSTANCE;
 
 
@@ -73,13 +73,13 @@ public class ColumnFilterParserTest {
     @Test
     public void decomposition() {
 
-        assertThat(Exprs.findBinaryTree(parse("A && B"), AND), contains(A, B));
+        assertThat(Formulas.findBinaryTree(parse("A && B"), AND), contains(A, B));
 
-        assertThat(Exprs.findBinaryTree(parse("A && B && C"), AND), contains(A, B, C));
+        assertThat(Formulas.findBinaryTree(parse("A && B && C"), AND), contains(A, B, C));
 
-        assertThat(Exprs.findBinaryTree(parse("A && (B && C)"), AND), contains(A, B, C));
+        assertThat(Formulas.findBinaryTree(parse("A && (B && C)"), AND), contains(A, B, C));
 
-        assertThat(Exprs.findBinaryTree(parse("(A && ((B && (C))))"), AND), contains(A, B, C));
+        assertThat(Formulas.findBinaryTree(parse("(A && ((B && (C))))"), AND), contains(A, B, C));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class ColumnFilterParserTest {
         config.setComparison("eq");
         config.setValue("1");
 
-        ExprNode columnExpr = parse("IF(A && B, A * 42 / 3, CEIL(B / 99))");
+        FormulaNode columnExpr = parse("IF(A && B, A * 42 / 3, CEIL(B / 99))");
 
         String filterFormula = toFormula(columnExpr, config).asExpression();
 

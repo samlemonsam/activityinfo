@@ -1,7 +1,7 @@
 package org.activityinfo.server.command.handler.binding;
 
-import org.activityinfo.model.expr.ConstantExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.ConstantNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -19,11 +19,11 @@ public class ConstantActivityIdFieldBinding extends ActivityIdFieldBinding {
 
     @Override
     public List<ColumnModel> getColumnQuery(FormTree formTree) {
-        return Collections.singletonList(new ColumnModel().setExpression(new ConstantExpr(id.toString())).as(CLASS_ID_COLUMN));
+        return Collections.singletonList(new ColumnModel().setFormula(new ConstantNode(id.toString())).as(CLASS_ID_COLUMN));
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        return Collections.singletonList(new ColumnModel().setExpression(new ConstantExpr(id.toString())).as(CLASS_ID_COLUMN));
+        return Collections.singletonList(new ColumnModel().setFormula(new ConstantNode(id.toString())).as(CLASS_ID_COLUMN));
     }
 }

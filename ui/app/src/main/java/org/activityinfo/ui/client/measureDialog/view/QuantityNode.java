@@ -3,10 +3,10 @@ package org.activityinfo.ui.client.measureDialog.view;
 import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.TableColumn;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
 import org.activityinfo.ui.client.analysis.model.MeasureModel;
@@ -53,9 +53,9 @@ public class QuantityNode extends MeasureTreeNode {
                 .build();
     }
 
-    private ExprNode measureFormula() {
+    private FormulaNode measureFormula() {
         if (rootFormId.equals(formId)) {
-            return new SymbolExpr(field.getId());
+            return new SymbolNode(field.getId());
         } else {
             return new CompoundExpr(formId, field.getName());
         }

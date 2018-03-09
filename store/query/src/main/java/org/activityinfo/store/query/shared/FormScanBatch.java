@@ -3,15 +3,15 @@ package org.activityinfo.store.query.shared;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.functions.SumFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.SumFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
@@ -119,7 +119,7 @@ public class FormScanBatch {
     }
 
     public Slot<ColumnView> addIdColumn(FilterLevel filterLevel, NodeMatch match) {
-        SymbolExpr matchExpr = (SymbolExpr) match.getExpr();
+        SymbolNode matchExpr = (SymbolNode) match.getExpr();
         switch (matchExpr.getName()) {
             case ColumnModel.ID_SYMBOL:
                 return addResourceIdColumn(filterLevel, match.getFormClass().getId());
@@ -195,7 +195,7 @@ public class FormScanBatch {
     }
 
     private Slot<ColumnView> addParentColumn(FilterLevel filterLevel, ResourceId formId) {
-        return getDataColumn(filterLevel, formId, new SymbolExpr("@parent"));
+        return getDataColumn(filterLevel, formId, new SymbolNode("@parent"));
     }
 
     private ReferenceJoin addJoinLink(FilterLevel filterLevel, JoinNode node) {
@@ -236,7 +236,7 @@ public class FormScanBatch {
         });
     }
 
-    public Slot<ColumnView> getDataColumn(FilterLevel filterLevel, ResourceId formId, ExprNode fieldExpr) {
+    public Slot<ColumnView> getDataColumn(FilterLevel filterLevel, ResourceId formId, FormulaNode fieldExpr) {
         return filter(filterLevel, formId, getTable(formId).addField(fieldExpr));
     }
 
@@ -262,7 +262,7 @@ public class FormScanBatch {
         return new ConstantColumnBuilder(addRowCount(filterLevel, rootFormClass), TextValue.valueOf(value));
     }
 
-    public Slot<ColumnView> addExpression(FilterLevel filterLevel, FormClass formClass, ExprNode node) {
+    public Slot<ColumnView> addExpression(FilterLevel filterLevel, FormClass formClass, FormulaNode node) {
         return filter(filterLevel, formClass.getId(), getTable(formClass).addField(node));
     }
 
@@ -334,7 +334,7 @@ public class FormScanBatch {
             FormTreeBuilder formTreeBuilder = new FormTreeBuilder(formClassProvider);
             FormTree formTree = formTreeBuilder.queryTree(formId);
 
-            ExprNode formula = ExprParser.parse(permissions.getViewFilter());
+            FormulaNode formula = FormulaParser.parse(permissions.getViewFilter());
             QueryEvaluator evaluator = new QueryEvaluator(FilterLevel.NONE, formTree, this);
             Slot<ColumnView> filterView = evaluator.evaluateExpression(formula);
             return new MemoizedSlot<>(filterView, new Function<ColumnView, TableFilter>() {

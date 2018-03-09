@@ -3,17 +3,17 @@ package org.activityinfo.store.query.shared;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.diagnostic.AmbiguousSymbolException;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.diagnostic.AmbiguousSymbolException;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
@@ -247,10 +247,10 @@ public class NodeMatcherTest {
 
         symbolTable = new NodeMatcher(tree);
         
-        ExprNode expr = ExprParser.parse(exprString);
+        FormulaNode expr = FormulaParser.parse(exprString);
         Collection<NodeMatch> matches;
-        if(expr instanceof SymbolExpr) {
-            matches = symbolTable.resolveSymbol((SymbolExpr) expr);
+        if(expr instanceof SymbolNode) {
+            matches = symbolTable.resolveSymbol((SymbolNode) expr);
         } else if(expr instanceof CompoundExpr) {
             matches = symbolTable.resolveCompoundExpr((CompoundExpr) expr);
         } else {

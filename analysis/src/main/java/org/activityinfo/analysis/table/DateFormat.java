@@ -1,12 +1,12 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 
 import java.util.Date;
 
 public class DateFormat extends SimpleColumnFormat<Date> {
 
-    protected DateFormat(String id, ExprNode formula) {
+    protected DateFormat(String id, FormulaNode formula) {
         super(id, formula);
     }
 

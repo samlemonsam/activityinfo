@@ -82,7 +82,7 @@ public class AttributeDimBinding extends DimBinding {
         }   
         
         if(fieldId != null) {
-            return Collections.singletonList(new ColumnModel().setExpression(fieldId).as(columnId));
+            return Collections.singletonList(new ColumnModel().setFormula(fieldId).as(columnId));
         } else {
             // this form has no corresponding attribute
             return Collections.emptyList();

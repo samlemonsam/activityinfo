@@ -2,9 +2,9 @@ package org.activityinfo.legacy.shared.impl;
 
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.model.expr.eval.FieldReader;
-import org.activityinfo.model.expr.eval.FieldReaderFactory;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formula.eval.FieldReader;
+import org.activityinfo.model.formula.eval.FieldReaderFactory;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;

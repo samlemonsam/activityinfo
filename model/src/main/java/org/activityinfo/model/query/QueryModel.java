@@ -6,10 +6,10 @@ import com.google.common.collect.Lists;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.resource.ResourceId;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
@@ -28,7 +28,7 @@ public class QueryModel implements JsonSerializable {
     private final List<ColumnModel> columns = Lists.newArrayList();
 
     private List<SortModel> sortModels = Lists.newArrayList();
-    private ExprNode filter;
+    private FormulaNode filter;
 
     public QueryModel() {
     }
@@ -72,7 +72,7 @@ public class QueryModel implements JsonSerializable {
     public ColumnModel selectField(String codeOrLabel) {
         ColumnModel column = new ColumnModel();
         column.setId(codeOrLabel);
-        column.setExpression("[" + codeOrLabel + "]");
+        column.setFormula("[" + codeOrLabel + "]");
         columns.add(column);
         return column;
     }
@@ -80,15 +80,15 @@ public class QueryModel implements JsonSerializable {
     public ColumnModel selectExpr(String expression) {
         ColumnModel column = new ColumnModel();
         column.setId("_expr" + (columns.size()+1));
-        column.setExpression(expression);
+        column.setFormula(expression);
         columns.add(column);
         return column;
     }
 
-    public ColumnModel selectExpr(ExprNode expression) {
+    public ColumnModel selectExpr(FormulaNode expression) {
         ColumnModel column = new ColumnModel();
         column.setId("_expr" + (columns.size() + 1));
-        column.setExpression(expression);
+        column.setFormula(expression);
         columns.add(column);
         return column;
     }
@@ -96,7 +96,7 @@ public class QueryModel implements JsonSerializable {
     public ColumnModel selectField(FieldPath path) {
         ColumnModel column = new ColumnModel();
         column.setId(path.getLeafId().asString());
-        column.setExpression(path);
+        column.setFormula(path);
         columns.add(column);
         return column;
     }
@@ -108,12 +108,12 @@ public class QueryModel implements JsonSerializable {
     public ColumnModel selectField(ResourceId fieldId) {
         ColumnModel column = new ColumnModel();
         column.setId(fieldId.asString());
-        column.setExpression(fieldId.asString());
+        column.setFormula(fieldId.asString());
         columns.add(column);
         return column;
     }
 
-    public ExprNode getFilter() {
+    public FormulaNode getFilter() {
         return filter;
     }
 
@@ -131,15 +131,15 @@ public class QueryModel implements JsonSerializable {
         if(filterExpression == null) {
             this.filter = null;
         } else {
-            this.filter = ExprParser.parse(filterExpression);
+            this.filter = FormulaParser.parse(filterExpression);
         }
     }
 
-    public void setFilter(ExprNode filter) {
+    public void setFilter(FormulaNode filter) {
         this.filter = filter;
     }
 
-    public void setFilter(Optional<ExprNode> filter) {
+    public void setFilter(Optional<FormulaNode> filter) {
         if(filter.isPresent()) {
             this.filter = filter.get();
         } else {
@@ -162,14 +162,14 @@ public class QueryModel implements JsonSerializable {
      */
     public ColumnModel selectResourceId() {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setExpression(new SymbolExpr(ColumnModel.ID_SYMBOL));
+        columnModel.setFormula(new SymbolNode(ColumnModel.ID_SYMBOL));
         columns.add(columnModel);
         return columnModel;
     }
 
     public ColumnModel selectClassId() {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setExpression(new SymbolExpr(ColumnModel.CLASS_SYMBOL));
+        columnModel.setFormula(new SymbolNode(ColumnModel.CLASS_SYMBOL));
         columns.add(columnModel);
         return columnModel;
     }
@@ -182,7 +182,7 @@ public class QueryModel implements JsonSerializable {
             if(needsComma) {
                 sb.append(", ");
             }
-            sb.append("(").append(column.getExpression()).append(") as ").append(column.getId());
+            sb.append("(").append(column.getFormula()).append(") as ").append(column.getId());
             needsComma = true;
         }
         return sb.toString();

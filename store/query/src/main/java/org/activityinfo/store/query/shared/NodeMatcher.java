@@ -4,13 +4,13 @@ package org.activityinfo.store.query.shared;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.diagnostic.AmbiguousSymbolException;
-import org.activityinfo.model.expr.functions.ExprFunction;
-import org.activityinfo.model.expr.functions.StatFunction;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.diagnostic.AmbiguousSymbolException;
+import org.activityinfo.model.formula.functions.FormulaFunction;
+import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordFieldType;
@@ -46,13 +46,13 @@ public class NodeMatcher {
      * to all of the values in the subform for that record.
      *
      */
-    public void enterFunction(ExprFunction function) {
+    public void enterFunction(FormulaFunction function) {
         if(function instanceof StatFunction) {
             aggregationContextStack.push((StatFunction) function);
         }
     }
 
-    public void exitFunction(ExprFunction function) {
+    public void exitFunction(FormulaFunction function) {
         if(function instanceof StatFunction) {
             aggregationContextStack.pop();
         }
@@ -62,7 +62,7 @@ public class NodeMatcher {
         return Optional.fromNullable(aggregationContextStack.peek());
     }
 
-    public Collection<NodeMatch> resolveSymbol(SymbolExpr symbol) {
+    public Collection<NodeMatch> resolveSymbol(SymbolNode symbol) {
         return matchNodes(new QueryPath(symbol), tree.getRootFields());
     }
 

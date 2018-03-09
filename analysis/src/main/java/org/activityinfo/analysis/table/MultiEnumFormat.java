@@ -1,8 +1,8 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -18,13 +18,13 @@ import java.util.List;
 public class MultiEnumFormat implements ColumnFormat {
 
     private final String columnId;
-    private final ExprNode formula;
+    private final FormulaNode formula;
     private final EnumType enumType;
 
     private final int numItems;
     private final String[] labels;
 
-    public MultiEnumFormat(String columnId, ExprNode formula, EnumType enumType) {
+    public MultiEnumFormat(String columnId, FormulaNode formula, EnumType enumType) {
         this.columnId = columnId;
         this.formula = formula;
         this.enumType = enumType;
@@ -50,7 +50,7 @@ public class MultiEnumFormat implements ColumnFormat {
 
             ColumnModel model = new ColumnModel();
             model.setId(getItemId(enumItem));
-            model.setExpression(new CompoundExpr(formula, new SymbolExpr(enumItem.getId())));
+            model.setFormula(new CompoundExpr(formula, new SymbolNode(enumItem.getId())));
 
             columns.add(model);
         }

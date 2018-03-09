@@ -6,12 +6,12 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
@@ -265,7 +265,7 @@ public class LookupKeySet {
         }
     }
 
-    public Map<LookupKey, ExprNode> getKeyFormulas(ExprNode baseField) {
+    public Map<LookupKey, FormulaNode> getKeyFormulas(FormulaNode baseField) {
 
         if(leafKeyMap.size() == 1) {
             return Iterables.getOnlyElement(getLeafKeys()).getKeyFormulas(baseField);
@@ -274,16 +274,16 @@ public class LookupKeySet {
             // For the case where a field can refer to one of several different forms,
             // query the keys using the syntax [formId].[keyFieldId]
 
-            Map<LookupKey, ExprNode> keyMap = new HashMap<>();
+            Map<LookupKey, FormulaNode> keyMap = new HashMap<>();
             for (LookupKey lookupKey : lookupKeys) {
-                keyMap.put(lookupKey, new CompoundExpr(new SymbolExpr(lookupKey.getFormId()), lookupKey.getKeyField()));
+                keyMap.put(lookupKey, new CompoundExpr(new SymbolNode(lookupKey.getFormId()), lookupKey.getKeyField()));
             }
 
             return keyMap;
         }
     }
 
-    public Map<LookupKey, ExprNode> getKeyFormulas(ResourceId fieldId) {
-        return getKeyFormulas(new SymbolExpr(fieldId));
+    public Map<LookupKey, FormulaNode> getKeyFormulas(ResourceId fieldId) {
+        return getKeyFormulas(new SymbolNode(fieldId));
     }
 }

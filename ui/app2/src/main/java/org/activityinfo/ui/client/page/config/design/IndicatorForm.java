@@ -32,9 +32,9 @@ import com.google.gwt.core.client.GWT;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.diagnostic.FormulaSyntaxException;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
@@ -210,22 +210,22 @@ class IndicatorForm extends AbstractDesignForm {
 
     private String validateExpression(String value) {
         try {
-            ExprLexer lexer = new ExprLexer(value);
-            ExprParser parser = new ExprParser(lexer);
-            ExprNode expr = parser.parse();
+            FormulaLexer lexer = new FormulaLexer(value);
+            FormulaParser parser = new FormulaParser(lexer);
+            FormulaNode expr = parser.parse();
 
             // expr node is created, expression is parsable
             // try to check variable names
-            List<SymbolExpr> placeholderExprList = Lists.newArrayList();
+            List<SymbolNode> placeholderExprList = Lists.newArrayList();
             gatherPlaceholderExprs(expr, placeholderExprList);
             List<String> existingIndicatorCodes = existingIndicatorCodes();
-            for (SymbolExpr placeholderExpr : placeholderExprList) {
+            for (SymbolNode placeholderExpr : placeholderExprList) {
                 if (!existingIndicatorCodes.contains(placeholderExpr.getName())) {
                     return I18N.MESSAGES.doesNotExist(placeholderExpr.getName());
                 }
             }
             return null;
-        } catch (ExprSyntaxException e) {
+        } catch (FormulaSyntaxException e) {
             return e.getMessage();
         } catch (Exception e) {
             e.printStackTrace();
@@ -234,13 +234,13 @@ class IndicatorForm extends AbstractDesignForm {
         return constants.calculationExpressionIsInvalid();
     }
 
-    private void gatherPlaceholderExprs(ExprNode node, List<SymbolExpr> placeholderExprList) {
-        if (node instanceof SymbolExpr) {
-            placeholderExprList.add((SymbolExpr) node);
+    private void gatherPlaceholderExprs(FormulaNode node, List<SymbolNode> placeholderExprList) {
+        if (node instanceof SymbolNode) {
+            placeholderExprList.add((SymbolNode) node);
         } else if (node instanceof FunctionCallNode) {
             FunctionCallNode functionCallNode = (FunctionCallNode) node;
-            List<ExprNode> arguments = functionCallNode.getArguments();
-            for (ExprNode arg : arguments) {
+            List<FormulaNode> arguments = functionCallNode.getArguments();
+            for (FormulaNode arg : arguments) {
                 gatherPlaceholderExprs(arg, placeholderExprList);
             }
         }

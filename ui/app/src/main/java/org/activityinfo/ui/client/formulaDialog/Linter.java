@@ -2,9 +2,9 @@ package org.activityinfo.ui.client.formulaDialog;
 
 import org.activityinfo.analysis.FieldReference;
 import org.activityinfo.analysis.ParsedFormula;
-import org.activityinfo.model.expr.FormulaError;
-import org.activityinfo.model.expr.SourcePos;
-import org.activityinfo.model.expr.SourceRange;
+import org.activityinfo.model.formula.FormulaError;
+import org.activityinfo.model.formula.SourcePos;
+import org.activityinfo.model.formula.SourceRange;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.codemirror.client.*;

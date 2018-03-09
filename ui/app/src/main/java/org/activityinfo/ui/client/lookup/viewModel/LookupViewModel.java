@@ -2,11 +2,11 @@ package org.activityinfo.ui.client.lookup.viewModel;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
-import org.activityinfo.model.expr.ExprNode;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.observable.Observable;
@@ -45,7 +45,7 @@ public class LookupViewModel {
     public LookupViewModel(FormSource formSource,
                            FormTree formTree,
                            FormField referenceField,
-                           Observable<Optional<ExprNode>> filter) {
+                           Observable<Optional<FormulaNode>> filter) {
 
         this.lookupKeySet = new LookupKeySet(formTree, referenceField);
 

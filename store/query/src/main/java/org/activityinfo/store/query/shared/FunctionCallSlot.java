@@ -1,8 +1,8 @@
 package org.activityinfo.store.query.shared;
 
 import com.google.common.collect.Lists;
-import org.activityinfo.model.expr.diagnostic.ExprException;
-import org.activityinfo.model.expr.functions.ColumnFunction;
+import org.activityinfo.model.formula.diagnostic.FormulaException;
+import org.activityinfo.model.formula.functions.ColumnFunction;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EmptyColumnView;
@@ -31,7 +31,7 @@ class FunctionCallSlot implements Slot<ColumnView> {
         }
         try {
             return function.columnApply(arguments.get(0).numRows(), arguments);
-        } catch (ExprException e) {
+        } catch (FormulaException e) {
             int numRows = arguments.get(0).numRows();
             return new EmptyColumnView(ColumnType.STRING, numRows);
         }

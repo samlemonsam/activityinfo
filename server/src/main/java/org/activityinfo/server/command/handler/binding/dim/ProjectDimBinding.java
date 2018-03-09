@@ -6,9 +6,9 @@ import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -54,14 +54,14 @@ public class ProjectDimBinding extends DimBinding {
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
-        SymbolExpr projectField = new SymbolExpr(CuidAdapter.field(targetFormId, CuidAdapter.PROJECT_FIELD));
+        SymbolNode projectField = new SymbolNode(CuidAdapter.field(targetFormId, CuidAdapter.PROJECT_FIELD));
 
         ColumnModel projectId = new ColumnModel();
-        projectId.setExpression(projectField);
+        projectId.setFormula(projectField);
         projectId.setId(PROJECT_ID_COLUMN);
 
         ColumnModel projectLabel = new ColumnModel();
-        projectLabel.setExpression(new CompoundExpr(projectField, new SymbolExpr("label")));
+        projectLabel.setFormula(new CompoundExpr(projectField, new SymbolNode("label")));
         projectLabel.setId(PROJECT_LABEL_COLUMN);
 
         return Arrays.asList(projectId, projectLabel);

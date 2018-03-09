@@ -2,11 +2,11 @@ package org.activityinfo.model.query;
 
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.diagnostic.ExprSyntaxException;
 import org.activityinfo.model.formTree.FieldPath;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.diagnostic.FormulaSyntaxException;
 import org.activityinfo.model.resource.ResourceId;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
@@ -24,7 +24,7 @@ public class ColumnModel implements JsonSerializable {
 
 
     private String id;
-    private ExprNode expression;
+    private FormulaNode formula;
 
     /**
      *
@@ -50,40 +50,40 @@ public class ColumnModel implements JsonSerializable {
         return setId(id);
     }
 
-    public ExprNode getExpression() {
-        return expression;
+    public FormulaNode getFormula() {
+        return formula;
     }
 
-    @JsonProperty("expression")
-    public String getExpressionAsString() {
-        if(expression == null) {
+    @JsonProperty("formula")
+    public String getFormulaAsString() {
+        if(formula == null) {
             return null;
         } else {
-            return expression.asExpression();
+            return formula.asExpression();
         }
     }
 
-    public ColumnModel setExpression(ExprNode expression) {
-        this.expression = expression;
+    public ColumnModel setFormula(FormulaNode formula) {
+        this.formula = formula;
         return this;
     }
 
     @JsonSetter
-    public ColumnModel setExpression(String expression) {
+    public ColumnModel setFormula(String formula) {
         try {
-            this.expression = ExprParser.parse(expression);
-        } catch (ExprSyntaxException e) {
-            throw new ColumnModelException("Invalid column expression '" + expression + "': " + e.getMessage(), e);
+            this.formula = FormulaParser.parse(formula);
+        } catch (FormulaSyntaxException e) {
+            throw new ColumnModelException("Invalid column expression '" + formula + "': " + e.getMessage(), e);
         }
         return this;
     }
 
-    public ColumnModel setExpression(ResourceId resourceId) {
-        return setExpression(new SymbolExpr(resourceId));
+    public ColumnModel setFormula(ResourceId resourceId) {
+        return setFormula(new SymbolNode(resourceId));
     }
 
-    public ColumnModel setExpression(FieldPath path) {
-        return setExpression(path.toExpr());
+    public ColumnModel setFormula(FieldPath path) {
+        return setFormula(path.toExpr());
     }
 
     @Deprecated
@@ -94,7 +94,7 @@ public class ColumnModel implements JsonSerializable {
     public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("id", id);
-        object.put("expression", getExpressionAsString());
+        object.put("expression", getFormulaAsString());
         return object;
     }
 
@@ -103,8 +103,11 @@ public class ColumnModel implements JsonSerializable {
         if(!object.get("id").isJsonNull()) {
             columnModel.setId(object.get("id").asString());
         }
-        if(object.get("expression").isJsonPrimitive()) {
-            columnModel.setExpression(object.get("expression").asString());
+        if(object.hasKey("expression")) {
+            columnModel.setFormula(object.getString("expression"));
+        }
+        if(object.hasKey("formula")) {
+            columnModel.setFormula(object.getString("formula"));
         }
         return columnModel;
     }

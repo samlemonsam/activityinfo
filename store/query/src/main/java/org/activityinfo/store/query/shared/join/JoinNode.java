@@ -1,8 +1,8 @@
 package org.activityinfo.store.query.shared.join;
 
 import com.google.common.base.Optional;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.functions.StatFunction;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -11,11 +11,11 @@ import org.activityinfo.model.resource.ResourceId;
 public class JoinNode {
     private JoinType type;
     private ResourceId leftFormId;
-    private ExprNode referenceField;
+    private FormulaNode referenceField;
     private ResourceId rightFormId;
     private Optional<StatFunction> aggregation;
 
-    public JoinNode(JoinType type, ResourceId leftFormId, ExprNode referenceField, ResourceId rightFormId,
+    public JoinNode(JoinType type, ResourceId leftFormId, FormulaNode referenceField, ResourceId rightFormId,
                     Optional<StatFunction> aggregation) {
         this.type = type;
         this.leftFormId = leftFormId;
@@ -28,7 +28,7 @@ public class JoinNode {
         }
     }
 
-    public JoinNode(JoinType type, ResourceId leftFormId, ExprNode referenceField, ResourceId rightFormId) {
+    public JoinNode(JoinType type, ResourceId leftFormId, FormulaNode referenceField, ResourceId rightFormId) {
         this(type, leftFormId, referenceField, rightFormId, Optional.<StatFunction>absent());
     }
 
@@ -44,7 +44,7 @@ public class JoinNode {
         return leftFormId;
     }
 
-    public ExprNode getReferenceField() {
+    public FormulaNode getReferenceField() {
         return referenceField;
     }
 

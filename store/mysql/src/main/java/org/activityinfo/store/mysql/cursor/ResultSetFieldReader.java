@@ -1,6 +1,6 @@
 package org.activityinfo.store.mysql.cursor;
 
-import org.activityinfo.model.expr.eval.FieldReader;
+import org.activityinfo.model.formula.eval.FieldReader;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.mysql.mapping.FieldValueConverter;

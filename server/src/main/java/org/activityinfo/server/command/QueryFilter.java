@@ -6,12 +6,11 @@ import com.google.common.collect.Multimap;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.functions.GreaterOrEqualFunction;
-import org.activityinfo.model.expr.functions.LessOrEqualFunction;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.functions.GreaterOrEqualFunction;
+import org.activityinfo.model.formula.functions.LessOrEqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -23,12 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static org.activityinfo.model.expr.Exprs.anyTrue;
-import static org.activityinfo.model.expr.Exprs.idConstant;
-import static org.activityinfo.model.expr.Exprs.symbol;
+import static java.util.Collections.*;
+import static org.activityinfo.model.formula.Formulas.*;
 
 public class QueryFilter {
 
@@ -46,8 +41,8 @@ public class QueryFilter {
         this.LOGGER = LOGGER;
     }
 
-    public ExprNode composeFilter(FormTree formTree) {
-        List<ExprNode> conditions = Lists.newArrayList();
+    public FormulaNode composeFilter(FormTree formTree) {
+        List<FormulaNode> conditions = Lists.newArrayList();
         conditions.addAll(filterExpr(siteIdField(formTree), CuidAdapter.SITE_DOMAIN, DimensionType.Site));
         conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
         conditions.addAll(filterExpr("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project));
@@ -58,7 +53,7 @@ public class QueryFilter {
         conditions.addAll(dateFilter("date2", filter.getEndDateRange()));
 
         if(conditions.size() > 0) {
-            ExprNode filterExpr = Exprs.allTrue(conditions);
+            FormulaNode filterExpr = Formulas.allTrue(conditions);
             if (LOGGER != null)
                 LOGGER.fine("Filter: " + filterExpr);
 
@@ -83,8 +78,8 @@ public class QueryFilter {
         }
     }
 
-    public ExprNode composeTargetFilter() {
-        List<ExprNode> conditions = Lists.newArrayList();
+    public FormulaNode composeTargetFilter() {
+        List<FormulaNode> conditions = Lists.newArrayList();
         conditions.addAll(filterExpr("partner", CuidAdapter.PARTNER_DOMAIN, DimensionType.Partner));
         conditions.addAll(filterExpr("project", CuidAdapter.PROJECT_DOMAIN, DimensionType.Project));
 
@@ -95,7 +90,7 @@ public class QueryFilter {
             return null;
         }
 
-        ExprNode filterExpr = Exprs.allTrue(conditions);
+        FormulaNode filterExpr = Formulas.allTrue(conditions);
         if (LOGGER != null)
             LOGGER.fine("Filter: " + filterExpr);
 
@@ -103,17 +98,17 @@ public class QueryFilter {
     }
 
 
-    private Set<ExprNode> adminFilter(FormTree formTree) {
+    private Set<FormulaNode> adminFilter(FormTree formTree) {
         if (this.filter.isRestricted(DimensionType.AdminLevel)) {
 
-            List<ExprNode> conditions = Lists.newArrayList();
+            List<FormulaNode> conditions = Lists.newArrayList();
 
             // we don't know which adminlevel this belongs to so we have construct a giant OR statement
-            List<ExprNode> adminIdExprs = findAdminIdExprs(formTree);
+            List<FormulaNode> adminIdExprs = findAdminIdExprs(formTree);
 
-            for(ExprNode adminIdExpr : adminIdExprs) {
+            for(FormulaNode adminIdExpr : adminIdExprs) {
                 for (Integer adminEntityId : this.filter.getRestrictions(DimensionType.AdminLevel)) {
-                    conditions.add(Exprs.equals(adminIdExpr, idConstant(CuidAdapter.entity(adminEntityId))));
+                    conditions.add(Formulas.equals(adminIdExpr, idConstant(CuidAdapter.entity(adminEntityId))));
                 }
             }
             return singleton(anyTrue(conditions));
@@ -123,8 +118,8 @@ public class QueryFilter {
         }
     }
 
-    private List<ExprNode> findAdminIdExprs(FormTree formTree) {
-        List<ExprNode> expressions = Lists.newArrayList();
+    private List<FormulaNode> findAdminIdExprs(FormTree formTree) {
+        List<FormulaNode> expressions = Lists.newArrayList();
 
         for (FormMetadata form : formTree.getForms()) {
             if (form.getId().getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
@@ -134,46 +129,46 @@ public class QueryFilter {
         return expressions;
     }
 
-    private List<ExprNode> attributeFilters() {
+    private List<FormulaNode> attributeFilters() {
 
-        List<ExprNode> conditions = Lists.newArrayList();
+        List<FormulaNode> conditions = Lists.newArrayList();
 
         for (String field : attributeFilters.keySet()) {
-            List<ExprNode> valueConditions = Lists.newArrayList();
+            List<FormulaNode> valueConditions = Lists.newArrayList();
             for (String value : attributeFilters.get(field)) {
-                valueConditions.add(new CompoundExpr(new SymbolExpr(field), new SymbolExpr(value)));
+                valueConditions.add(new CompoundExpr(new SymbolNode(field), new SymbolNode(value)));
             }
-            conditions.add(Exprs.anyTrue(valueConditions));
+            conditions.add(Formulas.anyTrue(valueConditions));
         }
         return conditions;
     }
 
-    private List<ExprNode> filterExpr(String fieldName, char domain, DimensionType type) {
+    private List<FormulaNode> filterExpr(String fieldName, char domain, DimensionType type) {
         Set<Integer> ids = this.filter.getRestrictions(type);
         if(ids.isEmpty()) {
             return Collections.emptyList();
         } else {
-            List<ExprNode> conditions = Lists.newArrayList();
+            List<FormulaNode> conditions = Lists.newArrayList();
 
             for (Integer id : ids) {
-                conditions.add(Exprs.equals(symbol(fieldName), idConstant(CuidAdapter.cuid(domain, id))));
+                conditions.add(Formulas.equals(symbol(fieldName), idConstant(CuidAdapter.cuid(domain, id))));
             }
 
-            return singletonList(Exprs.anyTrue(conditions));
+            return singletonList(Formulas.anyTrue(conditions));
         }
     }
 
 
     private Collection<FunctionCallNode> dateFilter(String dateField, DateRange range) {
 
-        SymbolExpr dateExpr = new SymbolExpr(dateField);
+        SymbolNode dateExpr = new SymbolNode(dateField);
         List<FunctionCallNode> conditions = Lists.newArrayList();
         if(range != null) {
             if (range.getMinLocalDate() != null) {
-                conditions.add(new FunctionCallNode(GreaterOrEqualFunction.INSTANCE, dateExpr, new ConstantExpr(new LocalDate(range.getMinDate()))));
+                conditions.add(new FunctionCallNode(GreaterOrEqualFunction.INSTANCE, dateExpr, new ConstantNode(new LocalDate(range.getMinDate()))));
             }
             if (range.getMaxLocalDate() != null) {
-                conditions.add(new FunctionCallNode(LessOrEqualFunction.INSTANCE, dateExpr, new ConstantExpr(new LocalDate(range.getMaxDate()))));
+                conditions.add(new FunctionCallNode(LessOrEqualFunction.INSTANCE, dateExpr, new ConstantNode(new LocalDate(range.getMaxDate()))));
             }
         }
         return conditions;

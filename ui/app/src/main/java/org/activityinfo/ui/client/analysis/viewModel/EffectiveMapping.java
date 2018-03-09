@@ -5,11 +5,11 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Ordering;
 import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.SymbolExpr;
-import org.activityinfo.model.expr.functions.date.MonthFunction;
-import org.activityinfo.model.expr.functions.date.QuarterFunction;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.date.MonthFunction;
+import org.activityinfo.model.formula.functions.date.QuarterFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnType;
@@ -107,9 +107,9 @@ public class EffectiveMapping {
             for (EnumItem enumItem : enumType.getValues()) {
                 ColumnModel columnModel = new ColumnModel();
                 columnModel.setId(getColumnId(enumItem));
-                columnModel.setExpression(new CompoundExpr(
+                columnModel.setFormula(new CompoundExpr(
                         this.formula.getRootNode(),
-                        new SymbolExpr(enumItem.getId())));
+                        new SymbolNode(enumItem.getId())));
                 columns.add(columnModel);
             }
             return columns;
@@ -118,7 +118,7 @@ public class EffectiveMapping {
         if(this.mapping != null && this.formula.isValid()) {
             ColumnModel columnModel = new ColumnModel();
             columnModel.setId(getColumnId());
-            columnModel.setExpression(this.formula.getFormula());
+            columnModel.setFormula(this.formula.getFormula());
             return Collections.singletonList(columnModel);
         }
         return Collections.emptyList();

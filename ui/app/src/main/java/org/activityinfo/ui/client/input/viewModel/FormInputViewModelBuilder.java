@@ -3,13 +3,13 @@ package org.activityinfo.ui.client.input.viewModel;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
@@ -73,9 +73,9 @@ public class FormInputViewModelBuilder {
 
         String formula = node.getField().getRelevanceConditionExpression();
 
-        ExprNode rootNode;
+        FormulaNode rootNode;
         try {
-            rootNode = ExprParser.parse(formula);
+            rootNode = FormulaParser.parse(formula);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Invalid relevance formula: " + formula, e);
             return;

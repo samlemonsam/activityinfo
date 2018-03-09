@@ -1,10 +1,10 @@
 package org.activityinfo.analysis.table;
 
 import com.google.common.base.Optional;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.ExprParser;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
@@ -97,7 +97,7 @@ public class SelectionViewModel {
         String filter = form.getPermissions().getFilter(operation);
         try {
             FormEvalContext context = new FormEvalContext(form.getSchema(), record);
-            ExprNode formula = ExprParser.parse(filter);
+            FormulaNode formula = FormulaParser.parse(filter);
             FieldValue result = formula.evaluate(context);
 
             return result == BooleanFieldValue.TRUE;

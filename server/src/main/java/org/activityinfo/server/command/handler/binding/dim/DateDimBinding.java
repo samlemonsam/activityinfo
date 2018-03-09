@@ -3,8 +3,8 @@ package org.activityinfo.server.command.handler.binding.dim;
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.DateDimension;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -37,14 +37,14 @@ public class DateDimBinding extends DimBinding {
         ResourceId classId = formTree.getRootFormId();
 
         return Collections.singletonList(new ColumnModel()
-                .setExpression(CuidAdapter.field(classId, CuidAdapter.END_DATE_FIELD))
+                .setFormula(CuidAdapter.field(classId, CuidAdapter.END_DATE_FIELD))
                 .as(DATE_COLUMN_ID));
     }
 
     @Override
     public List<ColumnModel> getTargetColumnQuery(ResourceId targetFormId) {
         return Collections.singletonList(new ColumnModel()
-                .setExpression(new SymbolExpr("toDate"))
+                .setFormula(new SymbolNode("toDate"))
                 .as(DATE_COLUMN_ID));
     }
 

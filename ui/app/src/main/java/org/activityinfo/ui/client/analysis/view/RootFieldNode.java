@@ -1,8 +1,8 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import com.google.gwt.resources.client.ImageResource;
-import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.analysis.model.DimensionMapping;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;

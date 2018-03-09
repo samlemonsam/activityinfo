@@ -1,8 +1,8 @@
 package org.activityinfo.server.command.handler.binding;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import org.activityinfo.model.expr.CompoundExpr;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
@@ -45,9 +45,9 @@ public class GenericLocationFieldBinding implements FieldBinding {
 
     public List<ColumnModel> getLocationQuery() {
         return Arrays.asList(
-                new ColumnModel().setExpression(LOCATION_SYMBOL).as(LOCATION_ID_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,NAME_SYMBOL)).as(LOCATION_NAME_COLUMN),
-                new ColumnModel().setExpression(new CompoundExpr(LOCATION_SYMBOL,CODE_SYMBOL)).as(LOCATION_CODE_COLUMN)
+                new ColumnModel().setFormula(LOCATION_SYMBOL).as(LOCATION_ID_COLUMN),
+                new ColumnModel().setFormula(new CompoundExpr(LOCATION_SYMBOL,NAME_SYMBOL)).as(LOCATION_NAME_COLUMN),
+                new ColumnModel().setFormula(new CompoundExpr(LOCATION_SYMBOL,CODE_SYMBOL)).as(LOCATION_CODE_COLUMN)
         );
     }
 }

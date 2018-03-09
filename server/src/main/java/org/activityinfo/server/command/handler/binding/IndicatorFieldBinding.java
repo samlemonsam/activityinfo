@@ -73,9 +73,9 @@ public class IndicatorFieldBinding implements FieldBinding {
     private List<ColumnModel> getIndicatorColumnQuery() {
         if (indicatorField.getType() instanceof CalculatedFieldType) {
             CalculatedFieldType calcType = (CalculatedFieldType) indicatorField.getType();
-            return Collections.singletonList(new ColumnModel().setExpression(calcType.getExpression()).as(indicatorId.toString()));
+            return Collections.singletonList(new ColumnModel().setFormula(calcType.getExpression()).as(indicatorId.toString()));
         } else {
-            return Collections.singletonList(new ColumnModel().setExpression(indicatorId).as(indicatorId.toString()));
+            return Collections.singletonList(new ColumnModel().setFormula(indicatorId).as(indicatorId.toString()));
         }
     }
 }

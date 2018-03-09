@@ -1,10 +1,10 @@
 package org.activityinfo.analysis;
 
-import org.activityinfo.model.expr.*;
-import org.activityinfo.model.expr.diagnostic.ArgumentException;
-import org.activityinfo.model.expr.diagnostic.ExprException;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.diagnostic.ArgumentException;
+import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.primitive.BooleanType;
@@ -37,7 +37,7 @@ public class FormulaValidator {
         this.nodeMatcher = new NodeMatcher(formTree);
     }
 
-    public boolean validate(ExprNode rootNode) {
+    public boolean validate(FormulaNode rootNode) {
         valid = true;
         try {
             resultType = validateExpr(rootNode);
@@ -63,45 +63,45 @@ public class FormulaValidator {
         return references;
     }
 
-    private FieldType validateExpr(ExprNode exprNode) {
-        if(exprNode instanceof ConstantExpr) {
-            return ((ConstantExpr) exprNode).getType();
-        } else if(exprNode instanceof GroupExpr) {
-            return validateExpr(((GroupExpr) exprNode).getExpr());
-        } else if(exprNode instanceof SymbolExpr) {
-            return validateReference(exprNode);
-        } else if(exprNode instanceof CompoundExpr) {
-            return validateReference(exprNode);
-        } else if(exprNode instanceof FunctionCallNode) {
-            return validateFunctionCall((FunctionCallNode) exprNode);
+    private FieldType validateExpr(FormulaNode formulaNode) {
+        if(formulaNode instanceof ConstantNode) {
+            return ((ConstantNode) formulaNode).getType();
+        } else if(formulaNode instanceof GroupNode) {
+            return validateExpr(((GroupNode) formulaNode).getExpr());
+        } else if(formulaNode instanceof SymbolNode) {
+            return validateReference(formulaNode);
+        } else if(formulaNode instanceof CompoundExpr) {
+            return validateReference(formulaNode);
+        } else if(formulaNode instanceof FunctionCallNode) {
+            return validateFunctionCall((FunctionCallNode) formulaNode);
         } else {
-            throw new UnsupportedOperationException("type: " + exprNode.getClass().getSimpleName());
+            throw new UnsupportedOperationException("type: " + formulaNode.getClass().getSimpleName());
         }
     }
 
 
-    private FieldType validateReference(ExprNode exprNode) {
+    private FieldType validateReference(FormulaNode formulaNode) {
         Collection<NodeMatch> matches;
         try {
-            if (exprNode instanceof SymbolExpr) {
-                matches = nodeMatcher.resolveSymbol((SymbolExpr) exprNode);
-            } else if (exprNode instanceof CompoundExpr) {
-                matches = nodeMatcher.resolveCompoundExpr((CompoundExpr) exprNode);
+            if (formulaNode instanceof SymbolNode) {
+                matches = nodeMatcher.resolveSymbol((SymbolNode) formulaNode);
+            } else if (formulaNode instanceof CompoundExpr) {
+                matches = nodeMatcher.resolveCompoundExpr((CompoundExpr) formulaNode);
             } else {
                 throw new IllegalArgumentException();
             }
-        } catch (ExprException e) {
-            errors.add(new FormulaError(exprNode, e.getMessage()));
+        } catch (FormulaException e) {
+            errors.add(new FormulaError(formulaNode, e.getMessage()));
             throw new ValidationFailed();
         }
 
         if(matches.isEmpty()) {
-            errors.add(new FormulaError(exprNode, "Invalid field reference"));
+            errors.add(new FormulaError(formulaNode, "Invalid field reference"));
             throw new ValidationFailed();
         }
 
         for (NodeMatch match : matches) {
-            references.add(new FieldReference(exprNode.getSourceRange(), match));
+            references.add(new FieldReference(formulaNode.getSourceRange(), match));
         }
 
         NodeMatch match = matches.iterator().next();
@@ -120,10 +120,10 @@ public class FormulaValidator {
     private FieldType findCalculatedFieldType(FormTree.Node fieldNode) {
 
         CalculatedFieldType fieldType = (CalculatedFieldType) fieldNode.getType();
-        ExprNode rootNode;
+        FormulaNode rootNode;
         try {
-            rootNode = ExprParser.parse(fieldType.getExpression());
-        } catch (ExprException e) {
+            rootNode = FormulaParser.parse(fieldType.getExpression());
+        } catch (FormulaException e) {
             throw new ValidationFailed();
         }
 
@@ -145,13 +145,13 @@ public class FormulaValidator {
         // a simple field reference
         this.simpleReference = false;
 
-        List<ExprNode> arguments = call.getArguments();
+        List<FormulaNode> arguments = call.getArguments();
         List<FieldType> argumentTypes = new ArrayList<>();
         boolean validationFailed = false;
 
-        for (ExprNode exprNode : arguments) {
+        for (FormulaNode formulaNode : arguments) {
             try {
-                argumentTypes.add(validateExpr(exprNode));
+                argumentTypes.add(validateExpr(formulaNode));
             } catch (ValidationFailed e) {
                 // Continue validating the other arguments.
                 validationFailed = true;
@@ -167,7 +167,7 @@ public class FormulaValidator {
         } catch (ArgumentException e) {
             errors.add(new FormulaError(arguments.get(e.getArgumentIndex()).getSourceRange(), e.getMessage()));
             throw new ValidationFailed();
-        } catch(ExprException e) {
+        } catch(FormulaException e) {
             errors.add(new FormulaError(call, e.getMessage()));
             throw new ValidationFailed();
         }

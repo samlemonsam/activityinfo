@@ -4,11 +4,11 @@ import com.google.gwt.resources.client.ImageResource;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.ui.client.icons.IconBundle;
 
@@ -24,12 +24,12 @@ public class FormulaElement {
     private final String key;
     private final String code;
     private final String label;
-    private final ExprNode exprNode;
+    private final FormulaNode formulaNode;
     private final ImageResource icon;
 
-    public FormulaElement(String key, ExprNode exprNode, FormField field) {
+    public FormulaElement(String key, FormulaNode formulaNode, FormField field) {
         this.key = key;
-        this.exprNode = exprNode;
+        this.formulaNode = formulaNode;
         this.label = field.getLabel();
         this.code = field.getCode();
         this.icon = IconBundle.iconForField(field.getType());
@@ -37,7 +37,7 @@ public class FormulaElement {
 
     public FormulaElement(FormulaElement field, EnumItem item) {
         this.key = field.getKey() + "#" + item.getId().asString();
-        this.exprNode = new CompoundExpr(field.getExpr(), new SymbolExpr(symbolFor(item)));
+        this.formulaNode = new CompoundExpr(field.getExpr(), new SymbolNode(symbolFor(item)));
         this.label = item.getLabel();
         this.icon = IconBundle.INSTANCE.enumField();
         this.code = null;
@@ -65,8 +65,8 @@ public class FormulaElement {
         return new FormulaElement("field:" + node.getPath().toString(), exprFor(node), node.getField());
     }
 
-    private static ExprNode exprFor(FormTree.Node node) {
-        SymbolExpr fieldSymbol = new SymbolExpr(symbolFor(node.getField()));
+    private static FormulaNode exprFor(FormTree.Node node) {
+        SymbolNode fieldSymbol = new SymbolNode(symbolFor(node.getField()));
         if(node.isRoot()) {
             return fieldSymbol;
         } else {
@@ -103,8 +103,8 @@ public class FormulaElement {
                 label.toLowerCase().contains(filter);
     }
 
-    public ExprNode getExpr() {
-       return exprNode;
+    public FormulaNode getExpr() {
+       return formulaNode;
     }
 
     public static boolean isSuitableSymbol(String text) {

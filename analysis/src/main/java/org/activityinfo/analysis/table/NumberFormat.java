@@ -1,10 +1,10 @@
 package org.activityinfo.analysis.table;
 
-import org.activityinfo.model.expr.ExprNode;
+import org.activityinfo.model.formula.FormulaNode;
 
 public class NumberFormat extends SimpleColumnFormat<Double> {
 
-    protected NumberFormat(String id, ExprNode formula) {
+    protected NumberFormat(String id, FormulaNode formula) {
         super(id, formula);
     }
 

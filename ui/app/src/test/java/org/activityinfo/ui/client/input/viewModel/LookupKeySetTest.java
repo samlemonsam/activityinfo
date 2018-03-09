@@ -3,15 +3,15 @@ package org.activityinfo.ui.client.input.viewModel;
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.analysis.ParsedFormula;
-import org.activityinfo.model.expr.CompoundExpr;
-import org.activityinfo.model.expr.ExprNode;
-import org.activityinfo.model.expr.Exprs;
-import org.activityinfo.model.expr.SymbolExpr;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -82,11 +82,11 @@ public class LookupKeySetTest {
         assertThat(lookupKeySet.getKey(1).getKeyLabel(), equalTo("Territory Name"));
         assertThat(lookupKeySet.getKey(2).getKeyLabel(), equalTo("Village Name"));
 
-        SymbolExpr villageName = Exprs.symbol(villageForm.getNameField().getId());
-        SymbolExpr villageTerritory = new SymbolExpr(villageForm.getAdminFieldId());
-        ExprNode territoryName = new CompoundExpr(villageTerritory, territoryForm.getNameFieldId());
-        ExprNode territoryProvince = new CompoundExpr(villageTerritory, territoryForm.getParentFieldId());
-        ExprNode provinceName = new CompoundExpr(territoryProvince, provinceForm.getNameFieldId());
+        SymbolNode villageName = Formulas.symbol(villageForm.getNameField().getId());
+        SymbolNode villageTerritory = new SymbolNode(villageForm.getAdminFieldId());
+        FormulaNode territoryName = new CompoundExpr(villageTerritory, territoryForm.getNameFieldId());
+        FormulaNode territoryProvince = new CompoundExpr(villageTerritory, territoryForm.getParentFieldId());
+        FormulaNode provinceName = new CompoundExpr(territoryProvince, provinceForm.getNameFieldId());
 
         assertThat(lookupKeySet.getLeafKeys(), hasSize(1));
 
@@ -161,7 +161,7 @@ public class LookupKeySetTest {
 
         LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminField());
 
-        Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
+        Map<LookupKey, FormulaNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
 
         ParsedFormula province = new ParsedFormula(formTree, formulas.get(lookupKeySet.getKey(0)).asExpression());
         assertThat(province.isValid(), equalTo(true));
@@ -177,7 +177,7 @@ public class LookupKeySetTest {
 
         LookupKeySet lookupKeySet = new LookupKeySet(formTree, localiteForm.getAdminField());
 
-        Map<LookupKey, ExprNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
+        Map<LookupKey, FormulaNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
 
         QueryModel queryModel = new QueryModel(localiteForm.getFormId());
         queryModel.selectResourceId().as("id");
@@ -284,7 +284,7 @@ public class LookupKeySetTest {
         FormTree formTree = catalog.getFormTree(multTextKeyForm.getFormId());
         LookupKeySet lookupKeySet = new LookupKeySet(formTree, refField);
 
-        Map<LookupKey,ExprNode> formulas = lookupKeySet.getKeyFormulas(refField.getId());
+        Map<LookupKey,FormulaNode> formulas = lookupKeySet.getKeyFormulas(refField.getId());
 
         assertThat(formulas.values(), containsInAnyOrder(pathToKey1, pathToKey2));
     }
