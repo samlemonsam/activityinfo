@@ -32,8 +32,8 @@
 
   <source path="analysis"/>
   <source path="date"/>
-  <source path="expr"/>
   <source path="form"/>
+  <source path="formula"/>
   <source path="formTree"/>
   <source path="job"/>
   <source path="legacy"/>
