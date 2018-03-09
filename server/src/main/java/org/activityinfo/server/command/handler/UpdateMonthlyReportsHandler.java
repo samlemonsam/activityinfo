@@ -37,11 +37,10 @@ import org.activityinfo.server.event.sitehistory.ChangeType;
 import org.activityinfo.server.event.sitehistory.SiteHistoryProcessor;
 
 import javax.persistence.EntityManager;
-import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Objects;
+import java.util.logging.Logger;
 
 import static org.activityinfo.legacy.shared.model.IndicatorDTO.getPropertyName;
 
@@ -51,8 +50,10 @@ import static org.activityinfo.legacy.shared.model.IndicatorDTO.getPropertyName;
  */
 public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthlyReports> {
 
-    private final String lockKeyRoot = "site";
-    private final double lockTimeout = 7;
+    private final static String LOCK_KEY_PREFIX = "site";
+    private final static double LOCK_TIMEOUT_SECONDS = 7;
+
+    private static final Logger LOGGER = Logger.getLogger(UpdateMonthlyReportsHandler.class.getName());
 
     private final EntityManager em;
     private final KeyGenerator keyGenerator;
@@ -78,9 +79,7 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
         // Once we have acquired a lock, we can then safely execute the command
 
 
-        if (!acquireLock(cmd.getSiteId())) {
-            throw new LockAcquisitionException("Cannot acquire lock for site " + cmd.getSiteId());
-        }
+        acquireLock(cmd.getSiteId());
 
         try {
 
@@ -155,28 +154,35 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
      * <p>Attempts to acquire a lock on the database for the update of site {@code siteId}
      * with the lock key "siteId.<{@code siteId}>", and a timeout of {@code lockTimeout} seconds.
      *
-     * @param siteId
-     * @return TRUE if lock is acquired. FALSE otherwise.
+     * @param siteId the site id on which to lock
+     * @throws LockAcquisitionException if the lock cannot be acquired within {@link #LOCK_TIMEOUT_SECONDS} seconds.
      *
      * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_get-lock">GET_LOCK() documentation</a>
      */
-    private boolean acquireLock(int siteId) {
-        String lockKey = lockKeyRoot + "." + siteId;
+    private void acquireLock(int siteId) {
+        String lockKey = LOCK_KEY_PREFIX + "." + siteId;
 
-        BigInteger lockResult = (BigInteger) em
+        Number lockResult = (Number) em
                 .createNativeQuery("SELECT GET_LOCK(?1, ?2)")
                 .setParameter(1, lockKey)
-                .setParameter(2, lockTimeout)
+                .setParameter(2, LOCK_TIMEOUT_SECONDS)
                 .getSingleResult();
 
-        return Objects.equals(lockResult,BigInteger.valueOf(1));
+        if(lockResult == null || lockResult.intValue() != 1) {
+            throw new LockAcquisitionException("Cannot acquire lock for site " + siteId + ": " + lockResult);
+        }
     }
 
     private void releaseLock(int siteId) {
-        String lockKey = lockKeyRoot + "." + siteId;
+        String lockKey = LOCK_KEY_PREFIX + "." + siteId;
 
-        em.createNativeQuery("SELECT RELEASE_LOCK(?1)")
-                .setParameter(1, lockKey);
+        Number result = (Number)em.createNativeQuery("SELECT RELEASE_LOCK(?1)")
+                .setParameter(1, lockKey)
+                .getSingleResult();
+
+        if(result == null || result.intValue() != 1) {
+            LOGGER.warning("Failed to release lock " + lockKey + ": result = " + result);
+        }
     }
 
     public void updateIndicatorValue(EntityManager em,
