@@ -68,5 +68,6 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liqui
   <include file="org/activityinfo/database/changelog/db.changelog-041-rp-orphans.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-042-indicator-visibility.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-043-category-permissions.xml"/>
+  <include file="org/activityinfo/database/changelog/db.changelog-044-activity-folder-foreign-key.xml"/>
 
 </databaseChangeLog>
