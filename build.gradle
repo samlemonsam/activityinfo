@@ -1,5 +1,33 @@
 
 /**
+ * Define the dependencies of *this* build script itself.
+ *
+ * These are the plugins and other libraries required to evaluate
+ * the *.gradle files themselves.
+ */
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
+    classpath 'com.moowork.gradle:gradle-grunt-plugin:0.12'
+    classpath "com.moowork.gradle:gradle-node-plugin:0.12"
+    classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
+    classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
+    classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
+  }
+}
+
+plugins {
+  id "org.sonarqube" version "2.6"
+}
+
+
+/**
  * Define common configuration properties and 
  * apply cross-project processes.
  */
@@ -8,6 +36,7 @@ apply from: "./gradle/version.gradle"
 apply from: "./gradle/jacoco.gradle"
 apply from: './gradle/database.gradle'
 apply from: "./gradle/environment.gradle"
+
 
 task wrapper(type: Wrapper) {
   gradleVersion = '4.3.1'
@@ -81,26 +110,3 @@ subprojects {
   }
 }
 
-
-/**
- * Define the dependencies of *this* build script itself.
- *
- * These are the plugins and other libraries required to evaluate
- * the *.gradle files themselves.
- */
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-    jcenter()
-  }
-  dependencies {
-    classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
-    classpath 'com.moowork.gradle:gradle-grunt-plugin:0.12'
-    classpath "com.moowork.gradle:gradle-node-plugin:0.12"
-    classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
-    classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
-    classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
-  }
-}
