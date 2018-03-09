@@ -1,0 +1,11 @@
+<module rename-to="ThemeDev">
+
+
+    <!-- This is the base theme generated from theme.groovy -->
+    <!--<inherits name="org.activityinfo.theme.ActivityInfoTheme"/>-->
+
+    <inherits name="com.google.gwt.user.User" />
+
+    <entry-point class="org.activityinfo.theme.dev.client.ThemeDevEntryPoint"/>
+
+</module>

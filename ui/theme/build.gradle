@@ -1,0 +1,76 @@
+
+plugins {
+    id "java"
+}
+
+ext {
+    themeOutputDir = "$buildDir/theme"
+    outputDir = "$buildDir/gwt-out"
+}
+
+configurations {
+    gwtSdk
+}
+
+
+
+dependencies {
+
+    compile "com.google.guava:guava:21.0"
+
+    compile libraries.immutables.annotations
+
+    compile "com.google.gwt:gwt-user:2.8.0"
+    compile 'com.google.guava:guava-gwt:21.0'
+
+    compile group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
+    compile group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
+
+    gwtSdk "com.google.gwt:gwt-dev:2.8.0"
+    gwtSdk "com.sencha.gxt:gxt-themebuilder:4.0.0"
+}
+
+task generateTheme(type: JavaExec) {
+
+    def themeFile = project.file('src/main/theme/theme.groovy')
+
+    inputs.file themeFile
+    outputs.dir themeOutputDir
+
+    classpath configurations.gwtSdk
+
+    main = 'com.sencha.gxt.themebuilder.ThemeBuilder'
+
+    args '-gen', themeOutputDir
+    args '-slicedDisabled', 'true'
+    args '-sourcesOnly', 'true'
+
+    args themeFile
+
+}
+
+task devMode(type: JavaExec) {
+
+    dependsOn 'compileJava'
+
+    main = 'com.google.gwt.dev.DevMode'
+
+    // Compiled java classes and libraries second
+    classpath sourceSets.main.java.srcDirs
+    classpath sourceSets.main.resources.srcDirs
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.gwtSdk
+
+    args '-logLevel', 'DEBUG'
+    args '-war', "${buildDir}/devMode"
+    args '-startupUrl', '/dev.html'
+    args 'org.activityinfo.theme.dev.ThemeDev'
+
+    doFirst {
+        for(cp in classpath) {
+            logger.lifecycle("classpath: " + cp)
+        }
+
+    }
+
+}

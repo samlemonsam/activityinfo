@@ -57,7 +57,6 @@ dependencies {
     compile project(':io:match')
     compile project(':analysis')
     compile project(':ui:icons')
-    compile project(':ui:core')
 
     compile project(':tools:codemirror')
     compile project(':tools:indexeddb')
@@ -81,7 +80,6 @@ dependencies {
 
     // Toolkit that includes Java->JavaScript compiler
     gwtSdk libraries.gwt.dev
-
 
 }
 
