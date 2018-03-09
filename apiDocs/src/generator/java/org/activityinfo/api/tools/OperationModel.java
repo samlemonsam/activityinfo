@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package 1;
+package org.activityinfo.api.tools;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
