@@ -1,26 +1,22 @@
-package org.activityinfo.server.report.renderer.image;
-
 /*
- * #%L
- * ActivityInfo Server
- * %%
- * Copyright (C) 2009 - 2013 UNICEF
- * %%
+ * ActivityInfo
+ * Copyright (C) 2009-2013 UNICEF
+ * Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the 
- * License, or (at your option) any later version.
- * 
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public 
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.activityinfo.server.report.renderer.image;
 
 import com.google.code.appengine.awt.*;
 import com.google.code.appengine.awt.color.ColorSpace;
@@ -31,11 +27,11 @@ import com.google.code.appengine.awt.geom.Rectangle2D;
 import com.google.code.appengine.awt.image.BufferedImage;
 import com.google.code.appengine.imageio.ImageIO;
 import com.google.inject.Inject;
-import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.legacy.shared.model.BaseMap;
 import org.activityinfo.legacy.shared.model.TileBaseMap;
 import org.activityinfo.legacy.shared.reports.content.*;
 import org.activityinfo.legacy.shared.reports.model.MapReportElement;
+import org.activityinfo.model.type.geo.AiLatLng;
 import org.activityinfo.server.geo.AdminGeo;
 import org.activityinfo.server.geo.AdminGeometryProvider;
 import org.activityinfo.server.report.generator.MapIconPath;

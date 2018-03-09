@@ -32,7 +32,18 @@ idea {
 subprojects {
 
   apply plugin: 'java'
-  apply plugin: "net.ltgt.apt"
+  apply plugin: 'net.ltgt.apt'
+  apply plugin: 'com.github.hierynomus.license'
+
+  license {
+    header rootProject.file('COPYRIGHT.txt')
+    strictCheck true
+    mapping {
+      java = 'SLASHSTAR_STYLE'
+    }
+    exclude "**/*.json"
+    exclude "**/*.txt"
+  }
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
@@ -90,5 +101,6 @@ buildscript {
     classpath "com.moowork.gradle:gradle-node-plugin:0.12"
     classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
     classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
+    classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
   }
 }

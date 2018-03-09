@@ -1,28 +1,23 @@
-package org.activityinfo.server.command.handler.sync;
-
 /*
- * #%L
- * ActivityInfo Server
- * %%
- * Copyright (C) 2009 - 2013 UNICEF
- * %%
+ * ActivityInfo
+ * Copyright (C) 2009-2013 UNICEF
+ * Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+ *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the 
- * License, or (at your option) any later version.
- * 
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public 
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- * #L%
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.activityinfo.server.command.handler.sync;
 
-import com.extjs.gxt.ui.client.data.RpcMap;
 import com.google.inject.Inject;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
@@ -33,7 +28,6 @@ import org.activityinfo.legacy.shared.command.result.SyncRegion;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.command.result.SyncRegions;
 import org.activityinfo.server.command.handler.GetSyncRegionsHandler;
-import org.activityinfo.server.command.handler.UpdateEntityHandler;
 import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.OnDataSet;
@@ -43,7 +37,6 @@ import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 

@@ -1,3 +1,21 @@
+/*
+ * ActivityInfo
+ * Copyright (C) 2009-2013 UNICEF
+ * Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnView;
@@ -6,15 +24,13 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.store.query.server.columns.CompactingEnumColumnBuilder;
-import org.activityinfo.store.query.server.columns.DiscreteStringColumnView8;
 import org.activityinfo.store.query.shared.PendingSlot;
 import org.junit.Test;
 
 import java.util.Objects;
 
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class CompactingEnumColumnBuilderTest {
 

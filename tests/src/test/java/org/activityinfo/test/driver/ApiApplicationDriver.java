@@ -1,5 +1,22 @@
+/*
+ * ActivityInfo
+ * Copyright (C) 2009-2013 UNICEF
+ * Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.activityinfo.test.driver;
-
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.*;
@@ -7,8 +24,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.ByteSource;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -19,7 +34,6 @@ import cucumber.runtime.java.guice.ScenarioScoped;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.test.TestMain;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.sut.Accounts;
 import org.activityinfo.test.sut.Server;

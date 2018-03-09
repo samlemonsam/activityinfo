@@ -1,6 +1,23 @@
+/*
+ * ActivityInfo
+ * Copyright (C) 2009-2013 UNICEF
+ * Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.activityinfo.server.endpoint.jsonrpc;
 
-import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.AddTarget;
 import org.activityinfo.legacy.shared.command.Command;
@@ -12,12 +29,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.validation.ConstraintViolation;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasProperty;
 
 public class CommandValidatorTest {
 

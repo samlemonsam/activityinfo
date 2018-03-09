@@ -1,6 +1,23 @@
+/*
+ * ActivityInfo
+ * Copyright (C) 2009-2013 UNICEF
+ * Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.activityinfo.ui.client.analysis.view;
 
-import com.google.common.base.Function;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -16,19 +33,14 @@ import com.sencha.gxt.widget.core.client.info.DefaultInfoConfig;
 import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.info.InfoConfig;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Observer;
 import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.analysis.model.PivotModel;
 import org.activityinfo.ui.client.analysis.model.Axis;
+import org.activityinfo.ui.client.analysis.model.PivotModel;
 import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.EffectiveModel;
 import org.activityinfo.ui.client.analysis.viewModel.WorkingModel;
 import org.activityinfo.ui.client.chrome.HasTitle;
-
-import javax.annotation.Nullable;
 
 public class AnalysisView implements IsWidget, HasTitle {
 
