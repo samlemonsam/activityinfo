@@ -30,8 +30,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.UserPermissionModel;
 import org.activityinfo.server.database.hibernate.dao.*;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.mail.InvitationMessage;
 import org.activityinfo.server.mail.MailSender;
@@ -48,9 +48,6 @@ import java.util.logging.Logger;
  * @see org.activityinfo.legacy.shared.command.UpdateUserPermissions
  */
 public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPermissions> {
-
-    // TODO: this needs to be pushed down into the domain layer, it doesn't
-    // belong here at the endpoint layer
 
     private final UserDAO userDAO;
     private final UserDatabaseDAO databaseDAO;
@@ -76,11 +73,11 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
     }
 
     @Override
-    public CommandResult execute(UpdateUserPermissions cmd, User executingUser) throws CommandException {
+    public CommandResult execute(UpdateUserPermissions cmd, User executingUser) {
 
         LOGGER.info("UpdateUserPermissions: " + cmd);
 
-        UserDatabase database = databaseDAO.findById(cmd.getDatabaseId());
+        Database database = databaseDAO.findById(cmd.getDatabaseId());
         UserPermissionDTO dto = cmd.getModel();
         /*
          * First check that the current user has permission to add users to to
@@ -129,11 +126,11 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         return null;
     }
 
-    private UserPermission queryUserPermission(User user, UserDatabase database) {
+    private UserPermission queryUserPermission(User user, Database database) {
         return permDAO.findUserPermissionByUserIdAndDatabaseId(user.getId(), database.getId());
     }
 
-    private User createNewUser(User executingUser, UserPermissionDTO dto) throws CommandException {
+    private User createNewUser(User executingUser, UserPermissionDTO dto) {
         if (executingUser.getId() == 0) {
             throw new AssertionError("executingUser.id == 0!");
         }
@@ -167,7 +164,7 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
      * @throws IllegalAccessCommandException
      */
     public static void verifyAuthority(UpdateUserPermissions cmd,
-                                       UserPermission executingUserPermissions) throws IllegalAccessCommandException {
+                                       UserPermission executingUserPermissions) {
         if (!executingUserPermissions.isAllowManageUsers()) {
             throw new IllegalAccessCommandException("Current user does not have the right to manage other users");
         }

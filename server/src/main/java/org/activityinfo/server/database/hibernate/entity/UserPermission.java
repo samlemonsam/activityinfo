@@ -41,7 +41,7 @@ public class UserPermission implements Serializable {
 
     private int id;
     private Partner partner;
-    private UserDatabase database;
+    private Database database;
     private User user;
     private boolean allowView;
     private boolean allowViewAll;
@@ -56,7 +56,7 @@ public class UserPermission implements Serializable {
     public UserPermission() {
     }
 
-    public UserPermission(UserDatabase database, User user) {
+    public UserPermission(Database database, User user) {
         this.database = database;
         this.user = user;
     }
@@ -106,22 +106,22 @@ public class UserPermission implements Serializable {
     }
 
     /**
-     * Gets the <code>UserDatabase</code> to which these permissions apply.
+     * Gets the <code>Database</code> to which these permissions apply.
      *
-     * @return The <code>UserDatabase</code> to which these permissions apply.
+     * @return The <code>Database</code> to which these permissions apply.
      */
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "DatabaseId", nullable = false, updatable = false)
-    public UserDatabase getDatabase() {
+    public Database getDatabase() {
         return this.database;
     }
 
     /**
-     * Sets the <code>UserDatabase</code> to which these permissions apply
+     * Sets the <code>Database</code> to which these permissions apply
      *
-     * @param database the <code>UserDatabase</code> to which these permissions
+     * @param database the <code>Database</code> to which these permissions
      *                 apply.
      */
-    public void setDatabase(UserDatabase database) {
+    public void setDatabase(Database database) {
         this.database = database;
     }
 
@@ -148,7 +148,7 @@ public class UserPermission implements Serializable {
      * Sets the permission to view the <code>User</code>'s own da
      *
      * @return True if the user has permission to view their own partner's data
-     * in the <code>UserDatabase</code>.
+     * in the <code>Database</code>.
      */
     @Column(name = "AllowView", nullable = false)
     public boolean isAllowView() {
@@ -159,7 +159,7 @@ public class UserPermission implements Serializable {
      * Sets the permission to view the database
      *
      * @param allowView True if the user has permission to view their own partner's
-     *                  data in the <code>UserDatabase</code>.
+     *                  data in the <code>Database</code>.
      */
     public void setAllowView(boolean allowView) {
         this.allowView = allowView;
@@ -230,10 +230,10 @@ public class UserPermission implements Serializable {
 
     /**
      * Gets the permission to design (create/change indicators, etc) the design
-     * of the <code>UserDatabase</code>
+     * of the <code>Database</code>
      *
      * @return True if the user has permission to make changes to the design the
-     * <code>UserDatabase</code>
+     * <code>Database</code>
      */
     @Column(name = "AllowDesign", nullable = false)
     public boolean isAllowDesign() {
@@ -242,7 +242,7 @@ public class UserPermission implements Serializable {
 
     /**
      * Sets the permission to make changes to the design of the
-     * <code>UserDatabase</code>
+     * <code>Database</code>
      *
      * @param allowDesign
      */
@@ -285,7 +285,7 @@ public class UserPermission implements Serializable {
      * <p/>
      * Note: owners of databases do not have a <code>UserPermission</code>
      * record, so to establish the last update to the schema, the
-     * <code>UserDatabase</code> table also needs to be checked.
+     * <code>Database</code> table also needs to be checked.
      *
      * @return The date on which the user visible schema was updated.
      */

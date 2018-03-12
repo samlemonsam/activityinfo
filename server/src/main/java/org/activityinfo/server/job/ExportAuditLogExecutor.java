@@ -64,7 +64,7 @@ public class ExportAuditLogExecutor implements JobExecutor<ExportAuditLog, Expor
         try(CsvWriter  writer = new CsvWriter(new OutputStreamWriter(export.openOutputStream(), Charsets.UTF_8))) {
             AuditLogWriter logWriter = new AuditLogWriter(entityManager.get(), db, writer);
             for (ActivityDTO activityDTO : db.getActivities()) {
-                logWriter.writeForm(catalog, activityDTO.getFormClassId());
+                logWriter.writeForm(catalog, activityDTO.getFormId());
             }
         }
 

@@ -93,7 +93,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         owner.setEmail("alex@bedatadriven.com");
         db.persist(owner);
 
-        UserDatabase udb = new UserDatabase(1, "PEAR");
+        Database udb = new Database(1, "PEAR");
         udb.setOwner(owner);
         db.persist(udb);
     }

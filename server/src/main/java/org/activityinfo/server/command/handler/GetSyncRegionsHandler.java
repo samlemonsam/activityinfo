@@ -22,14 +22,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegions;
-import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.SyncRegion;
 import org.activityinfo.legacy.shared.command.result.SyncRegions;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.command.handler.sync.AdminUpdateBuilder;
 import org.activityinfo.server.command.handler.sync.TableDefinitionUpdateBuilder;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 
 import javax.persistence.EntityManager;
@@ -49,18 +47,18 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
     }
 
     @Override
-    public SyncRegions execute(GetSyncRegions cmd, User user) throws CommandException {
+    public SyncRegions execute(GetSyncRegions cmd, User user) {
 
         Set<Integer> countryIds = Sets.newHashSet();
         Set<Integer> visibleDatabaseIds = Sets.newHashSet();
         List<SyncRegion> databaseRegions = new ArrayList<>();
         
-        List<UserDatabase> ownedDatabases = entityManager
-            .createQuery("SELECT db FROM UserDatabase db WHERE db.owner = :user", UserDatabase.class)
+        List<Database> ownedDatabases = entityManager
+            .createQuery("SELECT db FROM Database db WHERE db.owner = :user", Database.class)
             .setParameter("user", user)
             .getResultList();
 
-        for (UserDatabase database : ownedDatabases) {
+        for (Database database : ownedDatabases) {
             if(!database.isDeleted()) {
                 visibleDatabaseIds.add(database.getId());
                 countryIds.add(database.getCountry().getId());
@@ -135,7 +133,7 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
     }
 
     /**
-     * We need a separate sync region for each Partner/UserDatabase combination
+     * We need a separate sync region for each Partner/Database combination
      * because we may be given permission to view data at different times.
      */
     private Collection<SyncRegion> listSiteRegions(Collection<Integer> databases) {

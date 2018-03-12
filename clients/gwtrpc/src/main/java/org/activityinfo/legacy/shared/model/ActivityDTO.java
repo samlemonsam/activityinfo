@@ -21,7 +21,6 @@ package org.activityinfo.legacy.shared.model;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.Extents;
@@ -41,18 +40,21 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         LockedPeriodDTO.HasLockedPeriod, IsActivityDTO {
 
     public static final String ENTITY_NAME = "Activity";
+    public static final String CATEGORY_PROPERTY = "category";
+    public static final String FOLDER_ID_PROPERTY = "folderId";
+    public static final String LOCATION_TYPE_ID_PROPERTY = "locationTypeId";
+    public static final String LOCATION_TYPE = "locationType";
+    public static final String REPORTING_FREQUENCY_PROPERTY = "reportingFrequency";
+    public static final String PUBLISHED_PROPERTY = "published";
+    public static final String CLASSIC_VIEW_PROPERTY = "classicView";
 
     private UserDatabaseDTO database;
     private FolderDTO folder;
 
-    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
+    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>(0);
     private List<PartnerDTO> partnerRange = Lists.newArrayList();
 
-    // to ensure serializer
-    private Published _published;
     private LocationTypeDTO locationType;
-
-    private int version;
 
     public ActivityDTO() {
         setReportingFrequency(ActivityFormDTO.REPORT_ONCE);
@@ -111,7 +113,8 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     /**
      * @return this Activity's id
      */
-    @Override @JsonProperty
+    @Override
+    @JsonProperty
     @JsonView(DTOViews.Schema.class)
     public int getId() {
         return (Integer) get("id");
@@ -128,15 +131,17 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
      * Sets this Activity's name
      */
     public void setName(String value) {
-        set("name", value);
+        set(NAME_PROPERTY, value);
     }
 
     /**
      * @return this Activity's name
      */
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getName() {
-        return get("name");
+        return get(NAME_PROPERTY);
     }
 
     /**
@@ -158,23 +163,24 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         this.database = database;
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getPublished() {
-        return (Integer) get("published");
+        return (Integer) get(PUBLISHED_PROPERTY);
     }
 
     public void setPublished(int published) {
-        set("published", published);
+        set(PUBLISHED_PROPERTY, published);
     }
 
     public void setClassicView(boolean value) {
-        set("classicView", value);
+        set(CLASSIC_VIEW_PROPERTY, value);
     }
 
     @JsonProperty
     @JsonView(DTOViews.Schema.class)
     public boolean getClassicView() {
-        return get("classicView");
+        return get(CLASSIC_VIEW_PROPERTY);
     }
 
     public FolderDTO getFolder() {
@@ -183,7 +189,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
 
     public void setFolder(FolderDTO folder) {
         this.folder = folder;
-        set("folderId", folder.getId());
+        set(FOLDER_ID_PROPERTY, folder.getId());
     }
 
     /**
@@ -191,16 +197,17 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
      * <code>REPORT_ONCE</code> or <code>REPORT_MONTHLY</code>
      */
     public void setReportingFrequency(int frequency) {
-        set("reportingFrequency", frequency);
+        set(REPORTING_FREQUENCY_PROPERTY, frequency);
     }
 
     /**
      * @return the ReportingFrequency of this Activity, either
      * <code>REPORT_ONCE</code> or <code>REPORT_MONTHLY</code>
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getReportingFrequency() {
-        return (Integer) get("reportingFrequency");
+        return (Integer) get(REPORTING_FREQUENCY_PROPERTY);
     }
 
     /**
@@ -208,7 +215,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
      * belongs.
      */
     public void setLocationTypeId(int locationId) {
-        set("locationTypeId", locationId);
+        set(REPORTING_FREQUENCY_PROPERTY, locationId);
 
     }
 
@@ -226,7 +233,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
 
         // for form binding. uck.
         if(locationType != null) {
-            set("locationTypeId", locationType.getId());
+            set(REPORTING_FREQUENCY_PROPERTY, locationType.getId());
         }
     }
 
@@ -238,7 +245,8 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         this.partnerRange = partnerRange;
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public LocationTypeDTO getLocationType() {
         return locationType;
     }
@@ -247,9 +255,10 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     /**
      * @return this Activity's category
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getCategory() {
-        return get("category");
+        return get(ActivityDTO.CATEGORY_PROPERTY);
     }
 
     /**
@@ -259,7 +268,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         if(category != null && category.trim().length() == 0) {
             category = null;
         }
-        set("category", category);
+        set(ActivityDTO.CATEGORY_PROPERTY, category);
     }
 
     public boolean hasCategory() {
@@ -288,22 +297,11 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     }
 
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public Set<LockedPeriodDTO> getLockedPeriods() {
         return lockedPeriods;
-    }
-
-    @Override
-    public Set<LockedPeriodDTO> getEnabledLockedPeriods() {
-        Set<LockedPeriodDTO> enabled = Sets.newHashSet();
-
-        for (LockedPeriodDTO lockedPeriod : getLockedPeriods()) {
-            if (lockedPeriod.isEnabled()) {
-                enabled.add(lockedPeriod);
-            }
-        }
-
-        return enabled;
     }
 
     public String getDatabaseName() {
@@ -313,11 +311,6 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
     public boolean isEditAllowed() {
         return database.isEditAllowed();
     }
-
-    public boolean isAllowedToEdit(SiteDTO site) {
-        return database.isAllowedToEdit(site);
-    }
-
 
     public boolean isDesignAllowed() {
         return database.isEditAllowed();
@@ -335,7 +328,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
         return database.getCountry().getBounds();
     }
 
-    public ResourceId getFormClassId() {
+    public ResourceId getFormId() {
         return CuidAdapter.activityFormClass(getId());
     }
 }

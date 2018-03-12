@@ -22,6 +22,7 @@ import com.extjs.gxt.ui.client.data.BaseModelData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author yuriyz on 10/07/2014.
@@ -29,7 +30,9 @@ import java.util.List;
 public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO {
 
 
-    private List<ActivityDTO> activities = new ArrayList<ActivityDTO>();
+    public static final String ENTITY_NAME = "Folder";
+
+    private List<ActivityDTO> activities = new ArrayList<>();
 
     public FolderDTO() {
     }
@@ -87,7 +90,7 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO {
 
     @Override
     public String getEntityName() {
-        return "Folder";
+        return ENTITY_NAME;
     }
 
     @Override
@@ -97,9 +100,7 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO {
 
         FolderDTO that = (FolderDTO) o;
 
-        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
-
-        return true;
+        return Objects.equals(this.getName(), that.getName());
     }
 
     @Override

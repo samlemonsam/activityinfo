@@ -27,18 +27,16 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
 import org.hibernate.validator.constraints.Length;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @JsonAutoDetect(JsonMethod.NONE)
 public class TargetDTO extends BaseModelData implements EntityDTO {
 
+    public static final String ENTITY_NAME = "Target";
+
     private UserDatabaseDTO userDatabase;
     private List<TargetValueDTO> targetValues;
-
-    public static final String entityName = "Target";
 
     public TargetDTO() {
         super();
@@ -46,15 +44,14 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
 
     public TargetDTO(int id, String name) {
         super();
-
-        set("id", id);
-        set("name", name);
+        set(ID_PROPERTY, id);
+        set(NAME_PROPERTY, name);
     }
 
     @Override
     @JsonProperty
     public int getId() {
-        return get("id", 0);
+        return get(ID_PROPERTY, 0);
     }
 
     public void setId(int id) {
@@ -62,25 +59,15 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     }
 
     @Override
-    public Map<String, Object> getProperties() {
-        return super.getProperties();
-    }
-
-    @Override
-    public Collection<String> getPropertyNames() {
-        return super.getPropertyNames();
-    }
-
-    @Override
     @Required
     @JsonProperty
     @Length(max = 255)
     public String getName() {
-        return (String) get("name");
+        return get(NAME_PROPERTY);
     }
 
     public void setName(String name) {
-        set("name", name);
+        set(NAME_PROPERTY, name);
     }
 
     public void setDescription(String description) {
@@ -89,7 +76,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
 
     @JsonProperty
     public String getDescription() {
-        return (String) get("description");
+        return get("description");
     }
 
     public void setUserDatabase(UserDatabaseDTO database) {
@@ -105,8 +92,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     public ProjectDTO getProject() {
         return get("project");
     }
-    
-    
+
     @JsonSetter
     public void setProjectId(Integer id) {
         if(id == null) {
@@ -117,7 +103,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
             setProject(project);
         }
     }
-    
+
     public void setProject(ProjectDTO value) {
         set("project", value);
         if (value != null) { // keep also id, we still stick to id in bindings
@@ -129,7 +115,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     public PartnerDTO getPartner() {
         return get("partner");
     }
-        
+
     @JsonSetter
     public void setPartnerId(Integer id) {
         if(id == null) {
@@ -140,7 +126,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
             setPartner(partner);
         }
     }
-    
+
     public void setPartner(PartnerDTO value) {
         set("partner", value);
         if (value != null) { // keep also id, we still stick to id in bindings
@@ -157,13 +143,13 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     }
 
 
-    
+
     @Required
     @JsonProperty
     public LocalDate getFromDate() {
         return get("fromDate");
     }
-    
+
     @JsonSetter
     public void setFromDate(LocalDate date) {
         set("fromDate", date);
@@ -174,7 +160,7 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
     public LocalDate getToDate() {
         return get("toDate");
     }
-    
+
     @JsonSetter
     public void setToDate(LocalDate date) {
         set("toDate", date);
@@ -212,6 +198,6 @@ public class TargetDTO extends BaseModelData implements EntityDTO {
 
     @Override
     public String getEntityName() {
-        return entityName;
+        return ENTITY_NAME;
     }
 }

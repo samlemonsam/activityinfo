@@ -25,7 +25,6 @@ import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.UserResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
@@ -33,9 +32,9 @@ import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.UserPermissionModel;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 
 import javax.persistence.EntityManager;
@@ -63,9 +62,9 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
     }
 
     @Override
-    public CommandResult execute(GetUsers cmd, User currentUser) throws CommandException {
+    public CommandResult execute(GetUsers cmd, User currentUser) {
 
-        UserDatabase db = em.getReference(UserDatabase.class, cmd.getDatabaseId());
+        Database db = em.getReference(Database.class, cmd.getDatabaseId());
 
         UserPermission currentUserPermission = PermissionOracle.using(em).getPermissionByUser(db, currentUser);
 
@@ -129,7 +128,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
         if(Strings.isNullOrEmpty(perm.getModel())) {
             // Include all folders, as user has access to all
             List<FolderDTO> folderList = new ArrayList<>(folderMap.size());
-            folderMap.values().forEach((folder) -> folderList.add(createFolderDTO(folder)));
+            folderMap.values().forEach(folder -> folderList.add(createFolderDTO(folder)));
             return folderList;
         }
 

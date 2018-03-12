@@ -30,5 +30,5 @@ public interface IsActivityDTO extends IsFormClass {
 
     public boolean getClassicView();
 
-    public ResourceId getFormClassId();
+    public ResourceId getFormId();
 }

@@ -41,19 +41,16 @@ import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.extjs.gxt.ui.client.widget.menu.SeparatorMenuItem;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.extjs.gxt.ui.client.widget.treepanel.TreePanel;
-import com.google.common.base.Function;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
@@ -87,12 +84,13 @@ import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import javax.annotation.Nonnull;
+import java.util.*;
 import java.util.logging.Logger;
+
+import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
+import static org.activityinfo.legacy.shared.model.EntityDTO.DATABASE_ID_PROPERTY;
+import static org.activityinfo.legacy.shared.model.EntityDTO.SORT_ORDER_PROPERTY;
 
 /**
  * Presenter for the Design Page, which enables the user to define UserDatabases
@@ -104,11 +102,11 @@ public class DbEditor implements DbPage, IsWidget {
     public static final PageId PAGE_ID = new PageId("design");
 
     private static final Logger LOGGER = Logger.getLogger(DbEditor.class.getName());
+    public static final String BLANK_WINDOW_TARGET = "_blank";
 
     private final EventBus eventBus;
     private final Dispatcher service;
     private ResourceLocator locator;
-    private final UiConstants messages;
 
     private UserDatabaseDTO db;
 
@@ -116,31 +114,20 @@ public class DbEditor implements DbPage, IsWidget {
     private final TreePanel<ModelData> tree;
 
     private final ActionToolBar toolBar;
+    private DbEditorMenu newMenu;
     private final ContentPanel container;
     private final ContentPanel formContainer;
-
-    private MenuItem newAttributeGroup;
-    private MenuItem newAttribute;
-    private MenuItem newIndicator;
-    private Menu newMenu;
-    private AbstractDesignForm currentForm;
-    private MenuItem newFolder;
-    private MenuItem newActivity;
-    private MenuItem newForm;
-    private MenuItem newLocationType;
 
 
     @Inject
     public DbEditor(EventBus eventBus,
                     Dispatcher service,
                     ResourceLocator locator,
-                    StateProvider stateMgr,
-                    UiConstants messages) {
+                    StateProvider stateMgr) {
 
         this.eventBus = eventBus;
         this.service = service;
         this.locator = locator;
-        this.messages = messages;
 
         treeStore = new TreeStore<>();
         tree = new TreePanel<>(treeStore);
@@ -216,10 +203,7 @@ public class DbEditor implements DbPage, IsWidget {
         if(db.isDesignAllowed() && (model instanceof IndicatorDTO || model instanceof AttributeGroupDTO)) {
             return true;
         }
-        if(db.isDatabaseDesignAllowed()) {
-            return true;
-        }
-        return false;
+        return db.isDatabaseDesignAllowed();
     }
 
     @Override
@@ -229,7 +213,7 @@ public class DbEditor implements DbPage, IsWidget {
 
         container.setHeadingText(I18N.CONSTANTS.design() + " - "  + db.getName());
 
-        fillStore(messages);
+        fillStore();
 
         toolBar.setActionEnabled(UIActions.DELETE, false);
         toolBar.setActionEnabled(UIActions.EDIT, false);
@@ -237,22 +221,10 @@ public class DbEditor implements DbPage, IsWidget {
         toolBar.setActionEnabled(UIActions.DELETE, db.isDatabaseDesignAllowed());
         toolBar.setActionEnabled(UIActions.IMPORT, db.isDatabaseDesignAllowed());
 
-        newFolder.setEnabled(db.isDatabaseDesignAllowed());
-        newActivity.setEnabled(db.isDatabaseDesignAllowed());
-        newForm.setEnabled(db.isDatabaseDesignAllowed());
-        newLocationType.setEnabled(db.isDatabaseDesignAllowed());
-        newMenu.addListener(Events.BeforeShow, new Listener<BaseEvent>() {
-            @Override
-            public void handleEvent(BaseEvent be) {
-
-                ModelData sel = tree.getSelectionModel().getSelectedItem();
-                IsActivityDTO activity = DbEditor.this.getSelectedActivity(sel);
-
-                newAttributeGroup.setEnabled(activity != null && activity.getClassicView());
-                newAttribute.setEnabled(activity != null && (sel instanceof AttributeGroupDTO || sel instanceof AttributeDTO) && activity.getClassicView());
-                newIndicator.setEnabled(activity != null && activity.getClassicView());
-            }
-        });
+        newMenu.setNewFolderEnabled(db.isDatabaseDesignAllowed());
+        newMenu.setNewActivityEnabled(db.isDatabaseDesignAllowed());
+        newMenu.setNewFormEnabled(db.isDatabaseDesignAllowed());
+        newMenu.setNewLocationTypeEnabled(db.isDatabaseDesignAllowed());
     }
 
     public void refresh() {
@@ -266,7 +238,7 @@ public class DbEditor implements DbPage, IsWidget {
                     @Override
                     public void onSuccess(SchemaDTO result) {
                         db = result.getDatabaseById(db.getId());
-                        fillStore(messages);
+                        fillStore();
                         showForm(tree.getSelectionModel().getSelectedItem());
                     }
                 });
@@ -274,61 +246,19 @@ public class DbEditor implements DbPage, IsWidget {
 
     @Override
     public void shutdown() {
-
+        // No action required.
     }
 
-    private void fillStore(UiConstants messages) {
+    private void fillStore() {
 
         treeStore.removeAll();
-
 
         for (FolderDTO folderDTO : db.getFolders()) {
             treeStore.add(folderDTO, false);
         }
 
         for (ActivityDTO activity : db.getActivities()) {
-
-            ActivityDTO activityNode = new ActivityDTO(activity);
-            if(activity.getFolder() != null) {
-                treeStore.add(activity.getFolder(), activityNode, false);
-            } else {
-                treeStore.add(activityNode, false);
-            }
-
-            if (!activityNode.getClassicView()) {
-                continue; // skip indicators and attributes in tree if activity is not classicView=true
-            }
-
-            final AttributeGroupFieldGroup attributeFolder = new AttributeGroupFieldGroup(messages.attributes());
-            treeStore.add(activityNode, attributeFolder, false);
-
-            final IndicatorFieldGroup indicatorFolder = new IndicatorFieldGroup(messages.indicators());
-            treeStore.add(activityNode, indicatorFolder, false);
-
-            service.execute(new GetActivityForm(activity.getId())).then(new SuccessCallback<ActivityFormDTO>() {
-                @Override
-                public void onSuccess(ActivityFormDTO activityForm) {
-                    for (AttributeGroupDTO group : activityForm.getAttributeGroups()) {
-                        if (group != null) {
-                            AttributeGroupDTO groupNode = new AttributeGroupDTO(group);
-                            treeStore.add(attributeFolder, groupNode, false);
-
-                            for (AttributeDTO attribute : group.getAttributes()) {
-                                AttributeDTO attributeNode = new AttributeDTO(attribute);
-                                treeStore.add(groupNode, attributeNode, false);
-                            }
-                        }
-                    }
-
-                    for (IndicatorGroup group : activityForm.groupIndicators()) {
-                        for (IndicatorDTO indicator : group.getIndicators()) {
-                            IndicatorDTO indicatorNode = new IndicatorDTO(indicator);
-                            treeStore.add(indicatorFolder, indicatorNode, false);
-                        }
-                    }
-                }
-            });
-
+            fillStore(activity);
         }
 
         if(db.isDatabaseDesignAllowed()) {
@@ -336,6 +266,55 @@ public class DbEditor implements DbPage, IsWidget {
                 if (Objects.equals(locationType.getDatabaseId(), db.getId()) && !locationType.isDeleted()) {
                     treeStore.add(locationType, false);
                 }
+            }
+        }
+    }
+
+    private void fillStore(ActivityDTO activity) {
+        ActivityDTO activityNode = new ActivityDTO(activity);
+        if(activity.getFolder() != null) {
+            treeStore.add(activity.getFolder(), activityNode, false);
+        } else {
+            treeStore.add(activityNode, false);
+        }
+
+        if (!activityNode.getClassicView()) {
+            return;
+        }
+
+        final AttributeGroupFieldGroup attributeFolder = new AttributeGroupFieldGroup(I18N.CONSTANTS.attributes());
+        treeStore.add(activityNode, attributeFolder, false);
+
+        final IndicatorFieldGroup indicatorFolder = new IndicatorFieldGroup(I18N.CONSTANTS.indicators());
+        treeStore.add(activityNode, indicatorFolder, false);
+
+        service.execute(new GetActivityForm(activity.getId())).then(new SuccessCallback<ActivityFormDTO>() {
+            @Override
+            public void onSuccess(ActivityFormDTO activityForm) {
+                filleStore(activityForm, attributeFolder, indicatorFolder);
+            }
+        });
+    }
+
+    private void filleStore(ActivityFormDTO activityForm,
+                            AttributeGroupFieldGroup attributeFolder,
+                            IndicatorFieldGroup indicatorFolder) {
+        for (AttributeGroupDTO group : activityForm.getAttributeGroups()) {
+            if (group != null) {
+                AttributeGroupDTO groupNode = new AttributeGroupDTO(group);
+                treeStore.add(attributeFolder, groupNode, false);
+
+                for (AttributeDTO attribute : group.getAttributes()) {
+                    AttributeDTO attributeNode = new AttributeDTO(attribute);
+                    treeStore.add(groupNode, attributeNode, false);
+                }
+            }
+        }
+
+        for (IndicatorGroup group : activityForm.groupIndicators()) {
+            for (IndicatorDTO indicator : group.getIndicators()) {
+                IndicatorDTO indicatorNode = new IndicatorDTO(indicator);
+                treeStore.add(indicatorFolder, indicatorNode, false);
             }
         }
     }
@@ -349,15 +328,15 @@ public class DbEditor implements DbPage, IsWidget {
 
 
     private void exportFullDatabase() {
-        Window.open("/resources/database/" + db.getId() + "/schema.csv", "_blank", null);
+        Window.open("/resources/database/" + db.getId() + "/schema.csv", BLANK_WINDOW_TARGET, null);
     }
 
     private void exportFullDatabaseBeta() {
-        Window.open("/resources/database/" + db.getId() + "/schema-v3.csv", "_blank", null);
+        Window.open("/resources/database/" + db.getId() + "/schema-v3.csv", BLANK_WINDOW_TARGET, null);
     }
     
     private void exportFormAsXlsForm() {
-        Window.open("/resources/form/" + getSelectedFormClassId() + "/form.xls", "_blank", null);
+        Window.open("/resources/form/" + getSelectedFormId() + "/form.xls", BLANK_WINDOW_TARGET, null);
     }
 
     private void exportAuditLog() {
@@ -377,32 +356,32 @@ public class DbEditor implements DbPage, IsWidget {
             SchemaImportDialog dialog = new SchemaImportDialog(
                     new SchemaImporterV2(service, db),
                     new SchemaImporterV3(db.getId(), locator));
-            dialog.show().then(new Function<Void, Object>() {
-                @Nullable
-                @Override
-                public Object apply(@Nullable Void input) {
-                    refresh();
-                    return null;
-                }
+            dialog.show().then(() -> {
+                refresh();
+                return null;
             });
         } else if(UIActions.EDIT.equals(actionId)) {
-            eventBus.fireEvent(new NavigationEvent(
-                    NavigationHandler.NAVIGATION_REQUESTED,
-                    new ResourcePlace(getSelectedFormClassId(), ResourcePage.DESIGN_PAGE_ID)));
-
+            Optional<ResourceId> selectedFormId = getSelectedFormId();
+            if(selectedFormId.isPresent()) {
+                eventBus.fireEvent(new NavigationEvent(
+                        NavigationHandler.NAVIGATION_REQUESTED,
+                        new ResourcePlace(selectedFormId.get(), ResourcePage.DESIGN_PAGE_ID)));
+            }
         } else if(UIActions.OPEN_TABLE.equals(actionId)) {
-            App3.openNewTable(getSelectedFormClassId());
+            Optional<ResourceId> selectedFormId = getSelectedFormId();
+            if(selectedFormId.isPresent()) {
+                App3.openNewTable(selectedFormId.get());
+            }
         }
     }
 
-    private ResourceId getSelectedFormClassId() {
+    private Optional<ResourceId> getSelectedFormId() {
         ModelData selectedItem = tree.getSelectionModel().getSelectedItem();
         if (selectedItem instanceof IsFormClass) {
             IsFormClass formClass = (IsFormClass) selectedItem;
-            return formClass.getResourceId();
-        } else {
-            return getSelectedActivity(selectedItem).getFormClassId();
+            return Optional.of(formClass.getResourceId());
         }
+        return getSelectedActivity(selectedItem).map(IsActivityDTO::getFormId);
     }
 
     private void onNodeDropped(List<TreeStoreModel> data) {
@@ -441,32 +420,32 @@ public class DbEditor implements DbPage, IsWidget {
 
         ModelData selected = tree.getSelectionModel().getSelectedItem();
 
-        if ("Activity".equals(entityName)) {
+        if (ActivityDTO.ENTITY_NAME.equals(entityName)) {
             newEntity = new ActivityDTO();
-            newEntity.set("databaseId", db.getId());
-            newEntity.set("classicView", true);
-            newEntity.set("published", Published.NOT_PUBLISHED);
+            newEntity.set(DATABASE_ID_PROPERTY, db.getId());
+            newEntity.set(CLASSIC_VIEW_PROPERTY, true);
+            newEntity.set(PUBLISHED_PROPERTY, Published.NOT_PUBLISHED);
             parent = null;
 
         } else if("Form".equals(entityName)) {
             newEntity = new ActivityDTO();
-            newEntity.set("databaseId", db.getId());
-            newEntity.set("classicView", false);
-            newEntity.set("reportingFrequency", ActivityFormDTO.REPORT_ONCE);
-            newEntity.set("locationTypeId", db.getCountry().getNullLocationType().getId());
-            newEntity.set("published", Published.NOT_PUBLISHED);
+            newEntity.set(DATABASE_ID_PROPERTY, db.getId());
+            newEntity.set(CLASSIC_VIEW_PROPERTY, false);
+            newEntity.set(REPORTING_FREQUENCY_PROPERTY, ActivityFormDTO.REPORT_ONCE);
+            newEntity.set(LOCATION_TYPE_ID_PROPERTY, db.getCountry().getNullLocationType().getId());
+            newEntity.set(PUBLISHED_PROPERTY, Published.NOT_PUBLISHED);
             parent = null;
 
-        } else if("Folder".equals(entityName)) {
+        } else if(FolderDTO.ENTITY_NAME.equals(entityName)) {
             newEntity = new FolderDTO(db.getId(), null);
             parent = null;
 
-        } else if ("LocationType".equals(entityName)) {
+        } else if (LocationTypeDTO.ENTITY_NAME.equals(entityName)) {
             newEntity = new LocationTypeDTO();
-            newEntity.set("databaseId", db.getId());
+            newEntity.set(DATABASE_ID_PROPERTY, db.getId());
             parent = null;
 
-        } else if ("AttributeGroup".equals(entityName)) {
+        } else if (AttributeGroupDTO.ENTITY_NAME.equals(entityName)) {
             IsActivityDTO activity = findActivityFolder(selected);
 
             AttributeGroupDTO newAttributeGroup = new AttributeGroupDTO();
@@ -476,7 +455,7 @@ public class DbEditor implements DbPage, IsWidget {
             newEntity.set("activityId", activity.getId());
             parent = treeStore.getChild((ModelData) activity, 0);
 
-        } else if ("Attribute".equals(entityName)) {
+        } else if (AttributeDTO.ENTITY_NAME.equals(entityName)) {
             AttributeGroupDTO group = findAttributeGroupNode(selected);
 
             newEntity = new AttributeDTO();
@@ -484,7 +463,7 @@ public class DbEditor implements DbPage, IsWidget {
 
             parent = group;
 
-        } else if ("Indicator".equals(entityName)) {
+        } else if (IndicatorDTO.ENTITY_NAME.equals(entityName)) {
             IsActivityDTO activity = findActivityFolder(selected);
 
             IndicatorDTO newIndicator = new IndicatorDTO();
@@ -492,7 +471,7 @@ public class DbEditor implements DbPage, IsWidget {
             newIndicator.setType(FieldTypeClass.QUANTITY);
 
             if (activity instanceof ActivityFormDTO) {
-                newIndicator.set("sortOrder", ((ActivityFormDTO)activity).getIndicators().size() + 1);
+                newIndicator.set(SORT_ORDER_PROPERTY, ((ActivityFormDTO)activity).getIndicators().size() + 1);
             }
 
             newEntity = newIndicator;
@@ -530,8 +509,8 @@ public class DbEditor implements DbPage, IsWidget {
                         }
 
                         if (newEntity instanceof IsActivityDTO && ((IsActivityDTO) newEntity).getClassicView()) {
-                            treeStore.add(newEntity, new AttributeGroupFieldGroup(messages.attributes()), false);
-                            treeStore.add(newEntity, new IndicatorFieldGroup(messages.indicators()), false);
+                            treeStore.add(newEntity, new AttributeGroupFieldGroup(I18N.CONSTANTS.attributes()), false);
+                            treeStore.add(newEntity, new IndicatorFieldGroup(I18N.CONSTANTS.indicators()), false);
                         }
 
                         tether.hide();
@@ -568,13 +547,12 @@ public class DbEditor implements DbPage, IsWidget {
         // Schedule the save at the end of the event loop so we can
         // handle any blur events from the form
 
-        Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                executeSave(new MaskingAsyncMonitor(DbEditor.this.container, I18N.CONSTANTS.saving()),
-                        new NullCallback<>());
-            }
-        });
+        Scheduler.get().scheduleFinally(() ->
+                executeSave(new MaskingAsyncMonitor(DbEditor.this.container, I18N.CONSTANTS.saving())));
+    }
+
+    private void executeSave(AsyncMonitor monitor) {
+        executeSave(monitor, new NullCallback<>());
     }
 
     private void executeSave(AsyncMonitor monitor, AsyncCallback<Void> outerCallback) {
@@ -616,11 +594,10 @@ public class DbEditor implements DbPage, IsWidget {
 
         EntityDTO selectedEntity = (EntityDTO) selected;
 
-        if(selectedEntity instanceof FolderDTO) {
-            if(treeStore.getChildCount(selectedEntity) != 0) {
-                MessageBox.alert(I18N.CONSTANTS.delete(), I18N.CONSTANTS.folderNotEmpty(), null);
-                return;
-            }
+        if( selectedEntity instanceof FolderDTO &&
+            treeStore.getChildCount(selectedEntity) != 0) {
+            MessageBox.alert(I18N.CONSTANTS.delete(), I18N.CONSTANTS.folderNotEmpty(), null);
+            return;
         }
 
         SafeHtml message = confirmationMessage(selectedEntity);
@@ -643,6 +620,7 @@ public class DbEditor implements DbPage, IsWidget {
         service.execute(batchCommand, new MaskingAsyncMonitor(container, I18N.CONSTANTS.saving()), new AsyncCallback<BatchResult>() {
             @Override
             public void onFailure(Throwable caught) {
+                // Failure case handled by MaskingAsyncMonitor
             }
 
             @Override
@@ -671,21 +649,30 @@ public class DbEditor implements DbPage, IsWidget {
 
         // in case of activity enable only if reportingFrequency==once (monthly implementation with subforms is on the way...)
         boolean enableTable = selectedItem instanceof IsFormClass;
-        IsActivityDTO selectedActivity = getSelectedActivity(selectedItem);
-        if (selectedActivity != null) {
-            enableTable = selectedActivity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
+        Optional<IsActivityDTO> selectedActivity = getSelectedActivity(selectedItem);
+        if (selectedActivity.isPresent()) {
+            enableTable = selectedActivity.get().getReportingFrequency() == ActivityFormDTO.REPORT_ONCE;
         }
         toolBar.setActionEnabled(UIActions.OPEN_TABLE, enableTable);
+
+        ModelData sel = tree.getSelectionModel().getSelectedItem();
+        Optional<IsActivityDTO> activity = DbEditor.this.getSelectedActivity(sel);
+
+        boolean classicActivitySelected = activity.map(IsActivityDTO::getClassicView).orElse(false);
+        newMenu.setNewIndicatorEnabled(classicActivitySelected);
+        newMenu.setNewAttributeGroupEnabled(classicActivitySelected);
+        newMenu.setNewAttributeEnabled(classicActivitySelected && (sel instanceof AttributeGroupDTO || sel instanceof AttributeDTO));
     }
 
     private boolean canEditWithFormDesigner(ModelData selectedItem) {
-        IsActivityDTO activity = getSelectedActivity(selectedItem);
-        return activity != null && !activity.getClassicView();
+        return getSelectedActivity(selectedItem)
+                .map(activity -> !activity.getClassicView())
+                .orElse(false);
     }
 
-    private IsActivityDTO getSelectedActivity(ModelData selectedItem) {
+    private Optional<IsActivityDTO> getSelectedActivity(ModelData selectedItem) {
         if (selectedItem instanceof IsActivityDTO) {
-            return (IsActivityDTO) selectedItem;
+            return Optional.of((IsActivityDTO) selectedItem);
         } else if (selectedItem instanceof AttributeGroupFieldGroup ||
                 selectedItem instanceof IndicatorFieldGroup ||
                 selectedItem instanceof AttributeGroupDTO ||
@@ -694,7 +681,7 @@ public class DbEditor implements DbPage, IsWidget {
                 selectedItem instanceof AttributeDTO) {
             return getSelectedActivity(treeStore.getParent(selectedItem));
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -719,7 +706,7 @@ public class DbEditor implements DbPage, IsWidget {
                     executeSave(monitor, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-
+                            // Failure case handled by SavePromptMessageBox
                         }
 
                         @Override
@@ -770,48 +757,10 @@ public class DbEditor implements DbPage, IsWidget {
             }
         };
 
-
-        newFolder = new MenuItem(I18N.CONSTANTS.newFolder(), IconImageBundle.ICONS.folder(), listener);
-        newFolder.setItemId("Folder");
-
-        newActivity = new MenuItem(I18N.CONSTANTS.newClassicActivity(), IconImageBundle.ICONS.addActivity(), listener);
-        newActivity.setItemId("Activity");
-
-        newForm = new MenuItem(I18N.CONSTANTS.newForm(), IconImageBundle.ICONS.form(), listener);
-        newForm.setItemId("Form");
-
-        newLocationType = new MenuItem(
-                I18N.CONSTANTS.newLocationType(),
-                IconImageBundle.ICONS.marker(), listener);
-        newLocationType.setItemId("LocationType");
-
-        newAttributeGroup = newMenuItem("AttributeGroup",
-                I18N.CONSTANTS.newAttributeGroup(),
-                IconImageBundle.ICONS.attribute(),
-                listener);
-
-        newAttribute = newMenuItem("Attribute",
-                I18N.CONSTANTS.newAttribute(),
-                IconImageBundle.ICONS.attribute(),
-                listener);
-
-        newIndicator = new MenuItem(I18N.CONSTANTS.newIndicator(),
-                IconImageBundle.ICONS.indicator(),
-                listener);
-        newIndicator.setItemId("Indicator");
-
-        newMenu = new Menu();
-        newMenu.add(newFolder);
-        newMenu.add(newActivity);
-        newMenu.add(newForm);
-        newMenu.add(newLocationType);
-        newMenu.add(newAttributeGroup);
-        newMenu.add(newAttribute);
-        newMenu.add(newIndicator);
-
+        newMenu = new DbEditorMenu(listener);
 
         Button newButtonMenu = new Button(I18N.CONSTANTS.newText(), IconImageBundle.ICONS.add());
-        newButtonMenu.setMenu(newMenu);
+        newButtonMenu.setMenu(newMenu.asMenu());
         toolBar.add(newButtonMenu);
 
         toolBar.add(new SeparatorMenuItem());
@@ -862,15 +811,6 @@ public class DbEditor implements DbPage, IsWidget {
     }
 
 
-    private MenuItem newMenuItem(String itemId,
-                                 String label,
-                                 AbstractImagePrototype icon,
-                                 SelectionListener<MenuEvent> listener) {
-        final MenuItem newAttribute = new MenuItem(label, icon, listener);
-        newAttribute.setItemId(itemId);
-        return newAttribute;
-    }
-
 
     private Class formClassForSelection(ModelData sel) {
 
@@ -892,6 +832,7 @@ public class DbEditor implements DbPage, IsWidget {
 
     }
 
+    @Nonnull
     private AbstractDesignForm createForm(ModelData sel) {
         if (sel instanceof IsActivityDTO) {
             return new ActivityForm(service, db);
@@ -906,8 +847,7 @@ public class DbEditor implements DbPage, IsWidget {
         } else if (sel instanceof LocationTypeDTO) {
             return new LocationTypeForm();
         }
-
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     private void showForm(ModelData model) {
@@ -915,7 +855,7 @@ public class DbEditor implements DbPage, IsWidget {
         // do we have the right form?
         Class formClass = formClassForSelection(model);
 
-        currentForm = null;
+        AbstractDesignForm currentForm = null;
         if (formContainer.getItemCount() != 0) {
             currentForm = (AbstractDesignForm) formContainer.getItem(0);
         }

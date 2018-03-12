@@ -26,9 +26,9 @@ import org.activityinfo.server.database.hibernate.dao.PartnerDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.dao.UserPermissionDAO;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.login.model.SignUpConfirmationInvalidPageModel;
 import org.activityinfo.server.login.model.SignUpConfirmationPageModel;
@@ -130,7 +130,7 @@ public class SignUpConfirmationController {
     }
 
     protected void addUserToDefaultDatabase(User user) {
-        UserDatabase database = entityManager.find(UserDatabase.class, DEFAULT_DATABASE_ID);
+        Database database = entityManager.find(Database.class, DEFAULT_DATABASE_ID);
         if(database == null) {
             LOGGER.severe("Default database " + DEFAULT_DATABASE_ID + " does not exist, unable to add user " + user.getEmail());
             return;

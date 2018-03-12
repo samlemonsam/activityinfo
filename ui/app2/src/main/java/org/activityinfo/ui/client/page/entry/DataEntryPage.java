@@ -19,7 +19,8 @@
 package org.activityinfo.ui.client.page.entry;
 
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.event.*;
+import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
+import com.extjs.gxt.ui.client.event.SelectionChangedListener;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
@@ -28,10 +29,6 @@ import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.google.common.base.Optional;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
@@ -50,10 +47,8 @@ import org.activityinfo.ui.client.component.importDialog.ImportResultEvent;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
-import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
 import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
-import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
 import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
@@ -62,7 +57,6 @@ import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.entry.column.DefaultColumnModelProvider;
 import org.activityinfo.ui.client.page.entry.form.PrintDataEntryForm;
-import org.activityinfo.ui.client.page.entry.form.SiteDialogCallback;
 import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
@@ -79,13 +73,13 @@ import java.util.Set;
 /**
  * This is the container for the DataEntry page.
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class DataEntryPage extends LayoutContainer implements Page, ActionListener {
 
     public static final PageId PAGE_ID = new PageId("data-entry");
 
     private final Dispatcher dispatcher;
     private final EventBus eventBus;
-    private final StateProvider stateProvider;
 
     private GroupingComboBox groupingComboBox;
 
@@ -111,12 +105,10 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
 
     @Inject
-    public DataEntryPage(final EventBus eventBus, 
-                         Dispatcher dispatcher, ResourceLocator resourceLocator, 
-                         StateProvider stateProvider) {
+    public DataEntryPage(final EventBus eventBus,
+                         Dispatcher dispatcher, ResourceLocator resourceLocator) {
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
-        this.stateProvider = stateProvider;
         this.resourceLocator = resourceLocator;
 
         setLayout(new BorderLayout());
@@ -133,14 +125,10 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         filterLayout.setSplit(true);
         add(filterPane, filterLayout);
 
-        filterPane.getSet().addValueChangeHandler(new ValueChangeHandler<Filter>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Filter> event) {
-                eventBus.fireEvent(new NavigationEvent(NavigationHandler.NAVIGATION_REQUESTED,
-                        currentPlace.copy().setFilter(event.getValue())));
-            }
-        });
+        filterPane.getSet().addValueChangeHandler(event ->
+                eventBus.fireEvent(
+                        new NavigationEvent(NavigationHandler.NAVIGATION_REQUESTED,
+                            currentPlace.copy().setFilter(event.getValue()))));
     }
 
     private void addCenter() {
@@ -195,16 +183,12 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         betaLinkPanel.setHeaderVisible(false);
         betaLinkPanel.setLayout(new CenterLayout());
         Anchor betaLink = new Anchor(I18N.CONSTANTS.tryNewDataEntryInterface());
-        betaLink.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                if(!clickEvent.isControlKeyDown()) {
-                    navigateToNewNewInterface();
-                } else {
-                    navigateToNewInterface();
-                }
+        betaLink.addClickHandler(clickEvent -> {
+            if(!clickEvent.isControlKeyDown()) {
+                navigateToNewNewInterface();
+            } else {
+                navigateToNewInterface();
             }
-
         });
         betaLinkPanel.add(betaLink);
         return betaLinkPanel;
@@ -214,14 +198,9 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar = new ActionToolBar(this);
 
         groupingComboBox = new GroupingComboBox(dispatcher);
-        groupingComboBox.withSelectionListener(new Listener<FieldEvent>() {
-
-            @Override
-            public void handleEvent(FieldEvent be) {
+        groupingComboBox.withSelectionListener(event ->
                 eventBus.fireEvent(new NavigationEvent(NavigationHandler.NAVIGATION_REQUESTED,
-                        currentPlace.copy().setGrouping(groupingComboBox.getGroupingModel())));
-            }
-        });
+                        currentPlace.copy().setGrouping(groupingComboBox.getGroupingModel()))));
 
         toolBar.add(new Label(I18N.CONSTANTS.grouping()));
         toolBar.add(groupingComboBox);
@@ -237,8 +216,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.addExcelExportButton();
 
         toolBar.addPrintButton();
-        toolBar.addButton("EMBED", I18N.CONSTANTS.embed(), IconImageBundle.ICONS.embed());
-
+        toolBar.addButton(UIActions.EMBED, I18N.CONSTANTS.embed(), IconImageBundle.ICONS.embed());
 
         return toolBar;
     }
@@ -254,8 +232,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO Auto-generated method stub
-
                 }
 
                 @Override
@@ -400,7 +376,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.setActionEnabled(UIActions.PRINT, activities.size() == 1);
 
         // also embedding is only implemented for one activity
-        toolBar.setActionEnabled("EMBED", activities.size() == 1);
+        toolBar.setActionEnabled(UIActions.EMBED, activities.size() == 1);
 
         toolBar.setActionEnabled(UIActions.IMPORT, activities.size() == 1);
 
@@ -484,14 +460,10 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         if (UIActions.ADD.equals(actionId)) {
 
-            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
-            formHelper.addSite(filter, new SiteDialogCallback() {
-
-                @Override
-                public void onSaved() {
-                    gridPanel.refresh();
-                    filterPane.getSet().applyBaseFilter(filter);
-                }
+            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus);
+            formHelper.addSite(filter, () -> {
+                gridPanel.refresh();
+                filterPane.getSet().applyBaseFilter(filter);
             });
 
         } else if (UIActions.EDIT.equals(actionId)) {
@@ -512,7 +484,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             ExportDialog dialog = new ExportDialog();
             dialog.start(new ExportSitesTask(dispatcher, filter));
 
-        } else if ("EMBED".equals(actionId)) {
+        } else if (UIActions.EMBED.equals(actionId)) {
             EmbedDialog dialog = new EmbedDialog(dispatcher);
             dialog.show(currentPlace);
 
@@ -523,15 +495,11 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     }
 
     private void editSite(SiteDTO site) {
-        SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus, stateProvider);
-        launcher.editSite(site, new SiteDialogCallback() {
-
-            @Override
-            public void onSaved() {
-                gridPanel.refresh();
-                filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
-                updateEditedSelection(gridPanel.getSelection());
-            }
+        SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus);
+        launcher.editSite(site, () -> {
+            gridPanel.refresh();
+            filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
+            updateEditedSelection(gridPanel.getSelection());
         });
     }
 
@@ -581,12 +549,9 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
                 MessageBox.confirm(ClientContext.getAppTitle(),
                         I18N.MESSAGES.confirmDeleteSite(),
-                        new Listener<MessageBoxEvent>() {
-                            @Override
-                            public void handleEvent(MessageBoxEvent be) {
-                                if (be.getButtonClicked().getItemId().equals(Dialog.YES)) {
-                                    delete();
-                                }
+                        event -> {
+                            if (event.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                                delete();
                             }
                         });
             }
@@ -600,18 +565,14 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     protected void doImport() {
         final int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
-        final ResourceLocatorAdaptor resourceLocator = new ResourceLocatorAdaptor();
         ImportPresenter.showPresenter(CuidAdapter.activityFormClass(activityId), resourceLocator)
                        .then(new SuccessCallback<ImportPresenter>() {
                            @Override
                            public void onSuccess(ImportPresenter result) {
                                result.show(ImportPresenter.Mode.MODAL);
-                               result.getEventBus().addHandler(ImportResultEvent.TYPE, new ImportResultEvent.Handler() {
-                                   @Override
-                                   public void onResultChanged(ImportResultEvent event) {
-                                       gridPanel.refresh();
-                                       filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
-                                   }
+                               result.getEventBus().addHandler(ImportResultEvent.TYPE, event -> {
+                                   gridPanel.refresh();
+                                   filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
                                });
                            }
                        });

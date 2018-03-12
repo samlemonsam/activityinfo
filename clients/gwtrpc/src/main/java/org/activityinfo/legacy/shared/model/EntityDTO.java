@@ -27,6 +27,11 @@ import com.extjs.gxt.ui.client.data.ModelData;
  */
 public interface EntityDTO extends DTO, ModelData {
 
+    String ID_PROPERTY = "id";
+    String NAME_PROPERTY = "name";
+    String SORT_ORDER_PROPERTY = "sortOrder";
+    String DATABASE_ID_PROPERTY = "databaseId";
+
     /**
      * @return the corresponding entity's @Id
      */

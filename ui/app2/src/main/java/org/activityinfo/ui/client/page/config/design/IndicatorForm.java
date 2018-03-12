@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
+import org.activityinfo.legacy.shared.model.EntityDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formula.*;
@@ -41,6 +42,9 @@ import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
 
 import java.util.List;
 
+import static org.activityinfo.legacy.shared.model.EntityDTO.NAME_PROPERTY;
+
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 class IndicatorForm extends AbstractDesignForm {
 
     private final UiConstants constants = GWT.create(UiConstants.class);
@@ -67,22 +71,19 @@ class IndicatorForm extends AbstractDesignForm {
         idField = new NumberField();
         idField.setFieldLabel("ID");
         idField.setReadOnly(true);
-        binding.addFieldBinding(new FieldBinding(idField, "id"));
+        binding.addFieldBinding(new FieldBinding(idField, EntityDTO.ID_PROPERTY));
         add(idField);
 
         codeField = new TextField<>();
         codeField.setFieldLabel(constants.codeFieldLabel());
         codeField.setToolTip(constants.codeFieldLabel());
-        codeField.setValidator(new Validator() {
-            @Override
-            public String validate(Field<?> field, String value) {
-                if (!Strings.isNullOrEmpty(value) && !FormField.isValidCode(value)) {
-                    return constants.invalidCodeMessage();
-                }
-                return null;
+        codeField.setValidator((field, value) -> {
+            if (!Strings.isNullOrEmpty(value) && !FormField.isValidCode(value)) {
+                return constants.invalidCodeMessage();
             }
+            return null;
         });
-        binding.addFieldBinding(new OnlyValidFieldBinding(codeField, "nameInExpression"));
+        binding.addFieldBinding(new OnlyValidFieldBinding(codeField, IndicatorDTO.CODE_PROPERTY));
         this.add(codeField);
 
         this.add(new LabelField(constants.nameInExpressionTooltip()));
@@ -92,7 +93,7 @@ class IndicatorForm extends AbstractDesignForm {
         nameField.setAllowBlank(false);
         nameField.setValidator(new BlankValidator());
 
-        binding.addFieldBinding(new OnlyValidFieldBinding(nameField, "name"));
+        binding.addFieldBinding(new OnlyValidFieldBinding(nameField, NAME_PROPERTY));
         this.add(nameField);
 
         typeCombo = new MappingComboBox<>();
@@ -101,7 +102,7 @@ class IndicatorForm extends AbstractDesignForm {
         typeCombo.add(FieldTypeClass.FREE_TEXT.getId(), I18N.CONSTANTS.fieldTypeText());
         typeCombo.add(FieldTypeClass.NARRATIVE.getId(), I18N.CONSTANTS.fieldTypeNarrative());
 
-        binding.addFieldBinding(new MappingComboBoxBinding(typeCombo, "type"));
+        binding.addFieldBinding(new MappingComboBoxBinding(typeCombo, IndicatorDTO.TYPE_PROPERTY));
         this.add(typeCombo);
 
         unitsField = new TextField<>();
@@ -109,15 +110,15 @@ class IndicatorForm extends AbstractDesignForm {
         unitsField.setFieldLabel(constants.units());
         unitsField.setAllowBlank(false);
         unitsField.setMaxLength(IndicatorDTO.UNITS_MAX_LENGTH);
-        binding.addFieldBinding(new OnlyValidFieldBinding(unitsField, "units"));
+        binding.addFieldBinding(new OnlyValidFieldBinding(unitsField, IndicatorDTO.UNITS_PROPERTY));
         this.add(unitsField);
 
-        aggregationCombo = new MappingComboBox();
+        aggregationCombo = new MappingComboBox<Integer>();
         aggregationCombo.setFieldLabel(constants.aggregationMethod());
         aggregationCombo.add(IndicatorDTO.AGGREGATE_SUM, constants.sum());
         aggregationCombo.add(IndicatorDTO.AGGREGATE_AVG, constants.average());
         aggregationCombo.add(IndicatorDTO.AGGREGATE_SITE_COUNT, constants.siteCount());
-        binding.addFieldBinding(new MappingComboBoxBinding(aggregationCombo, "aggregation"));
+        binding.addFieldBinding(new MappingComboBoxBinding(aggregationCombo, IndicatorDTO.AGGREGATION_PROPERTY));
         this.add(aggregationCombo);
 
         this.add(new LabelField("Please note: text and narrative indicators are not yet " +
@@ -133,12 +134,6 @@ class IndicatorForm extends AbstractDesignForm {
 
         calculateAutomatically = new CheckBox();
         calculateAutomatically.setFieldLabel(constants.calculateAutomatically());
-        calculateAutomatically.addListener(Events.Change, new Listener<BaseEvent>() {
-            @Override
-            public void handleEvent(BaseEvent be) {
-                expressionField.setEnabled(calculateAutomatically.getValue());
-            }
-        });
         binding.addFieldBinding(new FieldBinding(calculateAutomatically, "calculatedAutomatically"));
         this.add(calculateAutomatically);
 
@@ -151,56 +146,49 @@ class IndicatorForm extends AbstractDesignForm {
         });
         expressionField.setFieldLabel(constants.calculation());
         expressionField.setToolTip(constants.calculatedIndicatorExplanation());
-        expressionField.setValidator(new Validator() {
-            @Override
-            public String validate(Field<?> field, String value) {
-                return validateExpression(value);
-            }
-        });
-        binding.addFieldBinding(new OnlyValidFieldBinding(expressionField, "expression"));
+        expressionField.setValidator((field, value) -> validateExpression(value));
+        binding.addFieldBinding(new OnlyValidFieldBinding(expressionField, IndicatorDTO.EXPRESSION_PROPERTY));
         this.add(expressionField);
+
+        calculateAutomatically.addListener(Events.Change,
+                event -> expressionField.setEnabled(calculateAutomatically.getValue()));
 
         calculatedExpressionLabelDesc = new LabelField(constants.calculatedIndicatorExplanation());
         this.add(calculatedExpressionLabelDesc);
+
 
         TextField<String> categoryField = new TextField<>();
         categoryField.setName("category");
         categoryField.setFieldLabel(constants.category());
         categoryField.setMaxLength(IndicatorDTO.MAX_CATEGORY_LENGTH);
-        binding.addFieldBinding(new OnlyValidFieldBinding(categoryField, "category"));
+        binding.addFieldBinding(new OnlyValidFieldBinding(categoryField, IndicatorDTO.CATEGORY_PROPERTY));
         this.add(categoryField);
 
 
         TextField<String> listHeaderField = new TextField<>();
         listHeaderField.setFieldLabel(constants.listHeader());
         listHeaderField.setMaxLength(IndicatorDTO.MAX_LIST_HEADER_LENGTH);
-        binding.addFieldBinding(new OnlyValidFieldBinding(listHeaderField, "listHeader"));
+        binding.addFieldBinding(new OnlyValidFieldBinding(listHeaderField, IndicatorDTO.LIST_HEADER_PROPERTY));
         this.add(listHeaderField);
 
         TextArea descField = new TextArea();
         descField.setFieldLabel(constants.description());
-        binding.addFieldBinding(new OnlyValidFieldBinding(descField, "description"));
+        binding.addFieldBinding(new OnlyValidFieldBinding(descField, IndicatorDTO.DESCRIPTION_PROPERTY));
         this.add(descField);
 
         CheckBox mandatoryCB = new CheckBox();
         mandatoryCB.setFieldLabel(constants.mandatory());
-        binding.addFieldBinding(new FieldBinding(mandatoryCB, "mandatory"));
+        binding.addFieldBinding(new FieldBinding(mandatoryCB, IndicatorDTO.MANDATORY_PROPERTY));
         this.add(mandatoryCB);
 
         CheckBox visibleCB = new CheckBox();
         visibleCB.setFieldLabel(constants.showInDataEntry());
-        binding.addFieldBinding(new FieldBinding(visibleCB, "visible"));
+        binding.addFieldBinding(new FieldBinding(visibleCB, IndicatorDTO.VISIBLE_PROPERTY));
         this.add(visibleCB);
 
         hideFieldWhenNull(idField);
 
-        binding.addListener(Events.Bind, new Listener<BindingEvent>() {
-
-            @Override
-            public void handleEvent(BindingEvent be) {
-                setState();
-            }
-        });
+        binding.addListener(Events.Bind, be -> setState());
 
     }
 
@@ -223,11 +211,9 @@ class IndicatorForm extends AbstractDesignForm {
             return null;
         } catch (FormulaSyntaxException e) {
             return e.getMessage();
-        } catch (Exception e) {
-            e.printStackTrace();
-            // ignore : expression is invalid
+        } catch (Exception ignored) {
+            return constants.calculationExpressionIsInvalid();
         }
-        return constants.calculationExpressionIsInvalid();
     }
 
     private void gatherPlaceholderExprs(FormulaNode node, List<SymbolNode> placeholderExprList) {

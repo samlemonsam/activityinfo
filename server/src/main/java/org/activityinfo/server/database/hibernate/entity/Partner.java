@@ -33,8 +33,8 @@ public class Partner implements java.io.Serializable {
     private int id;
     private String name;
     private String fullName;
-    private Set<UserDatabase> databases = new HashSet<UserDatabase>(0);
-    private Set<Target> targets = new HashSet<Target>(0);
+    private Set<Database> databases = new HashSet<>(0);
+    private Set<Target> targets = new HashSet<>(0);
 
     public Partner() {
     }
@@ -74,11 +74,11 @@ public class Partner implements java.io.Serializable {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY) @JoinTable(name = "PartnerInDatabase",
             joinColumns = {@JoinColumn(name = "PartnerId", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "DatabaseId", nullable = false, updatable = false)})
-    public Set<UserDatabase> getDatabases() {
+    public Set<Database> getDatabases() {
         return this.databases;
     }
 
-    public void setDatabases(Set<UserDatabase> databases) {
+    public void setDatabases(Set<Database> databases) {
         this.databases = databases;
     }
 

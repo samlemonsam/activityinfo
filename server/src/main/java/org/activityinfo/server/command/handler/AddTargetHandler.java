@@ -22,7 +22,6 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.AddTarget;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.activityinfo.server.database.hibernate.entity.*;
 
@@ -41,10 +40,10 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
     }
 
     @Override
-    public CommandResult execute(AddTarget cmd, User user) throws CommandException {
+    public CommandResult execute(AddTarget cmd, User user) {
 
         TargetDTO form = cmd.getTarget();
-        UserDatabase db = em.find(UserDatabase.class, cmd.getDatabaseId());
+        Database db = em.find(Database.class, cmd.getDatabaseId());
 
         permissionOracle.assertDesignPrivileges(db, user);
         
@@ -62,16 +61,9 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
             project = em.find(Project.class, form.getProject().getId());
         }
         
-        AdminEntity adminEntity = null;
-        // if(form.getAdminEntity() != null){
-        // adminEntity = em.find(AdminEntity.class,
-        // form.getAdminEntity().getId());
-        // }
-
         Target target = new Target();
         target.setName(form.getName());
-        target.setUserDatabase(db);
-        target.setAdminEntity(adminEntity);
+        target.setDatabase(db);
         target.setPartner(partner);
         target.setProject(project);
         target.setDate1(form.getFromDate().atMidnightInMyTimezone());
@@ -84,9 +76,6 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
 
         db.getTargets().add(target);
 
-        // if(adminEntity!=null){
-        // adminEntity.getTargets().add(target);
-        // }
         if (project != null) {
             project.getTargets().add(target);
         }

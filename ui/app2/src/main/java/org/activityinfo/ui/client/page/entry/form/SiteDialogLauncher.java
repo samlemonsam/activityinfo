@@ -18,8 +18,6 @@
  */
 package org.activityinfo.ui.client.page.entry.form;
 
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -34,24 +32,17 @@ import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
-import org.activityinfo.ui.client.dispatch.ResourceLocator;
-import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
-import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.entry.location.LocationDialog;
 
 public class SiteDialogLauncher {
 
     private final Dispatcher dispatcher;
-    private final ResourceLocator resourceLocator;
     private final EventBus eventBus;
-    private final StateProvider stateProvider;
 
-    public SiteDialogLauncher(Dispatcher dispatcher, EventBus eventBus, StateProvider stateProvider) {
+    public SiteDialogLauncher(Dispatcher dispatcher, EventBus eventBus) {
         super();
         this.dispatcher = dispatcher;
         this.eventBus = eventBus;
-        this.resourceLocator = new ResourceLocatorAdaptor();
-        this.stateProvider = stateProvider;
     }
 
     public void addSite(final Filter filter, final SiteDialogCallback callback) {
@@ -160,20 +151,16 @@ public class SiteDialogLauncher {
     }
 
     private void chooseLocationThenAddSite(final ActivityFormDTO activity, final SiteDialogCallback callback) {
-        LocationDialog dialog = new LocationDialog(dispatcher,
+        LocationDialog locationDialog = new LocationDialog(dispatcher,
                 activity.getLocationType());
 
-        dialog.show(new LocationDialog.Callback() {
+        locationDialog.show((location, isNew) -> {
+            SiteDTO newSite = new SiteDTO();
+            newSite.setActivityId(activity.getId());
+            newSite.setLocation(location);
 
-            @Override
-            public void onSelected(LocationDTO location, boolean isNew) {
-                SiteDTO newSite = new SiteDTO();
-                newSite.setActivityId(activity.getId());
-                newSite.setLocation(location);
-
-                SiteDialog dialog = new SiteDialog(dispatcher, activity, eventBus);
-                dialog.showNew(newSite, location, isNew, callback);
-            }
+            SiteDialog siteDialog = new SiteDialog(dispatcher, activity, eventBus);
+            siteDialog.showNew(newSite, location, isNew, callback);
         });
     }
 
@@ -208,12 +195,9 @@ public class SiteDialogLauncher {
         box.setTitle(dto.getName());
         box.setMessage(SafeHtmlUtils.fromString(I18N.CONSTANTS.pleaseUseNewDataEntry()));
         box.setButtons(MessageBox.OKCANCEL);
-        box.addCallback(new Listener<MessageBoxEvent>() {
-            @Override
-            public void handleEvent(MessageBoxEvent messageBoxEvent) {
-                if(messageBoxEvent.getButtonClicked().getItemId().equals(MessageBox.OK)) {
-                    App3.openNewTable(dto.getFormClassId());
-                }
+        box.addCallback(messageBoxEvent -> {
+            if(messageBoxEvent.getButtonClicked().getItemId().equals(MessageBox.OK)) {
+                App3.openNewTable(dto.getFormId());
             }
         });
         box.show();

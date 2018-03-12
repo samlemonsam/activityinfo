@@ -33,23 +33,36 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 /**
- * One-to-one DTO for the
- * {@link org.activityinfo.server.database.hibernate.entity.Indicator} domain
- * object.
+ * One-to-one DTO for the <code>Indicator</code> domain object.
  *
  * @author Alex Bertram
  */
 @JsonAutoDetect(JsonMethod.NONE)
 public final class IndicatorDTO extends BaseModelData implements EntityDTO, ProvidesKey, IsFormField {
-    public final static int AGGREGATE_SUM = 0;
-    public final static int AGGREGATE_AVG = 1;
-    public final static int AGGREGATE_SITE_COUNT = 2;
+
+    public static final String ENTITY_NAME = "Indicator";
+
+    public static final int AGGREGATE_SUM = 0;
+    public static final int AGGREGATE_AVG = 1;
+    public static final int AGGREGATE_SITE_COUNT = 2;
 
     public static final String PROPERTY_PREFIX = "I";
 
     public static final int UNITS_MAX_LENGTH = 254;
     public static final int MAX_LIST_HEADER_LENGTH = 29;
     public static final int MAX_CATEGORY_LENGTH = 50;
+
+    public static final String TYPE_PROPERTY = "type";
+    public static final String UNITS_PROPERTY = "units";
+    public static final String LIST_HEADER_PROPERTY = "listHeader";
+    public static final String DESCRIPTION_PROPERTY = "description";
+    public static final String EXPRESSION_PROPERTY = "expression";
+    public static final String RELEVANCE_PROPERTY = "relevanceExpression";
+    public static final String CODE_PROPERTY = "nameInExpression";
+    public static final String CATEGORY_PROPERTY = "category";
+    public static final String AGGREGATION_PROPERTY = "aggregation";
+    public static final String MANDATORY_PROPERTY = "mandatory";
+    public static final String VISIBLE_PROPERTY = "visible";
 
     private int databaseId;
     private String databaseName;
@@ -65,8 +78,8 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
      */
     public IndicatorDTO(String name, String units) {
         super();
-        set("name", name);
-        set("units", units);
+        set(NAME_PROPERTY, name);
+        set(UNITS_PROPERTY, units);
         setVisible(true);
     }
 
@@ -80,16 +93,18 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     /**
      * @return the id of the Indicator
      */
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getId() {
-        return (Integer) get("id");
+        return (Integer) get(ID_PROPERTY);
     }
 
     /**
      * Sets the Indicator's id
      */
     public void setId(int id) {
-        set("id", id);
+        set(ID_PROPERTY, id);
     }
 
 
@@ -113,39 +128,43 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
      * Sets the Indicator's name
      */
     public void setName(String name) {
-        set("name", name);
+        set(NAME_PROPERTY, name);
     }
 
     /**
      * @return the Indicator's name
      */
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getName() {
-        return get("name");
+        return get(NAME_PROPERTY);
     }
 
     /**
      * Sets the Indicator's units, for example, "household" or "%"
      */
     public void setUnits(String units) {
-        set("units", units);
+        set(UNITS_PROPERTY, units);
     }
 
     /**
      * @return the Indicator's units
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getUnits() {
-        return get("units");
+        return get(UNITS_PROPERTY);
     }
 
     /**
      * @return the short list header used when displaying this Indicator in a
      * grid
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getListHeader() {
-        return get("listHeader");
+        return get(LIST_HEADER_PROPERTY);
     }
 
     /**
@@ -153,7 +172,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
      * displayed in a grid.
      */
     public void setListHeader(String value) {
-        set("listHeader", value);
+        set(LIST_HEADER_PROPERTY, value);
     }
 
     /**
@@ -161,45 +180,49 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
      */
 
     public void setDescription(String description) {
-        set("description", description);
+        set(DESCRIPTION_PROPERTY, description);
     }
 
     /**
      * @return this Indicator's description, principally used to aid users
      * entering data
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getDescription() {
-        return get("description");
+        return get(DESCRIPTION_PROPERTY);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getExpression() {
-        return get("expression");
+        return get(EXPRESSION_PROPERTY);
     }
 
     public void setExpression(String expression) {
-        set("expression", expression);
+        set(EXPRESSION_PROPERTY, expression);
     }
 
     public String getRelevanceExpression() {
-        return get("relevanceExpression");
+        return get(RELEVANCE_PROPERTY);
     }
 
     public void setRelevanceExpression(String relevanceExpression) {
-        set("relevanceExpression", relevanceExpression);
+        set(RELEVANCE_PROPERTY, relevanceExpression);
     }
 
-    @JsonProperty("code") @JsonView(DTOViews.Schema.class)
+    @JsonProperty("code")
+    @JsonView(DTOViews.Schema.class)
     public String getNameInExpression() {
-        return get("nameInExpression");
+        return get(CODE_PROPERTY);
     }
 
     public void setNameInExpression(String nameInExpression) {
-        set("nameInExpression", nameInExpression);
+        set(CODE_PROPERTY, nameInExpression);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public Boolean getCalculatedAutomatically() {
         return get("calculatedAutomatically");
     }
@@ -219,66 +242,72 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
     }
 
     public void setType(FieldTypeClass type) {
-        set("type", type.getId());
+        set(IndicatorDTO.TYPE_PROPERTY, type.getId());
     }
 
-    public void setTypeId(String typeId) { set("type", typeId); }
+    public void setTypeId(String typeId) {
+        set(IndicatorDTO.TYPE_PROPERTY, typeId);
+    }
 
-    @JsonProperty("type")
+    @JsonProperty(IndicatorDTO.TYPE_PROPERTY)
     @JsonView(DTOViews.Schema.class)
     private String getTypeId() {
-        return get("type", QuantityType.TYPE_CLASS.getId());
+        return get(IndicatorDTO.TYPE_PROPERTY, QuantityType.TYPE_CLASS.getId());
     }
 
     public void setMandatory(boolean mandatory) {
-        set("mandatory", mandatory);
+        set(MANDATORY_PROPERTY, mandatory);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public boolean isMandatory() {
-        return get("mandatory", false);
+        return get(MANDATORY_PROPERTY, false);
     }
 
     public void setVisible(boolean visible) {
-        set("visible", visible);
+        set(VISIBLE_PROPERTY, visible);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public boolean isVisible() {
-        return get("visible",true);
+        return get(VISIBLE_PROPERTY, true);
     }
 
     /**
      * Sets the aggregation method for this indicator
      */
     public void setAggregation(int aggregation) {
-        set("aggregation", aggregation);
+        set(AGGREGATION_PROPERTY, aggregation);
     }
 
     /**
      * @return the aggregation method for this indicator
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getAggregation() {
-        return get("aggregation", AGGREGATE_SUM);
+        return get(AGGREGATION_PROPERTY, AGGREGATE_SUM);
     }
 
     /**
      * @return this Indicator's category
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getCategory() {
-        return get("category");
+        return get(CATEGORY_PROPERTY);
     }
 
     /**
      * Sets this Indicator's category
      */
     public void setCategory(String category) {
-        if(category != null && category.trim().length() == 0) {
+        if (category != null && category.trim().length() == 0) {
             category = null;
         }
-        set("category", category);
+        set(CATEGORY_PROPERTY, category);
     }
 
     public int getActivityId() {
@@ -332,25 +361,9 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         }
     }
 
-    /**
-     * Parses an Indicator property name, for example "I432", "I565" or "I309M2013-7" (in case of a monthly reported
-     * indicator that was stored in the sitehistory) for the Month part ("M2013-7" in above case). Returns null if there
-     * is none.
-     *
-     * @return the Month of the referenced Indicator
-     */
-    public static Month monthForPropertyName(String propertyName) {
-        int monthInfix = propertyName.indexOf(Month.PROPERTY_PREFIX);
-        if (monthInfix > -1) {
-            return Month.parseMonth(propertyName.substring(monthInfix + 1));
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public String getEntityName() {
-        return "Indicator";
+        return ENTITY_NAME;
     }
 
     @Override
@@ -365,7 +378,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
     @Override
     public int getSortOrder() {
-        return get("sortOrder", 0);
+        return get(SORT_ORDER_PROPERTY, 0);
     }
 
     @Override
@@ -378,7 +391,7 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
         field.setVisible(isVisible());
 
         String code = getNameInExpression();
-        if(!Strings.isNullOrEmpty(code)) {
+        if (!Strings.isNullOrEmpty(code)) {
             field.setCode(code);
         }
 
@@ -387,12 +400,12 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
         } else if (Strings.isNullOrEmpty(getTypeId()) || getTypeId().equals(QuantityType.TYPE_CLASS.getId())) {
             String units = getUnits();
-            if(Strings.isNullOrEmpty(units)) {
-                units = "units";
+            if (units == null) {
+                units = "";
             }
             field.setType(new QuantityType()
-                                .setUnits(units)
-                                .setAggregation(getAggregation()));
+                    .setUnits(units)
+                    .setAggregation(getAggregation()));
 
         } else {
             field.setType(getType().createType());
@@ -403,6 +416,6 @@ public final class IndicatorDTO extends BaseModelData implements EntityDTO, Prov
 
 
     public void setSortOrder(int sortOrder) {
-        set("sortOrder", sortOrder);
+        set(SORT_ORDER_PROPERTY, sortOrder);
     }
 }

@@ -35,18 +35,16 @@ public class ReportDefinition implements Serializable {
 
     private int id;
     private User owner;
-    private UserDatabase database;
+    private Database database;
     private int visibility;
     private String xml;
     private Date dateDeleted;
     private String title;
     private String description;
-    private Set<ReportSubscription> subscriptions = new HashSet<ReportSubscription>(0);
+    private Set<ReportSubscription> subscriptions = new HashSet<>(0);
     private String json;
 
-    public ReportDefinition() {
-
-    }
+    public ReportDefinition() {}
 
     @Id @Column(name = "ReportTemplateId") @GeneratedValue(strategy = GenerationType.AUTO)
     public int getId() {
@@ -67,11 +65,11 @@ public class ReportDefinition implements Serializable {
     }
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "DatabaseId", nullable = true, updatable = false)
-    public UserDatabase getDatabase() {
+    public Database getDatabase() {
         return database;
     }
 
-    public void setDatabase(UserDatabase database) {
+    public void setDatabase(Database database) {
         this.database = database;
     }
 

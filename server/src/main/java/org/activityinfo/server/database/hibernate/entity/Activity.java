@@ -29,7 +29,7 @@ import java.util.Set;
 
 /**
  * After the
- * {@link org.activityinfo.server.database.hibernate.entity.UserDatabase}, the
+ * {@link Database}, the
  * activity is the second level of organization in ActivityInfo. Each activity
  * has its set of indicators and attributes.
  * <p/>
@@ -47,7 +47,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     private int id;
     private LocationType locationType;
 
-    private UserDatabase database;
+    private Database database;
     private Folder folder;
     private String name;
     private String category;
@@ -59,11 +59,11 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     private Date dateDeleted;
 
-    private Set<Indicator> indicators = new HashSet<Indicator>(0);
+    private Set<Indicator> indicators = new HashSet<>(0);
 
-    private Set<Site> sites = new HashSet<Site>(0);
-    private Set<AttributeGroup> attributeGroups = new HashSet<AttributeGroup>(0);
-    private Set<LockedPeriod> lockedPeriods = new HashSet<LockedPeriod>();
+    private Set<Site> sites = new HashSet<>(0);
+    private Set<AttributeGroup> attributeGroups = new HashSet<>(0);
+    private Set<LockedPeriod> lockedPeriods = new HashSet<>();
 
     private String mapIcon;
 
@@ -149,11 +149,11 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     @Offline
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DatabaseId", nullable = false)
-    public UserDatabase getDatabase() {
+    public Database getDatabase() {
         return this.database;
     }
 
-    public void setDatabase(UserDatabase database) {
+    public void setDatabase(Database database) {
         this.database = database;
     }
 

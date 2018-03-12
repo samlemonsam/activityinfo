@@ -22,18 +22,13 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.Delete;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.server.database.hibernate.entity.Deleteable;
-import org.activityinfo.server.database.hibernate.entity.ReallyDeleteable;
-import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
+import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.server.database.hibernate.entity.*;
 
 import javax.persistence.EntityManager;
-import java.util.logging.Logger;
 
 public class DeleteHandler implements CommandHandler<Delete> {
-    
-    private static final Logger LOGGER = Logger.getLogger(DeleteHandler.class.getName());
-    
+
     private EntityManager em;
     private PermissionOracle permissionOracle;
 
@@ -47,8 +42,8 @@ public class DeleteHandler implements CommandHandler<Delete> {
     public CommandResult execute(Delete cmd, User user) {
 
         
-        Class entityClass = entityClassForEntityName(cmd.getEntityName());
-        Object entity = em.find(entityClass, cmd.getId());
+        Class<? extends Deleteable> entityClass = entityClassForEntityName(cmd.getEntityName());
+        Deleteable entity = em.find(entityClass, cmd.getId());
         
         if(entity == null) {
             throw new CommandException(String.format("%s with id %d does not exist.", 
@@ -58,28 +53,57 @@ public class DeleteHandler implements CommandHandler<Delete> {
         // Ensure that the user is authorized to perform deletion
         permissionOracle.assertDeletionAuthorized(entity, user);
 
-        if (entity instanceof Deleteable) {
-            Deleteable deleteable = (Deleteable) entity;
-            deleteable.delete();
-        }
+        // Mark the entity as deleted
+        entity.delete();
 
-        if (entity instanceof ReallyDeleteable) {
-            ReallyDeleteable reallyDeleteable = (ReallyDeleteable) entity;
-            reallyDeleteable.deleteReferences();
-            em.remove(reallyDeleteable);
+        if (entity instanceof HardDeleteable) {
+            em.remove(entity);
         }
 
         return null;
     }
 
 
-    private Class<Deleteable> entityClassForEntityName(String entityName) {
-        try {
-            return (Class<Deleteable>) Class.forName(UserDatabase.class.getPackage().getName() + "." + entityName);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Invalid entity name '" + entityName + "'", e);
-        } catch (ClassCastException e) {
-            throw new RuntimeException("Entity type '" + entityName + "' not Deletable", e);
+    private Class<? extends Deleteable> entityClassForEntityName(String entityName) {
+        switch (entityName) {
+            case ActivityDTO.ENTITY_NAME:
+                return Activity.class;
+
+            case AttributeDTO.ENTITY_NAME:
+                return Attribute.class;
+
+            case AttributeGroupDTO.ENTITY_NAME:
+                return AttributeGroup.class;
+
+            case FolderDTO.ENTITY_NAME:
+                return Folder.class;
+
+            case IndicatorDTO.ENTITY_NAME:
+                return Indicator.class;
+
+            case LocationTypeDTO.ENTITY_NAME:
+                return LocationType.class;
+
+            case LockedPeriodDTO.ENTITY_NAME:
+                return LockedPeriod.class;
+
+            case ProjectDTO.ENTITY_NAME:
+                return Project.class;
+
+            case SiteDTO.ENTITY_NAME:
+                return Site.class;
+
+            case TargetDTO.ENTITY_NAME:
+                return Target.class;
+
+            case TargetValueDTO.ENTITY_NAME:
+                return TargetValue.class;
+
+            case UserDatabaseDTO.ENTITY_NAME:
+                return Database.class;
+
+            default:
+                throw new IllegalArgumentException(entityName);
         }
     }
 }

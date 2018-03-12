@@ -24,12 +24,16 @@ import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+
+import static org.activityinfo.legacy.shared.model.EntityDTO.DATABASE_ID_PROPERTY;
+import static org.activityinfo.legacy.shared.model.EntityDTO.NAME_PROPERTY;
+import static org.activityinfo.legacy.shared.model.LocationTypeDTO.WORKFLOW_ID_PROPERTY;
 
 public class LocationTypePolicy implements EntityPolicy<Activity> {
 
@@ -42,17 +46,17 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
 
     @Override
     public Integer create(User user, PropertyMap properties) {
-        int databaseId = properties.get("databaseId");
-        UserDatabase database = em.find(UserDatabase.class, databaseId);
+        int databaseId = properties.get(DATABASE_ID_PROPERTY);
+        Database database = em.find(Database.class, databaseId);
 
         PermissionOracle.using(em).assertDesignPrivileges(database, user);
 
         // create the entity
         LocationType locationType = new LocationType();
         locationType.setVersion(1L);
-        locationType.setName(properties.<String>get("name"));
+        locationType.setName(properties.get(NAME_PROPERTY));
         locationType.setCountry(database.getCountry());
-        locationType.setWorkflowId(properties.getOptionalString("workflowId", LocationTypeDTO.CLOSED_WORKFLOW_ID));
+        locationType.setWorkflowId(properties.getOptionalString(WORKFLOW_ID_PROPERTY, LocationTypeDTO.CLOSED_WORKFLOW_ID));
         locationType.setDatabase(database);
 
         em.persist(locationType);
@@ -73,11 +77,11 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     }
 
     private void applyProperties(LocationType locationType, PropertyMap changes) {
-        if (changes.containsKey("name")) {
-            locationType.setName((String) changes.get("name"));
+        if (changes.containsKey(NAME_PROPERTY)) {
+            locationType.setName(changes.get(NAME_PROPERTY));
         }
-        if (changes.containsKey("workflowId")) {
-            String workflowId = changes.get("workflowId");
+        if (changes.containsKey(WORKFLOW_ID_PROPERTY)) {
+            String workflowId = changes.get(WORKFLOW_ID_PROPERTY);
             Preconditions.checkArgument(LocationDTO.isValidWorkflowId(workflowId), "invalid workflow id %s", workflowId);
             locationType.setWorkflowId(workflowId);
         }

@@ -36,9 +36,9 @@ public class Project implements SchemaElement, Serializable, Deleteable {
     private String name;
     private String description;
     private Date dateDeleted;
-    private UserDatabase userDatabase;
-    private Set<LockedPeriod> lockedPeriods = new HashSet<LockedPeriod>();
-    private Set<Target> targets = new HashSet<Target>(0);
+    private Database database;
+    private Set<LockedPeriod> lockedPeriods = new HashSet<>();
+    private Set<Target> targets = new HashSet<>(0);
 
     public Project() {
         super();
@@ -86,13 +86,13 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         return dateDeleted;
     }
 
-    public void setUserDatabase(UserDatabase userDatabase) {
-        this.userDatabase = userDatabase;
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "DatabaseId") @NotNull
-    public UserDatabase getUserDatabase() {
-        return userDatabase;
+    public Database getDatabase() {
+        return database;
     }
 
     public void setLockedPeriods(Set<LockedPeriod> lockedPeriods) {
@@ -114,8 +114,8 @@ public class Project implements SchemaElement, Serializable, Deleteable {
     }
 
     @Override
-    public UserDatabase findOwningDatabase() {
-        return userDatabase;
+    public Database findOwningDatabase() {
+        return database;
     }
 
     @Override

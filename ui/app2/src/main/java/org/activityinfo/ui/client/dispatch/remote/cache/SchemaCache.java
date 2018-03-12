@@ -38,11 +38,6 @@ import java.util.Set;
 
 /**
  * Caches the user's schema in-memory for the duration of the session.
- * <p/>
- * TODO: we need to peridiodically check the server for updates. Do we do this
- * here or in a separate class?
- *
- * @author Alex Bertram
  */
 public class SchemaCache implements DispatchListener {
 
@@ -56,7 +51,7 @@ public class SchemaCache implements DispatchListener {
 
         initSource(source, this);
 
-        schemaEntityTypes.add("UserDatabase");
+        schemaEntityTypes.add("Database");
         schemaEntityTypes.add("Activity");
         schemaEntityTypes.add("Indicator");
         schemaEntityTypes.add("AttributeGroup");
@@ -130,10 +125,8 @@ public class SchemaCache implements DispatchListener {
         } else if (command instanceof GetActivityForms) {
             cachActivityForms((ActivityFormResults)result);
             
-        } else if (schema != null) {
-            if (command instanceof AddPartner) {
-                clearCache();
-            }
+        } else if (schema != null && command instanceof AddPartner) {
+            clearCache();
         }
     }
 

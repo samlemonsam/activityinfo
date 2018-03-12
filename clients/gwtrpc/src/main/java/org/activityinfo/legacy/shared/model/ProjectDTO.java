@@ -31,10 +31,10 @@ import java.util.Set;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class ProjectDTO extends BaseModelData implements EntityDTO, HasLockedPeriod {
 
-    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
+    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>(0);
     private UserDatabaseDTO userDatabase;
 
-    public final static String ENTITY_NAME = "Project";
+    public static final String ENTITY_NAME = "Project";
 
     public ProjectDTO() {
         super();
@@ -47,31 +47,36 @@ public final class ProjectDTO extends BaseModelData implements EntityDTO, HasLoc
         setName(name);
     }
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getId() {
-        return (Integer) get("id");
+        return (Integer) get(ID_PROPERTY);
     }
 
     public void setId(int id) {
-        set("id", id);
+        set(ID_PROPERTY, id);
     }
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getName() {
-        return (String) get("name");
+        return get(NAME_PROPERTY);
     }
 
     public void setName(String name) {
-        set("name", name);
+        set(NAME_PROPERTY, name);
     }
 
     public void setDescription(String description) {
         set("description", description);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getDescription() {
-        return (String) get("description");
+        return get("description");
     }
 
     @Override
@@ -89,17 +94,6 @@ public final class ProjectDTO extends BaseModelData implements EntityDTO, HasLoc
 
     public UserDatabaseDTO getUserDatabase() {
         return userDatabase;
-    }
-
-    @Override
-    public Set<LockedPeriodDTO> getEnabledLockedPeriods() {
-        Set<LockedPeriodDTO> enabled = new HashSet<LockedPeriodDTO>(0);
-        for (LockedPeriodDTO lockedPeriod : getLockedPeriods()) {
-            if (lockedPeriod.isEnabled()) {
-                enabled.add(lockedPeriod);
-            }
-        }
-        return enabled;
     }
 
     @Override

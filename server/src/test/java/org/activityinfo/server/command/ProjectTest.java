@@ -26,7 +26,7 @@ import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -113,6 +113,6 @@ public class ProjectTest extends CommandTestCase {
     }
 
     private long lookupDbVersion(int dbId) {
-        return em.find(UserDatabase.class, dbId).getVersion();
+        return em.find(Database.class, dbId).getVersion();
     }
 }

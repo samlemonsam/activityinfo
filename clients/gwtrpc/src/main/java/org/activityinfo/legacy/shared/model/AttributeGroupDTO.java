@@ -34,18 +34,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * One-to-one DTO for the
- * {@link org.activityinfo.server.database.hibernate.entity.AttributeGroup}
- * domain object
+ * One-to-one DTO for the AttributeGroup domain object
  */
 @JsonAutoDetect(JsonMethod.NONE)
 public final class AttributeGroupDTO extends BaseModelData implements EntityDTO, IsFormField {
     private static final long serialVersionUID = 7927425202152761370L;
+
+    public static final String ENTITY_NAME = "AttributeGroup";
     public static final String PROPERTY_PREFIX = "AG";
 
     public static final int NAME_MAX_LENGTH = 255;
 
-    private List<AttributeDTO> attributes = new ArrayList<AttributeDTO>(0);
+    public static final String DEFAULT_VALUE_PROPERTY = "defaultValue";
+    public static final String WORKFLOW_PROPERTY = "workflow";
+    public static final String MULTIPLE_ALLOWED_PROPERTY = "multipleAllowed";
+
+    private List<AttributeDTO> attributes = new ArrayList<>(0);
 
     public AttributeGroupDTO() {
     }
@@ -73,57 +77,64 @@ public final class AttributeGroupDTO extends BaseModelData implements EntityDTO,
         this.setId(id);
     }
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getId() {
-        return (Integer) get("id");
+        return (Integer) get(ID_PROPERTY);
     }
 
     public void setId(int id) {
-        set("id", id);
+        set(ID_PROPERTY, id);
     }
 
     public void setName(String name) {
-        set("name", name);
+        set(NAME_PROPERTY, name);
     }
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getName() {
-        return get("name");
+        return get(NAME_PROPERTY);
     }
 
     public void setMandatory(boolean mandatory) {
-        set("mandatory", mandatory);
+        set(IndicatorDTO.MANDATORY_PROPERTY, mandatory);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public boolean isMandatory() {
-        return get("mandatory", false);
+        return get(IndicatorDTO.MANDATORY_PROPERTY, false);
     }
 
     public Integer getDefaultValue() {
-        return get("defaultValue", null);
+        return get(DEFAULT_VALUE_PROPERTY, null);
     }
 
     public void setDefaultValue(Integer defaultValue) {
-        set("defaultValue", defaultValue);
+        set(DEFAULT_VALUE_PROPERTY, defaultValue);
     }
 
     public void setWorkflow(boolean workflow) {
-        set("workflow", workflow);
+        set(WORKFLOW_PROPERTY, workflow);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public boolean isWorkflow() {
-        return get("workflow", false);
+        return get(WORKFLOW_PROPERTY, false);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public List<AttributeDTO> getAttributes() {
         return attributes;
     }
 
     public List<Integer> getAttributeIds() {
-        List<Integer> result = new ArrayList<Integer>();
+        List<Integer> result = new ArrayList<>();
         for (AttributeDTO attr : getAttributes()) {
             result.add(attr.getId());
         }
@@ -143,18 +154,19 @@ public final class AttributeGroupDTO extends BaseModelData implements EntityDTO,
         return null;
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public boolean isMultipleAllowed() {
-        return get("multipleAllowed", false);
+        return get(MULTIPLE_ALLOWED_PROPERTY, false);
     }
 
     public void setMultipleAllowed(boolean allowed) {
-        set("multipleAllowed", allowed);
+        set(MULTIPLE_ALLOWED_PROPERTY, allowed);
     }
 
     @Override
     public String getEntityName() {
-        return "AttributeGroup";
+        return ENTITY_NAME;
     }
 
     public static String getPropertyName(int attributeGroupId) {
@@ -162,17 +174,16 @@ public final class AttributeGroupDTO extends BaseModelData implements EntityDTO,
     }
 
 
-
     @Override
     public int getSortOrder() {
-        return get("sortOrder", 0);
+        return get(SORT_ORDER_PROPERTY, 0);
     }
 
     @Override
     public FormField asFormField() {
         Cardinality cardinality = isMultipleAllowed() ? Cardinality.MULTIPLE : Cardinality.SINGLE;
         List<EnumItem> values = Lists.newArrayList();
-        for(AttributeDTO attribute : getAttributes()) {
+        for (AttributeDTO attribute : getAttributes()) {
             values.add(new EnumItem(CuidAdapter.attributeId(attribute.getId()), attribute.getName()));
         }
 
@@ -183,15 +194,11 @@ public final class AttributeGroupDTO extends BaseModelData implements EntityDTO,
     }
 
     public void setSortOrder(int sortOrder) {
-        set("sortOrder", sortOrder);
+        set(SORT_ORDER_PROPERTY, sortOrder);
     }
 
     public String getPropertyName() {
         return getPropertyName(getId());
-    }
-
-    public static int idForPropertyName(String property) {
-        return Integer.parseInt(property.substring(PROPERTY_PREFIX.length()));
     }
 
     @Override

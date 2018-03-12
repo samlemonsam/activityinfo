@@ -32,6 +32,7 @@ import org.activityinfo.server.database.hibernate.entity.*;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,21 +57,21 @@ public class PermissionOracle {
      * Returns true if the given user is allowed to modify the structure of the
      * database.
      */
-    public boolean isDesignAllowed(UserDatabase database, User user) {
+    public boolean isDesignAllowed(Database database, User user) {
         return getPermissionByUser(database, user).isAllowDesign();
     }
 
-    public boolean isViewAllowed(UserDatabase database, User user) {
+    public boolean isViewAllowed(Database database, User user) {
         UserPermission permission = getPermissionByUser(database, user);
         return permission.isAllowView() || permission.isAllowViewAll();
     }
 
-    public boolean isManagePartnersAllowed(UserDatabase db, User user) {
+    public boolean isManagePartnersAllowed(Database db, User user) {
         UserPermission perm = getPermissionByUser(db, user);
         return perm.isAllowDesign() || perm.isAllowManageAllUsers();
     }
 
-    public void assertDesignPrivileges(UserDatabase database, User user) {
+    public void assertDesignPrivileges(Database database, User user) {
         if (!isDesignAllowed(database, user)) {
             LOGGER.severe(String.format(
                     "User %d does not have design privileges on database %d",
@@ -79,23 +80,49 @@ public class PermissionOracle {
             throw new IllegalAccessCommandException();
         }
     }
-    
+
+    public void assertDesignPrivileges(AttributeGroup group, User user) {
+
+        Set<Activity> activities = group.getActivities();
+        if(activities.isEmpty()) {
+            LOGGER.severe(String.format(
+                    "AttributeGroup %d is orphaned and cannot be edited.",
+                    group.getId()));
+            throw new IllegalAccessCommandException();
+        }
+
+        Activity activity = activities.iterator().next();
+        assertDesignPrivileges(activity, user);
+    }
+
+    public void assertDesignPrivileges(Activity activity, User user) {
+        assertDesignPrivileges(activity.getDatabase(), user);
+    }
+
+    public void assertDesignPrivileges(LockedPeriod lockedPeriod, User user) {
+        assertDesignPrivileges(lockedPeriod.getDatabase(), user);
+    }
+
     public void assertDesignPrivileges(FormClass formClass, User user) {
         assertDesignPrivileges(lookupDatabase(formClass), user);
     }
 
-    private UserDatabase lookupDatabase(FormClass formClass) {
+    public void assertDesignPrivileges(Target target, User user) {
+        assertDesignPrivileges(target.getDatabase(), user);
+    }
+
+    private Database lookupDatabase(FormClass formClass) {
         ResourceId databaseId = formClass.getDatabaseId();
         
         if(databaseId.getDomain() == DATABASE_DOMAIN) {
-            return em.get().getReference(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+            return em.get().getReference(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
         }
         LOGGER.severe(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
                 "a database", formClass.getLabel(), formClass.getId(), formClass.getDatabaseId()));
         throw new IllegalArgumentException();
     }
 
-    public void assertManagePartnerAllowed(UserDatabase database, User user) {
+    public void assertManagePartnerAllowed(Database database, User user) {
         if (!isManagePartnersAllowed(database, user)) {
             LOGGER.severe(String.format(
                     "User %d does not have design or manageAllUsers privileges on database %d",
@@ -183,7 +210,7 @@ public class PermissionOracle {
     }
 
     @Nonnull
-    public UserPermission getPermissionByUser(UserDatabase database, User user) {
+    public UserPermission getPermissionByUser(Database database, User user) {
 
         if (database.getOwner().getId() == user.getId()) {
             // owner has all rights
@@ -218,8 +245,8 @@ public class PermissionOracle {
     }
 
     public void assertDeletionAuthorized(Object entity, User user) {
-        if(entity instanceof UserDatabase) {
-            assertDatabaseDeletionAuthorized(((UserDatabase) entity), user);
+        if(entity instanceof Database) {
+            assertDatabaseDeletionAuthorized(((Database) entity), user);
 
         } else if(entity instanceof Site) {
             assertEditAllowed(((Site) entity), user);
@@ -237,16 +264,16 @@ public class PermissionOracle {
             assertEditAllowed(((Attribute) entity).getGroup(), user);
 
         } else if(entity instanceof Project) {
-            assertDesignPrivileges(((Project) entity).getUserDatabase(), user);
+            assertDesignPrivileges(((Project) entity).getDatabase(), user);
 
         } else if(entity instanceof LockedPeriod) {
             assertDesignPrivileges(((LockedPeriod) entity).getParentDatabase(), user);
 
         } else if(entity instanceof Target) {
-            assertDesignPrivileges(((Target) entity).getUserDatabase(), user);
+            assertDesignPrivileges(((Target) entity).getDatabase(), user);
 
         } else if(entity instanceof TargetValue) {
-            assertDesignPrivileges(((TargetValue) entity).getTarget().getUserDatabase(), user);
+            assertDesignPrivileges(((TargetValue) entity).getTarget().getDatabase(), user);
 
         } else if(entity instanceof LocationType) {
             assertDesignPrivileges(((LocationType) entity).getDatabase(), user);
@@ -262,7 +289,7 @@ public class PermissionOracle {
         }
     }
 
-    public void assertDatabaseDeletionAuthorized(UserDatabase entity, User user) {
+    public void assertDatabaseDeletionAuthorized(Database entity, User user) {
         if(entity.getOwner().getId() != user.getId()) {
             LOGGER.severe(String.format("User %d is not authorized to delete " +
                     "database %d: it is owned by user %d", user.getId(), entity.getId(), entity.getOwner().getId()));
@@ -303,10 +330,10 @@ public class PermissionOracle {
     }
 
     public void assertDesignPrivileges(int databaseId, AuthenticatedUser authenticatedUser) {
-        UserDatabase userDatabase = em.get().find(UserDatabase.class, databaseId);
+        Database database = em.get().find(Database.class, databaseId);
         User user = em.get().find(User.class, authenticatedUser.getId());
 
-        assertDesignPrivileges(userDatabase, user);
+        assertDesignPrivileges(database, user);
     }
 
     public boolean isViewAllowed(ResourceId databaseId, AuthenticatedUser authenticatedUser) {
@@ -314,9 +341,10 @@ public class PermissionOracle {
             return false;
         }
 
-        UserDatabase database = em.get().find(UserDatabase.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+        Database database = em.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
         User user = em.get().find(User.class, authenticatedUser.getId());
 
         return isViewAllowed(database, user);
     }
+
 }

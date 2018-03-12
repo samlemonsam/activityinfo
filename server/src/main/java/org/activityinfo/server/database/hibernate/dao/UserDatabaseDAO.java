@@ -18,18 +18,18 @@
  */
 package org.activityinfo.server.database.hibernate.dao;
 
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
+import org.activityinfo.server.database.hibernate.entity.Database;
 
 import java.util.List;
 
 /**
- * Data Access Object for {@link UserDatabase} domain classes. Implemented
+ * Data Access Object for {@link Database} domain classes. Implemented
  * automatically by
  * {@link org.activityinfo.server.database.hibernate.dao.DAOInvocationHandler
  * proxy}.
  */
-public interface UserDatabaseDAO extends DAO<UserDatabase, Integer> {
+public interface UserDatabaseDAO extends DAO<Database, Integer> {
 
-    List<UserDatabase> queryAllUserDatabasesAlphabetically();
+    List<Database> queryAllUserDatabasesAlphabetically();
 
 }

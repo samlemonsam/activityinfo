@@ -32,8 +32,6 @@ import java.util.List;
 
 /**
  * LocationType Data Transfer Object (DTO)
- *
- * @author Alex Bertram
  */
 @JsonAutoDetect(JsonMethod.NONE)
 public final class LocationTypeDTO extends BaseModelData implements EntityDTO, IsFormClass {
@@ -47,12 +45,14 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
 
     public static final String OPEN_WORKFLOW_ID = "open";
     public static final String CLOSED_WORKFLOW_ID = "closed";
+    public static final String ENTITY_NAME = "LocationType";
+    public static final String WORKFLOW_ID_PROPERTY = "workflowId";
+    public static final String BOUND_ADMIN_LEVEL_ID = "boundAdminLevelId";
 
     private Integer databaseId;
     private List<AdminLevelDTO> adminLevels = new ArrayList<>();
     private Extents countryBounds;
     private long version;
-    private long childVersion;
     private boolean deleted;
 
     public LocationTypeDTO() {
@@ -69,54 +69,56 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
     }
 
     public void setId(int id) {
-        set("id", id);
+        set(ID_PROPERTY, id);
     }
 
     @Override
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getId() {
-        return (Integer) get("id");
+        return get(ID_PROPERTY);
     }
 
     @Override
     public String getEntityName() {
-        return "LocationType";
+        return ENTITY_NAME;
     }
 
     public void setName(String value) {
-        set("name", value);
+        set(NAME_PROPERTY, value);
     }
 
     @Override
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getName() {
-        return get("name");
+        return get(NAME_PROPERTY);
     }
 
     /**
-     * 
-     * @return true if this location type represents the nationwide or "nullary" location type 
+     * @return true if this location type represents the nationwide or "nullary" location type
      * used by activities that actually have no geography.
      */
-    public boolean isNationwide() { 
+    public boolean isNationwide() {
         // Very special case for the Global null location type
         // which is not named "Country" but "Global"
-        if(getId() == GLOBAL_NULL_LOCATION_TYPE) {
+        if (getId() == GLOBAL_NULL_LOCATION_TYPE) {
             return true;
         }
         return NATIONWIDE_NAME.equals(getName()) &&
-               getId() != GLOBAL_NULL_LOCATION_TYPE &&
-                getBoundAdminLevelId() == null && 
+                getId() != GLOBAL_NULL_LOCATION_TYPE &&
+                getBoundAdminLevelId() == null &&
                 getDatabaseId() == null;
     }
 
-    @JsonProperty("adminLevelId") @JsonView(DTOViews.Schema.class)
+    @JsonProperty("adminLevelId")
+    @JsonView(DTOViews.Schema.class)
     public Integer getBoundAdminLevelId() {
-        return get("boundAdminLevelId");
+        return get(BOUND_ADMIN_LEVEL_ID);
     }
 
     public void setBoundAdminLevelId(Integer id) {
-        set("boundAdminLevelId", id);
+        set(BOUND_ADMIN_LEVEL_ID, id);
     }
 
     public boolean isAdminLevel() {
@@ -124,11 +126,11 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
     }
 
     public void setWorkflowId(String workflowId) {
-        set("workflowId", workflowId);
+        set(WORKFLOW_ID_PROPERTY, workflowId);
     }
 
     public String getWorkflowId() {
-        return get("workflowId");
+        return get(WORKFLOW_ID_PROPERTY);
     }
 
     public Integer getDatabaseId() {
@@ -156,14 +158,6 @@ public final class LocationTypeDTO extends BaseModelData implements EntityDTO, I
 
     public void setCountryBounds(Extents countryBounds) {
         this.countryBounds = countryBounds;
-    }
-
-    public long getChildVersion() {
-        return childVersion;
-    }
-
-    public void setChildVersion(long childVersion) {
-        this.childVersion = childVersion;
     }
 
     public long getVersion() {

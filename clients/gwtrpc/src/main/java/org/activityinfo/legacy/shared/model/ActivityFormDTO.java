@@ -21,7 +21,6 @@ package org.activityinfo.legacy.shared.model;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO.HasLockedPeriod;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -32,6 +31,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import java.util.*;
+
+import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
 
 /**
  * One-to-one DTO for the Activity table.
@@ -54,12 +55,11 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     private String databaseName;
     private FolderDTO folder;
 
-    private List<IndicatorDTO> indicators = new ArrayList<IndicatorDTO>(0);
-    private List<AttributeGroupDTO> attributeGroups = new ArrayList<AttributeGroupDTO>(0);
-    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
+    private List<IndicatorDTO> indicators = new ArrayList<>(0);
+    private List<AttributeGroupDTO> attributeGroups = new ArrayList<>(0);
+    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>(0);
 
     // to ensure serializer
-    private Published _published;
     private List<PartnerDTO> partners = Lists.newArrayList();
     private List<ProjectDTO> projects = Lists.newArrayList();
     private LocationTypeDTO locationType;
@@ -133,7 +133,7 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
      */
     @Override @JsonProperty @JsonView(DTOViews.Schema.class)
     public int getId() {
-        return (Integer) get("id");
+        return (Integer) get(ID_PROPERTY);
     }
 
     /**
@@ -147,15 +147,17 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
      * Sets this Activity's name
      */
     public void setName(String value) {
-        set("name", value);
+        set(NAME_PROPERTY, value);
     }
 
     /**
      * @return this Activity's name
      */
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getName() {
-        return get("name");
+        return get(NAME_PROPERTY);
     }
 
     public int getDatabaseId() {
@@ -179,34 +181,23 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         this.folder = folder;
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getPublished() {
-        return get("published", 0);
+        return get(PUBLISHED_PROPERTY, 0);
     }
 
     public void setPublished(int published) {
-        set("published", published);
+        set(PUBLISHED_PROPERTY, published);
     }
 
     /**
      * @return a list of this Activity's indicators
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public List<IndicatorDTO> getIndicators() {
         return indicators;
-    }
-
-    /**
-     * @param indicatorIds the ids of the indicators for which to search
-     * @return true if this activity contains any of the provided indicators
-     */
-    public boolean containsAny(Set<Integer> indicatorIds) {
-        for (IndicatorDTO indicator : getIndicators()) {
-            if (indicatorIds.contains(indicator.getId())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -216,7 +207,8 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         this.indicators = indicators;
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public List<AttributeGroupDTO> getAttributeGroups() {
         return attributeGroups;
     }
@@ -226,15 +218,15 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     }
 
     public void setClassicView(boolean value) {
-        set("classicView", value);
+        set(CLASSIC_VIEW_PROPERTY, value);
     }
 
     public boolean getClassicView() {
-        return get("classicView", true);
+        return get(CLASSIC_VIEW_PROPERTY, true);
     }
 
     @Override
-    public ResourceId getFormClassId() {
+    public ResourceId getFormId() {
         return CuidAdapter.activityFormClass(getId());
     }
 
@@ -244,16 +236,17 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
      * <code>REPORT_ONCE</code> or <code>REPORT_MONTHLY</code>
      */
     public void setReportingFrequency(int frequency) {
-        set("reportingFrequency", frequency);
+        set(REPORTING_FREQUENCY_PROPERTY, frequency);
     }
 
     /**
      * @return the ReportingFrequency of this Activity, either
      * <code>REPORT_ONCE</code> or <code>REPORT_MONTHLY</code>
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getReportingFrequency() {
-        return (Integer) get("reportingFrequency");
+        return (Integer) get(REPORTING_FREQUENCY_PROPERTY);
     }
 
     /**
@@ -277,11 +270,12 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     public void setLocationType(LocationTypeDTO locationType) {
         this.locationType = locationType;
 
-        // for form binding. uck.
-        set("locationTypeId", locationType.getId());
+        // for form binding.
+        set(LOCATION_TYPE_ID_PROPERTY, locationType.getId());
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public LocationTypeDTO getLocationType() {
         return locationType;
     }
@@ -297,16 +291,6 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
             AttributeDTO attribute = SchemaDTO.getById(group.getAttributes(), id);
             if (attribute != null) {
                 return attribute;
-            }
-        }
-        return null;
-    }
-
-    public AttributeGroupDTO getAttributeGroupByAttributeId(int id) {
-        for (AttributeGroupDTO group : attributeGroups) {
-            AttributeDTO attribute = SchemaDTO.getById(group.getAttributes(), id);
-            if (attribute != null) {
-                return group;
             }
         }
         return null;
@@ -330,9 +314,10 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     /**
      * @return this Activity's category
      */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getCategory() {
-        return get("category");
+        return get(CATEGORY_PROPERTY);
     }
 
     /**
@@ -355,8 +340,8 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
      * property.
      */
     public List<IndicatorGroup> groupIndicators(boolean categoryNullToEmpty) {
-        List<IndicatorGroup> groups = new ArrayList<IndicatorGroup>();
-        Map<String, IndicatorGroup> map = new HashMap<String, IndicatorGroup>();
+        List<IndicatorGroup> groups = new ArrayList<>();
+        Map<String, IndicatorGroup> map = new HashMap<>();
 
         for (IndicatorDTO indicator : indicators) {
             String category = indicator.getCategory();
@@ -421,22 +406,11 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         this.lockedPeriods = lockedPeriods;
     }
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public Set<LockedPeriodDTO> getLockedPeriods() {
         return lockedPeriods;
-    }
-
-    @Override
-    public Set<LockedPeriodDTO> getEnabledLockedPeriods() {
-        Set<LockedPeriodDTO> enabled = Sets.newHashSet();
-
-        for (LockedPeriodDTO lockedPeriod : getLockedPeriods()) {
-            if (lockedPeriod.isEnabled()) {
-                enabled.add(lockedPeriod);
-            }
-        }
-
-        return enabled;
     }
 
     public String getDatabaseName() {
@@ -513,21 +487,4 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         return new LockedPeriodSet(this);
     }
 
-    public ProjectDTO getProjectById(int projectId) {
-        for(ProjectDTO project : projects) {
-            if(project.getId() == projectId) {
-                return project;
-            }
-        }
-        return null;
-    }
-
-    public PartnerDTO getPartnerById(int partnerId) {
-        for(PartnerDTO partner : partners) {
-            if(partner.getId() == partnerId) {
-                return partner;
-            }
-        }
-        return null;
-    }
 }

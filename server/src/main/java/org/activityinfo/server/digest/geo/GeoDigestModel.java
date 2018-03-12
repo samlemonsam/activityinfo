@@ -21,7 +21,7 @@ package org.activityinfo.server.digest.geo;
 import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.reports.content.MapContent;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.digest.DigestModel;
 import org.activityinfo.server.digest.UserDigest;
 
@@ -37,7 +37,7 @@ public class GeoDigestModel implements DigestModel {
 
     public GeoDigestModel(UserDigest userDigest) {
         this.userDigest = userDigest;
-        this.databases = new TreeSet<DatabaseModel>();
+        this.databases = new TreeSet<>();
     }
 
     public UserDigest getUserDigest() {
@@ -72,11 +72,11 @@ public class GeoDigestModel implements DigestModel {
 
     public static class DatabaseModel implements Comparable<DatabaseModel> {
         private final GeoDigestModel model;
-        private final UserDatabase database;
+        private final Database database;
         private MapContent content;
         private String url;
 
-        public DatabaseModel(GeoDigestModel model, UserDatabase database) {
+        public DatabaseModel(GeoDigestModel model, Database database) {
             this.model = model;
             this.database = database;
 
@@ -87,7 +87,7 @@ public class GeoDigestModel implements DigestModel {
             return model;
         }
 
-        public UserDatabase getDatabase() {
+        public Database getDatabase() {
             return database;
         }
 

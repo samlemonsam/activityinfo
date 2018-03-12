@@ -21,10 +21,10 @@ package org.activityinfo.server.digest.activity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.digest.DigestModelBuilder;
 import org.activityinfo.server.digest.UserDigest;
 import org.activityinfo.server.digest.activity.ActivityDigestModel.ActivityMap;
@@ -35,7 +35,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -55,11 +54,11 @@ public class ActivityDigestModelBuilder implements DigestModelBuilder {
 
         ActivityDigestModel model = new ActivityDigestModel(userDigest);
 
-        List<UserDatabase> databases = findDatabases(userDigest.getUser());
+        List<Database> databases = findDatabases(userDigest.getUser());
         LOGGER.finest("found " + databases.size() + " database(s) for user " + userDigest.getUser().getId());
 
         if (!databases.isEmpty()) {
-            for (UserDatabase database : databases) {
+            for (Database database : databases) {
                 createDatabaseModel(model, database);
             }
         }
@@ -67,7 +66,7 @@ public class ActivityDigestModelBuilder implements DigestModelBuilder {
         return model;
     }
 
-    private void createDatabaseModel(ActivityDigestModel model, UserDatabase database) throws IOException {
+    private void createDatabaseModel(ActivityDigestModel model, Database database) {
 
         SiteHistory lastEdit = findLastEdit(database);
         // only include databases that are known to be edited at least once
@@ -105,14 +104,14 @@ public class ActivityDigestModelBuilder implements DigestModelBuilder {
      * a UserPermission for the specified user with allowDesign set to true. If the user happens to have his
      * emailnotification preference set to false, an empty list is returned.
      */
-    @VisibleForTesting @SuppressWarnings("unchecked") List<UserDatabase> findDatabases(User user) {
+    @VisibleForTesting @SuppressWarnings("unchecked") List<Database> findDatabases(User user) {
         // sanity check
         if (!user.isEmailNotification()) {
-            return new ArrayList<UserDatabase>();
+            return new ArrayList<>();
         }
 
         Query query = entityManager.get()
-                                   .createQuery("select distinct d from UserDatabase d left join d.userPermissions p " +
+                                   .createQuery("select distinct d from Database d left join d.userPermissions p " +
                                                 "where (d.owner = :user or (p.user = :user and p.allowDesign = true))" +
                                                 " and d.dateDeleted is null " +
                                                 "order by d.name");
@@ -172,7 +171,7 @@ public class ActivityDigestModelBuilder implements DigestModelBuilder {
         return query.getResultList();
     }
 
-    @VisibleForTesting @SuppressWarnings("unchecked") SiteHistory findLastEdit(UserDatabase database) {
+    @VisibleForTesting @SuppressWarnings("unchecked") SiteHistory findLastEdit(Database database) {
 
         Query query = entityManager.get().createQuery("select h from SiteHistory h " +
                                                       "where h.site.activity.database = :database " +

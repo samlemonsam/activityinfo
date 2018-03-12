@@ -43,7 +43,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private final PermissionOracle permissionOracle;
 
     private JpaBatchBuilder batch;
-    private UserDatabase database;
+    private Database database;
     private UserPermission permission;
 
     @Inject
@@ -58,7 +58,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // get the permissions before we apply the filter
         // otherwise they will be excluded
 
-        this.database = entityManager.find(UserDatabase.class, request.getRegionId());
+        this.database = entityManager.find(Database.class, request.getRegionId());
         this.permission = permissionOracle.getPermissionByUser(database, user);
 
         Preconditions.checkNotNull(database, "Failed to fetch database by id:" + 
@@ -84,10 +84,10 @@ public class DbUpdateBuilder implements UpdateBuilder {
         return batch.buildUpdate();
     }
 
-    private void queryUpdates() throws JSONException, IOException {
+    private void queryUpdates() throws IOException {
 
-        delete(UserDatabase.class, inDatabase());
-        insert(UserDatabase.class, inDatabase());
+        delete(Database.class, inDatabase());
+        insert(Database.class, inDatabase());
 
         // Projects
         delete(Project.class, inDatabase());
@@ -194,6 +194,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         return "DatabaseId = " + database.getId();
     }
 
+    @SuppressWarnings("squid:S3400")
     private String notDeleted() {
         return "DateDeleted IS NULL";
     }

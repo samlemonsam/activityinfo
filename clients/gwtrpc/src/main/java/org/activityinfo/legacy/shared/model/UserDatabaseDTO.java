@@ -44,15 +44,15 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     public static final String MY_PARTNER_ID = "myPartnerId";
 
     private CountryDTO country;
-    private List<PartnerDTO> partners = new ArrayList<PartnerDTO>(0);
+    private List<PartnerDTO> partners = new ArrayList<>(0);
     private List<ActivityDTO> activities = new ArrayList<>(0);
-    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
+    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>(0);
     private List<ProjectDTO> projects = new ArrayList<>(0);
     private List<FolderDTO> folders = new ArrayList<>(0);
 
     private boolean hasFolderLimitation = false;
 
-    public final static String ENTITY_NAME = "UserDatabase";
+    public static final String ENTITY_NAME = "UserDatabase";
 
     public UserDatabaseDTO() {
     }
@@ -404,19 +404,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return lockedPeriods;
     }
 
-    @Override
-    public Set<LockedPeriodDTO> getEnabledLockedPeriods() {
-        Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
-
-        for (LockedPeriodDTO lcokedPeriod : getLockedPeriods()) {
-            if (lcokedPeriod.isEnabled()) {
-                lockedPeriods.add(lcokedPeriod);
-            }
-        }
-
-        return lockedPeriods;
-    }
-
     public ProjectDTO getProjectById(int value) {
         for (ProjectDTO project : getProjects()) {
             if (value == project.getId()) {
@@ -507,19 +494,25 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     public boolean hasGreaterPermissions(UserPermissionDTO user) {
         if (user.getAllowEdit() == Boolean.TRUE && !isEditAllowed()) {
             return false;
-        } else if (user.getAllowViewAll() == Boolean.TRUE && !isViewAllAllowed()) {
-            return false;
-        } else if (user.getAllowEditAll() == Boolean.TRUE && !isEditAllAllowed()) {
-            return false;
-        } else if (user.getAllowDesign() == Boolean.TRUE && !isDesignAllowed()) {
-            return false;
-        } else if (user.getAllowManageUsers() == Boolean.TRUE && !isManageUsersAllowed()) {
-            return false;
-        } else if (user.getAllowManageAllUsers() == Boolean.TRUE && !isManageAllUsersAllowed()) {
-            return false;
-        } else {
-            return true;
         }
+        if (user.getAllowViewAll() == Boolean.TRUE && !isViewAllAllowed()) {
+            return false;
+        }
+
+        if (user.getAllowEditAll() == Boolean.TRUE && !isEditAllAllowed()) {
+            return false;
+        }
+
+        if (user.getAllowDesign() == Boolean.TRUE && !isDesignAllowed()) {
+            return false;
+        }
+        if (user.getAllowManageUsers() == Boolean.TRUE && !isManageUsersAllowed()) {
+            return false;
+        }
+        if (user.getAllowManageAllUsers() == Boolean.TRUE && !isManageAllUsersAllowed()) {
+            return false;
+        }
+        return true;
     }
 
     public boolean canGivePermission(PermissionType permissionType, UserPermissionDTO user) {

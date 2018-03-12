@@ -40,18 +40,19 @@ public class LocationType implements Serializable, Deleteable {
     private boolean reuse;
     private String name;
     private Country country;
-    private Set<Location> locations = new HashSet<Location>(0);
-    private Set<Activity> activities = new HashSet<Activity>(0);
+    private Set<Location> locations = new HashSet<>(0);
+    private Set<Activity> activities = new HashSet<>(0);
     private String workflowId;
     private long version;
     private long locationVersion;
 
-    private UserDatabase database;
+    private Database database;
 
     private AdminLevel boundAdminLevel;
     private Date dateDeleted;
 
     public LocationType() {
+        // Require
     }
 
     @Id
@@ -94,11 +95,11 @@ public class LocationType implements Serializable, Deleteable {
     }
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "DatabaseId", nullable = true)
-    public UserDatabase getDatabase() {
+    public Database getDatabase() {
         return this.database;
     }
 
-    public void setDatabase(UserDatabase database) {
+    public void setDatabase(Database database) {
         this.database = database;
     }
 

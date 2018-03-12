@@ -24,6 +24,10 @@ import com.google.common.collect.Lists;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
+import org.activityinfo.legacy.shared.model.EntityDTO;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
@@ -34,6 +38,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static org.activityinfo.legacy.shared.model.EntityDTO.NAME_PROPERTY;
+import static org.activityinfo.legacy.shared.model.EntityDTO.SORT_ORDER_PROPERTY;
+import static org.activityinfo.legacy.shared.model.IndicatorDTO.*;
 import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 
 /**
@@ -54,29 +61,25 @@ public class BaseEntityHandler {
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {
         PropertyMap changes = new PropertyMap(changeMap);
-        
-        if (changes.containsKey("name")) {
-            indicator.setName(trimAndTruncate(changes.get("name")));
+
+        if (changes.containsKey(NAME_PROPERTY)) {
+            indicator.setName(trimAndTruncate(changes.get(NAME_PROPERTY)));
         }
 
-        if (changes.containsKey("type")) {
-            FieldTypeClass type = parseType(changes.get("type"));
-            indicator.setType(type != null ? type.getId() : null);
-            if (type != FieldTypeClass.QUANTITY && !changes.containsKey("units")) {
-                indicator.setUnits("");
-            }
+        if (changes.containsKey(TYPE_PROPERTY)) {
+            updateType(indicator, changes);
         }
 
-        if (changes.containsKey("expression")) {
-            indicator.setExpression(trimAndTruncate(changes.get("expression")));
+        if (changes.containsKey(EXPRESSION_PROPERTY)) {
+            indicator.setExpression(trimAndTruncate(changes.get(EXPRESSION_PROPERTY)));
         }
 
-        if (changes.containsKey("relevanceExpression")) {
-            indicator.setRelevanceExpression(trimAndTruncate(changes.get("relevanceExpression")));
+        if (changes.containsKey(RELEVANCE_PROPERTY)) {
+            indicator.setRelevanceExpression(trimAndTruncate(changes.get(RELEVANCE_PROPERTY)));
         }
 
-        if (changes.containsKey("nameInExpression")) {
-            indicator.setNameInExpression(trimAndTruncate(changes.get("nameInExpression")));
+        if (changes.containsKey(CODE_PROPERTY)) {
+            indicator.setNameInExpression(trimAndTruncate(changes.get(CODE_PROPERTY)));
         }
         
         // Allow "code" as an alias from the JSON API
@@ -85,43 +88,51 @@ public class BaseEntityHandler {
         }
 
         if (changes.containsKey("calculatedAutomatically")) {
-            indicator.setCalculatedAutomatically((Boolean) changes.get("calculatedAutomatically"));
+            indicator.setCalculatedAutomatically(changes.get("calculatedAutomatically"));
         }
 
-        if (changes.containsKey("aggregation")) {
-            indicator.setAggregation((Integer) changes.get("aggregation"));
+        if (changes.containsKey(AGGREGATION_PROPERTY)) {
+            indicator.setAggregation(changes.get(AGGREGATION_PROPERTY));
         }
 
-        if (changes.containsKey("category")) {
-            indicator.setCategory(trimAndTruncate(changes.get("category")));
+        if (changes.containsKey(CATEGORY_PROPERTY)) {
+            indicator.setCategory(trimAndTruncate(changes.get(CATEGORY_PROPERTY)));
         }
 
-        if (changes.containsKey("listHeader")) {
-            indicator.setListHeader(trimAndTruncate(changes.get("listHeader")));
+        if (changes.containsKey(LIST_HEADER_PROPERTY)) {
+            indicator.setListHeader(trimAndTruncate(changes.get(LIST_HEADER_PROPERTY)));
         }
 
-        if (changes.containsKey("description")) {
-            indicator.setDescription(trimAndTruncate(changes.get("description")));
+        if (changes.containsKey(IndicatorDTO.DESCRIPTION_PROPERTY)) {
+            indicator.setDescription(trimAndTruncate(changes.get(DESCRIPTION_PROPERTY)));
         }
 
-        if (changes.containsKey("units")) {
-            indicator.setUnits(trimAndTruncate(changes.get("units")));
+        if (changes.containsKey(UNITS_PROPERTY)) {
+            indicator.setUnits(trimAndTruncate(changes.get(UNITS_PROPERTY)));
         }
 
-        if (changes.containsKey("sortOrder")) {
-            indicator.setSortOrder((Integer) changes.get("sortOrder"));
+        if (changes.containsKey(SORT_ORDER_PROPERTY)) {
+            indicator.setSortOrder(changes.get(SORT_ORDER_PROPERTY));
         }
 
-        if (changes.containsKey("mandatory")) {
-            indicator.setMandatory((Boolean) changes.get("mandatory"));
+        if (changes.containsKey(MANDATORY_PROPERTY)) {
+            indicator.setMandatory(changes.get(MANDATORY_PROPERTY));
         }
 
-        if (changes.containsKey("visible")) {
-            indicator.setVisible((Boolean) changes.get("visible"));
+        if (changes.containsKey(VISIBLE_PROPERTY)) {
+            indicator.setVisible(changes.get(VISIBLE_PROPERTY));
         }
 
         indicator.getActivity().incrementSchemaVersion();
         indicator.getActivity().getDatabase().setLastSchemaUpdate(new Date());
+    }
+
+    private void updateType(Indicator indicator, PropertyMap changes) {
+        FieldTypeClass type = parseType(changes.get(TYPE_PROPERTY));
+        indicator.setType(type != null ? type.getId() : null);
+        if ((type != FieldTypeClass.QUANTITY) && !changes.containsKey(UNITS_PROPERTY)) {
+            indicator.setUnits("");
+        }
     }
 
     private FieldTypeClass parseType(Object type) {
@@ -142,53 +153,56 @@ public class BaseEntityHandler {
     }
 
     protected void updateAttributeProperties(Map<String, Object> changes, Attribute attribute) {
-        if (changes.containsKey("name")) {
-            attribute.setName(trimAndTruncate(changes.get("name")));
+        if (changes.containsKey(NAME_PROPERTY)) {
+            attribute.setName(trimAndTruncate(changes.get(NAME_PROPERTY)));
         }
-        if (changes.containsKey("sortOrder")) {
-            attribute.setSortOrder((Integer) changes.get("sortOrder"));
+        if (changes.containsKey(SORT_ORDER_PROPERTY)) {
+            attribute.setSortOrder((Integer) changes.get(SORT_ORDER_PROPERTY));
         }
-        // TODO: update lastSchemaUpdate
+
+        for (Activity activity : attribute.getGroup().getActivities()) {
+            activity.getDatabase().updateVersion();
+        }
     }
 
     protected void updateAttributeGroupProperties(AttributeGroup group, Map<String, Object> changes) {
-        if (changes.containsKey("name")) {
-            group.setName(trimAndTruncate(changes.get("name")));
+        if (changes.containsKey(EntityDTO.NAME_PROPERTY)) {
+            group.setName(trimAndTruncate(changes.get(NAME_PROPERTY)));
         }
 
-        if (changes.containsKey("multipleAllowed")) {
-            group.setMultipleAllowed((Boolean) changes.get("multipleAllowed"));
+        if (changes.containsKey(AttributeGroupDTO.MULTIPLE_ALLOWED_PROPERTY)) {
+            group.setMultipleAllowed((Boolean) changes.get(AttributeGroupDTO.MULTIPLE_ALLOWED_PROPERTY));
         }
-        if (changes.containsKey("sortOrder")) {
-            group.setSortOrder((Integer) changes.get("sortOrder"));
+        if (changes.containsKey(SORT_ORDER_PROPERTY)) {
+            group.setSortOrder((Integer) changes.get(SORT_ORDER_PROPERTY));
         }
-        if (changes.containsKey("mandatory")) {
-            group.setMandatory((Boolean) changes.get("mandatory"));
+        if (changes.containsKey(IndicatorDTO.MANDATORY_PROPERTY)) {
+            group.setMandatory((Boolean) changes.get(IndicatorDTO.MANDATORY_PROPERTY));
         }
-        if (changes.containsKey("defaultValue")) {
-            group.setDefaultValue((Integer) changes.get("defaultValue"));
+        if (changes.containsKey(AttributeGroupDTO.DEFAULT_VALUE_PROPERTY)) {
+            group.setDefaultValue((Integer) changes.get(AttributeGroupDTO.DEFAULT_VALUE_PROPERTY));
         }
-        if (changes.containsKey("workflow")) {
-            group.setWorkflow((Boolean) changes.get("workflow"));
+        if (changes.containsKey(AttributeGroupDTO.WORKFLOW_PROPERTY)) {
+            group.setWorkflow((Boolean) changes.get(AttributeGroupDTO.WORKFLOW_PROPERTY));
         }
     }
 
     protected void updateLockedPeriodProperties(LockedPeriod lockedPeriod, Map<String, Object> changes) {
-        if (changes.containsKey("name")) {
-            lockedPeriod.setName(trimAndTruncate(changes.get("name")));
+        if (changes.containsKey(EntityDTO.NAME_PROPERTY)) {
+            lockedPeriod.setName(trimAndTruncate(changes.get(EntityDTO.NAME_PROPERTY)));
         }
-        if (changes.containsKey("toDate")) {
-            lockedPeriod.setToDate((LocalDate) changes.get("toDate"));
+        if (changes.containsKey(LockedPeriodDTO.END_DATE_PROPERTY)) {
+            lockedPeriod.setToDate((LocalDate) changes.get(LockedPeriodDTO.END_DATE_PROPERTY));
         }
-        if (changes.containsKey("fromDate")) {
-            lockedPeriod.setFromDate((LocalDate) changes.get("fromDate"));
+        if (changes.containsKey(LockedPeriodDTO.START_DATE_PROPERTY)) {
+            lockedPeriod.setFromDate((LocalDate) changes.get(LockedPeriodDTO.START_DATE_PROPERTY));
         }
-        if (changes.containsKey("enabled")) {
-            lockedPeriod.setEnabled((Boolean) changes.get("enabled"));
+        if (changes.containsKey(LockedPeriodDTO.ENABLED_PROPERTY)) {
+            lockedPeriod.setEnabled((Boolean) changes.get(LockedPeriodDTO.ENABLED_PROPERTY));
         }
 
         if (!lockedPeriod.getFromDate().before(lockedPeriod.getToDate()) && !lockedPeriod.getFromDate().equals(lockedPeriod.getToDate())) {
-            throw new RuntimeException("From date is not before To date. Refuse lock object persistence: " + lockedPeriod);
+            throw new IllegalArgumentException("From date is not before To date. Refuse lock object persistence: " + lockedPeriod);
         }
 
         lockedPeriod.getParentDatabase().setLastSchemaUpdate(new Date());
@@ -205,16 +219,16 @@ public class BaseEntityHandler {
     }
 
     protected void updateTargetProperties(Target target, Map<String, Object> changes) {
-        if (changes.containsKey("name")) {
-            target.setName(trimAndTruncate(changes.get("name")));
+        if (changes.containsKey(NAME_PROPERTY)) {
+            target.setName(trimAndTruncate(changes.get(NAME_PROPERTY)));
         }
 
-        if (changes.containsKey("fromDate")) {
-            target.setDate1(((LocalDate) changes.get("fromDate")).atMidnightInMyTimezone());
+        if (changes.containsKey(LockedPeriodDTO.START_DATE_PROPERTY)) {
+            target.setDate1(((LocalDate) changes.get(LockedPeriodDTO.START_DATE_PROPERTY)).atMidnightInMyTimezone());
         }
 
-        if (changes.containsKey("toDate")) {
-            target.setDate2(((LocalDate) changes.get("toDate")).atMidnightInMyTimezone());
+        if (changes.containsKey(LockedPeriodDTO.END_DATE_PROPERTY)) {
+            target.setDate2(((LocalDate) changes.get(LockedPeriodDTO.END_DATE_PROPERTY)).atMidnightInMyTimezone());
         }
 
         if (changes.containsKey("projectId")) {
@@ -249,7 +263,7 @@ public class BaseEntityHandler {
      * @param database The database the user is trying to modify
      * @throws IllegalAccessCommandException If the user does not have permission
      */
-    protected void assertDesignPrivileges(User user, UserDatabase database) throws IllegalAccessCommandException {
+    protected void assertDesignPrivileges(User user, Database database) {
 
         if (!permissionsOracle.isDesignAllowed(database, user)) {
             throw new IllegalAccessCommandException();

@@ -38,10 +38,10 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
     }
 
     @Override
-    public CommandResult execute(CreateLockedPeriod cmd, User user) throws CommandException {
+    public CommandResult execute(CreateLockedPeriod cmd, User user) {
 
         Activity activity = null;
-        UserDatabase database = null;
+        Database database = null;
         Project project = null;
 
         LockedPeriod lockedPeriod = new LockedPeriod();
@@ -53,13 +53,13 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
 
         int databaseId;
         if (cmd.getUserDatabseId() != 0) {
-            database = em.find(UserDatabase.class, cmd.getUserDatabseId());
-            lockedPeriod.setUserDatabase(database);
+            database = em.find(Database.class, cmd.getUserDatabseId());
+            lockedPeriod.setDatabase(database);
             databaseId = database.getId();
         } else if (cmd.getProjectId() != 0) {
             project = em.find(Project.class, cmd.getProjectId());
             lockedPeriod.setProject(project);
-            databaseId = project.getUserDatabase().getId();
+            databaseId = project.getDatabase().getId();
         } else if (cmd.getActivityId() != 0) {
             activity = em.find(Activity.class, cmd.getActivityId());
             lockedPeriod.setActivity(activity);
@@ -68,7 +68,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             throw new CommandException("One of the following must be provdied: userDatabaseId, projectId, activityId");
         }
 
-        UserDatabase db = em.find(UserDatabase.class, databaseId);
+        Database db = em.find(Database.class, databaseId);
 
         em.persist(lockedPeriod);
 

@@ -19,12 +19,13 @@
 package org.activityinfo.server.database.hibernate.entity;
 
 /**
- * @author Alex Bertram
+ * Common interface to Hibernate entites that can be deleted, either through soft deletion, or
+ * by being removed from the database.
  */
 public interface Deleteable {
 
-    public void delete();
+    void delete();
 
-    public boolean isDeleted();
+    boolean isDeleted();
 
 }

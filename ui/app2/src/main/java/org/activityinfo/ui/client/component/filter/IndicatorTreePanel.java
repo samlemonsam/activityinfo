@@ -20,7 +20,10 @@ package org.activityinfo.ui.client.component.filter;
 
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.data.*;
-import com.extjs.gxt.ui.client.event.*;
+import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.event.LoadListener;
+import com.extjs.gxt.ui.client.event.TreePanelEvent;
 import com.extjs.gxt.ui.client.store.Store;
 import com.extjs.gxt.ui.client.store.StoreEvent;
 import com.extjs.gxt.ui.client.store.StoreListener;
@@ -32,7 +35,6 @@ import com.extjs.gxt.ui.client.widget.toolbar.LabelToolItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
 import com.extjs.gxt.ui.client.widget.treepanel.TreePanel;
 import com.extjs.gxt.ui.client.widget.treepanel.TreePanel.CheckCascade;
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gwt.core.client.GWT;
@@ -46,7 +48,6 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -60,7 +61,6 @@ import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +71,7 @@ import java.util.Set;
  *
  * @author Alex Bertram
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class IndicatorTreePanel extends ContentPanel {
 
     private final Dispatcher dispatcher;
@@ -105,11 +106,11 @@ public class IndicatorTreePanel extends ContentPanel {
         this.setLayout(new FitLayout());
         this.setScrollMode(Style.Scroll.NONE);
 
-        store = new TreeStore<ModelData>(new Loader());
+        store = new TreeStore<>(new Loader());
 
         setStoreKeyProvider();
 
-        tree = new TreePanel<ModelData>(store);
+        tree = new TreePanel<>(store);
 
         tree.setCheckNodes(TreePanel.CheckNodes.BOTH);
         tree.setCheckStyle(CheckCascade.CHILDREN);
@@ -124,16 +125,12 @@ public class IndicatorTreePanel extends ContentPanel {
         tree.setStateId("indicatorPanel");
         tree.setStateful(true);
         tree.setAutoSelect(true);
-        tree.addListener(Events.BrowserEvent, new Listener<TreePanelEvent<ModelData>>() {
-
-            @Override
-            public void handleEvent(TreePanelEvent<ModelData> be) {
-                if (be.getEventTypeInt() == Event.ONKEYPRESS) {
-                    if (!toolBar.isVisible()) {
-                        toolBar.setVisible(true);
-                    }
-                    filter.focus();
+        tree.addListener(Events.BrowserEvent, (TreePanelEvent<ModelData> event) -> {
+            if (event.getEventTypeInt() == Event.ONKEYPRESS) {
+                if (!toolBar.isVisible()) {
+                    toolBar.setVisible(true);
                 }
+                filter.focus();
             }
         });
 
@@ -157,56 +154,39 @@ public class IndicatorTreePanel extends ContentPanel {
             }
         });
 
-        addCheckChangedListener(new Listener<TreePanelEvent>() {
-
-            @Override
-            public void handleEvent(TreePanelEvent be) {
-                if (be.getItem() instanceof IndicatorDTO) {
-                    IndicatorDTO indicator = (IndicatorDTO) be.getItem();
-                    if (be.isChecked()) {
-                        selection.add(indicator.getId());
-                    } else {
-                        selection.remove(indicator.getId());
-                    }
-                } else if (be.isChecked()) {
-                    tree.getStore().getLoader().loadChildren(be.getItem());
+        addCheckChangedListener(event -> {
+            if (event.getItem() instanceof IndicatorDTO) {
+                IndicatorDTO indicator = (IndicatorDTO) event.getItem();
+                if (event.isChecked()) {
+                    selection.add(indicator.getId());
+                } else {
+                    selection.remove(indicator.getId());
                 }
+            } else if (event.isChecked()) {
+                tree.getStore().getLoader().loadChildren(event.getItem());
             }
         });
     }
 
     private void setStoreKeyProvider() {
-        store.setKeyProvider(new ModelKeyProvider<ModelData>() {
-
-            @Override
-            public String getKey(ModelData model) {
-                new ArrayList<String>();
-                if (model instanceof ProvidesKey) {
-                    return ((ProvidesKey) model).getKey();
-                } else if (model == null) {
-                    throw new IllegalStateException(
-                            "Did not expect model to be null: assigning keys in IndicatorTreePanel");
-                }
-                throw new IllegalStateException("Unknown type: expected activity, userdb, indicator or indicatorgroup");
+        store.setKeyProvider(model -> {
+            if (model instanceof ProvidesKey) {
+                return ((ProvidesKey) model).getKey();
+            } else if (model == null) {
+                throw new IllegalStateException(
+                        "Did not expect model to be null: assigning keys in IndicatorTreePanel");
             }
+            throw new IllegalStateException("Unknown type: expected activity, userdb, indicator or indicatorgroup");
         });
-    }
-
-    @Override
-    public void setHeadingText(String heading) {
-        super.setHeadingText(heading);
     }
 
     private void createFilterBar() {
         toolBar = new ToolBar();
         toolBar.add(new LabelToolItem(I18N.CONSTANTS.search()));
         filter = new FilterField();
-        filter.addListener(Events.Blur, new Listener<BaseEvent>() {
-            @Override
-            public void handleEvent(BaseEvent be) {
-                if (filter.getRawValue() == null || filter.getRawValue().length() == 0) {
-                    toolBar.setVisible(false);
-                }
+        filter.addListener(Events.Blur, event -> {
+            if (filter.getRawValue() == null || filter.getRawValue().length() == 0) {
+                toolBar.setVisible(false);
             }
         });
         toolBar.add(filter);
@@ -266,74 +246,50 @@ public class IndicatorTreePanel extends ContentPanel {
                 callback.onSuccess(createIndicatorList((IndicatorGroup) parent));
             }
         }
-    }
 
-    private List<ModelData> createDatabaseChildren(UserDatabaseDTO databaseDTO) {
+        private List<ModelData> createDatabaseChildren(UserDatabaseDTO databaseDTO) {
 
-        List<ModelData> children = new ArrayList<ModelData>();
+            List<ModelData> children = new ArrayList<>();
 
-        Set<FolderDTO> categories = new HashSet<FolderDTO>();
+            Set<FolderDTO> categories = new HashSet<>();
 
-        for (ActivityDTO activityDTO : databaseDTO.getActivities()) {
-            if (activityDTO.hasCategory()) {
-                FolderDTO folder = new FolderDTO(databaseDTO.getId(), activityDTO.getCategory());
-                categories.add(folder);
-                if (!children.contains(folder)) {
-                    children.add(folder);
-                }
-            } else {
-                children.add(activityDTO);
-            }
-        }
-
-        // fill category with activities
-        for (FolderDTO category : categories) {
             for (ActivityDTO activityDTO : databaseDTO.getActivities()) {
-                if (category.getName().equals(activityDTO.getCategory())) {
-                    category.addActivity(activityDTO);
+                if (activityDTO.hasCategory()) {
+                    FolderDTO folder = new FolderDTO(databaseDTO.getId(), activityDTO.getCategory());
+                    categories.add(folder);
+                    if (!children.contains(folder)) {
+                        children.add(folder);
+                    }
+                } else {
+                    children.add(activityDTO);
                 }
             }
-        }
 
-        return children;
-    }
-
-    private Promise<List<ModelData>> loadActivityChildren(ActivityDTO activity) {
-    
-        if(activity.getClassicView()) {
-            return loadClassicActivityChildren(activity);
-        } else {
-            return loadFields(activity.getFormClassId());
-        }
-    }
-
-    private Promise<List<ModelData>> loadFields(ResourceId formId) {
-
-        return resourceLocator.getFormClass(formId).then(new Function<FormClass, List<ModelData>>() {
-            @Nullable
-            @Override
-            public List<ModelData> apply(@Nullable FormClass formClass) {
-                List<ModelData> children = new ArrayList<ModelData>();
-                for (FormField formField : formClass.getFields()) {
-                    if(formField.getType() instanceof QuantityType ||
-                       formField.getType() instanceof CalculatedFieldType) {
-                        IndicatorDTO indicator = new IndicatorDTO();
-                        indicator.setId(CuidAdapter.getLegacyIdFromCuid(formField.getId()));
-                        indicator.setName(formField.getLabel());
-                        children.add(indicator);
+            // fill category with activities
+            for (FolderDTO category : categories) {
+                for (ActivityDTO activityDTO : databaseDTO.getActivities()) {
+                    if (category.getName().equals(activityDTO.getCategory())) {
+                        category.addActivity(activityDTO);
                     }
                 }
-                return children;
             }
-        });
-    }
 
-    private Promise<List<ModelData>> loadClassicActivityChildren(ActivityDTO activity) {
-        return dispatcher.execute(new GetActivityForm(activity.getId())).then(new Function<ActivityFormDTO, List<ModelData>>() {
+            return children;
+        }
 
-            @Override
-            public List<ModelData> apply(ActivityFormDTO form) {
-                List<ModelData> children = new ArrayList<ModelData>();
+        private Promise<List<ModelData>> loadActivityChildren(ActivityDTO activity) {
+
+            if(activity.getClassicView()) {
+                return loadClassicActivityChildren(activity);
+            } else {
+                return loadFields(activity.getFormId());
+            }
+        }
+
+
+        private Promise<List<ModelData>> loadClassicActivityChildren(ActivityDTO activity) {
+            return dispatcher.execute(new GetActivityForm(activity.getId())).then(form -> {
+                List<ModelData> children = new ArrayList<>();
                 for (IndicatorGroup group : form.groupIndicators()) {
                     if (group.getName() == null) {
                         for (IndicatorDTO indicator : group.getIndicators()) {
@@ -346,26 +302,46 @@ public class IndicatorTreePanel extends ContentPanel {
                     }
                 }
                 return children;
-            }
-        });
-    }
-
-    private List<ModelData> createIndicatorList(IndicatorGroup group) {
-        ArrayList<ModelData> list = new ArrayList<ModelData>();
-        for (IndicatorDTO indicator : group.getIndicators()) {
-            if (indicator.getType() == FieldTypeClass.QUANTITY) {
-                list.add(indicator);
-            }
+            });
         }
 
-        return list;
+
+        private List<ModelData> createIndicatorList(IndicatorGroup group) {
+            ArrayList<ModelData> list = new ArrayList<>();
+            for (IndicatorDTO indicator : group.getIndicators()) {
+                if (indicator.getType() == FieldTypeClass.QUANTITY) {
+                    list.add(indicator);
+                }
+            }
+
+            return list;
+        }
+
     }
+
+    private Promise<List<ModelData>> loadFields(ResourceId formId) {
+
+        return resourceLocator.getFormClass(formId).then(formClass -> {
+                List<ModelData> children = new ArrayList<>();
+                for (FormField formField : formClass.getFields()) {
+                    if(formField.getType() instanceof QuantityType ||
+                       formField.getType() instanceof CalculatedFieldType) {
+                        IndicatorDTO indicator = new IndicatorDTO();
+                        indicator.setId(CuidAdapter.getLegacyIdFromCuid(formField.getId()));
+                        indicator.setName(formField.getLabel());
+                        children.add(indicator);
+                    }
+                }
+                return children;
+            });
+    }
+
 
     /**
      * @return the list of selected indicators
      */
     public List<IndicatorDTO> getSelection() {
-        List<IndicatorDTO> list = new ArrayList<IndicatorDTO>();
+        List<IndicatorDTO> list = new ArrayList<>();
         for (ModelData model : tree.getCheckedSelection()) {
             if (model instanceof IndicatorDTO) {
                 list.add((IndicatorDTO) model);
@@ -402,24 +378,11 @@ public class IndicatorTreePanel extends ContentPanel {
         tree.addListener(Events.CheckChange, listener);
     }
 
-    public void addBeforeCheckedListener(Listener<TreePanelEvent> listener) {
-        tree.addListener(Events.BeforeCheckChange, listener);
-    }
-
     /**
      * @return the list of the ids of selected indicators
      */
     public List<Integer> getSelectedIds() {
         return Lists.newArrayList(selection);
-    }
-
-    public void setMultipleSelection(boolean multipleSelection) {
-        this.multipleSelection = multipleSelection;
-        if (multipleSelection) {
-            tree.setCheckStyle(TreePanel.CheckCascade.CHILDREN);
-        } else {
-            tree.setCheckStyle(TreePanel.CheckCascade.NONE);
-        }
     }
 
     private class Loader extends BaseTreeLoader<ModelData> {
@@ -433,14 +396,15 @@ public class IndicatorTreePanel extends ContentPanel {
         }
     }
 
-    private static class FilterField extends StoreFilterField {
+    private static class FilterField extends StoreFilterField<ModelData> {
         @Override
         protected boolean doSelect(Store store, ModelData parent, ModelData record, String property, String filter) {
 
             String[] keywords = filter.toLowerCase().split("\\s+");
-            String name = ((String) record.get("name")).toLowerCase();
+            String name = record.get(EntityDTO.NAME_PROPERTY);
+            String loweredName = name.toLowerCase();
             for (String keyword : keywords) {
-                if (!name.contains(keyword)) {
+                if (!loweredName.contains(keyword)) {
                     return false;
                 }
             }

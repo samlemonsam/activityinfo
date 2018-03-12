@@ -34,6 +34,7 @@ import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
 
+import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
 import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 
 public class ActivityPolicy implements EntityPolicy<Activity> {
@@ -52,7 +53,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     @Override
     public Object create(User user, PropertyMap properties) {
 
-        UserDatabase database = getDatabase(properties);
+        Database database = getDatabase(properties);
         PermissionOracle.using(em).assertDesignPrivileges(database, user);
 
         // create the entity
@@ -88,12 +89,12 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         applyProperties(activity, changes);
     }
 
-    private UserDatabase getDatabase(PropertyMap properties) {
+    private Database getDatabase(PropertyMap properties) {
         return databaseDAO.findById(properties.getRequiredInt("databaseId"));
     }
 
     private LocationType getLocationType(PropertyMap properties) {
-        return em.getReference(LocationType.class, properties.getRequiredInt("locationTypeId"));
+        return em.getReference(LocationType.class, properties.getRequiredInt(LOCATION_TYPE_ID_PROPERTY));
     }
 
     private Integer calculateNextSortOrderIndex(int databaseId) {
@@ -102,8 +103,8 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     }
 
     private void applyProperties(Activity activity, PropertyMap changes) {
-        if (changes.containsKey("name")) {
-            String name = truncate(changes.get("name"));
+        if (changes.containsKey(NAME_PROPERTY)) {
+            String name = truncate(changes.get(NAME_PROPERTY));
 
             activity.setName(name);
 
@@ -112,74 +113,94 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
             updateFormClass(activity, name, json);
         }
 
-        if (changes.containsKey("locationTypeId")) {
-            LocationType location = em.find(LocationType.class, changes.get("locationTypeId"));
+        if (changes.containsKey(LOCATION_TYPE_ID_PROPERTY)) {
+            LocationType location = em.find(LocationType.class, changes.get(LOCATION_TYPE_ID_PROPERTY));
             if (location != null) {
                 activity.setLocationType(location);
             }
         }
 
-        if (changes.containsKey("folderId")) {
-            if(changes.get("folderId") == null) {
-                activity.setFolder(null);
-                activity.setCategory(null);
-            } else {
-                Folder folder = em.find(Folder.class, changes.get("folderId"));
-                if (folder != null && folder.getDatabase().getId() == activity.getDatabase().getId()) {
-                    activity.setFolder(folder);
-                    activity.setCategory(folder.getName());
-                }
-            }
+        if (changes.containsKey(FOLDER_ID_PROPERTY)) {
+            updateFolder(activity, changes);
         }
 
-        if (changes.containsKey("category")) {
-            String category = changes.get("category");
-            if(category == null) {
-                activity.setFolder(null);
-            } else if(activity.getFolder() == null || !activity.getFolder().getName().equalsIgnoreCase(category)) {
-                List<Folder> existingFolders = em.createQuery("SELECT f FROM Folder f WHERE f.database.id = :dbId AND f.name = :category", Folder.class)
-                        .setParameter("dbId", activity.getDatabase().getId())
-                        .setParameter("category", category)
-                        .getResultList();
-                Folder folder;
-                if(!existingFolders.isEmpty()) {
-                    folder = existingFolders.get(0);
-                } else {
-                    folder = new Folder();
-                    folder.setDatabase(activity.getDatabase());
-                    folder.setName(category);
-                    em.persist(folder);
-                }
-                activity.setFolder(folder);
-            }
+        if (changes.containsKey(CATEGORY_PROPERTY)) {
+            updateCategory(activity, changes);
         }
 
-        if (changes.containsKey("locationType")) {
-            activity.setLocationType(em.getReference(LocationType.class,
-                    ((LocationTypeDTO) changes.get("locationType")).getId()));
+        if (changes.containsKey(LOCATION_TYPE)) {
+            LocationTypeDTO newLocationType = changes.get(LOCATION_TYPE);
+            activity.setLocationType(em.getReference(LocationType.class, newLocationType.getId()));
         }
 
         if (changes.containsKey("mapIcon")) {
             activity.setMapIcon(changes.get("mapIcon"));
         }
 
-        if (changes.containsKey("reportingFrequency")) {
-            activity.setReportingFrequency(changes.get("reportingFrequency"));
+        if (changes.containsKey(REPORTING_FREQUENCY_PROPERTY)) {
+            activity.setReportingFrequency(changes.get(REPORTING_FREQUENCY_PROPERTY));
         }
 
-        if (changes.containsKey("published")) {
-            activity.setPublished(changes.get("published"));
+        if (changes.containsKey(PUBLISHED_PROPERTY)) {
+            activity.setPublished(changes.get(PUBLISHED_PROPERTY));
         }
 
-        if (changes.containsKey("classicView")) {
-            activity.setClassicView(changes.get("classicView"));
+        if (changes.containsKey(CLASSIC_VIEW_PROPERTY)) {
+            activity.setClassicView(changes.get(CLASSIC_VIEW_PROPERTY));
         }
 
-        if (changes.containsKey("sortOrder")) {
-            activity.setSortOrder(changes.get("sortOrder"));
+        if (changes.containsKey(SORT_ORDER_PROPERTY)) {
+            activity.setSortOrder(changes.get(SORT_ORDER_PROPERTY));
         }
 
         activity.getDatabase().setLastSchemaUpdate(new Date());
+    }
+
+    private void updateFolder(Activity activity, PropertyMap changes) {
+        if(changes.get(FOLDER_ID_PROPERTY) == null) {
+            activity.setFolder(null);
+            activity.setCategory(null);
+        } else {
+            Folder folder = em.find(Folder.class, changes.get(FOLDER_ID_PROPERTY));
+            if (folder != null && folder.getDatabase().getId() == activity.getDatabase().getId()) {
+                activity.setFolder(folder);
+                activity.setCategory(folder.getName());
+            }
+        }
+    }
+
+    private void updateCategory(Activity activity, PropertyMap changes) {
+        String category = changes.get(CATEGORY_PROPERTY);
+        if(category == null) {
+            activity.setFolder(null);
+            return;
+        }
+
+        // If the activity is already assigned to a folder of the same name,
+        // there is nothing to do
+        if(activity.getFolder() != null && activity.getFolder().getName().equalsIgnoreCase(category)) {
+            return;
+        }
+
+        // Otherwise assign to an existing folder, or create a new one
+
+        List<Folder> existingFolders = em.createQuery("SELECT f FROM Folder f WHERE f.database.id = :dbId AND f.name = :category", Folder.class)
+                .setParameter("dbId", activity.getDatabase().getId())
+                .setParameter(CATEGORY_PROPERTY, category)
+                .getResultList();
+
+        if(!existingFolders.isEmpty()) {
+            activity.setFolder(existingFolders.get(0));
+            return;
+        }
+
+        // Otherwise create a new folder...
+        Folder folder = new Folder();
+        folder.setDatabase(activity.getDatabase());
+        folder.setName(category);
+        em.persist(folder);
+
+        activity.setFolder(folder);
     }
 
     private void updateFormClass(Activity activity, String name, String json) {

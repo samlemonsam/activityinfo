@@ -23,10 +23,9 @@ import org.activityinfo.legacy.shared.command.RemovePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.RemoveFailedResult;
 import org.activityinfo.legacy.shared.command.result.RemoveResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -45,10 +44,10 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
     }
 
     @Override
-    public CommandResult execute(RemovePartner cmd, User user) throws CommandException {
+    public CommandResult execute(RemovePartner cmd, User user) {
 
         // verify the current user has access to this site
-        UserDatabase db = em.getReference(UserDatabase.class, cmd.getDatabaseId());
+        Database db = em.getReference(Database.class, cmd.getDatabaseId());
         PermissionOracle.using(em).isManagePartnersAllowed(db, user);
 
         // check to see if there are already sites associated with this partner

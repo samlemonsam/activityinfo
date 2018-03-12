@@ -23,10 +23,9 @@ import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.DuplicateCreateResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -47,9 +46,9 @@ public class AddPartnerHandler implements CommandHandler<AddPartner> {
     }
 
     @Override @SuppressWarnings("unchecked")
-    public CommandResult execute(AddPartner cmd, User user) throws CommandException {
+    public CommandResult execute(AddPartner cmd, User user) {
 
-        UserDatabase db = em.find(UserDatabase.class, cmd.getDatabaseId());
+        Database db = em.find(Database.class, cmd.getDatabaseId());
         PermissionOracle.using(em).assertManagePartnerAllowed(db, user);
 
         // first check to see if an organization by this name is already
@@ -68,7 +67,7 @@ public class AddPartnerHandler implements CommandHandler<AddPartner> {
 
 
         Partner partner;
-        if (allPartners.size() != 0) {
+        if (!allPartners.isEmpty()) {
             partner = allPartners.get(0);
 
         } else {

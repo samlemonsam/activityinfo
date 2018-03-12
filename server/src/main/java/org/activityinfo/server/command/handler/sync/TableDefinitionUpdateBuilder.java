@@ -32,12 +32,12 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
     
     private final JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
-    private final Class[] tablesToSync = new Class[]{
+    private static final Class[] tablesToSync = new Class[]{
             Country.class,
             AdminLevel.class,
             AdminEntity.class,
             LocationType.class,
-            UserDatabase.class,
+            Database.class,
             Folder.class,
             Partner.class,
             Activity.class,

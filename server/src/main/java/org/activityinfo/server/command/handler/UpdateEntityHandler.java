@@ -22,8 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.command.UpdateEntity;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.server.command.handler.crud.ActivityPolicy;
 import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
  */
 public class UpdateEntityHandler extends BaseEntityHandler implements CommandHandler<UpdateEntity> {
 
-    private final static Logger LOG = Logger.getLogger(UpdateEntityHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(UpdateEntityHandler.class.getName());
 
     private final Injector injector;
 
@@ -52,48 +51,71 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     }
 
     @Override
-    public CommandResult execute(UpdateEntity cmd, User user) throws CommandException {
+    public CommandResult execute(UpdateEntity cmd, User user) {
 
-        LOG.fine("[execute] Update command for entity: " + cmd.getEntityName() + ".");
+        LOGGER.fine("[execute] Update command for entity: " + cmd.getEntityName() + ".");
 
         Map<String, Object> changes = cmd.getChanges().getTransientMap();
         PropertyMap changeMap = new PropertyMap(changes);
 
-        if ("UserDatabase".equals(cmd.getEntityName())) {
-            UserDatabasePolicy policy = injector.getInstance(UserDatabasePolicy.class);
-            policy.update(user, cmd.getId(), changeMap);
+        switch (cmd.getEntityName()) {
 
-        } else if ("Activity".equals(cmd.getEntityName())) {
-            ActivityPolicy policy = injector.getInstance(ActivityPolicy.class);
-            policy.update(user, cmd.getId(), changeMap);
+            case UserDatabaseDTO.ENTITY_NAME:
+                updateDatabase(cmd, user, changeMap);
+                break;
 
-        } else if ("Folder".equals(cmd.getEntityName())) {
-            updateFolder(user, cmd.getId(), changeMap);
+            case ActivityDTO.ENTITY_NAME:
+                updateActivity(cmd, user, changeMap);
+                break;
 
-        } else if ("AttributeGroup".equals(cmd.getEntityName())) {
-            updateAttributeGroup(cmd, changes);
+            case FolderDTO.ENTITY_NAME:
+                updateFolder(user, cmd.getId(), changeMap);
+                break;
 
-        } else if ("Attribute".equals(cmd.getEntityName())) {
-            updateAttribute(user, cmd, changes);
+            case AttributeGroupDTO.ENTITY_NAME:
+                updateAttributeGroup(user, cmd, changes);
+                break;
 
-        } else if ("Indicator".equals(cmd.getEntityName())) {
-            updateIndicator(user, cmd, changes);
+            case AttributeDTO.ENTITY_NAME:
+                updateAttribute(user, cmd, changes);
+                break;
 
-        } else if ("LockedPeriod".equals(cmd.getEntityName())) {
-            updateLockedPeriod(user, cmd, changes);
+            case IndicatorDTO.ENTITY_NAME:
+                updateIndicator(user, cmd, changes);
+                break;
 
-        } else if ("Target".equals(cmd.getEntityName())) {
-            updateTarget(user, cmd, changes);
+            case LockedPeriodDTO.ENTITY_NAME:
+                updateLockedPeriod(user, cmd, changes);
+                break;
 
-        } else if ("LocationType".equals(cmd.getEntityName())) {
-            LocationTypePolicy policy = injector.getInstance(LocationTypePolicy.class);
-            policy.update(user, cmd.getId(), changeMap);
-            
-        } else {
-            throw new RuntimeException("unknown entity type");
+            case TargetDTO.ENTITY_NAME:
+                updateTarget(user, cmd, changes);
+                break;
+
+            case LocationTypeDTO.ENTITY_NAME:
+                updateLocationType(cmd, user, changeMap);
+                break;
+
+            default:
+                throw new UnsupportedOperationException("EntityType:" + cmd.getEntityName());
         }
 
         return null;
+    }
+
+    private void updateLocationType(UpdateEntity cmd, User user, PropertyMap changeMap) {
+        LocationTypePolicy policy = injector.getInstance(LocationTypePolicy.class);
+        policy.update(user, cmd.getId(), changeMap);
+    }
+
+    private void updateActivity(UpdateEntity cmd, User user, PropertyMap changeMap) {
+        ActivityPolicy policy = injector.getInstance(ActivityPolicy.class);
+        policy.update(user, cmd.getId(), changeMap);
+    }
+
+    private void updateDatabase(UpdateEntity cmd, User user, PropertyMap changeMap) {
+        UserDatabasePolicy policy = injector.getInstance(UserDatabasePolicy.class);
+        policy.update(user, cmd.getId(), changeMap);
     }
 
     private void updateFolder(User user, int id, PropertyMap changeMap) {
@@ -121,10 +143,10 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
     private void updateIndicator(User user,
                                  UpdateEntity cmd,
-                                 Map<String, Object> changes) throws IllegalAccessCommandException {
+                                 Map<String, Object> changes) {
         Indicator indicator = entityManager().find(Indicator.class, cmd.getId());
 
-        assertDesignPrivileges(user, indicator.getActivity().getDatabase());
+        permissionsOracle.assertDesignPrivileges(indicator.getActivity(), user);
 
         updateIndicatorProperties(indicator, changes);
     }
@@ -132,8 +154,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateLockedPeriod(User user, UpdateEntity cmd, Map<String, Object> changes) {
         LockedPeriod lockedPeriod = entityManager().find(LockedPeriod.class, cmd.getId());
 
-        // TODO: check permissions when updating the LockedPeriod
-        // assertDesignPrivileges(user, database)
+        permissionsOracle.assertDesignPrivileges(lockedPeriod, user);
 
         updateLockedPeriodProperties(lockedPeriod, changes);
     }
@@ -141,8 +162,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateAttribute(User user, UpdateEntity cmd, Map<String, Object> changes) {
         Attribute attribute = entityManager().find(Attribute.class, cmd.getId());
 
-        // TODO: decide where attributes belong and how to manage them
-        // assertDesignPrivileges(user, attribute.get);
+        permissionsOracle.assertDesignPrivileges(attribute.getGroup(), user);
 
         updateAttributeProperties(changes, attribute);
         AttributeGroup ag = entityManager().find(AttributeGroup.class, attribute.getGroup().getId());
@@ -151,8 +171,10 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         activity.getDatabase().setLastSchemaUpdate(new Date());
     }
 
-    private void updateAttributeGroup(UpdateEntity cmd, Map<String, Object> changes) {
+    private void updateAttributeGroup(User user, UpdateEntity cmd, Map<String, Object> changes) {
         AttributeGroup group = entityManager().find(AttributeGroup.class, cmd.getId());
+
+        permissionsOracle.assertDesignPrivileges(group, user);
 
         updateAttributeGroupProperties(group, changes);
 
@@ -162,11 +184,12 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     }
 
     private void updateTarget(User user, UpdateEntity cmd, Map<String, Object> changes) {
-        // TODO: check permissions when updating the Target
         Target target = entityManager().find(Target.class, cmd.getId());
+
+        permissionsOracle.assertDesignPrivileges(target, user);
 
         updateTargetProperties(target, changes);
 
-        target.getUserDatabase().setLastSchemaUpdate(new Date());
+        target.getDatabase().setLastSchemaUpdate(new Date());
     }
 }

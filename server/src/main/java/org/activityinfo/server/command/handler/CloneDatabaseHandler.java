@@ -29,7 +29,6 @@ import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.form.*;
@@ -82,9 +81,8 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     // Maps old folder id -> new folder object
     private final Map<Integer, Folder> folderMapping = Maps.newHashMap();
 
-    private CloneDatabase command;
-    private UserDatabase targetDb;
-    private UserDatabase sourceDb;
+    private Database targetDb;
+    private Database sourceDb;
 
     @Inject
     public CloneDatabaseHandler(Injector injector, Provider<FormStorageProvider> formCatalog) {
@@ -94,11 +92,10 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     }
 
     @Override
-    public CommandResult execute(CloneDatabase command, User user) throws CommandException {
-        
-        this.command = command;
-        this.targetDb = createDatabase(this.command, user);
-        this.sourceDb = em.find(UserDatabase.class, this.command.getSourceDatabaseId());
+    public CommandResult execute(CloneDatabase command, User user) {
+
+        this.targetDb = createDatabase(command, user);
+        this.sourceDb = em.find(Database.class, command.getSourceDatabaseId());
 
         createDefaultPartner(user);
 
@@ -107,12 +104,12 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         }
 
         // 1. copy partners and keep mapping between old and new partners
-        if (this.command.isCopyPartners() || this.command.isCopyUserPermissions()) {
+        if (command.isCopyPartners() || command.isCopyUserPermissions()) {
             copyPartners();
         }
 
         // 2. copy user permissions : without design privileges the user shouldn't be able to see the list of users.
-        if (this.command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
+        if (command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
             copyUserPermissions();
         }
 
@@ -120,7 +117,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         copyForms();
 
         // 4. Map old folder ids to new folder ids on permission model
-        if (this.command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
+        if (command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
             mapFolderPermissions();
         }
         
@@ -320,7 +317,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
                 targetContainer.addElement(targetField);
                 sourceIdToTargetFormElementMapping.put(sourceField, targetField);
             } else {
-                throw new RuntimeException("Unsupported FormElement : " + element);
+                throw new UnsupportedOperationException("Unsupported FormElement : " + element);
             }
         }
     }
@@ -550,8 +547,8 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         FormClass targetFormClass = copyFormClass(oldSubFormId, newSubFormId);
 
-        MySqlStorageProvider formCatalog = (MySqlStorageProvider) this.formCatalog.get();
-        formCatalog.createOrUpdateFormSchema(targetFormClass);
+        MySqlStorageProvider mysqlStorage = (MySqlStorageProvider) this.formCatalog.get();
+        mysqlStorage.createOrUpdateFormSchema(targetFormClass);
 
         return new SubFormReferenceType(newSubFormId);
     }
@@ -643,8 +640,8 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         }
     }
 
-    private UserDatabase createDatabase(CloneDatabase command, User user) {
-        UserDatabase db = new UserDatabase();
+    private Database createDatabase(CloneDatabase command, User user) {
+        Database db = new Database();
         db.setName(command.getName());
         db.setFullName(command.getDescription());
         db.setCountry(em.find(Country.class, command.getCountryId()));

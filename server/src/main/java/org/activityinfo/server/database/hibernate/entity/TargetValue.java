@@ -22,7 +22,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-public class TargetValue implements Serializable, ReallyDeleteable {
+public class TargetValue implements Serializable, HardDeleteable {
 
     private TargetValueId id;
     private Target target;
@@ -73,8 +73,8 @@ public class TargetValue implements Serializable, ReallyDeleteable {
     }
 
     @Override
-    public void deleteReferences() {
-        // TODO delete referneces if any
+    public void delete() {
+        // NOOP, will be removed directly from database.
     }
 
 }

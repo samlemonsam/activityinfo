@@ -24,7 +24,7 @@ import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.server.command.handler.crud.ActivityPolicy;
 import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
@@ -53,38 +53,59 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
     }
 
     @Override
-    public CommandResult execute(CreateEntity cmd, User user) throws CommandException {
+    public CommandResult execute(CreateEntity cmd, User user) {
 
         Map<String, Object> properties = cmd.getProperties().getTransientMap();
         PropertyMap propertyMap = new PropertyMap(cmd.getProperties().getTransientMap());
 
-        if ("UserDatabase".equals(cmd.getEntityName())) {
-            UserDatabasePolicy policy = injector.getInstance(UserDatabasePolicy.class);
-            return new CreateResult((Integer) policy.create(user, propertyMap));
-        } else if ("Folder".equals(cmd.getEntityName())) {
-            return createFolder(user, cmd, properties);
-        } else if ("Activity".equals(cmd.getEntityName())) {
-            ActivityPolicy policy = injector.getInstance(ActivityPolicy.class);
-            return new CreateResult((Integer) policy.create(user, propertyMap));
-        } else if ("AttributeGroup".equals(cmd.getEntityName())) {
-            return createAttributeGroup(cmd, properties);
-        } else if ("Attribute".equals(cmd.getEntityName())) {
-            return createAttribute(cmd, properties);
-        } else if ("Indicator".equals(cmd.getEntityName())) {
-            return createIndicator(user, cmd, properties);
-        } else if ("LocationType".equals(cmd.getEntityName())) {
-            LocationTypePolicy policy = injector.getInstance(LocationTypePolicy.class);
-            return new CreateResult(policy.create(user, propertyMap));
-        } else {
-            throw new CommandException("Invalid entity class " + cmd.getEntityName());
+        switch (cmd.getEntityName()) {
+            case UserDatabaseDTO.ENTITY_NAME:
+                return createDatabase(user, propertyMap);
+
+            case FolderDTO.ENTITY_NAME:
+                return createFolder(user, properties);
+
+            case ActivityDTO.ENTITY_NAME:
+                return createActivity(user, propertyMap);
+
+            case AttributeGroupDTO.ENTITY_NAME:
+                return createAttributeGroup(properties);
+
+            case AttributeDTO.ENTITY_NAME:
+                return createAttribute(properties);
+
+            case IndicatorDTO.ENTITY_NAME:
+                return createIndicator(user, properties);
+
+            case LocationTypeDTO.ENTITY_NAME:
+                return createLocationType(user, propertyMap);
+
+            default:
+                throw new CommandException("Invalid entity class " + cmd.getEntityName());
         }
     }
 
-    private CommandResult createFolder(User user, CreateEntity cmd, Map<String, Object> properties) {
-        Integer databaseId = (Integer) properties.get("databaseId");
-        String name = (String) properties.get("name");
+    private CommandResult createDatabase(User user, PropertyMap propertyMap) {
+        UserDatabasePolicy policy = injector.getInstance(UserDatabasePolicy.class);
+        return new CreateResult((Integer) policy.create(user, propertyMap));
+    }
 
-        UserDatabase database = entityManager().find(UserDatabase.class, databaseId);
+    private CommandResult createActivity(User user, PropertyMap propertyMap) {
+        ActivityPolicy policy = injector.getInstance(ActivityPolicy.class);
+        return new CreateResult((Integer) policy.create(user, propertyMap));
+    }
+
+    private CommandResult createLocationType(User user, PropertyMap propertyMap) {
+        LocationTypePolicy policy = injector.getInstance(LocationTypePolicy.class);
+        return new CreateResult(policy.create(user, propertyMap));
+    }
+
+
+    private CommandResult createFolder(User user, Map<String, Object> properties) {
+        Integer databaseId = (Integer) properties.get("databaseId");
+        String name = (String) properties.get(EntityDTO.NAME_PROPERTY);
+
+        Database database = entityManager().find(Database.class, databaseId);
         assertDesignPrivileges(user, database);
 
         Folder folder = new Folder();
@@ -96,7 +117,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         return new CreateResult(folder.getId());
     }
 
-    private CommandResult createAttributeGroup(CreateEntity cmd, Map<String, Object> properties) {
+    private CommandResult createAttributeGroup(Map<String, Object> properties) {
         Activity activity = entityManager().find(Activity.class, properties.get("activityId"));
 
         AttributeGroup group = new AttributeGroup();
@@ -115,7 +136,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         return new CreateResult(group.getId());
     }
 
-    private CommandResult createAttribute(CreateEntity cmd, Map<String, Object> properties) {
+    private CommandResult createAttribute(Map<String, Object> properties) {
         Attribute attribute = new Attribute();
         attribute.setId(generator.generateInt());
         AttributeGroup ag = entityManager().getReference(AttributeGroup.class, properties.get("attributeGroupId"));
@@ -138,9 +159,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
     }
 
 
-    private CommandResult createIndicator(User user,
-                                          CreateEntity cmd,
-                                          Map<String, Object> properties) throws IllegalAccessCommandException {
+    private CommandResult createIndicator(User user, Map<String, Object> properties)  {
 
         // query the next indicator sort order index
         

@@ -27,13 +27,13 @@ import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.dao.CountryDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.Country;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
 
-public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
+public class UserDatabasePolicy implements EntityPolicy<Database> {
 
     private final EntityManager em;
     private final UserDatabaseDAO databaseDAO;
@@ -49,7 +49,7 @@ public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
     @Override
     public Object create(User user, PropertyMap properties) {
 
-        UserDatabase database = new UserDatabase();
+        Database database = new Database();
         database.setCountry(findCountry(properties));
         database.setOwner(user);
 
@@ -71,7 +71,7 @@ public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
         new AddPartnerHandler(em).execute(command, user);
     }
 
-    public UserDatabase findById(int dbId) {
+    public Database findById(int dbId) {
         return databaseDAO.findById(dbId);
     }
 
@@ -92,12 +92,12 @@ public class UserDatabasePolicy implements EntityPolicy<UserDatabase> {
 
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
-        UserDatabase database = em.find(UserDatabase.class, entityId);
+        Database database = em.find(Database.class, entityId);
         PermissionOracle.using(em).assertDesignPrivileges(database, user);
         applyProperties(database, changes);
     }
 
-    private void applyProperties(UserDatabase database, PropertyMap properties) {
+    private void applyProperties(Database database, PropertyMap properties) {
 
         database.setLastSchemaUpdate(new Date());
 

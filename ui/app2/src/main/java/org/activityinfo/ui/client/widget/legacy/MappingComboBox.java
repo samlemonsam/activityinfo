@@ -33,21 +33,25 @@ import org.activityinfo.i18n.shared.I18N;
  *
  * @param <T> the underlying (boxed) primitive type
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
+
+    public static final String VALUE_PROPERTY = "value";
+    public static final String LABEL_PROPERTY = "label";
 
     public static class Wrapper<T> extends BaseModelData {
         public Wrapper(T value, String label) {
-            set("value", value);
-            set("label", label);
+            set(VALUE_PROPERTY, value);
+            set(LABEL_PROPERTY, label);
         }
 
         public T getWrappedValue() {
-            return (T) get("value");
+            return get(VALUE_PROPERTY);
         }
 
         @Override
         public int hashCode() {
-            Object value = get("value");
+            Object value = get(VALUE_PROPERTY);
             return value == null ? 0 : value.hashCode();
         }
 
@@ -60,8 +64,8 @@ public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
                 return false;
             }
             Wrapper otherWrapper = (Wrapper) obj;
-            Object otherValue = otherWrapper.get("value");
-            Object value = get("value");
+            Object otherValue = otherWrapper.get(VALUE_PROPERTY);
+            Object value = get(VALUE_PROPERTY);
 
             if (value == null) {
                 return otherValue != null;
@@ -70,7 +74,7 @@ public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
         }
 
         public String getLabel() {
-            return get("label");
+            return get(LABEL_PROPERTY);
         }
     }
 
@@ -79,10 +83,10 @@ public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
 
     public MappingComboBox() {
         super();
-        myStore = new ListStore<Wrapper<T>>();
+        myStore = new ListStore<>();
         setStore(myStore);
-        setValueField("value");
-        setDisplayField("label");
+        setValueField(VALUE_PROPERTY);
+        setDisplayField(LABEL_PROPERTY);
         setEditable(true);
         setForceSelection(true);
         setTypeAhead(true);
@@ -102,7 +106,7 @@ public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
                 return null;
             }
         } else {
-            return myStore.findModel("value", value);
+            return myStore.findModel(VALUE_PROPERTY, value);
         }
     }
 
@@ -132,7 +136,7 @@ public class MappingComboBox<T> extends ComboBox<MappingComboBox.Wrapper<T>> {
     }
 
     public String getValueLabel(T value) {
-        Wrapper wrapper = store.findModel("value", value);
+        Wrapper wrapper = store.findModel(VALUE_PROPERTY, value);
         return wrapper == null ? null : wrapper.getLabel();
     }
 

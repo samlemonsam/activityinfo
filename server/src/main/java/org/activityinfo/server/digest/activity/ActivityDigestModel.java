@@ -18,10 +18,10 @@
  */
 package org.activityinfo.server.digest.activity;
 
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.digest.DigestModel;
 import org.activityinfo.server.digest.UserDigest;
 import org.activityinfo.server.util.date.DateCalc;
@@ -36,7 +36,7 @@ public class ActivityDigestModel implements DigestModel {
 
     public ActivityDigestModel(UserDigest userDigest) {
         this.userDigest = userDigest;
-        this.databases = new TreeSet<DatabaseModel>();
+        this.databases = new TreeSet<>();
     }
 
     public UserDigest getUserDigest() {
@@ -53,7 +53,7 @@ public class ActivityDigestModel implements DigestModel {
     }
 
     public Collection<DatabaseModel> getActiveDatabases() {
-        List<DatabaseModel> activeDatabases = new ArrayList<DatabaseModel>();
+        List<DatabaseModel> activeDatabases = new ArrayList<>();
         for (DatabaseModel db : databases) {
             if (db.isActive()) {
                 activeDatabases.add(db);
@@ -63,7 +63,7 @@ public class ActivityDigestModel implements DigestModel {
     }
 
     public Collection<DatabaseModel> getInactiveDatabases() {
-        List<DatabaseModel> inactiveDatabases = new ArrayList<DatabaseModel>();
+        List<DatabaseModel> inactiveDatabases = new ArrayList<>();
         for (DatabaseModel db : databases) {
             if (!db.isActive()) {
                 inactiveDatabases.add(db);
@@ -74,17 +74,17 @@ public class ActivityDigestModel implements DigestModel {
 
     public static class DatabaseModel implements Comparable<DatabaseModel> {
         private final ActivityDigestModel model;
-        private final UserDatabase database;
+        private final Database database;
         private final SiteHistory lastEdit;
 
         private ActivityMap ownerActivityMap;
         private final Set<PartnerActivityModel> partnerActivityModels;
 
-        public DatabaseModel(ActivityDigestModel model, UserDatabase database, SiteHistory lastEdit) {
+        public DatabaseModel(ActivityDigestModel model, Database database, SiteHistory lastEdit) {
             this.model = model;
             this.database = database;
             this.lastEdit = lastEdit;
-            this.partnerActivityModels = new HashSet<PartnerActivityModel>();
+            this.partnerActivityModels = new HashSet<>();
 
             model.addDatabase(this);
         }
@@ -93,7 +93,7 @@ public class ActivityDigestModel implements DigestModel {
             return model;
         }
 
-        public UserDatabase getDatabase() {
+        public Database getDatabase() {
             return database;
         }
 
@@ -155,7 +155,7 @@ public class ActivityDigestModel implements DigestModel {
         public PartnerActivityModel(DatabaseModel databaseModel, Partner partner) {
             this.databaseModel = databaseModel;
             this.partner = partner;
-            this.activityMaps = new HashSet<ActivityMap>();
+            this.activityMaps = new HashSet<>();
 
             databaseModel.addPartnerActivityModel(this);
         }
@@ -177,7 +177,7 @@ public class ActivityDigestModel implements DigestModel {
         }
 
         public Map<Integer, Integer> getTotalActivityMap() {
-            Map<Integer, Integer> totals = new HashMap<Integer, Integer>();
+            Map<Integer, Integer> totals = new HashMap<>();
 
             int size = databaseModel.getModel().userDigest.getDays();
             if (activityMaps != null && !activityMaps.isEmpty()) {
@@ -215,7 +215,7 @@ public class ActivityDigestModel implements DigestModel {
     public static class ActivityMap implements Comparable<ActivityMap> {
         private final DatabaseModel databaseModel;
         private final User user;
-        private final Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+        private final Map<Integer, Integer> map = new HashMap<>();
 
         public ActivityMap(DatabaseModel databaseModel, User user, List<SiteHistory> histories) {
             this.databaseModel = databaseModel;

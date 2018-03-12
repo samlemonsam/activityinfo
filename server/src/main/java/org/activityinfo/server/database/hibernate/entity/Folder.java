@@ -25,11 +25,11 @@ import java.io.Serializable;
 
 @Entity
 @EntityListeners(SchemaChangeListener.class)
-public class Folder implements SchemaElement, Serializable, ReallyDeleteable  {
+public class Folder implements SchemaElement, Serializable, HardDeleteable {
 
     private int id;
     private String name;
-    private UserDatabase database;
+    private Database database;
     private int sortOrder;
 
     public Folder() {
@@ -49,7 +49,7 @@ public class Folder implements SchemaElement, Serializable, ReallyDeleteable  {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DatabaseId") @NotNull
-    public UserDatabase getDatabase() {
+    public Database getDatabase() {
         return database;
     }
 
@@ -78,17 +78,18 @@ public class Folder implements SchemaElement, Serializable, ReallyDeleteable  {
         this.sortOrder = sortOrder;
     }
 
-    public void setDatabase(UserDatabase database) {
+    public void setDatabase(Database database) {
         this.database = database;
     }
 
     @Override
-    public UserDatabase findOwningDatabase() {
+    public Database findOwningDatabase() {
         return database;
     }
 
 
     @Override
-    public void deleteReferences() {
+    public void delete() {
+        // NOOP, folder is removed directly from database
     }
 }

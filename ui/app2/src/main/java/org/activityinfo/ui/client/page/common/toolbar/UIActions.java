@@ -44,6 +44,8 @@ public final class UIActions {
 
     public static final String CANCEL = "cancel";
 
+    public static final String EMBED = "EMBED";
+
     public static final String MAP = "map";
 
     public static final String REFRESH = "refresh";

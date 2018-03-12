@@ -22,11 +22,10 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.CreateReport;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.ParseException;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.ReportDefinition;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.report.ReportParserJaxb;
 
 import javax.persistence.EntityManager;
@@ -35,26 +34,23 @@ import javax.xml.bind.JAXBException;
 public class CreateReportHandler implements CommandHandler<CreateReport> {
     private EntityManager em;
 
-    private ReportDefinition reportDef;
-
     @Inject
     public CreateReportHandler(EntityManager em) {
         this.em = em;
     }
 
     @Override
-    public CommandResult execute(CreateReport cmd, User user) throws CommandException {
+    public CommandResult execute(CreateReport cmd, User user) {
 
         // verify that the XML is valid
         try {
-            reportDef = new ReportDefinition();
+            ReportDefinition reportDef = new ReportDefinition();
 
-            // TODO should allow null to xml field
             String xml = ReportParserJaxb.createXML(cmd.getReport());
             reportDef.setXml(xml);
 
             if (cmd.getDatabaseId() != null) {
-                reportDef.setDatabase(em.getReference(UserDatabase.class, cmd.getDatabaseId()));
+                reportDef.setDatabase(em.getReference(Database.class, cmd.getDatabaseId()));
             }
 
             reportDef.setTitle(cmd.getReport().getTitle());

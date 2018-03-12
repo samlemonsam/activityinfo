@@ -22,11 +22,10 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.AddProject;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Project;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -44,15 +43,15 @@ public class AddProjectHandler implements CommandHandler<AddProject> {
     }
 
     @Override
-    public CommandResult execute(AddProject cmd, User user) throws CommandException {
+    public CommandResult execute(AddProject cmd, User user) {
 
-        UserDatabase db = em.find(UserDatabase.class, cmd.getDatabaseId());
+        Database db = em.find(Database.class, cmd.getDatabaseId());
 
         ProjectDTO from = cmd.getProjectDTO();
         Project project = new Project();
         project.setName(from.getName());
         project.setDescription(from.getDescription());
-        project.setUserDatabase(db);
+        project.setDatabase(db);
 
         db.setLastSchemaUpdate(new Date());
 

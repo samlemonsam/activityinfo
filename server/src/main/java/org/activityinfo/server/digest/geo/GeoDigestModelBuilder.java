@@ -31,8 +31,8 @@ import org.activityinfo.legacy.shared.reports.model.clustering.AutomaticClusteri
 import org.activityinfo.legacy.shared.reports.model.labeling.ArabicNumberSequence;
 import org.activityinfo.legacy.shared.reports.model.layers.BubbleMapLayer;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.digest.DigestModelBuilder;
 import org.activityinfo.server.digest.UserDigest;
 import org.activityinfo.server.digest.geo.GeoDigestModel.DatabaseModel;
@@ -76,13 +76,13 @@ public class GeoDigestModelBuilder implements DigestModelBuilder {
 
         GeoDigestModel model = new GeoDigestModel(userDigest);
 
-        List<UserDatabase> databases = findDatabases(userDigest.getUser());
+        List<Database> databases = findDatabases(userDigest.getUser());
         LOGGER.finest("found " + databases.size() + " database(s) for user " + userDigest.getUser().getId());
 
         if (!databases.isEmpty()) {
             model.setSchemaDTO(dispatcher.execute(new GetSchema()));
 
-            for (UserDatabase database : databases) {
+            for (Database database : databases) {
                 createDatabaseModel(model, database);
             }
         }
@@ -90,7 +90,7 @@ public class GeoDigestModelBuilder implements DigestModelBuilder {
         return model;
     }
 
-    private void createDatabaseModel(GeoDigestModel model, UserDatabase database) throws IOException {
+    private void createDatabaseModel(GeoDigestModel model, Database database) throws IOException {
 
         DatabaseModel databaseModel = new DatabaseModel(model, database);
 
@@ -140,14 +140,14 @@ public class GeoDigestModelBuilder implements DigestModelBuilder {
      * a UserPermission for the specified user with allowView set to true. If the user happens to have his
      * emailnotification preference set to false, an empty list is returned.
      */
-    @VisibleForTesting @SuppressWarnings("unchecked") List<UserDatabase> findDatabases(User user) {
+    @VisibleForTesting @SuppressWarnings("unchecked") List<Database> findDatabases(User user) {
         // sanity check
         if (!user.isEmailNotification()) {
-            return new ArrayList<UserDatabase>();
+            return new ArrayList<>();
         }
 
         Query query = entityManager.get()
-                                   .createQuery("select distinct d from UserDatabase d left join d.userPermissions p " +
+                                   .createQuery("select distinct d from Database d left join d.userPermissions p " +
                                                 "where (d.owner = :user or (p.user = :user and p.allowView = true)) " +
                                                 "and d.dateDeleted is null " +
                                                 "order by d.name");
@@ -161,7 +161,7 @@ public class GeoDigestModelBuilder implements DigestModelBuilder {
      * @param from     the timestamp (millis) to start searching from for edited sites
      * @return the siteIds linked to the specified database that were edited since the specified timestamp
      */
-    @VisibleForTesting @SuppressWarnings("unchecked") List<Integer> findSiteIds(UserDatabase database, long from) {
+    @VisibleForTesting @SuppressWarnings("unchecked") List<Integer> findSiteIds(Database database, long from) {
 
         Query query = entityManager.get().createQuery("select distinct s.id from Site s " +
                                                       "join s.siteHistories h " +

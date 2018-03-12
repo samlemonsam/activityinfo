@@ -25,13 +25,13 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-public class LockedPeriod implements Serializable, ReallyDeleteable {
+public class LockedPeriod implements Serializable, HardDeleteable {
 
     private Date fromDate;
     private Date toDate;
     private String name;
     private int id;
-    private UserDatabase userDatabase;
+    private Database database;
     private Project project;
     private Activity activity;
     private boolean enabled;
@@ -43,7 +43,7 @@ public class LockedPeriod implements Serializable, ReallyDeleteable {
         this.fromDate = lockedPeriod.fromDate;
         this.toDate = lockedPeriod.toDate;
         this.name = lockedPeriod.name;
-        this.userDatabase = lockedPeriod.userDatabase;
+        this.database = lockedPeriod.database;
         this.project = lockedPeriod.project;
         this.activity = lockedPeriod.activity;
         this.enabled = lockedPeriod.enabled;
@@ -95,12 +95,12 @@ public class LockedPeriod implements Serializable, ReallyDeleteable {
     }
 
     @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "UserDatabaseId", nullable = true)
-    public UserDatabase getUserDatabase() {
-        return userDatabase;
+    public Database getDatabase() {
+        return database;
     }
 
-    public void setUserDatabase(UserDatabase userDatabase) {
-        this.userDatabase = userDatabase;
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     public void setProject(Project project) {
@@ -130,32 +130,32 @@ public class LockedPeriod implements Serializable, ReallyDeleteable {
     }
 
     @Transient
-    public UserDatabase getParentDatabase() {
-        if (userDatabase != null) {
-            return userDatabase;
+    public Database getParentDatabase() {
+        if (database != null) {
+            return database;
         } else if (activity != null) {
             return activity.getDatabase();
         } else if (project != null) {
-            return project.getUserDatabase();
+            return project.getDatabase();
         }
 
         return null;
     }
 
     @Override
-    public void deleteReferences() {
+    public void delete() {
         getParentDatabase().updateVersion();
         if (activity != null) {
             activity.getLockedPeriods().remove(this);
         }
-        if (userDatabase != null) {
-            userDatabase.getLockedPeriods().remove(this);
+        if (database != null) {
+            database.getLockedPeriods().remove(this);
         }
         if (project != null) {
             project.getLockedPeriods().remove(this);
         }
         this.activity = null;
-        this.userDatabase = null;
+        this.database = null;
         this.project = null;
     }
 

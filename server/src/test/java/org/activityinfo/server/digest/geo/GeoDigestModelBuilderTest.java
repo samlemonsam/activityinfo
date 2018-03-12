@@ -24,8 +24,8 @@ import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.database.hibernate.entity.UserDatabase;
 import org.activityinfo.server.digest.TestDigestModule;
 import org.activityinfo.server.digest.UserDigest;
 import org.junit.Test;
@@ -55,27 +55,27 @@ public class GeoDigestModelBuilderTest {
     public void testFindDatabasesOwnerAndViewAndNotification() throws Exception {
         // owner & view & notification
         User user = em.find(User.class, 100);
-        List<UserDatabase> dbs = geoDigestModelBuilder.findDatabases(user);
+        List<Database> dbs = geoDigestModelBuilder.findDatabases(user);
         assertThat(dbs.size(), is(equalTo(2)));
-        assertTrue(dbs.contains(em.find(UserDatabase.class, 3)));
-        assertTrue(dbs.contains(em.find(UserDatabase.class, 100)));
+        assertTrue(dbs.contains(em.find(Database.class, 3)));
+        assertTrue(dbs.contains(em.find(Database.class, 100)));
     }
 
     @Test
     public void testFindDatabasesOwnerAndNotification() throws Exception {
         // owner & notification
         User user = em.find(User.class, 1);
-        List<UserDatabase> dbs = geoDigestModelBuilder.findDatabases(user);
+        List<Database> dbs = geoDigestModelBuilder.findDatabases(user);
         assertThat(dbs.size(), is(equalTo(2)));
-        assertTrue(dbs.contains(em.find(UserDatabase.class, 1)));
-        assertTrue(dbs.contains(em.find(UserDatabase.class, 2)));
+        assertTrue(dbs.contains(em.find(Database.class, 1)));
+        assertTrue(dbs.contains(em.find(Database.class, 2)));
     }
 
     @Test
     public void testFindDatabasesOwnerAndNoNotification() throws Exception {
         // owner & no notification
         User user = em.find(User.class, 2);
-        List<UserDatabase> dbs = geoDigestModelBuilder.findDatabases(user);
+        List<Database> dbs = geoDigestModelBuilder.findDatabases(user);
         dbs = geoDigestModelBuilder.findDatabases(user);
         assertThat(dbs.size(), is(equalTo(0)));
     }
@@ -84,16 +84,16 @@ public class GeoDigestModelBuilderTest {
     public void testFindDatabasesViewAndNotification() throws Exception {
         // view & notification
         User user = em.find(User.class, 3);
-        List<UserDatabase> dbs = geoDigestModelBuilder.findDatabases(user);
+        List<Database> dbs = geoDigestModelBuilder.findDatabases(user);
         assertThat(dbs.size(), is(equalTo(1)));
-        assertTrue(dbs.contains(em.find(UserDatabase.class, 1)));
+        assertTrue(dbs.contains(em.find(Database.class, 1)));
     }
 
     @Test
     public void testFindDatabasesOnlyNotification() throws Exception {
         // only notification
         User user = em.find(User.class, 7);
-        List<UserDatabase> dbs = geoDigestModelBuilder.findDatabases(user);
+        List<Database> dbs = geoDigestModelBuilder.findDatabases(user);
         assertThat(dbs.size(), is(equalTo(0)));
     }
 
@@ -110,21 +110,21 @@ public class GeoDigestModelBuilderTest {
     @Test
     public void testFindSitesNoSiteDatabase() {
         List<Integer> sites = geoDigestModelBuilder.findSiteIds(
-                em.find(UserDatabase.class, 2), 1300000000000L);
+                em.find(Database.class, 2), 1300000000000L);
         assertThat(sites.size(), is(equalTo(0)));
     }
 
     @Test
     public void testFindSitesBeforeFrom() {
         List<Integer> sites = geoDigestModelBuilder.findSiteIds(
-                em.find(UserDatabase.class, 1), 1370000000000L);
+                em.find(Database.class, 1), 1370000000000L);
         assertThat(sites.size(), is(equalTo(0)));
     }
 
     @Test
     public void testFindSitesBetween() {
         List<Integer> sites = geoDigestModelBuilder.findSiteIds(
-                em.find(UserDatabase.class, 1), 1360000000000L);
+                em.find(Database.class, 1), 1360000000000L);
         assertThat(sites.size(), is(equalTo(1)));
         assertTrue(sites.contains(1));
     }
@@ -132,7 +132,7 @@ public class GeoDigestModelBuilderTest {
     @Test
     public void testFindSitesAfterFrom() {
         List<Integer> sites = geoDigestModelBuilder.findSiteIds(
-                em.find(UserDatabase.class, 1), 1350000000000L);
+                em.find(Database.class, 1), 1350000000000L);
         assertThat(sites.size(), is(equalTo(2)));
         assertTrue(sites.contains(1));
         assertTrue(sites.contains(2));

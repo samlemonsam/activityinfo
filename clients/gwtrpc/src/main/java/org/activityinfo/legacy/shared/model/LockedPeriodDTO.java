@@ -20,13 +20,13 @@ package org.activityinfo.legacy.shared.model;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import com.google.common.base.Preconditions;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.Set;
 
@@ -36,14 +36,18 @@ import java.util.Set;
 @JsonAutoDetect(JsonMethod.NONE)
 public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
 
+    public static final String ENTITY_NAME = "LockedPeriod";
+    public static final String START_DATE_PROPERTY = "fromDate";
+    public static final String END_DATE_PROPERTY = "toDate";
+    public static final String ENABLED_PROPERTY = "enabled";
+    public static final String PARENT_NAME_PROPERTY = "parentName";
+    public static final String PARENT_TYPE_PROPERTY = "parentType";
+
     /**
      * An object supporting locks
      */
     public interface HasLockedPeriod extends EntityDTO {
-        public Set<LockedPeriodDTO> getLockedPeriods();
-
-        // This should be an instance method of LockedPeriodsList
-        public Set<LockedPeriodDTO> getEnabledLockedPeriods();
+        Set<LockedPeriodDTO> getLockedPeriods();
     }
 
     private HasLockedPeriod parent;
@@ -54,57 +58,63 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
     }
 
     public void setName(String name) {
-        set("name", name);
+        set(NAME_PROPERTY, name);
     }
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public String getName() {
-        return (String) get("name");
+        return get(NAME_PROPERTY);
     }
 
     public void setId(int id) {
-        set("id", id);
+        set(ID_PROPERTY, id);
     }
 
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getId() {
-        return (Integer) get("id");
+        return (Integer) get(ID_PROPERTY);
     }
 
     @JsonIgnore
     public void setToDate(Date toDate) {
-        set("toDate", new LocalDate(toDate));
+        set(START_DATE_PROPERTY, new LocalDate(toDate));
     }
 
     public void setToDate(LocalDate toDate) {
         if (toDate == null) {
-            set("toDate", null);
+            set(START_DATE_PROPERTY, null);
         } else {
-            set("toDate", toDate);
+            set(START_DATE_PROPERTY, toDate);
         }
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public LocalDate getToDate() {
-        return get("toDate");
+        return get(START_DATE_PROPERTY);
     }
 
     @JsonIgnore
     public void setFromDate(Date fromDate) {
         if (fromDate == null) {
-            set("fromDate", null);
+            set(END_DATE_PROPERTY, null);
         } else {
-            set("fromDate", new LocalDate(fromDate));
+            set(END_DATE_PROPERTY, new LocalDate(fromDate));
         }
     }
 
     public void setFromDate(LocalDate fromDate) {
-        set("fromDate", fromDate);
+        set(END_DATE_PROPERTY, fromDate);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public LocalDate getFromDate() {
-        return get("fromDate");
+        return get(END_DATE_PROPERTY);
     }
 
     /**
@@ -113,22 +123,23 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
      */
     public boolean isValid() {
         return getFromDate() != null &&
-               getToDate() != null &&
-               getFromDate().before(getToDate());
+                getToDate() != null &&
+                getFromDate().before(getToDate());
     }
 
     public void setEnabled(boolean enabled) {
-        set("enabled", enabled);
+        set(ENABLED_PROPERTY, enabled);
     }
 
-    @JsonProperty @JsonView(DTOViews.Schema.class)
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public boolean isEnabled() {
-        return (Boolean) get("enabled");
+        return (Boolean) get(ENABLED_PROPERTY);
     }
 
     @Override
     public String getEntityName() {
-        return "LockedPeriod";
+        return ENTITY_NAME;
     }
 
     public HasLockedPeriod getParent() {
@@ -138,8 +149,8 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
     public void setParent(HasLockedPeriod hasLock) {
         this.parent = hasLock;
         this.parentId = hasLock.getId();
-        set("parentName", hasLock.getName());
-        set("parentType", hasLock.getEntityName());
+        set(PARENT_NAME_PROPERTY, hasLock.getName());
+        set(PARENT_TYPE_PROPERTY, hasLock.getEntityName());
     }
 
     public boolean hasParent() {
@@ -159,23 +170,17 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
     }
 
     public String getParentType() {
-        return (String) get("parentType");
+        return get(PARENT_TYPE_PROPERTY);
     }
 
     /**
      * give meaning to the parentId by specifying the type of the parent.
      */
     public void setParentType(String type) {
-        set("parentType", type);
+        set(PARENT_TYPE_PROPERTY, type);
     }
 
-    public boolean fallsWithinPeriod(Date date) {
-        return fallsWithinPeriod(new LocalDate(date));
-    }
-
-    public boolean fallsWithinPeriod(LocalDate date) {
-        Preconditions.checkNotNull(date);
-
+    public boolean fallsWithinPeriod(@Nonnull LocalDate date) {
         LocalDate from = getFromDate();
         LocalDate to = getToDate();
 

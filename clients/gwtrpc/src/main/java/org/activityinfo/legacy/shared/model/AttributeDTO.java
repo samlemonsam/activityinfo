@@ -33,6 +33,7 @@ import org.codehaus.jackson.map.annotate.JsonView;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class AttributeDTO extends BaseModelData implements EntityDTO {
 
+    public static final String ENTITY_NAME = "Attribute";
     public static final String PROPERTY_PREFIX = "ATTRIB";
     public static final int NAME_MAX_LENGTH = 255;
 
@@ -86,7 +87,7 @@ public final class AttributeDTO extends BaseModelData implements EntityDTO {
 
     @Override
     public String getEntityName() {
-        return "Attribute";
+        return ENTITY_NAME;
     }
 
     @Override
