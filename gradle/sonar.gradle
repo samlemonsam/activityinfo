@@ -15,6 +15,7 @@ def projectCoverageFile = new File("$buildDir/jacoco/projectCoverage.exec")
 
 sonarqube {
     properties {
+        property "sonar.projectKey", "org.activityinfo:activityinfo"
         property "sonar.projectName", "ActivityInfo"
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.jacoco.reportPaths", projectCoverageFile
