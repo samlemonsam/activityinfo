@@ -1,7 +1,6 @@
 
 
 
-
 ext {
     outputDir = "$buildDir/gwt-out"
 }
@@ -38,7 +37,6 @@ dependencies {
     compile 'com.googlecode.gwtquery:gwtquery:1.5-beta1'
     compile 'com.arcbees:gwtchosen:3.0'
 
-    compile group: 'com.google.inject', name: 'guice', version: '3.0', classifier: 'sources'
     compile 'javax.xml.bind:jaxb-api:2.3.0'
 
     gwtSdk libraries.gwt.dev
