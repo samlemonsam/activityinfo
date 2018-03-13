@@ -1,0 +1,19 @@
+
+// license.gradle
+
+// Apply consistent license headers throughout
+// the project's source files.
+
+allprojects {
+    apply plugin: 'com.github.hierynomus.license'
+
+    license {
+        header rootProject.file('COPYRIGHT.txt')
+        strictCheck true
+        mapping {
+            java = 'SLASHSTAR_STYLE'
+        }
+        exclude "**/*.json"
+        exclude "**/*.txt"
+    }
+}

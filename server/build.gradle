@@ -11,7 +11,6 @@ apply from: './databaseSetup.gradle'
 apply from: './buildProperties.gradle'
 apply from: './devServer.gradle'
 
-
 description = 'ActivityInfo Server'
 
 
@@ -31,8 +30,8 @@ appengine {
     // set a new value in your personal
     // gradle.properties file
     httpPort = Integer.parseInt(devServerPort)
-
 }
+
 
 war {
     archiveName = "activityinfo-b${buildNumber}.war"
@@ -85,15 +84,6 @@ compileJava {
                     includes: 'org/activityinfo/server/database/hibernate/entity/*.class'
             )
         }
-    }
-}
-
-processResources {
-    inputs.property "project.version", project.version.toString()
-    filteringCharset = "UTF-8"
-    filter { line ->
-        line.replace('$[display.version]', project.version.toString())
-            .replace('$[git.commit.id]', commitId)
     }
 }
 

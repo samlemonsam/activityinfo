@@ -1,21 +1,50 @@
 
+// buildProperties.gradle
+
+// Writes a few files that are used during deployment to access
+// this build's version and git commit.
+
+// commit.id: git hash used by the user interface to determine if the cached version
+// is the most recent version
+
+// build.properties: retrieved by the BuildProperties class to display the version and
+// git sha1 commit id.
+
+// source-context.json: used by Google Cloud Debugger to locate sources for live debugging.
+
 ext {
-    commitIdFile = project.file("$buildDir/commit.id")
+    propertiesDir = project.file("$buildDir/properties")
 }
 
 task writeBuildProperties {
-    inputs.property "commitId", commitId
-    outputs.file commitIdFile
-    
     doLast {
+        def commitId = org.ajoberstar.grgit.Grgit.open(project.rootDir).head().id
+
+        def commitIdFile = new File("$propertiesDir/commit.id")
+        commitIdFile.parentFile.mkdirs()
         commitIdFile.write(commitId)
+
+        def classesDir = new File("$propertiesDir/WEB-INF/classes")
+        classesDir.mkdirs();
+
+        def buildPropertiesFile = new File(classesDir, "build.properties")
+        buildPropertiesFile.withWriter { writer ->
+            writer.println("commitId = ${commitId}")
+            writer.println("version = ${project.version}")
+        }
+
+        def sourceContextFile = new File(classesDir, "source-context.json")
+        sourceContextFile.write(groovy.json.JsonOutput.toJson([
+            git: [
+                revisionId: commitId,
+                url       : "https://github.com/bedatadriven/activityinfo.git"
+            ]
+        ]));
     }
 }
 
 war {
-    from(commitIdFile.parentFile) {
-        include commitIdFile.name
-    }
+    from propertiesDir
 }
 
 tasks['war'].dependsOn writeBuildProperties

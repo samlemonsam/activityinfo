@@ -19,27 +19,6 @@
 
 -->
 <!DOCTYPE html>
-<#--
- #%L
- ActivityInfo Server
- %%
- Copyright (C) 2009 - 2013 UNICEF
- %%
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as
- published by the Free Software Foundation, either version 3 of the 
- License, or (at your option) any later version.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public 
- License along with this program.  If not, see
- <http://www.gnu.org/licenses/gpl-3.0.html>.
- #L%
--->
 <#-- @ftlvariable name="" type="org.activityinfo.server.login.model.HostPageModel" -->
 <#if appCacheManifest??>
 <html manifest="${appCacheManifest}">
@@ -57,8 +36,6 @@
     <#if newUI>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     </#if>
-
-
 
     <title>${domain.title}</title>
 
@@ -105,8 +82,8 @@
             window.location = "/login" + window.location.hash;
         }
         var ClientContext = {
-            version: '$[display.version]',
-            commitId: '$[git.commit.id]',
+            version: '${buildProperties.version}',
+            commitId: '${buildProperties.commitId}',
             title: '${domain.title}',
             featureFlags: '${featureFlags!''}'
 
@@ -131,7 +108,7 @@
     <div id="loading-box">
         <div class="loading-indicator">
             <img src="/ActivityInfo/gxt231/images/default/shared/large-loading.gif" alt=""/>
-        ${domain.title} $[display.version]<br/>
+        ${domain.title} ${buildProperties.version}<br/>
             <span id="loading-msg">${label.loading}</span>
 
         </div>

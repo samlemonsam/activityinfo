@@ -18,6 +18,7 @@
  */
 package org.activityinfo.server.login.model;
 
+import org.activityinfo.server.BuildProperties;
 import org.activityinfo.server.DeploymentEnvironment;
 
 public class HostPageModel extends PageModel {
@@ -74,5 +75,9 @@ public class HostPageModel extends PageModel {
 
     public String getCommitId() {
         return DeploymentEnvironment.getCommitId();
+    }
+
+    public BuildProperties getBuildProperties() {
+        return BuildProperties.PROPERTIES;
     }
 }

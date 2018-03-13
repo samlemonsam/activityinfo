@@ -1,5 +1,9 @@
-// build a map of the dependency artifacts to use.  Allows centralized definition of the version of artifacts to
-// use.  In that respect it serves a role similar to <dependencyManagement> in Maven
+
+// license.gradle
+
+// Define common versions of dependencies to use throughout the project, and
+// define conflict resolution rules.
+
 ext {
 
     guavaVersion = '23.0'

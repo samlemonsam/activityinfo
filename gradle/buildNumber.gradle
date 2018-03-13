@@ -1,0 +1,23 @@
+
+// buildNumber.gradle
+
+// Grab the build number from the environment, or the command line,
+// for example, -Pbuild=1393
+
+if(System.env.PIPELINE_VERSION) {
+    // Resuming an existing pipeline
+    project.ext.buildNumber = System.env.PIPELINE_VERSION
+
+} else if(System.env.BUILD_NUMBER) {
+    // Starting a new pipeline build
+    project.ext.buildNumber = System.env.BUILD_NUMBER
+
+} else if(project.hasProperty('build')) {
+    // Specified via the command line
+    project.ext.buildNumber = Integer.parseInt(project.property('build'))
+
+} else {
+    // Development
+    project.ext.buildNumber = 'dev'
+}
+
