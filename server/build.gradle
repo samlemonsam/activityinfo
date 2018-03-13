@@ -81,7 +81,7 @@ compileJava {
         
         ant.hibernateInstrumentation() {
             fileset(
-                    dir: "${project.buildDir}/classes/main",
+                    dir: destinationDir,
                     includes: 'org/activityinfo/server/database/hibernate/entity/*.class'
             )
         }
