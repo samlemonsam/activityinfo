@@ -49,7 +49,8 @@ public class LockedPeriod implements Serializable, HardDeleteable {
         this.enabled = lockedPeriod.enabled;
     }
 
-    @Column(nullable = false) @Temporal(TemporalType.DATE)
+    @Column(nullable = false)
+    @Temporal(TemporalType.DATE)
     public Date getFromDate() {
         return fromDate;
     }
@@ -62,7 +63,8 @@ public class LockedPeriod implements Serializable, HardDeleteable {
         this.fromDate = fromDate.atMidnightInMyTimezone();
     }
 
-    @Column(nullable = false) @Temporal(TemporalType.DATE)
+    @Column(nullable = false)
+    @Temporal(TemporalType.DATE)
     public Date getToDate() {
         return toDate;
     }
@@ -84,7 +86,8 @@ public class LockedPeriod implements Serializable, HardDeleteable {
         this.name = name;
     }
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "LockedPeriodId", unique = true, nullable = false)
     public int getId() {
         return id;
@@ -94,7 +97,8 @@ public class LockedPeriod implements Serializable, HardDeleteable {
         this.id = id;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "UserDatabaseId", nullable = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserDatabaseId", nullable = true)
     public Database getDatabase() {
         return database;
     }
@@ -107,7 +111,8 @@ public class LockedPeriod implements Serializable, HardDeleteable {
         this.project = project;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "ProjectId", nullable = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ProjectId", nullable = true)
     public Project getProject() {
         return project;
     }
@@ -116,7 +121,8 @@ public class LockedPeriod implements Serializable, HardDeleteable {
         this.activity = activity;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "ActivityId", nullable = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ActivityId", nullable = true)
     public Activity getActivity() {
         return activity;
     }

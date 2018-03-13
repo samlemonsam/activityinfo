@@ -280,21 +280,6 @@ public class UserPermission implements Serializable {
     }
 
     /**
-     * Gets the timestamp on which the schema, as visible to the
-     * <code>user</code> was last updated.
-     * <p/>
-     * Note: owners of databases do not have a <code>UserPermission</code>
-     * record, so to establish the last update to the schema, the
-     * <code>Database</code> table also needs to be checked.
-     *
-     * @return The date on which the user visible schema was updated.
-     */
-    @Transient
-    public Date getLastSchemaUpdate() {
-        return new Date(version);
-    }
-
-    /**
      * Sets the timestamp on which the schema, as visble to the
      * <code>user</code> has last been updated.
      * <p/>
