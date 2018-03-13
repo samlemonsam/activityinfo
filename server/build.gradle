@@ -43,9 +43,6 @@ war {
     from(project(':apiDocs').outputDir) {
         into 'apidocs'   
     }
-    from(project(':api').outputSpec) {
-        into 'apidocs'
-    }
     from(project(':ui:app').outputDir) {
         exclude("**/*.symbolMap")
     }

@@ -46,7 +46,7 @@ task generateDocs(type: JavaExec) {
     main = 'org.activityinfo.api.tools.DocGenerator'
     classpath = sourceSets.generator.runtimeClasspath
     workingDir = rootProject.projectDir
-    args tasks.getByPath(':api:compileSpec').outputFile
+    args project.file('src/main/openapi/api.json')
     args outputDir
 }
 

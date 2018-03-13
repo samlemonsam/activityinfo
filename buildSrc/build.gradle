@@ -11,8 +11,6 @@ dependencies {
     compile 'com.google.appengine:gradle-appengine-plugin:1.9.19'
     compile 'com.google.apis:google-api-services-sqladmin:v1beta4-rev1-1.19.1'
     compile 'org.bouncycastle:bcprov-jdk16:1.46'
-
-    compile 'org.yaml:snakeyaml:1.17'
 }
 
 repositories {

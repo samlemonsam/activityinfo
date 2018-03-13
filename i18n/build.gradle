@@ -35,13 +35,6 @@ dependencies {
     toolCompile   'joda-time:joda-time:2.5'
 }
 
-idea {
-    module {
-        testSourceDirs += file('src/tool/java')
-        scopes.TEST.plus += [ configurations.toolCompile ]
-    }
-}
-
 jar {
     from project.sourceSets.main.allSource
     from project.sourceSets.main.output

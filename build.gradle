@@ -1,19 +1,15 @@
 
-/**
- * Define the dependencies of *this* build script itself.
- *
- * These are the plugins and other libraries required to evaluate
- * the *.gradle files themselves.
- */
+// ActivityInfo Root Project
+// The settings here are inherited by all subprojects
+
+// Declare the dependencies of the gradle build scripts
+// themselves.
+
 buildscript {
   repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-    jcenter()
+    maven { url "https://nexus.bedatadriven.com/content/groups/public" }
   }
   dependencies {
-    classpath 'com.bmuschko:gradle-nexus-plugin:2.3'
     classpath 'com.moowork.gradle:gradle-grunt-plugin:0.12'
     classpath "com.moowork.gradle:gradle-node-plugin:0.12"
     classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
@@ -33,30 +29,25 @@ plugins {
  */
 apply from: "./gradle/libraries.gradle"
 apply from: "./gradle/version.gradle"
-apply from: "./gradle/jacoco.gradle"
 apply from: './gradle/database.gradle'
 apply from: "./gradle/environment.gradle"
 
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '4.3.1'
+  gradleVersion = '4.6'
 }
 
 allprojects  {
   apply plugin: 'maven'
-  apply plugin: 'idea'
+  apply plugin: 'jacoco'
+
   group = 'org.activityinfo'
 
-}
-
-idea {
-  project {
-    jdkName = '1.7'
-    languageLevel = '1.7'
-    vcs = 'Git'
+  repositories {
+    mavenLocal()
+    maven { url "https://nexus.bedatadriven.com/content/groups/public" }
   }
 }
-
 
 subprojects {
 
@@ -86,16 +77,12 @@ subprojects {
 
   // This is required to stop javac from attempting to compile
   // java sources included in .jar files intended for GWT
+
   tasks.withType(JavaCompile) {
     options.compilerArgs += ["-implicit:none", "-sourcepath", ""]
     options.encoding = 'UTF-8'
   }
 
-  repositories {
-    mavenLocal()
-    maven { url "https://nexus.bedatadriven.com/content/groups/public" }
-    maven { url "https://plugins.gradle.org/m2/" }
-  }
 
   dependencies {
     compile libraries.slf4j.api
@@ -107,6 +94,28 @@ subprojects {
     testCompile libraries.junit
     testCompile libraries.hamcrest
     testCompile libraries.easymock
+  }
+}
+
+task jacocoMerge(type: JacocoMerge) {
+
+  def excluded = [ ':tests:test', ':tools:indexeddb:test' ]
+
+  subprojects.each { subproject ->
+    if(subproject.file('src/test/java').exists()) {
+      subproject.tasks.withType(Test).each { task ->
+        if (!excluded.contains(task.path)) {
+           executionData task
+        }
+      }
+    }
+  }
+}
+
+sonarqube {
+  properties {
+    property "sonar.projectName", "ActivityInfo"
+    property "sonar.jacoco.reportPaths", project.file('build/jacoco/jacocoMerge.exec')
   }
 }
 
