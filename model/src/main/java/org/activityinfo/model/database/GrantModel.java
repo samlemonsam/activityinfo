@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.model.permission;
+package org.activityinfo.model.database;
 
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
@@ -27,29 +27,41 @@ import org.activityinfo.json.JsonValue;
  */
 public class GrantModel implements JsonSerializable {
 
-    private String folderId;
+    private String id;
+    private String label;
+    private String resourceId;
 
     private GrantModel() {
     }
 
-    public GrantModel(String folderId) {
-        this.folderId = folderId;
+    public GrantModel(String resourceId) {
+        this.resourceId = resourceId;
     }
 
-    public String getFolderId() {
-        return folderId;
+    /**
+     * @return this grant's unique id within the database.
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @return the id of the database, folder, or form to which this grant applies.
+     */
+    public String getResourceId() {
+        return resourceId;
     }
 
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
-        object.put("folderId", folderId);
+        object.put("folderId", resourceId);
         return object;
     }
 
     public static GrantModel fromJson(JsonValue value) {
         GrantModel grant = new GrantModel();
-        grant.folderId = value.getString("folderId");
+        grant.resourceId = value.getString("folderId");
         return grant;
     }
 }

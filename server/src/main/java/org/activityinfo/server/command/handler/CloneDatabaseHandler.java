@@ -34,8 +34,8 @@ import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.model.permission.GrantModel;
-import org.activityinfo.model.permission.UserPermissionModel;
+import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -158,7 +158,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             List<GrantModel> destinationGrants = new ArrayList<>();
 
             for (GrantModel sourceGrant : sourceModel.getGrants()) {
-                int folderId = CuidAdapter.getLegacyIdFromCuid(sourceGrant.getFolderId());
+                int folderId = CuidAdapter.getLegacyIdFromCuid(sourceGrant.getResourceId());
                 if (!folderMapping.containsKey(folderId)) {
                     // folder not copied - do not add grant to new permission model
                     continue;

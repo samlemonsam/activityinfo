@@ -33,8 +33,8 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.GrantModel;
-import org.activityinfo.model.permission.UserPermissionModel;
+import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.promise.Promise;
 
@@ -81,8 +81,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         private FolderFilter(String modelJson) {
             UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(modelJson));
             for (GrantModel grantModel : model.getGrants()) {
-                if(grantModel.getFolderId().charAt(0) == CuidAdapter.FOLDER_DOMAIN) {
-                    int folderId = CuidAdapter.getLegacyIdFromCuid(grantModel.getFolderId());
+                if(grantModel.getResourceId().charAt(0) == CuidAdapter.FOLDER_DOMAIN) {
+                    int folderId = CuidAdapter.getLegacyIdFromCuid(grantModel.getResourceId());
                     folders.add(folderId);
                 }
             }

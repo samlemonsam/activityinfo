@@ -30,8 +30,8 @@ import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.GrantModel;
-import org.activityinfo.model.permission.UserPermissionModel;
+import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -136,7 +136,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(perm.getModel()));
             List<FolderDTO> folderList = new ArrayList<>();
             for (GrantModel grantModel : model.getGrants()) {
-                Folder folder = folderMap.get(grantModel.getFolderId());
+                Folder folder = folderMap.get(grantModel.getResourceId());
                 if(folder != null) {
                     folderList.add(createFolderDTO(folder));
                 }

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.model.permission;
+package org.activityinfo.model.database;
 
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
