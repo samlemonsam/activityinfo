@@ -41,7 +41,6 @@ task generateDocs(type: JavaExec) {
     description = 'Generates API Documentation'
 
     dependsOn 'generatorClasses'
-    dependsOn ':api:compileSpec'
 
     main = 'org.activityinfo.api.tools.DocGenerator'
     classpath = sourceSets.generator.runtimeClasspath
