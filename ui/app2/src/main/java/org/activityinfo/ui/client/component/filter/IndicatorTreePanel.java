@@ -317,15 +317,14 @@ public class IndicatorTreePanel extends ContentPanel {
             return list;
         }
 
-    }
 
-    private Promise<List<ModelData>> loadFields(ResourceId formId) {
+        private Promise<List<ModelData>> loadFields(ResourceId formId) {
 
-        return resourceLocator.getFormClass(formId).then(formClass -> {
+            return resourceLocator.getFormClass(formId).then(formClass -> {
                 List<ModelData> children = new ArrayList<>();
                 for (FormField formField : formClass.getFields()) {
                     if(formField.getType() instanceof QuantityType ||
-                       formField.getType() instanceof CalculatedFieldType) {
+                            formField.getType() instanceof CalculatedFieldType) {
                         IndicatorDTO indicator = new IndicatorDTO();
                         indicator.setId(CuidAdapter.getLegacyIdFromCuid(formField.getId()));
                         indicator.setName(formField.getLabel());
@@ -334,8 +333,8 @@ public class IndicatorTreePanel extends ContentPanel {
                 }
                 return children;
             });
+        }
     }
-
 
     /**
      * @return the list of selected indicators

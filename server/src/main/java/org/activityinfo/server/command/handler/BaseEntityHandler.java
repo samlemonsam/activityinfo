@@ -129,7 +129,7 @@ public class BaseEntityHandler {
 
     private void updateType(Indicator indicator, PropertyMap changes) {
         FieldTypeClass type = parseType(changes.get(TYPE_PROPERTY));
-        indicator.setType(type != null ? type.getId() : null);
+        indicator.setType(type.getId());
         if ((type != FieldTypeClass.QUANTITY) && !changes.containsKey(UNITS_PROPERTY)) {
             indicator.setUnits("");
         }
