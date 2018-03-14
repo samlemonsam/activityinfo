@@ -1,0 +1,38 @@
+
+// java.gradle
+
+// Applies common configuration to java projects
+
+subprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'net.ltgt.apt'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    // Keep the version out of the jars to avoid unnecessary rebuilds
+    jar {
+        archiveName = "activityinfo-${project.name}.jar"
+    }
+
+    // This is required to stop javac from attempting to compile
+    // java sources included in .jar files intended for GWT
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ["-implicit:none", "-sourcepath", ""]
+        options.encoding = 'UTF-8'
+    }
+
+    dependencies {
+        compile libraries.slf4j.api
+        compile libraries.slf4j.impl
+
+        apt libraries.immutables.apt
+        compileOnly libraries.immutables.annotations
+
+        testCompile libraries.junit
+        testCompile libraries.hamcrest
+        testCompile libraries.easymock
+    }
+}

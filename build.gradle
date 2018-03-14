@@ -2,11 +2,13 @@
 // ActivityInfo Root Project
 // The settings here are inherited by all subprojects
 
+
 // Declare the dependencies of the gradle build scripts
 // themselves.
 
 buildscript {
   repositories {
+    maven { url "https://plugins.gradle.org/m2/" }
     maven { url "https://nexus.bedatadriven.com/content/groups/public" }
   }
   dependencies {
@@ -15,107 +17,38 @@ buildscript {
     classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
     classpath "net.ltgt.gradle:gradle-apt-plugin:0.10"
     classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
+    classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2"
   }
 }
 
-plugins {
-  id "org.sonarqube" version "2.6"
-}
+// For resolving actual project dependencies, use only our local maven repo and BeDataDriven's nexus repository,
+// which proxies maven central as well as other upstream repositories.
 
-
-/**
- * Define common configuration properties and 
- * apply cross-project processes.
- */
-apply from: "./gradle/libraries.gradle"
-apply from: "./gradle/version.gradle"
-apply from: './gradle/database.gradle'
-apply from: "./gradle/environment.gradle"
-
-
-task wrapper(type: Wrapper) {
-  gradleVersion = '4.6'
-}
-
-allprojects  {
-  apply plugin: 'maven'
-  apply plugin: 'jacoco'
-
-  group = 'org.activityinfo'
-
+allprojects {
   repositories {
     mavenLocal()
     maven { url "https://nexus.bedatadriven.com/content/groups/public" }
   }
 }
 
-subprojects {
 
-  apply plugin: 'java'
-  apply plugin: 'net.ltgt.apt'
-  apply plugin: 'com.github.hierynomus.license'
+// Define common configuration properties and
+// apply cross-project processes.
 
-  license {
-    header rootProject.file('COPYRIGHT.txt')
-    strictCheck true
-    mapping {
-      java = 'SLASHSTAR_STYLE'
-    }
-    exclude "**/*.json"
-    exclude "**/*.txt"
-  }
+apply from: "./gradle/buildNumber.gradle"
+apply from: "./gradle/libraries.gradle"
+apply from: "./gradle/license.gradle"
+apply from: './gradle/database.gradle'
+apply from: "./gradle/environment.gradle"
+apply from: "./gradle/java.gradle"
+apply from: "./gradle/sonar.gradle"
 
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
+// Defines the version based on our major version and the environment
 
-  /**
-   * Keep the version out of the jars to avoid unnecessary rebuilds
-   */
-  jar {
-    archiveName = "activityinfo-${project.name}.jar"
-  }
-
-  // This is required to stop javac from attempting to compile
-  // java sources included in .jar files intended for GWT
-
-  tasks.withType(JavaCompile) {
-    options.compilerArgs += ["-implicit:none", "-sourcepath", ""]
-    options.encoding = 'UTF-8'
-  }
+ext.majorVersion = "2.17"
+project.version = "${majorVersion}.${buildNumber}"
 
 
-  dependencies {
-    compile libraries.slf4j.api
-    compile libraries.slf4j.impl
-
-    apt libraries.immutables.apt
-    compileOnly libraries.immutables.annotations
-
-    testCompile libraries.junit
-    testCompile libraries.hamcrest
-    testCompile libraries.easymock
-  }
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.6'
 }
-
-task jacocoMerge(type: JacocoMerge) {
-
-  def excluded = [ ':tests:test', ':tools:indexeddb:test' ]
-
-  subprojects.each { subproject ->
-    if(subproject.file('src/test/java').exists()) {
-      subproject.tasks.withType(Test).each { task ->
-        if (!excluded.contains(task.path)) {
-           executionData task
-        }
-      }
-    }
-  }
-}
-
-sonarqube {
-  properties {
-    property "sonar.projectName", "ActivityInfo"
-    property "sonar.jacoco.reportPaths", project.file('build/jacoco/jacocoMerge.exec')
-  }
-}
-

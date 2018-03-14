@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity 
+@Entity
 @EntityListeners(SchemaChangeListener.class)
 public class Project implements SchemaElement, Serializable, Deleteable {
 
@@ -44,14 +44,10 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         super();
     }
 
-    public Project(int id, String name) {
-        super();
-        this.id = id;
-        this.name = name;
-    }
 
-
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) @Column(name = "ProjectId", unique = true, nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ProjectId", unique = true, nullable = false)
     public int getId() {
         return id;
     }
@@ -60,7 +56,9 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         this.id = id;
     }
 
-    @AllowUserUpdate @NotNull @Size(max = 255)
+    @AllowUserUpdate
+    @NotNull
+    @Size(max = 255)
     public String getName() {
         return name;
     }
@@ -73,7 +71,8 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         this.description = description;
     }
 
-    @Lob @AllowUserUpdate
+    @Lob
+    @AllowUserUpdate
     public String getDescription() {
         return description;
     }
@@ -90,7 +89,9 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         this.database = database;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "DatabaseId") @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DatabaseId")
+    @NotNull
     public Database getDatabase() {
         return database;
     }
@@ -123,7 +124,8 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         dateDeleted = new Date();
     }
 
-    @Transient @Override
+    @Transient
+    @Override
     public boolean isDeleted() {
         return dateDeleted != null;
     }

@@ -1,0 +1,58 @@
+
+// sonar.gradle
+
+// Configures sonar static analysis rules, as well as code coverage
+// construction for the project.
+
+apply plugin: "org.sonarqube"
+apply plugin: 'jacoco'
+
+
+// We need a single coverage file for all test modules, so that we
+// record coverage of code tested in other modules
+
+def projectCoverageFile = new File("$buildDir/jacoco/projectCoverage.exec")
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "org.activityinfo:activityinfo"
+        property "sonar.projectName", "ActivityInfo"
+        property "sonar.dynamicAnalysis", "reuseReports"
+        property "sonar.jacoco.reportPaths", projectCoverageFile
+    }
+}
+
+// Configure sub projects to use jacoco to record test coverage
+// and for sonar to use our project-wide coverage file.
+
+subprojects {
+    apply plugin: 'jacoco'
+
+    sonarqube {
+        properties {
+            property "sonar.jacoco.reportPath", projectCoverageFile
+        }
+    }
+}
+
+// Define a task to merge the coverage reports from all modules
+// into a single coverage file
+
+task jacocoMerge(type: JacocoMerge) {
+
+    destinationFile = projectCoverageFile
+
+    def excluded = [ ':tests:test', ':tools:indexeddb:test' ]
+    subprojects.each { subproject ->
+        if(subproject.file('src/test/java').exists()) {
+            subproject.tasks.withType(Test).each { task ->
+                if (!excluded.contains(task.path)) {
+                    executionData task
+                }
+            }
+        }
+    }
+}
+
+// Make sure we merge jacoco test results before running sonar
+tasks.getByName("sonarqube").dependsOn "jacocoMerge"

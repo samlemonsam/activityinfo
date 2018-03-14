@@ -84,12 +84,6 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.siteVersion = 1;
     }
 
-    public Activity(int id, String name) {
-        this();
-        this.id = id;
-        this.name = name;
-    }
-
     public Activity(Activity sourceActivity) {
         this.locationType = sourceActivity.getLocationType();
 
