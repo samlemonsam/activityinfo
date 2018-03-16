@@ -7,6 +7,7 @@ subprojects {
 
     apply plugin: 'java'
     apply plugin: 'net.ltgt.apt'
+    apply plugin: 'net.ltgt.apt-idea'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
