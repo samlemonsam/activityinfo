@@ -19,6 +19,7 @@
 package org.activityinfo.model.resource;
 
 import com.google.common.base.Preconditions;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -37,6 +38,7 @@ import java.util.Date;
  * for {@code Resources}
  *
  */
+@Schema(type = "string")
 public final class ResourceId implements Serializable {
 
     public static final ResourceId ROOT_ID = ResourceId.valueOf("_root");

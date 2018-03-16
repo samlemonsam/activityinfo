@@ -7,6 +7,27 @@ configurations.all {
 
 }
 
+// Define an addition 'tool' source set that includes
+// the java code to generate Open API specification
+
+sourceSets {
+    tool {
+        java {
+            srcDir 'src/tool/java'
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+
+        }
+        resources {
+            srcDir 'src/tool/resources'
+        }
+    }
+}
+
+configurations {
+    toolCompile.extendsFrom testCompile
+}
+
 dependencies {
     compile project(':model')
     compile project(':clients:gwtrpc')
@@ -20,7 +41,9 @@ dependencies {
 
     compile project(':store:mysql')
     compile project(':store:hrd')
-    compile project(':store:apiserver')
+
+    compile libraries.swagger.annotations
+    toolCompile libraries.swagger.jaxrs
 
     testCompile project(':model').sourceSets.test.output
 

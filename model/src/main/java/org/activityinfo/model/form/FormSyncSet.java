@@ -18,6 +18,7 @@
  */
 package org.activityinfo.model.form;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
@@ -81,12 +82,14 @@ public final class FormSyncSet {
     }
 
     @JsOverlay
-    public Iterable<String> getDeleted() {
+    @Schema(description = "Array of record ids that have been deleted")
+    public List<String> getDeleted() {
         return Arrays.asList(deleted);
     }
 
     @JsOverlay
-    public Iterable<UpdatedRecord> getUpdatedRecords() {
+    @Schema(description = "Array of records that have been created or updated")
+    public List<UpdatedRecord> getUpdatedRecords() {
         return Arrays.asList(updatedRecords);
     }
 

@@ -19,7 +19,7 @@
 package org.activityinfo.server.util.jaxrs;
 
 import com.bedatadriven.geojson.GeoJsonModule;
-import org.activityinfo.store.server.JaxRsJsonReader;
+import org.activityinfo.server.endpoint.rest.JaxRsJsonReader;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;

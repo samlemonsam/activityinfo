@@ -19,7 +19,7 @@
 package org.activityinfo.server.util.jaxrs;
 
 import com.google.inject.servlet.ServletModule;
-import org.activityinfo.store.server.CacheFilterFactory;
+import org.activityinfo.server.endpoint.rest.CacheFilterFactory;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 /**

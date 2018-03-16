@@ -12,6 +12,8 @@ dependencies {
     compile libraries.rebar.time
     compile libraries.jsr305
     compile libraries.jackson.core
+
+    compile libraries.swagger.annotations
 }
 
 jar {

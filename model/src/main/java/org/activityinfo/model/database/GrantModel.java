@@ -28,7 +28,6 @@ import org.activityinfo.json.JsonValue;
 public class GrantModel implements JsonSerializable {
 
     private String id;
-    private String label;
     private String resourceId;
 
     private GrantModel() {

@@ -20,7 +20,6 @@ include 'store:mysql'
 include 'store:hrd'
 include 'store:testing'
 include 'store:migration'
-include 'store:apiserver'
 
 include 'server'
 

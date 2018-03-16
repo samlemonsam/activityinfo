@@ -1,0 +1,16 @@
+
+// openapi.gradle
+// Generates an OpenAPI specification for ActivityInfo's API
+
+
+task generateOpenApiSpec(type: JavaExec) {
+
+    def outputFile = new File(buildDir, "api.json")
+
+    main = 'org.activityinfo.openapi.OpenApiGenerator'
+    classpath = sourceSets.tool.runtimeClasspath
+    outputs.file(outputFile)
+
+    args outputFile.absolutePath
+}
+

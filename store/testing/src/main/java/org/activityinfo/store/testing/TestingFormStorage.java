@@ -19,7 +19,6 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.vividsolutions.jts.geom.Geometry;
@@ -29,6 +28,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.spi.*;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 @GwtIncompatible
 public class TestingFormStorage implements VersionedFormStorage {

@@ -25,6 +25,7 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.server.endpoint.rest.JaxRsJsonReader;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;

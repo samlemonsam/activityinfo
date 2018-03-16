@@ -19,7 +19,11 @@
 package org.activityinfo.analysis.table;
 
 import com.google.common.base.Optional;
-import org.activityinfo.model.form.*;
+import org.activityinfo.model.database.Permission;
+import org.activityinfo.model.form.FormEvalContext;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
@@ -100,12 +104,12 @@ public class SelectionViewModel {
         }
         FormInstance typedRecord = FormInstance.toFormInstance(form.getSchema(), record.get());
 
-        boolean editAllowed = evalPermission(form, typedRecord, FormOperation.EDIT_RECORD);
+        boolean editAllowed = evalPermission(form, typedRecord, Permission.EDIT_RECORD);
 
         return Optional.of(new SelectionViewModel(typedRecord, editAllowed, editAllowed));
     }
 
-    private static boolean evalPermission(FormMetadata form, FormInstance record, FormOperation operation) {
+    private static boolean evalPermission(FormMetadata form, FormInstance record, Permission operation) {
         if(!form.getPermissions().isAllowed(operation)) {
             return false;
         }

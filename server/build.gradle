@@ -10,6 +10,7 @@ apply from: './dependencies.gradle'
 apply from: './databaseSetup.gradle'
 apply from: './buildProperties.gradle'
 apply from: './devServer.gradle'
+apply from: './openapi.gradle'
 
 description = 'ActivityInfo Server'
 

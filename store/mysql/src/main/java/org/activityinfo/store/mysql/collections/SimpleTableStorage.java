@@ -19,7 +19,6 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -36,11 +35,15 @@ import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.update.BaseTableInserter;
 import org.activityinfo.store.mysql.update.BaseTableUpdater;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.RecordVersion;
+import org.activityinfo.store.spi.TypedRecordUpdate;
+import org.activityinfo.store.spi.VersionedFormStorage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 
 
 public class SimpleTableStorage implements VersionedFormStorage {

@@ -23,8 +23,8 @@ import com.google.common.io.Files;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ast.RootNode;
@@ -104,9 +104,9 @@ public class DocGenerator {
         return html.toString();
     }
 
-    private static SpecModel loadSpecModel(File specFile) {
-        Swagger spec = new SwaggerParser().read(specFile.getAbsolutePath());
-        return new SpecModel(spec);
+    private static SpecModel loadSpecModel(File specFile) throws IOException {
+        OpenAPI openAPI = Json.mapper().readValue(specFile, OpenAPI.class);
+        return new SpecModel(openAPI);
     }
 
 }

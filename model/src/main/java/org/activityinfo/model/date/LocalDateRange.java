@@ -29,7 +29,6 @@ import java.util.Date;
 public class LocalDateRange implements Serializable {
 
     private LocalDate minDate;
-
     private LocalDate maxDate;
 
     /**

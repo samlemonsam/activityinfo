@@ -19,7 +19,6 @@
 package org.activityinfo.server.endpoint.rest;
 
 import org.activityinfo.server.util.jaxrs.AbstractRestModule;
-import org.activityinfo.store.server.ApiBackend;
 
 public class RestApiModule extends AbstractRestModule {
 
