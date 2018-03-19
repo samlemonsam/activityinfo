@@ -31,6 +31,7 @@
   <super-source path="jre"/>
 
   <source path="analysis"/>
+  <source path="database"/>
   <source path="date"/>
   <source path="form"/>
   <source path="formula"/>
@@ -40,6 +41,5 @@
   <source path="query"/>
   <source path="resource"/>
   <source path="type"/>
-  <source path="permission"/>
   <source path="util"/>
 </module>

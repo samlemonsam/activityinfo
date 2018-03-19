@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    ActivityInfo
+    Copyright (C) 2009-2013 UNICEF
+    Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="alex" id="045-01">
+        <addColumn tableName="lockedperiod">
+            <column name="databaseId" type="int"/>
+        </addColumn>
+        <sql>
+            UPDATE lockedperiod lp
+            SET lp.databaseId = lp.userDatabaseId
+        </sql>
+        <sql>
+            UPDATE lockedperiod lp
+                LEFT JOIN activity a ON (lp.activityid = a.activityid)
+            SET lp.databaseId = a.databaseId
+            WHERE lp.ActivityId IS NOT NULL;
+        </sql>
+        <sql>
+            UPDATE lockedperiod lp
+            LEFT join project p ON (lp.projectId = p.projectId)
+            SET lp.databaseId = p.databaseId
+            WHERE lp.projectid is not null;
+        </sql>
+        <addNotNullConstraint columnDataType="int"
+                              columnName="databaseId"
+                              tableName="lockedperiod"/>
+
+        <addForeignKeyConstraint baseColumnNames="databaseId"
+                                 baseTableName="lockedperiod"
+                                 constraintName="fk_lockedperiod_databaseId"
+                                 referencedColumnNames="databaseId"
+                                 referencedTableName="userdatabase"/>
+    </changeSet>
+</databaseChangeLog>

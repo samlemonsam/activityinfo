@@ -32,6 +32,7 @@ public class LockedPeriod implements Serializable, HardDeleteable {
     private String name;
     private int id;
     private Database database;
+    private Database userDatabase;
     private Project project;
     private Activity activity;
     private boolean enabled;
@@ -98,13 +99,25 @@ public class LockedPeriod implements Serializable, HardDeleteable {
     }
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "UserDatabaseId", nullable = true)
+    @JoinColumn(name = "databaseId", nullable = false)
     public Database getDatabase() {
         return database;
     }
 
     public void setDatabase(Database database) {
         this.database = database;
+    }
+
+    @Deprecated
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UserDatabaseId", nullable = true)
+    public Database getUserDatabase() {
+        return userDatabase;
+    }
+
+    @Deprecated
+    public void setUserDatabase(Database userDatabase) {
+        this.userDatabase = userDatabase;
     }
 
     public void setProject(Project project) {

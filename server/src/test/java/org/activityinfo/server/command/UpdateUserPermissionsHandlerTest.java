@@ -278,7 +278,5 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
 
         assertThat(bavon.hasFolderLimitation(), equalTo(true));
 
-
-
     }
 }

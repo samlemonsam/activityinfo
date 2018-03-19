@@ -81,40 +81,40 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
 
     @JsonIgnore
     public void setToDate(Date toDate) {
-        set(START_DATE_PROPERTY, new LocalDate(toDate));
+        if(toDate == null) {
+            setToDate((LocalDate)null);
+        } else {
+            setToDate(new LocalDate(toDate));
+        }
     }
 
     public void setToDate(LocalDate toDate) {
-        if (toDate == null) {
-            set(START_DATE_PROPERTY, null);
-        } else {
-            set(START_DATE_PROPERTY, toDate);
-        }
+        set(END_DATE_PROPERTY, toDate);
     }
 
     @JsonProperty
     @JsonView(DTOViews.Schema.class)
     public LocalDate getToDate() {
-        return get(START_DATE_PROPERTY);
+        return get(END_DATE_PROPERTY);
     }
 
     @JsonIgnore
     public void setFromDate(Date fromDate) {
         if (fromDate == null) {
-            set(END_DATE_PROPERTY, null);
+            setFromDate((LocalDate) null);
         } else {
-            set(END_DATE_PROPERTY, new LocalDate(fromDate));
+            setFromDate(new LocalDate(fromDate));
         }
     }
 
     public void setFromDate(LocalDate fromDate) {
-        set(END_DATE_PROPERTY, fromDate);
+        set(START_DATE_PROPERTY, fromDate);
     }
 
     @JsonProperty
     @JsonView(DTOViews.Schema.class)
     public LocalDate getFromDate() {
-        return get(END_DATE_PROPERTY);
+        return get(START_DATE_PROPERTY);
     }
 
     /**

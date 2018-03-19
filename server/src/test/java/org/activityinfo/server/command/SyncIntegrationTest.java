@@ -132,7 +132,7 @@ public class SyncIntegrationTest extends LocalHandlerTestCase {
                 queryInt("select count(*) from LockedPeriod where ActivityId is not null"),
                 equalTo(1));
         assertThat(
-                queryInt("select count(*) from LockedPeriod where UserDatabaseId is not null"),
+                queryInt("select count(*) from LockedPeriod where ProjectId is null and ActivityId is null"),
                 equalTo(2));
 
         // / now try updating a site remotely (from another client)
