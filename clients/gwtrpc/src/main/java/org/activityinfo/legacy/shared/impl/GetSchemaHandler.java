@@ -80,7 +80,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         private FolderFilter(String modelJson) {
             UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(modelJson));
             for (GrantModel grantModel : model.getGrants()) {
-                if(grantModel.getResourceId().charAt(0) == CuidAdapter.FOLDER_DOMAIN) {
+                if(grantModel.getResourceId().getDomain() == CuidAdapter.FOLDER_DOMAIN) {
                     int folderId = CuidAdapter.getLegacyIdFromCuid(grantModel.getResourceId());
                     folders.add(folderId);
                 }

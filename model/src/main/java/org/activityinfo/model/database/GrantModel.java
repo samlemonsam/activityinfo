@@ -21,6 +21,10 @@ package org.activityinfo.model.database;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.resource.ResourceId;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Grants a user a set of permissions within a folder
@@ -28,13 +32,10 @@ import org.activityinfo.json.JsonValue;
 public class GrantModel implements JsonSerializable {
 
     private String id;
-    private String resourceId;
+    private ResourceId resourceId;
+    private Set<Operation> operations = new HashSet<>();
 
     private GrantModel() {
-    }
-
-    public GrantModel(String resourceId) {
-        this.resourceId = resourceId;
     }
 
     /**
@@ -47,20 +48,57 @@ public class GrantModel implements JsonSerializable {
     /**
      * @return the id of the database, folder, or form to which this grant applies.
      */
-    public String getResourceId() {
+    public ResourceId getResourceId() {
         return resourceId;
     }
 
     @Override
     public JsonValue toJson() {
+
+        JsonValue operationsArray = Json.createArray();
+        for (Operation operation : operations) {
+            operationsArray.add(Json.create(operation.name()));
+        }
+
         JsonValue object = Json.createObject();
-        object.put("folderId", resourceId);
+        object.put("folderId", resourceId.asString());
+        object.put("operations", operationsArray);
         return object;
     }
 
     public static GrantModel fromJson(JsonValue value) {
         GrantModel grant = new GrantModel();
-        grant.resourceId = value.getString("folderId");
+        grant.resourceId = ResourceId.valueOf(value.getString("folderId"));
         return grant;
+    }
+
+    public static class Builder {
+
+        private GrantModel model = new GrantModel();
+
+        /**
+         * Sets the resource to which this grant applies. This can be id
+         * of a folder, form, or the database itself.
+         *
+         */
+        public Builder setResourceId(ResourceId resourceId) {
+            model.resourceId = resourceId;
+            return this;
+        }
+
+        /**
+         * Adds a permitted operation to this grant.
+         */
+        public void addOperation(Operation operation) {
+            model.operations.add(operation);
+        }
+
+        public void addOperation(Operation operation, String recordFilter) {
+            model.operations.add(operation);
+        }
+
+        public GrantModel build() {
+            return model;
+        }
     }
 }

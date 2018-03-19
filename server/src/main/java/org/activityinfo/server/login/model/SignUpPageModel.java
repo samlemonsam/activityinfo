@@ -18,7 +18,7 @@
  */
 package org.activityinfo.server.login.model;
 
-import com.google.appengine.labs.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 
 public class SignUpPageModel extends PageModel {
     // used for form population after a continuable message

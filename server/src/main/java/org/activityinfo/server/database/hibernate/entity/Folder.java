@@ -18,6 +18,10 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
+import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceType;
+import org.activityinfo.model.legacy.CuidAdapter;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -87,6 +91,15 @@ public class Folder implements SchemaElement, Serializable, HardDeleteable {
         return database;
     }
 
+
+    public Resource asResource() {
+        return new Resource.Builder()
+            .setId(CuidAdapter.folderId(id))
+            .setParentId(CuidAdapter.databaseId(database.getId()))
+            .setLabel(getName())
+            .setType(ResourceType.FOLDER)
+            .build();
+    }
 
     @Override
     public void delete() {

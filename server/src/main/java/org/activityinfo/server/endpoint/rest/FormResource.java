@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.database.DatabaseLock;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -53,6 +54,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -159,6 +161,15 @@ public class FormResource {
         }
 
         return record.get();
+    }
+
+    @GET
+    @NoCache
+    @Path("locks")
+    @Produces(JSON_CONTENT_TYPE)
+    @Operation(summary = "Get the locks that apply to this form")
+    public List<DatabaseLock> getLocks() {
+        throw new UnsupportedOperationException();
     }
 
     @GET

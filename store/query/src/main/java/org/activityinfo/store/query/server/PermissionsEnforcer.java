@@ -19,7 +19,7 @@
 package org.activityinfo.store.query.server;
 
 import com.google.common.base.Strings;
-import org.activityinfo.model.database.Permission;
+import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formula.ConstantNode;
@@ -53,11 +53,11 @@ public class PermissionsEnforcer {
 
 
     public boolean canEdit(FormInstance record) {
-        return can(record, Permission.EDIT_RECORD);
+        return can(record, Operation.EDIT_RECORD);
     }
 
     public boolean canView(FormInstance record) {
-        return can(record, Permission.VIEW);
+        return can(record, Operation.VIEW);
     }
 
     public boolean canView(FormRecord record) {
@@ -65,7 +65,7 @@ public class PermissionsEnforcer {
         return canView(FormInstance.toFormInstance(formClass, record));
     }
 
-    public boolean can(FormInstance record, Permission operation) {
+    public boolean can(FormInstance record, Operation operation) {
         FormPermissions formPermissions = supervisor.getFormPermissions(record.getFormId());
         if(!formPermissions.isAllowed(operation)) {
             return false;

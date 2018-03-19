@@ -21,14 +21,17 @@ package org.activityinfo.server.command;
 import com.bedatadriven.rebar.sql.server.jdbc.JdbcScheduler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
@@ -125,6 +128,15 @@ public class GetSchemaTest extends CommandTestCase2 {
         assertTrue(locks.isProjectLocked(1, new LocalDate(2009, 1, 12)));
         assertFalse(locks.isProjectLocked(1, new LocalDate(2008, 1, 12)));
         assertFalse(locks.isProjectLocked(1, new LocalDate(2010, 1, 12)));
+    }
+
+    @Test
+    public void testDatabaseMetadata() {
+        DatabaseProviderImpl impl = injector.getInstance(DatabaseProviderImpl.class);
+        UserDatabaseMeta metadata = impl.getDatabaseMetadata(1, 1);
+
+        System.out.println(Json.stringify(metadata.toJson(), 4));
+
 
     }
 

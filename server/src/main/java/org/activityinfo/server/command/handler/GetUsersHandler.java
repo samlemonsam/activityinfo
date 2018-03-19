@@ -19,7 +19,7 @@
 package org.activityinfo.server.command.handler;
 
 import com.extjs.gxt.ui.client.Style;
-import com.google.appengine.labs.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.GetUsers;
@@ -29,9 +29,10 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.database.GrantModel;
 import org.activityinfo.model.database.UserPermissionModel;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -88,7 +89,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                 .setParameter("dbId", cmd.getDatabaseId())
                 .getResultList();
 
-        Map<String, Folder> folderMap = new HashMap<>();
+        Map<ResourceId, Folder> folderMap = new HashMap<>();
         for (Folder folder : folders) {
             folderMap.put(CuidAdapter.folderId(folder.getId()), folder);
         }
@@ -123,7 +124,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
         return new UserResult(models, cmd.getOffset(), queryTotalCount(cmd, currentUser, whereClause));
     }
 
-    private List<FolderDTO> folderList(Map<String, Folder> folderMap, UserPermission perm) {
+    private List<FolderDTO> folderList(Map<ResourceId, Folder> folderMap, UserPermission perm) {
 
         if(Strings.isNullOrEmpty(perm.getModel())) {
             // Include all folders, as user has access to all

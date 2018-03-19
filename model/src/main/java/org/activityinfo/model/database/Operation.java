@@ -21,7 +21,7 @@ package org.activityinfo.model.database;
 /**
  * Describes the different operations that can be granted to a user.
  */
-public enum Permission {
+public enum Operation {
 
     /**
      * View the resource, whether a form, folder, or database.

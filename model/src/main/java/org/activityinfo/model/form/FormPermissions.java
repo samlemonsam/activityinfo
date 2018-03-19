@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.database.Permission;
+import org.activityinfo.model.database.Operation;
 
 /**
  * Describes effective form-level permissions for a specific user. The principle permissions include:
@@ -167,7 +167,7 @@ public final class FormPermissions implements JsonSerializable {
         return !Strings.isNullOrEmpty(viewFilter);
     }
 
-    public boolean isAllowed(Permission operation) {
+    public boolean isAllowed(Operation operation) {
         switch (operation) {
             case VIEW:
                 return isVisible();
@@ -185,7 +185,7 @@ public final class FormPermissions implements JsonSerializable {
      * Returns true if permission to execute the given permission depends on
      * the record's field values.
      */
-    public boolean isFiltered(Permission operation) {
+    public boolean isFiltered(Operation operation) {
         switch (operation) {
             case VIEW:
                 return !Strings.isNullOrEmpty(viewFilter);
@@ -197,7 +197,7 @@ public final class FormPermissions implements JsonSerializable {
         return false;
     }
 
-    public String getFilter(Permission operation) {
+    public String getFilter(Operation operation) {
        switch (operation) {
            case VIEW:
                return viewFilter;

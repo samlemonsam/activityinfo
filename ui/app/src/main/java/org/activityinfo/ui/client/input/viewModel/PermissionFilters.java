@@ -24,7 +24,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.analysis.FieldReference;
 import org.activityinfo.analysis.FormulaValidator;
-import org.activityinfo.model.database.Permission;
+import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formula.FormulaNode;
@@ -59,8 +59,8 @@ public class PermissionFilters {
         if(permissions.hasVisibilityFilter()) {
             criteria.addAll(parsePermission(permissions.getViewFilter()));
         }
-        if(permissions.isFiltered(Permission.EDIT_RECORD)) {
-            criteria.addAll(parsePermission(permissions.getFilter(Permission.EDIT_RECORD)));
+        if(permissions.isFiltered(Operation.EDIT_RECORD)) {
+            criteria.addAll(parsePermission(permissions.getFilter(Operation.EDIT_RECORD)));
         }
 
         /*

@@ -266,17 +266,8 @@ public class CuidAdapter {
         return cuid(ATTRIBUTE_GROUP_FIELD_DOMAIN, attributeGroupId);
     }
 
-    public static ResourceId activityCategoryFolderId(int dbId, String category) {
-        return ResourceId.valueOf(ACTIVITY_CATEGORY_DOMAIN + block(dbId) + block(Math.abs(category.hashCode())));
-    }
-
-    public static ResourceId attributeGroupFormClass(int attributeGroupId) {
-        return cuid(ATTRIBUTE_GROUP_DOMAIN, attributeGroupId);
-    }
-
-
-    public static String folderId(int folderId) {
-        return cuid(FOLDER_DOMAIN, folderId).asString();
+    public static ResourceId folderId(int folderId) {
+        return cuid(FOLDER_DOMAIN, folderId);
     }
 
     public static ResourceId userId(int userId) {

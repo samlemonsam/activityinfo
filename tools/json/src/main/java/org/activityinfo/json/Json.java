@@ -108,4 +108,11 @@ public class Json {
     }
 
 
+    public static JsonValue toJsonArray(Iterable<? extends JsonSerializable> objects) {
+        JsonValue array = Json.createArray();
+        for (JsonSerializable object : objects) {
+            array.add(object.toJson());
+        }
+        return array;
+    }
 }

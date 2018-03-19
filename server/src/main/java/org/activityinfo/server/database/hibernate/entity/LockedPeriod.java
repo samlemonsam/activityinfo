@@ -19,6 +19,10 @@
 package org.activityinfo.server.database.hibernate.entity;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import org.activityinfo.model.database.DatabaseLock;
+import org.activityinfo.model.date.LocalDateRange;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -148,17 +152,36 @@ public class LockedPeriod implements Serializable, HardDeleteable {
         return enabled;
     }
 
+    /**
+     * @return the id of the resource to which this lock applies.
+     */
+    @Transient
+    public ResourceId getResourceId() {
+        if(activity != null) {
+            return CuidAdapter.activityFormClass(activity.getId());
+        } else {
+            return CuidAdapter.databaseId(database.getId());
+        }
+    }
+
+    @Transient
+    public LocalDateRange getDateRange() {
+        return new LocalDateRange(fromDate, toDate);
+    }
+
     @Transient
     public Database getParentDatabase() {
-        if (database != null) {
-            return database;
-        } else if (activity != null) {
-            return activity.getDatabase();
-        } else if (project != null) {
-            return project.getDatabase();
-        }
+        return database;
+    }
 
-        return null;
+    public DatabaseLock asDatabaseLock() {
+        return new DatabaseLock.Builder()
+            .setId(CuidAdapter.lockId(getId()))
+            .setResourceId(getResourceId())
+            .setDateRange(getDateRange())
+            .setLabel(getName())
+            .build();
+
     }
 
     @Override
