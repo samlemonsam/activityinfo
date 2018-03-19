@@ -79,7 +79,7 @@ public class XlsColumnFactory implements TableColumnVisitor<List<XlsColumn>> {
 
     @Override
     public List<XlsColumn> visitDateColumn(EffectiveTableColumn columnModel, DateFormat dateFormat) {
-        return singleColumn(columnModel, styles.getDateStyle(), new XlsDateRenderer(with(dateFormat.createRenderer())));
+        return singleColumn(columnModel, styles.getDateStyle(), new XlsDateRenderer(with(dateFormat.createLocalDateRenderer())));
     }
 
     @Override
