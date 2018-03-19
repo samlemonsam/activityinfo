@@ -26,7 +26,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.json.JsonValue;
@@ -105,11 +104,7 @@ public class FormResource {
     @GET
     @NoCache
     @Path("schema")
-    @Operation(summary = "Get a form's schema", responses = {
-        @ApiResponse(responseCode = "200"),
-        @ApiResponse(responseCode = "404", description = "No form with this ID exists, or it has been deleted"),
-        @ApiResponse(responseCode = "401", description = "You do not have permission to view this form.")
-    })
+    @Operation(summary = "Get a form's schema")
     @Produces(JSON_CONTENT_TYPE)
     public FormClass getFormSchema() {
         return assertVisible(formId).getFormClass();

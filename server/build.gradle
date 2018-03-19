@@ -2,6 +2,7 @@
 evaluationDependsOn ":ui:app"
 evaluationDependsOn ":ui:app2"
 evaluationDependsOn ":clients:gwtrest"
+evaluationDependsOn ":clients:docs"
 
 apply plugin: 'war'
 apply plugin: 'appengine'
@@ -10,7 +11,6 @@ apply from: './dependencies.gradle'
 apply from: './databaseSetup.gradle'
 apply from: './buildProperties.gradle'
 apply from: './devServer.gradle'
-apply from: './openapi.gradle'
 
 description = 'ActivityInfo Server'
 
@@ -40,7 +40,7 @@ war {
         return !file.name.startsWith('guava-gwt') &&
                 !file.name.startsWith('gwt-user')
     }
-    from(project(':apiDocs').outputDir) {
+    from(project(':clients:docs').outputDir) {
         into 'apidocs'   
     }
     from(project(':ui:app').outputDir) {
@@ -96,7 +96,7 @@ task checkDownloadSize(type: org.activityinfo.gwt.CheckDownloadSizeTask) {
     appCacheDownloadSizeLimit "2000kb"
 }
 
-tasks.war.dependsOn ':apiDocs:build'
+tasks.war.dependsOn ':clients:docs:build'
 tasks.war.dependsOn ':ui:app:compileApp'
 tasks.war.dependsOn ':ui:app2:compileApp'
 

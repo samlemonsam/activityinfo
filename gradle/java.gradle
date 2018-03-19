@@ -29,7 +29,7 @@ subprojects {
         compile libraries.slf4j.api
         compile libraries.slf4j.impl
 
-        apt libraries.immutables.apt
+        annotationProcessor libraries.immutables.apt
         compileOnly libraries.immutables.annotations
 
         testCompile libraries.junit

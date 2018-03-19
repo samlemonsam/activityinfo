@@ -18,13 +18,11 @@
  */
 package org.activityinfo.model.type.primitive;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
-@Schema(type = "string")
 public class TextValue implements FieldValue, HasStringValue {
 
     private final String value;

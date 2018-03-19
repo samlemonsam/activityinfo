@@ -8,11 +8,10 @@ include 'tools:indexeddb'
 include 'tools:codemirror'
 include 'tools:promises'
 
+include 'clients:docs'
 include 'clients:gwtrpc'
 include 'clients:gwtrest'
 include 'clients:javarest'
-
-include 'apiDocs'
 
 include 'store:spi'
 include 'store:query'

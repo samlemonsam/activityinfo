@@ -18,8 +18,6 @@
  */
 package org.activityinfo.model.form;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
@@ -58,7 +56,6 @@ public class FormRecord implements JsonSerializable {
         return formId;
     }
 
-    @Schema(hidden = true)
     public RecordRef getRef() {
         return new RecordRef(ResourceId.valueOf(formId), ResourceId.valueOf(recordId));
     }
@@ -67,7 +64,6 @@ public class FormRecord implements JsonSerializable {
         return parentRecordId;
     }
 
-    @ArraySchema(schema = @Schema(ref = "#/components/schemas/FieldValue"))
     public JsonValue getFields() {
         return fields;
     }

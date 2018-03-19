@@ -55,7 +55,7 @@ public class QueryResource {
 
         final StreamingOutput output = outputStream -> {
             ColumnJsonWriter columnSetWriter = new ColumnJsonWriter(outputStream, Charsets.UTF_8);
-            columnSetWriter.write(columnSet);
+            columnSetWriter. write(columnSet);
             columnSetWriter.flush();
         };
 

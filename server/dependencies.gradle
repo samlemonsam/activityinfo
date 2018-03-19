@@ -7,23 +7,6 @@ configurations.all {
 
 }
 
-// Define an addition 'tool' source set that includes
-// the java code to generate Open API specification
-
-sourceSets {
-    tool {
-        java {
-            srcDir 'src/tool/java'
-            compileClasspath += main.output
-            runtimeClasspath += main.output
-
-        }
-        resources {
-            srcDir 'src/tool/resources'
-        }
-    }
-}
-
 configurations {
     toolCompile.extendsFrom testCompile
 }

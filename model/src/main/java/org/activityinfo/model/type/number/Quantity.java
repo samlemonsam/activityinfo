@@ -18,13 +18,11 @@
  */
 package org.activityinfo.model.type.number;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.FieldValue;
 
-@Schema(type = "number", format = "double")
 public class Quantity implements FieldValue {
 
     private final double value;
