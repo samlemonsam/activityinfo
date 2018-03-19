@@ -19,7 +19,7 @@ sourceSets {
 
 dependencies {
     generatorCompile libraries.guava
-    generatorCompile 'io.swagger:swagger-parser:1.0.19'
+    generatorCompile libraries.swagger.core
     generatorCompile 'org.pegdown:pegdown:1.6.0'
     generatorCompile libraries.freemarker
     generatorCompile project(':model')
@@ -40,13 +40,15 @@ task generateDocs(type: JavaExec) {
     group = "API"
     description = 'Generates API Documentation'
 
-    dependsOn 'generatorClasses'
+    dependsOn ':server:generateOpenApiSpec', 'generatorClasses'
 
     main = 'org.activityinfo.api.tools.DocGenerator'
     classpath = sourceSets.generator.runtimeClasspath
     workingDir = rootProject.projectDir
-    args project.file('src/main/openapi/api.json')
-    args outputDir
+    doFirst {
+        args "${project(":server").buildDir}/api.json"
+        args outputDir
+    }
 }
 
 tasks.getByName('build').dependsOn copyAssets, compileSass, generateDocs

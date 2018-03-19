@@ -18,7 +18,6 @@
  */
 package org.activityinfo.store.hrd;
 
-import com.google.common.base.Predicate;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.FormSyncSet;
@@ -27,6 +26,7 @@ import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.spi.RecordChangeType;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class SyncSetBuilder {
 
@@ -44,7 +44,7 @@ public class SyncSetBuilder {
     }
 
     public void add(FormRecordSnapshotEntity snapshot) {
-        if(visibilityPredicate.apply(snapshot.getRecord().getRecordId())) {
+        if(visibilityPredicate.test(snapshot.getRecord().getRecordId())) {
             if (snapshot.getType() == RecordChangeType.DELETED) {
                 deleted.add(snapshot.getRecordId().asString());
                 snapshots.remove(snapshot.getRecordId());

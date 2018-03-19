@@ -18,9 +18,15 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
+import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.Operation;
+import org.activityinfo.model.legacy.CuidAdapter;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Defines a given user's access to a given database.
@@ -310,5 +316,45 @@ public class UserPermission implements Serializable {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    @Transient
+    public List<GrantModel> getGrants() {
+        if(!this.allowView) {
+            return Collections.emptyList();
+        }
+        if(model == null) {
+            // Simple legacy model
+            GrantModel.Builder grantModel = new GrantModel.Builder();
+            grantModel.setResourceId(CuidAdapter.databaseId(database.getId()));
+            if(isAllowViewAll()) {
+                grantModel.addOperation(Operation.VIEW);
+            } else if(isAllowView()) {
+                grantModel.addOperation(Operation.VIEW, getPartnerFilter());
+            }
+            if(isAllowEditAll()) {
+                grantModel.addOperation(Operation.EDIT_RECORD);
+            } else if(isAllowEdit()) {
+                grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter());
+            }
+            if(isAllowManageAllUsers()) {
+                grantModel.addOperation(Operation.MANAGE_USERS);
+            } else if(isAllowManageUsers()) {
+                grantModel.addOperation(Operation.MANAGE_USERS, getPartnerFilter());
+            }
+            if(isAllowDesign()) {
+                grantModel.addOperation(Operation.CREATE_FORM);
+                grantModel.addOperation(Operation.EDIT_FORM);
+                grantModel.addOperation(Operation.DELETE_FORM);
+            }
+            return Collections.emptyList();
+        }
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Transient
+    private String getPartnerFilter() {
+        return CuidAdapter.partnerFormId(database.getId()).asString() + "==" +
+                CuidAdapter.partnerRecordId(partner.getId()).asString();
     }
 }

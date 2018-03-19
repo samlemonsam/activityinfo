@@ -28,10 +28,10 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -226,22 +226,7 @@ public class PermissionOracle {
             return ownersPermission;
         }
 
-        List<UserPermission> permissions = em.get()
-                                             .createQuery(
-                                                     "select u from UserPermission u where u.user = :user and u" +
-                                                     ".database = :db",
-                                                     UserPermission.class)
-                                             .setParameter("user", user)
-                                             .setParameter("db", database)
-                                             .getResultList();
-
-        if (permissions.isEmpty()) {
-            // return a permission with nothing enabled
-            return new UserPermission();
-
-        } else {
-            return permissions.get(0);
-        }
+        return DatabaseProviderImpl.getUserPermission(em.get(), database, user.getId()).orElse(new UserPermission());
     }
 
     public void assertDeletionAuthorized(Object entity, User user) {

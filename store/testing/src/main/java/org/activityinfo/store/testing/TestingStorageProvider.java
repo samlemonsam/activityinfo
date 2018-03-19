@@ -31,15 +31,11 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
-import org.activityinfo.store.spi.BlobAuthorizerStub;
-import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.FormStorageProvider;
-import org.activityinfo.store.spi.SerialNumberProvider;
+import org.activityinfo.store.spi.*;
 
 import java.util.Collection;
 import java.util.HashMap;

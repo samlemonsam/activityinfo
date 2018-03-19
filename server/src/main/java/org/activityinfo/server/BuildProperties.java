@@ -1,8 +1,8 @@
 package org.activityinfo.server;
 
-import com.google.appengine.labs.repackaged.com.google.common.io.CharSource;
-import com.google.appengine.labs.repackaged.com.google.common.io.Resources;
 import com.google.common.base.Charsets;
+import com.google.common.io.CharSource;
+import com.google.common.io.Resources;
 
 import java.io.Reader;
 import java.util.Properties;

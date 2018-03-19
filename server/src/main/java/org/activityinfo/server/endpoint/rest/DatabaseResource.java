@@ -19,13 +19,16 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.google.inject.Provider;
+import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.io.xform.XFormReader;
 import org.activityinfo.io.xform.form.XForm;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.DispatcherSync;
@@ -44,12 +47,21 @@ public class DatabaseResource {
 
     private Provider<FormStorageProvider> catalog;
     private final DispatcherSync dispatcher;
+    private final DatabaseProviderImpl databaseProvider;
     private final int databaseId;
 
-    public DatabaseResource(Provider<FormStorageProvider> catalog, DispatcherSync dispatcher, int databaseId) {
+    public DatabaseResource(Provider<FormStorageProvider> catalog, DispatcherSync dispatcher,
+                            DatabaseProviderImpl databaseProvider, int databaseId) {
         this.catalog = catalog;
         this.dispatcher = dispatcher;
+        this.databaseProvider = databaseProvider;
         this.databaseId = databaseId;
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public UserDatabaseMeta getDatabaseMetadata(@InjectParam AuthenticatedUser user) {
+        return databaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
     }
 
     private UserDatabaseDTOWithForms getSchema() {

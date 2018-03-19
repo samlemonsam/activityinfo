@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.store.server;
+package org.activityinfo.store.spi;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+public interface TransactionalStorageProvider {
 
-public class NotAuthorizedException extends WebApplicationException {
+    void begin();
 
-    public NotAuthorizedException() {
-        super(Response.Status.FORBIDDEN);
-    }
+    void commit();
+
+    void rollback();
+
+
 }

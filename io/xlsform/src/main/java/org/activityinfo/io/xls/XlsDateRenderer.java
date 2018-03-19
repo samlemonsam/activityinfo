@@ -19,15 +19,14 @@
 package org.activityinfo.io.xls;
 
 import org.activityinfo.analysis.table.ColumnRenderer;
+import org.activityinfo.model.type.time.LocalDate;
 import org.apache.poi.ss.usermodel.Cell;
-
-import java.util.Date;
 
 public class XlsDateRenderer implements XlsColumnRenderer {
 
-    private ColumnRenderer<Date> renderer;
+    private ColumnRenderer<LocalDate> renderer;
 
-    public XlsDateRenderer(ColumnRenderer<Date> renderer) {
+    public XlsDateRenderer(ColumnRenderer<LocalDate> renderer) {
         this.renderer = renderer;
     }
 
@@ -38,6 +37,14 @@ public class XlsDateRenderer implements XlsColumnRenderer {
 
     @Override
     public void setValue(Cell cell, int row) {
-        cell.setCellValue(renderer.render(row));
+        // Excel does not support date values prior to 1900,
+        // so we have no choice but to render the value as text if the date occurs
+        // prior to 1900.
+        LocalDate localDate = renderer.render(row);
+        if(localDate.getYear() < 1900) {
+            cell.setCellValue(localDate.toString());
+        } else {
+            cell.setCellValue(localDate.atMidnightInMyTimezone());
+        }
     }
 }

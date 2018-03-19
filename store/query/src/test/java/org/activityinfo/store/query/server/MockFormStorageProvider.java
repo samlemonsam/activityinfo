@@ -24,11 +24,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.TransactionalStorageProvider;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.FormStorageProvider;
-import org.activityinfo.store.spi.TypedRecordUpdate;
+import org.activityinfo.store.spi.*;
 
 import java.util.Collection;
 import java.util.List;

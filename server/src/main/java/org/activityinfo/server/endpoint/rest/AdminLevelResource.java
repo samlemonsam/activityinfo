@@ -32,8 +32,6 @@ import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.rest.model.NewAdminEntity;
 import org.activityinfo.server.endpoint.rest.model.NewAdminLevel;
 import org.activityinfo.server.util.monitoring.Timed;
-import org.activityinfo.store.server.ApiBackend;
-import org.activityinfo.store.server.FormResource;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;

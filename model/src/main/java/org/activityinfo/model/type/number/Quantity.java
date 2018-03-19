@@ -18,7 +18,6 @@
  */
 package org.activityinfo.model.type.number;
 
-import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;

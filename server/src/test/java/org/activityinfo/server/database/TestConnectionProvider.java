@@ -147,11 +147,26 @@ public class TestConnectionProvider implements ConnectionProvider, Provider<Conn
 
     private static void initializeDatabase() throws SQLException, LiquibaseException {
 
-        Connection connection = DriverManager.getConnection(connectionUrl(DATABASE_NAME), USERNAME, PASSWORD);
-        Statement stmt = connection.createStatement();
-        stmt.execute("DROP DATABASE IF EXISTS " + DATABASE_NAME);
-        stmt.execute("CREATE DATABASE " + DATABASE_NAME);
-        stmt.execute("USE " + DATABASE_NAME);
+        Connection connection;
+        try {
+            connection = DriverManager.getConnection(connectionUrl(DATABASE_NAME), USERNAME, PASSWORD);
+            Statement stmt = connection.createStatement();
+            stmt.execute("DROP DATABASE IF EXISTS " + DATABASE_NAME);
+            stmt.execute("CREATE DATABASE " + DATABASE_NAME);
+            stmt.execute("USE " + DATABASE_NAME);
+        } catch (SQLException e) {
+            // Database probably doesn't exist yet
+            connection = DriverManager.getConnection(connectionUrl(""), USERNAME, PASSWORD);
+            Statement stmt = connection.createStatement();
+            stmt.execute("CREATE DATABASE " + DATABASE_NAME);
+            stmt.close();
+            connection.close();
+
+            // Re-open specifically for this database
+            connection = DriverManager.getConnection(connectionUrl(DATABASE_NAME), USERNAME, PASSWORD);
+
+        }
+
 
         Liquibase liquibase = new Liquibase("org/activityinfo/database/changelog/db.changelog-master.xml",
                 new ClassLoaderResourceAccessor(),

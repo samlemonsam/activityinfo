@@ -16,19 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.store.server;
+package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.sun.jersey.api.NotFoundException;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.database.DatabaseLock;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -49,12 +50,11 @@ import org.activityinfo.store.spi.VersionedFormStorage;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,6 +62,8 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 import static org.activityinfo.model.resource.ResourceId.valueOf;
 
+@Tag(name = "forms")
+@Path("/resource/form/{formId}")
 public class FormResource {
 
     public static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
@@ -99,11 +101,12 @@ public class FormResource {
 
     /**
      *
-     * @return this form's {@link org.activityinfo.model.form.FormClass}
+     * @return this form's {@link FormClass}
      */
     @GET
     @NoCache
     @Path("schema")
+    @Operation(summary = "Get a form's schema")
     @Produces(JSON_CONTENT_TYPE)
     public FormClass getFormSchema() {
         return assertVisible(formId).getFormClass();
@@ -111,6 +114,7 @@ public class FormResource {
 
     @POST
     @Path("schema")
+    @Operation(summary = "Update a form's schema")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postUpdatedFormSchema(FormClass updatedFormClass) {
 
@@ -133,16 +137,17 @@ public class FormResource {
         } else {
             backend.createNewForm(updatedFormClass);
         }
-        
+
         return Response.ok().build();
     }
-    
+
     @GET
     @NoCache
     @Path("record/{recordId}")
     @Produces(JSON_CONTENT_TYPE)
+    @Operation(summary = "Get a single record")
     public FormRecord getRecord(@PathParam("recordId") String recordId) {
-        
+
         FormStorage form = assertVisible(formId);
 
         Optional<FormRecord> record = form.get(ResourceId.valueOf(recordId));
@@ -160,7 +165,17 @@ public class FormResource {
 
     @GET
     @NoCache
+    @Path("locks")
+    @Produces(JSON_CONTENT_TYPE)
+    @Operation(summary = "Get the locks that apply to this form")
+    public List<DatabaseLock> getLocks() {
+        throw new UnsupportedOperationException();
+    }
+
+    @GET
+    @NoCache
     @Path("records/versionRange")
+    @Operation(summary = "Get the records that have changed between two versions of this form")
     public FormSyncSet getVersionRange(
             @QueryParam("localVersion") long localVersion,
             @QueryParam("version") long version) {
@@ -170,7 +185,7 @@ public class FormResource {
         // Compute a predicate that will tell us whether a given
         // record should be visible to the user, based on their *current* permissions.
 
-        Predicate<ResourceId> visibilityPredicate = computeVisibilityPredicate();
+        java.util.function.Predicate<ResourceId> visibilityPredicate = computeVisibilityPredicate();
 
         FormSyncSet syncSet;
         if(collection instanceof VersionedFormStorage) {
@@ -184,10 +199,10 @@ public class FormResource {
     /**
      * Computes a record-level visibility predicate.
      */
-    private Predicate<ResourceId> computeVisibilityPredicate() {
+    private java.util.function.Predicate<ResourceId> computeVisibilityPredicate() {
         FormPermissions formPermissions = backend.getFormSupervisor().getFormPermissions(formId);
         if (!formPermissions.hasVisibilityFilter()) {
-            return Predicates.alwaysTrue();
+            return resourceId -> true;
         }
 
         QueryModel queryModel = new QueryModel(formId);
@@ -199,12 +214,7 @@ public class FormResource {
         for (int i = 0; i < id.numRows(); i++) {
             idSet.add(id.getString(i));
         }
-        return new Predicate<ResourceId>() {
-            @Override
-            public boolean apply(ResourceId resourceId) {
-                return idSet.contains(resourceId.asString());
-            }
-        };
+        return resourceId -> idSet.contains(resourceId.asString());
     }
 
     @POST
@@ -278,6 +288,7 @@ public class FormResource {
     @NoCache
     @Path("record/{recordId}/history")
     @Produces(JSON_CONTENT_TYPE)
+    @Operation(summary = "Get the history of changes to a single record")
     public RecordHistory getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
 
         assertVisible(formId);
@@ -289,6 +300,7 @@ public class FormResource {
     @NoCache
     @Path("records")
     @Produces(JSON_CONTENT_TYPE)
+    @Operation(summary = "Get all the records in this sub-form that belong to a given parent record")
     public FormRecordSet getRecords(@QueryParam("parentId") String parentId) {
         return new FormRecordSet(formId.asString(),
                 assertVisible(formId).getSubRecords(ResourceId.valueOf(parentId)));
@@ -297,8 +309,9 @@ public class FormResource {
     @POST
     @Path("records")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Create a new record")
     public Response createRecord(JsonValue jsonObject) {
-        
+
         try {
             backend.newUpdater().create(formId, jsonObject);
         } catch (InvalidUpdateException e) {
@@ -312,6 +325,7 @@ public class FormResource {
     @Path("record/{recordId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update an existing record")
     public Response updateRecord(@PathParam("recordId") String recordId, JsonValue jsonObject) {
 
         try {
@@ -321,7 +335,7 @@ public class FormResource {
         }
         return Response.ok().build();
     }
-    
+
     @GET
     @NoCache
     @Produces(JSON_CONTENT_TYPE)
@@ -333,26 +347,21 @@ public class FormResource {
     @GET
     @NoCache
     @Path("form.xls")
+    @Operation(summary = "Get a form's schema as an XLSForm")
     public Response getXlsForm() {
         assertVisible(formId);
 
         final XlsFormBuilder xlsForm = new XlsFormBuilder(backend.getStorage());
         xlsForm.build(formId);
 
-        StreamingOutput output = new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                xlsForm.write(outputStream);
-            }
-        };
+        StreamingOutput output = xlsForm::write;
 
         return Response.ok(output, "application/vnd.ms-excel").build();
     }
-    
+
     /**
      *
-     * @return a list of {@link org.activityinfo.model.form.FormClass}es that includes the {@code FormClass}
+     * @return a list of {@link FormClass}es that includes the {@code FormClass}
      * of this collection and any {@code FormClass}es reachable from this collection's fields.
      */
     @GET
@@ -393,13 +402,10 @@ public class FormResource {
 
         LOGGER.info("Query completed with " + columnSet.getNumRows() + " rows.");
 
-        final StreamingOutput output = new StreamingOutput() {
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                RowBasedJsonWriter writer = new RowBasedJsonWriter(outputStream, Charsets.UTF_8);
-                writer.write(columnSet);
-                writer.flush();
-            }
+        final StreamingOutput output = outputStream -> {
+            RowBasedJsonWriter writer = new RowBasedJsonWriter(outputStream, Charsets.UTF_8);
+            writer.write(columnSet);
+            writer.flush();
         };
 
         return Response
@@ -430,13 +436,10 @@ public class FormResource {
     public Response queryColumns(@Context UriInfo uriInfo) {
         final ColumnSet columnSet = query(uriInfo);
 
-        final StreamingOutput output = new StreamingOutput() {
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                ColumnJsonWriter columnSetWriter = new ColumnJsonWriter(outputStream, Charsets.UTF_8);
-                columnSetWriter.write(columnSet);
-                columnSetWriter.flush();
-            }
+        final StreamingOutput output = outputStream -> {
+            ColumnJsonWriter columnSetWriter = new ColumnJsonWriter(outputStream, Charsets.UTF_8);
+            columnSetWriter.write(columnSet);
+            columnSetWriter.flush();
         };
 
         return Response.ok(output).type(JSON_CONTENT_TYPE).build();

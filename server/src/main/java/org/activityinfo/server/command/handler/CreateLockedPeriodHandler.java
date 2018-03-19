@@ -59,10 +59,12 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
         } else if (cmd.getProjectId() != 0) {
             project = em.find(Project.class, cmd.getProjectId());
             lockedPeriod.setProject(project);
+            lockedPeriod.setDatabase(project.getDatabase());
             databaseId = project.getDatabase().getId();
         } else if (cmd.getActivityId() != 0) {
             activity = em.find(Activity.class, cmd.getActivityId());
             lockedPeriod.setActivity(activity);
+            lockedPeriod.setDatabase(activity.getDatabase());
             databaseId = activity.getDatabase().getId();
         } else {
             throw new CommandException("One of the following must be provdied: userDatabaseId, projectId, activityId");

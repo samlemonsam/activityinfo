@@ -20,7 +20,6 @@ package org.activityinfo.store.hrd;
 
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.googlecode.objectify.cmd.Query;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
@@ -41,6 +40,7 @@ import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.activityinfo.store.hrd.Hrd.ofy;
 

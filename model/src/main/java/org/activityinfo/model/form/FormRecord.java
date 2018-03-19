@@ -56,6 +56,10 @@ public class FormRecord implements JsonSerializable {
         return formId;
     }
 
+    public RecordRef getRef() {
+        return new RecordRef(ResourceId.valueOf(formId), ResourceId.valueOf(recordId));
+    }
+
     public String getParentRecordId() {
         return parentRecordId;
     }
@@ -131,9 +135,6 @@ public class FormRecord implements JsonSerializable {
         return new Builder();
     }
 
-    public RecordRef getRef() {
-        return new RecordRef(ResourceId.valueOf(formId), ResourceId.valueOf(recordId));
-    }
 
     public static class Builder {
         

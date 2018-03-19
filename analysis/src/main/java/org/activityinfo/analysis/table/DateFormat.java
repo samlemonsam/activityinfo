@@ -19,6 +19,7 @@
 package org.activityinfo.analysis.table;
 
 import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.type.time.LocalDate;
 
 import java.util.Date;
 
@@ -31,6 +32,10 @@ public class DateFormat extends SimpleColumnFormat<Date> {
     @Override
     public ColumnRenderer<Date> createRenderer() {
         return new DateRenderer(getId());
+    }
+
+    public ColumnRenderer<LocalDate> createLocalDateRenderer() {
+        return new LocalDateRenderer(getId());
     }
 
     @Override

@@ -19,7 +19,6 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.*;
@@ -49,6 +48,7 @@ import org.activityinfo.store.spi.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static org.activityinfo.store.hrd.Hrd.ofy;
 

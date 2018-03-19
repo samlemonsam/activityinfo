@@ -19,6 +19,9 @@
 package org.activityinfo.model.date;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonSerializable;
+import org.activityinfo.json.JsonValue;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -26,10 +29,9 @@ import java.util.Date;
 /**
  * @author yuriyz on 07/03/2015.
  */
-public class LocalDateRange implements Serializable {
+public class LocalDateRange implements Serializable, JsonSerializable {
 
     private LocalDate minDate;
-
     private LocalDate maxDate;
 
     /**
@@ -179,5 +181,13 @@ public class LocalDateRange implements Serializable {
                 "minDate=" + minDate +
                 ", maxDate=" + maxDate +
                 '}';
+    }
+
+    @Override
+    public JsonValue toJson() {
+        JsonValue object = Json.createObject();
+        object.put("start", minDate.toString());
+        object.put("end", maxDate.toString());
+        return object;
     }
 }

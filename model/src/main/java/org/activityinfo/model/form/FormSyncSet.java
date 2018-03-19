@@ -81,12 +81,12 @@ public final class FormSyncSet {
     }
 
     @JsOverlay
-    public Iterable<String> getDeleted() {
+    public List<String> getDeleted() {
         return Arrays.asList(deleted);
     }
 
     @JsOverlay
-    public Iterable<UpdatedRecord> getUpdatedRecords() {
+    public List<UpdatedRecord> getUpdatedRecords() {
         return Arrays.asList(updatedRecords);
     }
 

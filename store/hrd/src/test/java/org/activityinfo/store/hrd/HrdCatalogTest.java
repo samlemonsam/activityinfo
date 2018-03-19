@@ -21,7 +21,6 @@ package org.activityinfo.store.hrd;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.util.Closeable;
@@ -346,7 +345,7 @@ public class HrdCatalogTest {
         // and the version range (0, 1] should be empty.
         assertThat(formStorage.cacheVersion(), equalTo(1L));
 
-        FormSyncSet updatedRecords = formStorage.getVersionRange(0, 1L, Predicates.<ResourceId>alwaysTrue());
+        FormSyncSet updatedRecords = formStorage.getVersionRange(0, 1L, resourceId -> true);
 
         assertTrue(updatedRecords.isEmpty());
 
@@ -363,7 +362,7 @@ public class HrdCatalogTest {
 
         assertThat(formStorage.cacheVersion(), equalTo(2L));
 
-        FormSyncSet updated = formStorage.getVersionRange(0, 2L, Predicates.<ResourceId>alwaysTrue());
+        FormSyncSet updated = formStorage.getVersionRange(0, 2L, resourceId -> true);
         assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
         // Update the first record and add a new one
@@ -378,7 +377,7 @@ public class HrdCatalogTest {
 
         assertThat(formStorage.cacheVersion(), equalTo(3L));
 
-        updated = formStorage.getVersionRange(2L, 3L, Predicates.<ResourceId>alwaysTrue());
+        updated = formStorage.getVersionRange(2L, 3L, resourceId -> true);
         assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
     }

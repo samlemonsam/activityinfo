@@ -29,12 +29,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.json.Json;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.GrantModel;
-import org.activityinfo.model.permission.UserPermissionModel;
 import org.activityinfo.model.type.geo.Extents;
 import org.activityinfo.promise.Promise;
 
@@ -81,8 +80,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
         private FolderFilter(String modelJson) {
             UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(modelJson));
             for (GrantModel grantModel : model.getGrants()) {
-                if(grantModel.getFolderId().charAt(0) == CuidAdapter.FOLDER_DOMAIN) {
-                    int folderId = CuidAdapter.getLegacyIdFromCuid(grantModel.getFolderId());
+                if(grantModel.getResourceId().getDomain() == CuidAdapter.FOLDER_DOMAIN) {
+                    int folderId = CuidAdapter.getLegacyIdFromCuid(grantModel.getResourceId());
                     folders.add(folderId);
                 }
             }
@@ -110,16 +109,15 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
     }
 
     private class SchemaBuilder {
-        private final List<UserDatabaseDTO> databaseList = new ArrayList<UserDatabaseDTO>();
-        private final List<CountryDTO> countryList = new ArrayList<CountryDTO>();
+        private final List<UserDatabaseDTO> databaseList = new ArrayList<>();
+        private final List<CountryDTO> countryList = new ArrayList<>();
 
-        private final Map<Integer, UserDatabaseDTO> databaseMap = new HashMap<Integer, UserDatabaseDTO>();
+        private final Map<Integer, UserDatabaseDTO> databaseMap = new HashMap<>();
         private final Map<Integer, FolderDTO> folders = new HashMap<>();
-        private final Map<Integer, CountryDTO> countries = new HashMap<Integer, CountryDTO>();
-        private final Map<Integer, PartnerDTO> partners = new HashMap<Integer, PartnerDTO>();
+        private final Map<Integer, CountryDTO> countries = new HashMap<>();
+        private final Map<Integer, PartnerDTO> partners = new HashMap<>();
         private final Map<Integer, ActivityDTO> activities = new HashMap<>();
-        private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<Integer, AttributeGroupDTO>();
-        private final Map<Integer, ProjectDTO> projects = new HashMap<Integer, ProjectDTO>();
+        private final Map<Integer, ProjectDTO> projects = new HashMap<>();
         private final Map<Integer, LocationTypeDTO> locationTypes = new HashMap<>();
 
         private final Map<Integer, SchemaFilter> databaseFilters = new HashMap<>();
@@ -332,12 +330,9 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
                         databaseFilters.put(db.getId(), schemaFilter);
 
-                        // todo fix query !!! sometimes it returns duplicates
                         if (!databaseMap.containsKey(db.getId())) {
                             databaseMap.put(db.getId(), db);
                             databaseList.add(db);
-                        } else {
-                            continue;
                         }
                     }
 
@@ -436,10 +431,11 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     "enabled",
                     "name",
                     "lockedPeriodId",
-                    "userDatabaseId",
+                    "databaseId",
                     "activityId",
-                    "projectId").from("lockedperiod")
-
+                    "projectId")
+                    .from("lockedperiod")
+                    .where("databaseId").in(databaseMap.keySet())
                     .execute(tx, new SqlResultCallback() {
 
                         @Override
@@ -453,8 +449,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                 lockedPeriod.setName(row.getString("name"));
                                 lockedPeriod.setId(row.getInt("lockedPeriodId"));
 
-                                boolean parentFound = false;
-
                                 if (!row.isNull("activityId")) {
                                     Integer activityId = row.getInt("activityId");
                                     ActivityDTO activity = activities.get(activityId);
@@ -463,33 +457,21 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                         activity.getLockedPeriods().add(lockedPeriod);
                                         lockedPeriod.setParent(activity);
                                     }
-                                    parentFound = true;
-                                }
-                                if (!row.isNull("userDatabaseId")) {
-                                    Integer databaseId = row.getInt("userDatabaseId");
+                                } else if (!row.isNull("projectId")) {
+                                    Integer projectId = row.getInt("projectId");
+                                    ProjectDTO project = projects.get(projectId);
+                                    if (project != null) {
+                                        project.getLockedPeriods().add(lockedPeriod);
+                                        lockedPeriod.setParent(project);
+                                    }
+                                } else {
+                                    Integer databaseId = row.getInt("databaseId");
                                     UserDatabaseDTO database = databaseMap.get(databaseId);
                                     if (database != null) { // databases can be
                                         // deleted
                                         database.getLockedPeriods().add(lockedPeriod);
                                         lockedPeriod.setParent(database);
                                     }
-                                    parentFound = true;
-                                }
-                                if (!row.isNull("projectId")) {
-                                    Integer projectId = row.getInt("projectId");
-                                    ProjectDTO project = projects.get(projectId);
-                                    if (project != null) {
-                                        project.getLockedPeriods().add(lockedPeriod);
-                                        lockedPeriod.setParent(project);
-                                        parentFound = true;
-                                    }
-                                }
-
-                                if (!parentFound) {
-                                    Log.debug(
-                                            "Orphan lockedPeriod: No parent (UserDatabase/Activity/Project) found for" +
-                                                    " LockedPeriod with Id=" +
-                                                    lockedPeriod.getId());
                                 }
                             }
                             promise.resolve(null);

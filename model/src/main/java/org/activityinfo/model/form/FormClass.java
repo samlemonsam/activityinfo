@@ -24,6 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonSerializable;
@@ -51,6 +52,7 @@ import static org.activityinfo.json.Json.createObject;
  * {@code Resources} which fulfill the contract described by a {@code FormClass}
  * are called {@code FormInstances}.
  */
+@Schema(name = "FormSchema")
 public class FormClass implements FormElementContainer, JsonSerializable {
 
 

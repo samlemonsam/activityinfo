@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.api.client.NewFormRecordBuilder;
@@ -118,7 +117,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return Promise.rejected(new RuntimeException("No such form"));
         }
         VersionedFormStorage formStorage = (VersionedFormStorage) form.get();
-        return Promise.resolved(formStorage.getVersionRange(localVersion, toVersion, Predicates.alwaysTrue()));
+        return Promise.resolved(formStorage.getVersionRange(localVersion, toVersion, resourceId -> true));
     }
 
     @Override

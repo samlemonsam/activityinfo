@@ -19,6 +19,10 @@
 package org.activityinfo.server.database.hibernate.entity;
 
 import org.activityinfo.legacy.shared.model.Published;
+import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceType;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
@@ -68,11 +72,11 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     private String mapIcon;
 
     private int published = Published.NOT_PUBLISHED.getIndex();
-    
+
     private long version;
     private long siteVersion;
     private long schemaVersion;
-    
+
     private boolean classicView = true;
 
     private String formClassJson;
@@ -103,7 +107,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     @Id
     @Offline
-    @GeneratedValue(strategy = GenerationType.AUTO) 
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ActivityId", unique = true, nullable = false)
     public int getId() {
         return this.id;
@@ -113,7 +117,22 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.id = id;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY) 
+
+    @Transient
+    public ResourceId getFormId() {
+        return CuidAdapter.activityFormClass(id);
+    }
+
+    @Transient
+    public ResourceId getParentResourceId() {
+        if(folder == null) {
+            return CuidAdapter.databaseId(database.getId());
+        } else {
+            return CuidAdapter.folderId(folder.getId());
+        }
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @Offline
     @JoinColumn(name = "LocationTypeId", nullable = false)
     public LocationType getLocationType() {
@@ -125,7 +144,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     }
 
     @Offline
-    @ManyToOne(fetch = FetchType.LAZY) 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FolderId", nullable = true)
     public Folder getFolder() {
         return this.folder;
@@ -190,7 +209,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     }
 
     @Offline
-    @Override 
+    @Override
     @Column(name = "SortOrder", nullable = false)
     public int getSortOrder() {
         return this.sortOrder;
@@ -258,7 +277,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.gzFormClassJson = gzFormClassJson;
     }
 
-    @Column 
+    @Column
     @Temporal(value = TemporalType.TIMESTAMP)
     public Date getDateDeleted() {
         return this.dateDeleted;
@@ -285,7 +304,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.category = category;
     }
 
-    @Override 
+    @Override
     @Transient
     public boolean isDeleted() {
         return getDateDeleted() != null;
@@ -340,11 +359,11 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     public long getSchemaVersion() {
         return schemaVersion;
     }
-    
+
     public void setSchemaVersion(long schemaVersion) {
         this.schemaVersion = schemaVersion;
     }
-    
+
     public long incrementSchemaVersion() {
         version++;
         schemaVersion = version;
@@ -355,5 +374,14 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         version++;
         siteVersion = version;
         return version;
+    }
+
+    public Resource asResource() {
+        return new Resource.Builder()
+            .setId(getFormId())
+            .setType(ResourceType.FORM)
+            .setParentId(getParentResourceId())
+            .setLabel(getName())
+            .build();
     }
 }

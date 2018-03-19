@@ -49,7 +49,6 @@ import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateInterval;
 import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.model.type.time.PeriodValue;
-import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.spi.*;
 
 import java.util.*;

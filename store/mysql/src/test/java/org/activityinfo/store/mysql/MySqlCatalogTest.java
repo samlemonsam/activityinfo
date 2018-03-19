@@ -19,7 +19,6 @@
 package org.activityinfo.store.mysql;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
@@ -536,7 +535,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(form.cacheVersion(), greaterThan(0L));
 
-        FormSyncSet versionRange = form.getVersionRange(0, form.cacheVersion(), Predicates.<ResourceId>alwaysTrue());
+        FormSyncSet versionRange = form.getVersionRange(0, form.cacheVersion(), resourceId -> true);
         assertThat(versionRange.getUpdatedRecordCount(), equalTo(3));
 
         System.out.println(versionRange);

@@ -216,7 +216,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.addExcelExportButton();
 
         toolBar.addPrintButton();
-        toolBar.addButton(UIActions.EMBED, I18N.CONSTANTS.embed(), IconImageBundle.ICONS.embed());
 
         return toolBar;
     }
@@ -375,9 +374,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         Set<Integer> activities = filter.getRestrictions(DimensionType.Activity);
         toolBar.setActionEnabled(UIActions.PRINT, activities.size() == 1);
 
-        // also embedding is only implemented for one activity
-        toolBar.setActionEnabled(UIActions.EMBED, activities.size() == 1);
-
         toolBar.setActionEnabled(UIActions.IMPORT, activities.size() == 1);
 
         // adding is also only enabled for one activity, but we have to
@@ -484,13 +480,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             ExportDialog dialog = new ExportDialog();
             dialog.start(new ExportSitesTask(dispatcher, filter));
 
-        } else if (UIActions.EMBED.equals(actionId)) {
-            EmbedDialog dialog = new EmbedDialog(dispatcher);
-            dialog.show(currentPlace);
-
         } else if (UIActions.IMPORT.equals(actionId)) {
             doImport();
-
         }
     }
 

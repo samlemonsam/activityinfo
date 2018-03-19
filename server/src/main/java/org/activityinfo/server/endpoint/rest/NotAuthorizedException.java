@@ -16,15 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.model.form;
+package org.activityinfo.server.endpoint.rest;
 
-/**
- * Describes the different operations
- */
-public enum FormOperation {
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
-    VIEW,
-    CREATE_RECORD,
-    EDIT_RECORD,
-    DELETE_RECORD
+public class NotAuthorizedException extends WebApplicationException {
+
+    public NotAuthorizedException() {
+        super(Response.Status.FORBIDDEN);
+    }
 }

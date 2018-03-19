@@ -10,7 +10,7 @@ ext {
     rebarVersion = '2.5.31'
     gwtVersion = '2.8.0-bdd4'
     jerseyVersion = '1.19.4'
-    gaeVersion = '1.9.48'
+    gaeVersion = '1.9.59'
     jacksonVersion = '1.9.2'
     cucumberVersion = '1.2.2'
     libraries = [
@@ -89,7 +89,14 @@ ext {
             api:            'org.slf4j:slf4j-api:1.6.1',
             impl:           'org.slf4j:slf4j-jdk14:1.6.1'
         ],
-            
+
+        swagger: [
+            annotations:    'io.swagger.core.v3:swagger-annotations:2.0.0-rc4',
+            core:           'io.swagger.core.v3:swagger-core:2.0.0-rc4',
+            jaxrs:          'io.swagger.core.v3:swagger-jaxrs2:2.0.0-rc4',
+            codegen:        'io.swagger:swagger-codegen:3.0.0-rc0'
+        ],
+
         hibernate: [
             entitymanager:  'org.hibernate:hibernate-entitymanager:4.2.8.Final',
             spatial:        'org.hibernate:hibernate-spatial:4.0',

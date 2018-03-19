@@ -41,10 +41,6 @@ import org.activityinfo.server.endpoint.rest.usage.UsageResource;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.query.server.Updater;
-import org.activityinfo.store.server.ApiBackend;
-import org.activityinfo.store.server.CatalogResource;
-import org.activityinfo.store.server.FormResource;
-import org.activityinfo.store.server.QueryResource;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -142,7 +138,8 @@ public class RootResource {
 
     @Path("/database/{id}")
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
-        return new DatabaseResource(catalog, dispatcher, id);
+        return new DatabaseResource(catalog, dispatcher,
+                new DatabaseProviderImpl(entityManager), id);
     }
 
     @Path("/adminLevel/{id}")

@@ -18,7 +18,7 @@
  */
 package org.activityinfo.server.job;
 
-import com.google.appengine.labs.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
