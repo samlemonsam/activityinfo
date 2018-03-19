@@ -10,7 +10,7 @@ ext {
     rebarVersion = '2.5.31'
     gwtVersion = '2.8.0-bdd4'
     jerseyVersion = '1.19.4'
-    gaeVersion = '1.9.48'
+    gaeVersion = '1.9.59'
     jacksonVersion = '1.9.2'
     cucumberVersion = '1.2.2'
     libraries = [

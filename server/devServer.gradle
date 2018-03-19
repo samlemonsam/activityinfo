@@ -102,8 +102,17 @@ task appengineDevMode(type: JavaExec) {
         // The SDK root is only available after appengineDownloadSdk runs
         def sdkRoot = System.getProperty('appengine.sdk.root')
         classpath "${sdkRoot}/lib/appengine-tools-api.jar"
-        jvmArgs "-javaagent:${sdkRoot}/lib/agent/appengine-agent.jar"
-        
+
+        // The appengine agent is a runtime agent that makes sure
+        // we don't use any classes that are forbidden in the AppEngine environment.
+        // However, it doesn't seem to have been updated for the new Java8 runtime.
+        //
+        // We can't remove the agent entirely, because the AppEngineLauncher class
+        // will throw an error if it is not on the classpath. So, as a workaround,
+        // place it on the classpath, but don't install it as an agent.
+
+        classpath "${sdkRoot}/lib/agent/appengine-agent.jar"
+
         // Write the application configuration pointing to the development database
         writeConfiguration mysql.localDev
         jvmArgs "-Dactivityinfo.config=${configFile}"
