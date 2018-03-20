@@ -245,7 +245,8 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
                 .appendColumn("location.axe", "LocationAxe")
                 .appendColumn("locationType.name", "LocationTypeName")
                 .appendColumn("location.x", "x")
-                .appendColumn("location.y", "y");
+                .appendColumn("location.y", "y")
+                .appendColumn("location.workflowStatusId", "workflowStatusId");
 
         }
         if(locationJoinRequired(command)) {
@@ -316,7 +317,8 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
             .appendColumn("location.axe", "LocationAxe")
             .appendColumn("locationType.name", "LocationTypeName")
             .appendColumn("location.x", "x")
-            .appendColumn("location.y", "y");
+            .appendColumn("location.y", "y")
+            .appendColumn("location.workflowStatusId", "workflowStatusId");
         }
 
         if (command.getFilter().isRestricted(DimensionType.Indicator)) {
@@ -956,6 +958,7 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
             model.setLocationId(row.getInt("LocationId"));
             model.setLocationName(row.getString("LocationName"));
             model.setLocationAxe(row.getString("LocationAxe"));
+            model.setWorkflowStatusId(row.getString("workflowStatusId"));
 
             if (!row.isNull("x") && !row.isNull("y")) {
                 model.setX(row.getDouble("x"));

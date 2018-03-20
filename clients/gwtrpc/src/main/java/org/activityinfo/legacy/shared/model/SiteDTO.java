@@ -485,6 +485,8 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
         setLocationAxe(location.getAxe());
         setY(location.getLatitude());
         setX(location.getLongitude());
+        setWorkflowStatusId(location.getWorkflowStatusId());
+
         // TODO: think of better construct for this mess
         for (String admin : location.getPropertyNames()) {
             if (admin.startsWith(AdminLevelDTO.PROPERTY_PREFIX)) {
@@ -504,12 +506,21 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
         location.setAxe(getLocationAxe());
         location.setLatitude(getY());
         location.setLongitude(getX());
+        location.setWorkflowStatusId(getWorkflowStatusId());
 
         for (AdminEntityDTO entity : getAdminEntities().values()) {
             location.setAdminEntity(entity.getLevelId(), entity);
         }
 
         return location;
+    }
+
+    public String getWorkflowStatusId() {
+        return get("workflowStatusId");
+    }
+
+    public void setWorkflowStatusId(String workflowStatusId) {
+        set("workflowStatusId", workflowStatusId);
     }
 
     public Integer getLocationId() {

@@ -52,13 +52,15 @@ public class LocationDTO extends BaseModelData implements EntityDTO, HasAdminEnt
         Double latitude = row.isNull("Y") ? null : row.getDouble("Y");
         Integer locationType = row.isNull("LocationTypeId") ? null : row.getInt("LocationTypeId");
         int id = row.getInt("LocationId");
+        String workflowStatusId = row.getString("workflowStatusId");
 
         return new LocationDTO().setId(id)
                                 .setName(name)
                                 .setAxe(axe)
                                 .setLongitude(longitude)
                                 .setLatitude(latitude)
-                                .setLocationTypeId(locationType);
+                                .setLocationTypeId(locationType)
+                                .setWorkflowStatusId(workflowStatusId);
     }
 
     public static boolean isValidWorkflowId(String workflowId) {
@@ -183,8 +185,9 @@ public class LocationDTO extends BaseModelData implements EntityDTO, HasAdminEnt
         return !Strings.isNullOrEmpty(getAxe());
     }
 
-    public void setWorkflowStatusId(String workflowStatusId) {
+    public LocationDTO setWorkflowStatusId(String workflowStatusId) {
         set("workflowStatusId", workflowStatusId);
+        return this;
     }
 
     public String getWorkflowStatusId() {
