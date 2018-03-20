@@ -30,16 +30,16 @@ import org.activityinfo.legacy.shared.model.PartnerDTO;
  *
  * @author Alex Bertram
  */
-public class AddPartner implements MutatingCommand<CreateResult> {
+public class UpdatePartner implements MutatingCommand<CreateResult> {
 
     private int databaseId;
     private PartnerDTO partner;
 
-    public AddPartner() {
+    public UpdatePartner() {
 
     }
 
-    public AddPartner(int databaseId, PartnerDTO partner) {
+    public UpdatePartner(int databaseId, PartnerDTO partner) {
         this.databaseId = databaseId;
         this.partner = partner;
     }

@@ -74,7 +74,7 @@ public class SchemaCache implements DispatchListener {
         
         source.registerListener(UpdateEntity.class, cache);
         source.registerListener(CreateEntity.class, cache);
-        source.registerListener(AddPartner.class, cache);
+        source.registerListener(UpdatePartner.class, cache);
         source.registerListener(RemovePartner.class, cache);
         source.registerListener(RequestChange.class, cache);
         source.registerListener(BatchCommand.class, cache);
@@ -91,7 +91,7 @@ public class SchemaCache implements DispatchListener {
         } else if (command instanceof Delete && isSchemaEntity(((Delete) command).getEntityName())) {
             clearCache();
 
-        } else if (command instanceof AddPartner || command instanceof RemovePartner) {
+        } else if (command instanceof UpdatePartner || command instanceof RemovePartner) {
             clearCache();
 
         } else if (command instanceof RequestChange && isSchemaEntity(((RequestChange) command).getEntityType())) {
@@ -125,7 +125,7 @@ public class SchemaCache implements DispatchListener {
         } else if (command instanceof GetActivityForms) {
             cachActivityForms((ActivityFormResults)result);
             
-        } else if (schema != null && command instanceof AddPartner) {
+        } else if (schema != null && command instanceof UpdatePartner) {
             clearCache();
         }
     }

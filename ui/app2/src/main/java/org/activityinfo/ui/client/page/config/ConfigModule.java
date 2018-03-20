@@ -35,7 +35,6 @@ public class ConfigModule extends AbstractGinModule {
 
         // binds the view components
         bind(DbListPresenter.View.class).to(DbListPage.class);
-        bind(DbPartnerEditor.View.class).to(DbPartnerGrid.class);
         bind(DbProjectEditor.View.class).to(DbProjectGrid.class);
         bind(LockedPeriodListEditor.class).to(LockedPeriodGrid.class);
         bind(DbTargetEditor.View.class).to(DbTargetGrid.class);

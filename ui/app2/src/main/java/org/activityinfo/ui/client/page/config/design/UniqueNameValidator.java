@@ -18,39 +18,19 @@
  */
 package org.activityinfo.ui.client.page.config.design;
 
+import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.widget.form.Field;
 import com.extjs.gxt.ui.client.widget.form.Validator;
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.EntityDTO;
 
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-/**
- * Created by yuriyz on 6/21/2016.
- */
 public class UniqueNameValidator implements Validator {
-
-    public static class UniqueNamesFunction implements Function<Void, Set<String>> {
-
-        private final Collection<? extends EntityDTO> entities;
-
-        public UniqueNamesFunction(Collection<? extends EntityDTO> entities) {
-            this.entities = entities;
-        }
-
-        @Override
-        public Set<String> apply(Void input) {
-            Set<String> names = Sets.newHashSet();
-            for (EntityDTO entity : entities) {
-                names.add(entity.getName());
-            }
-            return names;
-        }
-    }
 
     private Set<String> usedNames;
 
@@ -58,12 +38,17 @@ public class UniqueNameValidator implements Validator {
         this.usedNames = usedNames;
     }
 
-    public UniqueNameValidator(Collection<? extends EntityDTO> entities) {
-        this(new UniqueNamesFunction(entities));
+    public UniqueNameValidator(List<? extends ModelData> models, String currentName) {
+        this.usedNames = new HashSet<>();
+        for (ModelData model : models) {
+            String name = model.get(EntityDTO.NAME_PROPERTY);
+            if(!Strings.isNullOrEmpty(name) && !Objects.equals(name, currentName)) {
+                usedNames.add(name);
+            }
+        }
     }
-
-    public UniqueNameValidator(Function<Void, Set<String>> uniqueNamesFunction) {
-        this.usedNames = uniqueNamesFunction.apply(null);
+    public UniqueNameValidator(List<? extends ModelData> models) {
+        this(models, "");
     }
 
     @Override

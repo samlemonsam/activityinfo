@@ -234,7 +234,7 @@ public class ColumnModelBuilder {
 
     public ColumnModelBuilder maybeAddTwoLineLocationColumn(ActivityFormDTO activity) {
         if (activity.getLocationType().getBoundAdminLevelId() == null) {
-            ReadTextColumn column = new ReadTextColumn("locationName", activity.getLocationType().getName(), 100);
+            ReadTextColumn column = new ReadTextColumn(SiteDTO.LOCATION_NAME_PROPERTY, activity.getLocationType().getName(), 100);
             column.setRenderer(new LocationColumnRenderer());
             columns.add(column);
         }
@@ -243,14 +243,14 @@ public class ColumnModelBuilder {
 
     public ColumnModelBuilder maybeAddSingleLineLocationColumn(ActivityFormDTO activity) {
         if (activity.getLocationType().getBoundAdminLevelId() == null) {
-            ReadTextColumn column = new ReadTextColumn("locationName", activity.getLocationType().getName(), 100);
+            ReadTextColumn column = new ReadTextColumn(SiteDTO.LOCATION_NAME_PROPERTY, activity.getLocationType().getName(), 100);
             columns.add(column);
         }
         return this;
     }
 
     public ColumnModelBuilder addLocationColumn() {
-        ReadTextColumn column = new ReadTextColumn("locationName", I18N.CONSTANTS.location(), 100);
+        ReadTextColumn column = new ReadTextColumn(SiteDTO.LOCATION_NAME_PROPERTY, I18N.CONSTANTS.location(), 100);
         columns.add(column);
         return this;
     }
@@ -295,6 +295,16 @@ public class ColumnModelBuilder {
     public ColumnModelBuilder addPartnerColumn() {
         ColumnConfig column = new ColumnConfig("partner", I18N.CONSTANTS.partner(), 100);
         column.setToolTip(I18N.CONSTANTS.partner());
+        column.setRenderer(new GridCellRenderer<SiteDTO>() {
+
+            @Override
+            public SafeHtml render(SiteDTO site, String s, ColumnData columnData, int i, int i1, ListStore<SiteDTO> listStore, Grid<SiteDTO> grid) {
+                if(site == null) {
+                    return null;
+                }
+                return SafeHtmlUtils.fromString(site.getPartnerName());
+            }
+        });
         columns.add(column);
         return this;
     }
@@ -363,7 +373,7 @@ public class ColumnModelBuilder {
 
             private String propertyName(ModelData model) {
                 if (model instanceof SiteDTO) {
-                    return "locationName";
+                    return SiteDTO.LOCATION_NAME_PROPERTY;
                 } else {
                     return "name";
                 }

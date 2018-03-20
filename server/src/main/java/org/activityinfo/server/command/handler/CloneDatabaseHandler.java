@@ -25,8 +25,8 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.json.Json;
-import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
+import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
@@ -131,7 +131,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         PartnerDTO partner = new PartnerDTO();
         partner.setName("Default");
 
-        new AddPartnerHandler(em).execute(new AddPartner(targetDb.getId(), partner), user);
+        new UpdatePartnerHandler(em).execute(new UpdatePartner(targetDb.getId(), partner), user);
     }
 
     private void copyUserPermissions() {

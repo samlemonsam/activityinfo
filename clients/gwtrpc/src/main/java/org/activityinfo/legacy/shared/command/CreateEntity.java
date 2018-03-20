@@ -30,7 +30,7 @@ import java.util.Map;
  * Note: Some entities require specialized commands to create or update, such
  * as:
  * <ul>
- * <li>{@link org.activityinfo.legacy.shared.command.AddPartner}</li>
+ * <li>{@link UpdatePartner}</li>
  * <li>{@link UpdateUserPermissions}</li>
  * <li>{@link org.activityinfo.legacy.shared.command.CreateReport}</li>
  * </ul>

@@ -34,8 +34,6 @@ import org.activityinfo.ui.client.page.common.dialog.FormDialogImpl;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogTether;
 import org.activityinfo.ui.client.page.common.grid.AbstractGridView;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
-import org.activityinfo.ui.client.page.config.design.BlankValidator;
-import org.activityinfo.ui.client.page.config.design.CompositeValidator;
 import org.activityinfo.ui.client.page.config.design.UniqueNameValidator;
 import org.activityinfo.ui.client.page.config.form.ProjectForm;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
@@ -68,7 +66,7 @@ public class DbProjectGrid extends AbstractGridView<ProjectDTO, DbProjectEditor>
     }
 
     protected ColumnModel createColumnModel() {
-        List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
+        List<ColumnConfig> columns = new ArrayList<>();
 
         columns.add(new ColumnConfig("name", messages.name(), 150));
         columns.add(new ColumnConfig("description", messages.description(), 300));
@@ -94,9 +92,8 @@ public class DbProjectGrid extends AbstractGridView<ProjectDTO, DbProjectEditor>
 
         ProjectForm form = new ProjectForm();
         form.getBinding().bind(project);
-        form.getNameField().setValidator(
-                new CompositeValidator(new BlankValidator(), new UniqueNameValidator(new UniqueNameValidator.UniqueNamesFunction(grid.getStore().getModels()))));
-        FormDialogImpl<ProjectForm> dlg = new FormDialogImpl<ProjectForm>(form);
+        form.getNameField().setValidator(new UniqueNameValidator(grid.getStore().getModels()));
+        FormDialogImpl<ProjectForm> dlg = new FormDialogImpl<>(form);
         dlg.setWidth(450);
         dlg.setHeight(300);
         dlg.setHeadingText(messages.createProject());

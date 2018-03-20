@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!--
+  #%L
+  ActivityInfo Server
+  %%
+  Copyright (C) 2009 - 2013 UNICEF
+  %%
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public
+  License along with this program.  If not, see
+  <http://www.gnu.org/licenses/gpl-3.0.html>.
+  #L%
+  -->
+
+
+<dataset>
+
+
+    <!-- Country setup -->
+
+    <country countryId="1" name="Rdc" x1="12.18794184" y1="31.306" x2="-13.45599996" y2="5.386098154"/>
+
+    <adminLevel countryId="1" adminLevelId="1" name="Province" deleted="0"/>
+
+
+    <locationType locationTypeId="10" countryId="1" version="1" locationVersion="1" workflowId="closed"
+                  name="Country" reuse="1"/>
+    <location locationId="11" name="Country" locationTypeId="10" X="1.533" Y="27.324" version="1"/>
+
+
+    <!-- User setup -->
+    <userLogin userId="1" name="Alex"
+               email="akbertram@gmail.com" password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
+               locale="fr" organization="" jobtitle="" emailnotification="1"/>
+    <userLogin userId="2" name="Bavon" email="bavon@nrc.org"
+               password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
+               locale="fr" organization="" jobtitle="" emailnotification="0"/>
+
+    <userLogin userId="21" name="Pacifique" email="pacifique@nrc.org"
+               password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
+               locale="fr" organization="" jobtitle="" emailnotification="0"/>
+
+    <userLogin userId="5" name="Christian" email="christian@nrc.org"
+               password="xyz" locale="fr" organization="" jobtitle="" emailnotification="0"/>
+    <userLogin userId="3" name="Lisa"
+               email="lisa@solidarites" password="xyz" locale="fr" organization="" jobtitle=""
+               emailnotification="0"/>
+
+    <userLogin userId="4" name="Marlene"
+               email="marlene@solidarites" password="xyz" locale="en" organization="" jobtitle=""
+               emailnotification="1"/>
+
+    <!-- Partners -->
+
+    <partner partnerId="1" name="Default"/>
+    <partner partnerId="2" name="NRC"/>
+
+
+    <!-- Database: NFI Cluster -->
+
+    <userDatabase databaseId="1" name="NFI Cluster" countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+
+
+    <partnerInDatabase partnerId="1" databaseId="1"/>
+    <partnerInDatabase partnerId="2" databaseId="1"/>
+
+
+    <activity activityId="1" databaseId="1" name="NFI Distribution"
+              reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="10"
+              published="0"/>
+
+    <site siteId="1" activityId="1" locationId="11" partnerId="1"
+          Date1="2009-01-01" Date2="2009-12-31" DateCreated="2009-01-01"
+          DateEdited="2009-01-01" timeEdited="420"/>
+
+    <site siteId="2" activityId="1" locationId="11" partnerId="1"
+          Date1="2009-01-01" Date2="2009-12-31" DateCreated="2009-01-01"
+          DateEdited="2009-01-01" timeEdited="420"/>
+
+    <site siteId="3" activityId="1" locationId="11" partnerId="2"
+          Date1="2009-01-01" Date2="2009-12-31" DateCreated="2009-01-01"
+          DateEdited="2009-01-01" timeEdited="420"/>
+
+    <!-- Lisa@solidarites, initially at the default partner -->
+    <userPermission databaseId="1" partnerId="1" userId="3"
+                    allowView="1"  allowViewAll="0" allowEdit="0" allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
+                    allowDesign="0" lastSchemaUpdate="2009-01-02"/>
+
+    <!-- Bavon at NRC -->
+    <userPermission databaseId="1" partnerId="2" userId="2"
+                    allowView="1"  allowViewAll="0" allowEdit="0" allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
+                    allowDesign="0" lastSchemaUpdate="2009-01-02"/>
+
+    <!-- Database: Health Cluster -->
+
+    <userDatabase databaseId="2" name="Health Cluster" countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+
+    <partnerInDatabase partnerId="1" databaseId="2"/>
+
+    <activity activityId="2" databaseId="2" name="Vaccination"
+              reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="10"
+              published="0"/>
+
+    <site siteId="4" activityId="2" locationId="11" partnerId="1"
+          Date1="2009-01-01" Date2="2009-12-31" DateCreated="2009-01-01"
+          DateEdited="2009-01-01" timeEdited="420"/>
+
+    <userPermission databaseId="2" partnerId="1" userId="2"
+                    allowView="1" allowViewAll="0" allowEdit="0" allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
+                    allowDesign="0" lastSchemaUpdate="2009-01-02"/>/>
+
+</dataset>

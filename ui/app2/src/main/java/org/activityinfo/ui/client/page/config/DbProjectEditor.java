@@ -31,7 +31,6 @@ import org.activityinfo.legacy.shared.command.AddProject;
 import org.activityinfo.legacy.shared.command.RequestChange;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.exception.DuplicatePartnerException;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.AppEvents;
@@ -46,8 +45,6 @@ import org.activityinfo.ui.client.page.common.dialog.FormDialogTether;
 import org.activityinfo.ui.client.page.common.grid.AbstractGridPresenter;
 import org.activityinfo.ui.client.page.common.grid.GridView;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
-import org.activityinfo.ui.client.page.config.design.BlankValidator;
-import org.activityinfo.ui.client.page.config.design.CompositeValidator;
 import org.activityinfo.ui.client.page.config.design.UniqueNameValidator;
 import org.activityinfo.ui.client.page.config.form.ProjectForm;
 
@@ -87,7 +84,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
     public void go(UserDatabaseDTO db) {
         this.db = db;
 
-        store = new ListStore<ProjectDTO>();
+        store = new ListStore<>();
         store.setSortField("name");
         store.setSortDir(Style.SortDir.ASC);
         store.add(new ArrayList<ProjectDTO>(db.getProjects()));
@@ -117,8 +114,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
         List<ProjectDTO> allowed = Lists.newArrayList(store.getModels());
         allowed.remove(model);
 
-        dialog.getForm().getNameField().setValidator(
-                new CompositeValidator(new BlankValidator(), new UniqueNameValidator(allowed)));
+        dialog.getForm().getNameField().setValidator(new UniqueNameValidator(allowed));
         dialog.show(new FormDialogCallback() {
 
             @Override
@@ -170,11 +166,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
                 service.execute(new AddProject(db.getId(), newProject), dlg, new AsyncCallback<CreateResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        if (caught instanceof DuplicatePartnerException) {
-                            MessageBox.alert(I18N.CONSTANTS.error(), I18N.CONSTANTS.errorOnServer(), null);
-                        } else {
-                            MessageBox.alert(I18N.CONSTANTS.error(), I18N.CONSTANTS.errorOnServer(), null);
-                        }
+                        MessageBox.alert(I18N.CONSTANTS.error(), I18N.CONSTANTS.errorOnServer(), null);
                     }
 
                     @Override
@@ -207,6 +199,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
 
     @Override
     public void shutdown() {
+        // No shutdown actions necessary
     }
 
     @Override

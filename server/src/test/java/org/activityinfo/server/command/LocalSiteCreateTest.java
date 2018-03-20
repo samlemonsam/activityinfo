@@ -24,7 +24,6 @@ import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
@@ -48,7 +47,7 @@ public class LocalSiteCreateTest extends LocalHandlerTestCase {
 
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
-    public void createNew() throws CommandException {
+    public void createNew() {
 
         synchronize();
 
@@ -90,13 +89,13 @@ public class LocalSiteCreateTest extends LocalHandlerTestCase {
         GetSites pagingRequest = new GetSites();
         pagingRequest.setLimit(1);
 
-        loadResult = executeLocally(pagingRequest);
+        executeLocally(pagingRequest);
 
     }
 
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
-    public void delete() throws CommandException {
+    public void delete() {
 
         synchronize();
 
@@ -125,7 +124,7 @@ public class LocalSiteCreateTest extends LocalHandlerTestCase {
         PartnerDTO iom = new PartnerDTO();
         iom.setName("IOM");
 
-        CreateResult result = executeRemotely(new AddPartner(databaseId, iom));
+        CreateResult result = executeRemotely(new UpdatePartner(databaseId, iom));
         iom.setId(result.getNewId());
 
         // Now U2 synchronizes, and adds a new site with this partner

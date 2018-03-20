@@ -19,16 +19,23 @@
 package org.activityinfo.ui.client.page.config;
 
 import com.extjs.gxt.ui.client.Style;
-import com.extjs.gxt.ui.client.data.ModelData;
+import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
+import com.extjs.gxt.ui.client.event.SelectionChangedListener;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.widget.ContentPanel;
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
+import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
+import com.extjs.gxt.ui.client.widget.grid.Grid;
+import com.extjs.gxt.ui.client.widget.layout.FitLayout;
+import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.ImplementedBy;
-import com.google.inject.Inject;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
-import org.activityinfo.legacy.shared.command.AddPartner;
 import org.activityinfo.legacy.shared.command.RemovePartner;
+import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.DuplicateCreateResult;
 import org.activityinfo.legacy.shared.command.result.RemoveFailedResult;
@@ -38,106 +45,116 @@ import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
-import org.activityinfo.ui.client.dispatch.state.StateProvider;
+import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
+import org.activityinfo.ui.client.page.NavigationCallback;
 import org.activityinfo.ui.client.page.PageId;
 import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogCallback;
+import org.activityinfo.ui.client.page.common.dialog.FormDialogImpl;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogTether;
-import org.activityinfo.ui.client.page.common.grid.AbstractGridPresenter;
-import org.activityinfo.ui.client.page.common.grid.GridView;
+import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
+import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
+import org.activityinfo.ui.client.page.config.form.PartnerForm;
+import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * @author Alex Bertram
  */
-public class DbPartnerEditor extends AbstractGridPresenter<PartnerDTO> implements DbPage {
+public class DbPartnerEditor implements IsWidget, ActionListener, DbPage {
+
     public static final PageId PAGE_ID = new PageId("partners");
 
-    @ImplementedBy(DbPartnerGrid.class)
-    public interface View extends GridView<DbPartnerEditor, PartnerDTO> {
+    private static final Logger LOGGER = Logger.getLogger(DbPartnerEditor.class.getName());
 
-        public void init(DbPartnerEditor editor, UserDatabaseDTO db, ListStore<PartnerDTO> store);
-
-        public FormDialogTether showAddDialog(PartnerDTO partner, FormDialogCallback callback);
-    }
-
-    private final Dispatcher service;
     private final EventBus eventBus;
-    private final View view;
+    private final Dispatcher dispatcher;
+
+    private final ContentPanel contentPanel;
+    private final ActionToolBar toolBar;
+    private final ListStore<PartnerDTO> store;
+    private final Grid<PartnerDTO> grid;
 
     private UserDatabaseDTO db;
-    private ListStore<PartnerDTO> store;
 
     @Inject
-    public DbPartnerEditor(EventBus eventBus, Dispatcher service, StateProvider stateMgr, View view) {
-        super(eventBus, stateMgr, view);
-        this.service = service;
+    public DbPartnerEditor(EventBus eventBus, Dispatcher dispatcher) {
         this.eventBus = eventBus;
-        this.view = view;
+        this.dispatcher = dispatcher;
+
+        toolBar = new ActionToolBar(this);
+        toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.addPartner(), IconImageBundle.ICONS.add());
+        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.edit(), IconImageBundle.ICONS.edit());
+        toolBar.addButton(UIActions.DELETE, I18N.CONSTANTS.delete(), IconImageBundle.ICONS.delete());
+        toolBar.setDirty(false);
+
+        store = new ListStore<>();
+        store.setSortField("name");
+        store.setSortDir(Style.SortDir.ASC);
+
+        grid = new Grid<>(store, createColumnModel());
+        grid.setAutoExpandColumn("fullName");
+        grid.setLoadMask(true);
+        grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<PartnerDTO>() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent<PartnerDTO> event) {
+                onSelectionChanged(Optional.ofNullable(event.getSelectedItem()));
+            }
+        });
+
+        this.contentPanel = new ContentPanel();
+        this.contentPanel.setTopComponent(toolBar);
+        this.contentPanel.setLayout(new FitLayout());
+        this.contentPanel.add(grid);
+    }
+
+    private void onSelectionChanged(Optional<PartnerDTO> selection) {
+        this.toolBar.setActionEnabled(UIActions.EDIT, selection.isPresent());
+        this.toolBar.setActionEnabled(UIActions.DELETE, selection.isPresent());
     }
 
     @Override
     public void go(UserDatabaseDTO db) {
         this.db = db;
+        this.contentPanel.setHeadingText(db.getName() + " - " + I18N.CONSTANTS.partners());
+        this.store.removeAll();
+        this.store.add(new ArrayList<>(db.getPartners()));
+    }
 
-        store = new ListStore<PartnerDTO>();
-        store.setSortField("name");
-        store.setSortDir(Style.SortDir.ASC);
-        store.add(new ArrayList<PartnerDTO>(db.getPartners()));
+    private ColumnModel createColumnModel() {
+        List<ColumnConfig> columns = new ArrayList<>();
+        columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 150));
+        columns.add(new ColumnConfig("fullName", I18N.CONSTANTS.description(), 300));
 
-        view.init(this, db, store);
-        view.setActionEnabled(UIActions.DELETE, false);
+        return new ColumnModel(columns);
     }
 
     @Override
-    protected String getStateId() {
-        return "PartnersGrid";
+    public void onUIAction(String actionId) {
+        switch (actionId) {
+            case UIActions.ADD:
+                showAddDialog();
+                break;
+            case UIActions.EDIT:
+                showEditDialog(grid.getSelectionModel().getSelectedItem());
+                break;
+            case UIActions.DELETE:
+                confirmDelete(grid.getSelectionModel().getSelectedItem());
+                break;
+        }
     }
 
-    // public void onSelectionChanged(PartnerDTO selectedItem) {
-    // this.view.setActionEnabled(UIActions.delete, selectedItem != null);
-    // }
+    private void confirmDelete(PartnerDTO selectedItem) {
 
-    @Override
-    protected void onAdd() {
-        final PartnerDTO newPartner = new PartnerDTO();
-        this.view.showAddDialog(newPartner, new FormDialogCallback() {
-
-            @Override
-            public void onValidated(final FormDialogTether dlg) {
-
-                service.execute(new AddPartner(db.getId(), newPartner), dlg, new AsyncCallback<CreateResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Log.debug("DbPartnerEditor caught exception while executing command AddPartner: ", caught);
-                    }
-
-                    @Override
-                    public void onSuccess(CreateResult result) {
-                        if (result instanceof DuplicateCreateResult) {
-                            Log.debug("DbPartnerEditor tried to add partner '" + newPartner.getName() +
-                                      "' to database " + db.getId() + " but it already exists");
-                            MessageBox.alert(I18N.CONSTANTS.newPartner(), I18N.CONSTANTS.duplicatePartner(), null);
-                        } else {
-                            Log.debug("DbPartnerEditor added new partner '" + newPartner.getName() +
-                                      "' to database " + db.getId());
-                            newPartner.setId(result.getNewId());
-                            store.add(newPartner);
-                            eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
-                            dlg.hide();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    @Override
-    protected void onDeleteConfirmed(final PartnerDTO model) {
-        service.execute(new RemovePartner(db.getId(), model.getId()),
-                view.getDeletingMonitor(),
+        dispatcher.execute(new RemovePartner(db.getId(), selectedItem.getId()),
+                new MaskingAsyncMonitor(grid, I18N.CONSTANTS.deletionInProgress()),
                 new AsyncCallback<RemoveResult>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -147,19 +164,105 @@ public class DbPartnerEditor extends AbstractGridPresenter<PartnerDTO> implement
                     @Override
                     public void onSuccess(RemoveResult result) {
                         if (result instanceof RemoveFailedResult) {
-                            Log.debug("DbPartnerEditor tried to remove partner '" + model.getName() +
-                                      "' from database " + db.getId() + " but there's data associated with it");
+                            Log.debug("DbPartnerEditor tried to remove partner '" + selectedItem.getName() +
+                                    "' from database " + db.getId() + " but there's data associated with it");
                             MessageBox.alert(I18N.CONSTANTS.removePartner(),
-                                    I18N.MESSAGES.partnerHasDataWarning(model.getName()),
+                                    I18N.MESSAGES.partnerHasDataWarning(selectedItem.getName()),
                                     null);
                         } else {
-                            Log.debug("DbPartnerEditor removed partner '" + model.getName() +
-                                      "' from database " + db.getId());
-                            store.remove(model);
+                            Log.debug("DbPartnerEditor removed partner '" + selectedItem.getName() +
+                                    "' from database " + db.getId());
+                            store.remove(selectedItem);
                         }
                     }
                 });
+    }
 
+
+    private Set<String> otherPartnerNames(PartnerDTO editingPartner) {
+        List<PartnerDTO> models = grid.getStore().getModels();
+        Set<String> names = Sets.newHashSet();
+        for (PartnerDTO partner : models) {
+                names.add(partner.getName() != null ? partner.getName().trim() : "");
+        }
+        if(editingPartner.getName() != null) {
+            names.remove(editingPartner.getName());
+        }
+        return names;
+    }
+
+    private void showAddDialog() {
+
+        PartnerDTO newPartner = new PartnerDTO();
+
+        showEditDialog(newPartner);
+    }
+
+    private void showEditDialog(PartnerDTO partner) {
+        PartnerForm form = new PartnerForm(otherPartnerNames(partner));
+        form.getBinding().bind(partner);
+
+        FormDialogImpl<PartnerForm> dlg = new FormDialogImpl<>(form);
+        dlg.setWidth(450);
+        dlg.setHeight(300);
+        dlg.setHeadingText(I18N.CONSTANTS.newPartner());
+
+        dlg.show(new FormDialogCallback() {
+            @Override
+            public void onValidated(FormDialogTether dlg) {
+                dispatcher.execute(new UpdatePartner(db.getId(), partner), dlg, new AsyncCallback<CreateResult>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Log.debug("DbPartnerEditor caught exception while executing command AddPartner: ", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(CreateResult result) {
+                        if (result instanceof DuplicateCreateResult) {
+                            LOGGER.fine("DbPartnerEditor tried to add partner '" + partner.getName() +
+                                    "' to database " + db.getId() + " but it already exists");
+                            MessageBox.alert(I18N.CONSTANTS.newPartner(), I18N.CONSTANTS.duplicatePartner(), null);
+
+                        } else {
+                            LOGGER.fine("DbPartnerEditor added/updated new partner '" + partner.getName() +
+                                    "' to database " + db.getId());
+                            partner.setId(result.getNewId());
+                            store.add(partner);
+                            eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
+                            dlg.hide();
+                            updateStore(partner, result);
+                        }
+                    }
+
+
+                });
+            }
+        });
+    }
+
+    private void updateStore(PartnerDTO partner, CreateResult createResult) {
+        if(!partner.hasId()) {
+            // Brand new partner, add directly to store
+            partner.setId(createResult.getNewId());
+            store.add(partner);
+
+        } else if(partner.getId() == createResult.getNewId()){
+            // Partner has been updated, update the store
+            store.update(partner);
+        } else {
+            // Shared partner has been replaced
+            store.remove(partner);
+
+            // Update with new id
+            partner.setId(createResult.getNewId());
+            store.add(partner);
+        }
+
+    }
+
+    @Override
+    public Widget asWidget() {
+        return contentPanel;
     }
 
     @Override
@@ -169,7 +272,17 @@ public class DbPartnerEditor extends AbstractGridPresenter<PartnerDTO> implement
 
     @Override
     public Object getWidget() {
-        return view;
+        return contentPanel;
+    }
+
+    @Override
+    public void requestToNavigateAway(PageState place, NavigationCallback callback) {
+        callback.onDecided(true);
+    }
+
+    @Override
+    public String beforeWindowCloses() {
+        return null;
     }
 
     @Override
@@ -179,11 +292,6 @@ public class DbPartnerEditor extends AbstractGridPresenter<PartnerDTO> implement
 
     @Override
     public void shutdown() {
-
-    }
-
-    @Override
-    public void onSelectionChanged(ModelData selectedItem) {
-        this.view.setActionEnabled(UIActions.DELETE, selectedItem != null);
+        // No shutdown actions required
     }
 }

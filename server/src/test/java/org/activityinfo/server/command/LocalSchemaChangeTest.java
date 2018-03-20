@@ -19,8 +19,10 @@
 package org.activityinfo.server.command;
 
 import com.extjs.gxt.ui.client.data.ModelData;
-import com.google.common.base.Function;
-import com.google.common.collect.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
@@ -37,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.*;
@@ -60,11 +63,11 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
 
     @Test
     public void update() throws Exception {
-        assertChangeIsSynchronized(3, new UpdateEntity("Indicator", 5, newName()));
-        assertChangeIsSynchronized(   new UpdateEntity("Activity", 2, newName()));
-        assertChangeIsSynchronized(1, new UpdateEntity("AttributeGroup", 1, newName()));
-        assertChangeIsSynchronized(1, new UpdateEntity("Attribute", 1, newName()));
-        assertChangeIsSynchronized(   new UpdateEntity("LockedPeriod", 1, newName()));
+        assertChangeIsSynchronized(3, new UpdateEntity(IndicatorDTO.ENTITY_NAME, 5, newName()));
+        assertChangeIsSynchronized(   new UpdateEntity(ActivityDTO.ENTITY_NAME, 2, newName()));
+        assertChangeIsSynchronized(1, new UpdateEntity(AttributeGroupDTO.ENTITY_NAME, 1, newName()));
+        assertChangeIsSynchronized(1, new UpdateEntity(AttributeDTO.ENTITY_NAME, 1, newName()));
+        assertChangeIsSynchronized(   new UpdateEntity(LockedPeriodDTO.ENTITY_NAME, 1, newName()));
         assertChangeIsSynchronized(   new UpdateEntity(UserDatabaseDTO.ENTITY_NAME, 1, newName()));
     }
     
@@ -79,12 +82,12 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
 
     @Test
     public void delete() throws Exception {
-        assertChangeIsSynchronized(3, new Delete("Indicator", 5));
-        assertChangeIsSynchronized(   new Delete("Activity", 2));
-        assertChangeIsSynchronized(1, new Delete("Attribute", 1));
-        assertChangeIsSynchronized(1, new Delete("AttributeGroup", 1));
-        assertChangeIsSynchronized(   new Delete("LockedPeriod", 1));
-        assertChangeIsSynchronized(   new Delete("Project", 1));
+        assertChangeIsSynchronized(3, new Delete(IndicatorDTO.ENTITY_NAME, 5));
+        assertChangeIsSynchronized(   new Delete(ActivityDTO.ENTITY_NAME, 2));
+        assertChangeIsSynchronized(1, new Delete(AttributeDTO.ENTITY_NAME, 1));
+        assertChangeIsSynchronized(1, new Delete(AttributeGroupDTO.ENTITY_NAME, 1)); 
+        assertChangeIsSynchronized(   new Delete(LockedPeriodDTO.ENTITY_NAME, 1));
+        assertChangeIsSynchronized(   new Delete(ProjectDTO.ENTITY_NAME, 1));
         assertChangeIsSynchronized(   new Delete(UserDatabaseDTO.ENTITY_NAME, 1));
     }
 
@@ -92,7 +95,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
     public void updatePartners() throws Exception {
         int databaseId = 1;
         CreateResult createResult = assertChangeIsSynchronized(
-                new AddPartner(databaseId, new PartnerDTO(9999, "Judean People's Front")));
+                new UpdatePartner(databaseId, new PartnerDTO(9999, "Judean People's Front")));
         assertChangeIsSynchronized(new RemovePartner(1, createResult.getNewId()));
     }
 
@@ -117,7 +120,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         indicator.put("units", "bricks");
         indicator.put("activityId", 2);
 
-        assertChangeIsSynchronized(2, new CreateEntity("Indicator", indicator));
+        assertChangeIsSynchronized(2, new CreateEntity(IndicatorDTO.ENTITY_NAME, indicator));
     }
 
 
@@ -130,14 +133,14 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         attributeGroup.put("multipleAllowed", true);
         attributeGroup.put("mandatory", true);
 
-        CreateResult createResult = assertChangeIsSynchronized(2, new CreateEntity("AttributeGroup", attributeGroup));
+        CreateResult createResult = assertChangeIsSynchronized(2, new CreateEntity(AttributeGroupDTO.ENTITY_NAME, attributeGroup));
 
 
         Map<String, Object> attribute = Maps.newHashMap();
         attribute.put("name", "New Attribute");
         attribute.put("attributeGroupId", createResult.getNewId());
 
-        assertChangeIsSynchronized(2, new CreateEntity("Attribute", attribute));
+        assertChangeIsSynchronized(2, new CreateEntity(AttributeDTO.ENTITY_NAME, attribute));
     }
     
     @Test
@@ -146,13 +149,8 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         locationType.put("name", "Feeding Center");
         locationType.put("databaseId", 2);
 
-        CreateResult createResult = assertChangeIsSynchronized(
-                new CreateEntity("LocationType", locationType));
+        assertChangeIsSynchronized(new CreateEntity("LocationType", locationType));
         
-         
-        // Waiting for AI-848
-       // assertChangeIsSynchronized(new Delete("LocationType", createResult.getNewId()));
-
     }
     
     @Test
@@ -269,14 +267,14 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
 
 
     private String dump(ActivityFormDTO object) throws Exception {
-        Set<Object> visited = Sets.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         StringBuilder sb = new StringBuilder();
         dump(sb, visited, "form[" + object.getId() + "]", object);
         return sb.toString();
     }
     
     private String dump(SchemaDTO object) throws Exception {
-        Set<Object> visited = Sets.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         StringBuilder sb = new StringBuilder();
         dump(sb, visited, "countries", object.getCountries());
         dump(sb, visited, "databases", object.getDatabases());
@@ -288,43 +286,10 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
      */
     private void dump(StringBuilder sb, Set<Object> visited, String prefix, Object modelData) throws Exception {
         if (modelData instanceof ModelData) {
-            if(visited.contains(modelData)) {
-                sb.append(prefix).append(" = ")
-                        .append(modelData.getClass().getSimpleName())
-                        .append("[").append(((ModelData) modelData).<Object>get("id")).append("]\n");
-            } else {
-                visited.add(modelData);
-                BeanInfo beanInfo = Introspector.getBeanInfo(modelData.getClass());
-                for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
-                    if (property.getReadMethod() != null && 
-                        property.getReadMethod().getDeclaringClass().getName().startsWith("org.activityinfo")) {
-                        
-                        try {
-                            Object propertyValue = property.getReadMethod().invoke(modelData);
-                            dump(sb, visited, prefix + "." + property.getName(), propertyValue);
-
-                        } catch (Exception e) {
-                            sb.append(prefix).append(".").append(property.getName()).append(" = <")
-                                    .append(e.getClass().getSimpleName()).append(">\n");
-                        }
-                    }
-                }
-            }
+            dumpModelData(sb, visited, prefix, modelData);
 
         } else if (modelData instanceof Iterable) {
-            List<ModelData> list = Lists.newArrayList(Iterables.filter((Iterable) modelData, ModelData.class));
-            if(!list.isEmpty()) {
-                Collections.sort(list, Ordering.natural().onResultOf(new Function<ModelData, Integer>() {
-                    @Override
-                    public Integer apply(ModelData input) {
-                        return input.get("id");
-                    }
-                }));
-            }
-            
-            for (int i = 0; i != list.size(); ++i) {
-                dump(sb, visited, prefix + "[" + list.get(i).get("id") + "]", list.get(i));
-            }
+            dumpList(sb, visited, prefix, (Iterable) modelData);
         } else if(
                 modelData instanceof Number || 
                 modelData instanceof String || 
@@ -334,6 +299,50 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
                 modelData instanceof Enum || 
                 modelData instanceof Extents) {
             sb.append(prefix).append(" = ").append(modelData).append("\n");
+        }
+    }
+
+    private void dumpModelData(StringBuilder sb, Set<Object> visited, String prefix, Object modelData) throws IntrospectionException {
+        if(visited.contains(modelData)) {
+            dumpModelReference(sb, prefix, modelData);
+        } else {
+            visited.add(modelData);
+            dumpModelProperties(sb, visited, prefix, modelData);
+        }
+    }
+
+
+    private void dumpModelReference(StringBuilder sb, String prefix, Object modelData) {
+        sb.append(prefix).append(" = ")
+                .append(modelData.getClass().getSimpleName())
+                .append("[").append(((ModelData) modelData).<Object>get("id")).append("]\n");
+    }
+
+    private void dumpModelProperties(StringBuilder sb, Set<Object> visited, String prefix, Object modelData) throws IntrospectionException {
+        BeanInfo beanInfo = Introspector.getBeanInfo(modelData.getClass());
+        for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+            if (property.getReadMethod() != null &&
+                property.getReadMethod().getDeclaringClass().getName().startsWith("org.activityinfo")) {
+
+                try {
+                    Object propertyValue = property.getReadMethod().invoke(modelData);
+                    dump(sb, visited, prefix + "." + property.getName(), propertyValue);
+
+                } catch (Exception e) {
+                    sb.append(prefix).append(".").append(property.getName()).append(" = <")
+                            .append(e.getClass().getSimpleName()).append(">\n");
+                }
+            }
+        }
+    }
+
+
+    private void dumpList(StringBuilder sb, Set<Object> visited, String prefix, Iterable modelData) throws Exception {
+        List<ModelData> list = Lists.newArrayList(Iterables.filter(modelData, ModelData.class));
+        Collections.sort(list, Ordering.natural().onResultOf(input -> input.get("id")));
+
+        for (int i = 0; i != list.size(); ++i) {
+            dump(sb, visited, prefix + "[" + list.get(i).get("id") + "]", list.get(i));
         }
     }
 }

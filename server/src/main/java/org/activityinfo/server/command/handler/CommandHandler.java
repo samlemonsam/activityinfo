@@ -20,7 +20,6 @@ package org.activityinfo.server.command.handler;
 
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
-import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.database.hibernate.entity.User;
 
 /**
@@ -32,11 +31,6 @@ import org.activityinfo.server.database.hibernate.entity.User;
  */
 public interface CommandHandler<CommandT extends Command> {
 
-    /*
-     * TODO: is there anyway the return type can be automatically parameratized
-     * with the type parameter of CommandT ? (and without adding a second type
-     * parameter to CommandHandler
-     */
 
     /**
      * Execute a command received from the client
@@ -47,6 +41,6 @@ public interface CommandHandler<CommandT extends Command> {
      * successful, an exception should be thrown.
      * @throws org.activityinfo.legacy.shared.exception.CommandException
      */
-    public CommandResult execute(CommandT cmd, User user) throws CommandException;
+    public CommandResult execute(CommandT cmd, User user);
 
 }

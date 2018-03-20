@@ -25,6 +25,8 @@ import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
+import static org.activityinfo.legacy.shared.model.EntityDTO.ID_PROPERTY;
+
 /**
  * One-to-one DTO of the
  * {@link org.activityinfo.server.database.hibernate.entity.Partner} domain
@@ -49,14 +51,19 @@ public final class PartnerDTO extends BaseModelData implements DTO, ProvidesKey 
     }
 
     public void setId(int id) {
-        set("id", id);
+        set(ID_PROPERTY, id);
+    }
+
+
+    public boolean hasId() {
+        return get(ID_PROPERTY) != null;
     }
 
     @Required
     @JsonProperty 
     @JsonView(DTOViews.Schema.class)
     public int getId() {
-        return (Integer) get("id");
+        return (Integer) get(ID_PROPERTY);
     }
 
     @JsonProperty 
@@ -78,13 +85,9 @@ public final class PartnerDTO extends BaseModelData implements DTO, ProvidesKey 
         return get("fullName");
     }
 
-    public boolean isOperational() {
-        return true;
-    }
-
     @Override
     public String toString() {
-        return getName();
+        return "PartnerDTO{id="+ get(ID_PROPERTY) + ", name=" + getName() + "}";
     }
 
     @Override

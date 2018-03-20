@@ -25,7 +25,9 @@ import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.core.client.GWT;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.ui.client.page.config.design.BlankValidator;
+import org.activityinfo.ui.client.page.config.design.UniqueNameValidator;
+
+import java.util.Set;
 
 public class PartnerForm extends FormPanel {
 
@@ -33,22 +35,22 @@ public class PartnerForm extends FormPanel {
 
     private final TextField<String> nameField;
 
-    public PartnerForm() {
+    public PartnerForm(Set<String> existingPartnerName) {
         super();
 
         binding = new FormBinding(this);
 
         UiConstants constants = GWT.create(UiConstants.class);
 
-        nameField = new TextField<String>();
+        nameField = new TextField<>();
         nameField.setFieldLabel(constants.name());
         nameField.setMaxLength(PartnerDTO.NAME_MAX_LENGTH);
         nameField.setAllowBlank(false);
-        nameField.setValidator(new BlankValidator());
+        nameField.setValidator(new UniqueNameValidator(existingPartnerName));
         binding.addFieldBinding(new FieldBinding(nameField, "name"));
         this.add(nameField);
 
-        TextField<String> fullField = new TextField<String>();
+        TextField<String> fullField = new TextField<>();
         fullField.setFieldLabel(constants.description());
         fullField.setMaxLength(64);
         binding.addFieldBinding(new FieldBinding(fullField, "fullName"));

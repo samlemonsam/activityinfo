@@ -40,8 +40,7 @@ import java.util.*;
 public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminEntityValues {
 
     public static final String ENTITY_NAME = "Site";
-
-    public static final char CUID_DOMAIN = 's';
+    public static final String LOCATION_NAME_PROPERTY = "locationName";
 
     // ensure that serializer/deserializer is generated for LocalDate
     private LocalDate date;
@@ -76,7 +75,6 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
     /**
      * Sets this site's id
      *
-     * @param id
      */
     public void setId(int id) {
         set("id", id);
@@ -110,7 +108,6 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
     /**
      * Sets the id of Activity to which this Site belongs
      *
-     * @param id
      */
     public void setActivityId(int id) {
         set("activityId", id);
@@ -125,8 +122,6 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
 
     /**
      * Sets the beginning of work at this Site
-     *
-     * @param date1
      */
     public void setDate1(Date date1) {
         if (date1 == null) {
@@ -149,8 +144,6 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
 
     /**
      * Sets the end of work at this Site
-     *
-     * @param date2
      */
     public void setDate2(Date date2) {
         if (date2 == null) {
@@ -225,8 +218,6 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
 
     /**
      * Sets the partner who owns this Site
-     *
-     * @param partner
      */
     public void setPartner(PartnerDTO partner) {
         set("partner", partner);
@@ -239,14 +230,14 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
      * @param name the name of the location.
      */
     public void setLocationName(String name) {
-        set("locationName", name);
+        set(LOCATION_NAME_PROPERTY, name);
     }
 
     /**
      * @return the name of the Location of the Site
      */
     public String getLocationName() {
-        return get("locationName");
+        return get(LOCATION_NAME_PROPERTY);
     }
 
     /**
@@ -258,8 +249,6 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
 
     /**
      * Sets the axe routier on which the Location of the Site lies
-     *
-     * @param name
      */
     public void setLocationAxe(String name) {
         set("locationAxe", name);
@@ -461,7 +450,7 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
     }
 
     public ProjectDTO getProject() {
-        return (ProjectDTO) get("project");
+        return get("project");
     }
 
     public void setProject(ProjectDTO project) {
@@ -487,7 +476,6 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
         setX(location.getLongitude());
         setWorkflowStatusId(location.getWorkflowStatusId());
 
-        // TODO: think of better construct for this mess
         for (String admin : location.getPropertyNames()) {
             if (admin.startsWith(AdminLevelDTO.PROPERTY_PREFIX)) {
                 int id = Integer.parseInt(admin.substring(admin.length() - 1));
@@ -529,16 +517,7 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
 
     @Override
     public String getName() {
-        // TODO Leave unimplemented for now. A site with a name?
         return null;
-    }
-
-    public List<Integer> getAttachmentIds() {
-        return (List<Integer>) get("attachmentIds");
-    }
-
-    public void setAttachmentIds(List<Integer> ids) {
-        set("attachmentIds", ids);
     }
 
     public int getPartnerId() {
@@ -565,12 +544,12 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
     public void addDisplayAttribute(String groupName, String attributeName) {
         if (groupName != null && attributeName != null) {
             if (attributeDisplayMap == null) {
-                attributeDisplayMap = new HashMap<String, List<String>>();
+                attributeDisplayMap = new HashMap<>();
             }
 
             List<String> groupValues = attributeDisplayMap.get(groupName);
             if (groupValues == null) {
-                groupValues = new ArrayList<String>();
+                groupValues = new ArrayList<>();
                 attributeDisplayMap.put(groupName, groupValues);
             }
 
