@@ -18,6 +18,10 @@
  */
 package org.activityinfo.api.tools;
 
+import io.swagger.models.Model;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

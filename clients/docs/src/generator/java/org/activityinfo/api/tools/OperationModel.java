@@ -127,7 +127,7 @@ public class OperationModel {
     }
     
     private String tryReadExample(String ext)  {
-        File file = new File("apiDocs/src/main/examples/" + getId() + ext);
+        File file = new File("clients/docs/src/main/examples/" + getId() + ext);
         if(!file.exists()) {
             return null;
         }

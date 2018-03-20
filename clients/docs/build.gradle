@@ -6,7 +6,7 @@ ext {
 }
 
 sourceSets {
-    // This source set *generates* the client code for GWT
+    // This source set *generates* the documentation
     generator {
         java {
             srcDir 'src/generator/java'
@@ -19,7 +19,7 @@ sourceSets {
 
 dependencies {
     generatorCompile libraries.guava
-    generatorCompile libraries.swagger.core
+    generatorCompile 'io.swagger:swagger-parser:1.0.19'
     generatorCompile 'org.pegdown:pegdown:1.6.0'
     generatorCompile libraries.freemarker
     generatorCompile project(':model')
@@ -40,14 +40,16 @@ task generateDocs(type: JavaExec) {
     group = "API"
     description = 'Generates API Documentation'
 
-    dependsOn ':server:generateOpenApiSpec', 'generatorClasses'
+    dependsOn 'generatorClasses'
 
     main = 'org.activityinfo.api.tools.DocGenerator'
     classpath = sourceSets.generator.runtimeClasspath
     workingDir = rootProject.projectDir
+    args project.file('src/main/openapi/api.json')
+    args outputDir
+
     doFirst {
-        args "${project(":server").buildDir}/api.json"
-        args outputDir
+        logger.lifecycle("Output dir:  ${outputDir}")
     }
 }
 

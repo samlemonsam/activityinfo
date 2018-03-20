@@ -18,8 +18,6 @@
  */
 package org.activityinfo.api.tools;
 
-import io.swagger.v3.oas.models.OpenAPI;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,14 +28,14 @@ import java.util.Map;
  */
 public class SpecModel {
     
-    private OpenAPI spec;
+    private Swagger spec;
     private List<ApiSectionModel> sections = new ArrayList<>();
     private Map<String, DefinitionModel> definitions = new HashMap<>();
     
-    public SpecModel(OpenAPI spec) {
+    public SpecModel(Swagger spec) {
         this.spec = spec;
 
-        for (Map.Entry<String, Model> entry : spec.getComponents().entrySet()) {
+        for (Map.Entry<String, Model> entry : spec.getDefinitions().entrySet()) {
             definitions.put(entry.getKey(), new DefinitionModel(entry.getKey(), entry.getValue()));
         }
 
