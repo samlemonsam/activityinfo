@@ -95,7 +95,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
     public void updatePartners() throws Exception {
         int databaseId = 1;
         CreateResult createResult = assertChangeIsSynchronized(
-                new UpdatePartner(databaseId, new PartnerDTO(9999, "Judean People's Front")));
+                new UpdatePartner(databaseId, new PartnerDTO("Judean People's Front")));
         assertChangeIsSynchronized(new RemovePartner(1, createResult.getNewId()));
     }
 

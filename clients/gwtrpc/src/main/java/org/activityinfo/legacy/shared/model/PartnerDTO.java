@@ -50,6 +50,10 @@ public final class PartnerDTO extends BaseModelData implements DTO, ProvidesKey 
         setName(name);
     }
 
+    public PartnerDTO(String name) {
+        setName(name);
+    }
+
     public void setId(int id) {
         set(ID_PROPERTY, id);
     }
