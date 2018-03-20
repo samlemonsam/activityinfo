@@ -92,6 +92,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
     private ColumnModel forSingleActivity(GroupingModel grouping, ActivityFormDTO activity) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
+                                           .addDeletedLocationWarning()
                                            .maybeAddLockOrLinkColumn(activity)
                                            .maybeAddDateColumn(activity)
                                            .maybeAddPartnerColumn(activity)
@@ -110,7 +111,8 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                                            .build();
         } else if (grouping instanceof TimeGroupingModel) {
 
-            return new ColumnModelBuilder().maybeAddLockOrLinkColumn(activity)
+            return new ColumnModelBuilder().addDeletedLocationWarning()
+                                           .maybeAddLockOrLinkColumn(activity)
                                            .addTreeNameColumn()
                                            .maybeAddDateColumn(activity)
                                            .maybeAddPartnerColumn(activity)
@@ -126,6 +128,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
     private ColumnModel forSingleDatabase(GroupingModel grouping, UserDatabaseDTO database) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
+                                           .addDeletedLocationWarning()
                                            .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
                                            .addLocationColumn()
@@ -145,7 +148,8 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
 
         } else if (grouping instanceof TimeGroupingModel) {
 
-            return new ColumnModelBuilder().addTreeNameColumn()
+            return new ColumnModelBuilder().addDeletedLocationWarning()
+                                           .addTreeNameColumn()
                                            .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
                                            .maybeAddPartnerColumn(database)
@@ -161,6 +165,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
     private ColumnModel forMultipleDatabases(GroupingModel grouping, SchemaDTO schema) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
+                                           .addDeletedLocationWarning()
                                            .addDatabaseColumn(schema)
                                            .addActivityColumn(schema)
                                            .addLocationColumn()

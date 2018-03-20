@@ -24,6 +24,7 @@ import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.form.NumberField;
 import com.extjs.gxt.ui.client.widget.grid.*;
 import com.extjs.gxt.ui.client.widget.treegrid.TreeGridCellRenderer;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -40,6 +41,8 @@ import java.util.List;
  * Builder class for constructing a ColumnModel for site grids
  */
 public class ColumnModelBuilder {
+
+    private final String warningStyle = "color:tomato; font-size:20px; font-weight:bold";
 
     private List<ColumnConfig> columns = Lists.newArrayList();
 
@@ -378,4 +381,31 @@ public class ColumnModelBuilder {
         }
         return this;
     }
+
+    public ColumnModelBuilder addDeletedLocationWarning() {
+        ColumnConfig deletedWarning = new ColumnConfig("deleted", "", 25);
+        deletedWarning.setRenderer(new TreeGridCellRenderer<ModelData>() {
+
+            @Override
+            public SafeHtml render(ModelData model,
+                                   String property,
+                                   ColumnData config,
+                                   int rowIndex,
+                                   int colIndex,
+                                   ListStore<ModelData> store,
+                                   Grid<ModelData> grid) {
+                if (model instanceof SiteDTO) {
+                    String workflowStatus = ((SiteDTO) model).getLocation().getWorkflowStatusId();
+                    if (!Strings.isNullOrEmpty(workflowStatus) && workflowStatus.equals(LocationDTO.REJECTED)) {
+                        return SafeHtmlUtils.fromSafeConstant("<div style='" + warningStyle + "' title='" + I18N.CONSTANTS.deletedLocation() + "'>&nbsp;!&nbsp;</div>");
+                    }
+                }
+                return SafeHtmlUtils.fromSafeConstant("&nbsp;");
+            }
+        });
+
+        columns.add(deletedWarning);
+        return this;
+    }
+
 }

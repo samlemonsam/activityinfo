@@ -1848,4 +1848,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Try our new reporting interface! (BETA)")
     String tryNewReportingInterface();
+
+    @DefaultStringValue("This entry references a site which has been deleted. Please update the location to avoid loss of data.")
+    String deletedLocation();
 }
