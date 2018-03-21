@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
@@ -73,13 +75,13 @@ public class TargetTest extends CommandTestCase {
     @Test
     public void updateTarget() throws Throwable {
 
-        LocalDate toDate = new LocalDate(2015, 3, 3);
-        LocalDate fromDate = new LocalDate(2015, 3, 4);
+        LocalDate fromDate = new LocalDate(2015, 3, 3);
+        LocalDate toDate = new LocalDate(2015, 3, 4);
 
         Map<String, Object> changes = new HashMap<String, Object>();
         changes.put("name", "newNameOfTarget");
-        changes.put("toDate", toDate);
         changes.put("fromDate", fromDate);
+        changes.put("toDate", toDate);
 
         execute(new BatchCommand(new UpdateEntity("Target", 1, changes)));
 
@@ -87,9 +89,9 @@ public class TargetTest extends CommandTestCase {
 
         TargetDTO dto = getTargetById(targets, 1);
 
-        assertEquals("newNameOfTarget", dto.getName());
-        assertEquals(fromDate, dto.getFromDate());
-        assertEquals(toDate, dto.getToDate());
+        assertThat(dto.getName(), equalTo("newNameOfTarget"));
+        assertThat(dto.getFromDate(), equalTo(fromDate));
+        assertThat(dto.getToDate(), equalTo(toDate));
     }
 
     @Test

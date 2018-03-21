@@ -133,7 +133,7 @@ public class GetSchemaTest extends CommandTestCase2 {
     @Test
     public void testDatabaseMetadata() {
         DatabaseProviderImpl impl = injector.getInstance(DatabaseProviderImpl.class);
-        UserDatabaseMeta metadata = impl.getDatabaseMetadata(1, 1);
+        UserDatabaseMeta metadata = impl.getDatabaseMetadata(CuidAdapter.databaseId(1), 1);
 
         System.out.println(Json.stringify(metadata.toJson(), 4));
 
