@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.cell.core.client.form.DateCell;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.form.DateField;
 import org.activityinfo.model.type.FieldValue;
@@ -38,6 +37,8 @@ public class LocalDateWidget implements PeriodFieldWidget {
 
     public LocalDateWidget(FieldUpdater fieldUpdater) {
         this.field = new DateField();
+        // Ensure that no date can be selected which occurs before the epoch set on LocalDate
+        this.field.setMinValue(LocalDate.EPOCH);
         this.field.addValueChangeHandler(event -> fieldUpdater.update(input()));
     }
 

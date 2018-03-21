@@ -18,14 +18,43 @@
  */
 package org.activityinfo.model.type.time;
 
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class LocalDateTest {
 
-    
+    @Test
+    @Ignore("LocalDate state check will cause exceptions for users with current date values which occur before epoch")
+    @SuppressWarnings("deprecation")
+    public void epoch() {
+        LocalDate postEpochParsed = LocalDate.parse("2017-01-01");
+        LocalDate postEpochDate = new LocalDate(new Date(2017-1900,0,1));
+        assertThat(postEpochParsed, equalTo(postEpochDate));
+
+        LocalDate onEpoch = LocalDate.parse("1000-01-01");
+        LocalDate onEpochDate = new LocalDate(new Date(1000-1900,0,1));
+        assertThat(onEpoch, equalTo(onEpochDate));
+
+        try {
+            LocalDate preEpoch = LocalDate.parse("999-01-01");
+            throw new AssertionError("Should not be able to create date before epoch");
+        } catch (IllegalStateException excp) {
+            // Should cause exception when we try to create a LocalDate before the epoch
+        }
+
+        try {
+            LocalDate preEpoch = new LocalDate(new Date(999-1900,0,1));
+            throw new AssertionError("Should not be able to create date before epoch");
+        } catch (IllegalStateException excp) {
+            // Should cause exception when we try to create a LocalDate before the epoch
+        }
+    }
+
     @Test
     public void quarter() {
         assertThat(quarterOfMonth(1),  equalTo(1));
