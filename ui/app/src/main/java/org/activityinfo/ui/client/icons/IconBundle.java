@@ -21,40 +21,120 @@ package org.activityinfo.ui.client.icons;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
-import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.attachment.AttachmentType;
+import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.model.type.time.*;
 
 public interface IconBundle extends ClientBundle {
 
     IconBundle INSTANCE = GWT.create(IconBundle.class);
 
     static ImageResource iconForField(FieldType type) {
-        if(type instanceof QuantityType) {
-            return INSTANCE.quantityField();
+        return type.accept(new FieldTypeVisitor<ImageResource>() {
+            @Override
+            public ImageResource visitAttachment(AttachmentType attachmentType) {
+                return INSTANCE.textField();
+            }
 
-        } else if(type instanceof TextType) {
-            return INSTANCE.textField();
+            @Override
+            public ImageResource visitCalculated(CalculatedFieldType calculatedFieldType) {
+                return INSTANCE.calculatedField();
+            }
 
-        } else if(type instanceof LocalDateType) {
-            return INSTANCE.dateField();
+            @Override
+            public ImageResource visitReference(ReferenceType referenceType) {
+                return INSTANCE.referenceField();
+            }
 
-        } else if(type instanceof ReferenceType) {
-            return INSTANCE.referenceField();
+            @Override
+            public ImageResource visitNarrative(NarrativeType narrativeType) {
+                return INSTANCE.textField();
+            }
 
-        } else if(type instanceof EnumType) {
-            return INSTANCE.enumField();
+            @Override
+            public ImageResource visitBoolean(BooleanType booleanType) {
+                return INSTANCE.quantityField();
+            }
 
-        } else if(type instanceof GeoAreaType) {
-            return INSTANCE.geoAreaField();
+            @Override
+            public ImageResource visitQuantity(QuantityType type) {
+                return INSTANCE.quantityField();
+            }
 
-        } else {
-            return INSTANCE.calculatedField();
-        }
+            @Override
+            public ImageResource visitGeoPoint(GeoPointType geoPointType) {
+                return INSTANCE.textField();
+            }
+
+            @Override
+            public ImageResource visitGeoArea(GeoAreaType geoAreaType) {
+                return INSTANCE.geoAreaField();
+            }
+
+            @Override
+            public ImageResource visitEnum(EnumType enumType) {
+                return INSTANCE.enumField();
+            }
+
+            @Override
+            public ImageResource visitBarcode(BarcodeType barcodeType) {
+                return INSTANCE.textField();
+            }
+
+            @Override
+            public ImageResource visitSubForm(SubFormReferenceType subFormReferenceType) {
+                return INSTANCE.referenceField();
+            }
+
+            @Override
+            public ImageResource visitLocalDate(LocalDateType localDateType) {
+                return INSTANCE.dateField();
+            }
+
+            @Override
+            public ImageResource visitMonth(MonthType monthType) {
+                return INSTANCE.dateField();
+            }
+
+            @Override
+            public ImageResource visitYear(YearType yearType) {
+                return INSTANCE.dateField();
+            }
+
+            @Override
+            public ImageResource visitFortnight(FortnightType fortnightType) {
+                return INSTANCE.dateField();
+            }
+
+            @Override
+            public ImageResource visitWeek(EpiWeekType epiWeekType) {
+                return INSTANCE.dateField();
+            }
+
+            @Override
+            public ImageResource visitLocalDateInterval(LocalDateIntervalType localDateIntervalType) {
+                return INSTANCE.dateField();
+            }
+
+            @Override
+            public ImageResource visitText(TextType textType) {
+                return INSTANCE.textField();
+            }
+
+            @Override
+            public ImageResource visitSerialNumber(SerialNumberType serialNumberType) {
+                return INSTANCE.quantityField();
+            }
+        });
     }
 
     @Source("count.png")
