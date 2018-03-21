@@ -56,6 +56,19 @@ public class LocalDateInterval implements FieldValue {
         return endDate;
     }
 
+
+    /**
+     * @return true if the {@code other} interval overlaps this interval with at least one day.
+     */
+    public boolean overlaps(LocalDateInterval other) {
+        // Either the other interval finishes before this interval starts...
+        // .. or it starts after this interval finishes
+
+        return !(other.endDate.before(this.startDate) ||
+                 other.startDate.after(this.endDate));
+    }
+
+
     @Override
     public FieldTypeClass getTypeClass() {
         return LocalDateIntervalType.TYPE_CLASS;
@@ -69,6 +82,13 @@ public class LocalDateInterval implements FieldValue {
         return object;
     }
 
+    public static LocalDateInterval fromJson(JsonValue object) {
+        return new LocalDateInterval(
+                LocalDate.parse(object.getString("start")),
+                LocalDate.parse(object.getString("end")));
+    }
+
+
     @Override
     public String toString() {
         return "[" + startDate + ", " + endDate + "]";
@@ -80,11 +100,8 @@ public class LocalDateInterval implements FieldValue {
         if (o == null || getClass() != o.getClass()) return false;
 
         LocalDateInterval that = (LocalDateInterval) o;
-
-        if (endDate != null ? !endDate.equals(that.endDate) : that.endDate != null) return false;
-        if (startDate != null ? !startDate.equals(that.startDate) : that.startDate != null) return false;
-
-        return true;
+        return this.startDate.equals(that.startDate) &&
+               this.endDate.equals(that.endDate);
     }
 
     @Override
@@ -92,5 +109,18 @@ public class LocalDateInterval implements FieldValue {
         int result = startDate != null ? startDate.hashCode() : 0;
         result = 31 * result + (endDate != null ? endDate.hashCode() : 0);
         return result;
+    }
+
+    public static LocalDateInterval year(int year) {
+        return new LocalDateInterval(
+                new LocalDate(year, 1, 1),
+                new LocalDate(year, 12, 31));
+    }
+
+    public static LocalDateInterval month(int year, int month) {
+        LocalDate start = new LocalDate(year, month, 1);
+        LocalDate end = LocalDate.getLastDateOfMonth(year, month);
+
+        return new LocalDateInterval(start, end);
     }
 }

@@ -29,7 +29,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.date.CalendarUtils;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.ui.client.component.importDialog.model.type.formatter.DateFormatterFactory;
 
@@ -93,7 +92,7 @@ public class DateRangePanel implements IsWidget {
             showError(I18N.CONSTANTS.pleaseSpecifyToDate());
             return false;
         }
-        if (CalendarUtils.before(fromDateValue, toDateValue)) {
+        if (fromDateValue.before(toDateValue)) {
             showError(I18N.CONSTANTS.inconsistentDateRangeWarning());
             return false;
         }

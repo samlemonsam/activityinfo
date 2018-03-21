@@ -28,7 +28,6 @@ import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
-import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
@@ -65,6 +64,7 @@ public class FormPanel implements IsWidget {
     private int horizontalPadding = 0;
 
     private FormInputViewModel viewModel;
+    private final TextButton deleteButton;
 
     public FormPanel(FormSource formSource, FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
         this.formSource = formSource;
@@ -100,10 +100,10 @@ public class FormPanel implements IsWidget {
                 }
             }
         }
+        deleteButton = new TextButton(I18N.CONSTANTS.remove());
 
         if(formTree.getRootFormClass().isSubForm()) {
-            TextButton deleteButton = new TextButton(I18N.CONSTANTS.remove());
-            deleteButton.addSelectHandler(this::onDelete);
+            deleteButton.addSelectHandler(event -> onDelete());
             panel.add(deleteButton, new CssFloatLayoutContainer.CssFloatData(1,
                     new Margins(0, horizontalPadding, 10, horizontalPadding)));
         }
@@ -114,7 +114,7 @@ public class FormPanel implements IsWidget {
                 node.getType() instanceof PeriodType;
     }
 
-    private void onDelete(SelectEvent event) {
+    private void onDelete() {
         MessageBox messageBox = new MessageBox(I18N.CONSTANTS.confirmDeletion());
         messageBox.setMessage(I18N.CONSTANTS.confirmDeleteRecord());
         messageBox.setPredefinedButtons(Dialog.PredefinedButton.OK, Dialog.PredefinedButton.CANCEL);
@@ -144,6 +144,8 @@ public class FormPanel implements IsWidget {
     public void updateView(FormInputViewModel viewModel) {
 
         this.viewModel = viewModel;
+
+        deleteButton.setEnabled(!viewModel.isLocked());
 
         // Update Field Views
         for (FieldView fieldView : fieldViews) {

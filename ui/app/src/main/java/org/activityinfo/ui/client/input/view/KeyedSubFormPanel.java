@@ -18,6 +18,8 @@
  */
 package org.activityinfo.ui.client.input.view;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
@@ -27,7 +29,7 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.SubFormKind;
@@ -52,6 +54,11 @@ public class KeyedSubFormPanel implements IsWidget {
 
     private static final Logger LOGGER = Logger.getLogger(KeyedSubFormPanel.class.getName());
 
+    /**
+     * https://emojipedia.org/lock/
+     */
+    private static final SafeHtml LOCK_EMOJI = SafeHtmlUtils.fromSafeConstant("<span>\uD83D\uDD12</span>");
+
     private RecordRef parentRef;
     private final ResourceId fieldId;
     private final ResourceId subFormId;
@@ -61,6 +68,8 @@ public class KeyedSubFormPanel implements IsWidget {
     private final FormPanel formPanel;
     private final ContentPanel contentPanel;
     private final InputHandler inputHandler;
+
+    private final LabelToolItem lockIndicator;
 
     private SubFormViewModel viewModel;
 
@@ -76,11 +85,16 @@ public class KeyedSubFormPanel implements IsWidget {
 
         TextButton previousButton = new TextButton();
         previousButton.setText("<");
-        previousButton.addSelectHandler(this::onPreviousPeriod);
+        previousButton.addSelectHandler(event -> onPreviousPeriod());
 
         TextButton nextButton = new TextButton();
         nextButton.setText(">");
-        nextButton.addSelectHandler(this::onNextPeriod);
+        nextButton.addSelectHandler(event -> onNextPeriod());
+
+        lockIndicator = new LabelToolItem();
+        lockIndicator.addStyleName(InputResources.INSTANCE.style().lockIcon());
+        lockIndicator.setLabel(LOCK_EMOJI);
+        lockIndicator.setToolTip(I18N.CONSTANTS.dateFallsWithinLockedPeriodWarning());
 
         ToolBar toolBar = new ToolBar(new KeyedSubFormBarAppearance());
         toolBar.add(previousButton);
@@ -88,6 +102,7 @@ public class KeyedSubFormPanel implements IsWidget {
             toolBar.add(component);
         }
         toolBar.add(nextButton);
+        toolBar.add(lockIndicator);
 
         formPanel = new FormPanel(formSource, subTree,
                 new RecordRef(subTree.getRootFormId(), ResourceId.generateId()), inputHandler);
@@ -115,17 +130,18 @@ public class KeyedSubFormPanel implements IsWidget {
                 return new WeekWidget(updater);
             case DAILY:
                 return new LocalDateWidget(updater);
+
+            case REPEATING:
+            default:
+                throw new UnsupportedOperationException("kind: " + subFormKind);
         }
-        throw new UnsupportedOperationException("kind: " + subFormKind);
     }
 
-
-    private void onPreviousPeriod(SelectEvent event) {
+    private void onPreviousPeriod() {
         changeActivePeriod(viewModel.getActivePeriod().previous());
     }
 
-
-    private void onNextPeriod(SelectEvent event) {
+    private void onNextPeriod() {
         changeActivePeriod(viewModel.getActivePeriod().next());
     }
 
@@ -170,6 +186,7 @@ public class KeyedSubFormPanel implements IsWidget {
         }
 
         formPanel.updateView(viewModel.getActiveSubViewModel());
+        lockIndicator.setVisible(viewModel.getActiveSubViewModel().isLocked());
 
         this.viewModel = viewModel;
     }

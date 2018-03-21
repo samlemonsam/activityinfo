@@ -21,6 +21,7 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.sun.jersey.api.NotFoundException;
+import com.sun.jersey.api.core.InjectParam;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
@@ -29,7 +30,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.database.DatabaseLock;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.model.database.RecordLock;
+import org.activityinfo.model.database.RecordLockSet;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -81,21 +85,41 @@ public class FormResource {
     @GET
     @NoCache
     @Produces(JSON_CONTENT_TYPE)
-    public FormMetadata getMetadataResponse(@QueryParam("localVersion") Long localVersion) {
+    public FormMetadata getMetadataResponse(@InjectParam DatabaseProviderImpl databaseProvider,
+                                            @InjectParam AuthenticatedUser user,
+                                            @QueryParam("localVersion") Long localVersion) {
 
         Optional<FormStorage> storage = backend.getStorage().getForm(formId);
         if(!storage.isPresent()) {
             return FormMetadata.notFound(formId);
         }
+
+        ResourceId databaseId = storage.get().getFormClass().getDatabaseId();
+        UserDatabaseMeta databaseMetadata = databaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
+
         FormPermissions permissions = backend.getFormSupervisor().getFormPermissions(formId);
         if(!permissions.isVisible()) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
 
         } else {
-            return FormMetadata.of(
-                    storage.get().cacheVersion(),
-                    storage.get().getFormClass(),
-                    permissions);
+
+            // Workaround for sub form, which we don't yet have indexed to the
+            // database in which they live.
+            FormClass schema = storage.get().getFormClass();
+            RecordLockSet locks;
+            if(schema.isSubForm()) {
+                locks = databaseMetadata.getEffectiveLocks(schema.getParentFormId().get());
+            } else {
+                locks = databaseMetadata.getEffectiveLocks(formId);
+            }
+
+            return new FormMetadata.Builder()
+                    .setId(formId)
+                    .setPermissions(permissions)
+                    .setSchema(schema)
+                    .setLocks(locks)
+                    .setVersion(storage.get().cacheVersion())
+                    .build();
         }
     }
 
@@ -168,7 +192,7 @@ public class FormResource {
     @Path("locks")
     @Produces(JSON_CONTENT_TYPE)
     @Operation(summary = "Get the locks that apply to this form")
-    public List<DatabaseLock> getLocks() {
+    public List<RecordLock> getLocks() {
         throw new UnsupportedOperationException();
     }
 

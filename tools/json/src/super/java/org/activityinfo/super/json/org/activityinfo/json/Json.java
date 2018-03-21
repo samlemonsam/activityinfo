@@ -22,7 +22,6 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GwtScriptOnly;
 import org.activityinfo.json.impl.JsJsonFactory;
-import org.activityinfo.json.impl.JreJsonFactory;
 import org.activityinfo.json.JsonSerializable;
 
 /**
@@ -30,6 +29,9 @@ import org.activityinfo.json.JsonSerializable;
  */
 @GwtScriptOnly
 public class Json {
+
+  private Json() {
+  }
 
   public static JsonValue createFromNullable(String string) {
     return instance().createFromNullable(string);
@@ -96,6 +98,15 @@ public class Json {
     } else {
       return toJsonMagic(value);
     }
+  }
+
+
+  public static JsonValue toJsonArray(Iterable<? extends JsonSerializable> objects) {
+    JsonValue array = Json.createArray();
+    for (JsonSerializable object : objects) {
+      array.add(object.toJson());
+    }
+    return array;
   }
 
   private static native JsonValue toJsonMagic(Object value) /*-{

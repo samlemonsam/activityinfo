@@ -43,40 +43,20 @@ import java.util.Set;
  */
 public class FormInputViewModel {
 
-    private FormTree formTree;
-    private Map<ResourceId, FieldValue> existingValues;
-    private FormInputModel inputModel;
-    private final Map<ResourceId, FieldValue> fieldValueMap;
-    private final Map<ResourceId, SubFormViewModel> subFormMap;
-    private final Set<ResourceId> relevant;
-    private final Set<ResourceId> missing;
-    private final Multimap<ResourceId, String> validationErrors;
-    private final boolean valid;
-    private boolean dirty;
-    private boolean placeholder;
+    FormTree formTree;
+    FormInputModel inputModel;
+    Map<ResourceId, FieldValue> existingValues;
+    Map<ResourceId, FieldValue> fieldValueMap;
+    Map<ResourceId, SubFormViewModel> subFormMap;
+    Set<ResourceId> relevant;
+    Set<ResourceId> missing;
+    Multimap<ResourceId, String> validationErrors;
+    boolean valid;
+    boolean locked;
+    boolean dirty;
+    boolean placeholder;
 
-    FormInputViewModel(FormTree formTree,
-                       Map<ResourceId, FieldValue> existingValues,
-                       FormInputModel inputModel,
-                       Map<ResourceId, FieldValue> fieldValueMap,
-                       Map<ResourceId, SubFormViewModel> subFormMap,
-                       Set<ResourceId> relevant,
-                       Set<ResourceId> missing,
-                       Multimap<ResourceId, String> validationErrors,
-                       boolean valid,
-                       boolean dirty,
-                       boolean placeholder) {
-        this.formTree = formTree;
-        this.existingValues = existingValues;
-        this.inputModel = inputModel;
-        this.fieldValueMap = fieldValueMap;
-        this.subFormMap = subFormMap;
-        this.relevant = relevant;
-        this.missing = missing;
-        this.validationErrors = validationErrors;
-        this.valid = valid;
-        this.dirty = dirty;
-        this.placeholder = placeholder;
+    FormInputViewModel() {
     }
 
     public FormTree getFormTree() {
@@ -167,4 +147,7 @@ public class FormInputViewModel {
         return tx.build();
     }
 
+    public boolean isLocked() {
+        return locked;
+    }
 }

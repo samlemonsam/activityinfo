@@ -28,6 +28,7 @@ import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
@@ -36,6 +37,7 @@ import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
@@ -43,7 +45,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,27 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         this.baseUrl = baseUrl;
     }
 
+    private String formUrl(String formId) {
+        return baseUrl + "/form" + "/" + formId;
+    }
+
+    private String formUrl(ResourceId formId) {
+        return formUrl(formId.asString());
+    }
+
+    private String schemaUrl(String formId) {
+        return formUrl(formId) + "/schema";
+    }
+
+    private String recordUrl(String formId, String recordId) {
+        return formUrl(formId) + "/record/" + recordId;
+    }
+
+    @Override
+    public Promise<UserDatabaseMeta> getDatabase(ResourceId databaseId) {
+        return get(baseUrl + "/database/" + CuidAdapter.getLegacyIdFromCuid(databaseId), UserDatabaseMeta::fromJson);
+    }
+
     /**
      * Get a List of Forms
      *
@@ -78,12 +100,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         if(parent != null) {
             urlBuilder.append("?parent=").append(UriUtils.encode(parent));
         }
-        return get(urlBuilder.toString(), new Function<JsonValue, List<CatalogEntry>>() {
-            @Override
-            public List<CatalogEntry> apply(JsonValue jsonElement) {
-                return CatalogEntry.fromJsonArray(jsonElement);
-            }
-        });
+        return get(urlBuilder.toString(), CatalogEntry::fromJsonArray);
     }
 
     /**
@@ -93,27 +110,20 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param recordId Id of the record
      */
     public Promise<Maybe<FormRecord>> getRecord(final String formId, final String recordId) {
-        StringBuilder urlBuilder = new StringBuilder(baseUrl);
-        urlBuilder.append("/form");
-        urlBuilder.append("/").append(formId);
-        urlBuilder.append("/record");
-        urlBuilder.append("/").append(recordId);
-
-        return getRaw(urlBuilder.toString(), new Function<Response, Maybe<FormRecord>>() {
-            @Override
-            public Maybe<FormRecord> apply(Response response) {
-                if(response.getStatusCode() == 200) {
+        return getRaw(recordUrl(formId, recordId), response -> {
+            switch (response.getStatusCode()) {
+                case 200:
                     return Maybe.of(FormRecord.fromJson(JSON_PARSER.parse(response.getText())));
-                } else if(response.getStatusCode() == 403) {
+                case 403:
                     return Maybe.forbidden();
-                } else if(response.getStatusCode() == 404) {
+                case 404:
                     return Maybe.notFound();
-                } else {
+                default:
                     throw new ApiException(response.getStatusCode());
-                }
             }
         });
     }
+
 
     /**
      * Update a Form Record
@@ -123,15 +133,8 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param update The record to update
      */
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder update) {
-        StringBuilder urlBuilder = new StringBuilder(baseUrl);
-        urlBuilder.append("/form");
-        urlBuilder.append("/").append(formId);
-        urlBuilder.append("/record");
-        urlBuilder.append("/").append(recordId);
-
-        return post(RequestBuilder.PUT, urlBuilder.toString(), update.toJsonString());
+        return post(RequestBuilder.PUT, recordUrl(formId, recordId), update.toJsonString());
     }
-
 
     /**
      * Get a Record's History
@@ -140,21 +143,11 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param recordId Id of the record
      */
     public Promise<RecordHistory> getRecordHistory(String formId, String recordId) {
-        StringBuilder urlBuilder = new StringBuilder(baseUrl);
-        urlBuilder.append("/form");
-        urlBuilder.append("/").append(formId);
-        urlBuilder.append("/record");
-        urlBuilder.append("/").append(recordId);
-        urlBuilder.append("/history");
-
-        return get(urlBuilder.toString(), new Function<JsonValue, RecordHistory>() {
-            @Override
-            public RecordHistory apply(JsonValue jsonElement) {
-                try {
-                    return Json.fromJson(RecordHistory.class, jsonElement);
-                } catch (JsonMappingException e) {
-                    throw new RuntimeException(e);
-                }
+        return get(recordUrl(formId, recordId) + "/history", jsonElement -> {
+            try {
+                return Json.fromJson(RecordHistory.class, jsonElement);
+            } catch (JsonMappingException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -167,9 +160,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param parentId Limits the records to those which are sub-records of this parent record id.
      */
     public Promise<FormRecordSet> getRecords(String formId, String parentId) {
-        StringBuilder urlBuilder = new StringBuilder(baseUrl);
-        urlBuilder.append("/form");
-        urlBuilder.append("/").append(formId);
+        StringBuilder urlBuilder = new StringBuilder(formUrl(formId));
         urlBuilder.append("/records");
         if(parentId != null) {
             urlBuilder.append("?parentId=").append(UriUtils.encode(parentId));
@@ -179,41 +170,33 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, final long toVersion) {
-        StringBuilder urlBuilder = new StringBuilder(baseUrl);
-        urlBuilder.append("/form");
-        urlBuilder.append("/").append(formId);
-        urlBuilder.append("/records/versionRange");
-        urlBuilder.append("?localVersion=").append(localVersion);
-        urlBuilder.append("&version=").append(toVersion);
+        String url = formUrl(formId) +
+                "/records/versionRange" +
+                "?localVersion=" + localVersion +
+                "&version=" + toVersion;
 
-        return get(urlBuilder.toString(), new Function<JsonValue, FormSyncSet>() {
-            @Override
-            public FormSyncSet apply(JsonValue value) {
-                try {
-                    return Json.fromJson(FormSyncSet.class, value);
-                } catch (JsonMappingException e) {
-                    throw new RuntimeException(e);
-                }
+        return get(url, value -> {
+            try {
+                return Json.fromJson(FormSyncSet.class, value);
+            } catch (JsonMappingException e) {
+                throw new RuntimeException(e);
             }
         });
     }
 
 
     private Promise<FormRecordSet> getRecords(final ResourceId formId, final String url) {
-        return getRaw(url, new Function<Response, FormRecordSet>() {
-            @Override
-            public FormRecordSet apply(Response response) {
-                if(response.getStatusCode() == Response.SC_NOT_FOUND ||
-                    response.getStatusCode() == Response.SC_FORBIDDEN) {
-
-                    return new FormRecordSet(formId.asString());
-
-                } else if(response.getStatusCode() == Response.SC_OK) {
+        return getRaw(url, response -> {
+            switch (response.getStatusCode()) {
+                case Response.SC_OK:
                     return FormRecordSet.fromJson(Json.parse(response.getText()));
 
-                } else {
+                case Response.SC_NOT_FOUND:
+                case Response.SC_FORBIDDEN:
+                    return new FormRecordSet(formId.asString());
+
+                default:
                     throw new ApiException(response.getStatusCode());
-                }
             }
         });
     }
@@ -239,46 +222,33 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param formId Id of the form
      */
     public Promise<FormClass> getFormSchema(String formId) {
-        return get(schemaUrl(formId), new Function<JsonValue, FormClass>() {
-            @Override
-            public FormClass apply(JsonValue jsonElement) {
-                return FormClass.fromJson(jsonElement);
-            }
-        });
+        return get(schemaUrl(formId), FormClass::fromJson);
     }
 
     @Override
     public Promise<FormMetadata> getFormMetadata(String formId) {
-        return get(baseUrl + "/form/" + formId, new Function<JsonValue, FormMetadata>() {
-            @Override
-            public FormMetadata apply(JsonValue jsonElement) {
-                return FormMetadata.fromJson(jsonElement);
-            }
-        });
+        return get(formUrl(formId), FormMetadata::fromJson);
     }
 
     @Override
     public Promise<FormTree> getFormTree(final ResourceId formId) {
-        return get(baseUrl + "/form/" + formId.asString() + "/tree", new Function<JsonValue, FormTree>() {
-            @Override
-            public FormTree apply(JsonValue jsonElement) {
-                JsonValue root = jsonElement;
-                JsonValue forms = root.get("forms");
-                final Map<ResourceId, FormClass> formMap = new HashMap<>();
-                for (Map.Entry<String, JsonValue> entry : forms.entrySet()) {
-                    FormClass formClass = FormClass.fromJson(entry.getValue());
-                    formMap.put(formClass.getId(), formClass);
-                }
-                FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
-                    @Override
-                    public FormClass getFormClass(ResourceId formId) {
-                        FormClass formClass = formMap.get(formId);
-                        assert formClass != null;
-                        return formClass;
-                    }
-                });
-                return builder.queryTree(formId);
+        return get(formUrl(formId) + "/tree", jsonElement -> {
+            JsonValue root = jsonElement;
+            JsonValue forms = root.get("forms");
+            final Map<ResourceId, FormClass> formMap = new HashMap<>();
+            for (Map.Entry<String, JsonValue> entry : forms.entrySet()) {
+                FormClass formClass = FormClass.fromJson(entry.getValue());
+                formMap.put(formClass.getId(), formClass);
             }
+            FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
+                @Override
+                public FormClass getFormClass(ResourceId formId1) {
+                    FormClass formClass = formMap.get(formId1);
+                    assert formClass != null;
+                    return formClass;
+                }
+            });
+            return builder.queryTree(formId);
         });
     }
 
@@ -294,9 +264,6 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return post(RequestBuilder.PUT, schemaUrl(formId), updatedSchema.toJsonString());
     }
 
-    private String schemaUrl(String formId) {
-        return baseUrl + "/form/" + formId + "/schema";
-    }
 
     /**
      * Query Table Columns
@@ -304,12 +271,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
      * @param query The shape of the table to retrieve
      */
     public Promise<ColumnSet> queryTableColumns(QueryModel query) {
-        return post(RequestBuilder.POST, baseUrl + "/query/columns", query.toJsonString(), new Function<String, ColumnSet>() {
-            @Override
-            public ColumnSet apply(String responseText) {
-                return ColumnSetParser.fromJson(responseText);
-            }
-        });
+        return post(RequestBuilder.POST, baseUrl + "/query/columns", query.toJsonString(), ColumnSetParser::fromJson);
     }
 
     @Override
@@ -319,23 +281,20 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Maybe<Analysis>> getAnalysis(String id) {
-        return getRaw(baseUrl + "/analysis/" + id, new Function<Response, Maybe<Analysis>>() {
-            @Nullable
-            @Override
-            public Maybe<Analysis> apply(@Nullable Response response) {
-                if(response.getStatusCode() == Response.SC_OK) {
+        return getRaw(baseUrl + "/analysis/" + id, response -> {
+            switch (response.getStatusCode()) {
+                case Response.SC_OK:
                     try {
                         return Maybe.of(Json.fromJson(Analysis.class, Json.parse(response.getText())));
                     } catch (JsonMappingException e) {
                         throw new RuntimeException(e);
                     }
-                } else if(response.getStatusCode() == Response.SC_FORBIDDEN) {
+                case Response.SC_FORBIDDEN:
                     return Maybe.forbidden();
-                } else if(response.getStatusCode() == Response.SC_NOT_FOUND) {
+                case Response.SC_NOT_FOUND:
                     return Maybe.notFound();
-                } else {
+                default:
                     throw new ApiException(response.getStatusCode());
-                }
             }
         });
     }
@@ -350,24 +309,14 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
         JobRequest request = new JobRequest(job, LocaleInfo.getCurrentLocale().getLocaleName());
 
-        return post(RequestBuilder.POST, baseUrl + "/jobs", request.toJsonObject().toJson(), new Function<String, JobStatus<T, R>>() {
-            @Override
-            public JobStatus<T, R> apply(String s) {
-                return JobStatus.fromJson(JSON_PARSER.parse(s));
-            }
-        });
+        return post(RequestBuilder.POST, baseUrl + "/jobs", request.toJsonObject().toJson(),
+                s -> JobStatus.fromJson(JSON_PARSER.parse(s)));
     }
 
     @Override
     public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
-        return get(baseUrl + "/jobs/" + jobId, new Function<JsonValue, JobStatus<?, ?>>() {
-            @Override
-            public JobStatus<?, ?> apply(JsonValue jsonElement) {
-                return JobStatus.fromJson(jsonElement);
-            }
-        });
+        return get(baseUrl + "/jobs/" + jobId, JobStatus::fromJson);
     }
-
 
     private <R> Promise<R> getRaw(final String url, final Function<Response, R> parser) {
         final Promise<R> result = new Promise<>();
@@ -397,26 +346,18 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
     private <R> Promise<R> get(final String url, final Function<JsonValue, R> parser) {
-        return getRaw(url, new Function<Response, R>() {
-            @Override
-            public R apply(Response response) {
-                if(response.getStatusCode() == 200) {
-                    return parser.apply(JSON_PARSER.parse(response.getText()));
-                } else {
-                    throw new ApiException(response.getStatusCode());
-                }
+        return getRaw(url, response -> {
+            if(response.getStatusCode() == 200) {
+                return parser.apply(JSON_PARSER.parse(response.getText()));
+            } else {
+                throw new ApiException(response.getStatusCode());
             }
         });
     }
 
 
     private Promise<Void> post(RequestBuilder.Method method, final String url, String jsonRequest) {
-        return post(method, url, jsonRequest, new Function<String, Void>() {
-            @Override
-            public Void apply(String s) {
-                return null;
-            }
-        });
+        return post(method, url, jsonRequest, s -> null);
     }
 
     private <R> Promise<R> post(RequestBuilder.Method method, final String url, String jsonRequest, final Function<String, R> parser) {

@@ -1,28 +1,31 @@
 package org.activityinfo.model.database;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Describes a single user's view of database, including the folders, forms,
  * and locks visible to the user, as well as their own permissions within this database.
  */
 public class UserDatabaseMeta {
-    private int databaseId;
+    private ResourceId databaseId;
     private int userId;
     private String label;
     private boolean visible;
     private boolean owner;
     private String version;
 
-    private final List<Resource> resources = new ArrayList<>();
-    private List<GrantModel> grants = new ArrayList<>();
-    private List<DatabaseLock> locks = new ArrayList<>();
+    private final Map<ResourceId, Resource> resources = new HashMap<>();
+    private final Multimap<ResourceId, GrantModel> grants = HashMultimap.create();
+    private final Multimap<ResourceId, RecordLock> locks = HashMultimap.create();
 
-    public int getDatabaseId() {
+    public ResourceId getDatabaseId() {
         return databaseId;
     }
 
@@ -42,17 +45,32 @@ public class UserDatabaseMeta {
         return owner;
     }
 
-    public List<Resource> getResources() {
-        return resources;
+    public Collection<Resource> getResources() {
+        return resources.values();
     }
 
-    public List<GrantModel> getGrants() {
-        return grants;
+    public Collection<GrantModel> getGrants() {
+        return grants.values();
     }
 
-    public List<DatabaseLock> getLocks() {
-        return locks;
+    public Collection<RecordLock> getLocks() {
+        return locks.values();
     }
+
+    public RecordLockSet getEffectiveLocks(ResourceId resourceId) {
+        List<RecordLock> effective = new ArrayList<>();
+        do {
+            effective.addAll(this.locks.get(resourceId));
+            Resource resource = resources.get(resourceId);
+            if(resource == null) {
+                break;
+            }
+            resourceId = resource.getParentId();
+        } while(true);
+
+        return new RecordLockSet(effective);
+    }
+
 
     public String getVersion() {
         return version;
@@ -60,16 +78,45 @@ public class UserDatabaseMeta {
 
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
-        object.put("id", databaseId);
+        object.put("id", databaseId.asString());
         object.put("version", version);
         object.put("label", label);
         object.put("visible", visible);
         object.put("owner", owner);
         object.put("userId", userId);
-        object.put("resources", Json.toJsonArray(resources));
-        object.put("locks", Json.toJsonArray(locks));
-        object.put("grants", Json.toJsonArray(grants));
+        object.put("resources", Json.toJsonArray(resources.values()));
+        object.put("locks", Json.toJsonArray(locks.values()));
+        object.put("grants", Json.toJsonArray(grants.values()));
         return object;
+    }
+
+    public static UserDatabaseMeta fromJson(JsonValue object) {
+        UserDatabaseMeta meta = new UserDatabaseMeta();
+        meta.databaseId = ResourceId.valueOf(object.getString("id"));
+        meta.userId = (int) object.getNumber("userId");
+        meta.version = object.getString("version");
+        meta.label = object.getString("label");
+        meta.visible = object.getBoolean("visible");
+        meta.owner = object.getBoolean("owner");
+
+        JsonValue resourceArray = object.get("resources");
+        for (int i = 0; i < resourceArray.length(); i++) {
+            Resource resource = Resource.fromJson(resourceArray.get(i));
+            meta.resources.put(resource.getId(), resource);
+        }
+
+        JsonValue lockArray = object.get("locks");
+        for (int i = 0; i < lockArray.length(); i++) {
+            RecordLock lock = RecordLock.fromJson(lockArray.get(i));
+            meta.locks.put(lock.getResourceId(), lock);
+        }
+
+        JsonValue grantsArray = object.get("grants");
+        for (int i = 0; i < grantsArray.length(); i++) {
+            GrantModel grant = GrantModel.fromJson(grantsArray.get(i));
+            meta.grants.put(grant.getResourceId(), grant);
+        }
+        return meta;
     }
 
 
@@ -85,9 +132,13 @@ public class UserDatabaseMeta {
             return this;
         }
 
-        public Builder setDatabaseId(int id) {
+        public Builder setDatabaseId(ResourceId id) {
             meta.databaseId = id;
             return this;
+        }
+
+        public Builder setDatabaseId(int id) {
+            return setDatabaseId(CuidAdapter.databaseId(id));
         }
 
         public Builder setUserId(int userId) {
@@ -106,19 +157,35 @@ public class UserDatabaseMeta {
             return this;
         }
 
-
-        public Builder addGrants(List<GrantModel> userGrants) {
-            meta.grants.addAll(userGrants);
+        public Builder addGrants(List<GrantModel> grants) {
+            for (GrantModel grant : grants) {
+                meta.grants.put(grant.getResourceId(), grant);
+            }
             return this;
         }
 
-        public Builder addLocks(List<DatabaseLock> databaseLocks) {
-            meta.locks.addAll(databaseLocks);
+        public Builder addLock(RecordLock lock) {
+            meta.locks.put(lock.getResourceId(), lock);
             return this;
         }
 
-        public void addResources(List<Resource> forms) {
-            meta.resources.addAll(forms);
+        public Builder addLocks(List<RecordLock> locks) {
+            for (RecordLock lock : locks) {
+                addLock(lock);
+            }
+            return this;
+        }
+
+        public Builder addResources(List<Resource> resources) {
+            for (Resource resource : resources) {
+                addResource(resource);
+            }
+            return this;
+        }
+
+        public Builder addResource(Resource resource) {
+            meta.resources.put(resource.getId(), resource);
+            return this;
         }
 
         public boolean isVisible() {

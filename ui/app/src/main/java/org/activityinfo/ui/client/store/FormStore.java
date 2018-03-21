@@ -19,6 +19,7 @@
 package org.activityinfo.ui.client.store;
 
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
@@ -39,6 +40,8 @@ import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import java.util.List;
 
 public interface FormStore extends FormSource {
+
+    Observable<UserDatabaseMeta> getDatabase(ResourceId databaseId);
 
     Observable<FormMetadata> getFormMetadata(ResourceId formId);
 

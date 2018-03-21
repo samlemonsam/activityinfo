@@ -54,7 +54,7 @@ public class LocalDateIntervalType implements FieldType {
 
     @Override
     public FieldValue parseJsonValue(JsonValue value) {
-        throw new UnsupportedOperationException("TODO");
+        return LocalDateInterval.fromJson(value);
     }
 
     @Override

@@ -20,6 +20,7 @@ package org.activityinfo.api.client;
 
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
@@ -35,6 +36,9 @@ import org.activityinfo.promise.Promise;
 import java.util.List;
 
 public interface ActivityInfoClientAsync {
+
+
+    Promise<UserDatabaseMeta> getDatabase(ResourceId databaseId);
 
     /**
      * Get a List of Forms

@@ -50,5 +50,7 @@ public interface InputResources extends ClientBundle {
         String periodToolBar();
 
         String fieldUnits();
+
+        String lockIcon();
     }
 }

@@ -46,7 +46,7 @@ public class FieldView {
     }
 
     public void updateView(FormInputViewModel viewModel) {
-        widget.setRelevant(viewModel.isRelevant(fieldId));
+        widget.setRelevant(viewModel.isRelevant(fieldId) && !viewModel.isLocked());
 
         if(viewModel.isMissing(fieldId)) {
             validationMessage.setText(I18N.CONSTANTS.requiredFieldMessage());

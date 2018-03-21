@@ -67,7 +67,7 @@ public class FormStoreTest {
         HttpStore httpStore = new HttpStore(client, scheduler);
         OfflineStore offlineStore = new OfflineStore(httpStore, new IDBFactoryStub());
 
-        Survey survey = client.getCatalog().getSurvey();
+        Survey survey = client.getStorageProvider().getSurvey();
 
         // We start offline
         client.setConnected(false);
@@ -95,7 +95,7 @@ public class FormStoreTest {
     @Test
     public void httpBus() {
         AsyncClientStub client = new AsyncClientStub();
-        Survey survey = client.getCatalog().getSurvey();
+        Survey survey = client.getStorageProvider().getSurvey();
 
         HttpStore httpStore = new HttpStore(client, scheduler);
 
@@ -114,7 +114,7 @@ public class FormStoreTest {
         OfflineStore offlineStore = new OfflineStore(httpStore, new IDBFactoryStub());
         FormStoreImpl formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
 
-        Survey survey = client.getCatalog().getSurvey();
+        Survey survey = client.getStorageProvider().getSurvey();
 
         // Start online
         Connection<FormOfflineStatus> offlineStatusView = connect(formStore.getOfflineStatus(survey.getFormId()));
@@ -179,7 +179,7 @@ public class FormStoreTest {
     @Test
     public void relatedFormsAreAlsoCached() {
         AsyncClientStub client = new AsyncClientStub();
-        IntakeForm intakeForm = client.getCatalog().getIntakeForm();
+        IntakeForm intakeForm = client.getStorageProvider().getIntakeForm();
 
         HttpStore httpStore = new HttpStore(client, scheduler);
         OfflineStore offlineStore = new OfflineStore(httpStore, new IDBFactoryStub());

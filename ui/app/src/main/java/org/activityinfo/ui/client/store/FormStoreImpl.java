@@ -22,7 +22,11 @@ import com.google.common.base.Function;
 import com.google.gwt.core.client.Scheduler;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.*;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.form.CatalogEntry;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.RecordHistory;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
@@ -38,7 +42,10 @@ import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.http.*;
+import org.activityinfo.ui.client.store.http.CatalogRequest;
+import org.activityinfo.ui.client.store.http.DatabaseRequest;
+import org.activityinfo.ui.client.store.http.HttpStore;
+import org.activityinfo.ui.client.store.http.SubRecordsRequest;
 import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
@@ -46,12 +53,9 @@ import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 
 public class FormStoreImpl implements FormStore {
-
-    private static final Logger LOGGER = Logger.getLogger(FormStoreImpl.class.getName());
 
     private final HttpStore httpStore;
     private final OfflineStore offlineStore;
@@ -93,6 +97,11 @@ public class FormStoreImpl implements FormStore {
     @Override
     public Observable<List<FormRecord>> getSubRecords(ResourceId formId, RecordRef parent) {
         return httpStore.get(new SubRecordsRequest(formId, parent));
+    }
+
+    @Override
+    public Observable<UserDatabaseMeta> getDatabase(ResourceId databaseId) {
+        return httpStore.get(new DatabaseRequest(databaseId));
     }
 
     @Override

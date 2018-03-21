@@ -18,14 +18,9 @@
  */
 package org.activityinfo.model.date;
 
-/**
- * @author yuriyz on 07/03/2015.
- */
-
-import com.bedatadriven.rebar.time.calendar.LocalDate;
-
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author yuriyz on 02/05/2015.
@@ -72,27 +67,13 @@ public class DateRange implements Serializable {
         return start == null || end == null || start.getTime() <= end.getTime();
     }
 
-    public Date midDate() {
-        long midDate = (start.getTime() + end.getTime()) / 2;
-        return new Date(midDate);
-    }
-
-    public LocalDateRange asLocalDateRange() {
-        return new LocalDateRange(
-                start != null ? new LocalDate(start) : null,
-                end != null ? new LocalDate(end) : null);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DateRange dateRange = (DateRange) o;
-        if (end != null ? !end.equals(dateRange.end) : dateRange.end != null) return false;
-        if (start != null ? !start.equals(dateRange.start) : dateRange.start != null) return false;
-
-        return true;
+        DateRange that = (DateRange) o;
+        return Objects.equals(this.start, that.start) && Objects.equals(this.end, that.end);
     }
 
     @Override

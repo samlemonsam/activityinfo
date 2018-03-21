@@ -1,12 +1,11 @@
 package org.activityinfo.server.endpoint.rest;
 
-import org.activityinfo.model.database.DatabaseLock;
+import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
-import org.activityinfo.server.database.hibernate.entity.Database;
-import org.activityinfo.server.database.hibernate.entity.Folder;
-import org.activityinfo.server.database.hibernate.entity.LockedPeriod;
-import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.inject.Inject;
@@ -27,13 +26,13 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
 
         UserDatabaseMeta.Builder meta = new UserDatabaseMeta.Builder()
                 .setDatabaseId(databaseId)
                 .setUserId(userId);
 
-        Database database = entityManager.get().find(Database.class, databaseId);
+        Database database = entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
         if(database != null) {
 
             if (database.getOwner().getId() == userId) {
@@ -58,6 +57,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     }
 
 
+
     public static Optional<UserPermission> getUserPermission(EntityManager entityManager, Database database, int userId) {
         List<UserPermission> permissions = entityManager
                 .createQuery(
@@ -78,14 +78,14 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         }
     }
 
-    public List<DatabaseLock> queryLocks(Database database) {
+    public List<RecordLock> queryLocks(Database database) {
         return entityManager.get()
                 .createQuery("select k from LockedPeriod k where k.database = :database", LockedPeriod.class)
                 .setParameter("database", database)
                 .getResultList()
                 .stream()
-                .filter(k -> k.isEnabled())
-                .map(k -> k.asDatabaseLock())
+                .filter(LockedPeriod::isEnabled)
+                .map(LockedPeriod::asDatabaseLock)
                 .collect(Collectors.toList());
     }
 
@@ -95,7 +95,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 .setParameter("database", database)
                 .getResultList()
                 .stream()
-                .map(f -> f.asResource())
+                .map(Folder::asResource)
                 .collect(Collectors.toList());
     }
 
@@ -104,7 +104,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         return database.getActivities()
                 .stream()
                 .filter(a -> !a.isDeleted())
-                .map(a -> a.asResource())
+                .map(Activity::asResource)
                 .collect(Collectors.toList());
     }
 

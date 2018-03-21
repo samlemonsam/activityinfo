@@ -47,6 +47,15 @@ public class Resource implements JsonSerializable {
         return object;
     }
 
+    public static Resource fromJson(JsonValue object) {
+        Resource resource = new Resource();
+        resource.id = ResourceId.valueOf(object.getString("id"));
+        resource.parentId = ResourceId.valueOf(object.getString("parentId"));
+        resource.label = object.getString("label");
+        resource.type = ResourceType.valueOf(object.getString("type"));
+        return resource;
+    }
+
     public static class Builder {
         private Resource resource = new Resource();
 

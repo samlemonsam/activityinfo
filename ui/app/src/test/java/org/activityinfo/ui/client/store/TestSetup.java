@@ -20,6 +20,7 @@ package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.testing.StubScheduler;
 import org.activityinfo.indexedb.IDBFactoryStub;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.ResourceId;
@@ -36,12 +37,13 @@ import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
  */
 public class TestSetup {
 
+    private final TestingDatabaseProvider databases;
+    private final TestingStorageProvider catalog;
     private final AsyncClientStub client;
     private final HttpStore httpStore;
     private final OfflineStore offlineStore;
     private final FormStore formStore;
     private final StubScheduler scheduler;
-    private final TestingStorageProvider catalog;
     private final RecordSynchronizer synchronizer;
 
     public TestSetup() {
@@ -49,8 +51,9 @@ public class TestSetup {
     }
 
     public TestSetup(IDBFactoryStub database, boolean connected) {
+        databases = new TestingDatabaseProvider();
         catalog = new TestingStorageProvider();
-        client = new AsyncClientStub(catalog);
+        client = new AsyncClientStub(catalog, databases);
         client.setConnected(connected);
 
         scheduler = new StubScheduler();
@@ -58,6 +61,10 @@ public class TestSetup {
         offlineStore = new OfflineStore(httpStore, database);
         formStore = new FormStoreImpl(httpStore, offlineStore, scheduler);
         synchronizer = new RecordSynchronizer(httpStore, offlineStore);
+    }
+
+    public void describeDatabase(UserDatabaseMeta databaseMetadata) {
+        databases.add(databaseMetadata);
     }
 
     public FormStore getFormStore() {

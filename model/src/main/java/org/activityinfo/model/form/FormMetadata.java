@@ -20,6 +20,7 @@ package org.activityinfo.model.form;
 
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collections;
@@ -61,6 +62,8 @@ public class FormMetadata implements JsonSerializable {
     private FormClass schema;
 
     private boolean visible = true;
+
+    private RecordLockSet locks = RecordLockSet.EMPTY;
 
 
     public static FormMetadata notFound(ResourceId formId) {
@@ -107,6 +110,10 @@ public class FormMetadata implements JsonSerializable {
         return permissions;
     }
 
+    public RecordLockSet getLocks() {
+        return locks;
+    }
+
     public boolean isVisible() {
         return visible;
     }
@@ -130,6 +137,14 @@ public class FormMetadata implements JsonSerializable {
         this.schemaVersion = schema.getSchemaVersion();
     }
 
+    public List<FormField> getFields() {
+        if(isVisible()) {
+            return getSchema().getFields();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = createObject();
@@ -142,6 +157,9 @@ public class FormMetadata implements JsonSerializable {
         }
         if(schema != null) {
             object.put("schema", schema.toJson());
+        }
+        if(!locks.isEmpty()) {
+            object.put("locks", locks.toJson());
         }
         if(visible) {
             object.put("version", version);
@@ -173,14 +191,46 @@ public class FormMetadata implements JsonSerializable {
         if(object.hasKey("deleted")) {
             metadata.deleted = object.get("deleted").asBoolean();
         }
+        if(object.hasKey("locks")) {
+            metadata.locks = RecordLockSet.fromJson(object.get("locks"));
+        }
         return metadata;
     }
 
-    public List<FormField> getFields() {
-        if(isVisible()) {
-            return getSchema().getFields();
-        } else {
-            return Collections.emptyList();
+
+    public static class Builder {
+        private FormMetadata meta = new FormMetadata();
+
+        public Builder setId(ResourceId id) {
+            meta.id = id;
+            return this;
         }
+
+        public Builder setSchema(FormClass schema) {
+            meta.schema = schema;
+            meta.schemaVersion = schema.getSchemaVersion();
+            return this;
+        }
+
+        public Builder setPermissions(FormPermissions permissions) {
+            meta.permissions = permissions;
+            return this;
+        }
+
+        public Builder setLocks(RecordLockSet locks) {
+            meta.locks = locks;
+            return this;
+        }
+
+        public Builder setVersion(long version) {
+            meta.version = version;
+            return this;
+        }
+
+        public FormMetadata build() {
+            return meta;
+        }
+
     }
+
 }

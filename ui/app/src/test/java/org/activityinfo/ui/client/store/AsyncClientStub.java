@@ -24,6 +24,8 @@ import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.RecordLockSet;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
@@ -46,15 +48,22 @@ import java.util.List;
 
 public class AsyncClientStub implements ActivityInfoClientAsync {
 
-    private TestingStorageProvider catalog;
+    private TestingStorageProvider storageProvider;
+    private final TestingDatabaseProvider databaseProvider;
     private boolean connected = true;
 
+
     public AsyncClientStub() {
-        this.catalog = new TestingStorageProvider();
+        this(new TestingStorageProvider(), new TestingDatabaseProvider());
     }
 
     public AsyncClientStub(TestingStorageProvider testingCatalog) {
-        this.catalog = testingCatalog;
+        this(testingCatalog, new TestingDatabaseProvider());
+    }
+
+    public AsyncClientStub(TestingStorageProvider storageProvider, TestingDatabaseProvider databaseProvider) {
+        this.storageProvider = storageProvider;
+        this.databaseProvider = databaseProvider;
     }
 
     public void setConnected(boolean connected) {
@@ -62,12 +71,17 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
+    public Promise<UserDatabaseMeta> getDatabase(ResourceId databaseId) {
+        return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
     public Promise<List<CatalogEntry>> getFormCatalog(String parent) {
         return Promise.rejected(new UnsupportedOperationException());
     }
 
-    public TestingStorageProvider getCatalog() {
-        return catalog;
+    public TestingStorageProvider getStorageProvider() {
+        return storageProvider;
     }
 
     @Override
@@ -76,7 +90,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         if(!connected) {
             return offlineResult();
         }
-        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        Optional<FormStorage> form = storageProvider.getForm(ResourceId.valueOf(formId));
         if(!form.isPresent()) {
             return Promise.resolved(Maybe.notFound());
         }
@@ -99,7 +113,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         if(!connected) {
             return offlineResult();
         }
-        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        Optional<FormStorage> form = storageProvider.getForm(ResourceId.valueOf(formId));
         if(!form.isPresent()) {
             return Promise.rejected(new RuntimeException("No such form"));
         }
@@ -112,7 +126,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         if(!connected) {
             return offlineResult();
         }
-        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        Optional<FormStorage> form = storageProvider.getForm(ResourceId.valueOf(formId));
         if(!form.isPresent()) {
             return Promise.rejected(new RuntimeException("No such form"));
         }
@@ -131,7 +145,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return offlineResult();
         }
 
-        Optional<FormStorage> formSchema = catalog.getForm(ResourceId.valueOf(formId));
+        Optional<FormStorage> formSchema = storageProvider.getForm(ResourceId.valueOf(formId));
         if(formSchema.isPresent()) {
             return Promise.resolved(formSchema.get().getFormClass());
         } else {
@@ -145,14 +159,24 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return offlineResult();
         }
 
-        Optional<FormStorage> form = catalog.getForm(ResourceId.valueOf(formId));
+        return getFormMetadata(ResourceId.valueOf(formId));
+    }
+
+    private Promise<FormMetadata> getFormMetadata(ResourceId formId) {
+        Optional<FormStorage> form = storageProvider.getForm(formId);
         if(!form.isPresent()) {
-            return Promise.resolved(FormMetadata.notFound(ResourceId.valueOf(formId)));
+            return Promise.resolved(FormMetadata.notFound(formId));
         } else {
-            return Promise.resolved(FormMetadata.of(
-                form.get().cacheVersion(),
-                form.get().getFormClass(),
-                FormPermissions.readWrite()));
+
+            java.util.Optional<UserDatabaseMeta> database = databaseProvider.lookupDatabase(formId);
+
+            return Promise.resolved(new FormMetadata.Builder()
+            .setId(formId)
+            .setSchema(form.get().getFormClass())
+            .setPermissions(FormPermissions.readWrite())
+            .setVersion(form.get().cacheVersion())
+            .setLocks(database.map(d -> d.getEffectiveLocks(formId)).orElse(RecordLockSet.EMPTY))
+            .build());
         }
     }
 
@@ -173,7 +197,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return offlineResult();
         }
 
-        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
+        ColumnSetBuilder columnSetBuilder = new ColumnSetBuilder(storageProvider, new NullFormScanCache(), new NullFormSupervisor());
         ColumnSet columnSet = columnSetBuilder.build(query);
 
         return Promise.resolved(columnSet);
@@ -185,7 +209,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return offlineResult();
         }
 
-        catalog.updateRecords(transactions);
+        storageProvider.updateRecords(transactions);
 
         return Promise.done();
     }

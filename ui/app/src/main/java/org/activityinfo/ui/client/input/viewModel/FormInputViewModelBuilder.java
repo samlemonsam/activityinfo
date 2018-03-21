@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.input.viewModel;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
@@ -33,6 +34,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -41,6 +43,8 @@ import org.activityinfo.ui.client.store.FormStore;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * Helper class which constructs a {@link FormInputViewModel}.
@@ -54,7 +58,7 @@ public class FormInputViewModelBuilder {
 
     private final FormTree formTree;
     private final FormEvalContext evalContext;
-    private final PermissionFilters filters;
+    private final RecordLockSet locks;
 
     private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
 
@@ -64,14 +68,12 @@ public class FormInputViewModelBuilder {
 
     public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, ActivePeriodMemory memory) {
         this.formTree = formTree;
-        this.filters = new PermissionFilters(formTree);
+        this.locks = formTree.getRootMetadata().getLocks();
         this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
         for (FormTree.Node node : this.formTree.getRootFields()) {
-            if(node.isSubForm()) {
-                if(node.isSubFormVisible()) {
-                    subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node, memory));
-                }
+            if(node.isSubForm() && node.isSubFormVisible()) {
+                subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node, memory));
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);
@@ -133,102 +135,82 @@ public class FormInputViewModelBuilder {
 
     public FormInputViewModel build(FormInputModel inputModel, Maybe<RecordTree> existingRecord, boolean placeholder) {
 
-        FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormId());
+        // Combine the original values of the record with the newly entered data
+
+        Map<ResourceId, FieldValue> existingValues = existingRecord
+                .transform(r -> r.getRoot().getFieldValueMap())
+                .or(emptyMap());
+
+        FormInstance record = computeUpdatedRecord(existingValues, inputModel);
+
+        // Now construct the viewModel that includes everything about
+        // the current state of data entry.
+
+        FormInputViewModel viewModel = new FormInputViewModel();
+        viewModel.formTree = this.formTree;
+        viewModel.inputModel = inputModel;
+        viewModel.fieldValueMap = record.getFieldValueMap();
+        viewModel.subFormMap = computeSubViewModels(inputModel, existingRecord);
+        viewModel.existingValues = existingValues;
+        viewModel.placeholder = placeholder;
+        viewModel.relevant = computeRelevance(record);
+        viewModel.missing = computeMissing(record, viewModel.relevant);
+        viewModel.validationErrors = validateFieldValues(record);
+        viewModel.dirty = computeDirty(placeholder, existingValues, record);
+        viewModel.locked = checkLocks(record);
+        viewModel.valid =
+                allInputValid(inputModel) &&
+                viewModel.missing.isEmpty() &&
+                viewModel.validationErrors.isEmpty() &&
+                viewModel.subFormMap.values().stream().allMatch(SubFormViewModel::isValid);
+
+        LOGGER.info("Valid = " + viewModel.valid);
+
+        return viewModel;
+    }
 
 
-        // Keep track if this form is valid and ready to submit
-        boolean valid = true;
-        boolean dirty = false;
+    /**
+     * Computes the effective record, based
+     * @param existingValues
+     * @param inputModel
+     * @return
+     */
+    private FormInstance computeUpdatedRecord(Map<ResourceId, FieldValue> existingValues, FormInputModel inputModel) {
 
         // We inherit all the existing values...
-        Map<ResourceId, FieldValue> existingValues;
-        if(existingRecord.isVisible()) {
-            existingValues = existingRecord.get().getRoot().getFieldValueMap();
-        } else {
-            existingValues = Collections.emptyMap();
-        }
 
+        FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormId());
         record.setAll(existingValues);
 
         // Now apply changes...
         for (FormTree.Node node : formTree.getRootFields()) {
             FieldInput fieldInput = inputModel.get(node.getFieldId());
-            FieldValue existingValue = record.get(node.getFieldId());
             switch (fieldInput.getState()) {
+                case UNTOUCHED:
+                    // No changes
+                    break;
                 case EMPTY:
-                    if(existingValue != null) {
-                        dirty = true;
-                    }
                     record.set(node.getFieldId(), (FieldValue)null);
                     break;
                 case VALID:
-                    if(!fieldInput.getValue().equals(existingValue)) {
-                        dirty = true;
-                    }
                     record.set(node.getFieldId(), fieldInput.getValue());
                     break;
                 case INVALID:
                     LOGGER.info("Field with invalid input = " + node.getFieldId());
-                    dirty = true;
-                    valid = false;
+                    record.set(node.getFieldId(), (FieldValue)null);
                     break;
             }
         }
-
-        // Determine which fields are "relevant" and can be enabled
-        Set<ResourceId> relevantSet = computeRelevance(record);
-
-        // Finally, check to ensure that all required -AND- relevant
-        // values are provided
-        Set<ResourceId> missing = computeMissing(record, relevantSet);
-
-        LOGGER.info("Missing fields = " + missing);
-
-        if(!missing.isEmpty()) {
-            valid = false;
-        }
-
-        // Run individual field validators
-        Multimap<ResourceId, String> validationErrors = HashMultimap.create();
-        for (FieldValidator validator : validators) {
-            validator.run(record, validationErrors);
-        }
-        if(!validationErrors.isEmpty()) {
-            valid = false;
-        }
-
-        // Build repeating sub form view models
-        Map<ResourceId, SubFormViewModel> subFormMap = new HashMap<>();
-        for (SubFormViewModelBuilder subBuilder : subBuilders) {
-            SubFormViewModel subViewModel = subBuilder.build(inputModel, existingRecord);
-            if(!subViewModel.isValid()) {
-                valid = false;
-            }
-            subFormMap.put(subBuilder.getFieldId(), subViewModel);
-        }
-
-        LOGGER.info("Valid = " + valid);
-
         LOGGER.info("fieldValues = " + record.getFieldValueMap());
-
-        if(placeholder) {
-            // if this is a placeholder subrecord, there may be a key
-            // field provided, but we won't consider it dirty because
-            // the user themselves hasn't entered any information.
-            dirty = false;
-        }
-
-        return new FormInputViewModel(formTree,
-                existingValues,
-                inputModel,
-                record.getFieldValueMap(),
-                subFormMap,
-                relevantSet,
-                missing, validationErrors, valid,
-                dirty,
-                placeholder);
+        return record;
     }
 
+    /**
+     * Computes the set of fields that are relevant based the current state of the
+     * form and the rules defined in the form's schema.
+     *
+     */
     private Set<ResourceId> computeRelevance(FormInstance record) {
         // All fields are relevant by default
         Set<ResourceId> relevantSet = new HashSet<>();
@@ -248,10 +230,8 @@ public class FormInputViewModelBuilder {
                     record.set(field.getKey(), (FieldValue)null);
                 }
 
-                boolean wasRelevant = toggle(relevantSet, field.getKey(), relevant);
-                if(relevant != wasRelevant) {
+                if(toggle(relevantSet, field.getKey(), relevant)) {
                     changing = true;
-
                 }
             }
         } while(changing);
@@ -263,16 +243,16 @@ public class FormInputViewModelBuilder {
      * @param relevantSet the relevancy set
      * @param fieldId the id of the field to add or remove
      * @param relevant true if the field is relevant
-     * @return {@code true} if the field was previously relevant.
+     * @return {@code true} if the set has changed.
      */
     private boolean toggle(Set<ResourceId> relevantSet, ResourceId fieldId, boolean relevant) {
+        boolean wasRelevant = relevantSet.contains(fieldId);
         if(relevant) {
-            boolean wasNotPresent = relevantSet.add(fieldId);
-            return !wasNotPresent;
+            relevantSet.add(fieldId);
         } else {
-            boolean wasPresent = relevantSet.remove(fieldId);
-            return wasPresent;
+            relevantSet.remove(fieldId);
         }
+        return wasRelevant != relevant;
     }
 
 
@@ -285,14 +265,85 @@ public class FormInputViewModelBuilder {
             if(node.getType() instanceof SerialNumberType) {
                 continue;
             }
-            if(node.getField().isRequired() && node.getField().isVisible()) {
-                if(relevantSet.contains(node.getFieldId())) {
-                    if(record.get(node.getFieldId()) == null) {
-                        missing.add(node.getFieldId());
-                    }
-                }
+            boolean required = node.getField().isRequired();
+            boolean visible = node.getField().isVisible();
+            boolean relevant = relevantSet.contains(node.getFieldId());
+            boolean empty = record.get(node.getFieldId()) == null;
+
+            if (required && visible && relevant && empty) {
+                missing.add(node.getFieldId());
             }
         }
+
+        LOGGER.info("Missing fields = " + missing);
+
         return missing;
     }
+
+    private Map<ResourceId, SubFormViewModel> computeSubViewModels(FormInputModel inputModel, Maybe<RecordTree> existingRecord) {
+        // Build repeating sub form view models
+        Map<ResourceId, SubFormViewModel> subFormMap = new HashMap<>();
+        for (SubFormViewModelBuilder subBuilder : subBuilders) {
+            SubFormViewModel subViewModel = subBuilder.build(inputModel, existingRecord);
+
+            subFormMap.put(subBuilder.getFieldId(), subViewModel);
+        }
+        return subFormMap;
+    }
+
+    private Multimap<ResourceId, String> validateFieldValues(FormInstance record) {
+        Multimap<ResourceId, String> validationErrors = HashMultimap.create();
+        for (FieldValidator validator : validators) {
+            validator.run(record, validationErrors);
+        }
+        return validationErrors;
+    }
+
+    private boolean checkLocks(FormInstance record) {
+        FieldValue period = record.get(ResourceId.valueOf("period"));
+        if(period instanceof PeriodValue) {
+            boolean locked = locks.isLocked(((PeriodValue) period).asInterval());
+
+            if(locked) {
+                LOGGER.info("Locked = true");
+            }
+            return locked;
+        }
+        return false;
+    }
+
+    private boolean computeDirty(boolean placeholder, Map<ResourceId, FieldValue> existingValues, FormInstance currentValues) {
+
+        if(placeholder) {
+            // if this is a placeholder subrecord, there may be a key
+            // field provided, but we won't consider it dirty because
+            // the user themselves hasn't entered any information.
+            return false;
+        }
+
+        for (FormTree.Node node : formTree.getRootFields()) {
+            FieldValue originalValue = existingValues.get(node.getFieldId());
+            FieldValue currentValue = currentValues.get(node.getFieldId());
+            if (!Objects.equals(originalValue, currentValue)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Returns true if the user has not entered something that is not even an valid field value.
+     * For example, if the user enters text in a quantity field, or an incomplete geographic coordinate.
+     */
+    private boolean allInputValid(FormInputModel inputModel) {
+        for (FormTree.Node node : formTree.getRootFields()) {
+            FieldInput fieldInput = inputModel.get(node.getFieldId());
+            if(fieldInput != null && fieldInput.getState() == FieldInput.State.INVALID) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

@@ -19,6 +19,10 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.database.RecordLock;
+import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceType;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormPermissions;
@@ -37,6 +41,7 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.LocalDateInterval;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -316,7 +321,6 @@ public class FormInputViewModelTest {
         assertThat(viewModel.getValidationErrors(intakeForm.getRegNumberFieldId()), not(empty()));
     }
 
-
     @Test
     public void requiredSubFormFields() {
         BioDataForm bioDataForm = setup.getCatalog().getBioDataForm();
@@ -411,6 +415,60 @@ public class FormInputViewModelTest {
         assertThat(viewModel.getSubForm(subFormFieldId).getActiveRecordRef(), equalTo(novemberId));
         assertThat(viewModel.getSubForm(subFormFieldId).isValid(), equalTo(true));
     }
+
+
+    @Test
+    public void lockedMonthlySubForms() {
+
+        ClinicForm clinicForm = setup.getCatalog().getClinicForm();
+
+        ResourceId databaseId = ResourceId.valueOf("db1");
+
+        setup.describeDatabase(new UserDatabaseMeta.Builder()
+            .setDatabaseId(databaseId)
+            .setLabel("My Database")
+            .setOwner(true)
+            .setVersion("1")
+            .addResource(new Resource.Builder()
+                        .setId(clinicForm.getFormId())
+                        .setParentId(databaseId)
+                        .setLabel(clinicForm.getFormClass().getLabel())
+                        .setType(ResourceType.FORM)
+                        .build())
+            .addResource(new Resource.Builder()
+                        .setId(clinicForm.getSubForm().getFormId())
+                        .setParentId(clinicForm.getFormId())
+                        .setLabel(clinicForm.getSubForm().getFormClass().getLabel())
+                        .setType(ResourceType.FORM)
+                        .build())
+            .addLock(new RecordLock.Builder()
+                        .setId(ResourceId.valueOf("lock1"))
+                        .setLabel("Archived")
+                        .setResourceId(clinicForm.getFormId())
+                        .setDateRange(LocalDateInterval.year(2017))
+                        .build())
+            .build());
+
+        ResourceId consultCountFieldId = clinicForm.getSubForm().getConsultsField().getId();
+
+        FormInputViewModelBuilder builder = builderFor(clinicForm);
+
+        ResourceId parentRecordId = ResourceId.generateId();
+        FormInputModel inputModel = new FormInputModel(new RecordRef(clinicForm.getFormId(), parentRecordId));
+
+        FormInputViewModel viewModel = builder.build(inputModel);
+
+        // Get the sub form view model.
+        // The active ref should be set to 2017-10 by default.
+        ResourceId subFormFieldId = clinicForm.getSubFormField().getId();
+        SubFormViewModel subForm = viewModel.getSubForm(subFormFieldId);
+        assertThat(subForm, notNullValue());
+
+        // All of 2017 should be locked
+        assertTrue(subForm.getActiveSubViewModel().isLocked());
+
+    }
+
 
     /**
      * Test the ViewModel for when the user does not have access to a referenced sub form.

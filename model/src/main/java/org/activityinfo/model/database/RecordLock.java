@@ -3,17 +3,16 @@ package org.activityinfo.model.database;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.date.LocalDateRange;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.time.LocalDateInterval;
 
-public class DatabaseLock implements JsonSerializable {
+public class RecordLock implements JsonSerializable {
     private ResourceId id;
     private String label;
     private ResourceId resourceId;
-    private LocalDateRange dateRange;
-    private String filter;
+    private LocalDateInterval dateRange;
 
-    private DatabaseLock() {}
+    private RecordLock() {}
 
     /**
      * @return the id of this lock itself.
@@ -40,7 +39,7 @@ public class DatabaseLock implements JsonSerializable {
     /**
      * @return the date range of records to which this lock applies.
      */
-    public LocalDateRange getDateRange() {
+    public LocalDateInterval getDateRange() {
         return dateRange;
     }
 
@@ -54,9 +53,19 @@ public class DatabaseLock implements JsonSerializable {
         return object;
     }
 
+    public static RecordLock fromJson(JsonValue object) {
+        RecordLock lock = new RecordLock();
+        lock.id = ResourceId.valueOf(object.getString("id"));
+        lock.label = object.getString("label");
+        lock.resourceId = ResourceId.valueOf(object.getString("resourceId"));
+        lock.dateRange = LocalDateInterval.fromJson(object.get("dateRange"));
+
+        return lock;
+    }
+
     public static class Builder {
 
-        private DatabaseLock lock = new DatabaseLock();
+        private RecordLock lock = new RecordLock();
 
         public Builder setId(ResourceId id) {
             lock.id = id;
@@ -68,7 +77,7 @@ public class DatabaseLock implements JsonSerializable {
             return this;
         }
 
-        public Builder setDateRange(LocalDateRange range) {
+        public Builder setDateRange(LocalDateInterval range) {
             lock.dateRange = range;
             return this;
         }
@@ -78,7 +87,7 @@ public class DatabaseLock implements JsonSerializable {
             return this;
         }
 
-        public DatabaseLock build() {
+        public RecordLock build() {
             assert lock.id != null : "id is missing";
             assert lock.resourceId != null : "resourceId is missing";
             assert lock.dateRange != null : "dateRange is missing";

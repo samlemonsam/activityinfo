@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.store;
 import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
@@ -93,6 +94,14 @@ public class TestingFormStore implements FormStore {
         while(!pendingTasks.isEmpty()) {
             pendingTasks.pop().execute();
         }
+    }
+
+    @Override
+    public Observable<UserDatabaseMeta> getDatabase(ResourceId databaseId) {
+        return Observable.just(new UserDatabaseMeta.Builder()
+            .setUserId(1)
+            .setLabel("Database " + databaseId)
+            .build());
     }
 
     @Override

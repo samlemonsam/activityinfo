@@ -33,11 +33,6 @@ public class FormStructure {
     private FormTree formTree;
     private Maybe<RecordTree> existingRecord;
 
-    public FormStructure(FormTree formTree) {
-        this.formTree = formTree;
-        this.existingRecord = Maybe.notFound();
-    }
-
     public FormStructure(FormTree formTree, Maybe<RecordTree> existingRecord) {
         this.formTree = formTree;
         this.existingRecord = existingRecord;

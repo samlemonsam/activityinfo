@@ -45,3 +45,9 @@
 .periodToolBar {
     background: HEADER_BACKGROUND_COLOR;
 }
+
+.lockIcon span {
+    color: white;
+    font-weight: bold;
+    cursor: help;
+}
