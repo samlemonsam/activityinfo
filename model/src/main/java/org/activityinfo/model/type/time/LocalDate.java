@@ -18,7 +18,6 @@
  */
 package org.activityinfo.model.type.time;
 
-import com.bedatadriven.rebar.time.CalendricalException;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -35,14 +34,14 @@ public class LocalDate implements FieldValue, PeriodValue {
         SUNDAY,
         MONDAY,
         TUESDAY,
-        WEDNESAY,
+        WEDNESDAY,
         THURSDAY,
         FRIDAY,
         SATURDAY
     }
 
-    private static final int DAYS_IN_MONTH[] = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    private static final int CUM_DAYS_IN_MONTH[] = new int[] { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+    private static final int[] DAYS_IN_MONTH = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    private static final int[] CUM_DAYS_IN_MONTH = new int[] { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
     private int year;
     private int monthOfYear;

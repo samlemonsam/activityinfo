@@ -20,7 +20,6 @@ package org.activityinfo.model.type.time;
 
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.type.FieldTypeClass;
 
 import java.io.Serializable;
@@ -170,7 +169,7 @@ public class EpiWeek implements Serializable, PeriodValue {
                 return new LocalDate(year - 1, 12, 31);
             case TUESDAY:
                 return new LocalDate(year - 1, 12, 30);
-            case WEDNESAY:
+            case WEDNESDAY:
                 return new LocalDate(year - 1, 12, 29);
             case THURSDAY:
                 return new LocalDate(year, 1, 4);
@@ -178,8 +177,8 @@ public class EpiWeek implements Serializable, PeriodValue {
                 return new LocalDate(year, 1, 3);
             case SATURDAY:
                 return new LocalDate(year, 1, 2);
-            default:
             case SUNDAY:
+            default:
                 return new LocalDate(year, 1, 1);
         }
     }
