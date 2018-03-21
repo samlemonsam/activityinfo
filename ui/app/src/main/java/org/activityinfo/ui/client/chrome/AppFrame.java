@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client.chrome;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTML;
@@ -81,7 +82,6 @@ public class AppFrame implements IsWidget {
             @Override
             public void setWidget(IsWidget w) {
                 container.setCenterWidget(w);
-                container.forceLayout();
 
                 if(titleSubscription != null) {
                     titleSubscription.unsubscribe();
@@ -95,6 +95,8 @@ public class AppFrame implements IsWidget {
                     title = Observable.loading();
                 }
                 titleSubscription = title.subscribe(AppFrame.this::titleChanged);
+
+                Scheduler.get().scheduleFinally(() -> container.forceLayout());
             }
         };
     }
