@@ -37,6 +37,7 @@ import org.activityinfo.model.type.barcode.BarcodeType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.analysis.model.DimensionModel;
@@ -123,7 +124,8 @@ public class NewDimensionDialog implements HasSelectionHandlers<DimensionModel> 
         return type instanceof TextType ||
                 type instanceof BarcodeType ||
                 type instanceof EnumType ||
-                type instanceof LocalDateType;
+                type instanceof LocalDateType ||
+                type instanceof PeriodType;
     }
 
     private void onOkClicked(SelectEvent event) {
