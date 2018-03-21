@@ -25,6 +25,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
@@ -37,7 +40,10 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.SerialNumber;
+import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -45,10 +51,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.model.type.time.LocalDate;
-import org.activityinfo.model.type.time.LocalDateInterval;
-import org.activityinfo.model.type.time.PeriodType;
-import org.activityinfo.model.type.time.PeriodValue;
+import org.activityinfo.store.TransactionalStorageProvider;
 import org.activityinfo.store.spi.*;
 
 import java.util.*;
@@ -66,13 +69,6 @@ import static java.lang.String.format;
 public class Updater {
 
     private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
-
-    private static final List<ResourceId> HARD_LOCKS = Lists.newArrayList(
-            ResourceId.valueOf("d0000008089"),
-            ResourceId.valueOf("d0000008454"));
-    private static final LocalDate HARD_LOCK_START_DATE = LocalDate.parse("2018-01-01");
-    private static final LocalDate HARD_LOCK_END_DATE = LocalDate.parse("2018-04-05");
-    private static final boolean HARD_LOCK_ENABLED = true;
 
     private final FormStorageProvider catalog;
     private int userId;
@@ -358,9 +354,6 @@ public class Updater {
     public static void validateUpdate(FormClass formClass, Optional<FormRecord> existingResource, TypedRecordUpdate update) {
         LOGGER.info("Loaded existingResource " + existingResource);
 
-        // Validate against any hard locks we've set
-        validateAgainstHardLocks(formClass, update);
-
         Map<ResourceId, FormField> fieldMap = new HashMap<>();
         for (FormField formField : formClass.getFields()) {
             fieldMap.put(formField.getId(), formField);
@@ -377,25 +370,6 @@ public class Updater {
 
         // AI-1578 Allow missing fields
         //validateRequiredFields(formClass, existingResource, update);
-    }
-
-    private static void validateAgainstHardLocks(FormClass formClass, TypedRecordUpdate update) {
-        // Check if the database is hard locked
-        if (HARD_LOCK_ENABLED && HARD_LOCKS.contains(formClass.getDatabaseId())) {
-            update.getChangedFieldValues().forEach((id,value) -> {
-                Optional<FormField> field = formClass.getFieldIfPresent(id);
-                if (field.isPresent()) {
-                    FieldType type = field.get().getType();
-
-                    if (type instanceof PeriodType && value instanceof PeriodValue) {
-                        LocalDateInterval interval = ((PeriodValue) value).asInterval();
-                        if(interval.getStartDate().before(HARD_LOCK_START_DATE) || interval.getEndDate().after(HARD_LOCK_END_DATE)) {
-                            throw new InvalidUpdateException("HARD LOCK: Date outside bounds of hard lock");
-                        }
-                    }
-                }
-            });
-        }
     }
 
     /**
