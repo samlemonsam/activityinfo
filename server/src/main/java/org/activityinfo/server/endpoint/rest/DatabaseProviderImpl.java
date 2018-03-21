@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 public class DatabaseProviderImpl implements DatabaseProvider {
 
+    public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
     private Provider<EntityManager> entityManager;
 
     @Inject
@@ -27,10 +28,28 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     @Override
     public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
+        if(databaseId.equals(GEODB_ID)) {
+            return queryGeoDb(userId);
+        } else {
+            return queryMySQLDatabase(databaseId, userId);
+        }
+    }
 
+    private UserDatabaseMeta queryGeoDb(int userId) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(GEODB_ID)
+                .setUserId(userId)
+                .setLabel("Geographic Database")
+                .setOwner(false)
+                .setVersion("1")
+                .build();
+    }
+
+    private UserDatabaseMeta queryMySQLDatabase(ResourceId databaseId, int userId) {
         UserDatabaseMeta.Builder meta = new UserDatabaseMeta.Builder()
                 .setDatabaseId(databaseId)
                 .setUserId(userId);
+
 
         Database database = entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
         if(database != null) {
@@ -55,7 +74,6 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         }
         return meta.build();
     }
-
 
 
     public static Optional<UserPermission> getUserPermission(EntityManager entityManager, Database database, int userId) {
