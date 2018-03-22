@@ -60,8 +60,6 @@ public class UserForm extends FormPanel {
     private ComboBox<PartnerDTO> partnerCombo;
     private Map<Integer, CheckBox> folderCheckBoxMap = new HashMap<>();
 
-    private Integer userId;
-
     public UserForm(UserDatabaseDTO database) {
         this.database = database;
 
@@ -72,20 +70,20 @@ public class UserForm extends FormPanel {
         this.setLayout(layout);
         this.setScrollMode(Style.Scroll.AUTOY);
 
-        nameField = new TextField<String>();
+        nameField = new TextField<>();
         nameField.setFieldLabel(constants.name());
         nameField.setAllowBlank(false);
         nameField.setValidator(new BlankValidator());
         nameField.setMaxLength(50);
         this.add(nameField);
 
-        emailField = new TextField<String>();
+        emailField = new TextField<>();
         emailField.setFieldLabel(constants.email());
         emailField.setAllowBlank(false);
         emailField.setRegex("\\S+@\\S+\\.\\S+");
         this.add(emailField);
 
-        ListStore<PartnerDTO> partnerStore = new ListStore<PartnerDTO>();
+        ListStore<PartnerDTO> partnerStore = new ListStore<>();
         partnerStore.add(database.getPartners());
         partnerStore.sort("name", SortDir.ASC);
 
