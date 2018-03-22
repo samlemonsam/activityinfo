@@ -88,6 +88,7 @@ public class GetSchemaTest extends CommandTestCase2 {
         ActivityDTO nfi = schema.getDatabaseById(1).getActivities().get(0);
         assertThat(nfi.getLocationTypeId(), equalTo(1));
         assertThat(nfi.<Integer>get("locationTypeId"), equalTo(1));
+        assertThat(nfi.getReportingFrequency(), equalTo(ActivityFormDTO.REPORT_ONCE));
 
         AdminLevelDTO adminLevel = schema.getCountries().get(0).getAdminLevels().get(0);
         assertThat("CountryId is not null", adminLevel.getCountryId(), not(equalTo(0)));

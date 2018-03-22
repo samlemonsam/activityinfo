@@ -215,7 +215,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
      * belongs.
      */
     public void setLocationTypeId(int locationId) {
-        set(REPORTING_FREQUENCY_PROPERTY, locationId);
+        set(LOCATION_TYPE_ID_PROPERTY, locationId);
 
     }
 
@@ -233,7 +233,7 @@ public final class ActivityDTO extends BaseModelData implements EntityDTO, Provi
 
         // for form binding. uck.
         if(locationType != null) {
-            set(REPORTING_FREQUENCY_PROPERTY, locationType.getId());
+            set(LOCATION_TYPE_ID_PROPERTY, locationType.getId());
         }
     }
 
