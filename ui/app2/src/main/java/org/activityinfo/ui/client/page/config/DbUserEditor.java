@@ -143,7 +143,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
         columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 100));
         columns.add(new ColumnConfig("email", I18N.CONSTANTS.email(), 150));
-        columns.add(new ColumnConfig("partner", I18N.CONSTANTS.partner(), 150));
+        columns.add(new ColumnConfig("partner.name", I18N.CONSTANTS.partner(), 150));
 
         ColumnConfig folderColumn = new ColumnConfig("category", I18N.CONSTANTS.folders(), 150);
         folderColumn.setSortable(false);

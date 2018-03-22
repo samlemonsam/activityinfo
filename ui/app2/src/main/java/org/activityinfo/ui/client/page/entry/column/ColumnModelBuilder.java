@@ -293,18 +293,8 @@ public class ColumnModelBuilder {
     }
 
     public ColumnModelBuilder addPartnerColumn() {
-        ColumnConfig column = new ColumnConfig("partner", I18N.CONSTANTS.partner(), 100);
+        ColumnConfig column = new ColumnConfig("partner.name", I18N.CONSTANTS.partner(), 100);
         column.setToolTip(I18N.CONSTANTS.partner());
-        column.setRenderer(new GridCellRenderer<SiteDTO>() {
-
-            @Override
-            public SafeHtml render(SiteDTO site, String s, ColumnData columnData, int i, int i1, ListStore<SiteDTO> listStore, Grid<SiteDTO> grid) {
-                if(site == null) {
-                    return null;
-                }
-                return SafeHtmlUtils.fromString(site.getPartnerName());
-            }
-        });
         columns.add(column);
         return this;
     }
