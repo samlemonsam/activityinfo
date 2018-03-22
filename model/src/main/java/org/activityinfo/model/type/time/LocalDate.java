@@ -18,6 +18,7 @@
  */
 package org.activityinfo.model.type.time;
 
+import com.google.common.base.Preconditions;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -45,18 +46,14 @@ public class LocalDate implements FieldValue, PeriodValue {
     private static final int[] CUM_DAYS_IN_MONTH = new int[] { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
     /**
-     * All dates in ActivityInfo must occur on or after 1000-01-01T00:00:00+00:00 (i.e. before 01-01-1000 CE)
-     *
      * Due to variations in locale date year patterns ("y" vs. "yy"), non-intuitive behaviour can occur when entering
-     * short dates which are nevertheless in line with {@link DateTimeFormatInfo} implementations.
+     * short dates which are nevertheless in line with {@link DateTimeFormatInfo} implementations. This causes users of
+     * some locales to enter "01/01/20" believing it to be the 1 Jan 2020, when in fact the locale year format of 'y'
+     * will cause the shortened year to be interpreted as the literal year 20CE.
      *
-     * This causes users of some locales to enter "01/01/20" believing it to be the 1 Jan 2020, when in fact the locale
-     * year format of 'y' will cause the shortened year to be interpreted as the literal year 20CE.
-     *
-     * To prevent this, the ActivityInfo epoch is set to 1000-01-01T00:00:00+00:00 and entry of dates before this is
-     * restricted. This date is -30610224000000 milliseconds from the UNIX epoch.
+     * To correct for this we set a minimum date for calendar entries of 1000-01-01 CE.
      */
-    public static final Date EPOCH = new Date(-30610224000000L);
+    public static final LocalDate MIN_DATE = new LocalDate(1000, 1, 1);
 
     private int year;
     private int monthOfYear;
@@ -66,11 +63,8 @@ public class LocalDate implements FieldValue, PeriodValue {
         this(new Date());
     }
 
-    @SuppressWarnings("deprecation")
     public LocalDate(int year, int monthOfYear, int dayOfMonth) {
-        // Epoch check disabled as this will cause exceptions for users with current incorrect data
-        //Date date = new Date(year-1900, monthOfYear-1, dayOfMonth);
-        //Preconditions.checkState(date.after(EPOCH), "Date cannot occur before 1000-01-01T00:00:00+00:00");
+        Preconditions.checkState(year > 0, "Must be a positive year (i.e. occur in 1CE or later)");
 
         this.year = year;
         this.monthOfYear = monthOfYear;
@@ -79,8 +73,7 @@ public class LocalDate implements FieldValue, PeriodValue {
 
     @SuppressWarnings("deprecation")
     public LocalDate(Date date) {
-        // Epoch check disabled as this will cause exceptions for users with current incorrect data
-        //Preconditions.checkState(date.after(EPOCH), "Date cannot occur before 1000-01-01T00:00:00+00:00");
+        Preconditions.checkState((date.getYear()+1900) > 0, "Must be a positive year (i.e. occur in 1CE or later)");
 
         this.year = date.getYear()+1900;
         this.monthOfYear = date.getMonth()+1;
@@ -202,7 +195,7 @@ public class LocalDate implements FieldValue, PeriodValue {
      *
      * <p>{Year}-{MonthOfYear}-{DayOfMonth}
      *
-     * <p>The year has between 4 and 10 digits with values from MIN_YEAR to MAX_YEAR. If there are more than 4 digits then the year must be prefixed with the plus symbol. Negative years are allowed, but not negative zero.
+     * <p>The year has between 4 and 10 digits with values from MIN_YEAR to MAX_YEAR. If there are more than 4 digits then the year must be prefixed with the plus symbol. Zero and negative years are _not_ allowed, and will cause an exception in the LocalDate constructor.
      *
      * <p>The month-of-year has 2 digits with values from 1 to 12.
      *

@@ -37,8 +37,8 @@ public class LocalDateWidget implements PeriodFieldWidget {
 
     public LocalDateWidget(FieldUpdater fieldUpdater) {
         this.field = new DateField();
-        // Ensure that no date can be selected which occurs before the epoch set on LocalDate
-        this.field.setMinValue(LocalDate.EPOCH);
+        // Ensure that no date can be selected which occurs before the minimum date set on LocalDate
+        this.field.setMinValue(LocalDate.MIN_DATE.atMidnightInMyTimezone());
         this.field.addValueChangeHandler(event -> fieldUpdater.update(input()));
     }
 

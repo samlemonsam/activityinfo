@@ -18,41 +18,40 @@
  */
 package org.activityinfo.model.type.time;
 
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class LocalDateTest {
 
     @Test
-    @Ignore("LocalDate state check will cause exceptions for users with current date values which occur before epoch")
-    @SuppressWarnings("deprecation")
-    public void epoch() {
-        LocalDate postEpochParsed = LocalDate.parse("2017-01-01");
-        LocalDate postEpochDate = new LocalDate(new Date(2017-1900,0,1));
-        assertThat(postEpochParsed, equalTo(postEpochDate));
-
-        LocalDate onEpoch = LocalDate.parse("1000-01-01");
-        LocalDate onEpochDate = new LocalDate(new Date(1000-1900,0,1));
-        assertThat(onEpoch, equalTo(onEpochDate));
-
+    public void negYear() {
         try {
-            LocalDate preEpoch = LocalDate.parse("999-01-01");
-            throw new AssertionError("Should not be able to create date before epoch");
-        } catch (IllegalStateException excp) {
-            // Should cause exception when we try to create a LocalDate before the epoch
-        }
+            LocalDate negYearDate = new LocalDate(-100,1,1);
+            throw new AssertionError("Should not be able to enter negative years (i.e. BCE)");
+        } catch (IllegalStateException excp) { /* Good - prevented from entering negative years */ }
+    }
 
+    @Test
+    public void zeroYear() {
         try {
-            LocalDate preEpoch = new LocalDate(new Date(999-1900,0,1));
-            throw new AssertionError("Should not be able to create date before epoch");
-        } catch (IllegalStateException excp) {
-            // Should cause exception when we try to create a LocalDate before the epoch
-        }
+            LocalDate zeroYearDate = new LocalDate(0,1,1);
+            throw new AssertionError("Should not be able to enter zero years (i.e. 1 BCE)");
+        } catch (IllegalStateException excp) { /* Good - prevented from entering zero years */ }
+    }
+
+    @Test
+    public void minDate() {
+        LocalDate afterMinDate = new LocalDate(2017,01,01);
+        assertTrue("Should be _after_ minimum date", afterMinDate.after(LocalDate.MIN_DATE));
+
+        LocalDate onMinDate = new LocalDate(1000,01,01);
+        assertTrue("Should be _on_ minimum date", onMinDate.equals(LocalDate.MIN_DATE));
+
+        LocalDate beforeMinDate = new LocalDate(99,01,01);
+        assertTrue("Should be _before_ minimum date", beforeMinDate.before(LocalDate.MIN_DATE));
     }
 
     @Test
