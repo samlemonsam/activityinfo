@@ -1,19 +1,23 @@
 package org.activityinfo.model.database;
 
+import org.activityinfo.json.AutoJson;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.annotation.AutoBuilder;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
 
+@AutoJson
+@AutoBuilder
 public class Resource implements JsonSerializable {
-    private ResourceId id;
-    private ResourceId parentId;
-    private ResourceType type;
-    private String label;
+    ResourceId id;
+    ResourceId parentId;
+    ResourceType type;
+    String label;
 
-    private Resource() {}
+    Resource() {}
 
     public Resource(ResourceId id, ResourceId parentId, String label) {
         this.id = id;

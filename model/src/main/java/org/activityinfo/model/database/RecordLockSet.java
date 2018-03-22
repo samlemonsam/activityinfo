@@ -1,6 +1,6 @@
 package org.activityinfo.model.database;
 
-import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArrays;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.time.LocalDateInterval;
 
@@ -29,7 +29,7 @@ public class RecordLockSet implements Iterable<RecordLock> {
     }
 
     public JsonValue toJson() {
-        return Json.toJsonArray(locks);
+        return JsonArrays.toJsonArray(locks);
     }
 
     public static RecordLockSet fromJson(JsonValue array) {

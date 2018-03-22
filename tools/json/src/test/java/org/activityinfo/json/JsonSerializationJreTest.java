@@ -18,10 +18,12 @@
  */
 package org.activityinfo.json;
 
+import com.google.common.collect.Lists;
 import junit.framework.TestCase;
 import org.activityinfo.json.impl.JsonUtil;
 
 import java.io.*;
+import java.util.List;
 
 public class JsonSerializationJreTest extends TestCase {
 
@@ -93,6 +95,12 @@ public class JsonSerializationJreTest extends TestCase {
   public void testSerializeNumber() throws Exception {
     assertJsonEqualsAfterSerialization(Json.create(0));
     assertJsonEqualsAfterSerialization(Json.create(-1.213123123));
+  }
+
+  public void testSerializeEnumList() {
+    List<DummyEnum> colors = Lists.newArrayList(DummyEnum.BLUE, DummyEnum.BLUE, DummyEnum.RED);
+    JsonArrays.toJsonArrayFromEnums(colors);
+
   }
 
   private <T extends Serializable & JsonValue> void assertJsonEqualsAfterSerialization(

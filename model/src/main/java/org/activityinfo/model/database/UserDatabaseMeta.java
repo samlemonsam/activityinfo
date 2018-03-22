@@ -3,6 +3,7 @@ package org.activityinfo.model.database;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonArrays;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -84,9 +85,9 @@ public class UserDatabaseMeta {
         object.put("visible", visible);
         object.put("owner", owner);
         object.put("userId", userId);
-        object.put("resources", Json.toJsonArray(resources.values()));
-        object.put("locks", Json.toJsonArray(locks.values()));
-        object.put("grants", Json.toJsonArray(grants.values()));
+        object.put("resources", JsonArrays.toJsonArray(resources.values()));
+        object.put("locks", JsonArrays.toJsonArray(locks.values()));
+        object.put("grants", JsonArrays.toJsonArray(grants.values()));
         return object;
     }
 

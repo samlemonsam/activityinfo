@@ -22,6 +22,7 @@ import org.activityinfo.json.AutoJson;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.annotation.AutoBuilder;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.HashSet;
@@ -31,13 +32,15 @@ import java.util.Set;
  * Grants a user a set of permissions within a folder
  */
 @AutoJson
+@AutoBuilder
 public class GrantModel implements JsonSerializable {
 
-    private String id;
-    private ResourceId resourceId;
-    private Set<Operation> operations = new HashSet<>();
+    String id;
+    ResourceId resourceId;
+    String foobar;
+    final Set<Operation> operations = new HashSet<>();
 
-    private GrantModel() {
+    GrantModel() {
     }
 
     /**
@@ -52,6 +55,10 @@ public class GrantModel implements JsonSerializable {
      */
     public ResourceId getResourceId() {
         return resourceId;
+    }
+
+    public Set<Operation> getOperations() {
+        return operations;
     }
 
     @Override

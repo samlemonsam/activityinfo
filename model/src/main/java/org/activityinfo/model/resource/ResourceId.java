@@ -20,6 +20,8 @@ package org.activityinfo.model.resource;
 
 import com.google.common.base.Preconditions;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -39,7 +41,7 @@ import java.util.Date;
  *
  */
 @Schema(type = "string")
-public final class ResourceId implements Serializable {
+public final class ResourceId implements Serializable, JsonSerializable {
 
     public static final ResourceId ROOT_ID = ResourceId.valueOf("_root");
 
@@ -155,6 +157,11 @@ public final class ResourceId implements Serializable {
 
     public ResourceId fieldId(String propertyName) {
         return ResourceId.valueOf(text + "." + propertyName);
+    }
+
+    @Override
+    public org.activityinfo.json.JsonValue toJson() {
+        return Json.create(text);
     }
 
 }
