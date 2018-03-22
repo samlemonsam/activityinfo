@@ -130,6 +130,7 @@ public class UserForm extends FormPanel {
             CheckBox folderCheckBox = new CheckBox();
             folderCheckBox.setBoxLabel(folder.getName());
             folderCheckBox.setValue(false);
+            folderCheckBox.addListener(Events.Change, this::onIndividualFolderChanged);
             folderGroup.add(folderCheckBox);
             folderCheckBoxMap.put(folder.getId(), folderCheckBox);
         }
@@ -163,6 +164,18 @@ public class UserForm extends FormPanel {
         }
     }
 
+    private void onIndividualFolderChanged(BaseEvent baseEvent) {
+        if (!(baseEvent.getSource() instanceof CheckBox)) {
+            return;
+        }
+
+        CheckBox folderCheckBox = (CheckBox) baseEvent.getSource();
+        if (folderCheckBox.getValue() == Boolean.FALSE && allFolderCheckbox.getValue() == Boolean.TRUE) {
+            allFolderCheckbox.setFireChangeEventOnSetValue(false);
+            allFolderCheckbox.setValue(false);
+            allFolderCheckbox.setFireChangeEventOnSetValue(true);
+        }
+    }
 
     public void edit(UserPermissionDTO user) {
 
