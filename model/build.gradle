@@ -14,6 +14,8 @@ dependencies {
     compile libraries.jackson.core
 
     compile libraries.swagger.annotations
+
+    annotationProcessor project(':tools:model-apt')
 }
 
 jar {

@@ -18,6 +18,7 @@
  */
 package org.activityinfo.model.database;
 
+import org.activityinfo.json.AutoJson;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
@@ -29,6 +30,7 @@ import java.util.Set;
 /**
  * Grants a user a set of permissions within a folder
  */
+@AutoJson
 public class GrantModel implements JsonSerializable {
 
     private String id;

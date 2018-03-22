@@ -7,6 +7,7 @@ include 'tools:json'
 include 'tools:indexeddb'
 include 'tools:codemirror'
 include 'tools:promises'
+include 'tools:model-apt'
 
 include 'clients:docs'
 include 'clients:gwtrpc'

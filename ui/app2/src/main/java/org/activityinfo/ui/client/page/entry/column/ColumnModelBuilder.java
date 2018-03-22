@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class ColumnModelBuilder {
 
-    private final String warningStyle = "color:tomato; font-size:20px; font-weight:bold";
+    private static final String WARNING_STYLE = "color:tomato; font-size:20px; font-weight:bold";
 
     private List<ColumnConfig> columns = Lists.newArrayList();
 
@@ -397,7 +397,7 @@ public class ColumnModelBuilder {
                 if (model instanceof SiteDTO) {
                     String workflowStatus = ((SiteDTO) model).getLocation().getWorkflowStatusId();
                     if (!Strings.isNullOrEmpty(workflowStatus) && workflowStatus.equals(LocationDTO.REJECTED)) {
-                        return SafeHtmlUtils.fromSafeConstant("<div style='" + warningStyle + "' title='" + I18N.CONSTANTS.deletedLocation() + "'>&nbsp;!&nbsp;</div>");
+                        return SafeHtmlUtils.fromSafeConstant("<div style='" + WARNING_STYLE + "' title='" + I18N.CONSTANTS.deletedLocation() + "'>&nbsp;!&nbsp;</div>");
                     }
                 }
                 return SafeHtmlUtils.fromSafeConstant("&nbsp;");
