@@ -1,5 +1,8 @@
 package org.activityinfo.model.meta;
 
+import javax.lang.model.AnnotatedConstruct;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
@@ -50,7 +53,7 @@ public class MetaTypes {
               if(element.getKind() == ElementKind.ENUM) {
                   return new EnumMetaType(element);
               }
-              throw new UnsupportedOperationException("visitDeclared: " + element.getQualifiedName());
+              return new ModelMetaType(t);
           }
 
           @Override
@@ -78,5 +81,48 @@ public class MetaTypes {
               throw new UnsupportedOperationException("visitNoType");
           }
       }, null);
+    }
+
+    public static boolean inherits(TypeMirror typeMirror, String qualifiedInterfaceName) {
+        if (typeMirror.getKind() == TypeKind.DECLARED) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
+            TypeElement element = (TypeElement) declaredType.asElement();
+            for (TypeMirror interfaceMirror : element.getInterfaces()) {
+                if(isClass(interfaceMirror, qualifiedInterfaceName)) {
+                    return true;
+                }
+                if(inherits(interfaceMirror, qualifiedInterfaceName)) {
+                    return true;
+                }
+            }
+            if(element.getQualifiedName().contentEquals("java.lang.Object")) {
+                return false;
+            }
+            return inherits(element.getSuperclass(), qualifiedInterfaceName);
+        }
+        return false;
+    }
+
+    public static boolean isClass(TypeMirror typeMirror, String qualifiedClassName) {
+        if(typeMirror.getKind() == TypeKind.DECLARED) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
+            Element element = declaredType.asElement();
+            if(element instanceof TypeElement) {
+                TypeElement typeElement = (TypeElement) element;
+                if(typeElement.getQualifiedName().contentEquals(qualifiedClassName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean annotatedWith(AnnotatedConstruct model, String qualifiedAnnotationName) {
+        for (AnnotationMirror annotationMirror : model.getAnnotationMirrors()) {
+            if(isClass(annotationMirror.getAnnotationType(), qualifiedAnnotationName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

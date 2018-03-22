@@ -19,8 +19,8 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.database.RecordLock;
-import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.RecordLockBuilder;
+import org.activityinfo.model.database.ResourceBuilder;
 import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
@@ -429,19 +429,19 @@ public class FormInputViewModelTest {
             .setLabel("My Database")
             .setOwner(true)
             .setVersion("1")
-            .addResource(new Resource.Builder()
+            .addResource(new ResourceBuilder()
                         .setId(clinicForm.getFormId())
                         .setParentId(databaseId)
                         .setLabel(clinicForm.getFormClass().getLabel())
                         .setType(ResourceType.FORM)
                         .build())
-            .addResource(new Resource.Builder()
+            .addResource(new ResourceBuilder()
                         .setId(clinicForm.getSubForm().getFormId())
                         .setParentId(clinicForm.getFormId())
                         .setLabel(clinicForm.getSubForm().getFormClass().getLabel())
                         .setType(ResourceType.FORM)
                         .build())
-            .addLock(new RecordLock.Builder()
+            .addLock(new RecordLockBuilder()
                         .setId(ResourceId.valueOf("lock1"))
                         .setLabel("Archived")
                         .setResourceId(clinicForm.getFormId())

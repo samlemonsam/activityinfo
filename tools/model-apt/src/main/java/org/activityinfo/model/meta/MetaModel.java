@@ -2,14 +2,17 @@ package org.activityinfo.model.meta;
 
 import com.squareup.javapoet.TypeName;
 
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.util.ElementFilter.fieldsIn;
+import static javax.lang.model.util.ElementFilter.methodsIn;
 
 public class MetaModel {
 
@@ -54,12 +57,28 @@ public class MetaModel {
         return TypeName.get(modelClass.asType());
     }
 
-    public List<VariableElement> getPackageProtectedFields() {
-        return fieldsIn(modelClass.getEnclosedElements())
-                .stream()
-                .filter(f -> !f.getModifiers().contains(Modifier.PRIVATE) &&
-                             !f.getModifiers().contains(Modifier.STATIC))
-                .collect(Collectors.toList());
+    public List<BuilderTarget> getBuilderTargets() {
+        List<BuilderTarget> targets = new ArrayList<>();
+        for (VariableElement field : fieldsIn(modelClass.getEnclosedElements())) {
+            if(!field.getModifiers().contains(Modifier.PRIVATE) &&
+               !field.getModifiers().contains(Modifier.STATIC)) {
+
+                MetaType metaType = MetaTypes.of(field.asType());
+                if(metaType instanceof SetMetaType) {
+                    targets.add(new CollectionBuilderTarget(field, (SetMetaType)metaType));
+                } else {
+                    targets.add(new SimpleBuilderTarget(field, metaType));
+                }
+            }
+        }
+
+        for (ExecutableElement method : methodsIn(modelClass.getEnclosedElements())) {
+            if(MetaTypes.annotatedWith(method, "org.activityinfo.model.annotation.BuilderMethod")) {
+                targets.add(new BuilderMethodTarget(method));
+            }
+        }
+
+        return targets;
     }
 
 }

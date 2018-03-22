@@ -8,7 +8,7 @@ public class AutoJsonTest {
     @Test
     public void test() {
 
-        GrantModel.Builder grant = new GrantModel.Builder();
+        GrantModelBuilder grant = new GrantModelBuilder();
         grant.setResourceId(ResourceId.valueOf("foo"));
         grant.addOperation(Operation.EDIT_RECORD);
 

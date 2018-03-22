@@ -19,6 +19,7 @@
 package org.activityinfo.server.database.hibernate.entity;
 
 import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.GrantModelBuilder;
 import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.legacy.CuidAdapter;
 
@@ -325,7 +326,7 @@ public class UserPermission implements Serializable {
         }
         if(model == null) {
             // Simple legacy model
-            GrantModel.Builder grantModel = new GrantModel.Builder();
+            GrantModelBuilder grantModel = new GrantModelBuilder();
             grantModel.setResourceId(CuidAdapter.databaseId(database.getId()));
             if(isAllowViewAll()) {
                 grantModel.addOperation(Operation.VIEW);

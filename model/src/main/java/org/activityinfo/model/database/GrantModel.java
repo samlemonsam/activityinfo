@@ -23,6 +23,7 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.annotation.AutoBuilder;
+import org.activityinfo.model.annotation.BuilderMethod;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.HashSet;
@@ -37,10 +38,14 @@ public class GrantModel implements JsonSerializable {
 
     String id;
     ResourceId resourceId;
-    String foobar;
     final Set<Operation> operations = new HashSet<>();
 
     GrantModel() {
+    }
+
+    @BuilderMethod
+    void addOperation(Operation operation, String filter) {
+        operations.add(operation);
     }
 
     /**

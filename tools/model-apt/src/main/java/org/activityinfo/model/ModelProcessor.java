@@ -12,14 +12,14 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 @SupportedAnnotationTypes({
         "org.activityinfo.json.AutoJson",
@@ -79,17 +79,13 @@ public class ModelProcessor extends AbstractProcessor {
                 .initializer(CodeBlock.of("new $T()", metaModel.getTypeName()))
                 .build();
 
-        MethodSpec buildMethod = MethodSpec.methodBuilder("build")
-                .returns(metaModel.getTypeName())
-                .addAnnotation(Nonnull.class)
-                .addStatement(CodeBlock.of("return this.model"))
-                .build();
+        List<BuilderTarget> targets = metaModel.getBuilderTargets();
 
         TypeSpec builderClass = TypeSpec.classBuilder(builderClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(modelField)
-                .addMethods(builderMethods(builderClassName, metaModel))
-                .addMethod(buildMethod)
+                .addMethods(targets.stream().flatMap(t -> t.builderMethods(builderClassName)).collect(toList()))
+                .addMethod(buildMethod(metaModel, targets))
                 .build();
 
 
@@ -103,63 +99,22 @@ public class ModelProcessor extends AbstractProcessor {
         }
     }
 
-    private Iterable<MethodSpec> builderMethods(ClassName builderClassName, MetaModel metaModel) {
-        List<MethodSpec> methods = new ArrayList<>();
+    private MethodSpec buildMethod(MetaModel metaModel, List<BuilderTarget> targets) {
 
-        for (VariableElement field : metaModel.getPackageProtectedFields()) {
+        MethodSpec.Builder method = MethodSpec.methodBuilder("build")
+                .returns(metaModel.getTypeName())
+                .addAnnotation(Nonnull.class)
+                .addModifiers(Modifier.PUBLIC);
 
-            MetaType metaType = MetaTypes.of(field.asType());
-
-            if(metaType instanceof SetMetaType) {
-                methods.add(builderAddMethod(builderClassName, field, ((SetMetaType) metaType)));
-
-            } else if(!field.getModifiers().contains(Modifier.FINAL)) {
-                methods.add(builderSetMethod(builderClassName, field));
+        for (BuilderTarget target : targets) {
+            for (CodeBlock codeBlock : target.assertions()) {
+                method.addStatement(codeBlock);
             }
         }
-
-        return methods;
+        method.addStatement("return this.model");
+        return method.build();
     }
 
-    private MethodSpec builderSetMethod(ClassName builderClassName, VariableElement field) {
-
-        ParameterSpec valueParameter = ParameterSpec.builder(TypeName.get(field.asType()), field.getSimpleName().toString())
-                .addAnnotation(Nonnull.class)
-                .build();
-
-        return MethodSpec.methodBuilder(methodName("set", field))
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(valueParameter)
-                .addAnnotation(Nonnull.class)
-                .returns(builderClassName)
-                .addStatement("this.model.$N = $N", field.getSimpleName(), field.getSimpleName())
-                .addStatement("return this")
-                .build();
-    }
-
-    private MethodSpec builderAddMethod(ClassName builderClassName, VariableElement field, SetMetaType setType) {
-        ParameterSpec elementParameter = ParameterSpec.builder(setType.getElementType().getTypeName(), "element")
-                .addAnnotation(Nonnull.class)
-                .build();
-
-
-        return MethodSpec.methodBuilder(methodName("add", field))
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(elementParameter)
-                .addAnnotation(Nonnull.class)
-                .returns(builderClassName)
-                .addStatement("this.model.$N.add($N)", field.getSimpleName(), "element")
-                .addStatement("return this")
-                .build();
-    }
-
-    private String methodName(String prefix, VariableElement field) {
-        return methodName(prefix, field.getSimpleName().toString());
-    }
-
-    private String methodName(String prefix, String name) {
-        return prefix + name.substring(0, 1).toUpperCase() + name.substring(1);
-    }
 
     private void writeJsonClass(TypeElement modelClass) throws IOException {
 

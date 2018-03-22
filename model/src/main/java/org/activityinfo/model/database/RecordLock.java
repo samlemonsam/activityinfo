@@ -1,18 +1,22 @@
 package org.activityinfo.model.database;
 
+import org.activityinfo.json.AutoJson;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.annotation.AutoBuilder;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.time.LocalDateInterval;
 
+@AutoJson
+@AutoBuilder
 public class RecordLock implements JsonSerializable {
-    private ResourceId id;
-    private String label;
-    private ResourceId resourceId;
-    private LocalDateInterval dateRange;
+    ResourceId id;
+    String label;
+    ResourceId resourceId;
+    LocalDateInterval dateRange;
 
-    private RecordLock() {}
+    RecordLock() {}
 
     /**
      * @return the id of this lock itself.
@@ -63,36 +67,4 @@ public class RecordLock implements JsonSerializable {
         return lock;
     }
 
-    public static class Builder {
-
-        private RecordLock lock = new RecordLock();
-
-        public Builder setId(ResourceId id) {
-            lock.id = id;
-            return this;
-        }
-
-        public Builder setResourceId(ResourceId resourceId) {
-            lock.resourceId = resourceId;
-            return this;
-        }
-
-        public Builder setDateRange(LocalDateInterval range) {
-            lock.dateRange = range;
-            return this;
-        }
-
-        public Builder setLabel(String name) {
-            lock.label = name;
-            return this;
-        }
-
-        public RecordLock build() {
-            assert lock.id != null : "id is missing";
-            assert lock.resourceId != null : "resourceId is missing";
-            assert lock.dateRange != null : "dateRange is missing";
-            assert lock.label != null : "label is missing";
-            return lock;
-        }
-    }
 }

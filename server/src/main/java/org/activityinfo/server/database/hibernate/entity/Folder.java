@@ -19,6 +19,7 @@
 package org.activityinfo.server.database.hibernate.entity;
 
 import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceBuilder;
 import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.legacy.CuidAdapter;
 
@@ -93,7 +94,7 @@ public class Folder implements SchemaElement, Serializable, HardDeleteable {
 
 
     public Resource asResource() {
-        return new Resource.Builder()
+        return new ResourceBuilder()
             .setId(CuidAdapter.folderId(id))
             .setParentId(CuidAdapter.databaseId(database.getId()))
             .setLabel(getName())

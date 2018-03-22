@@ -27,6 +27,7 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.GrantModelBuilder;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.hibernate.dao.*;
@@ -244,7 +245,8 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
     private UserPermissionModel constructModel(UserPermission perm, UserPermissionDTO dto) {
         List<GrantModel> grants = new ArrayList<>();
         for (FolderDTO folderDTO : dto.getFolders()) {
-            GrantModel grant = new GrantModel.Builder()
+            GrantModel grant = new GrantModelBuilder()
+                .setId("1")
                 .setResourceId(CuidAdapter.folderId(folderDTO.getId()))
                 .build();
             grants.add(grant);

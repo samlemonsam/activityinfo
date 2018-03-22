@@ -32,6 +32,7 @@ import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.GrantModelBuilder;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -164,7 +165,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
                     continue;
                 }
                 Folder destinationFolder = folderMapping.get(folderId);
-                destinationGrants.add(new GrantModel.Builder()
+                destinationGrants.add(new GrantModelBuilder()
                     .setResourceId(CuidAdapter.folderId(destinationFolder.getId()))
                     .build());
             }

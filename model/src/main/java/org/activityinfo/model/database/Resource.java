@@ -7,8 +7,6 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.annotation.AutoBuilder;
 import org.activityinfo.model.resource.ResourceId;
 
-import javax.annotation.Nonnull;
-
 @AutoJson
 @AutoBuilder
 public class Resource implements JsonSerializable {
@@ -58,37 +56,6 @@ public class Resource implements JsonSerializable {
         resource.label = object.getString("label");
         resource.type = ResourceType.valueOf(object.getString("type"));
         return resource;
-    }
-
-    public static class Builder {
-        private Resource resource = new Resource();
-
-        public Builder setId(ResourceId id) {
-            resource.id = id;
-            return this;
-        }
-
-        public Builder setLabel(@Nonnull String label) {
-            resource.label = label;
-            return this;
-        }
-
-        public Builder setParentId(ResourceId id) {
-            resource.parentId = id;
-            return this;
-        }
-
-        public Builder setType(ResourceType type) {
-            resource.type = type;
-            return this;
-        }
-
-        public Resource build() {
-            assert resource.id != null : "id is missing";
-            assert resource.label != null : "label is missing";
-            assert resource.type != null : "type is missing";
-            return resource;
-        }
     }
 
 }

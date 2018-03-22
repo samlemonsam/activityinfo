@@ -20,6 +20,7 @@ package org.activityinfo.server.database.hibernate.entity;
 
 import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceBuilder;
 import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -377,7 +378,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     }
 
     public Resource asResource() {
-        return new Resource.Builder()
+        return new ResourceBuilder()
             .setId(getFormId())
             .setType(ResourceType.FORM)
             .setParentId(getParentResourceId())

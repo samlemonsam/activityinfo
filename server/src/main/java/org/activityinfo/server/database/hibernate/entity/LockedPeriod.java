@@ -20,6 +20,7 @@ package org.activityinfo.server.database.hibernate.entity;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import org.activityinfo.model.database.RecordLock;
+import org.activityinfo.model.database.RecordLockBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.time.LocalDateInterval;
@@ -175,7 +176,7 @@ public class LockedPeriod implements Serializable, HardDeleteable {
     }
 
     public RecordLock asDatabaseLock() {
-        return new RecordLock.Builder()
+        return new RecordLockBuilder()
             .setId(CuidAdapter.lockId(getId()))
             .setResourceId(getResourceId())
             .setDateRange(getDateRange())
