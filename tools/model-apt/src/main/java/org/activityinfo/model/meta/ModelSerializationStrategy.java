@@ -11,10 +11,20 @@ public enum ModelSerializationStrategy {
         public CodeBlock toJsonValue(TypeName typeName, CodeBlock value) {
             return CodeBlock.of("$L.toJson()", value);
         }
+
+        @Override
+        public CodeBlock fromJson(TypeName typeName, CodeBlock jsonValue) {
+            return CodeBlock.of("$T.fromJson($L)", typeName, jsonValue);
+        }
     },
     NONE {
         @Override
         public CodeBlock toJsonValue(TypeName typeName, CodeBlock value) {
+            throw new UnsupportedOperationException(typeName + " cannot be serialized to JSON.");
+        }
+
+        @Override
+        public CodeBlock fromJson(TypeName typeName, CodeBlock jsonValue) {
             throw new UnsupportedOperationException(typeName + " cannot be serialized to JSON.");
         }
     };
@@ -27,4 +37,6 @@ public enum ModelSerializationStrategy {
     }
 
     public abstract CodeBlock toJsonValue(TypeName typeName, CodeBlock value);
+
+    public abstract CodeBlock fromJson(TypeName typeName, CodeBlock jsonValue);
 }

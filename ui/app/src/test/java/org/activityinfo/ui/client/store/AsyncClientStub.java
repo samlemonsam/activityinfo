@@ -170,7 +170,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
 
             java.util.Optional<UserDatabaseMeta> database = databaseProvider.lookupDatabase(formId);
 
-            return Promise.resolved(new FormMetadata.Builder()
+            return Promise.resolved(new FormMetadataBuilder()
             .setId(formId)
             .setSchema(form.get().getFormClass())
             .setPermissions(FormPermissions.readWrite())

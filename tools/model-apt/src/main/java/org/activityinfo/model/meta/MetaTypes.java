@@ -45,7 +45,7 @@ public class MetaTypes {
                   return new StringMetaType(element);
               }
               if(element.getQualifiedName().contentEquals("java.util.Set")) {
-                  return new SetMetaType(t, t.getTypeArguments().get(0));
+                  return new CollectionMetaType(t, t.getTypeArguments().get(0));
               }
               if(element.getQualifiedName().contentEquals("org.activityinfo.model.resource.ResourceId")) {
                   return new ResourceIdType(element);

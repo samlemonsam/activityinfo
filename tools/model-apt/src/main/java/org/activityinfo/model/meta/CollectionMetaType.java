@@ -6,14 +6,19 @@ import com.squareup.javapoet.TypeName;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-public class SetMetaType implements MetaType {
+public class CollectionMetaType implements MetaType {
 
     private final DeclaredType collectionType;
     private final MetaType elementType;
 
-    public SetMetaType(DeclaredType collectionType, TypeMirror elementType) {
+    public CollectionMetaType(DeclaredType collectionType, TypeMirror elementType) {
         this.collectionType = collectionType;
         this.elementType = MetaTypes.of(elementType);
+    }
+
+    @Override
+    public TypeName getTypeName() {
+        return TypeName.get(collectionType);
     }
 
     public MetaType getElementType() {
@@ -36,7 +41,12 @@ public class SetMetaType implements MetaType {
     }
 
     @Override
-    public TypeName getTypeName() {
-        return TypeName.get(collectionType);
+    public CodeBlock fromJsonProperty(CodeBlock jsonValue, String name) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public CodeBlock fromJsonValue(CodeBlock jsonValue) {
+        throw new UnsupportedOperationException("TODO");
     }
 }

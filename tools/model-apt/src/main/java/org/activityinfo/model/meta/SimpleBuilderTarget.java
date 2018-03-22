@@ -40,6 +40,12 @@ public class SimpleBuilderTarget extends BuilderTarget {
     }
 
     @Override
+    public void addFromJson(MethodSpec.Builder method) {
+        method.addStatement(CodeBlock.of("model.$N = $L", field.getSimpleName(),
+                type.fromJsonProperty(CodeBlock.of("object"), field.getSimpleName().toString())));
+    }
+
+    @Override
     public List<CodeBlock> assertions() {
         if(type.getTypeName().isPrimitive()) {
             return Collections.emptyList();

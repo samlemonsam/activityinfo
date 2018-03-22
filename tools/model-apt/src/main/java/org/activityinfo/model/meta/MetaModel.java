@@ -64,8 +64,8 @@ public class MetaModel {
                !field.getModifiers().contains(Modifier.STATIC)) {
 
                 MetaType metaType = MetaTypes.of(field.asType());
-                if(metaType instanceof SetMetaType) {
-                    targets.add(new CollectionBuilderTarget(field, (SetMetaType)metaType));
+                if(metaType instanceof CollectionMetaType) {
+                    targets.add(new CollectionBuilderTarget(field, (CollectionMetaType)metaType));
                 } else {
                     targets.add(new SimpleBuilderTarget(field, metaType));
                 }

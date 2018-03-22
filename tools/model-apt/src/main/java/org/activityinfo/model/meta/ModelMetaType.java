@@ -34,4 +34,14 @@ public class ModelMetaType implements MetaType {
     public TypeName getTypeName() {
         return TypeName.get(declaredType);
     }
+
+    @Override
+    public CodeBlock fromJsonProperty(CodeBlock jsonValue, String name) {
+        return serializationStrategy.fromJson(getTypeName(), CodeBlock.of("$L.get($S)", jsonValue, name));
+    }
+
+    @Override
+    public CodeBlock fromJsonValue(CodeBlock jsonValue) {
+        return serializationStrategy.fromJson(getTypeName(), jsonValue);
+    }
 }

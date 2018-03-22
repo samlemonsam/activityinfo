@@ -32,4 +32,14 @@ public class StringMetaType implements MetaType {
     public TypeName getTypeName() {
         return TypeName.get(typeElement.asType());
     }
+
+    @Override
+    public CodeBlock fromJsonProperty(CodeBlock jsonValue, String name) {
+        return CodeBlock.of("$L.getString($S)", jsonValue, name);
+    }
+
+    @Override
+    public CodeBlock fromJsonValue(CodeBlock jsonValue) {
+        return CodeBlock.of("$L.asString()", jsonValue);
+    }
 }

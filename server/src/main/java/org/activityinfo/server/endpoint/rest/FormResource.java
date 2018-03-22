@@ -113,7 +113,7 @@ public class FormResource {
                 locks = databaseMetadata.getEffectiveLocks(formId);
             }
 
-            return new FormMetadata.Builder()
+            return new FormMetadataBuilder()
                     .setId(formId)
                     .setPermissions(permissions)
                     .setSchema(schema)

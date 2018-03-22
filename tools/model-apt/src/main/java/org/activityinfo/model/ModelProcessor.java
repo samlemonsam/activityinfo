@@ -128,6 +128,7 @@ public class ModelProcessor extends AbstractProcessor {
         TypeSpec jsonClass = TypeSpec.classBuilder(jsonClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(buildToJsonMethod(metaModel))
+                .addMethod(buildFromJsonMethod(metaModel))
                 .build();
 
         JavaFile javaFile = JavaFile.builder(jsonClassName.packageName(), jsonClass)
@@ -140,6 +141,7 @@ public class ModelProcessor extends AbstractProcessor {
             javaFile.writeTo(out);
         }
     }
+
 
     private MethodSpec buildToJsonMethod(MetaModel metaModel) {
         MethodSpec.Builder toJson = MethodSpec.methodBuilder("toJson")
@@ -158,5 +160,23 @@ public class ModelProcessor extends AbstractProcessor {
         }
         toJson.addStatement("return object");
         return toJson.build();
+    }
+
+
+    private MethodSpec buildFromJsonMethod(MetaModel metaModel) {
+        MethodSpec.Builder method = MethodSpec.methodBuilder("fromJson")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(metaModel.getTypeName())
+                .addParameter(TypeName.get(JsonValue.class), "object");
+
+        method.addStatement("$T model = new $T()", metaModel.getTypeName(), metaModel.getTypeName());
+
+        for (BuilderTarget builderTarget : metaModel.getBuilderTargets()) {
+            builderTarget.addFromJson(method);
+        }
+
+        method.addStatement("return model");
+
+        return method.build();
     }
 }

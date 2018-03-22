@@ -18,8 +18,10 @@
  */
 package org.activityinfo.model.form;
 
+import org.activityinfo.json.AutoJson;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.annotation.AutoBuilder;
 import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -32,39 +34,40 @@ import static org.activityinfo.json.Json.createObject;
  * Provides user-specific metadata for a given form, including permissions
  * and versioning.
  */
+@AutoJson
+@AutoBuilder
 public class FormMetadata implements JsonSerializable {
 
-    private ResourceId id;
+    ResourceId id;
 
 
     /**
      * The overall version of the form. The version number is incremented
      * whenever a record or the schema is changed.
      */
-    private long version;
+    long version;
 
     /**
      * The version of the Schema. The version number is incremented
      * whenver a
      */
-    private long schemaVersion;
+    long schemaVersion;
 
     /**
      * True if this form has been deleted.
      */
-    private boolean deleted = false;
+    boolean deleted = false;
 
     /**
      * The permissions for the current user.
      */
-    private FormPermissions permissions;
+    FormPermissions permissions;
 
-    private FormClass schema;
+    FormClass schema;
 
-    private boolean visible = true;
+    boolean visible = true;
 
-    private RecordLockSet locks = RecordLockSet.EMPTY;
-
+    RecordLockSet locks = RecordLockSet.EMPTY;
 
     public static FormMetadata notFound(ResourceId formId) {
         FormMetadata metadata = new FormMetadata();
@@ -132,11 +135,6 @@ public class FormMetadata implements JsonSerializable {
         return schema;
     }
 
-    public void setSchema(FormClass schema) {
-        this.schema = schema;
-        this.schemaVersion = schema.getSchemaVersion();
-    }
-
     public List<FormField> getFields() {
         if(isVisible()) {
             return getSchema().getFields();
@@ -197,40 +195,5 @@ public class FormMetadata implements JsonSerializable {
         return metadata;
     }
 
-
-    public static class Builder {
-        private FormMetadata meta = new FormMetadata();
-
-        public Builder setId(ResourceId id) {
-            meta.id = id;
-            return this;
-        }
-
-        public Builder setSchema(FormClass schema) {
-            meta.schema = schema;
-            meta.schemaVersion = schema.getSchemaVersion();
-            return this;
-        }
-
-        public Builder setPermissions(FormPermissions permissions) {
-            meta.permissions = permissions;
-            return this;
-        }
-
-        public Builder setLocks(RecordLockSet locks) {
-            meta.locks = locks;
-            return this;
-        }
-
-        public Builder setVersion(long version) {
-            meta.version = version;
-            return this;
-        }
-
-        public FormMetadata build() {
-            return meta;
-        }
-
-    }
 
 }

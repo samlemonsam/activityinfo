@@ -5,6 +5,9 @@ import com.squareup.javapoet.TypeName;
 
 public interface MetaType {
 
+
+    TypeName getTypeName();
+
     /**
      *
      * @param value a code block that yields a value of this type
@@ -20,7 +23,18 @@ public interface MetaType {
      */
     CodeBlock toJsonArray(CodeBlock value);
 
+
+    /**
+     *
+     * @param jsonValue a code block that yields a JsonValue of type "object"
+     * @param name the property name to accces
+     * @return a code block that yields an instance of this type, converted from the Json property
+     */
+    CodeBlock fromJsonProperty(CodeBlock jsonValue, String name);
+
+    CodeBlock fromJsonValue(CodeBlock jsonValue);
+
     CodeBlock getJsonSerializerMethodRef();
 
-    TypeName getTypeName();
+
 }

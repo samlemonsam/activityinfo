@@ -32,4 +32,22 @@ public class PrimitiveMetaType implements MetaType {
     public TypeName getTypeName() {
         return TypeName.get(type);
     }
+
+    @Override
+    public CodeBlock fromJsonProperty(CodeBlock jsonValue, String name) {
+        if(getTypeName().equals(TypeName.BOOLEAN)) {
+            return CodeBlock.of("$L.getBoolean($S)", jsonValue, name);
+        } else {
+            return CodeBlock.of("($T)$L.getNumber($S)", getTypeName(), jsonValue, name);
+        }
+    }
+
+    @Override
+    public CodeBlock fromJsonValue(CodeBlock jsonValue) {
+        if(getTypeName().equals(TypeName.BOOLEAN)) {
+            return CodeBlock.of("$L.asBoolean()", jsonValue);
+        } else {
+            return CodeBlock.of("($T)$L.asNumber()", getTypeName(), jsonValue);
+        }
+    }
 }

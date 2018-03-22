@@ -33,4 +33,14 @@ public class EnumMetaType implements MetaType {
     public TypeName getTypeName() {
         return TypeName.get(element.asType());
     }
+
+    @Override
+    public CodeBlock fromJsonProperty(CodeBlock jsonValue, String name) {
+        return CodeBlock.of("$T.valueOf($L.getString($S))", element, jsonValue, name);
+    }
+
+    @Override
+    public CodeBlock fromJsonValue(CodeBlock jsonValue) {
+        return CodeBlock.of("$T.valueOf($L.asString())", element, jsonValue);
+    }
 }

@@ -36,4 +36,14 @@ public class ResourceIdType implements MetaType {
     public TypeName getTypeName() {
         return TypeName.get(typeElement.asType());
     }
+
+    @Override
+    public CodeBlock fromJsonProperty(CodeBlock jsonValue, String name) {
+        return CodeBlock.of("$T.valueOf($L.getString($S))", typeElement, jsonValue, name);
+    }
+
+    @Override
+    public CodeBlock fromJsonValue(CodeBlock jsonValue) {
+        throw new UnsupportedOperationException("TODO");
+    }
 }

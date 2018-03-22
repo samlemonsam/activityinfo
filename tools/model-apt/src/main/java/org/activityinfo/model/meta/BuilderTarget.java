@@ -12,6 +12,10 @@ public abstract class BuilderTarget {
 
     public abstract Stream<MethodSpec> builderMethods(TypeName builderClassName);
 
+    public void addFromJson(MethodSpec.Builder method) {
+
+    }
+
     public List<CodeBlock> assertions() {
         return Collections.emptyList();
     }
