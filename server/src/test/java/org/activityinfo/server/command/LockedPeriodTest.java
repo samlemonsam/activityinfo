@@ -19,7 +19,9 @@
 package org.activityinfo.server.command;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.util.Providers;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.CreateLockedPeriod;
 import org.activityinfo.legacy.shared.command.GetSchema;
@@ -29,11 +31,16 @@ import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.model.database.RecordLock;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.junit.Assert.assertThat;
@@ -92,5 +99,14 @@ public class LockedPeriodTest extends CommandTestCase {
 
         assertTrue(locks.isActivityLocked(1, new LocalDate(2011, 1,1)));
 
+        // Verify that the new code works too...
+        DatabaseProviderImpl provider = new DatabaseProviderImpl(Providers.of(em));
+        UserDatabaseMeta metadata = provider.getDatabaseMetadata(CuidAdapter.databaseId(1), 1);
+
+        ArrayList<RecordLock> folderLocks = Lists.newArrayList(metadata.getEffectiveLocks(CuidAdapter.folderId(1)));
+        ArrayList<RecordLock> formLocks = Lists.newArrayList(metadata.getEffectiveLocks(CuidAdapter.activityFormClass(1)));
+
+        assertThat(folderLocks, Matchers.hasSize(2));
+        assertThat(formLocks, Matchers.hasSize(3));
     }
 }

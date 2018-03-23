@@ -470,6 +470,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                                     FolderDTO folder = folders.get(folderId);
                                     if(folder != null) {
                                         folder.getLockedPeriods().add(lockedPeriod);
+                                        lockedPeriod.setParent(folder);
                                     }
                                 } else {
                                     Integer databaseId = row.getInt("databaseId");

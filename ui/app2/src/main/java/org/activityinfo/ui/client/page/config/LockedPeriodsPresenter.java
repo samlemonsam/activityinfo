@@ -87,6 +87,9 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
         if (lockedPeriod.getParent() instanceof UserDatabaseDTO) {
             lockUserDatabase.setDatabaseId(lockedPeriod.getParent().getId());
         }
+        if (lockedPeriod.getParent() instanceof FolderDTO) {
+            lockUserDatabase.setFolderId(lockedPeriod.getParent().getId());
+        }
 
         service.execute(lockUserDatabase, new AsyncCallback<CreateResult>() {
             @Override
@@ -123,7 +126,6 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
                 public void onFailure(Throwable caught) {
                     // Tell the user an error occurred
                     view.getDeletingMonitor().onServerError(caught);
-                    // TODO Handle failure
                     MessageBox.alert(I18N.CONSTANTS.error(),
                             I18N.CONSTANTS.errorOnServer() + "\n\n" + caught.getMessage(),
                             null);
@@ -237,19 +239,23 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
     public void go(UserDatabaseDTO db) {
         parentModel = db;
 
-        ArrayList<LockedPeriodDTO> items = new ArrayList<LockedPeriodDTO>(db.getLockedPeriods());
+        ArrayList<LockedPeriodDTO> items = new ArrayList<>(db.getLockedPeriods());
         for (ActivityDTO activity : db.getActivities()) {
-            if (activity.getLockedPeriods() != null && activity.getLockedPeriods().size() > 0) {
+            if (activity.getLockedPeriods() != null) {
                 items.addAll(activity.getLockedPeriods());
             }
         }
         for (ProjectDTO project : db.getProjects()) {
-            if (project.getLockedPeriods() != null && project.getLockedPeriods().size() > 0) {
+            if (project.getLockedPeriods() != null) {
                 items.addAll(project.getLockedPeriods());
             }
         }
+        for (FolderDTO folder : db.getFolders()) {
+            items.addAll(folder.getLockedPeriods());
+        }
+
         view.setItems(items);
-        if (items.size() > 0) {
+        if (!items.isEmpty()) {
             view.setValue(items.get(0));
         }
         view.setParent(parentModel);

@@ -19,8 +19,6 @@
 package org.activityinfo.ui.client.page.config;
 
 import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.FieldEvent;
-import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.HorizontalPanel;
 import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
@@ -33,10 +31,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
-import org.activityinfo.legacy.shared.model.ProjectDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.AddLockedPeriodView;
 import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
@@ -48,12 +43,15 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
     private Radio radioDatabase;
     private Radio radioActivity;
     private Radio radioProject;
+    private Radio radioFolder;
     private LabelField labelDatabase;
     private LabelField labelDatabaseName;
     private LabelField labelProject;
+    private LabelField labelFolder;
     private LabelField labelActivity;
 
     private HorizontalPanel panelDatabase;
+    private HorizontalPanel panelFolder;
     private HorizontalPanel panelActivity;
     private HorizontalPanel panelProject;
 
@@ -61,8 +59,13 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
     private ComboBox<ProjectDTO> comboboxProjects;
     private ListStore<ProjectDTO> storeProjects;
+
+    private ComboBox<FolderDTO> comboBoxFolder;
+    private ListStore<FolderDTO> storeFolders;
+
     private ComboBox<ActivityDTO> comboboxActivities;
     private ListStore<ActivityDTO> storeActivities;
+
 
     private TextField<String> textfieldName;
     private DateField datefieldFromDate;
@@ -88,6 +91,9 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         storeProjects.removeAll();
         storeProjects.add(userDatabase.getProjects());
 
+        storeFolders.removeAll();
+        storeFolders.add(userDatabase.getFolders());
+
         storeActivities.removeAll();
         storeActivities.add(userDatabase.getActivities());
     }
@@ -101,23 +107,32 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         fieldsetContainer = new FieldSet();
         fieldsetContainer.setHeadingHtml(SafeHtmlUtils.htmlEscape(I18N.CONSTANTS.type()));
 
-        comboboxProjects = new ComboBox<ProjectDTO>();
-        storeProjects = new ListStore<ProjectDTO>();
+        comboboxProjects = new ComboBox<>();
+        storeProjects = new ListStore<>();
         comboboxProjects.setStore(storeProjects);
         comboboxProjects.setDisplayField("name");
         comboboxProjects.setForceSelection(true);
         comboboxProjects.setTriggerAction(TriggerAction.ALL);
         comboboxProjects.setEditable(false);
-        comboboxProjects.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<ProjectDTO>("name")));
+        comboboxProjects.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
 
-        comboboxActivities = new ComboBox<ActivityDTO>();
-        storeActivities = new ListStore<ActivityDTO>();
+        comboBoxFolder = new ComboBox<>();
+        storeFolders = new ListStore<>();
+        comboBoxFolder.setStore(storeFolders);
+        comboBoxFolder.setDisplayField("name");
+        comboBoxFolder.setForceSelection(true);
+        comboBoxFolder.setTriggerAction(TriggerAction.ALL);
+        comboBoxFolder.setEditable(false);
+        comboboxProjects.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
+
+        comboboxActivities = new ComboBox<>();
+        storeActivities = new ListStore<>();
         comboboxActivities.setStore(storeActivities);
         comboboxActivities.setDisplayField("name");
         comboboxActivities.setForceSelection(true);
         comboboxActivities.setTriggerAction(TriggerAction.ALL);
         comboboxActivities.setEditable(false);
-        comboboxActivities.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<ActivityDTO>("name")));
+        comboboxActivities.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
 
         radiogroupContainer = new RadioGroup();
         radiogroupContainer.setFieldLabel(I18N.CONSTANTS.type());
@@ -129,12 +144,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         radioDatabase = new Radio();
         radioDatabase.setFieldLabel(I18N.CONSTANTS.database());
-        radioDatabase.addListener(Events.Change, new Listener<FieldEvent>() {
-            @Override
-            public void handleEvent(FieldEvent be) {
-                setState();
-            }
-        });
+        radioDatabase.addListener(Events.Change, be -> setState());
         radiogroupContainer.add(radioDatabase);
 
         panelDatabase = new HorizontalPanel();
@@ -143,14 +153,25 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         panelDatabase.add(labelDatabaseName);
         fieldsetContainer.add(panelDatabase);
 
+        radioFolder = new Radio();
+        radioFolder.setFieldLabel(I18N.CONSTANTS.folder());
+        radioFolder.addListener(Events.Change, be -> setState());
+
+        labelFolder = new LabelField(I18N.CONSTANTS.folder());
+        labelFolder.setWidth(100);
+
+        panelFolder = new HorizontalPanel();
+        panelFolder.add(labelFolder);
+        panelFolder.add(radioFolder);
+        panelFolder.add(comboBoxFolder);
+        panelFolder.add(panelFolder);
+        fieldsetContainer.add(panelFolder);
+        radiogroupContainer.add(radioFolder);
+
+
         radioActivity = new Radio();
         radioActivity.setFieldLabel(I18N.CONSTANTS.activity());
-        radioActivity.addListener(Events.Change, new Listener<FieldEvent>() {
-            @Override
-            public void handleEvent(FieldEvent be) {
-                setState();
-            }
-        });
+        radioActivity.addListener(Events.Change, be -> setState());
 
         labelActivity = new LabelField(I18N.CONSTANTS.activity());
         labelActivity.setWidth(100);
@@ -164,12 +185,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         radioProject = new Radio();
         radioProject.setFieldLabel(I18N.CONSTANTS.project());
-        radioProject.addListener(Events.Change, new Listener<FieldEvent>() {
-            @Override
-            public void handleEvent(FieldEvent be) {
-                setState();
-            }
-        });
+        radioProject.addListener(Events.Change, be -> setState());
 
         labelProject = new LabelField(I18N.CONSTANTS.project());
         labelProject.setWidth(100);
@@ -183,7 +199,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         add(fieldsetContainer);
 
-        textfieldName = new TextField<String>();
+        textfieldName = new TextField<>();
         textfieldName.setFieldLabel(I18N.CONSTANTS.name());
         textfieldName.setAllowBlank(false);
         add(textfieldName);
@@ -197,14 +213,11 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         datefieldFromDate = new DateField();
         datefieldFromDate.setFieldLabel(I18N.CONSTANTS.fromDate());
         datefieldFromDate.setAllowBlank(false);
-        datefieldFromDate.setValidator(new Validator() {
-            @Override
-            public String validate(Field<?> field, String value) {
-                if (datefieldFromDate.getValue().after(datefieldToDate.getValue())) {
-                    return I18N.CONSTANTS.fromDateIsBeforeToDate();
-                }
-                return null;
+        datefieldFromDate.setValidator((field, value) -> {
+            if (datefieldFromDate.getValue().after(datefieldToDate.getValue())) {
+                return I18N.CONSTANTS.fromDateIsBeforeToDate();
             }
+            return null;
         });
         add(datefieldFromDate);
 
@@ -213,22 +226,13 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         datefieldToDate.setAllowBlank(false);
         add(datefieldToDate);
 
-        radiogroupContainer.addListener(Events.Change, new Listener<FieldEvent>() {
-
-            @Override
-            public void handleEvent(FieldEvent be) {
-                comboboxActivities.setAllowBlank(!radioActivity.getValue());
-                comboboxProjects.setAllowBlank(!radioProject.getValue());
-                comboboxActivities.clearInvalid();
-                comboboxProjects.clearInvalid();
-            }
+        radiogroupContainer.addListener(Events.Change, be -> {
+            comboboxActivities.setAllowBlank(!radioActivity.getValue());
+            comboboxProjects.setAllowBlank(!radioProject.getValue());
+            comboboxActivities.clearInvalid();
+            comboboxProjects.clearInvalid();
         });
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                setState();
-            }
-        });
+        Scheduler.get().scheduleDeferred(this::setState);
     }
 
     private void setState() {
@@ -267,6 +271,9 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         }
         if (radioProject.getValue() && comboboxProjects.getValue() != null) {
             newLockedPeriod.setParent(comboboxProjects.getValue());
+        }
+        if (radioFolder.getValue() && comboBoxFolder.getValue() != null) {
+            newLockedPeriod.setParent(comboBoxFolder.getValue());
         }
         if (radioDatabase.getValue()) {
             newLockedPeriod.setParent(userDatabase);
