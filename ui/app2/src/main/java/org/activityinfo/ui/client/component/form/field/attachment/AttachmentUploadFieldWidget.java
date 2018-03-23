@@ -24,21 +24,14 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.*;
-import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.attachment.Attachment;
@@ -82,7 +75,6 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
 
     private final ValueUpdater valueUpdater;
     private final ResourceId resourceId;
-    private final Uploader uploader;
 
     private HandlerRegistration oldHandler;
     private boolean readOnly;
@@ -92,28 +84,6 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
         this.valueUpdater = valueUpdater;
 
         ourUiBinder.createAndBindUi(this);
-
-        this.uploader = new Uploader(formPanel, fileUpload, resourceId, hiddenFieldsContainer, new Uploader.UploadCallback() {
-            @Override
-            public void onFailure(Throwable exception) {
-                uploadFailed.setVisible(true);
-            }
-
-            @Override
-            public void upload() {
-                AttachmentUploadFieldWidget.this.upload();
-            }
-        });
-
-        fileUpload.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (fieldWidgetMode == FieldWidgetMode.NORMAL) {
-                    uploader.setAttachment(new Attachment());
-                    uploader.upload();
-                }
-            }
-        });
 
         Event.sinkEvents(browseButton, Event.ONCLICK);
         Event.setEventListener(browseButton, new EventListener() {
@@ -143,41 +113,12 @@ public class AttachmentUploadFieldWidget implements FormFieldWidget<AttachmentVa
                 // event.getResults is always null because of cross-domain upload
                 // we are forced to make additional call to check whether upload is successful
 
-                checkBlobExistance();
                 formPanel.reset();
             }
         });
         formPanel.submit();
     }
 
-    public void checkBlobExistance() {
-        try {
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, uploader.getBaseUrl() + "/exists");
-            requestBuilder.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    if (response.getStatusCode() == Response.SC_OK) {
-                        addNewRow(uploader.getAttachment());
-
-                        setState(true);
-                        fireValueChanged();
-                    } else {
-                        Log.error("Failed to fetch attachment serving url. Status code is not ok. ");
-                        setState(false);
-                    }
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    Log.error("Failed to fetch attachment serving url. ", exception);
-                    setState(false);
-                }
-            });
-        } catch (Exception e) {
-            Log.error("Failed to send request for fetching serving url. ", e);
-            setState(false);
-        }
-    }
 
     private void setState(boolean success) {
         loadingContainer.setVisible(false);

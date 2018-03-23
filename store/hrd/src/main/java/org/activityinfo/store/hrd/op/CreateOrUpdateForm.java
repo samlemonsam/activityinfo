@@ -20,9 +20,11 @@ package org.activityinfo.store.hrd.op;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.VoidWork;
+import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
+import org.activityinfo.store.hrd.entity.ResourceEntity;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -56,8 +58,14 @@ public class CreateOrUpdateForm extends VoidWork {
         
         FormSchemaEntity formClassEntity = new FormSchemaEntity(formClass);
         formClassEntity.setSchemaVersion(1);
-        
-        ofy().save().entities(rootEntity, formClassEntity);
+
+        ResourceEntity resourceEntity = new ResourceEntity();
+        resourceEntity.setId(formClass.getId());
+        resourceEntity.setDatabaseId(formClass.getDatabaseId());
+        resourceEntity.setParentId(formClass.getParentFormId().or(formClass.getDatabaseId()));
+        resourceEntity.setResourceType(ResourceType.FORM);
+
+        ofy().save().entities(rootEntity, formClassEntity, resourceEntity);
     }
 
     private void update(FormSchemaEntity formClassEntity) {
@@ -72,7 +80,14 @@ public class CreateOrUpdateForm extends VoidWork {
         // Update the schema
         formClassEntity.setSchema(formClass);
         formClassEntity.setSchemaVersion(newVersion);
+
+        // Update the resource index
+        ResourceEntity resourceEntity = new ResourceEntity();
+        resourceEntity.setId(formClass.getId());
+        resourceEntity.setDatabaseId(formClass.getDatabaseId());
+        resourceEntity.setParentId(formClass.getParentFormId().or(formClass.getDatabaseId()));
+        resourceEntity.setResourceType(ResourceType.FORM);
         
-        ofy().save().entities(rootEntity, formClassEntity);
+        ofy().save().entities(rootEntity, formClassEntity, resourceEntity);
     }
 }

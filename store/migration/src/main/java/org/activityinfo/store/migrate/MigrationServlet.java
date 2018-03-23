@@ -64,6 +64,8 @@ public class MigrationServlet extends HttpServlet {
                 return startPartnerMigration();
             case "snapshots":
                 return reindexSnapshots();
+            case "subforms":
+                return indexSubForms();
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
@@ -92,6 +94,17 @@ public class MigrationServlet extends HttpServlet {
 
     }
 
+
+    private String indexSubForms() {
+        DatastoreInput input = new DatastoreInput("FormSchema", 10);
+        SubFormIndexer reindexer = new SubFormIndexer();
+
+        MapSpecification<Entity, Void, Void> spec = new MapSpecification.Builder<Entity, Void, Void>(input, reindexer)
+                .setJobName("Reindex forms")
+                .build();
+
+        return MapJob.start(spec, getSettings());
+    }
 
     private MapSettings getSettings() {
         MapSettings settings = new MapSettings.Builder()

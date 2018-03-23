@@ -23,7 +23,7 @@ import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
-import org.activityinfo.server.blob.GcsBlobFieldStorageService;
+import org.activityinfo.server.uploads.UploadResource;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.BlobId;
 
@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class TestBlobstoreService extends GcsBlobFieldStorageService implements BlobAuthorizer {
+public class TestBlobstoreService extends UploadResource implements BlobAuthorizer {
 
     public TestBlobstoreService(DeploymentConfiguration config, final EntityManager em) {
         super(config, new Provider<EntityManager>() {
@@ -40,7 +40,7 @@ public class TestBlobstoreService extends GcsBlobFieldStorageService implements 
             public EntityManager get() {
                 return em;
             }
-        });
+        }, databaseProvider);
     }
 
     @Override

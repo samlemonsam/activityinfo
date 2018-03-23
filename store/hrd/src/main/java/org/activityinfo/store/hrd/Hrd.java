@@ -34,6 +34,7 @@ public class Hrd {
         ObjectifyService.register(FormSchemaEntity.class);
         ObjectifyService.register(AnalysisEntity.class);
         ObjectifyService.register(AnalysisSnapshotEntity.class);
+        ObjectifyService.register(ResourceEntity.class);
     }
 
     public static Objectify ofy() {

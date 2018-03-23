@@ -92,7 +92,6 @@ public class AttachmentUploadRow extends Composite {
     private void setFileName() {
         fileName.setInnerSafeHtml(SafeHtmlUtils.fromString(
                 !Strings.isNullOrEmpty(attachment.getFilename()) ? " " + attachment.getFilename() : " " + I18N.CONSTANTS.unknown()));
-        fileName.setHref(Uploader.getPermanentLink(attachment.getBlobId(), resourceId));
     }
 
     public Button getRemoveButton() {
