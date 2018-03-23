@@ -99,6 +99,9 @@ public class PermissionOracle {
         assertDesignPrivileges(activity.getDatabase(), user);
     }
 
+    public void assertDesignPrivileges(Folder folder, User user) {
+        assertDesignPrivileges(folder.getDatabase(), user);
+    }
     public void assertDesignPrivileges(LockedPeriod lockedPeriod, User user) {
         assertDesignPrivileges(lockedPeriod.getDatabase(), user);
     }

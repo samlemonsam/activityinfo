@@ -20,19 +20,17 @@ package org.activityinfo.legacy.shared.model;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author yuriyz on 10/07/2014.
  */
-public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO {
-
+public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO, LockedPeriodDTO.HasLockedPeriod {
 
     public static final String ENTITY_NAME = "Folder";
 
     private List<ActivityDTO> activities = new ArrayList<>();
+    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>();
 
     public FolderDTO() {
     }
@@ -111,5 +109,10 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO {
     @Override
     public String getKey() {
         return "activity_category_" + getDatabaseId() + "_" + getName();
+    }
+
+    @Override
+    public Set<LockedPeriodDTO> getLockedPeriods() {
+        return lockedPeriods;
     }
 }

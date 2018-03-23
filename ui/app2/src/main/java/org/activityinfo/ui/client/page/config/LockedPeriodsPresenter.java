@@ -85,7 +85,7 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
             lockUserDatabase.setProjectId(lockedPeriod.getParent().getId());
         }
         if (lockedPeriod.getParent() instanceof UserDatabaseDTO) {
-            lockUserDatabase.setUserDatabaseId(lockedPeriod.getParent().getId());
+            lockUserDatabase.setDatabaseId(lockedPeriod.getParent().getId());
         }
 
         service.execute(lockUserDatabase, new AsyncCallback<CreateResult>() {

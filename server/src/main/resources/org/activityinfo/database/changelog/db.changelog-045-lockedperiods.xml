@@ -53,4 +53,15 @@
                                  referencedColumnNames="databaseId"
                                  referencedTableName="userdatabase"/>
     </changeSet>
+
+    <changeSet id="045-02" author="alex">
+        <addColumn tableName="lockedperiod">
+            <column name="folderId" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="folderId"
+                                 baseTableName="lockedperiod"
+                                 constraintName="fk_lockedperiod_folderId"
+                                 referencedColumnNames="folderId"
+                                 referencedTableName="folder"/>
+    </changeSet>
 </databaseChangeLog>

@@ -23,8 +23,9 @@ import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
 
 public class CreateLockedPeriod implements MutatingCommand<CreateResult> {
     private int activityId = 0;
-    private int userDatabseId = 0;
+    private int databaseId = 0;
     private int projectId = 0;
+    private int folderId = 0;
     private LockedPeriodDTO lockedPeriod;
 
     public CreateLockedPeriod() {
@@ -42,12 +43,20 @@ public class CreateLockedPeriod implements MutatingCommand<CreateResult> {
         this.activityId = activityId;
     }
 
-    public int getUserDatabseId() {
-        return userDatabseId;
+    public int getDatabaseId() {
+        return databaseId;
     }
 
-    public void setUserDatabaseId(int userDatabseId) {
-        this.userDatabseId = userDatabseId;
+    public void setDatabaseId(int userDatabseId) {
+        this.databaseId = userDatabseId;
+    }
+
+    public int getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(int folderId) {
+        this.folderId = folderId;
     }
 
     public int getProjectId() {

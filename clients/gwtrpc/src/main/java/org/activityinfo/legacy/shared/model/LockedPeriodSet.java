@@ -48,6 +48,11 @@ public class LockedPeriodSet {
         for (ProjectDTO project : db.getProjects()) {
             addEnabled(projectLocks, project.getId(), project.getLockedPeriods());
         }
+        for (FolderDTO folder : db.getFolders()) {
+            for (ActivityDTO activity : folder.getActivities()) {
+                addEnabled(activityLocks, activity.getId(), folder.getLockedPeriods());
+            }
+        }
     }
 
     private void addEnabled(Multimap<Integer, LockedPeriodDTO> map, int key, Iterable<LockedPeriodDTO> periods) {

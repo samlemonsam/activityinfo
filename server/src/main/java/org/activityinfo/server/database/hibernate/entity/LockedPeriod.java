@@ -39,6 +39,7 @@ public class LockedPeriod implements Serializable, HardDeleteable {
     private Database userDatabase;
     private Project project;
     private Activity activity;
+    private Folder folder;
     private boolean enabled;
 
     public LockedPeriod() {
@@ -142,6 +143,16 @@ public class LockedPeriod implements Serializable, HardDeleteable {
     @JoinColumn(name = "ActivityId", nullable = true)
     public Activity getActivity() {
         return activity;
+    }
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "FolderId", nullable = true)
+    public Folder getFolder() {
+        return folder;
+    }
+
+    public void setFolder(Folder folder) {
+        this.folder = folder;
     }
 
     public void setEnabled(boolean isEnabled) {

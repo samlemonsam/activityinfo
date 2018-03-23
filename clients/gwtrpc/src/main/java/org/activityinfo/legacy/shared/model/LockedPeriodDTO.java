@@ -153,31 +153,12 @@ public class LockedPeriodDTO extends BaseModelData implements EntityDTO {
         set(PARENT_TYPE_PROPERTY, hasLock.getEntityName());
     }
 
-    public boolean hasParent() {
-        return parent != null;
-    }
-
-    public boolean hasParentId() {
-        return parentId != 0;
-    }
-
     public void setParentId(int id) {
         this.parentId = id;
     }
 
     public int getParentId() {
         return parentId;
-    }
-
-    public String getParentType() {
-        return get(PARENT_TYPE_PROPERTY);
-    }
-
-    /**
-     * give meaning to the parentId by specifying the type of the parent.
-     */
-    public void setParentType(String type) {
-        set(PARENT_TYPE_PROPERTY, type);
     }
 
     public boolean fallsWithinPeriod(@Nonnull LocalDate date) {
