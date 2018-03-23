@@ -117,12 +117,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
     }
 
     private Promise<ActivityFormDTO> fetchForm(ExecutionContext context, final int activityId) {
-        return new FormBuilder(activityId).build(context).then(new Function<ActivityFormDTO, ActivityFormDTO>() {
-            @Override
-            public ActivityFormDTO apply(ActivityFormDTO input) {
-                return input;
-            }
-        });
+        return new FormBuilder(activityId).build(context);
     }
 
     private class FormBuilder {
@@ -132,7 +127,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
         private int activityId;
 
         private ActivityFormDTO activity;
-        private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<Integer, AttributeGroupDTO>();
+        private final Map<Integer, AttributeGroupDTO> attributeGroups = new HashMap<>();
 
         private SqlTransaction tx;
 
@@ -225,7 +220,6 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                 @Override
                 public Promise<Void> apply(Void input) {
                     return Promise.waitAll(
-                            loadLockedPeriods(),
                             loadAdminLevels(),
                             loadPartners(),
                             loadProjects());
@@ -243,7 +237,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
 
                         @Override
                         public void onSuccess(SqlTransaction tx, SqlResultSet results) {
-                            Map<Integer, AdminLevelDTO> levels = new HashMap<Integer, AdminLevelDTO>();
+                            Map<Integer, AdminLevelDTO> levels = new HashMap<>();
                             for (SqlResultSetRow row : results.getRows()) {
                                 AdminLevelDTO level = new AdminLevelDTO();
                                 level.setId(row.getInt("adminLevelId"));
@@ -283,7 +277,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
          * @return root admin level
          */
         private List<AdminLevelDTO> getRootAdminLevel(Map<Integer, AdminLevelDTO> adminLevels, LocationTypeDTO type) {
-            List<AdminLevelDTO> ancestors = new ArrayList<AdminLevelDTO>();
+            List<AdminLevelDTO> ancestors = new ArrayList<>();
             AdminLevelDTO level = adminLevels.get(type.getBoundAdminLevelId());
 
             if (level == null) {
@@ -321,55 +315,6 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                                 projects.add(project);
                             }
                             activity.setProjects(projects);
-                            promise.resolve(null);
-                        }
-                    });
-            return promise;
-        }
-
-        protected Promise<Void> loadLockedPeriods() {
-            final Promise<Void> promise = new Promise<>();
-            SqlQuery.select("fromDate",
-                    "toDate",
-                    "enabled",
-                    "name",
-                    "lockedPeriodId",
-                    "userDatabaseId",
-                    "activityId",
-                    "projectId")
-                    .from("lockedperiod")
-                    .whereTrue("(userDatabaseId=" + databaseId + ") OR " +
-                            "(activityId=" + activity.getId() + ") OR " +
-                            "(projectId in (select projectId from project where databaseId=" + databaseId + "))")
-
-                    .execute(tx, new SqlResultCallback() {
-
-                        @Override
-                        public void onSuccess(SqlTransaction tx, SqlResultSet results) {
-                            for (SqlResultSetRow row : results.getRows()) {
-                                LockedPeriodDTO lockedPeriod = new LockedPeriodDTO();
-                                lockedPeriod.setId(row.getInt("lockedPeriodId"));
-                                lockedPeriod.setFromDate(row.getDate("fromDate"));
-                                lockedPeriod.setToDate(row.getDate("toDate"));
-                                lockedPeriod.setEnabled(row.getBoolean("enabled"));
-                                lockedPeriod.setName(row.getString("name"));
-
-                                if (!row.isNull("userDatabaseId")) {
-                                    lockedPeriod.setParentId(row.getInt("userDatabaseId"));
-                                    lockedPeriod.setParentType(UserDatabaseDTO.ENTITY_NAME);
-                                    activity.getLockedPeriods().add(lockedPeriod);
-
-                                } else if (!row.isNull("activityId")) {
-                                    lockedPeriod.setParentId(row.getInt("activityId"));
-                                    lockedPeriod.setParentType(ActivityDTO.ENTITY_NAME);
-                                    activity.getLockedPeriods().add(lockedPeriod);
-
-                                } else if (!row.isNull("projectId")) {
-                                    lockedPeriod.setParentId(row.getInt("projectId"));
-                                    lockedPeriod.setParentType(ProjectDTO.ENTITY_NAME);
-                                    activity.getLockedPeriods().add(lockedPeriod);
-                                }
-                            }
                             promise.resolve(null);
                         }
                     });
@@ -466,16 +411,13 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                         attributeGroupIds.add(row.getInt("AttributeGroupId"));
                     }
                 }
-            }).join(new Function<Void, Promise<Void>>() {
-                @Override
-                public Promise<Void> apply(Void input) {
-                    LOGGER.fine("loading attribute groups. Size: " + attributeGroupIds.size());
+            }).join(input -> {
+                LOGGER.fine("loading attribute groups. Size: " + attributeGroupIds.size());
 
-                    return Promise.waitAll(
-                            loadAttributeGroups(attributeGroupIds),
-                            loadAttributes(attributeGroupIds)
-                    );
-                }
+                return Promise.waitAll(
+                        loadAttributeGroups(attributeGroupIds),
+                        loadAttributes(attributeGroupIds)
+                );
             });
         }
 

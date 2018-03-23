@@ -42,13 +42,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetMonthlyReports;
+import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.UpdateMonthlyReports;
 import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
-import org.activityinfo.legacy.shared.model.LockedPeriodSet;
-import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
@@ -89,8 +87,8 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         setLayout(new FitLayout());
 
         proxy = new ReportingPeriodProxy();
-        loader = new BaseListLoader<MonthlyReportResult>(proxy);
-        store = new GroupingStore<IndicatorRowDTO>(loader);
+        loader = new BaseListLoader<>(proxy);
+        store = new GroupingStore<>(loader);
         store.setMonitorChanges(true);
         store.addListener(Store.Update, new Listener<BaseEvent>() {
             @Override
@@ -106,7 +104,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     public boolean isModified() {
-        return store.getModifiedRecords().size() != 0;
+        return !store.getModifiedRecords().isEmpty();
     }
 
     private void addToolBar() {
@@ -115,7 +113,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         toolBar.addSaveSplitButton();
         toolBar.add(new LabelToolItem(I18N.CONSTANTS.month() + ": "));
 
-        monthCombo = new MappingComboBox<Month>();
+        monthCombo = new MappingComboBox<>();
         monthCombo.setEditable(false);
         monthCombo.addListener(Events.Select, new Listener<FieldEvent>() {
             @Override
@@ -144,12 +142,9 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
 
     public void load(final SiteDTO site) {
         if (isModified()) {
-            confirmUnsavedData(new Function() {
-                @Override
-                public Object apply(Object input) {
-                    loadSite(site);
-                    return null;
-                }
+            confirmUnsavedData(input -> {
+                loadSite(site);
+                return null;
             });
         } else {
             loadSite(site);
@@ -165,6 +160,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                     MonthlyReportsPanel.this.save().then(new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
+                            // handled by monitor
                         }
 
                         @Override
@@ -194,31 +190,24 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         this.currentSiteId = site.getId();
         this.grid.getStore().removeAll();
 
-        service.execute(new GetActivityForm(site.getActivityId()),
-                new MaskingAsyncMonitor(this, I18N.CONSTANTS.loading()),
-                new AsyncCallback<ActivityFormDTO>() {
+        MaskingAsyncMonitor monitor = new MaskingAsyncMonitor(this, I18N.CONSTANTS.loading());
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // caught by monitor
-                    }
-
-                    @Override
-                    public void onSuccess(ActivityFormDTO result) {
-                        currentActivity = result;
-                        populateGrid(site, currentActivity);
-                    }
-                });
+        service.execute(new GetSchema(), monitor).thenDo(schema -> {
+            service.execute(new GetActivityForm(site.getActivityId()), monitor).thenDo(activity -> {
+                currentActivity = activity;
+                populateGrid(site, schema);
+            });
+        });
     }
 
-    private void populateGrid(SiteDTO site, ActivityFormDTO activity) {
+    private void populateGrid(SiteDTO site, SchemaDTO schema) {
 
         if(currentMonth == null) {
             currentMonth = getInitialStartMonth(site);
         }
 
         monthCombo.setMappedValue(currentMonth);
-        grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(activity)));
+        grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(schema)));
         grid.updateMonthColumns(currentMonth);
         grid.setReadOnly(currentActivity.isAllowedToEdit(site));
         proxy.setStartMonth(currentMonth);
@@ -227,12 +216,9 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     private Predicate<Month> createLockPredicate(final LockedPeriodSet lockedPeriodSet) {
-        return new Predicate<Month>() {
-            @Override
-            public boolean apply(Month input) {
-                DateWrapper date = new DateWrapper(input.getYear(), input.getMonth() - 1, 1).getLastDateOfMonth();
-                return lockedPeriodSet.isActivityLocked(currentActivity.getId(), date.asDate());
-            }
+        return input -> {
+            DateWrapper date = new DateWrapper(input.getYear(), input.getMonth() - 1, 1).getLastDateOfMonth();
+            return lockedPeriodSet.isActivityLocked(currentActivity.getId(), date.asDate());
         };
     }
 
@@ -266,14 +252,14 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     }
 
     public Promise<Void> save() {
-        ArrayList<UpdateMonthlyReports.Change> changes = new ArrayList<UpdateMonthlyReports.Change>();
+        ArrayList<UpdateMonthlyReports.Change> changes = new ArrayList<>();
         for (Record record : store.getModifiedRecords()) {
             IndicatorRowDTO report = (IndicatorRowDTO) record.getModel();
             for (String property : record.getChanges().keySet()) {
                 UpdateMonthlyReports.Change change = new UpdateMonthlyReports.Change();
                 change.setIndicatorId(report.getIndicatorId());
                 change.setMonth(IndicatorRowDTO.monthForProperty(property));
-                change.setValue((Double) report.get(property));
+                change.setValue(report.get(property));
                 changes.add(change);
             }
         }
@@ -299,17 +285,13 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
 
     public void setReadOnly(boolean readOnly) {
         this.grid.setReadOnly(readOnly);
-        //        this.toolBar.setActionEnabled(UIActions.SAVE, !readOnly);
     }
 
     public void onNoSelection() {
-        confirmUnsavedData(new Function() {
-            @Override
-            public Object apply(Object input) {
-                MonthlyReportsPanel.this.grid.getStore().removeAll();
-                MonthlyReportsPanel.this.grid.getView().setEmptyText(I18N.MESSAGES.SelectSiteAbove());
-                return null;
-            }
+        confirmUnsavedData(input -> {
+            MonthlyReportsPanel.this.grid.getStore().removeAll();
+            MonthlyReportsPanel.this.grid.getView().setEmptyText(I18N.MESSAGES.SelectSiteAbove());
+            return null;
         });
     }
 

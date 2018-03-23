@@ -270,6 +270,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.setActionEnabled(UIActions.OPEN_TABLE, false);
         monthlyPanel.onNoSelection();
         attachmentsTab.onNoSelection();
+        detailTab.onNoSelection();
+        siteHistoryTab.onNoSelection();
     }
 
     @Override
@@ -456,7 +458,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
         if (UIActions.ADD.equals(actionId)) {
 
-            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher, eventBus);
+            SiteDialogLauncher formHelper = new SiteDialogLauncher(dispatcher);
             formHelper.addSite(filter, () -> {
                 gridPanel.refresh();
                 filterPane.getSet().applyBaseFilter(filter);
@@ -486,7 +488,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     }
 
     private void editSite(SiteDTO site) {
-        SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher, eventBus);
+        SiteDialogLauncher launcher = new SiteDialogLauncher(dispatcher);
         launcher.editSite(site, () -> {
             gridPanel.refresh();
             filterPane.getSet().applyBaseFilter(currentPlace.getFilter());

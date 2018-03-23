@@ -36,8 +36,26 @@ public abstract class AbstractDispatcher implements Dispatcher {
         if (monitor == null) {
             execute(command, callback);
         } else {
-            execute(command, new MonitoringCallback(monitor, callback));
+            execute(command, new MonitoringCallback<T>(monitor, callback));
         }
+    }
+
+    @Override
+    public <T extends CommandResult> Promise<T> execute(Command<T> command, AsyncMonitor monitor) {
+        final Promise<T> promise = new Promise<>();
+
+        execute(command, monitor, new AsyncCallback<T>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+                promise.onFailure(throwable);
+            }
+
+            @Override
+            public void onSuccess(T result) {
+                promise.onSuccess(result);
+            }
+        });
+        return promise;
     }
 
 

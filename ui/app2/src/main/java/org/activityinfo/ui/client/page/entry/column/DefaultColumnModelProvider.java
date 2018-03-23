@@ -56,8 +56,20 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                 }
 
                 @Override
-                public void onSuccess(ActivityFormDTO result) {
-                    callback.onSuccess(forSingleActivity(grouping, result));
+                public void onSuccess(ActivityFormDTO activity) {
+                    dispatcher.execute(new GetSchema()).then(new AsyncCallback<SchemaDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            callback.onFailure(caught);
+                        }
+
+                        @Override
+                        public void onSuccess(SchemaDTO schema) {
+                            callback.onSuccess(forSingleActivity(grouping,
+                                    schema.getDatabaseById(activity.getDatabaseId()),
+                                    activity));
+                        }
+                    });
                 }
             });
 
@@ -85,17 +97,16 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
     }
 
     /**
-     * Builds
+     * Builds a grid model for a single classic activity
      *
-     * @param activity
      */
-    private ColumnModel forSingleActivity(GroupingModel grouping, ActivityFormDTO activity) {
+    private ColumnModel forSingleActivity(GroupingModel grouping, UserDatabaseDTO database, ActivityFormDTO activity) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
                                            .addDeletedLocationWarning()
-                                           .maybeAddLockOrLinkColumn(activity)
+                                           .maybeAddLockOrLinkColumn(database)
                                            .maybeAddDateColumn(activity)
-                                           .maybeAddPartnerColumn(activity)
+                                           .addPartnerColumn()
                                            .maybeAddProjectColumn(activity)
                                            .maybeAddKeyIndicatorColumns(activity)
                                            .maybeAddTwoLineLocationColumn(activity)
@@ -103,19 +114,19 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                                            .build();
         } else if (grouping instanceof AdminGroupingModel) {
 
-            return new ColumnModelBuilder().maybeAddLockOrLinkColumn(activity)
+            return new ColumnModelBuilder().maybeAddLockOrLinkColumn(database)
                                            .addTreeNameColumn()
                                            .maybeAddDateColumn(activity)
-                                           .maybeAddPartnerColumn(activity)
+                                           .addPartnerColumn()
                                            .maybeAddProjectColumn(activity)
                                            .build();
         } else if (grouping instanceof TimeGroupingModel) {
 
             return new ColumnModelBuilder().addDeletedLocationWarning()
-                                           .maybeAddLockOrLinkColumn(activity)
+                                           .maybeAddLockOrLinkColumn(database)
                                            .addTreeNameColumn()
                                            .maybeAddDateColumn(activity)
-                                           .maybeAddPartnerColumn(activity)
+                                           .addPartnerColumn()
                                            .maybeAddProjectColumn(activity)
                                            .maybeAddSingleLineLocationColumn(activity)
                                            .addAdminLevelColumns(activity)
@@ -132,7 +143,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                                            .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
                                            .addLocationColumn()
-                                           .maybeAddPartnerColumn(database)
+                                           .addPartnerColumn()
                                            .maybeAddProjectColumn(database)
                                            .addAdminLevelColumns(database)
                                            .build();
@@ -142,7 +153,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
             return new ColumnModelBuilder().addTreeNameColumn()
                                            .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
-                                           .maybeAddPartnerColumn(database)
+                                           .addPartnerColumn()
                                            .maybeAddProjectColumn(database)
                                            .build();
 
@@ -152,7 +163,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
                                            .addTreeNameColumn()
                                            .maybeAddLockOrLinkColumn(database)
                                            .addActivityColumn(database)
-                                           .maybeAddPartnerColumn(database)
+                                           .addPartnerColumn()
                                            .maybeAddProjectColumn(database)
                                            .addLocationColumn()
                                            .addAdminLevelColumns(database)

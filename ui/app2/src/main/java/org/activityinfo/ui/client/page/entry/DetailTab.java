@@ -46,7 +46,10 @@ public class DetailTab extends TabItem {
         content = new Html();
         content.setStyleName(ApplicationBundle.INSTANCE.styles().details());
         add(content);
+    }
 
+    public void onNoSelection() {
+        content.setHtml(SafeHtmlUtils.EMPTY_SAFE_HTML);
     }
 
     public void setSite(final SiteDTO site) {
@@ -71,4 +74,5 @@ public class DetailTab extends TabItem {
         SiteRenderer renderer = new SiteRenderer(new IndicatorNumberFormat());
         content.setHtml(SafeHtmlUtils.fromTrustedString(renderer.renderSite(site, form, true)));
     }
+
 }

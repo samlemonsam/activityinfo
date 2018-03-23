@@ -40,12 +40,10 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
-import org.activityinfo.ui.client.dispatch.ResourceLocator;
-import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
 import org.activityinfo.ui.client.page.entry.form.resources.SiteFormResources;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
@@ -66,9 +64,7 @@ public class SiteDialog extends Window {
     private final Button finishButton;
 
     private final Dispatcher dispatcher;
-    private final ResourceLocator resourceLocator;
     private final ActivityFormDTO activity;
-    private final EventBus eventBus;
 
     private SiteDialogCallback callback;
 
@@ -80,11 +76,9 @@ public class SiteDialog extends Window {
     private boolean newSite;
     private KeyGenerator keyGenerator;
 
-    public SiteDialog(Dispatcher dispatcher, ActivityFormDTO activity, EventBus eventBus) {
+    public SiteDialog(Dispatcher dispatcher, LockedPeriodSet locks, ActivityFormDTO activity) {
         this.dispatcher = dispatcher;
-        this.resourceLocator = new ResourceLocatorAdaptor();
         this.activity = activity;
-        this.eventBus = eventBus;
 
         setHeadingText(I18N.MESSAGES.addNewSiteForActivity(activity.getName()));
         setWidth(WIDTH);
@@ -111,7 +105,7 @@ public class SiteDialog extends Window {
             locationForm = new LocationSection(dispatcher, activity);
         }
 
-        addSection(FormSectionModel.forComponent(new ActivitySection(activity))
+        addSection(FormSectionModel.forComponent(new ActivitySection(locks, activity))
                 .withHeader(I18N.CONSTANTS.siteDialogIntervention())
                 .withDescription(I18N.CONSTANTS.siteDialogInterventionDesc()));
 

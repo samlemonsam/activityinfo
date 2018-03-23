@@ -30,19 +30,16 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.ui.client.App3;
-import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.page.entry.location.LocationDialog;
 
 public class SiteDialogLauncher {
 
     private final Dispatcher dispatcher;
-    private final EventBus eventBus;
 
-    public SiteDialogLauncher(Dispatcher dispatcher, EventBus eventBus) {
+    public SiteDialogLauncher(Dispatcher dispatcher) {
         super();
         this.dispatcher = dispatcher;
-        this.eventBus = eventBus;
     }
 
     public void addSite(final Filter filter, final SiteDialogCallback callback) {
@@ -74,6 +71,8 @@ public class SiteDialogLauncher {
                         return;
                     }
 
+                    LockedPeriodSet locks = new LockedPeriodSet(activity.getDatabase());
+
                     dispatcher.execute(new GetActivityForm(activityId)).then(new AsyncCallback<ActivityFormDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -81,16 +80,16 @@ public class SiteDialogLauncher {
                         }
 
                         @Override
-                        public void onSuccess(ActivityFormDTO activity) {
+                        public void onSuccess(ActivityFormDTO activityForm) {
 
-                            if (activity.getLocationType().isAdminLevel()) {
-                                addNewSiteWithBoundLocation(activity, callback);
+                            if (activityForm.getLocationType().isAdminLevel()) {
+                                addNewSiteWithBoundLocation(locks, activityForm, callback);
 
-                            } else if (activity.getLocationType().isNationwide()) {
-                                addNewSiteWithNoLocation(activity, callback);
+                            } else if (activityForm.getLocationType().isNationwide()) {
+                                addNewSiteWithNoLocation(locks, activityForm, callback);
 
                             } else {
-                                chooseLocationThenAddSite(activity, callback);
+                                chooseLocationThenAddSite(locks, activityForm, callback);
                             }
                         }
                     });
@@ -123,11 +122,12 @@ public class SiteDialogLauncher {
                     return;
                 }
 
+
                 // check whether the site has been locked
                 // (this only applies to Once-reported activities because
                 //  otherwise the date criteria applies to the monthly report)
+                LockedPeriodSet locks = new LockedPeriodSet(schema);
                 if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-                    LockedPeriodSet locks = new LockedPeriodSet(schema);
                     if (locks.isLocked(site)) {
                         MessageBox.alert(I18N.CONSTANTS.lockedSiteTitle(), I18N.CONSTANTS.siteIsLocked(), null);
                         return;
@@ -141,8 +141,8 @@ public class SiteDialogLauncher {
                     }
 
                     @Override
-                    public void onSuccess(ActivityFormDTO result) {
-                        SiteDialog dialog = new SiteDialog(dispatcher, result, eventBus);
+                    public void onSuccess(ActivityFormDTO activity) {
+                        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity);
                         dialog.showExisting(site, callback);
                     }
                 });
@@ -150,7 +150,7 @@ public class SiteDialogLauncher {
         });
     }
 
-    private void chooseLocationThenAddSite(final ActivityFormDTO activity, final SiteDialogCallback callback) {
+    private void chooseLocationThenAddSite(LockedPeriodSet locks, final ActivityFormDTO activity, final SiteDialogCallback callback) {
         LocationDialog locationDialog = new LocationDialog(dispatcher,
                 activity.getLocationType());
 
@@ -159,12 +159,12 @@ public class SiteDialogLauncher {
             newSite.setActivityId(activity.getId());
             newSite.setLocation(location);
 
-            SiteDialog siteDialog = new SiteDialog(dispatcher, activity, eventBus);
+            SiteDialog siteDialog = new SiteDialog(dispatcher, locks, activity);
             siteDialog.showNew(newSite, location, isNew, callback);
         });
     }
 
-    private void addNewSiteWithBoundLocation(ActivityFormDTO activity, SiteDialogCallback callback) {
+    private void addNewSiteWithBoundLocation(LockedPeriodSet locks, ActivityFormDTO activity, SiteDialogCallback callback) {
         SiteDTO newSite = new SiteDTO();
         newSite.setActivityId(activity.getId());
 
@@ -172,11 +172,11 @@ public class SiteDialogLauncher {
         location.setId(new KeyGenerator().generateInt());
         location.setLocationTypeId(activity.getLocationTypeId());
 
-        SiteDialog dialog = new SiteDialog(dispatcher, activity, eventBus);
+        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity);
         dialog.showNew(newSite, location, true, callback);
     }
 
-    private void addNewSiteWithNoLocation(ActivityFormDTO activity, SiteDialogCallback callback) {
+    private void addNewSiteWithNoLocation(LockedPeriodSet locks, ActivityFormDTO activity, SiteDialogCallback callback) {
         SiteDTO newSite = new SiteDTO();
         newSite.setActivityId(activity.getId());
 
@@ -184,7 +184,7 @@ public class SiteDialogLauncher {
         location.setId(activity.getLocationTypeId());
         location.setLocationTypeId(activity.getLocationTypeId());
 
-        SiteDialog dialog = new SiteDialog(dispatcher, activity, eventBus);
+        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity);
         dialog.showNew(newSite, location, true, callback);
     }
 

@@ -21,11 +21,6 @@ package org.activityinfo.legacy.shared.model;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.ReferenceValue;
 
 import java.util.Collection;
 import java.util.Date;
@@ -45,23 +40,6 @@ public class LockedPeriodSet {
         indexLocks(userDatabaseDTO);
     }
 
-    public LockedPeriodSet(ActivityFormDTO activity) {
-        for (LockedPeriodDTO lock : activity.getLockedPeriods()) {
-            if (lock.isEnabled()) {
-                if (lock.getParentType().equals(ProjectDTO.ENTITY_NAME)) {
-                    projectLocks.put(lock.getParentId(), lock);
-                } else {
-                    activityLocks.put(activity.getId(), lock);
-                }
-            }
-        }
-    }
-
-    public LockedPeriodSet(ActivityDTO activity) {
-        indexLocks(activity.getDatabase());
-    }
-
-
     private void indexLocks(UserDatabaseDTO db) {
         for (ActivityDTO activity : db.getActivities()) {
             addEnabled(activityLocks, activity.getId(), db.getLockedPeriods());
@@ -78,20 +56,6 @@ public class LockedPeriodSet {
                 map.put(key, lock);
             }
         }
-    }
-
-    public boolean isLocked(FormInstance instance, FormClass formClass) {
-        Date endDate = BuiltinFields.getDateRange(instance, formClass).getEnd();
-        if (endDate != null) {
-            int activityId = CuidAdapter.getLegacyIdFromCuid(formClass.getId());
-            int projectId = -1;
-            FieldValue projectValue = BuiltinFields.getProjectValue(instance, formClass);
-            if (projectValue instanceof ReferenceValue && !((ReferenceValue) projectValue).getReferences().isEmpty() ) {
-                projectId = CuidAdapter.getLegacyIdFromCuid(((ReferenceValue) projectValue).getReferences().iterator().next().getRecordId());
-            }
-            return isLocked(activityId, new LocalDate(endDate), projectId);
-        }
-        return false;
     }
 
     public boolean isLocked(SiteDTO site) {
@@ -144,7 +108,4 @@ public class LockedPeriodSet {
         return false;
     }
 
-    public boolean hasLocks() {
-        return !activityLocks.isEmpty() || !projectLocks.isEmpty();
-    }
 }

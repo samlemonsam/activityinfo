@@ -19,9 +19,7 @@
 package org.activityinfo.ui.client.page.entry.form;
 
 import com.extjs.gxt.ui.client.widget.form.DateField;
-import com.extjs.gxt.ui.client.widget.form.Field;
 import com.extjs.gxt.ui.client.widget.form.TextField;
-import com.extjs.gxt.ui.client.widget.form.Validator;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
@@ -32,29 +30,27 @@ import org.activityinfo.ui.client.page.entry.form.field.ProjectComboBox;
 public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
 
     private final ActivityFormDTO activity;
-    private final LockedPeriodSet locks;
 
     private DateField dateField1;
     private DateField dateField2;
     private PartnerComboBox partnerCombo;
     private ProjectComboBox projectCombo;
 
-    public ActivitySection(final ActivityFormDTO activity) {
+    public ActivitySection(LockedPeriodSet locks, final ActivityFormDTO activity) {
         super();
 
         this.activity = activity;
-        this.locks = new LockedPeriodSet(activity);
 
         getFormLayout().setLabelWidth(100);
         getFormLayout().setDefaultWidth(200);
 
-        TextField<String> databaseField = new TextField<String>();
+        TextField<String> databaseField = new TextField<>();
         databaseField.setValue(activity.getDatabaseName());
         databaseField.setFieldLabel(I18N.CONSTANTS.database());
         databaseField.setReadOnly(true);
         add(databaseField);
 
-        TextField<String> activityField = new TextField<String>();
+        TextField<String> activityField = new TextField<>();
         activityField.setValue(activity.getName());
         activityField.setFieldLabel(I18N.CONSTANTS.activity());
         activityField.setReadOnly(true);
@@ -80,29 +76,28 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
             dateField2.setName("date2");
             dateField2.setAllowBlank(false);
             dateField2.setFieldLabel(I18N.CONSTANTS.endDate());
-            dateField2.setValidator(new Validator() {
-                @Override
-                public String validate(Field<?> field, String value) {
-                    if (dateField1.getValue() != null && dateField2.getValue() != null) {
-                        if (dateField2.getValue().before(dateField1.getValue())) {
-                            return I18N.CONSTANTS.inconsistentDateRangeWarning();
-                        }
-                        if (locks.isActivityLocked(activity.getId(), dateField2.getValue())) {
-                            return I18N.CONSTANTS.dateFallsWithinLockedPeriodWarning();
-                        }
-                        if (projectCombo.getValue() != null) {
-                            int projectId = projectCombo.getValue().getId();
-                            if (locks.isProjectLocked(projectId, dateField2.getValue())) {
-                                return I18N.CONSTANTS.dateFallsWithinLockedPeriodWarning();
-                            }
-                        }
-                    }
-                    return null;
-                }
-            });
+            dateField2.setValidator((field, value) -> validateDateRange(locks, activity));
             add(dateField2);
 
         }
+    }
+
+    private String validateDateRange(LockedPeriodSet locks, ActivityFormDTO activity) {
+        if (dateField1.getValue() != null && dateField2.getValue() != null) {
+            if (dateField2.getValue().before(dateField1.getValue())) {
+                return I18N.CONSTANTS.inconsistentDateRangeWarning();
+            }
+            if (locks.isActivityLocked(activity.getId(), dateField2.getValue())) {
+                return I18N.CONSTANTS.dateFallsWithinLockedPeriodWarning();
+            }
+            if (projectCombo.getValue() != null) {
+                int projectId = projectCombo.getValue().getId();
+                if (locks.isProjectLocked(projectId, dateField2.getValue())) {
+                    return I18N.CONSTANTS.dateFallsWithinLockedPeriodWarning();
+                }
+            }
+        }
+        return null;
     }
 
     @Override

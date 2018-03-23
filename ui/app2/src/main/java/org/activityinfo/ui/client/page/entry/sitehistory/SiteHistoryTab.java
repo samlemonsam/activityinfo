@@ -23,6 +23,7 @@ import com.extjs.gxt.ui.client.widget.Html;
 import com.extjs.gxt.ui.client.widget.TabItem;
 import com.google.common.base.Strings;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.SiteDTO;
@@ -70,6 +71,11 @@ public class SiteHistoryTab extends TabItem {
                         render(site, history.getEntries());
                     }
                 });
+    }
+
+
+    public void onNoSelection() {
+        content.setHtml(SafeHtmlUtils.EMPTY_SAFE_HTML);
     }
 
     private void renderStatus(String message) {

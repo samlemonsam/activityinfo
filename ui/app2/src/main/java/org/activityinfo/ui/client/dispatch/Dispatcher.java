@@ -55,6 +55,18 @@ public interface Dispatcher extends Function<Command, Promise<CommandResult>> {
      * complete in the order they were submitted.
      *
      * @param command  The command to execute
+     * @param monitor  The monitor which handles status reports to the user
+     * @param callback The callback which implements application logic
+     * @param <T>      The type of the {@code CommandResult}
+     */
+    <T extends CommandResult> Promise<T> execute(Command<T> command, AsyncMonitor monitor);
+
+    /**
+     * Attempts to execute a command. The command may not neccessarily be
+     * executed immediately, and there are no gaurantees that commands will
+     * complete in the order they were submitted.
+     *
+     * @param command  The command to execute
      * @param callback The callback which implements application logic
      * @param <T>      The type of the {@code CommandResult}
      */

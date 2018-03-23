@@ -19,15 +19,11 @@
 package org.activityinfo.ui.client.page.entry.column;
 
 import com.extjs.gxt.ui.client.Style;
-import com.extjs.gxt.ui.client.data.ModelData;
-import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.form.NumberField;
-import com.extjs.gxt.ui.client.widget.grid.*;
-import com.extjs.gxt.ui.client.widget.treegrid.TreeGridCellRenderer;
-import com.google.common.base.Strings;
+import com.extjs.gxt.ui.client.widget.grid.CellEditor;
+import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
+import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.google.common.collect.Lists;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.FieldTypeClass;
@@ -42,30 +38,12 @@ import java.util.List;
  */
 public class ColumnModelBuilder {
 
-    private final String warningStyle = "color:tomato; font-size:20px; font-weight:bold";
-
     private List<ColumnConfig> columns = Lists.newArrayList();
 
     public ColumnModelBuilder addActivityColumn(final UserDatabaseDTO database) {
         ColumnConfig config = new ColumnConfig("activityId", I18N.CONSTANTS.activity(), 100);
         config.setToolTip(I18N.CONSTANTS.activity());
-        config.setRenderer(new GridCellRenderer<SiteDTO>() {
-
-            @Override
-            public SafeHtml render(SiteDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<SiteDTO> store,
-                                 Grid<SiteDTO> grid) {
-
-                ActivityDTO activity = database.getActivityById(model.getActivityId());
-                return activity == null ?
-                        SafeHtmlUtils.EMPTY_SAFE_HTML :
-                        SafeHtmlUtils.fromString(activity.getName());
-            }
-        });
+        config.setRenderer(new ActivityCellRenderer(database));
         columns.add(config);
         return this;
     }
@@ -73,21 +51,7 @@ public class ColumnModelBuilder {
     public ColumnModelBuilder addActivityColumn(final SchemaDTO schema) {
         ColumnConfig config = new ColumnConfig("activityId", I18N.CONSTANTS.activity(), 100);
         config.setToolTip(I18N.CONSTANTS.activity());
-        config.setRenderer(new GridCellRenderer<SiteDTO>() {
-
-            @Override
-            public SafeHtml render(SiteDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<SiteDTO> store,
-                                 Grid<SiteDTO> grid) {
-
-                ActivityDTO activity = schema.getActivityById(model.getActivityId());
-                return activity == null ? SafeHtmlUtils.EMPTY_SAFE_HTML : SafeHtmlUtils.fromString(activity.getName());
-            }
-        });
+        config.setRenderer(new ActivityCellRenderer(schema));
         columns.add(config);
         return this;
     }
@@ -95,23 +59,7 @@ public class ColumnModelBuilder {
     public ColumnModelBuilder addDatabaseColumn(final SchemaDTO schema) {
         ColumnConfig config = new ColumnConfig("activityId", I18N.CONSTANTS.database(), 100);
         config.setToolTip(I18N.CONSTANTS.database());
-        config.setRenderer(new GridCellRenderer<SiteDTO>() {
-
-            @Override
-            public SafeHtml render(SiteDTO model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore<SiteDTO> store,
-                                 Grid<SiteDTO> grid) {
-
-                ActivityDTO activity = schema.getActivityById(model.getActivityId());
-                return activity == null ?
-                        SafeHtmlUtils.EMPTY_SAFE_HTML :
-                        SafeHtmlUtils.fromString(activity.getDatabaseName());
-            }
-        });
+        config.setRenderer(new DatabaseCellRenderer(schema));
         columns.add(config);
         return this;
     }
@@ -139,16 +87,6 @@ public class ColumnModelBuilder {
         columns.add(lockedOrLinkColumn);
     }
 
-    public ColumnModelBuilder maybeAddLockOrLinkColumn(final ActivityFormDTO activity) {
-        addLockOrLinkColumn(activity.getLockedPeriodSet());
-        return this;
-    }
-
-    public ColumnModelBuilder maybeAddLockOrLinkColumn(final SchemaDTO schemaDTO) {
-        addLockOrLinkColumn(new LockedPeriodSet(schemaDTO));
-        return this;
-    }
-
     public ColumnModelBuilder maybeAddLockOrLinkColumn(final UserDatabaseDTO userdatabase) {
         addLockOrLinkColumn(new LockedPeriodSet(userdatabase));
         return this;
@@ -171,65 +109,14 @@ public class ColumnModelBuilder {
             // For SUM indicators, don't show ZEROs in the Grid
             // (it looks better if we don't)
             if (indicator.getAggregation() == IndicatorDTO.AGGREGATE_SUM) {
-                indicatorColumn.setRenderer(new GridCellRenderer() {
-                    @Override
-                    public SafeHtml render(ModelData model,
-                                         String property,
-                                         ColumnData config,
-                                         int rowIndex,
-                                         int colIndex,
-                                         ListStore listStore,
-                                         Grid grid) {
-                        Object value = model.get(property);
-                        if (value instanceof Double && (Double) value != 0) {
-                            return SafeHtmlUtils.fromTrustedString(
-                                    IndicatorNumberFormat.INSTANCE.format((Double) value));
-                        } else {
-                            return SafeHtmlUtils.EMPTY_SAFE_HTML;
-                        }
-                    }
-                });
+                indicatorColumn.setRenderer(new QuantityCellRenderer());
             } else if (indicator.getAggregation() == IndicatorDTO.AGGREGATE_SITE_COUNT) {
-                indicatorColumn.setRenderer(new GridCellRenderer() {
-                    @Override
-                    public SafeHtml render(ModelData model,
-                                         String property,
-                                         ColumnData config,
-                                         int rowIndex,
-                                         int colIndex,
-                                         ListStore listStore,
-                                         Grid grid) {
-
-                        return SafeHtmlUtils.fromSafeConstant("1"); // the value of a site count indicator a single site is always 1
-                    }
-                });
+                indicatorColumn.setRenderer(new SiteCountCellRenderer());
             }
         } else if (indicator.getType() == FieldTypeClass.FREE_TEXT || indicator.getType() == FieldTypeClass.NARRATIVE) {
-            indicatorColumn.setRenderer(new GridCellRenderer() {
-                @Override
-                public SafeHtml render(ModelData model,
-                                     String property,
-                                     ColumnData config,
-                                     int rowIndex,
-                                     int colIndex,
-                                     ListStore listStore,
-                                     Grid grid) {
-
-                    Object value = model.get(property);
-                    if(value instanceof String) {
-                        return SafeHtmlUtils.fromString((String) value);
-                    } else {
-                        return SafeHtmlUtils.EMPTY_SAFE_HTML;
-                    }
-                }
-            });
+            indicatorColumn.setRenderer(new TextIndicatorCellRenderer());
         }
         return indicatorColumn;
-    }
-
-    public ColumnModelBuilder addIndicatorColumn(IndicatorDTO indicator, String header) {
-        columns.add(createIndicatorColumn(indicator, header));
-        return this;
     }
 
     public ColumnModelBuilder maybeAddTwoLineLocationColumn(ActivityFormDTO activity) {
@@ -259,14 +146,6 @@ public class ColumnModelBuilder {
         return addAdminLevelColumns(activity.getAdminLevels());
     }
 
-    public ColumnModelBuilder addSingleAdminColumn(ActivityFormDTO activity) {
-        ColumnConfig admin = new ColumnConfig("admin", I18N.CONSTANTS.location(), 100);
-        admin.setToolTip(I18N.CONSTANTS.location());
-        admin.setRenderer(new AdminColumnRenderer(activity.getAdminLevels()));
-        columns.add(admin);
-        return this;
-    }
-
     public ColumnModelBuilder addAdminLevelColumns(List<AdminLevelDTO> adminLevels) {
         for (AdminLevelDTO level : adminLevels) {
             ColumnConfig column = new ColumnConfig(AdminLevelDTO.getPropertyName(level.getId()), level.getName(), 100);
@@ -280,16 +159,6 @@ public class ColumnModelBuilder {
     public ColumnModelBuilder addAdminLevelColumns(UserDatabaseDTO database) {
         return addAdminLevelColumns(database.getCountry().getAdminLevels());
 
-    }
-
-    public ColumnModelBuilder maybeAddPartnerColumn(ActivityFormDTO activity) {
-        addPartnerColumn();
-        return this;
-    }
-
-    public ColumnModelBuilder maybeAddPartnerColumn(UserDatabaseDTO activity) {
-        addPartnerColumn();
-        return this;
     }
 
     public ColumnModelBuilder addPartnerColumn() {
@@ -308,26 +177,7 @@ public class ColumnModelBuilder {
 
     public ColumnModelBuilder addMapColumn() {
         ColumnConfig mapColumn = new ColumnConfig("x", "", 25);
-        mapColumn.setRenderer(new GridCellRenderer<ModelData>() {
-            @Override
-            public SafeHtml render(ModelData model,
-                                 String property,
-                                 ColumnData config,
-                                 int rowIndex,
-                                 int colIndex,
-                                 ListStore listStore,
-                                 Grid grid) {
-                if (model instanceof SiteDTO) {
-                    SiteDTO siteModel = (SiteDTO) model;
-                    if (siteModel.hasCoords()) {
-                        return SafeHtmlUtils.fromSafeConstant("<div class='mapped'>&nbsp;&nbsp;</div>");
-                    } else {
-                        return SafeHtmlUtils.fromSafeConstant("<div class='unmapped'>&nbsp;&nbsp;</div>");
-                    }
-                }
-                return SafeHtmlUtils.fromSafeConstant("&nbsp;");
-            }
-        });
+        mapColumn.setRenderer(new MappedColumnRenderer());
         columns.add(mapColumn);
         return this;
     }
@@ -347,29 +197,7 @@ public class ColumnModelBuilder {
     public ColumnModelBuilder addTreeNameColumn() {
         ColumnConfig name = new ColumnConfig("name", I18N.CONSTANTS.location(), 200);
         name.setToolTip(I18N.CONSTANTS.location());
-        name.setRenderer(new TreeGridCellRenderer<ModelData>() {
-
-            @Override
-            public SafeHtml render(ModelData model,
-                                   String property,
-                                   ColumnData config,
-                                   int rowIndex,
-                                   int colIndex,
-                                   ListStore<ModelData> store,
-                                   Grid<ModelData> grid) {
-
-                return super.render(model, propertyName(model), config, rowIndex, colIndex, store, grid);
-            }
-
-            private String propertyName(ModelData model) {
-                if (model instanceof SiteDTO) {
-                    return SiteDTO.LOCATION_NAME_PROPERTY;
-                } else {
-                    return "name";
-                }
-            }
-
-        });
+        name.setRenderer(new TreeNameCellRenderer());
         columns.add(name);
 
         return this;
@@ -384,26 +212,7 @@ public class ColumnModelBuilder {
 
     public ColumnModelBuilder addDeletedLocationWarning() {
         ColumnConfig deletedWarning = new ColumnConfig("deleted", "", 25);
-        deletedWarning.setRenderer(new TreeGridCellRenderer<ModelData>() {
-
-            @Override
-            public SafeHtml render(ModelData model,
-                                   String property,
-                                   ColumnData config,
-                                   int rowIndex,
-                                   int colIndex,
-                                   ListStore<ModelData> store,
-                                   Grid<ModelData> grid) {
-                if (model instanceof SiteDTO) {
-                    String workflowStatus = ((SiteDTO) model).getLocation().getWorkflowStatusId();
-                    if (!Strings.isNullOrEmpty(workflowStatus) && workflowStatus.equals(LocationDTO.REJECTED)) {
-                        return SafeHtmlUtils.fromSafeConstant("<div style='" + warningStyle + "' title='" + I18N.CONSTANTS.deletedLocation() + "'>&nbsp;!&nbsp;</div>");
-                    }
-                }
-                return SafeHtmlUtils.fromSafeConstant("&nbsp;");
-            }
-        });
-
+        deletedWarning.setRenderer(new DeletedLocationCellRenderer());
         columns.add(deletedWarning);
         return this;
     }

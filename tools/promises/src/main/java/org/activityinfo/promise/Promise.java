@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -215,7 +216,19 @@ public final class Promise<T> implements AsyncCallback<T> {
         return fmap(new ConcatList<T>()).apply(aList, b);
     }
 
-    
+    public void thenDo(final Consumer<T> consumer) {
+        then(new AsyncCallback<T>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(T result) {
+                consumer.accept(result);
+            }
+        });
+    }
+
     public <R> Promise<R> then(final Function<? super T, R> function) {
         assert function != null : "function is null";
 
@@ -367,7 +380,7 @@ public final class Promise<T> implements AsyncCallback<T> {
             @Nullable
             @Override
             public List<T> apply(@Nullable Void aVoid) {
-                List<T> items = new ArrayList<T>();
+                List<T> items = new ArrayList<>();
                 for (Promise<T> promise : promises) {
                     items.add(promise.get());
                 }

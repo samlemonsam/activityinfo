@@ -21,7 +21,6 @@ package org.activityinfo.legacy.shared.model;
 import com.extjs.gxt.ui.client.data.BaseModelData;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.activityinfo.legacy.shared.model.LockedPeriodDTO.HasLockedPeriod;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.Extents;
@@ -30,7 +29,10 @@ import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
 
@@ -40,7 +42,7 @@ import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
  * @author Alex Bertram
  */
 @JsonAutoDetect(JsonMethod.NONE)
-public final class ActivityFormDTO extends BaseModelData implements EntityDTO, HasLockedPeriod, ProvidesKey, IsFormClass, IsActivityDTO {
+public final class ActivityFormDTO extends BaseModelData implements EntityDTO, ProvidesKey, IsFormClass, IsActivityDTO {
 
     public static final String ENTITY_NAME = "Activity";
 
@@ -57,7 +59,6 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
 
     private List<IndicatorDTO> indicators = new ArrayList<>(0);
     private List<AttributeGroupDTO> attributeGroups = new ArrayList<>(0);
-    private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>(0);
 
     // to ensure serializer
     private List<PartnerDTO> partners = Lists.newArrayList();
@@ -131,7 +132,9 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     /**
      * @return this Activity's id
      */
-    @Override @JsonProperty @JsonView(DTOViews.Schema.class)
+    @Override
+    @JsonProperty
+    @JsonView(DTOViews.Schema.class)
     public int getId() {
         return (Integer) get(ID_PROPERTY);
     }
@@ -324,7 +327,7 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
      * Sets this Activity's category
      */
     public void setCategory(String category) {
-        if(category != null && category.trim().length() == 0) {
+        if (category != null && category.trim().length() == 0) {
             category = null;
         }
         set("category", category);
@@ -402,17 +405,6 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
         return "act" + getId();
     }
 
-    public void setLockedPeriods(Set<LockedPeriodDTO> lockedPeriods) {
-        this.lockedPeriods = lockedPeriods;
-    }
-
-    @Override
-    @JsonProperty
-    @JsonView(DTOViews.Schema.class)
-    public Set<LockedPeriodDTO> getLockedPeriods() {
-        return lockedPeriods;
-    }
-
     public String getDatabaseName() {
         return databaseName;
     }
@@ -471,7 +463,6 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
     }
 
     /**
-     *
      * @return the list of allowable values for the partner
      * field for the requesting user
      */
@@ -481,10 +472,6 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, H
 
     public void setPartnerRange(List<PartnerDTO> partners) {
         this.partners = partners;
-    }
-
-    public LockedPeriodSet getLockedPeriodSet() {
-        return new LockedPeriodSet(this);
     }
 
 }
