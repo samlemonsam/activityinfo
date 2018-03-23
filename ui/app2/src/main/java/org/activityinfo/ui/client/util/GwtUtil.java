@@ -90,8 +90,4 @@ public class GwtUtil {
         }
     }
 
-    public static Rectangle getRectangle(Element element) {
-        return new Rectangle(element.getAbsoluteLeft(), element.getAbsoluteRight(), element.getAbsoluteTop(), element.getAbsoluteBottom());
-    }
-
 }

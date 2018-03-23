@@ -24,7 +24,7 @@ import com.google.gwt.resources.client.ImageResource;
 
 public interface LoadingClientBundle extends ClientBundle {
 
-    public static final LoadingClientBundle INSTANCE = GWT.create(LoadingClientBundle.class);
+    LoadingClientBundle INSTANCE = GWT.create(LoadingClientBundle.class);
 
     @Source("large-loading.gif")
     ImageResource loadingIcon();

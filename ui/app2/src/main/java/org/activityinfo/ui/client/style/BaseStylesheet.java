@@ -33,7 +33,7 @@ import com.google.gwt.core.shared.GWT;
 @Source("base.less")
 public interface BaseStylesheet extends Stylesheet {
 
-    public static final BaseStylesheet INSTANCE = GWT.create(BaseStylesheet.class);
+    BaseStylesheet INSTANCE = GWT.create(BaseStylesheet.class);
 
 
     /**

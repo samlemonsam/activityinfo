@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.ui.client.pageView.formClass;
+package org.activityinfo.ui.client.page.resource;
 
 import com.google.common.base.Function;
 import com.google.gwt.user.client.ui.FlowPanel;

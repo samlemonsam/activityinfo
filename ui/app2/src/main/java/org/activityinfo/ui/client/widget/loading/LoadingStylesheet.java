@@ -26,7 +26,7 @@ import com.google.gwt.core.client.GWT;
 @Source("Loading.less")
 public interface LoadingStylesheet extends Stylesheet {
 
-    public static final LoadingStylesheet INSTANCE = GWT.create(LoadingStylesheet.class);
+    LoadingStylesheet INSTANCE = GWT.create(LoadingStylesheet.class);
 
     String loadingContainer();
     String indicator();
@@ -34,5 +34,4 @@ public interface LoadingStylesheet extends Stylesheet {
     String failed();
     String loaded();
 
-    String imageContainer();
 }

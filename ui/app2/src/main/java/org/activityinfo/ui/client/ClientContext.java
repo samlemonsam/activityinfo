@@ -18,9 +18,7 @@
  */
 package org.activityinfo.ui.client;
 
-import com.google.common.base.Strings;
 import com.google.gwt.i18n.client.Dictionary;
-import com.google.gwt.user.client.Window;
 
 public final class ClientContext {
 
@@ -48,14 +46,5 @@ public final class ClientContext {
         return DICTIONARY.get("commitId");
     }
 
-    public static String getFeatureFlags() {
-        return Strings.nullToEmpty(DICTIONARY.get("featureFlags"));
-    }
 
-
-    public static boolean isNewFieldsFlagEnabled() {
-        return getFeatureFlags().contains("newfields") ||
-                Window.Location.getHostName().contains("ai-staging") ||
-                Window.Location.getHostName().contains("ai-dev");
-    }
 }
