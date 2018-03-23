@@ -98,6 +98,7 @@ public class DbPartnerEditor implements IsWidget, ActionListener, DbPage {
         store = new ListStore<>();
         store.setSortField("name");
         store.setSortDir(Style.SortDir.ASC);
+        store.setModelComparer((a, b) -> a.getId() == b.getId());
 
         grid = new Grid<>(store, createColumnModel());
         grid.setAutoExpandColumn("fullName");
@@ -226,8 +227,6 @@ public class DbPartnerEditor implements IsWidget, ActionListener, DbPage {
                         } else {
                             LOGGER.fine("DbPartnerEditor added/updated new partner '" + partner.getName() +
                                     "' to database " + db.getId());
-                            partner.setId(result.getNewId());
-                            store.add(partner);
                             eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
                             dlg.hide();
                             updateStore(partner, result);
