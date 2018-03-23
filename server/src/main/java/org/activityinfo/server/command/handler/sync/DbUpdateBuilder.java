@@ -115,7 +115,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         // Locked Periods
         delete(LockedPeriod.class, lockedPeriodsInDatabase());
-        insert(LockedPeriod.class, lockedPeriodsInDatabase(notDeleted()));
+        insert(LockedPeriod.class, lockedPeriodsInDatabase());
 
 
         // Since Partners are model, we replace the join table completely
@@ -179,15 +179,8 @@ public class DbUpdateBuilder implements UpdateBuilder {
                     "g.DateDeleted IS NULL AND " + inDatabaseAttributeGroups(notDeleted()) + ")";
     }
 
-    private String lockedPeriodsInDatabase(String... criteria) {
-        return  "UserDatabaseId = " + database.getId() + " OR " +
-                 inProjectDatabases(criteria) + " OR " +
-                 inDatabaseActivities(criteria);
-    }
-
-    private String inProjectDatabases(String... criteria) {
-        return "ProjectId IN (SELECT ProjectID FROM Project WHERE " +
-                all(inDatabase(), criteria) + ")";
+    private String lockedPeriodsInDatabase() {
+        return  "databaseId = " + database.getId();
     }
 
     private String inDatabase() {
