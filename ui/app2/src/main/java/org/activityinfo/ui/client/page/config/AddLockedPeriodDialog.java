@@ -238,6 +238,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
     private void setState() {
         comboboxProjects.setEnabled(radioProject.getValue());
         comboboxActivities.setEnabled(radioActivity.getValue());
+        comboBoxFolder.setEnabled(radioFolder.getValue());
     }
 
     @Override
