@@ -47,8 +47,9 @@ apply from: "./gradle/sonar.gradle"
 // Defines the version based on our major version and the environment
 
 ext.majorVersion = "2.17"
-project.version = "${majorVersion}.${buildNumber}"
-
+allprojects {
+  project.version = "${majorVersion}.${buildNumber}"
+}
 
 task wrapper(type: Wrapper) {
   gradleVersion = '4.6'
