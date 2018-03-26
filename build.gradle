@@ -46,7 +46,7 @@ apply from: "./gradle/sonar.gradle"
 
 // Defines the version based on our major version and the environment
 
-ext.majorVersion = "2.17"
+ext.majorVersion = "2.18"
 allprojects {
   project.version = "${majorVersion}.${buildNumber}"
 }
