@@ -13,26 +13,16 @@
     <max-concurrent-requests>5</max-concurrent-requests>
   </queue>
 
-  <!-- The Akvo queues are used by the Akvo importer which is currently
-       living as a seperate module, but queues need to be defined globally within AppEngine -->
-
-  <queue>
-    <name>akvo-index</name>
-    <rate>20/s</rate>
-    <bucket-size>40</bucket-size>
-    <max-concurrent-requests>1</max-concurrent-requests>
-  </queue>
-
-  <queue>
-    <name>akvo-fetch</name>
-    <rate>20/s</rate>
-    <bucket-size>40</bucket-size>
-    <max-concurrent-requests>1</max-concurrent-requests>
-  </queue>
-
   <queue>
     <name>user-jobs</name>
     <rate>20/s</rate>
+  </queue>
+
+  <queue>
+    <name>logging-ingest</name>
+    <rate>1/s</rate>
+    <max-concurrent-requests>1</max-concurrent-requests>
+    <target>logging</target>
   </queue>
 
 </queue-entries>
