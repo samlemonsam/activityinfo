@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
+import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 
 import javax.ws.rs.Consumes;
@@ -57,6 +58,26 @@ public class QueryResource {
             ColumnJsonWriter columnSetWriter = new ColumnJsonWriter(outputStream, Charsets.UTF_8);
             columnSetWriter. write(columnSet);
             columnSetWriter.flush();
+        };
+
+        return Response.ok(output).type(MediaType.APPLICATION_JSON_TYPE).build();
+    }
+
+    @POST
+    @Path("rows")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Executes a query over a set of forms in row format")
+    public Response queryRows(QueryModel model) {
+
+        ColumnSetBuilder builder = backend.newQueryBuilder();
+
+        final ColumnSet columnSet = builder.build(model);
+
+        final StreamingOutput output = outputStream -> {
+            RowBasedJsonWriter writer = new RowBasedJsonWriter(outputStream, Charsets.UTF_8);
+            writer. write(columnSet);
+            writer.flush();
         };
 
         return Response.ok(output).type(MediaType.APPLICATION_JSON_TYPE).build();

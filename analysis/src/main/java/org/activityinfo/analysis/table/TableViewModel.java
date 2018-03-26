@@ -115,6 +115,10 @@ public class TableViewModel implements TableUpdater {
         return effectiveTable;
     }
 
+    public Observable<ApiViewModel> getApiViewModel() {
+        return effectiveTable.transform(ApiViewModel::new);
+    }
+
     public Observable<ColumnSet> getColumnSet() {
         return columnSet;
     }
