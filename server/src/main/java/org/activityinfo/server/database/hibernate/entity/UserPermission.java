@@ -21,7 +21,6 @@ package org.activityinfo.server.database.hibernate.entity;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.GrantModel;
-import org.activityinfo.model.database.GrantModelBuilder;
 import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -330,7 +329,7 @@ public class UserPermission implements Serializable {
         if(!this.allowView) {
             return Collections.emptyList();
         }
-        GrantModelBuilder grantModel = new GrantModelBuilder();
+        GrantModel.Builder grantModel = new GrantModel.Builder();
 
         if(isAllowViewAll()) {
             grantModel.addOperation(Operation.VIEW);
