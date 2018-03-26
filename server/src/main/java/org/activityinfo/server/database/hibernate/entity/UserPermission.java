@@ -18,15 +18,20 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.GrantModelBuilder;
 import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Defines a given user's access to a given database.
@@ -44,6 +49,8 @@ import java.util.List;
 @Entity @NamedQueries({@NamedQuery(name = "findUserPermissionByUserIdAndDatabaseId",
         query = "select p from UserPermission p where p.database.id = :databaseId and p.user.id = :userId")})
 public class UserPermission implements Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(UserPermission.class.getName());
 
     private int id;
     private Partner partner;
@@ -323,33 +330,46 @@ public class UserPermission implements Serializable {
         if(!this.allowView) {
             return Collections.emptyList();
         }
-        if(model == null) {
-            // Simple legacy model
-            GrantModel.Builder grantModel = new GrantModel.Builder();
-            grantModel.setResourceId(CuidAdapter.databaseId(database.getId()));
-            if(isAllowViewAll()) {
-                grantModel.addOperation(Operation.VIEW);
-            } else if(isAllowView()) {
-                grantModel.addOperation(Operation.VIEW, getPartnerFilter());
-            }
-            if(isAllowEditAll()) {
-                grantModel.addOperation(Operation.EDIT_RECORD);
-            } else if(isAllowEdit()) {
-                grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter());
-            }
-            if(isAllowManageAllUsers()) {
-                grantModel.addOperation(Operation.MANAGE_USERS);
-            } else if(isAllowManageUsers()) {
-                grantModel.addOperation(Operation.MANAGE_USERS, getPartnerFilter());
-            }
-            if(isAllowDesign()) {
-                grantModel.addOperation(Operation.CREATE_FORM);
-                grantModel.addOperation(Operation.EDIT_FORM);
-                grantModel.addOperation(Operation.DELETE_FORM);
-            }
-            return Collections.emptyList();
+        GrantModelBuilder grantModel = new GrantModelBuilder();
+
+        if(isAllowViewAll()) {
+            grantModel.addOperation(Operation.VIEW);
+        } else if(isAllowView()) {
+            grantModel.addOperation(Operation.VIEW, getPartnerFilter());
         }
-        throw new UnsupportedOperationException("TODO");
+        if(isAllowEditAll()) {
+            grantModel.addOperation(Operation.EDIT_RECORD);
+        } else if(isAllowEdit()) {
+            grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter());
+        }
+        if(isAllowManageAllUsers()) {
+            grantModel.addOperation(Operation.MANAGE_USERS);
+        } else if(isAllowManageUsers()) {
+            grantModel.addOperation(Operation.MANAGE_USERS, getPartnerFilter());
+        }
+        if(isAllowDesign()) {
+            grantModel.addOperation(Operation.CREATE_FORM);
+            grantModel.addOperation(Operation.EDIT_FORM);
+            grantModel.addOperation(Operation.DELETE_FORM);
+        }
+
+        if(model == null) {
+            grantModel.setResourceId(CuidAdapter.databaseId(database.getId()));
+        } else {
+            JsonValue modelObject = Json.parse(model);
+            if(modelObject.hasKey("grants") &&
+               modelObject.get("grants").length() == 1 &&
+               modelObject.get("grants").get(0).hasKey("folderId")) {
+
+                // Temporary format...
+                grantModel.setResourceId(ResourceId.valueOf(modelObject.get("grants").get(0).getString("folderId")));
+            } else {
+                LOGGER.severe("Could not parse permissions model: " + model);
+                throw new UnsupportedOperationException("Unsupported model");
+            }
+        }
+
+        return Collections.singletonList(grantModel.build());
     }
 
     @Transient

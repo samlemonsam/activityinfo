@@ -95,7 +95,20 @@ public class FormResource {
         }
 
         ResourceId databaseId = storage.get().getFormClass().getDatabaseId();
-        UserDatabaseMeta databaseMetadata = databaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
+
+        UserDatabaseMeta databaseMetadata;
+        try {
+            databaseMetadata = databaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
+        } catch (Exception e) {
+            // We are initially using this just for locks,
+            // not actually permissions, so just log the warning for now.
+            LOGGER.log(Level.SEVERE, "Failed to retrieve metadata for database " + databaseId + " for user " + user.getUserId(), e);
+            databaseMetadata = new UserDatabaseMeta.Builder()
+                    .setDatabaseId(databaseId)
+                    .setLabel("")
+                    .setOwner(false)
+                    .build();
+        }
 
         FormPermissions permissions = backend.getFormSupervisor().getFormPermissions(formId);
         if(!permissions.isVisible()) {
