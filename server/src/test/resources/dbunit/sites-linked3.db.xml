@@ -187,6 +187,26 @@
     <indicatorValue reportingPeriodId="1" indicatorId="4"
                     value="35"/>
 
+    <site siteId="3" activityId="2" locationId="1" partnerId="1"
+          Date1="2009-01-01" Date2="2009-01-03" DateCreated="2009-02-01"
+          DateEdited="2009-02-01" timeEdited="3" ProjectId="1"/>
+
+    <reportingPeriod reportingPeriodId="3" siteId="3"
+                     date1="2009-01-01" date2="2009-01-03" DateCreated="2009-02-01"
+                     DateEdited="2009-02-01"/>
+    <indicatorValue reportingPeriodId="3" indicatorId="3"
+                    value="1500"/>
+
+    <site siteId="4" activityId="2" locationId="1" partnerId="1"
+          Date1="2009-01-01" Date2="2009-01-04" DateCreated="2009-02-01"
+          DateEdited="2009-02-01" timeEdited="3" ProjectId="1"/>
+
+    <reportingPeriod reportingPeriodId="4" siteId="4"
+                     date1="2009-01-01" date2="2009-01-04" DateCreated="2009-02-01"
+                     DateEdited="2009-02-01"/>
+    <indicatorValue reportingPeriodId="4" indicatorId="4"
+                    value="35"/>
+
   <!-- Site in DESTINATION -->
 
   <location locationId="2" name="Penekusu Kivu 2"
@@ -203,6 +223,16 @@
                    DateEdited="2009-02-01"/>
   <indicatorValue reportingPeriodId="2" indicatorId="1"
                   value="400"/>
+
+    <site siteId="5" activityId="1" locationId="2" partnerId="2"
+          Date1="2009-01-01" Date2="2009-01-05" DateCreated="2009-02-01"
+          DateEdited="2009-02-01" timeEdited="3" ProjectId="1"/>
+
+    <reportingPeriod reportingPeriodId="5" siteId="5"
+                     date1="2009-01-01" date2="2009-01-05" DateCreated="2009-02-01"
+                     DateEdited="2009-02-01"/>
+    <indicatorValue reportingPeriodId="5" indicatorId="2"
+                    value="400"/>
 
 
 </dataset>
