@@ -783,6 +783,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private List<SiteDTO> extractLinkedSites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
         if (acceptResult(columnSet.getNumRows())) {
+            totalResultLength = totalResultLength + columnSet.getNumRows();
             SiteDTO[] extractedSiteArray = extractSiteData(fieldBindings, columnSet);
             List<SiteDTO> extractedSiteList = Lists.newArrayList(extractedSiteArray);
             siteList.addAll(extractedSiteList);
