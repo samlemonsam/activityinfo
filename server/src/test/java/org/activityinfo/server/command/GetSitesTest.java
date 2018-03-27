@@ -36,9 +36,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.closeTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -359,6 +363,55 @@ public class GetSitesTest extends CommandTestCase2 {
         SiteDTO s1 = result.getData().get(1);
         assertThat(s1.getId(), equalTo(1));
         assertThat(s1.getProject().getId(), equalTo(1));
+    }
+
+    @Test
+    @OnDataSet("/dbunit/sites-linked3.db.xml")
+    public void testCalculatedIndicatorQuery() throws CommandException {
+        setUser(1);
+
+        GetSites cmd = new GetSites();
+        cmd.filter().onActivity(1);
+
+        cmd.setLegacyFetch(true);
+        PagingLoadResult<SiteDTO> legacyResult = execute(cmd);
+        assertThat(legacyResult.getTotalLength(), equalTo(2));
+        List<SiteDTO> legacySites = legacyResult.getData();
+        assertThat(legacySites.size(), equalTo(2));
+
+        // first site should be entered site
+        SiteDTO enteredSite = legacySites.get(0);
+        assertThat(enteredSite.getId(), equalTo(2));
+        assertFalse(enteredSite.isLinked());
+        assertThat(enteredSite.getIndicatorValue(1), equalTo(400.0));
+        assertThat(enteredSite.getIndicatorValue(5), equalTo(400.0));
+
+        // second site should be linked site
+        SiteDTO linkedSite = legacySites.get(1);
+        assertThat(linkedSite.getId(), equalTo(1));
+        assertTrue(linkedSite.isLinked());
+        assertThat(linkedSite.getIndicatorValue(1), equalTo(1500.0));
+        assertThat(linkedSite.getIndicatorValue(5), equalTo(1500.0));
+
+        cmd.setLegacyFetch(false);
+        PagingLoadResult<SiteDTO> newResult = execute(cmd);
+        assertThat(newResult.getTotalLength(), equalTo(2));
+        List<SiteDTO> newSites = newResult.getData();
+        assertThat(newSites.size(), equalTo(2));
+
+        // first site should be entered site
+        SiteDTO newEnteredSite = newSites.get(0);
+        assertThat(newEnteredSite.getId(), equalTo(2));
+        assertFalse(newEnteredSite.isLinked());
+        assertThat(newEnteredSite.getIndicatorValue(1), equalTo(400.0));
+        assertThat(newEnteredSite.getIndicatorValue(5), equalTo(400.0));
+
+        // second site should be linked site
+        SiteDTO newLinkedSite = newSites.get(1);
+        assertThat(newLinkedSite.getId(), equalTo(1));
+        assertTrue(newLinkedSite.isLinked());
+        assertThat(newLinkedSite.getIndicatorValue(1), equalTo(1500.0));
+        assertThat(newLinkedSite.getIndicatorValue(5), equalTo(1500.0));
     }
 
     @Test

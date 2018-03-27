@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<!--
+
+    ActivityInfo
+    Copyright (C) 2009-2013 UNICEF
+    Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<dataset>
+
+
+  <!-- Country setup -->
+
+  <country countryId="1" name="Rdc" x1="0" y1="0" x2="0" y2="0"/>
+
+  <adminLevel countryId="1" adminLevelId="1" name="Province"/>
+  <adminLevel countryId="1" adminLevelId="2" name="Territoire"
+              ParentId="1"/>
+
+  <locationType locationTypeId="1" countryId="1" name="localite"
+                reuse="1"/>
+  <locationType locationTypeId="2" countryId="1"
+                name="Health Center" reuse="1"/>
+  <locationType locationTypeId="3" countryId="1" name="Territorie"
+                reuse="1" BoundAdminLevelId="2"/>
+
+  <adminEntity adminLevelId="1" adminEntityId="1" name="Kinshasa"
+               code="10" x1="0" y1="0" x2="0" y2="0"/>
+  <adminEntity adminLevelId="1" adminEntityId="2" name="Sud Kivu"
+               code="20" x1="0" y1="0" x2="0" y2="0"/>
+  <adminEntity adminLevelId="1" adminEntityId="3" name="Nord Kivu"
+               code="30" x1="0" y1="0" x2="0" y2="0"/>
+  <adminEntity adminLevelId="1" adminEntityId="4" name="Ituri"
+               code="40" x1="0" y1="0" x2="0" y2="0"/>
+
+  <adminEntity adminLevelId="2" adminEntityId="10"
+               adminEntityParentId="4" name="Bukavu" code="203" x1="0" y1="0" x2="0"
+               y2="0"/>
+  <adminEntity adminLevelId="2" adminEntityId="11"
+               adminEntityParentId="2" name="Walungu" code="201" x1="0" y1="0" x2="0"
+               y2="0"/>
+  <adminEntity adminLevelId="2" adminEntityId="12"
+               adminEntityParentId="2" name="Shabunda" code="202" x1="0" y1="0" x2="0"
+               y2="0"/>
+  <adminEntity adminLevelId="2" adminEntityId="13"
+               adminEntityParentId="2" name="Kalehe" code="203" x1="-44" y1="-22"
+               x2="33.5" y2="40"/>
+  <adminEntity adminLevelId="2" adminEntityId="21"
+               adminEntityParentId="4" name="Irumu" code="203" x1="0" y1="0" x2="0"
+               y2="0"/>
+
+  <!-- User setup -->
+  <userLogin userId="1" name="Alex" email="akbertram@gmail.com"
+             password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
+             locale="fr" organization="" jobtitle="" emailnotification="0"/>
+  <userLogin userId="2" name="Bavon" email="bavon@nrc.org"
+             password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
+             locale="fr" organization="" jobtitle="" emailnotification="0"/>
+  <userLogin userId="5" name="Christian" email="christian@nrc.org"
+             password="xyz" locale="fr" organization="" jobtitle="" emailnotification="0"/>
+  <userLogin userId="3" name="Lisa" email="lisa@solidarites"
+             password="xyz" locale="fr" organization="" jobtitle="" emailnotification="0"/>
+
+  <userLogin userId="4" name="Marlene" email="marlene@solidarites"
+             password="xyz" locale="fr" organization="" jobtitle="" emailnotification="0"/>
+
+  <!-- Attributes -->
+
+  <!-- NFI Attribute 1: Cause -->
+
+  <attributeGroup attributeGroupId="1" name="cause"
+                  multipleAllowed="1" sortOrder="2" mandatory="0"/>
+
+  <attribute attributeGroupId="1" attributeId="1" sortOrder="2"
+             name="Catastrophe Naturelle"/>
+  <attribute attributeGroupId="1" attributeId="2" sortOrder="1"
+             name="Deplacement"/>
+
+  <attributeValue siteId="1" attributeId="1" value="1"/>
+
+  <attributeGroupInActivity activityId="2" attributeGroupId="1"/>
+
+  <!-- NFI Attribute 2: Contenu de Kit -->
+
+  <attributeGroup attributeGroupId="2" name="contenu du kit"
+                  multipleAllowed="1" sortOrder="1" mandatory="0"/>
+
+  <attribute attributeGroupId="2" attributeId="3" name="Casserole"
+             sortOrder="1"/>
+
+  <attribute attributeGroupId="2" attributeId="4" name="Soap"
+             sortOrder="2"/>
+
+  <attributeValue siteId="2" attributeId="3" value="1"/>
+
+  <attributeGroupInActivity activityId="1" attributeGroupId="2"/>
+
+  <attributeGroup attributeGroupId="3" name="Something about Kivu"
+                  multipleAllowed="1" sortOrder="1" mandatory="0"/>
+
+  <attributeGroup attributeGroupId="991" name="Deleted"
+                  dateDeleted="2011-1-1" multipleAllowed="1" sortOrder="1" mandatory="0"/>
+
+  <!-- Target Database: NFI Cluster -->
+
+  <userDatabase databaseId="1" name="NFI Cluster"
+                countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+
+  <activity activityId="1" databaseId="1" name="NFI Distribution"
+            reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"/>
+
+
+  <indicator indicatorId="1" activityId="1" name="Beneficiaries" nameInExpression="BENE"
+             units="menages" aggregation="0" category="inputs" description="falling in lve"
+             listHeader="no header really" sortOrder="1" mandatory="0"
+             calculatedAutomatically="0" />
+
+  <indicator indicatorId="2" activityId="1" name="baches" nameInExpression="BACHE"
+             units="menages" aggregation="0" category="outputs" listHeader="header"
+             description="desc" sortOrder="1" mandatory="0"
+             calculatedAutomatically="0" />
+
+  <indicator indicatorId="5" activityId="1" name="calculation"
+             units="menages" aggregation="0" category="reports" description="calucated on linked indicators"
+             listHeader="header" sortOrder="1" mandatory="0"
+             calculatedAutomatically="1" expression="{BENE}+{BACHE}"/>
+
+  <!-- Source Database 1: RRMP -->
+
+  <userDatabase databaseId="2" name="NFI Cluster"
+                countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+
+  <activity activityId="2" databaseId="2" name="NFI Distribution"
+            reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"/>
+
+  <indicator indicatorId="3" activityId="2" name="RRMP Beneficiaries"
+             units="menages" aggregation="0" category="inputs"
+             listHeader="no header really" sortOrder="1" mandatory="0"
+             calculatedAutomatically="0"/>
+
+  <indicator indicatorId="4" activityId="2" name="RRMP Beneficiaries Students"
+               units="menages" aggregation="0"
+               sortOrder="2" mandatory="0"
+             calculatedAutomatically="0"/>
+
+
+  <partner partnerId="1" name="NRC"/>
+  <partnerInDatabase partnerId="1" databaseId="1"/>
+  <partnerInDatabase partnerId="1" databaseId="2"/>
+  <partner partnerId="2" name="NRC2"/>
+  <partnerInDatabase partnerId="2" databaseId="1"/>
+  <partnerInDatabase partnerId="2" databaseId="2"/>
+
+  <!--  LINK Source DB to DEST db -->
+
+  <indicatorlink SourceIndicatorId="3" DestinationIndicatorId="1"/>
+
+  <!-- Site in SOURCE -->
+
+  <location locationId="1" name="Penekusu Kivu" locationTypeId="1"
+            X="1.532" Y="27.323" timeEdited="3"/>
+  <locationAdminLink locationId="1" adminEntityId="2"/>
+  <locationAdminLink locationId="1" adminEntityId="12"/>
+
+  <site siteId="1" activityId="2" locationId="1" partnerId="1"
+        Date1="2009-01-01" Date2="2009-01-02" DateCreated="2009-02-01"
+        DateEdited="2009-02-01" timeEdited="3" ProjectId="1"/>
+
+  <reportingPeriod reportingPeriodId="1" siteId="1"
+                   date1="2009-01-01" date2="2009-01-02" DateCreated="2009-02-01"
+                   DateEdited="2009-02-01"/>
+  <indicatorValue reportingPeriodId="1" indicatorId="3"
+                  value="1500"/>
+    <indicatorValue reportingPeriodId="1" indicatorId="4"
+                    value="35"/>
+
+  <!-- Site in DESTINATION -->
+
+  <location locationId="2" name="Penekusu Kivu 2"
+            locationTypeId="1" X="1.532" Y="27.323" timeEdited="2"/>
+  <locationAdminLink locationId="2" adminEntityId="2"/>
+  <locationAdminLink locationId="2" adminEntityId="12"/>
+
+  <site siteId="2" activityId="1" locationId="2" partnerId="2"
+        Date1="2009-01-01" Date2="2009-01-02" DateCreated="2009-02-01"
+        DateEdited="2009-02-01" timeEdited="3" ProjectId="1"/>
+
+  <reportingPeriod reportingPeriodId="2" siteId="2"
+                   date1="2009-01-01" date2="2009-01-02" DateCreated="2009-02-01"
+                   DateEdited="2009-02-01"/>
+  <indicatorValue reportingPeriodId="2" indicatorId="1"
+                  value="400"/>
+
+
+</dataset>
