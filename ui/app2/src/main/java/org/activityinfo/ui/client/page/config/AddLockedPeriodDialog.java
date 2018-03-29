@@ -86,6 +86,8 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
     public void setUserDatabase(UserDatabaseDTO userDatabase) {
         this.userDatabase = userDatabase;
 
+        radioDatabase.setValue(userDatabase.isDatabaseDesignAllowed());
+        radioDatabase.setEnabled(userDatabase.isDatabaseDesignAllowed());
         labelDatabaseName.setText(userDatabase.getName());
 
         storeProjects.removeAll();

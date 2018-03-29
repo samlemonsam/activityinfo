@@ -32,14 +32,12 @@ import org.activityinfo.ui.client.page.config.design.DbEditor;
 public class DbConfigPresenter implements DbPage {
 
     private final GalleryView view;
-    private final Dispatcher dispatcher;
 
     public static final PageId PAGE_ID = new PageId("db");
 
     @Inject
     public DbConfigPresenter(GalleryView view, Dispatcher dispatcher) {
         this.view = view;
-        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -52,20 +50,10 @@ public class DbConfigPresenter implements DbPage {
                     I18N.CONSTANTS.designDescription(),
                     "db-design.png",
                     new DbPageState(DbEditor.PAGE_ID, db.getId()));
-        }
-        if (db.isDatabaseDesignAllowed()) {
             view.add(I18N.CONSTANTS.partner(),
                     I18N.CONSTANTS.partnerEditorDescription(),
                     "db-partners.png",
                     new DbPageState(DbPartnerEditor.PAGE_ID, db.getId()));
-        }
-        if (db.isManageUsersAllowed()) {
-            view.add(I18N.CONSTANTS.users(),
-                    I18N.CONSTANTS.userManagerDescription(),
-                    "db-users.png",
-                    new DbPageState(DbUserEditor.PAGE_ID, db.getId()));
-        }
-        if (db.isDatabaseDesignAllowed()) {
             view.add(I18N.CONSTANTS.timeLocks(),
                     I18N.CONSTANTS.lockPeriodsDescription(),
                     "db-lockedperiods.png",
@@ -79,7 +67,12 @@ public class DbConfigPresenter implements DbPage {
                     "db-targets.png",
                     new DbPageState(DbTargetEditor.PAGE_ID, db.getId()));
         }
-
+        if (db.isManageUsersAllowed()) {
+            view.add(I18N.CONSTANTS.users(),
+                    I18N.CONSTANTS.userManagerDescription(),
+                    "db-users.png",
+                    new DbPageState(DbUserEditor.PAGE_ID, db.getId()));
+        }
         if (view.getStore().getCount() == 0) {
             view.setPermissionsInfo(I18N.CONSTANTS.noDbDesignPermissions());
         }
@@ -112,6 +105,5 @@ public class DbConfigPresenter implements DbPage {
 
     @Override
     public void shutdown() {
-
     }
 }
