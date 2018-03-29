@@ -117,13 +117,10 @@ public class FieldEditor implements IsWidget {
 
     public void start(FormDesigner formDesigner) {
         this.formDesigner = formDesigner;
-        formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, new WidgetContainerSelectionEvent.Handler() {
-            @Override
-            public void handle(WidgetContainerSelectionEvent event) {
-                WidgetContainer widgetContainer = event.getSelectedItem();
-                if (widgetContainer instanceof FieldWidgetContainer) {
-                    show((FieldWidgetContainer) widgetContainer);
-                }
+        formDesigner.getEventBus().addHandler(WidgetContainerSelectionEvent.TYPE, event -> {
+            WidgetContainer widgetContainer = event.getSelectedItem();
+            if (widgetContainer instanceof FieldWidgetContainer) {
+                show((FieldWidgetContainer) widgetContainer);
             }
         });
     }
@@ -184,9 +181,7 @@ public class FieldEditor implements IsWidget {
         }
         if(type instanceof ReferenceType) {
             ReferenceType referenceType = (ReferenceType) type;
-            if(referenceType.getCardinality() == Cardinality.SINGLE) {
-                return true;
-            }
+            return referenceType.getCardinality() == Cardinality.SINGLE;
         }
         return false;
     }
@@ -198,12 +193,12 @@ public class FieldEditor implements IsWidget {
      */
     private boolean validateCode(FieldWidgetContainer fieldWidgetContainer) {
         codeGroup.setShowValidationMessage(false);
-        String code = this.code.getValue();
-        if (Strings.isNullOrEmpty(code)) {
+        String codeString = this.code.getValue();
+        if (Strings.isNullOrEmpty(codeString)) {
             return true;
         }
 
-        if (!FormField.isValidCode(code)) {
+        if (!FormField.isValidCode(codeString)) {
             codeGroup.showValidationMessage(I18N.CONSTANTS.invalidCodeMessage());
             return false;
         } else {
@@ -212,8 +207,8 @@ public class FieldEditor implements IsWidget {
             List<FormField> formFields = fieldWidgetContainer.getFormDesigner().getModel().getAllFormsFields();
             formFields.remove(fieldWidgetContainer.getFormField());
 
-            for (FormField formField : formFields) {
-                if (code.equals(formField.getCode())) {
+            for (FormField field : formFields) {
+                if (codeString.equals(field.getCode())) {
                     codeGroup.showValidationMessage(I18N.CONSTANTS.duplicateCodeMessage());
                     return false;
                 }
@@ -288,13 +283,23 @@ public class FieldEditor implements IsWidget {
 
     @UiHandler("relevanceEnabled")
     void onRelevanceEnabled(ValueChangeEvent<Boolean> event) {
+        if (formField.hasRelevanceCondition()) {
+            onRelevanceChanged();
+        }
         formField.setRelevanceConditionExpression(null);
         setRelevanceState(formField, false);
     }
 
     @UiHandler("relevanceEnabledIf")
     void onRelevanceEnabledIf(ValueChangeEvent<Boolean> event) {
+        if (!formField.hasRelevanceCondition()) {
+            onRelevanceChanged();
+        }
         setRelevanceState(formField, false);
+    }
+
+    public void onRelevanceChanged() {
+        fireUpdate();
     }
 
     private void fireUpdate() {
@@ -311,14 +316,6 @@ public class FieldEditor implements IsWidget {
             }
         }
         relevanceButton.setEnabled(relevanceEnabledIf.getValue());
-
-//        view.getRelevanceState().setText(formField.hasRelevanceConditionExpression() ? I18N.CONSTANTS.defined() : I18N.CONSTANTS.no());
-//        view.getRelevanceExpression().setInnerText(formField.getRelevanceConditionExpression());
-//        if (formField.hasRelevanceConditionExpression()) {
-//            view.getRelevanceExpression().removeClassName("hide");
-//        } else if (!view.getRelevanceExpression().getClassName().contains("hide")) {
-//            view.getRelevanceExpression().addClassName("hide");
-//        }
     }
 
 }
