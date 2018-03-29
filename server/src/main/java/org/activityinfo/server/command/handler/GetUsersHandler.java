@@ -187,7 +187,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                 property = "up.user.name";
             } else if ("email".equals(field)) {
                 property = "up.user.email";
-            } else if ("partner".equals(field)) {
+            } else if ("partner".equals(field) || "partner.name".equals(field)) {
                 property = "up.partner.name";
             } else if (field != null && field.startsWith("allow")) {
                 property = "up." + field;
