@@ -59,9 +59,6 @@ public class DbConfigPresenter implements DbPage {
         }
     }
 
-    /**
-     * Viewable if user has Design Permissions
-     */
     private void maybeAddDesignPage(@NotNull UserDatabaseDTO db) {
         if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.design(),
@@ -71,11 +68,8 @@ public class DbConfigPresenter implements DbPage {
         }
     }
 
-    /**
-     * Viewable if user has Design permissions and ALL folder access
-     */
     private void maybeAddPartnerPage(@NotNull UserDatabaseDTO db) {
-        if (db.isDesignAllowed() && !db.hasFolderLimitation()) {
+        if (db.isManagePartnersAllowed()) {
             view.add(I18N.CONSTANTS.partner(),
                     I18N.CONSTANTS.partnerEditorDescription(),
                     "db-partners.png",
@@ -83,9 +77,6 @@ public class DbConfigPresenter implements DbPage {
         }
     }
 
-    /**
-     * Viewable if user has Manage Users permissions
-     */
     private void maybeAddUsersPage(@NotNull UserDatabaseDTO db) {
         if (db.isManageUsersAllowed()) {
             view.add(I18N.CONSTANTS.users(),
@@ -95,9 +86,6 @@ public class DbConfigPresenter implements DbPage {
         }
     }
 
-    /**
-     * Viewable if user has Design permissions
-     */
     private void maybeAddLocksPage(@NotNull UserDatabaseDTO db) {
         if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.timeLocks(),
@@ -107,11 +95,8 @@ public class DbConfigPresenter implements DbPage {
         }
     }
 
-    /**
-     * Viewable if user has Design permissions and ALL folder access
-     */
     private void maybeAddProjectPage(@NotNull UserDatabaseDTO db) {
-        if (db.isDesignAllowed() && !db.hasFolderLimitation()) {
+        if (db.isManageProjectsAllowed()) {
             view.add(I18N.CONSTANTS.project(),
                     I18N.CONSTANTS.projectManagerDescription(),
                     "db-projects.png",
@@ -119,9 +104,6 @@ public class DbConfigPresenter implements DbPage {
         }
     }
 
-    /**
-     * Viewable if user has Design permissions
-     */
     private void maybeAddTargetPage(@NotNull UserDatabaseDTO db) {
         if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.target(),
