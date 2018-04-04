@@ -29,6 +29,7 @@ import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
@@ -444,6 +445,24 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             return getMyPartnerId() == site.getPartnerId();
         } else {
             return false;
+        }
+    }
+
+    public boolean isVisible(@NotNull ActivityDTO activity) {
+        if (!hasFolderLimitation) {
+            return true;
+        } else if (activity.getFolder() == null) {
+            return false;
+        } else {
+            return folders.contains(activity.getFolder());
+        }
+    }
+
+    public boolean isVisible(@NotNull FolderDTO folder) {
+        if (!hasFolderLimitation) {
+            return true;
+        } else {
+            return folders.contains(folder);
         }
     }
 

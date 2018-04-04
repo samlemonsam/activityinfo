@@ -35,10 +35,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
-import org.activityinfo.legacy.shared.model.IsActivityDTO;
-import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.monitor.NullAsyncMonitor;
 import org.activityinfo.ui.client.page.common.columns.EditableLocalDateColumn;
@@ -52,10 +49,7 @@ import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.LockedPerio
 import org.activityinfo.ui.client.page.config.mvp.CanCreate;
 import org.activityinfo.ui.client.page.config.mvp.CanUpdate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEditor {
 
@@ -63,13 +57,14 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     // UI stuff
     private ListStore<LockedPeriodDTO> lockedPeriodStore;
-    private EditorGrid<LockedPeriodDTO> lockedPeriodGrid;
+    private EditorGrid<LockedPeriodDTO> lockedPeriodDTOGrid;
     private AsyncMonitor deletingMonitor = new NullAsyncMonitor();
     private AsyncMonitor loadingMonitor = new NullAsyncMonitor();
     private AsyncMonitor updatingMonitor = new NullAsyncMonitor();
     private EditCheckColumnConfig columnEnabled;
 
     // Data
+    private UserDatabaseDTO database;
     private LockedPeriodDTO lockedPeriod;
     private ActivityFormDTO activityFilter = null;
 
@@ -96,6 +91,16 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
         }
     }
 
+    private boolean canEditLock(LockedPeriodDTO lock) {
+        if (lock.getParent() instanceof ActivityDTO) {
+            return database.isVisible((ActivityDTO) lock.getParent());
+        } else if (lock.getParent() instanceof FolderDTO) {
+            return database.isVisible((FolderDTO) lock.getParent());
+        } else {
+            // User can only edit if they have no folder limitations
+            return !database.hasFolderLimitation();
+        }
+    }
 
     public LockedPeriodGrid() {
         super();
@@ -128,44 +133,44 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
         configs.add(new EditableLocalDateColumn("fromDate", I18N.CONSTANTS.fromDate(), 100));
         configs.add(new EditableLocalDateColumn("toDate", I18N.CONSTANTS.toDate(), 100));
 
-        lockedPeriodGrid = new EditorGrid<>(lockedPeriodStore, new ColumnModel(configs));
+        lockedPeriodDTOGrid = new EditorGrid<>(lockedPeriodStore, new ColumnModel(configs));
+        lockedPeriodDTOGrid.addListener(Events.BeforeEdit, baseEvent -> {
+            GridEvent gridEvent = (GridEvent) baseEvent;
+            LockedPeriodDTO model = (LockedPeriodDTO) gridEvent.getModel();
+            baseEvent.setCancelled(!canEditLock(model));
+        });
+        lockedPeriodDTOGrid.addListener(Events.ValidateEdit, baseEvent -> {
+            GridEvent gridEvent = (GridEvent) baseEvent;
+            LockedPeriodDTO model = (LockedPeriodDTO) gridEvent.getModel();
 
-        lockedPeriodGrid.addListener(Events.ValidateEdit, new Listener<BaseEvent>() {
-            @Override
-            public void handleEvent(BaseEvent baseEvent) {
-                GridEvent gridEvent = (GridEvent) baseEvent;
-                LockedPeriodDTO model = (LockedPeriodDTO) gridEvent.getModel();
+            LocalDate fromDate = model.getFromDate();
+            LocalDate toDate = model.getToDate();
 
-                LocalDate fromDate = model.getFromDate();
-                LocalDate toDate = model.getToDate();
+            if ("fromDate".equals(gridEvent.getProperty())) {
+                fromDate = (LocalDate) gridEvent.getValue();
+            }
+            if ("toDate".equals(gridEvent.getProperty())) {
+                toDate = (LocalDate) gridEvent.getValue();
+            }
 
-                if ("fromDate".equals(gridEvent.getProperty())) {
-                    fromDate = (LocalDate) gridEvent.getValue();
-                }
-                if ("toDate".equals(gridEvent.getProperty())) {
-                    toDate = (LocalDate) gridEvent.getValue();
-                }
-
-                if (!fromDate.before(toDate) && !fromDate.equals(toDate)) {
-                    MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.fromDateIsBeforeToDate(), null);
-                    lockedPeriodGrid.getActiveEditor().cancelEdit();
-                }
+            if (!fromDate.before(toDate) && !fromDate.equals(toDate)) {
+                MessageBox.alert(I18N.CONSTANTS.alert(), I18N.CONSTANTS.fromDateIsBeforeToDate(), null);
+                lockedPeriodDTOGrid.getActiveEditor().cancelEdit();
             }
         });
 
-        lockedPeriodGrid.addListener(Events.OnClick, new Listener<ComponentEvent>() {
-            @Override
-            public void handleEvent(ComponentEvent be) {
-                updateState(be);
-            }
-        });
-        add(lockedPeriodGrid);
+        lockedPeriodDTOGrid.addListener(Events.OnClick, (Listener<ComponentEvent>) this::updateState);
+        add(lockedPeriodDTOGrid);
     }
 
     private void updateState(ComponentEvent be) {
-        lockedPeriod = lockedPeriodGrid.getSelectionModel().getSelectedItem();
-        setDeleteEnabled(lockedPeriodGrid.getSelectionModel().getSelectedItem() != null);
-        columnEnabled.checkForSelection(be);
+        lockedPeriod = lockedPeriodDTOGrid.getSelectionModel().getSelectedItem();
+        if (lockedPeriod != null && canEditLock(lockedPeriod)) {
+            setDeleteEnabled(true);
+            columnEnabled.checkForSelection(be);
+        } else {
+            setDeleteEnabled(false);
+        }
     }
 
     private void updateStateLater() {
@@ -199,6 +204,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
                     eventBus.fireEvent(new UpdateEvent());
                     break;
                 case UIActions.DISCARD_CHANGES:
+                default:
                     eventBus.fireEvent(new CancelUpdateEvent());
                     break;
             }
@@ -276,7 +282,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     @Override
     public void cancelUpdate(LockedPeriodDTO item) {
-        lockedPeriodGrid.stopEditing(true);
+        lockedPeriodDTOGrid.stopEditing(true);
     }
 
     @Override
@@ -307,15 +313,15 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
             // Remove LockedPeriods which have a different Activity then the
             // activiftyFilter
             List<LockedPeriodDTO> lockedPeriodsFilteredByActivity = new ArrayList<>();
-            for (LockedPeriodDTO lockedPeriod : items) {
-                if (lockedPeriod.getParent() != null && lockedPeriod.getParent() instanceof IsActivityDTO) {
+            for (LockedPeriodDTO lock : items) {
+                if (lock.getParent() != null && lock.getParent() instanceof IsActivityDTO) {
                     // Activity as parent, only add when activity equals filter
-                    if (lockedPeriod.getParent().getId() == activityFilter.getId()) {
-                        lockedPeriodsFilteredByActivity.add(lockedPeriod);
+                    if (lock.getParent().getId() == activityFilter.getId()) {
+                        lockedPeriodsFilteredByActivity.add(lock);
                     }
                 } else {
                     // Database or Project, can be added
-                    lockedPeriodsFilteredByActivity.add(lockedPeriod);
+                    lockedPeriodsFilteredByActivity.add(lock);
                 }
             }
             return lockedPeriodsFilteredByActivity;
@@ -375,11 +381,11 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     @Override
     public Map<String, Object> getChanges(LockedPeriodDTO item) {
         for (Record record : lockedPeriodStore.getModifiedRecords()) {
-            LockedPeriodDTO lockedPeriod = (LockedPeriodDTO) record.getModel();
-            if (lockedPeriod.getId() == item.getId()) {
+            LockedPeriodDTO model = (LockedPeriodDTO) record.getModel();
+            if (model.getId() == item.getId()) {
                 Map<String, Object> changes = new HashMap<>();
                 for (String property : record.getPropertyNames()) {
-                    changes.put(property, lockedPeriod.get(property));
+                    changes.put(property, model.get(property));
                 }
 
                 return changes;
@@ -449,14 +455,17 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     @Override
     public void setRefreshEnabled(boolean canRefresh) {
+        //
     }
 
     @Override
     public void startUpdate() {
+        //
     }
 
     @Override
     public void cancelDelete() {
+        //
     }
 
     @Override
@@ -471,10 +480,12 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
 
     @Override
     public void initialize() {
+        //
     }
 
     @Override
     public void setValue(LockedPeriodDTO value) {
+        //
     }
 
     public void setActivityFilter(ActivityFormDTO activityFilter) {
@@ -490,5 +501,10 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     @Override
     public void setTitle(String title) {
         setHeadingText(title);
+    }
+
+    @Override
+    public void setUserDatabase(UserDatabaseDTO userDatabase) {
+        this.database = userDatabase;
     }
 }

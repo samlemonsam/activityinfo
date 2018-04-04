@@ -56,6 +56,8 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
     public interface LockedPeriodListEditor extends CrudView<LockedPeriodDTO, UserDatabaseDTO> {
 
         void setTitle(String title);
+
+        void setUserDatabase(UserDatabaseDTO userDatabase);
     }
 
     @ImplementedBy(AddLockedPeriodDialog.class)
@@ -187,6 +189,7 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
 
     @Override
     public void onCancelUpdate(CancelUpdateEvent updateEvent) {
+        //
     }
 
     @Override
@@ -211,6 +214,7 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
 
     @Override
     public void onFilter(FilterEvent filterEvent) {
+        //
     }
 
     @Override
@@ -258,11 +262,13 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
         if (!items.isEmpty()) {
             view.setValue(items.get(0));
         }
+        view.setUserDatabase(db);
         view.setParent(parentModel);
     }
 
     @Override
     public void shutdown() {
+        //
     }
 
     @Override

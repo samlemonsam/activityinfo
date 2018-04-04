@@ -92,6 +92,8 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
         storeProjects.removeAll();
         storeProjects.add(userDatabase.getProjects());
+        radioProject.setValue(userDatabase.isManageProjectsAllowed());
+        radioProject.setEnabled(userDatabase.isManageProjectsAllowed());
 
         storeFolders.removeAll();
         storeFolders.add(userDatabase.getFolders());
@@ -245,6 +247,7 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
     @Override
     public void initialize() {
+        //
     }
 
     @Override
@@ -298,10 +301,12 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
     @Override
     public void create(LockedPeriodDTO item) {
+        //
     }
 
     @Override
     public void setCreateEnabled(boolean createEnabled) {
+        //
     }
 
     @Override
@@ -339,25 +344,27 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
 
     @Override
     public void update(LockedPeriodDTO item) {
+        //
     }
 
     @Override
     public void cancelUpdate(LockedPeriodDTO item) {
-
+        //
     }
 
     @Override
     public void cancelUpdateAll() {
-
+        //
     }
 
     @Override
     public void startUpdate() {
-
+        //
     }
 
     @Override
     public void setUpdateEnabled(boolean updateEnabled) {
+        //
     }
 
     @Override
