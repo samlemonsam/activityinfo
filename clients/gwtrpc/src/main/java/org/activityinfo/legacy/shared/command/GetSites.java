@@ -18,7 +18,6 @@
  */
 package org.activityinfo.legacy.shared.command;
 
-import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.common.collect.Sets;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 
@@ -47,7 +46,7 @@ public class GetSites extends PagingGetCommand<SiteResult> implements Command<Si
     private boolean fetchDates = true;
     private boolean fetchAllReportingPeriods = false;
 
-    private boolean legacyFetch = true;
+    private boolean legacyFetch = false;
 
     public GetSites() {
     }
