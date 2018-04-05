@@ -136,6 +136,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 Object f1 = o1.get(sortInfo.getSortField());
                 Object f2 = o2.get(sortInfo.getSortField());
 
+                if (f1 == null || f2 == null) {
+                    LOGGER.log(Level.WARNING,"Cannot retrieve referenced sort field: {0}", sortInfo.getSortField());
+                    return 0;
+                }
+
                 switch (sortInfo.getSortDir()) {
                     case ASC:
                         return compareFields(f1, f2);
