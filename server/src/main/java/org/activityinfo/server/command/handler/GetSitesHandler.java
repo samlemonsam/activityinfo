@@ -162,7 +162,8 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             } else if (f1 instanceof ProjectDTO && f2 instanceof ProjectDTO) {
                 return ((ProjectDTO) f1).getName().compareTo(((ProjectDTO) f2).getName());
             } else {
-                throw new CommandException("Unimplemented sort on GetSites");
+                LOGGER.log(Level.WARNING,"Unimplemented sort on GetSites: '{0}'", sortInfo.getSortField());
+                return 0;
             }
         }
 
