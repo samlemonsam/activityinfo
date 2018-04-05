@@ -29,6 +29,7 @@ import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonView;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
@@ -200,113 +201,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         this.projects = projects;
     }
 
-    /**
-     * Sets the permission of the current user to view all partner's data in
-     * this UserDatabase.
-     */
-    public void setViewAllAllowed(boolean value) {
-        set("viewAllAllowed", value);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to view data
-     * from all partners in this UserDatabase.
-     */
-    public boolean isViewAllAllowed() {
-        return (Boolean) get("viewAllAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to edit data on behalf of the
-     * Partner in this UserDatabase to which the current user belongs.
-     */
-    public void setEditAllowed(boolean allowed) {
-        set("editAllowed", allowed);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to edit data
-     * for their Partner in this UserDatabase
-     */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
-    public boolean isEditAllowed() {
-        return get("editAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to design this UserDatabase.
-     */
-    public void setDesignAllowed(boolean allowed) {
-        set("designAllowed", allowed);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to design
-     * at least some forms in this database.
-     */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
-    public boolean isDesignAllowed() {
-        return get("designAllowed", false);
-    }
-
-    public boolean isDatabaseDesignAllowed() {
-        return get("databaseDesignAllowed", false);
-    }
-
-    public void setDatabaseDesignAllowed(boolean value) {
-        set("databaseDesignAllowed", value);
-    }
-
-    /**
-     * Sets the permission of the current user to edit data in this UserDatabase
-     * on behalf of all partners.
-     */
-    public void setEditAllAllowed(boolean value) {
-        set("editAllAllowed", value);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to edit data
-     * for all Partners in this UserDatabase
-     */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
-    public boolean isEditAllAllowed() {
-        return get("editAllAllowed", false);
-    }
-
-    /**
-     * @return true if current user is allowed to make changes to user
-     * permissions on behalf of the Partner to which they belong
-     */
-    public boolean isManageUsersAllowed() {
-        return get("manageUsersAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to make changes to user
-     * permissions on behalf of the Partner to which they belong in this
-     * UserDatabase.
-     */
-    public void setManageUsersAllowed(boolean allowed) {
-        set("manageUsersAllowed", allowed);
-    }
-
-    /**
-     * @return true if the current user is allowed to make changes to user
-     * permissions on behalf of all Partners in this UserDatabase
-     */
-    public boolean isManageAllUsersAllowed() {
-        return get("manageAllUsersAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to modify user permissions for
-     * this UserDatabase on behalf of all Partners in this UserDatabase
-     */
-    public void setManageAllUsersAllowed(boolean allowed) {
-        set("manageAllUsersAllowed", allowed);
-    }
-
     public Optional<PartnerDTO> getDefaultPartner() {
         return getDefaultPartner(getPartners());
     }
@@ -414,7 +308,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return null;
     }
 
-
     public FolderDTO getFolderById(int folderId) {
         for (FolderDTO folder : folders) {
             if(folder.getId() == folderId) {
@@ -422,16 +315,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             }
         }
         return null;
-    }
-
-    public boolean isAllowedToEdit(SiteDTO site) {
-        if (isEditAllAllowed()) {
-            return true;
-        } else if (isEditAllowed()) {
-            return getMyPartnerId() == site.getPartnerId();
-        } else {
-            return false;
-        }
     }
 
     @JsonIgnore
@@ -444,6 +327,171 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     @Override
     public Collection<String> getPropertyNames() {
         return super.getPropertyNames();
+    }
+
+    /////////////////////////////////////////////////// PERMISSIONS ///////////////////////////////////////////////////
+
+    /**
+     * Sets the permission of the current user to view all partner's data in
+     * this UserDatabase.
+     */
+    public void setViewAllAllowed(boolean value) {
+        set("viewAllAllowed", value);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to view data
+     * from all partners in this UserDatabase.
+     */
+    public boolean isViewAllAllowed() {
+        return get("viewAllAllowed", false);
+    }
+
+    /**
+     * Sets the permission of the current user to edit data on behalf of the
+     * Partner in this UserDatabase to which the current user belongs.
+     */
+    public void setEditAllowed(boolean allowed) {
+        set("editAllowed", allowed);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to edit data
+     * for their Partner in this UserDatabase
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isEditAllowed() {
+        return get("editAllowed", false);
+    }
+
+    /**
+     * Sets the permission of the current user to design this UserDatabase.
+     */
+    public void setDesignAllowed(boolean allowed) {
+        set("designAllowed", allowed);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to design
+     * at least some forms in this database.
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isDesignAllowed() {
+        return get("designAllowed", false);
+    }
+
+    public boolean isDatabaseDesignAllowed() {
+        return get("databaseDesignAllowed", false);
+    }
+
+    public void setDatabaseDesignAllowed(boolean value) {
+        set("databaseDesignAllowed", value);
+    }
+
+    /**
+     * Sets the permission of the current user to edit data in this UserDatabase
+     * on behalf of all partners.
+     */
+    public void setEditAllAllowed(boolean value) {
+        set("editAllAllowed", value);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to edit data
+     * for all Partners in this UserDatabase
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isEditAllAllowed() {
+        return get("editAllAllowed", false);
+    }
+
+    /**
+     * @return true if current user is allowed to make changes to user
+     * permissions on behalf of the Partner to which they belong
+     */
+    public boolean isManageUsersAllowed() {
+        return get("manageUsersAllowed", false);
+    }
+
+    /**
+     * Sets the permission of the current user to make changes to user
+     * permissions on behalf of the Partner to which they belong in this
+     * UserDatabase.
+     */
+    public void setManageUsersAllowed(boolean allowed) {
+        set("manageUsersAllowed", allowed);
+    }
+
+    /**
+     * @return true if the current user is allowed to make changes to user
+     * permissions on behalf of all Partners in this UserDatabase
+     */
+    public boolean isManageAllUsersAllowed() {
+        return get("manageAllUsersAllowed", false);
+    }
+
+    /**
+     * Sets the permission of the current user to modify user permissions for
+     * this UserDatabase on behalf of all Partners in this UserDatabase
+     */
+    public void setManageAllUsersAllowed(boolean allowed) {
+        set("manageAllUsersAllowed", allowed);
+    }
+
+    public boolean isAllowedToEdit(SiteDTO site) {
+        if (isEditAllAllowed()) {
+            return true;
+        } else if (isEditAllowed()) {
+            return getMyPartnerId() == site.getPartnerId();
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isVisible(@NotNull ActivityDTO activity) {
+        if (!hasFolderLimitation) {
+            return true;
+        } else if (activity.getFolder() == null) {
+            return false;
+        } else {
+            return folders.contains(activity.getFolder());
+        }
+    }
+
+    public boolean isVisible(@NotNull FolderDTO folder) {
+        if (!hasFolderLimitation) {
+            return true;
+        } else {
+            return folders.contains(folder);
+        }
+    }
+
+    /**
+     * @return true if current user is allowed to make changes to partners on this database
+     */
+    public boolean isManagePartnersAllowed() {
+        // User must have Design Permissions, and have ALL folder access
+        return isDesignAllowed() && !hasFolderLimitation;
+    }
+
+    /**
+     * @return true if current user is allowed to make changes to projects on this database
+     */
+    public boolean isManageProjectsAllowed() {
+        // User must have Design Permissions, and have ALL folder access
+        return isDesignAllowed() && !hasFolderLimitation;
+    }
+
+    public boolean hasFolderLimitation() {
+        return hasFolderLimitation;
+    }
+
+    public void setFolderLimitation(boolean hasFolderLimitation) {
+        this.hasFolderLimitation = hasFolderLimitation;
+    }
+
+    private boolean isFolderSubset(List<FolderDTO> folders) {
+        return getFolders().containsAll(folders);
     }
 
     public List<PartnerDTO> getAllowablePartners() {
@@ -591,16 +639,4 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         }
     }
 
-    public boolean hasFolderLimitation() {
-        return hasFolderLimitation;
-    }
-
-    private boolean isFolderSubset(List<FolderDTO> folders) {
-        return getFolders().containsAll(folders);
-    }
-
-
-    public void setFolderLimitation(boolean hasFolderLimitation) {
-        this.hasFolderLimitation = hasFolderLimitation;
-    }
 }

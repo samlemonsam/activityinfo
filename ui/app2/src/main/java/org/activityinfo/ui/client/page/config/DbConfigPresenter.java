@@ -29,17 +29,17 @@ import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.page.common.GalleryView;
 import org.activityinfo.ui.client.page.config.design.DbEditor;
 
+import javax.validation.constraints.NotNull;
+
 public class DbConfigPresenter implements DbPage {
 
     private final GalleryView view;
-    private final Dispatcher dispatcher;
 
     public static final PageId PAGE_ID = new PageId("db");
 
     @Inject
     public DbConfigPresenter(GalleryView view, Dispatcher dispatcher) {
         this.view = view;
-        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -47,41 +47,69 @@ public class DbConfigPresenter implements DbPage {
         view.setHeading(!Strings.isNullOrEmpty(db.getName()) ? db.getName() : "");
         view.setIntro(!Strings.isNullOrEmpty(db.getFullName()) ? db.getFullName() : "");
 
+        maybeAddDesignPage(db);
+        maybeAddPartnerPage(db);
+        maybeAddUsersPage(db);
+        maybeAddLocksPage(db);
+        maybeAddProjectPage(db);
+        maybeAddTargetPage(db);
+
+        if (view.getStore().getCount() == 0) {
+            view.setPermissionsInfo(I18N.CONSTANTS.noDbDesignPermissions());
+        }
+    }
+
+    private void maybeAddDesignPage(@NotNull UserDatabaseDTO db) {
         if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.design(),
                     I18N.CONSTANTS.designDescription(),
                     "db-design.png",
                     new DbPageState(DbEditor.PAGE_ID, db.getId()));
         }
-        if (db.isDatabaseDesignAllowed()) {
+    }
+
+    private void maybeAddPartnerPage(@NotNull UserDatabaseDTO db) {
+        if (db.isManagePartnersAllowed()) {
             view.add(I18N.CONSTANTS.partner(),
                     I18N.CONSTANTS.partnerEditorDescription(),
                     "db-partners.png",
                     new DbPageState(DbPartnerEditor.PAGE_ID, db.getId()));
         }
+    }
+
+    private void maybeAddUsersPage(@NotNull UserDatabaseDTO db) {
         if (db.isManageUsersAllowed()) {
             view.add(I18N.CONSTANTS.users(),
                     I18N.CONSTANTS.userManagerDescription(),
                     "db-users.png",
                     new DbPageState(DbUserEditor.PAGE_ID, db.getId()));
         }
-        if (db.isDatabaseDesignAllowed()) {
+    }
+
+    private void maybeAddLocksPage(@NotNull UserDatabaseDTO db) {
+        if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.timeLocks(),
                     I18N.CONSTANTS.lockPeriodsDescription(),
                     "db-lockedperiods.png",
                     new DbPageState(LockedPeriodsPresenter.PAGE_ID, db.getId()));
+        }
+    }
+
+    private void maybeAddProjectPage(@NotNull UserDatabaseDTO db) {
+        if (db.isManageProjectsAllowed()) {
             view.add(I18N.CONSTANTS.project(),
                     I18N.CONSTANTS.projectManagerDescription(),
                     "db-projects.png",
                     new DbPageState(DbProjectEditor.PAGE_ID, db.getId()));
+        }
+    }
+
+    private void maybeAddTargetPage(@NotNull UserDatabaseDTO db) {
+        if (db.isDesignAllowed()) {
             view.add(I18N.CONSTANTS.target(),
                     I18N.CONSTANTS.targetDescription(),
                     "db-targets.png",
                     new DbPageState(DbTargetEditor.PAGE_ID, db.getId()));
-        }
-
-        if (view.getStore().getCount() == 0) {
-            view.setPermissionsInfo(I18N.CONSTANTS.noDbDesignPermissions());
         }
     }
 
@@ -112,6 +140,6 @@ public class DbConfigPresenter implements DbPage {
 
     @Override
     public void shutdown() {
-
+        //
     }
 }

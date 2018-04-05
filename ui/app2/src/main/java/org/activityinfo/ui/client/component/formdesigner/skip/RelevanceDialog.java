@@ -19,8 +19,6 @@
 package org.activityinfo.ui.client.component.formdesigner.skip;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.ui.client.component.formdesigner.container.FieldWidgetContainer;
@@ -32,7 +30,7 @@ import org.activityinfo.ui.client.widget.ModalDialog;
  */
 public class RelevanceDialog {
 
-    public static final int DIALOG_WIDTH = 900;
+    private static final int DIALOG_WIDTH = 900;
 
     private final FormField formField;
     private final ModalDialog dialog;
@@ -44,13 +42,11 @@ public class RelevanceDialog {
         this.dialog = new ModalDialog(presenter.getView());
         this.dialog.setDialogTitle(I18N.CONSTANTS.defineRelevanceLogic());
         this.dialog.getDialogDiv().getStyle().setWidth(DIALOG_WIDTH, Style.Unit.PX);
-        this.dialog.getPrimaryButton().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                presenter.updateFormField();
-                propertiesPresenter.setRelevanceState(formField, true);
-                dialog.hide();
-            }
+        this.dialog.getPrimaryButton().addClickHandler(event -> {
+            presenter.updateFormField();
+            propertiesPresenter.setRelevanceState(formField, true);
+            propertiesPresenter.onRelevanceChanged();
+            dialog.hide();
         });
     }
 

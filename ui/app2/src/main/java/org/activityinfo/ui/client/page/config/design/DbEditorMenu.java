@@ -22,32 +22,39 @@ class DbEditorMenu {
     public DbEditorMenu(SelectionListener<MenuEvent> listener) {
         newFolder = new MenuItem(I18N.CONSTANTS.newFolder(), IconImageBundle.ICONS.folder(), listener);
         newFolder.setItemId("Folder");
+        newFolder.setEnabled(false);
 
         newActivity = new MenuItem(I18N.CONSTANTS.newClassicActivity(), IconImageBundle.ICONS.addActivity(), listener);
         newActivity.setItemId("Activity");
+        newActivity.setEnabled(false);
 
         newForm = new MenuItem(I18N.CONSTANTS.newForm(), IconImageBundle.ICONS.form(), listener);
         newForm.setItemId("Form");
+        newForm.setEnabled(false);
 
         newLocationType = new MenuItem(
                 I18N.CONSTANTS.newLocationType(),
                 IconImageBundle.ICONS.marker(), listener);
         newLocationType.setItemId("LocationType");
+        newLocationType.setEnabled(false);
 
         newAttributeGroup = newMenuItem("AttributeGroup",
                 I18N.CONSTANTS.newAttributeGroup(),
                 IconImageBundle.ICONS.attribute(),
                 listener);
+        newAttributeGroup.setEnabled(false);
 
         newAttribute = newMenuItem("Attribute",
                 I18N.CONSTANTS.newAttribute(),
                 IconImageBundle.ICONS.attribute(),
                 listener);
+        newAttribute.setEnabled(false);
 
         newIndicator = new MenuItem(I18N.CONSTANTS.newIndicator(),
                 IconImageBundle.ICONS.indicator(),
                 listener);
         newIndicator.setItemId("Indicator");
+        newIndicator.setEnabled(false);
 
         menu = new Menu();
         menu.add(newFolder);

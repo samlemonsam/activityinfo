@@ -905,6 +905,7 @@ public class DbEditor implements DbPage, IsWidget {
         AbstractDesignForm form = createForm(entity);
         form.getBinding().bind(entity);
         form.getBinding().setStore(tree.getStore());
+        form.setScrollMode(Style.Scroll.AUTOY);
 
         for (FieldBinding field : form.getBinding().getBindings()) {
             field.getField().clearInvalid();

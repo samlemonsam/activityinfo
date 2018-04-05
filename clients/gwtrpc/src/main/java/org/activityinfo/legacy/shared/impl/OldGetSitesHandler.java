@@ -418,7 +418,7 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
                 query.orderBy("Date2", ascending);
             } else if (field.equals("locationName")) {
                 query.orderBy("LocationName", ascending);
-            } else if (field.equals("partner")) {
+            } else if (field.equals("partner") || field.equals("partner.name")) {
                 query.orderBy("PartnerName", ascending);
             } else if (field.equals("project")) {
                 query.orderBy("ProjectName", ascending);
