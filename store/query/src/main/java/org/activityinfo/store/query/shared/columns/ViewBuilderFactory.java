@@ -95,7 +95,11 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
 
     @Override
     public CursorObserver<FieldValue> visitEnum(EnumType enumType) {
-        return factory.newEnumBuilder(result, enumType);
+        if (Cardinality.SINGLE.equals(enumType.getCardinality())) {
+            return factory.newEnumBuilder(result, enumType);
+        } else {
+            return new UnsupportedColumnTypeBuilder(result);
+        }
     }
 
     @Override
