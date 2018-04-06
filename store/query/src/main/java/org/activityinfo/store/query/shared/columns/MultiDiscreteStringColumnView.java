@@ -107,6 +107,9 @@ public class MultiDiscreteStringColumnView implements EnumColumnView, ColumnView
     @Override
     public ColumnView select(int[] selectedRows) {
         BitSet[] filtered = new BitSet[labels.length];
+        for (int i=0; i < filtered.length; i++) {
+            filtered[i] = new BitSet();
+         }
 
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
