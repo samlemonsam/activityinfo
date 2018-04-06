@@ -46,7 +46,7 @@ public class FormScan {
      * This can be changed to ensure that new versions do not use results cached by earlier versions
      * of ActivityInfo.
      */
-    private static final String CACHE_KEY_VERSION = "8:";
+    private static final String CACHE_KEY_VERSION = "9:";
 
     private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
 
@@ -81,12 +81,7 @@ public class FormScan {
      * @return a slot that will receive the result when the scan completes
      */
     public Slot<ColumnView> addResourceId() {
-        PendingSlot<ColumnView> column = columnMap.get(PK_COLUMN_KEY);
-        if(column == null) {
-            column = new PendingSlot<>();
-            columnMap.put(PK_COLUMN_KEY, column);
-        }
-        return column;
+        return columnMap.computeIfAbsent(PK_COLUMN_KEY, key -> new PendingSlot<>());
     }
 
     /**
@@ -128,12 +123,7 @@ public class FormScan {
     public Slot<ForeignKey> addForeignKey(String fieldName, ResourceId rightFormId) {
         // create the key builder if it doesn't exist
         ForeignKeyId fkId = new ForeignKeyId(fieldName, rightFormId);
-        PendingSlot<ForeignKey> builder = foreignKeyMap.get(fkId);
-        if(builder == null) {
-            builder = new PendingSlot<>();
-            foreignKeyMap.put(fkId, builder);
-        }
-        return builder;
+        return foreignKeyMap.computeIfAbsent(fkId, key -> new PendingSlot<>());
     }
 
 
@@ -160,7 +150,7 @@ public class FormScan {
         // from this collection
         if (cacheVersion == 0) {
 
-            LOGGER.severe(this.formId + " has zero-valued version.");
+            LOGGER.severe(() -> this.formId + " has zero-valued version.");
 
             return Collections.emptySet();
         }
@@ -247,7 +237,7 @@ public class FormScan {
 
         // Only add a row count observer IF it has been requested AND
         // it hasn't been loaded from the cache.
-        RowCountBuilder rowCountBuilder = null;
+        RowCountBuilder rowCountBuilder;
         if (rowCount != null && !rowCount.isSet()) {
             rowCountBuilder = new RowCountBuilder(rowCount);
             queryBuilder.addResourceId(rowCountBuilder);
