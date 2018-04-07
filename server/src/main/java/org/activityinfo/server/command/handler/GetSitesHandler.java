@@ -432,18 +432,19 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     public static Iterator<ResourceId> getRange(FormField field) {
         Collection<ResourceId> range = getRange(field.getType());
         if (range.isEmpty()) {
-            throw new IllegalStateException("No form referenced on given field");
+            LOGGER.log(Level.WARNING, "No form(s) referenced on field {0}", field.getId());
+            return Collections.emptyIterator();
         }
         return range.iterator();
     }
 
     public static Collection<ResourceId> getRange(FieldType type) {
-        if (type instanceof ReferenceType) {
-            ReferenceType refType = (ReferenceType) type;
-            return refType.getRange();
-        } else {
+        if (!(type instanceof ReferenceType)) {
             throw new IllegalArgumentException("Given FieldType " + type + " should be of reference type");
         }
+
+        ReferenceType refType = (ReferenceType) type;
+        return refType.getRange();
     }
 
     private void batchQueries() {
