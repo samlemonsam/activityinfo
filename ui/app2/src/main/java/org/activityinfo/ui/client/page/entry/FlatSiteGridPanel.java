@@ -26,6 +26,7 @@ import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
 import com.extjs.gxt.ui.client.widget.grid.EditorGrid;
 import com.extjs.gxt.ui.client.widget.grid.EditorGrid.ClicksToEdit;
@@ -36,6 +37,7 @@ import com.extjs.gxt.ui.client.widget.tips.QuickTip;
 import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
@@ -69,13 +71,14 @@ final class FlatSiteGridPanel extends ContentPanel implements SiteGridPanelView 
 
     public void initGrid(Filter filter, ColumnModel columnModel) {
 
-        PagingLoader<PagingLoadResult<SiteDTO>> loader = new BasePagingLoader<PagingLoadResult<SiteDTO>>(new
+        PagingLoader<PagingLoadResult<SiteDTO>> loader = new BasePagingLoader<>(new
                 SiteProxy());
         loader.addLoadListener(new LoadListener() {
 
             @Override
             public void loaderLoadException(LoadEvent le) {
                 Log.debug("Exception thrown during load of FlatSiteGrid: ", le.exception);
+                MessageBox.alert(I18N.CONSTANTS.serverError(), le.exception.getLocalizedMessage(), null);
             }
 
         });
@@ -87,13 +90,12 @@ final class FlatSiteGridPanel extends ContentPanel implements SiteGridPanelView 
         listStore = new ListStore<>(loader);
 
         if (editorGrid == null) {
-            editorGrid = new EditorGrid<SiteDTO>(listStore, columnModel);
+            editorGrid = new EditorGrid<>(listStore, columnModel);
             editorGrid.setLoadMask(true);
-            // editorGrid.setStateful(true);
             editorGrid.setClicksToEdit(ClicksToEdit.TWO);
             editorGrid.setStripeRows(true);
 
-            final GridSelectionModel<SiteDTO> sm = new GridSelectionModel<SiteDTO>();
+            final GridSelectionModel<SiteDTO> sm = new GridSelectionModel<>();
             sm.setSelectionMode(SelectionMode.SINGLE);
             sm.addSelectionChangedListener(new SelectionChangedListener<SiteDTO>() {
 
@@ -106,14 +108,10 @@ final class FlatSiteGridPanel extends ContentPanel implements SiteGridPanelView 
 
             new QuickTip(editorGrid);
             
-            editorGrid.addListener(Events.RowDoubleClick, new Listener<GridEvent>() {
-
-                @Override
-                public void handleEvent(GridEvent be) {
-                    SiteDTO site = listStore.getAt(be.getRowIndex());
-                    SelectionChangedEvent<SiteDTO> event = new SelectionChangedEvent<>(sm, site);
-                    fireEvent(Events.RowDoubleClick, event);
-                }
+            editorGrid.addListener(Events.RowDoubleClick, (Listener<GridEvent>) be -> {
+                SiteDTO site = listStore.getAt(be.getRowIndex());
+                SelectionChangedEvent<SiteDTO> event = new SelectionChangedEvent<>(sm, site);
+                fireEvent(Events.RowDoubleClick, event);
             });
             
 
