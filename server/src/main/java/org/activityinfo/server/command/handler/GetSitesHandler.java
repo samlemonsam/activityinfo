@@ -539,20 +539,33 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private int[] generatePaginationIndex(int numResultRows) {
         int pageOffset = (offset > 0) ? offset : 0;
         int pageLimit;
+        int pageSize;
 
-        if ((limit > 0) && (numResultRows > limit-siteList.size())) {
-            pageLimit = limit - siteList.size();
+        // Determine the current page limit if a limit is set
+        if (limit > 0) {
+            // if numResults is smaller than the remaining limit, then use numResults as current page limit
+            if (numResultRows < (limit-siteList.size())) {
+                pageLimit = numResultRows;
+            } else {
+                pageLimit = limit - siteList.size();
+            }
         } else {
             pageLimit = numResultRows;
         }
 
-        int[] pageIndex = new int[pageLimit-pageOffset];
+        // If the number of sites remaining after offset is less than the current page limit, use that as the page size
+        if (pageLimit < (numResultRows-pageOffset)) {
+            pageSize = pageLimit;
+        } else {
+            pageSize = numResultRows-pageOffset;
+        }
 
+        int[] pageIndex = new int[pageSize];
         for (int i=0; i<pageIndex.length; i++) {
             pageIndex[i] = pageOffset + i;
         }
 
-        offset = offset - pageOffset;
+        offset = offset - pageLimit;
         return pageIndex;
     }
 
