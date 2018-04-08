@@ -264,7 +264,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     private void checkForLinkedActivities() {
         activities.values().forEach(activity -> {
-            if (!activity.getLinkedActivities().isEmpty()) {
+            if (!activity.getLinkedActivities().isEmpty() || !activity.getSelfLinkedIndicators().isEmpty()) {
                 throw new CommandException("Linked Activity - Run OldGetSites");
             }
         });
