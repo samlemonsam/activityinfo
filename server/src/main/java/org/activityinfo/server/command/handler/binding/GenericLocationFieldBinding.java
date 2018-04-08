@@ -41,8 +41,12 @@ public class GenericLocationFieldBinding implements FieldBinding {
         ColumnView code = columnSet.getColumnView(LOCATION_CODE_COLUMN);
 
         for (int i=0; i<columnSet.getNumRows(); i++) {
-            String idVal = id.getString(i);
-            dataArray[i].set(LOCATION_ID_COLUMN, CuidAdapter.getLegacyIdFromCuid(idVal));
+            if (id.isMissing(i)) {
+                dataArray[i].set(LOCATION_ID_COLUMN, ColumnView.NA);
+            } else {
+                String idVal = id.getString(i);
+                dataArray[i].set(LOCATION_ID_COLUMN, CuidAdapter.getLegacyIdFromCuid(idVal));
+            }
 
             dataArray[i].set(LOCATION_NAME_COLUMN, name.getString(i));
             dataArray[i].set(LOCATION_CODE_COLUMN, code.getString(i));
