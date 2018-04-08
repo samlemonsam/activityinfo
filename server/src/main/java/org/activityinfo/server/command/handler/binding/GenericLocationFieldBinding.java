@@ -42,7 +42,7 @@ public class GenericLocationFieldBinding implements FieldBinding {
 
         for (int i=0; i<columnSet.getNumRows(); i++) {
             if (id.isMissing(i)) {
-                dataArray[i].set(LOCATION_ID_COLUMN, null);
+                dataArray[i].set(LOCATION_ID_COLUMN, 0);
             } else {
                 String idVal = id.getString(i);
                 dataArray[i].set(LOCATION_ID_COLUMN, CuidAdapter.getLegacyIdFromCuid(idVal));
