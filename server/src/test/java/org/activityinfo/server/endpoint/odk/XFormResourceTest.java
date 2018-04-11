@@ -29,6 +29,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.io.xform.ItemSetBuilder;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;

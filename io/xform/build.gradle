@@ -3,5 +3,8 @@
 
 dependencies {
     compile project(':model')
+    compile project(':store:query')
     compile libraries.guava
+
+    testCompile project(':store:testing')
 }

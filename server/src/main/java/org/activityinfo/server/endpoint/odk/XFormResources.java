@@ -20,6 +20,7 @@ package org.activityinfo.server.endpoint.odk;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
+import org.activityinfo.io.xform.ItemSetBuilder;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.io.xform.manifest.MediaFile;
 import org.activityinfo.io.xform.manifest.XFormManifest;
@@ -35,7 +36,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
 import java.util.logging.Logger;
 
 
@@ -126,15 +126,15 @@ public class XFormResources {
         return OpenRosaResponse.build(manifest);
     }
 
-    @GET
-    @Path("{id}/itemsets.csv")
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response itemSet(@PathParam("id") int id) throws IOException {
-
-        authProvider.get();
-
-        return Response.ok(itemSetBuilder.build(CuidAdapter.activityFormClass(id)))
-                .type("text/plain; charset=utf-8")
-                .build();
-    }
+//    @GET
+//    @Path("{id}/itemsets.csv")
+//    @Produces(MediaType.TEXT_PLAIN)
+//    public Response itemSet(@PathParam("id") int id) throws IOException {
+//
+//        authProvider.get();
+//
+//        return Response.ok(itemSetBuilder.build(CuidAdapter.activityFormClass(id)))
+//                .type("text/plain; charset=utf-8")
+//                .build();
+//    }
 }
