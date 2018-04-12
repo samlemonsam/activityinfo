@@ -45,6 +45,12 @@ public class CompactingDoubleColumnBuilderTest {
         CompactingDoubleColumnBuilder builder = new CompactingDoubleColumnBuilder(new PendingSlot<ColumnView>(), DUMMY);
         builder.onNext(10316050152d);
         builder.onNext(10316050151d);
+        builder.onNext(0);
+        builder.onNext(0);
+        builder.onNext(0);
+        builder.onNext(0);
+        builder.onNext(0);
+        builder.onNext(0);
 
         ColumnView result = builder.build();
         ColumnView doubleResult = builder.buildDouble();
@@ -62,6 +68,7 @@ public class CompactingDoubleColumnBuilderTest {
         builder.onNext(Double.NaN);
         builder.onNext(-3);
         builder.onNext(-10 + 254);
+        builder.onNext(0);
         builder.onNext(0);
 
         IntColumnView8 result = (IntColumnView8) builder.build();
