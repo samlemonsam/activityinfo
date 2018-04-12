@@ -25,7 +25,7 @@ import org.activityinfo.model.util.HeapsortColumn;
  */
 public class BooleanColumnView implements ColumnView {
 
-    private int values[];
+    private int[] values;
 
     public BooleanColumnView() {
     }
@@ -81,17 +81,25 @@ public class BooleanColumnView implements ColumnView {
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        int filteredValues[] = new int[selectedRows.length];
+        if (missingRows(selectedRows)) {
+            return new FilteredColumnView(this, selectedRows);
+        }
+
+        int[] filteredValues = new int[selectedRows.length];
         for (int i = 0; i < filteredValues.length; i++) {
             int selectedRow = selectedRows[i];
-            if(selectedRow == -1) {
-                filteredValues[i] = NA;
-            } else {
-                filteredValues[i] = values[selectedRow];
-            }
-
+            filteredValues[i] = values[selectedRow];
         }
         return new BooleanColumnView(filteredValues);
+    }
+
+    private boolean missingRows(int[] selectedRows) {
+        for (int i = 0; i < selectedRows.length; i++) {
+            if (selectedRows[i] < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -111,6 +119,8 @@ public class BooleanColumnView implements ColumnView {
                 } else {
                     HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
                 }
+                break;
+            default:
                 break;
         }
         return sortVector;

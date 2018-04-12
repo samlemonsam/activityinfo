@@ -18,7 +18,6 @@
  */
 package org.activityinfo.geoadmin.merge2.view.mapping;
 
-import com.google.common.base.Function;
 import org.activityinfo.geoadmin.match.MatchLevel;
 import org.activityinfo.geoadmin.merge2.model.ReferenceMatch;
 import org.activityinfo.geoadmin.merge2.view.ImportView;
@@ -84,12 +83,7 @@ public class LookupTable {
     }
 
     public static Observable<LookupTable> compute(final LookupGraph graph, ObservableSet<ReferenceMatch> matches) {
-        return matches.asObservable().transform(new Function<Set<ReferenceMatch>, LookupTable>() {
-            @Override
-            public LookupTable apply(Set<ReferenceMatch> input) {
-                return new LookupTable(graph, input);
-            }
-        });
+        return matches.asObservable().transform(input -> new LookupTable(graph, input));
     }
     
     private Map<SourceLookupKey, Integer> buildUserMap(Set<ReferenceMatch> matchSet) {
@@ -175,7 +169,7 @@ public class LookupTable {
             @Override
             public String getString(int row) {
                 int targetRowIndex = matching[row];
-                if(targetRowIndex == -1) {
+                if(targetRowIndex < 0) {
                     return null;
                 } else {
                     return graph.getTargetKeyFields().get(fieldIndex).getView().getString(targetRowIndex);
@@ -194,8 +188,7 @@ public class LookupTable {
     
     public ResourceId getTargetMatchId(int sourceKeyIndex) {
         int row = getTargetMatchRow(sourceKeyIndex);
-        ResourceId id = graph.getTargetForm().getRowId(row);
-        return id;
+        return graph.getTargetForm().getRowId(row);
     }
 
     public SourceLookupKey getSourceKey(int sourceKeyIndex) {

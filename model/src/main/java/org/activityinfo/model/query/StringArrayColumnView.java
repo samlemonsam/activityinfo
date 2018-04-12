@@ -79,14 +79,25 @@ public class StringArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public ColumnView select(int[] selectedRows) {
+        if (missingRows(selectedRows)) {
+            return new FilteredColumnView(this, selectedRows);
+        }
+
         String[] filteredValues = new String[selectedRows.length];
         for (int i = 0; i < filteredValues.length; i++) {
             int selectedRow = selectedRows[i];
-            if(selectedRow != -1) {
-                filteredValues[i] = this.values[selectedRow];
-            }
+            filteredValues[i] = this.values[selectedRow];
         }
         return new StringArrayColumnView(filteredValues);
+    }
+
+    private boolean missingRows(int[] selectedRows) {
+        for (int i=0; i<selectedRows.length; i++) {
+            if (selectedRows[i] < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -111,6 +122,8 @@ public class StringArrayColumnView implements ColumnView, Serializable {
                 } else {
                     HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
                 }
+                break;
+            default:
                 break;
         }
         return sortVector;

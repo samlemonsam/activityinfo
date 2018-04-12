@@ -87,17 +87,24 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        double filteredValues[] = new double[selectedRows.length];
-        for (int i = 0; i < filteredValues.length; i++) {
+        if (missingRows(selectedRows)) {
+            return new FilteredColumnView(this, selectedRows);
+        }
 
-            int selectedRow = selectedRows[i];
-            if(selectedRow == -1) {
-                filteredValues[i] = Double.NaN;
-            } else {
-                filteredValues[i] = values[selectedRow];
-            }
+        double[] filteredValues = new double[selectedRows.length];
+        for (int i = 0; i < filteredValues.length; i++) {
+            filteredValues[i] = values[selectedRows[i]];
         }
         return new DoubleArrayColumnView(filteredValues);
+    }
+
+    private boolean missingRows(int[] selectedRows) {
+        for (int i=0; i < selectedRows.length; i++) {
+            if (selectedRows[i] < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -137,6 +144,8 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
                 } else {
                     HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
                 }
+                break;
+            default:
                 break;
         }
         return sortVector;

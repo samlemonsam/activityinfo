@@ -96,23 +96,33 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
 
     @Override
     public ColumnView select(int[] selectedRows) {
+        if (missingRows(selectedRows)) {
+            return new FilteredColumnView(this, selectedRows);
+        }
+
         BitSet filtered = new BitSet();
         BitSet filteredMissing = new BitSet();
 
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
-            if(selectedRow == -1) {
-                filteredMissing.set(i);
-            } else {
-                filtered.set(i, bitSet.get(selectedRow));
-                filteredMissing.set(i, missing.get(selectedRow));
-            }
+            filtered.set(i, bitSet.get(selectedRow));
+            filteredMissing.set(i, missing.get(selectedRow));
         }
+
         if(filteredMissing.cardinality() == 0) {
             return new BitSetColumnView(selectedRows.length, filtered);
         } else {
             return new BitSetWithMissingView(selectedRows.length, filtered, filteredMissing);
         }
+    }
+
+    private boolean missingRows(int[] selectedRows) {
+        for (int i = 0; i < selectedRows.length; i++) {
+            if (selectedRows[i] < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -43,7 +43,7 @@ public abstract class MappedView implements ColumnView {
     @Override
     public final Object get(int row) {
         int newRow = transformRow(row);
-        if(newRow == -1) {
+        if(newRow < 0) {
             return null;
         }
         return source.get(newRow);
@@ -52,7 +52,7 @@ public abstract class MappedView implements ColumnView {
     @Override
     public final double getDouble(int row) {
         int newRow = transformRow(row);
-        if(newRow == -1) {
+        if(newRow < 0) {
             return Double.NaN;
         }
         return source.getDouble(newRow);
@@ -61,7 +61,7 @@ public abstract class MappedView implements ColumnView {
     @Override
     public final String getString(int row) {
         int newRow = transformRow(row);
-        if(newRow == -1) {
+        if(newRow < 0) {
             return null;
         }
         return source.getString(newRow);
@@ -70,7 +70,7 @@ public abstract class MappedView implements ColumnView {
     @Override
     public final int getBoolean(int row) {
         int newRow = transformRow(row);
-        if(newRow == -1) {
+        if(newRow < 0) {
             throw new UnsupportedOperationException("null boolean");
         }
         return source.getBoolean(newRow);
@@ -79,7 +79,7 @@ public abstract class MappedView implements ColumnView {
     @Override
     public boolean isMissing(int row) {
         int newRow = transformRow(row);
-        if(newRow == -1) {
+        if(newRow < 0) {
             return true;
         }
         return source.isMissing(newRow);

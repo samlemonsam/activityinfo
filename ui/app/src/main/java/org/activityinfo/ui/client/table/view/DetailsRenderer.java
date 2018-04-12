@@ -33,6 +33,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.query.ErrorCode;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.Attachment;
@@ -293,7 +294,7 @@ public class DetailsRenderer {
                 if(label.isVisible()) {
                     html.appendEscaped(label.get());
                 } else {
-                    html.appendEscaped("#VALUE!");
+                    html.appendEscaped(ErrorCode.BAD_REF.getValue());
                 }
                 if(recordRefs.hasNext()) {
                     html.appendHtmlConstant("<br>");
