@@ -293,7 +293,7 @@ public class DetailsRenderer {
                 if(label.isVisible()) {
                     html.appendEscaped(label.get());
                 } else {
-                    html.appendEscaped("#VALUE!");
+                    html.appendEscaped("#REF!");
                 }
                 if(recordRefs.hasNext()) {
                     html.appendHtmlConstant("<br>");
