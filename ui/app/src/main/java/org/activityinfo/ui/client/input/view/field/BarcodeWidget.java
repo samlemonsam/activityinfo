@@ -19,6 +19,8 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import com.google.common.base.Strings;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.TextInputCell;
 import com.sencha.gxt.widget.core.client.form.TextField;
@@ -33,11 +35,32 @@ import org.activityinfo.ui.client.input.model.FieldInput;
  */
 public class BarcodeWidget implements FieldWidget {
 
+    private class BarcodeTextField extends TextField {
+
+        private final FieldUpdater updater;
+
+        BarcodeTextField(TextInputCell cell, FieldUpdater updater) {
+            super(cell);
+            this.updater = updater;
+            sinkEvents(Event.ONPASTE);
+        }
+
+        @Override
+        public void onBrowserEvent(Event event) {
+            super.onBrowserEvent(event);
+            if (event.getTypeInt() == Event.ONPASTE) {
+                Scheduler.get().scheduleDeferred(() -> updater.update(input()));
+            }
+        }
+    }
+
     private final TextField field;
 
     public BarcodeWidget(FieldUpdater updater) {
-        field = new TextField(new TextInputCell());
+        field = new BarcodeTextField(new TextInputCell(), updater);
+
         field.addKeyUpHandler(event -> updater.update(input()));
+        field.addValueChangeHandler(event -> updater.update(input()));
     }
 
     private FieldInput input() {

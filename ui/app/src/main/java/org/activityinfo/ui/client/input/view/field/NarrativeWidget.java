@@ -19,6 +19,8 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.TextAreaInputCell;
 import com.sencha.gxt.widget.core.client.form.TextArea;
@@ -31,6 +33,25 @@ import org.activityinfo.ui.client.input.model.FieldInput;
  */
 public class NarrativeWidget implements FieldWidget {
 
+    private class NarrativeTextArea extends TextArea {
+
+        private final FieldUpdater updater;
+
+        NarrativeTextArea(TextAreaInputCell cell, FieldUpdater updater) {
+            super(cell);
+            this.updater = updater;
+            sinkEvents(Event.ONPASTE);
+        }
+
+        @Override
+        public void onBrowserEvent(Event event) {
+            super.onBrowserEvent(event);
+            if (event.getTypeInt() == Event.ONPASTE) {
+                Scheduler.get().scheduleDeferred(() -> updater.update(input()));
+            }
+        }
+    }
+
     private TextArea textArea;
 
     public NarrativeWidget(FieldUpdater updater) {
@@ -38,8 +59,11 @@ public class NarrativeWidget implements FieldWidget {
     }
 
     public NarrativeWidget(TextAreaInputCell.TextAreaAppearance appearance, FieldUpdater updater) {
-        textArea = new TextArea(new TextAreaInputCell(appearance));
+        textArea = new NarrativeTextArea(new TextAreaInputCell(appearance), updater);
+
         textArea.addKeyUpHandler(event -> updater.update(input()));
+        textArea.addValueChangeHandler(event -> updater.update(input()));
+
         textArea.setWidth(-1);
     }
 
