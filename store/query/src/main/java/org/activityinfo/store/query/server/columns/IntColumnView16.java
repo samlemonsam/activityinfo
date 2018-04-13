@@ -19,7 +19,6 @@
 package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.FilteredColumnView;
 import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.util.HeapsortColumn;
 
@@ -34,7 +33,7 @@ class IntColumnView16 extends AbstractNumberColumn {
     private short[] values;
     private int delta;
 
-    IntColumnView16(double[] doubleValues, int numRows, int minValue) {
+    IntColumnView16(double doubleValues[], int numRows, int minValue) {
         this.values = new short[numRows];
 
         // Reserve 0 for missing values
@@ -76,25 +75,14 @@ class IntColumnView16 extends AbstractNumberColumn {
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        if (missingRows(selectedRows)) {
-            return new FilteredColumnView(this, selectedRows);
-        }
-
         short[] selectedValues = new short[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
-            selectedValues[i] = this.values[selectedRow];
-        }
-        return new IntColumnView16(selectedValues, delta);
-    }
-
-    private boolean missingRows(int[] selectedRows) {
-        for (int i = 0; i < selectedRows.length; i++) {
-            if (selectedRows[i] < 0) {
-                return true;
+            if(selectedRow != -1) {
+                selectedValues[i] = this.values[selectedRow];
             }
         }
-        return false;
+        return new IntColumnView16(selectedValues, delta);
     }
 
     @Override
@@ -114,8 +102,6 @@ class IntColumnView16 extends AbstractNumberColumn {
                 } else {
                     HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
                 }
-                break;
-            default:
                 break;
         }
         return sortVector;

@@ -22,8 +22,6 @@ public class FilteredColumnView implements ColumnView {
     private ColumnView view;
     private int[] filteredIndices;
 
-    public FilteredColumnView() {
-    }
 
     public FilteredColumnView(ColumnView view, int[] filteredIndices) {
         this.view = view;
@@ -55,16 +53,16 @@ public class FilteredColumnView implements ColumnView {
     @Override
     public Object get(int row) {
         int selectedRow = filteredIndices[row];
-        if(selectedRow < 0) {
+        if(selectedRow == -1) {
             return Double.NaN;
         }
-        return view.get(selectedRow);
+        return view.getDouble(selectedRow);
     }
 
     @Override
     public double getDouble(int row) {
         int selectedRow = filteredIndices[row];
-        if(selectedRow < 0) {
+        if(selectedRow == -1) {
             return Double.NaN;
         }
         return view.getDouble(selectedRow);
@@ -73,10 +71,8 @@ public class FilteredColumnView implements ColumnView {
     @Override
     public String getString(int row) {
         int selectedRow = filteredIndices[row];
-        if(selectedRow == ErrorCode.MISSING.getCode()) {
+        if(selectedRow == -1) {
             return null;
-        } else if(selectedRow == ErrorCode.BAD_REF.getCode()) {
-            return ErrorCode.BAD_REF.getValue();
         }
         return view.getString(selectedRow);
     }
@@ -84,7 +80,7 @@ public class FilteredColumnView implements ColumnView {
     @Override
     public int getBoolean(int row) {
         int selectedRow = filteredIndices[row];
-        if(selectedRow < 0) {
+        if(selectedRow == -1) {
             return NA;
         }
         return view.getBoolean(selectedRow);
@@ -93,7 +89,7 @@ public class FilteredColumnView implements ColumnView {
     @Override
     public boolean isMissing(int row) {
         int selectedRow = filteredIndices[row];
-        if(selectedRow < 0) {
+        if(selectedRow == -1) {
             return true;
         }
         return view.isMissing(selectedRow);
@@ -101,13 +97,11 @@ public class FilteredColumnView implements ColumnView {
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        int[] filteredFilteredIndices = new int[selectedRows.length];
+        int filteredFilteredIndices[] = new int[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
-            if(selectedRow == ErrorCode.MISSING.getCode()) {
-                filteredFilteredIndices[i] = ErrorCode.MISSING.getCode();
-            } else if (selectedRow == ErrorCode.BAD_REF.getCode()) {
-                filteredFilteredIndices[i] = ErrorCode.BAD_REF.getCode();
+            if(selectedRow == -1) {
+                filteredFilteredIndices[i] = -1;
             } else {
                 filteredFilteredIndices[i] = filteredIndices[selectedRow];
             }

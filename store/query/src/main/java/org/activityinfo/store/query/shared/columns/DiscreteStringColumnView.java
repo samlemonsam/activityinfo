@@ -18,7 +18,10 @@
  */
 package org.activityinfo.store.query.shared.columns;
 
-import org.activityinfo.model.query.*;
+import org.activityinfo.model.query.ColumnType;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.EnumColumnView;
+import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.util.HeapsortColumn;
 
 import java.io.Serializable;
@@ -94,25 +97,16 @@ public class DiscreteStringColumnView implements EnumColumnView, ColumnView, Ser
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        if (missingRows(selectedRows)) {
-            return new FilteredColumnView(this, selectedRows);
-        }
-
-        int[] filteredValues = new int[selectedRows.length];
+        int filteredValues[] = new int[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
-            filteredValues[i] = values[selectedRow];
-        }
-        return new DiscreteStringColumnView(ids, labels, filteredValues);
-    }
-
-    private boolean missingRows(int[] selectedRows) {
-        for (int i = 0; i < selectedRows.length; i++) {
-            if (selectedRows[i] < 0) {
-                return true;
+            if(selectedRow < 0) {
+                filteredValues[i] = -1;
+            } else {
+                filteredValues[i] = values[selectedRow];
             }
         }
-        return false;
+        return new DiscreteStringColumnView(ids, labels, filteredValues);
     }
 
     @Override
@@ -138,8 +132,6 @@ public class DiscreteStringColumnView implements EnumColumnView, ColumnView, Ser
                     HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, range.length, range);
                 }
                 break;
-            default:
-                return sortVector;
         }
         return sortVector;
     }

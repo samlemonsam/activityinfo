@@ -60,18 +60,17 @@ public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
         // in the LEFT table, mapping[i] gives us the corresponding
         // row in the RIGHT table.
 
-        int[] left = links.get(0).copyOfMapping();
+        int left[] = links.get(0).copyOfMapping();
 
 
         // If we have intermediate tables, we have to follow the links...
 
         for(int j=1;j<links.size();++j) {
-            int[] right = links.get(j).mapping();
+            int right[] = links.get(j).mapping();
             for(int i=0;i!=left.length;++i) {
-                if(left[i] < 0) {
-                    continue;
+                if(left[i] != -1) {
+                    left[i] = right[left[i]];
                 }
-                left[i] = right[left[i]];
             }
         }
 
@@ -92,8 +91,8 @@ public class JoinedReferenceColumnViewSlot implements Slot<ColumnView> {
 
     @Override
     public int hashCode() {
-        int hashResult = links.hashCode();
-        hashResult = 31 * hashResult + nestedColumn.hashCode();
-        return hashResult;
+        int result = links.hashCode();
+        result = 31 * result + nestedColumn.hashCode();
+        return result;
     }
 }

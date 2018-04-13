@@ -23,7 +23,6 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import org.activityinfo.model.query.ErrorCode;
 
 import java.util.Collections;
 import java.util.Set;
@@ -54,12 +53,12 @@ public class ErrorCell implements Cell<String> {
 
     @Override
     public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event, ValueUpdater<String> valueUpdater) {
-        //
+
     }
 
     @Override
     public void render(Context context, String value, SafeHtmlBuilder sb) {
-        sb.appendEscaped(ErrorCode.MISSING.getValue());
+        sb.appendEscaped("#VALUE!");
     }
 
     @Override
@@ -69,6 +68,5 @@ public class ErrorCell implements Cell<String> {
 
     @Override
     public void setValue(Context context, Element parent, String value) {
-        //
     }
 }

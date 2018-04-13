@@ -20,7 +20,6 @@ package org.activityinfo.store.query.server.columns;
 
 import com.google.common.primitives.UnsignedBytes;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.FilteredColumnView;
 import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.util.HeapsortColumn;
 
@@ -35,7 +34,7 @@ class IntColumnView8 extends AbstractNumberColumn {
     private byte[] values;
     private int delta;
 
-    IntColumnView8(double[] doubleValues, int numRows, int minValue) {
+    IntColumnView8(double doubleValues[], int numRows, int minValue) {
         this.values = new byte[numRows];
 
         // Reserve 0 for missing values
@@ -76,25 +75,14 @@ class IntColumnView8 extends AbstractNumberColumn {
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        if (missingRows(selectedRows)) {
-            return new FilteredColumnView(this, selectedRows);
-        }
-
         byte[] selectedValues = new byte[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
-            selectedValues[i] = this.values[selectedRow];
-        }
-        return new IntColumnView8(selectedValues, delta);
-    }
-
-    private boolean missingRows(int[] selectedRows) {
-        for (int i = 0; i < selectedRows.length; i++) {
-            if (selectedRows[i] < 0) {
-                return true;
+            if(selectedRow != -1) {
+                selectedValues[i] = this.values[selectedRow];
             }
         }
-        return false;
+        return new IntColumnView8(selectedValues, delta);
     }
 
     @Override
@@ -114,8 +102,6 @@ class IntColumnView8 extends AbstractNumberColumn {
                 } else {
                     HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
                 }
-                break;
-            default:
                 break;
         }
         return sortVector;

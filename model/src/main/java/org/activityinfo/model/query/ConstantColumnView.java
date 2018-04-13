@@ -162,7 +162,7 @@ public class ConstantColumnView implements ColumnView, Serializable {
 
     private boolean noneMissing(int[] selectedRows) {
         for (int i = 0; i < selectedRows.length; i++) {
-            if(selectedRows[i] < 0) {
+            if(selectedRows[i] == -1) {
                 return false;
             }
         }

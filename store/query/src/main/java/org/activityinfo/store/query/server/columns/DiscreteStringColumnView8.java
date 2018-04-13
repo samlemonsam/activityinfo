@@ -101,25 +101,16 @@ class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
 
     @Override
     public ColumnView select(int[] selectedRows) {
-        if (missingRows(selectedRows)) {
-            return new FilteredColumnView(this, selectedRows);
-        }
-
-        byte[] filteredValues = new byte[selectedRows.length];
+        byte filteredValues[] = new byte[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
-            filteredValues[i] = values[selectedRow];
-        }
-        return new DiscreteStringColumnView8(ids, labels, filteredValues);
-    }
-
-    private boolean missingRows(int[] selectedRows) {
-        for (int i = 0; i < selectedRows.length; i++) {
-            if (selectedRows[i] < 0) {
-                return true;
+            if(selectedRow < 0) {
+                filteredValues[i] = -1;
+            } else {
+                filteredValues[i] = values[selectedRow];
             }
         }
-        return false;
+        return new DiscreteStringColumnView8(ids, labels, filteredValues);
     }
 
     @Override
@@ -145,8 +136,6 @@ class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
                     HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, range.length, range);
                 }
                 break;
-            default:
-                return sortVector;
         }
         return sortVector;
     }

@@ -24,9 +24,7 @@ import org.activityinfo.legacy.shared.command.PivotSites.PivotResult;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.legacy.shared.reports.content.EntityCategory;
 import org.activityinfo.legacy.shared.reports.model.Dimension;
-import org.activityinfo.model.query.ErrorCode;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.junit.Test;
@@ -71,7 +69,7 @@ public class ProjectTest extends CommandTestCase {
 
         PivotResult buckets = execute(pivot);
         assertThat(buckets.getBuckets().size(), equalTo(1));
-        assertThat(buckets.getBuckets().get(0).getCategory(projectDimension), is(new EntityCategory(2, ErrorCode.BAD_REF.getValue())));
+        assertThat(buckets.getBuckets().get(0).getCategory(projectDimension), is(nullValue()));
 
         // make sure the version number of the database is updated
         assertThat(lookupDbVersion(1), not(equalTo(originalDatabaseVersion)));

@@ -18,7 +18,6 @@
  */
 package org.activityinfo.store.query.shared.columns;
 
-import org.activityinfo.model.query.ErrorCode;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 
 import java.io.Serializable;
@@ -61,7 +60,7 @@ public class ForeignKey32 implements Serializable, ForeignKey {
 
     @Override
     public ForeignKey filter(int[] selectedRows) {
-        int[] selectedKeys= new int[selectedRows.length];
+        int selectedKeys[] = new int[selectedRows.length];
         for (int i = 0; i < selectedRows.length; i++) {
             int selectedRow = selectedRows[i];
             if(selectedRow == -1) {
@@ -92,20 +91,18 @@ public class ForeignKey32 implements Serializable, ForeignKey {
     public int[] buildMapping(PrimaryKeyMap pk) {
 
         // First map the our key Names to rows in the right table
-        int[] rowLookup= new int[keyNames.length];
+        int rowLookup[] = new int[keyNames.length];
         for (int i = 0; i < keyNames.length; i++) {
             rowLookup[i] = pk.getRowIndex(keyNames[i]);
         }
 
         // Now we can use this lookup to find the row indexes
         // for all the rows in the left table.
-        int[] mapping = new int[numRows()];
+        int mapping[] = new int[numRows()];
         for (int i = 0; i < mapping.length; i++) {
             int keyId = keys[i];
             if(keyId == -1) {
-                mapping[i] = ErrorCode.MISSING.getCode();
-            } else if (rowLookup[keyId] == -1) {
-                mapping[i] = ErrorCode.BAD_REF.getCode();
+                mapping[i] = -1;
             } else {
                 mapping[i] = rowLookup[keyId];
             }
