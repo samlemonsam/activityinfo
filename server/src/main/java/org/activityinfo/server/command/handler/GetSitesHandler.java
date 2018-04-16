@@ -162,6 +162,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 return ((String) f1).compareTo((String) f2);
             } else if (f1 instanceof Double && f2 instanceof Double) {
                 return ((Double) f1).compareTo((Double) f2);
+            } else if (f1 instanceof AdminEntityDTO && f2 instanceof AdminEntityDTO) {
+                return ((AdminEntityDTO) f1).getName().compareTo(((AdminEntityDTO) f2).getName());
+            } else if (f1 instanceof LocationDTO && f2 instanceof LocationDTO) {
+                return ((LocationDTO) f1).getName().compareTo(((LocationDTO) f2).getName());
             } else if (f1 instanceof PartnerDTO && f2 instanceof PartnerDTO) {
                 return ((PartnerDTO) f1).getName().compareTo(((PartnerDTO) f2).getName());
             } else if (f1 instanceof ProjectDTO && f2 instanceof ProjectDTO) {
