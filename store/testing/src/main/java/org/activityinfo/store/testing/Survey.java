@@ -274,12 +274,24 @@ public class Survey implements TestForm {
         return wealthTv.getId();
     }
 
+    public String getWealthTvLabel() {
+        return wealthTv.getLabel();
+    }
+
     public ResourceId getWealthRadio() {
         return wealthRadio.getId();
     }
 
+    public String getWealthRadioLabel() {
+        return wealthRadio.getLabel();
+    }
+
     public ResourceId getWealthFridge() {
         return wealthFridge.getId();
+    }
+
+    public String getWealthFridgeLabel() {
+        return wealthFridge.getLabel();
     }
 
     public static int getRowCount() {

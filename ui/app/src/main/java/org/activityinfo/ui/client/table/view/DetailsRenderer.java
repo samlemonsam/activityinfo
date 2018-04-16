@@ -67,7 +67,7 @@ public class DetailsRenderer {
         SafeHtml attachmentLink(SafeUri uri, String name);
     }
 
-    private final static Templates TEMPLATES = GWT.create(Templates.class);
+    private static final Templates TEMPLATES = GWT.create(Templates.class);
 
     private interface ValueRenderer {
         void renderTo(FieldValue fieldValue, SafeHtmlBuilder html);
@@ -229,22 +229,23 @@ public class DetailsRenderer {
         }
     }
 
-    private abstract class FieldRenderer {
+    private interface FieldRenderer {
 
-        public abstract void renderTo(RecordTree recordTree, SafeHtmlBuilder html);
+        void renderTo(RecordTree recordTree, SafeHtmlBuilder html);
+
     }
 
 
-    private class NullRenderer extends FieldRenderer {
+    private class NullRenderer implements FieldRenderer {
 
         @Override
         public void renderTo(RecordTree recordTree, SafeHtmlBuilder html) {
-
+            return;
         }
     }
 
 
-    private class SimpleFieldRenderer extends FieldRenderer {
+    private class SimpleFieldRenderer implements FieldRenderer {
         private FormField field;
         private ValueRenderer valueRenderer;
 
@@ -265,7 +266,7 @@ public class DetailsRenderer {
         }
     }
 
-    private class ReferenceFieldRenderer extends FieldRenderer {
+    private class ReferenceFieldRenderer implements FieldRenderer {
         private final FormField field;
         private final LookupKeySet keySet;
 
@@ -278,20 +279,24 @@ public class DetailsRenderer {
         @Override
         public void renderTo(RecordTree recordTree, SafeHtmlBuilder html) {
             ReferenceValue fieldValue = (ReferenceValue) recordTree.getRoot().get(field.getId());
-            if(fieldValue != null) {
-                html.appendHtmlConstant("<h3>");
-                html.appendEscaped(field.getLabel());
-                html.appendHtmlConstant("</h3>");
+            if(fieldValue == null) {
+                return;
+            }
 
-                Iterator<RecordRef> recordRefs = fieldValue.getReferences().iterator();
-                while (recordRefs.hasNext()) {
-                    Maybe<String> label = keySet.label(recordTree, recordRefs.next());
-                    if(label.isVisible()) {
-                        html.appendEscaped(label.get());
-                    }
-                    if(recordRefs.hasNext()) {
-                        html.appendHtmlConstant("<br>");
-                    }
+            html.appendHtmlConstant("<h3>");
+            html.appendEscaped(field.getLabel());
+            html.appendHtmlConstant("</h3>");
+
+            Iterator<RecordRef> recordRefs = fieldValue.getReferences().iterator();
+            while (recordRefs.hasNext()) {
+                Maybe<String> label = keySet.label(recordTree, recordRefs.next());
+                if(label.isVisible()) {
+                    html.appendEscaped(label.get());
+                } else {
+                    html.appendEscaped("#REF!");
+                }
+                if(recordRefs.hasNext()) {
+                    html.appendHtmlConstant("<br>");
                 }
             }
         }

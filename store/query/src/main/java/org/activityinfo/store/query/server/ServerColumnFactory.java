@@ -20,10 +20,12 @@ package org.activityinfo.store.query.server;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.store.query.server.columns.CompactingDoubleColumnBuilder;
 import org.activityinfo.store.query.server.columns.CompactingEnumColumnBuilder;
+import org.activityinfo.store.query.server.columns.MultiEnumColumnBuilder;
 import org.activityinfo.store.query.server.join.FastPrimaryKeyMap;
 import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.shared.PendingSlot;
@@ -51,7 +53,11 @@ public class ServerColumnFactory implements ColumnFactory {
 
     @Override
     public CursorObserver<FieldValue> newEnumBuilder(PendingSlot<ColumnView> result, EnumType enumType) {
-        return new CompactingEnumColumnBuilder(result, enumType);
+        if (enumType.getCardinality() == Cardinality.SINGLE) {
+            return new CompactingEnumColumnBuilder(result, enumType);
+        } else {
+            return new MultiEnumColumnBuilder(result, enumType);
+        }
     }
 
     @Override
