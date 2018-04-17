@@ -28,11 +28,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
+import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
-import org.activityinfo.legacy.shared.model.ActivityDTO;
-import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.page.entry.column.ColumnModelProvider;
@@ -93,8 +91,7 @@ public final class SiteGridPanel extends ContentPanel {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-
+                //
             }
 
             @Override
@@ -121,17 +118,49 @@ public final class SiteGridPanel extends ContentPanel {
 
     protected void createGrid(GroupingModel grouping, Filter filter, ColumnModel columnModel) {
 
-        if (grouping == NullGroupingModel.INSTANCE) {
-            FlatSiteGridPanel panel = new FlatSiteGridPanel(dispatcher);
-
-            panel.initGrid(filter, columnModel);
-            installGrid(panel);
-
-        } else {
-            SiteTreeGrid treeGrid = new SiteTreeGrid(dispatcher, grouping, filter, columnModel);
-            
-            installGrid(treeGrid);
+        if (grouping != NullGroupingModel.INSTANCE) {
+            installTreeGrid(grouping, filter, columnModel);
+            return;
         }
+
+        if (!filter.isDimensionRestrictedToSingleCategory(DimensionType.Activity)) {
+            installFlatSiteGridPanel(filter, columnModel);
+            return;
+        }
+
+        int activityId = filter.getRestrictedCategory(DimensionType.Activity);
+        dispatcher.execute(new GetActivityForm(activityId), new AsyncCallback<ActivityFormDTO>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                installFlatSiteGridPanel(filter, columnModel);
+            }
+
+            @Override
+            public void onSuccess(ActivityFormDTO result) {
+                if (result.getClassicView()) {
+                    installFlatSiteGridPanel(filter, columnModel);
+                } else {
+                    installTableViewLinkPanel(result);
+                }
+            }
+        });
+    }
+
+    private void installTreeGrid(GroupingModel grouping, Filter filter, ColumnModel columnModel) {
+        SiteTreeGrid treeGrid = new SiteTreeGrid(dispatcher, grouping, filter, columnModel);
+        installGrid(treeGrid);
+    }
+
+    private void installFlatSiteGridPanel(Filter filter, ColumnModel columnModel) {
+        FlatSiteGridPanel panel = new FlatSiteGridPanel(dispatcher);
+        panel.initGrid(filter, columnModel);
+        installGrid(panel);
+    }
+
+    private void installTableViewLinkPanel(ActivityFormDTO form) {
+        TableViewLinkPanel panel = new TableViewLinkPanel(form);
+        installGrid(panel);
     }
 
     public void addSelectionChangedListener(SelectionChangedListener<SiteDTO> listener) {

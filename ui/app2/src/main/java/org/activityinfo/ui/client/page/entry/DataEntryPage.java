@@ -25,12 +25,10 @@ import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
-import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
@@ -39,7 +37,6 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.ui.client.App3;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
@@ -100,7 +97,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private SiteHistoryTab siteHistoryTab;
 
     private ActionToolBar toolBar;
-    private ContentPanel betaLinkPanel;
     private ResourceLocator resourceLocator;
 
 
@@ -138,7 +134,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         LayoutContainer center = new LayoutContainer();
         center.setLayout(new BorderLayout());
 
-        center.add(createNewInterfaceLink(), new BorderLayoutData(LayoutRegion.NORTH, 30));
         center.add(gridPanel, new BorderLayoutData(LayoutRegion.CENTER));
 
         gridPanel.addSelectionChangedListener(new SelectionChangedListener<SiteDTO>() {
@@ -176,22 +171,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         center.add(tabPanel, tabPanel.getBorderLayoutData());
         onNoSelection();
         add(center, new BorderLayoutData(LayoutRegion.CENTER));
-    }
-    
-    private Component createNewInterfaceLink() {
-        betaLinkPanel = new ContentPanel();
-        betaLinkPanel.setHeaderVisible(false);
-        betaLinkPanel.setLayout(new CenterLayout());
-        Anchor betaLink = new Anchor(I18N.CONSTANTS.tryNewDataEntryInterface());
-        betaLink.addClickHandler(clickEvent -> {
-            if(!clickEvent.isControlKeyDown()) {
-                navigateToNewNewInterface();
-            } else {
-                navigateToNewInterface();
-            }
-        });
-        betaLinkPanel.add(betaLink);
-        return betaLinkPanel;
     }
 
     private ActionToolBar createToolBar() {
@@ -231,6 +210,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
                 @Override
                 public void onFailure(Throwable caught) {
+                    //
                 }
 
                 @Override
@@ -276,6 +256,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     @Override
     public void shutdown() {
+        //
     }
 
     @Override
@@ -349,6 +330,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
             @Override
             public void onFailure(Throwable caught) {
+                //
             }
 
             @Override
@@ -371,28 +353,27 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         gridPanel.load(currentPlace.getGrouping(), filter);
         groupingComboBox.setFilter(filter);
         filterPane.getSet().applyBaseFilter(filter);
+        tabPanel.enable();
 
         // currently the print form only does one activity
         Set<Integer> activities = filter.getRestrictions(DimensionType.Activity);
+        toolBar.enable();
         toolBar.setActionEnabled(UIActions.PRINT, activities.size() == 1);
-
         toolBar.setActionEnabled(UIActions.IMPORT, activities.size() == 1);
 
         // adding is also only enabled for one activity, but we have to
         // lookup to see whether it possible for this activity
         toolBar.setActionEnabled(UIActions.ADD, false);
-        
-        betaLinkPanel.setVisible(false);
-        
+
         if (activities.size() == 1) {
-            enableToolbarButtons(activities.iterator().next());
-            maybeShowBetaLinkPanel(activities.iterator().next());
+            maybeShowTableViewLinkPanel(activities.iterator().next());
         } 
         onNoSelection();
     }
 
-    private void maybeShowBetaLinkPanel(final Integer activityId) {
+    private void maybeShowTableViewLinkPanel(final Integer activityId) {
         dispatcher.execute(new GetActivityForm(activityId), new AsyncCallback<ActivityFormDTO>() {
+
             @Override
             public void onFailure(Throwable throwable) {
                 // sigh, ignore.
@@ -401,35 +382,38 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
             @Override
             public void onSuccess(ActivityFormDTO form) {
-                // make sure we haven't navigated away by the time the request comes back
-                Optional<Integer> currentActivityId = getCurrentActivityId();
-                if(!currentActivityId.isPresent() || !Objects.equals(currentActivityId.get(), activityId)) {
-                    return;
+                if (showTableView(form)) {
+                    toolBar.disable();
+                    // SiteGridPanel holds TableViewLinkPanel
+                    tabPanel.disable();
+                } else {
+                    enableToolbarButtons(form);
+                    tabPanel.enable();
                 }
-                if(form.getReportingFrequency() != ActivityFormDTO.REPORT_ONCE) {
-                    return;
-                }
-                if(form.getClassicView()) {
-                    return;
-                }
-                betaLinkPanel.setVisible(true);
             }
         });
     }
 
-    private void enableToolbarButtons(final int activityId) {
-        dispatcher.execute(new GetSchema(), new AsyncCallback<SchemaDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
+    private boolean showTableView(ActivityFormDTO form) {
+        // make sure we haven't navigated away by the time the request comes back
+        Optional<Integer> currentActivityId = getCurrentActivityId();
+        if(!currentActivityId.isPresent() || !Objects.equals(currentActivityId.get(), form.getId())) {
+            return false;
+        }
+        if(form.getReportingFrequency() != ActivityFormDTO.REPORT_ONCE) {
+            return false;
+        }
+        if(form.getClassicView()) {
+            return false;
+        }
+        return true;
+    }
 
-            @Override
-            public void onSuccess(SchemaDTO result) {
-                boolean isAllowed = result.getActivityById(activityId).isEditAllowed();
-                toolBar.setActionEnabled(UIActions.ADD, isAllowed);
-                toolBar.setActionEnabled("IMPORT", isAllowed);
-            }
-        });
+    private void enableToolbarButtons(ActivityFormDTO activity) {
+        toolBar.enable();
+        boolean isAllowed = activity.isEditAllowed();
+        toolBar.setActionEnabled(UIActions.ADD, isAllowed);
+        toolBar.setActionEnabled(UIActions.IMPORT, isAllowed);
     }
 
     private void updateEditedSelection(final SiteDTO site) {
@@ -513,14 +497,6 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
                     new ResourcePlace(formClassId, ResourcePage.TABLE_PAGE_ID)));
-        }
-    }
-
-
-    private void navigateToNewNewInterface() {
-        Optional<Integer> activityId = getCurrentActivityId();
-        if(activityId.isPresent()) {
-            App3.openNewTable(activityId.get());
         }
     }
 

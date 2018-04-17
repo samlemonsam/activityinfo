@@ -127,7 +127,7 @@ public class ActivityFilterPanel extends ContentPanel implements FilterPanel {
                     }
                 });
             } else {
-                List<Link> list = new ArrayList<Link>();
+                List<Link> list = new ArrayList<>();
                 List<ModelData> children = ((Link) parent).getChildren();
                 for (ModelData child : children) {
                     list.add((Link) child);
@@ -137,7 +137,7 @@ public class ActivityFilterPanel extends ContentPanel implements FilterPanel {
         }
 
         private List<Link> buildTree(SchemaDTO schema) {
-            List<Link> list = new ArrayList<Link>();
+            List<Link> list = new ArrayList<>();
             for (UserDatabaseDTO db : schema.getDatabases()) {
                 if (db.getActivities().size() != 0) {
 
@@ -174,7 +174,9 @@ public class ActivityFilterPanel extends ContentPanel implements FilterPanel {
         private Link activityLink(ActivityDTO activity) {
             return Link.to(new DataEntryPlace(activity))
                                             .labeled(activity.getName())
-                                            .withIcon(IconImageBundle.ICONS.table())
+                                            .withIcon(activity.getClassicView()
+                                                    ? IconImageBundle.ICONS.activity()
+                                                    : IconImageBundle.ICONS.table())
                                             .build();
         }
 
