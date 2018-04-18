@@ -18,6 +18,7 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
+import com.google.common.collect.Lists;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.GrantModel;
@@ -329,8 +330,46 @@ public class UserPermission implements Serializable {
         if(!this.allowView) {
             return Collections.emptyList();
         }
-        GrantModel.Builder grantModel = new GrantModel.Builder();
 
+        if(model == null) {
+            GrantModel.Builder databaseGrant = new GrantModel.Builder();
+            databaseGrant.setResourceId(CuidAdapter.databaseId(database.getId()));
+            setOperations(databaseGrant);
+            return Collections.singletonList(databaseGrant.build());
+        }
+
+        JsonValue modelObject = Json.parse(model);
+
+        if (!modelObject.hasKey("grants")) {
+            LOGGER.severe(() -> "Could not parse permissions model: " + model);
+            throw new UnsupportedOperationException("Unsupported model");
+        }
+
+        List<GrantModel> grants = Lists.newArrayList();
+        modelObject.get("grants").values().forEach(grant -> {
+            if (grant.hasKey("folderId")) {
+                GrantModel.Builder folderGrant = new GrantModel.Builder();
+                folderGrant.setResourceId(ResourceId.valueOf(grant.getString("folderId")));
+                setFolderOperations(folderGrant, grant);
+                grants.add(folderGrant.build());
+            }
+        });
+        return grants;
+    }
+
+    private void setFolderOperations(GrantModel.Builder folderGrantModel, JsonValue folderGrant) {
+        if (!folderGrant.hasKey("operations") || folderGrant.get("operations").length() == 0) {
+            // Set common operations
+            setOperations(folderGrantModel);
+            return;
+        }
+
+        folderGrant.get("operations")
+                .values()
+                .forEach(operation -> folderGrantModel.addOperation(Operation.valueOf(operation.asString())));
+    }
+
+    private void setOperations(GrantModel.Builder grantModel) {
         if(isAllowViewAll()) {
             grantModel.addOperation(Operation.VIEW);
         } else if(isAllowView()) {
@@ -351,24 +390,6 @@ public class UserPermission implements Serializable {
             grantModel.addOperation(Operation.EDIT_FORM);
             grantModel.addOperation(Operation.DELETE_FORM);
         }
-
-        if(model == null) {
-            grantModel.setResourceId(CuidAdapter.databaseId(database.getId()));
-        } else {
-            JsonValue modelObject = Json.parse(model);
-            if(modelObject.hasKey("grants") &&
-               modelObject.get("grants").length() == 1 &&
-               modelObject.get("grants").get(0).hasKey("folderId")) {
-
-                // Temporary format...
-                grantModel.setResourceId(ResourceId.valueOf(modelObject.get("grants").get(0).getString("folderId")));
-            } else {
-                LOGGER.severe("Could not parse permissions model: " + model);
-                throw new UnsupportedOperationException("Unsupported model");
-            }
-        }
-
-        return Collections.singletonList(grantModel.build());
     }
 
     @Transient
