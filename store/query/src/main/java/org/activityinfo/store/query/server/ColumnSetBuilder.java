@@ -74,6 +74,7 @@ public class ColumnSetBuilder {
     }
 
     public ColumnSet build(QueryModel queryModel) {
+        LOGGER.info(() -> "QUERY: " + queryModel);
 
         // We want to make at most one pass over every collection we need to scan,
         // so first queue up all necessary work before executing
@@ -89,6 +90,9 @@ public class ColumnSetBuilder {
             throw new RuntimeException("Failed to execute query batch", e);
         }
 
+        LOGGER.info(() ->
+                "NCOLS:" + columnSet.get().getColumns().size() + "; " +
+                "NROWS:" + columnSet.get().getNumRows());
         return columnSet.get();
     }
 
@@ -136,7 +140,7 @@ public class ColumnSetBuilder {
     private void executeScan(FormScan scan) {
 
         if(scan.isEmpty()) {
-            LOGGER.info("Skipping form scan of " + scan.getFormId() + ", fully resolved from cache");
+            LOGGER.info(() -> "Skipping form scan of " + scan.getFormId() + ", fully resolved from cache");
             return;
         }
 
@@ -153,7 +157,7 @@ public class ColumnSetBuilder {
         Stopwatch stopwatch = Stopwatch.createStarted();
         queryBuilder.execute();
 
-        LOGGER.info("Form scan of " + scan.getFormId() + " completed in " + stopwatch);
+        LOGGER.info(() -> "Form scan of " + scan.getFormId() + " completed in " + stopwatch);
     }
 
 
