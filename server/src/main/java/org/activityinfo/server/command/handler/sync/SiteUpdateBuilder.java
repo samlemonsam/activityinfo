@@ -128,13 +128,15 @@ public class SiteUpdateBuilder implements UpdateBuilder {
         return SqlQuery.select()
                        .from(Tables.ATTRIBUTE_VALUE, "av")
                        .leftJoin(Tables.SITE, "s").on("av.SiteId = s.SiteId")
+                       .leftJoin(Tables.ATTRIBUTE,"a").on("av.AttributeId = a.AttributeId")
                        .appendColumn("av.AttributeId")
                        .appendColumn("av.SiteId")
                        .appendColumn("av.Value")
                        .where("s.ActivityId").equalTo(activity.getId())
                        .where("s.version").greaterThan(localVersion)
                        .whereTrue("av.Value=1")
-                       .whereTrue("s.dateDeleted IS NULL");
+                       .whereTrue("s.dateDeleted IS NULL")
+                       .whereTrue("a.dateDeleted IS NULL");
     }
 
     private SqlQuery updatedSitesQuery() {

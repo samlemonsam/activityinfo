@@ -616,6 +616,7 @@ public class ActivityLoader {
         String sql = "SELECT DISTINCT A.* from attribute A " +
                 "LEFT JOIN attributegroupinactivity G on (A.attributegroupid=G.attributegroupid) " +
                 "WHERE G.activityid IN " + idList(activityIds) + " " +
+                "AND A.dateDeleted IS NULL " +
                 "ORDER BY A.sortorder";
 
         try(ResultSet rs = executor.query(sql)) {

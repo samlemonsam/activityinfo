@@ -907,6 +907,7 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
                 .on("a.AttributeGroupId=g.AttributeGroupId")
                 .whereTrue("v.Value=1")
                 .and("g.dateDeleted IS NULL")
+                .and("a.dateDeleted IS NULL")
                 .orderBy("groupName, attributeName");
 
         if(weAreFetchingAllSitesForAnActivityAndThereAreNoLinkedSites(command, siteMap)) {

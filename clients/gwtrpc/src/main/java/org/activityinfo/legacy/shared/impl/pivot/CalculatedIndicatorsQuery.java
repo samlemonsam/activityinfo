@@ -195,6 +195,7 @@ public class CalculatedIndicatorsQuery implements WorkItem {
                 .from(Tables.ATTRIBUTE, "a")
                 .leftJoin(Tables.ATTRIBUTE_GROUP, "g").on("a.attributeGroupId=g.attributeGroupId")
                 .where("a.attributeGroupId").in(groupIds)
+                .and("a.dateDeleted IS NULL")
                 .execute(queryContext.getExecutionContext().getTransaction(), new SqlResultCallback() {
                     @Override
                     public void onSuccess(SqlTransaction tx, SqlResultSet results) {
