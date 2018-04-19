@@ -155,13 +155,11 @@ public class SideColumnBuilder {
         sql.append("SELECT site.siteId, -1, av.attributeId, av.value").append(newLine);
         sql.append("FROM site").append(newLine);
         sql.append("LEFT JOIN attributevalue av ON (site.siteId = av.siteId)").append(newLine);
-        sql.append("LEFT JOIN attribute a ON (a.AttributeId = av.AttributeId)").append(newLine);
         if(siteId.isPresent()) {
             sql.append("WHERE site.SiteId=").append(siteId.get()).append(newLine);
         } else {
             sql.append("WHERE site.deleted=0 AND site.activityId=").append(activityId).append(newLine);
         }
-        sql.append("AND a.dateDeleted IS NULL").append(newLine);
         sql.append("ORDER BY site.siteId");
         
         execute(executor, sql);
