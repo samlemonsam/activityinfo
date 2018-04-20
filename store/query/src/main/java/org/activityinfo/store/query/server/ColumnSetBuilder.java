@@ -75,6 +75,7 @@ public class ColumnSetBuilder {
 
     public ColumnSet build(QueryModel queryModel) {
         LOGGER.info(() -> "QUERY: " + queryModel);
+        LOGGER.info(() -> "NCOLS: " + queryModel.getColumns().size());
 
         // We want to make at most one pass over every collection we need to scan,
         // so first queue up all necessary work before executing
@@ -90,9 +91,7 @@ public class ColumnSetBuilder {
             throw new RuntimeException("Failed to execute query batch", e);
         }
 
-        LOGGER.info(() ->
-                "NCOLS:" + columnSet.get().getColumns().size() + "; " +
-                "NROWS:" + columnSet.get().getNumRows());
+        LOGGER.info(() -> "NROWS: " + columnSet.get().getNumRows());
         return columnSet.get();
     }
 
