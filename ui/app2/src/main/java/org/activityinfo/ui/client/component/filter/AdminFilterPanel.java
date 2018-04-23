@@ -19,6 +19,7 @@
 package org.activityinfo.ui.client.component.filter;
 
 import com.extjs.gxt.ui.client.Style;
+import com.extjs.gxt.ui.client.data.LoadEvent;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.CheckChangedEvent;
 import com.extjs.gxt.ui.client.event.CheckChangedListener;
@@ -116,7 +117,19 @@ public class AdminFilterPanel extends ContentPanel implements FilterPanel {
         this.setIcon(IconImageBundle.ICONS.filter());
 
         loader = new AdminTreeLoader(dispatcher);
-        store = new TreeStore<AdminEntityDTO>(loader);
+        store = new TreeStore<AdminEntityDTO>(loader) {
+
+            @Override
+            protected void onBeforeLoad(LoadEvent le) {
+                if (isCollapsed()) {
+                    le.setCancelled(true);
+                }
+
+                if (!le.isCancelled() && !this.fireEvent(BeforeDataChanged, this.createStoreEvent())) {
+                    le.setCancelled(true);
+                }
+            }
+        };
     }
 
     private void createFilterToolBar() {
@@ -145,7 +158,7 @@ public class AdminFilterPanel extends ContentPanel implements FilterPanel {
      */
     public List<AdminEntityDTO> getSelection() {
         List<AdminEntityDTO> checked = tree.getCheckedSelection();
-        List<AdminEntityDTO> selected = new ArrayList<AdminEntityDTO>();
+        List<AdminEntityDTO> selected = new ArrayList<>();
 
         for (AdminEntityDTO entity : checked) {
             selected.add(entity);
@@ -222,6 +235,12 @@ public class AdminFilterPanel extends ContentPanel implements FilterPanel {
 
             baseFilter = filter;
         }
+    }
+
+    @Override
+    protected void afterExpand() {
+        super.afterExpand();
+        loader.load();
     }
 
     private void applyInternalState() {
