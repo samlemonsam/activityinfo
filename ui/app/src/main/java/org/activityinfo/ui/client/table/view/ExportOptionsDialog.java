@@ -116,6 +116,21 @@ public class ExportOptionsDialog {
         columnsPanel.add(allColumnsRadio);
         columnsPanel.add(selectedColumnsRadio);
 
+        // Choose to include filter
+        Radio noFilterRadio = new Radio();
+        noFilterRadio.setBoxLabel(I18N.CONSTANTS.noFilter());
+
+        Radio currentFilterRadio = new Radio();
+        currentFilterRadio.setBoxLabel(I18N.CONSTANTS.currentFilter());
+        currentFilterRadio.setValue(true);
+
+        ToggleGroup filterGroup = new ToggleGroup();
+        filterGroup.add(noFilterRadio);
+        filterGroup.add(currentFilterRadio);
+
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.add(noFilterRadio);
+        filterPanel.add(currentFilterRadio);
 
         VerticalLayoutContainer container = new VerticalLayoutContainer();
         Margins fieldMargins = new Margins(5, 10, 5, 10);
@@ -124,6 +139,8 @@ public class ExportOptionsDialog {
                 new VerticalLayoutContainer.VerticalLayoutData(1, -1, fieldMargins));
         container.add(new FieldLabel(columnsPanel, I18N.CONSTANTS.columns()),
                 new VerticalLayoutContainer.VerticalLayoutData(-1, -1, fieldMargins));
+        container.add(new FieldLabel(filterPanel, I18N.CONSTANTS.filter()),
+                new VerticalLayoutContainer.VerticalLayoutData(-1,-1, fieldMargins));
 
         dialog = new Dialog();
         dialog.setHeading(I18N.CONSTANTS.export());
@@ -137,9 +154,10 @@ public class ExportOptionsDialog {
 
         Observable<ResourceId> selectedForm = GxtObservables.of(formCombo).transform(form -> form.formId);
         Observable<ExportScope> columnScope = GxtObservables.of(selectedColumnsRadio).transform(checked -> checked ? ExportScope.SELECTED : ExportScope.ALL);
+        Observable<ExportScope> rowScope = GxtObservables.of(currentFilterRadio).transform(checked -> checked ? ExportScope.SELECTED : ExportScope.ALL);
 
         this.formTree = viewModel.getFormTree();
-        this.exportModel = viewModel.computeExportModel(selectedForm, columnScope);
+        this.exportModel = viewModel.computeExportModel(selectedForm, columnScope, rowScope);
     }
 
 

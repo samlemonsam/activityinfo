@@ -256,6 +256,37 @@ public class TableViewModelTest {
     }
 
     @Test
+    public void testSubFormExportWithFilter() {
+
+        IncidentForm incidentForm = setup.getCatalog().getIncidentForm();
+
+        TableModel tableModel = ImmutableTableModel.builder().formId(incidentForm.getFormId())
+                .addColumns(ImmutableTableColumn.builder()
+                        .label("My PCODE")
+                        .formula(IncidentForm.PROTECTION_CODE_FIELD_ID.asString())
+                        .build())
+                .filter(constructFilter())
+                .build();
+        TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
+
+        Connection<TableModel> exportModel = setup.connect(
+                viewModel.computeExportModel(
+                        Observable.just(ReferralSubForm.FORM_ID),
+                        Observable.just(ExportScope.SELECTED),
+                        Observable.just(ExportScope.SELECTED)));
+
+        System.out.println(Json.stringify(exportModel.assertLoaded().toJson(), 2));
+
+        assertThat(exportModel.assertLoaded().getFormId(), equalTo(ReferralSubForm.FORM_ID));
+        assertThat(exportModel.assertLoaded().getColumns(), hasSize(3));
+        assertThat(exportModel.assertLoaded().getFilter(), equalTo(Optional.of(constructFilter())));
+    }
+
+    private String constructFilter() {
+        return new CompoundExpr(IncidentForm.URGENCY, IncidentForm.HIGH.asString()).asExpression();
+    }
+
+    @Test
     public void testClassicAdminHierarchy() {
 
         LocaliteForm localiteForm = setup.getCatalog().getLocaliteForm();

@@ -1851,4 +1851,11 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("This entry references a site which has been deleted. Please update the location to avoid loss of data.")
     String deletedLocation();
+
+    @DefaultStringValue("No Filter")
+    String noFilter();
+
+    @DefaultStringValue("Current Filter")
+    String currentFilter();
+
 }

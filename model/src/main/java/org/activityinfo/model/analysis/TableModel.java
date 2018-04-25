@@ -67,6 +67,9 @@ public abstract class TableModel implements AnalysisModel  {
             }
             object.put("columns", columnArray);
         }
+        if (getFilter().isPresent()) {
+            object.put("filter", getFilter().get());
+        }
 
         return object;
     }
@@ -81,6 +84,13 @@ public abstract class TableModel implements AnalysisModel  {
                 model.addColumns(TableColumn.fromJson(columnArray.get(i)));
             }
         }
+
+        if (object.hasKey("filter")) {
+            model.filter(Optional.of(object.getString("filter")));
+        } else {
+            model.filter(Optional.absent());
+        }
+
         return model.build();
     }
 }

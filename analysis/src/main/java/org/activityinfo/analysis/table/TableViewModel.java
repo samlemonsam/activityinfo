@@ -195,6 +195,13 @@ public class TableViewModel implements TableUpdater {
     public Observable<TableModel> computeExportModel(
             Observable<ResourceId> selectedForm,
             Observable<ExportScope> columnScope) {
+        return computeExportModel(selectedForm, columnScope, Observable.just(ExportScope.ALL));
+    }
+
+    public Observable<TableModel> computeExportModel(
+            Observable<ResourceId> selectedForm,
+            Observable<ExportScope> columnScope,
+            Observable<ExportScope> rowScope) {
 
         Observable<EffectiveTableModel> parentFormModel = getEffectiveTable();
         Observable<Optional<EffectiveTableModel>> subFormModel = selectedForm.join(formId -> {
@@ -206,7 +213,7 @@ public class TableViewModel implements TableUpdater {
             }
         });
 
-        return Observable.transform(parentFormModel, subFormModel, columnScope, (parent, sub, columns) -> {
+        return Observable.transform(parentFormModel, subFormModel, columnScope, rowScope, (parent, sub, columns, rows) -> {
             ImmutableTableModel.Builder model = ImmutableTableModel.builder();
             if(sub.isPresent()) {
                 model.formId(sub.get().getFormId());
@@ -225,6 +232,9 @@ public class TableViewModel implements TableUpdater {
                                 .build());
                     }
                 }
+                if (rows == ExportScope.SELECTED) {
+                    model.filter(parent.getFilter());
+                }
             } else {
                 model.formId(parent.getFormId());
                 if(columns == ExportScope.SELECTED) {
@@ -235,6 +245,9 @@ public class TableViewModel implements TableUpdater {
                                 .build());
 
                     }
+                }
+                if (rows == ExportScope.SELECTED) {
+                    model.filter(parent.getFilter());
                 }
             }
             return model.build();

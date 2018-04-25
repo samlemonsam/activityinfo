@@ -41,9 +41,9 @@ public class IncidentForm implements TestForm {
 
     public static final ResourceId URGENCY = ResourceId.valueOf("F3");
 
-    private static final ResourceId HIGH = ResourceId.valueOf("U1");
-    private static final ResourceId MEDIUM = ResourceId.valueOf("U2");
-    private static final ResourceId LOW = ResourceId.valueOf("U3");
+    public static final ResourceId HIGH = ResourceId.valueOf("U1");
+    public static final ResourceId MEDIUM = ResourceId.valueOf("U2");
+    public static final ResourceId LOW = ResourceId.valueOf("U3");
 
 
     public static final int ROW_COUNT = 940;
