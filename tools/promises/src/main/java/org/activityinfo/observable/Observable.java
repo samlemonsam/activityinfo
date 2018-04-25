@@ -25,6 +25,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Function3;
+import org.activityinfo.promise.Function4;
 import org.activityinfo.promise.Promise;
 
 import java.util.ArrayList;
@@ -172,6 +173,30 @@ public abstract class Observable<T> {
                 B b = (B) arguments[1];
                 C c = (C) arguments[2];
                 return function.apply(a, b, c);
+            }
+        };
+    }
+
+    public static <A, B, C, D, R> Observable<R> transform(Observable<A> a, Observable<B> b,
+                                                          Observable<C> c, Observable<D> d,
+                                                       final Function4<A, B, C, D, R> function) {
+        return transform(SynchronousScheduler.INSTANCE, a, b, c, d, function);
+    }
+
+    public static <A, B, C, D, R> Observable<R> transform(Scheduler scheduler,
+                                                          Observable<A> a, Observable<B> b,
+                                                          Observable<C> c, Observable<D> d,
+                                                       final Function4<A, B, C, D, R> function) {
+        return new ObservableFunction<R>(scheduler, a, b, c, d) {
+
+            @Override
+            @SuppressWarnings("unchecked")
+            protected R compute(Object[] arguments) {
+                A a = (A) arguments[0];
+                B b = (B) arguments[1];
+                C c = (C) arguments[2];
+                D d = (D) arguments[3];
+                return function.apply(a, b, c, d);
             }
         };
     }
