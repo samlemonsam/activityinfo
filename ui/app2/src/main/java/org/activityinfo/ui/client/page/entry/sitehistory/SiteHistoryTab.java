@@ -88,7 +88,7 @@ public class SiteHistoryTab extends TabItem {
 
         SafeHtmlBuilder html = new SafeHtmlBuilder();
 
-        if(site.getDateCreated().before(HISTORY_AVAILABLE_FROM)) {
+        if(site.getDateCreated() != null && site.getDateCreated().before(HISTORY_AVAILABLE_FROM)) {
             appendItemSpan(html, I18N.MESSAGES.siteHistoryDateCreated(site.getDateCreated()));
             html.appendHtmlConstant("<br>");
             html.appendEscaped(I18N.MESSAGES.siteHistoryAvailableFrom(HISTORY_AVAILABLE_FROM));
