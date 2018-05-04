@@ -238,17 +238,19 @@ public class TableViewModelTest {
                 .build();
         TableViewModel viewModel = new TableViewModel(setup.getFormStore(), tableModel);
 
-        Connection<TableModel> exportModel = setup.connect(
-                viewModel.computeExportModel(
-                    Observable.just(ReferralSubForm.FORM_ID),
-                    Observable.just(ExportScope.SELECTED)));
+        Observable<ExportViewModel> exportModel = viewModel.computeExportModel(
+                Observable.just(ReferralSubForm.FORM_ID),
+                Observable.just(ExportScope.SELECTED));
+        Connection<TableModel> exportModelConnection = setup.connect(exportModel.transform(ExportViewModel::getTableModel));
+        Connection<Boolean> columnLimitConnection = setup.connect(exportModel.transform(ExportViewModel::isColumnLimitExceeded));
 
-        System.out.println(Json.stringify(exportModel.assertLoaded().toJson(), 2));
+        System.out.println(Json.stringify(exportModelConnection.assertLoaded().toJson(), 2));
 
-        assertThat(exportModel.assertLoaded().getFormId(), equalTo(ReferralSubForm.FORM_ID));
-        assertThat(exportModel.assertLoaded().getColumns(), hasSize(3));
+        assertThat(exportModelConnection.assertLoaded().getFormId(), equalTo(ReferralSubForm.FORM_ID));
+        assertThat(exportModelConnection.assertLoaded().getColumns(), hasSize(3));
+        assertThat(columnLimitConnection.assertLoaded(), equalTo(false));
 
-        TableColumn firstColumn = exportModel.assertLoaded().getColumns().get(0);
+        TableColumn firstColumn = exportModelConnection.assertLoaded().getColumns().get(0);
         assertThat(firstColumn.getLabel(), equalTo(Optional.of("My PCODE")));
         assertThat(firstColumn.getFormula(), equalTo(
                 new CompoundExpr(new SymbolNode(ColumnModel.PARENT_SYMBOL),
@@ -273,7 +275,8 @@ public class TableViewModelTest {
                 viewModel.computeExportModel(
                         Observable.just(ReferralSubForm.FORM_ID),
                         Observable.just(ExportScope.SELECTED),
-                        Observable.just(ExportScope.SELECTED)));
+                        Observable.just(ExportScope.SELECTED))
+                        .transform(ExportViewModel::getTableModel));
 
         System.out.println(Json.stringify(exportModel.assertLoaded().toJson(), 2));
 

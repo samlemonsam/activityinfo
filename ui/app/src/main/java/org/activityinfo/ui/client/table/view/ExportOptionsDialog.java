@@ -19,29 +19,27 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.Dialog;
-import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.Radio;
-import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.ExportScope;
+import org.activityinfo.analysis.table.ExportViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.job.JobStatus;
-import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
@@ -52,9 +50,6 @@ import org.activityinfo.ui.client.store.FormStore;
  * Provides user with export options.
  */
 public class ExportOptionsDialog {
-
-    private static final int XLS_COLUMN_LIMIT = 256;
-    private static final String XLS_EXPORT = "XLS";
 
     private class Form {
         private ResourceId formId;
@@ -83,13 +78,13 @@ public class ExportOptionsDialog {
 
     private final ListStore<Form> formListStore;
     private final ComboBox<Form> formCombo;
+    private final Label errorMessage;
 
     private final Dialog dialog;
 
     private final Observable<FormTree> formTree;
-    private final Observable<TableModel> exportModel;
+    private final Observable<ExportViewModel> exportViewModel;
     private final SubscriptionSet subscriptions = new SubscriptionSet();
-    private final SubscriptionSet exportSubscriptions = new SubscriptionSet();
 
 
     public ExportOptionsDialog(FormStore formStore, TableViewModel viewModel) {
@@ -137,6 +132,8 @@ public class ExportOptionsDialog {
         filterPanel.add(noFilterRadio);
         filterPanel.add(currentFilterRadio);
 
+        errorMessage = new Label();
+
         VerticalLayoutContainer container = new VerticalLayoutContainer();
         Margins fieldMargins = new Margins(5, 10, 5, 10);
 
@@ -146,6 +143,8 @@ public class ExportOptionsDialog {
                 new VerticalLayoutContainer.VerticalLayoutData(-1, -1, fieldMargins));
         container.add(new FieldLabel(filterPanel, I18N.CONSTANTS.filter()),
                 new VerticalLayoutContainer.VerticalLayoutData(-1,-1, fieldMargins));
+        container.add(new FieldLabel(errorMessage),
+                new VerticalLayoutContainer.VerticalLayoutData(-1, -1, fieldMargins));
 
         dialog = new Dialog();
         dialog.setHeading(I18N.CONSTANTS.export());
@@ -162,14 +161,14 @@ public class ExportOptionsDialog {
         Observable<ExportScope> rowScope = GxtObservables.of(currentFilterRadio).transform(checked -> checked ? ExportScope.SELECTED : ExportScope.ALL);
 
         this.formTree = viewModel.getFormTree();
-        this.exportModel = viewModel.computeExportModel(selectedForm, columnScope, rowScope);
+        this.exportViewModel = viewModel.computeExportModel(selectedForm, columnScope, rowScope);
     }
 
 
     public void show() {
         dialog.show();
         subscriptions.add(formTree.subscribe(this::onFormTreeChanged));
-        subscriptions.add(exportModel.subscribe(this::onExportModelChanged));
+        subscriptions.add(exportViewModel.subscribe(this::onExportModelChanged));
     }
 
 
@@ -194,9 +193,15 @@ public class ExportOptionsDialog {
         }
     }
 
-
-    private void onExportModelChanged(Observable<TableModel> exportModel) {
-        dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(exportModel.isLoaded());
+    private void onExportModelChanged(Observable<ExportViewModel> exportModel) {
+        if (exportModel.isLoaded()) {
+            dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(exportModel.get().isValid());
+            errorMessage.setText(exportModel.get().getErrorMessage());
+            errorMessage.setVisible(!exportModel.get().isValid());
+        } else {
+            dialog.getButton(Dialog.PredefinedButton.OK).setEnabled(false);
+            errorMessage.setVisible(false);
+        }
     }
 
     private void onCancel(SelectEvent event) {
@@ -208,35 +213,7 @@ public class ExportOptionsDialog {
     }
 
     private void onOk(SelectEvent event) {
-        TableViewModel exportTableView = new TableViewModel(formStore, exportModel.get());
-        exportSubscriptions.add(exportTableView.getEffectiveTable().subscribe(this::onExportTableLoaded));
-    }
-
-    private void onExportTableLoaded(Observable<EffectiveTableModel> effectiveTableModel) {
-        if (!effectiveTableModel.isLoaded()) {
-            return;
-        }
-        EffectiveTableModel exportTable = effectiveTableModel.get();
-        exportSubscriptions.add(exportTable.getColumnSet().subscribe(this::onExportColumnSetLoaded));
-    }
-
-    private void onExportColumnSetLoaded(Observable<ColumnSet> columnSet) {
-        if (!columnSet.isLoaded()) {
-            return;
-        }
-
-        ColumnSet exportColumnSet = columnSet.get();
-        exportSubscriptions.unsubscribeAll();
-
-        if (exportColumnSet.getColumns().size() > XLS_COLUMN_LIMIT) {
-            AlertMessageBox warning = new AlertMessageBox(
-                    I18N.CONSTANTS.warning(),
-                    I18N.MESSAGES.columnLimit(exportColumnSet.getColumns().size(), XLS_COLUMN_LIMIT, XLS_EXPORT));
-            warning.show();
-            return;
-        }
-
-        ExportFormJob exportFormJob = new ExportFormJob(exportModel.get());
+        ExportFormJob exportFormJob = new ExportFormJob(exportViewModel.get().getTableModel());
         dialog.hide();
 
         Observable<JobStatus<ExportFormJob, ExportResult>> jobStatus = formStore.startJob(exportFormJob);

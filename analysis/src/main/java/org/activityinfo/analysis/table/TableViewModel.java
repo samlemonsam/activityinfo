@@ -70,12 +70,16 @@ public class TableViewModel implements TableUpdater {
         this.formStore = formStore;
         this.formTree = formStore.getFormTree(formId);
         this.tableModel = new StatefulValue<>(tableModel);
-        this.effectiveTable = this.tableModel.join(tm -> {
-            return formTree.transform(tree -> new EffectiveTableModel(formStore, tree, tm));
-        });
+        this.effectiveTable = computeEffectiveTableModel(this.tableModel);
 
         this.selectionViewModel = SelectionViewModel.compute(formStore, selectedRecordRef);
         this.columnSet = this.effectiveTable.join(table -> table.getColumnSet());
+    }
+
+    public Observable<EffectiveTableModel> computeEffectiveTableModel(Observable<TableModel> tableModel) {
+        return tableModel.join(tm -> {
+            return formTree.transform(tree -> new EffectiveTableModel(formStore, tree, tm));
+        });
     }
 
     public Observable<TableModel> getTableModel() {
@@ -192,13 +196,13 @@ public class TableViewModel implements TableUpdater {
                 .build());
     }
 
-    public Observable<TableModel> computeExportModel(
+    public Observable<ExportViewModel> computeExportModel(
             Observable<ResourceId> selectedForm,
             Observable<ExportScope> columnScope) {
         return computeExportModel(selectedForm, columnScope, Observable.just(ExportScope.ALL));
     }
 
-    public Observable<TableModel> computeExportModel(
+    public Observable<ExportViewModel> computeExportModel(
             Observable<ResourceId> selectedForm,
             Observable<ExportScope> columnScope,
             Observable<ExportScope> rowScope) {
@@ -213,7 +217,7 @@ public class TableViewModel implements TableUpdater {
             }
         });
 
-        return Observable.transform(parentFormModel, subFormModel, columnScope, rowScope, (parent, sub, columns, rows) -> {
+        Observable<TableModel> exportTableModel = Observable.transform(parentFormModel, subFormModel, columnScope, rowScope, (parent, sub, columns, rows) -> {
             ImmutableTableModel.Builder model = ImmutableTableModel.builder();
             if(sub.isPresent()) {
                 model.formId(sub.get().getFormId());
@@ -252,7 +256,8 @@ public class TableViewModel implements TableUpdater {
             }
             return model.build();
         });
-
+        Observable<Boolean> colLimitExceed = computeEffectiveTableModel(exportTableModel).transform(ExportViewModel::columnLimitExceeded);
+        return Observable.transform(exportTableModel, colLimitExceed, ExportViewModel::new);
     }
 
     private String parentFormula(ParsedFormula formula) {

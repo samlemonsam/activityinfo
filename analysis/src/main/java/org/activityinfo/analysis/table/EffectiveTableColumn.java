@@ -23,6 +23,7 @@ import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 
 import java.util.List;
@@ -90,6 +91,14 @@ public class EffectiveTableColumn {
 
     public <T> T accept(TableColumnVisitor<T> visitor) {
         return format.accept(this, visitor);
+    }
+
+    public int getExportedColumns() {
+        if (formula.isValid() && formula.getResultType() instanceof GeoPointType) {
+            return 2;
+        } else {
+            return 1;
+        }
     }
 
     @Override
