@@ -35,6 +35,8 @@ import java.io.OutputStream;
 
 public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResult> {
 
+    private static final int XLS_COLUMN_LIMITATION = 256;
+
     private final FormSource formSource;
     private final StorageProvider storageProvider;
 
@@ -56,6 +58,10 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
 
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();
         ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
+
+        if (columnSet.getColumns().size() > XLS_COLUMN_LIMITATION) {
+            throw new IOException("Current column length " + columnSet.getColumns().size() + " exceeds XLS Column Limitation of " + XLS_COLUMN_LIMITATION);
+        }
 
         XlsTableWriter writer = new XlsTableWriter();
         writer.addSheet(effectiveTableModel, columnSet);
