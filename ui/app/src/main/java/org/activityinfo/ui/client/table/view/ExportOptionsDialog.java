@@ -89,6 +89,7 @@ public class ExportOptionsDialog {
     private final Observable<FormTree> formTree;
     private final Observable<TableModel> exportModel;
     private final SubscriptionSet subscriptions = new SubscriptionSet();
+    private final SubscriptionSet exportSubscriptions = new SubscriptionSet();
 
 
     public ExportOptionsDialog(FormStore formStore, TableViewModel viewModel) {
@@ -207,16 +208,30 @@ public class ExportOptionsDialog {
     }
 
     private void onOk(SelectEvent event) {
+        TableViewModel exportTableView = new TableViewModel(formStore, exportModel.get());
+        exportSubscriptions.add(exportTableView.getEffectiveTable().subscribe(this::onExportTableLoaded));
+    }
 
-        TableModel exportTable = exportModel.get();
-        TableViewModel exportTableView = new TableViewModel(formStore, exportTable);
-        EffectiveTableModel effectiveExportTable = exportTableView.getEffectiveTable().get();
-        ColumnSet exportColumnSet = effectiveExportTable.getColumnSet().get();
+    private void onExportTableLoaded(Observable<EffectiveTableModel> effectiveTableModel) {
+        if (!effectiveTableModel.isLoaded()) {
+            return;
+        }
+        EffectiveTableModel exportTable = effectiveTableModel.get();
+        exportSubscriptions.add(exportTable.getColumnSet().subscribe(this::onExportColumnSetLoaded));
+    }
+
+    private void onExportColumnSetLoaded(Observable<ColumnSet> columnSet) {
+        if (!columnSet.isLoaded()) {
+            return;
+        }
+
+        ColumnSet exportColumnSet = columnSet.get();
+        exportSubscriptions.unsubscribeAll();
 
         if (exportColumnSet.getColumns().size() > XLS_COLUMN_LIMIT) {
             AlertMessageBox warning = new AlertMessageBox(
                     I18N.CONSTANTS.warning(),
-                    I18N.MESSAGES.columnLimit(effectiveExportTable.getColumns().size(), XLS_COLUMN_LIMIT, XLS_EXPORT));
+                    I18N.MESSAGES.columnLimit(exportColumnSet.getColumns().size(), XLS_COLUMN_LIMIT, XLS_EXPORT));
             warning.show();
             return;
         }

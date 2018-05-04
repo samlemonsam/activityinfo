@@ -24,6 +24,7 @@ import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Padding;
 import com.sencha.gxt.widget.core.client.AutoProgressBar;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
@@ -81,6 +82,13 @@ public class ExportJobDialog {
                     dialog.forceLayout();
 
                     ExportJobDialog.this.dialog.getButton(Dialog.PredefinedButton.CANCEL).setText(I18N.CONSTANTS.close());
+                } else if (observable.get().getState() == JobState.FAILED) {
+                    progressBar.reset();
+                    progressBar.updateProgress(1, I18N.CONSTANTS.error());
+                    ExportJobDialog.this.dialog.getButton(Dialog.PredefinedButton.CANCEL).setText(I18N.CONSTANTS.close());
+
+                    AlertMessageBox warning = new AlertMessageBox(I18N.CONSTANTS.error(),I18N.CONSTANTS.errorOnServer());
+                    warning.show();
                 }
             }
         });
