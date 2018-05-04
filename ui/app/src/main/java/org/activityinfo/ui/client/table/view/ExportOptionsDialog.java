@@ -41,6 +41,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.job.JobStatus;
+import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
@@ -210,8 +211,9 @@ public class ExportOptionsDialog {
         TableModel exportTable = exportModel.get();
         TableViewModel exportTableView = new TableViewModel(formStore, exportTable);
         EffectiveTableModel effectiveExportTable = exportTableView.getEffectiveTable().get();
+        ColumnSet exportColumnSet = effectiveExportTable.getColumnSet().get();
 
-        if (effectiveExportTable.getColumns().size() > XLS_COLUMN_LIMIT) {
+        if (exportColumnSet.getColumns().size() > XLS_COLUMN_LIMIT) {
             AlertMessageBox warning = new AlertMessageBox(
                     I18N.CONSTANTS.warning(),
                     I18N.MESSAGES.columnLimit(effectiveExportTable.getColumns().size(), XLS_COLUMN_LIMIT, XLS_EXPORT));
