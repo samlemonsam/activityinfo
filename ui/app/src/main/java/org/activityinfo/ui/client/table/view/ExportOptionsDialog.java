@@ -24,6 +24,7 @@ import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -50,7 +51,7 @@ import org.activityinfo.ui.client.store.FormStore;
  */
 public class ExportOptionsDialog {
 
-
+    private static final int XLS_COLUMN_LIMIT = 256;
 
     private class Form {
         private ResourceId formId;
@@ -203,6 +204,14 @@ public class ExportOptionsDialog {
     }
 
     private void onOk(SelectEvent event) {
+
+        if (exportModel.get().getColumns().size() > XLS_COLUMN_LIMIT) {
+            AlertMessageBox warning = new AlertMessageBox(I18N.CONSTANTS.warning(),
+                    "Current column length " + exportModel.get().getColumns().size() +
+                    " exceeds XLS Column Limitation of " + XLS_COLUMN_LIMIT);
+            warning.show();
+            return;
+        }
 
         ExportFormJob exportFormJob = new ExportFormJob(exportModel.get());
         dialog.hide();
