@@ -31,6 +31,7 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import com.sencha.gxt.widget.core.client.form.Radio;
+import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.ExportScope;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
@@ -52,6 +53,7 @@ import org.activityinfo.ui.client.store.FormStore;
 public class ExportOptionsDialog {
 
     private static final int XLS_COLUMN_LIMIT = 256;
+    private static final String XLS_EXPORT = "XLS";
 
     private class Form {
         private ResourceId formId;
@@ -205,10 +207,14 @@ public class ExportOptionsDialog {
 
     private void onOk(SelectEvent event) {
 
-        if (exportModel.get().getColumns().size() > XLS_COLUMN_LIMIT) {
-            AlertMessageBox warning = new AlertMessageBox(I18N.CONSTANTS.warning(),
-                    "Current column length " + exportModel.get().getColumns().size() +
-                    " exceeds XLS Column Limitation of " + XLS_COLUMN_LIMIT);
+        TableModel exportTable = exportModel.get();
+        TableViewModel exportTableView = new TableViewModel(formStore, exportTable);
+        EffectiveTableModel effectiveExportTable = exportTableView.getEffectiveTable().get();
+
+        if (effectiveExportTable.getColumns().size() > XLS_COLUMN_LIMIT) {
+            AlertMessageBox warning = new AlertMessageBox(
+                    I18N.CONSTANTS.warning(),
+                    I18N.MESSAGES.columnLimit(effectiveExportTable.getColumns().size(), XLS_COLUMN_LIMIT, XLS_EXPORT));
             warning.show();
             return;
         }

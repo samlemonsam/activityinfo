@@ -282,4 +282,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Distinct count of {0}")
     String countDistinctMeasure(String formLabel);
+
+    @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
+    String columnLimit(int colLength, int colLimit, String exportType);
 }
