@@ -25,6 +25,7 @@ import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
+import org.activityinfo.model.type.time.LocalDateInterval;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.database.hibernate.entity.*;
 
@@ -56,14 +57,22 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
 
         Site site = em.find(Site.class, cmd.getSiteId());
         if(!permissionOracle.isViewAllowed(site, user)) {
-            LOGGER.severe("User " + user.getEmail() + " has no view privs on site " + site.getId() + "," +
+            LOGGER.severe(() -> "User " + user.getEmail() + " has no view privs on site " + site.getId() + "," +
                           "partner = " + site.getPartner().getName() + " " + site.getPartner().getId());
             throw new IllegalAccessCommandException();
         }
 
+        LocalDateInterval startMonthInterval = cmd.getStartMonth().asInterval();
+        LocalDateInterval endMonthInterval = cmd.getEndMonth().asInterval();
+
         List<ReportingPeriod> periods = em.createQuery(
-            "SELECT p from ReportingPeriod p WHERE p.site.id = :siteId", ReportingPeriod.class)
+            "SELECT p from ReportingPeriod p " +
+                    "WHERE p.site.id = :siteId " +
+                    "AND p.date1 >= :date1 " +
+                    "AND p.date2 <= :date2", ReportingPeriod.class)
             .setParameter("siteId", cmd.getSiteId())
+            .setParameter("date1", startMonthInterval.getStartDate().atMidnightInMyTimezone())
+            .setParameter("date2", endMonthInterval.getEndDate().atMidnightInMyTimezone())
             .getResultList();
 
         List<Indicator> indicators = em.createQuery(
@@ -74,36 +83,41 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
            .setParameter("siteId", cmd.getSiteId())
            .getResultList();
 
-        List<IndicatorRowDTO> list = new ArrayList<IndicatorRowDTO>();
+        List<IndicatorRowDTO> list = new ArrayList<>();
 
         for (Indicator indicator : indicators) {
-
-            IndicatorRowDTO dto = new IndicatorRowDTO();
-            dto.setIndicatorId(indicator.getId());
-            dto.setSiteId(cmd.getSiteId());
-            dto.setIndicatorName(indicator.getName());
-            dto.setCategory(indicator.getCategory());
-            dto.setActivityName(indicator.getActivity().getName());
-            dto.setExpression(indicator.getExpression());
-
-            for (ReportingPeriod period : periods) {
-
-                Month month = HandlerUtil.monthFromRange(period.getDate1(), period.getDate2());
-                if (month != null &&
-                    month.compareTo(cmd.getStartMonth()) >= 0 &&
-                    month.compareTo(cmd.getEndMonth()) <= 0) {
-
-                    for (IndicatorValue value : period.getIndicatorValues()) {
-                        if (value.getIndicator().getId() == indicator.getId()) {
-                            dto.setValue(month, value.getValue());
-                        }
-                    }
-                }
-            }
-
+            IndicatorRowDTO dto = buildRowDTO(cmd, indicator);
+            addValues(cmd, dto, periods);
             list.add(dto);
         }
 
         return new MonthlyReportResult(list);
+    }
+
+    private IndicatorRowDTO buildRowDTO(GetMonthlyReports cmd, Indicator indicator) {
+        IndicatorRowDTO dto = new IndicatorRowDTO();
+        dto.setIndicatorId(indicator.getId());
+        dto.setSiteId(cmd.getSiteId());
+        dto.setIndicatorName(indicator.getName());
+        dto.setCategory(indicator.getCategory());
+        dto.setActivityName(indicator.getActivity().getName());
+        dto.setExpression(indicator.getExpression());
+        return dto;
+    }
+
+    private void addValues(GetMonthlyReports cmd, IndicatorRowDTO dto, List<ReportingPeriod> periods) {
+        for (ReportingPeriod period : periods) {
+            Month month = HandlerUtil.monthFromRange(period.getDate1(), period.getDate2());
+            if (month != null &&
+                    month.compareTo(cmd.getStartMonth()) >= 0 &&
+                    month.compareTo(cmd.getEndMonth()) <= 0) {
+
+                for (IndicatorValue value : period.getIndicatorValues()) {
+                    if (value.getIndicator().getId() == dto.getIndicatorId()) {
+                        dto.setValue(month, value.getValue());
+                    }
+                }
+            }
+        }
     }
 }
