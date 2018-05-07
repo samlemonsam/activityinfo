@@ -18,19 +18,16 @@
  */
 package org.activityinfo.ui.client.table.view;
 
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.grid.LiveGridView;
-import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 
 public class LiveRecordGridView extends LiveGridView<Integer> {
-
-    private static final boolean SORTING_IMPLEMENTED = false;
 
     /**
      * Creates a context menu for the given column, including sort menu items and column visibility sub-menu.
@@ -38,34 +35,32 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
      * @param colIndex the column index
      * @return the context menu for the given column
      */
+    @Override
     protected Menu createContextMenu(final int colIndex) {
         final Menu menu = new Menu();
 
-        if (SORTING_IMPLEMENTED && cm.isSortable(colIndex)) {
+        if (cm.isSortable(colIndex)) {
             MenuItem item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortAscText());
             item.setIcon(header.getAppearance().sortAscendingIcon());
-            item.addSelectionHandler(new SelectionHandler<Item>() {
-                @Override
-                public void onSelection(SelectionEvent<Item> event) {
-                    doSort(colIndex, SortDir.ASC);
-                }
-            });
+            item.addSelectionHandler(select -> sort(colIndex, SortDir.ASC));
             menu.add(item);
 
             item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortDescText());
             item.setIcon(header.getAppearance().sortDescendingIcon());
-            item.addSelectionHandler(new SelectionHandler<Item>() {
-                @Override
-                public void onSelection(SelectionEvent<Item> event) {
-                    doSort(colIndex, SortDir.DESC);
-                }
-            });
+            item.addSelectionHandler(select -> sort(colIndex, SortDir.DESC));
             menu.add(item);
         }
 
         return menu;
+    }
+
+    private void sort(int colIndex, SortDir dir) {
+        ValueProvider vp = cm.getColumn(colIndex).getValueProvider();
+        Store.StoreSortInfo sortInfo = new Store.StoreSortInfo(vp, dir);
+        grid.getStore().clearSortInfo();
+        grid.getStore().addSortInfo(sortInfo);
     }
 
     @Override

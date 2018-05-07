@@ -27,7 +27,6 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
 import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoader;
-import com.sencha.gxt.widget.core.client.event.SortChangeEvent;
 import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.Grid;
@@ -73,7 +72,6 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
 
         proxy = new ColumnSetProxy();
         loader = new PagingLoader<>(proxy);
-        loader.setRemoteSort(true);
 
         store = new ListStore<>(index -> index.toString());
 
@@ -107,7 +105,6 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         grid.setLoadMask(true);
         grid.setView(gridView);
         grid.setSelectionModel(sm);
-        grid.addSortChangeHandler(this::changeSort);
 
         // Setup grid filters
         filters = new TableGridFilters(tableUpdater);
@@ -125,7 +122,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
 
         ColumnConfig<Integer, Object> column = grid.getColumnModel().getColumn(e.getColumnIndex());
 
-        LOGGER.info("Column " + column.getValueProvider().getPath() + " resized to " + e.getColumnWidth() + "px");
+        LOGGER.info(() -> "Column " + column.getValueProvider().getPath() + " resized to " + e.getColumnWidth() + "px");
 
         tableUpdater.updateColumnWidth(column.getValueProvider().getPath(), e.getColumnWidth());
     }
@@ -141,13 +138,6 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
                 eventBus.fireEvent(new SelectionChangedEvent<>(Collections.singletonList(selectedRef)));
             }
         }
-    }
-
-    /**
-     * Changes the current sort order based on the user's input.
-     */
-    private void changeSort(SortChangeEvent event) {
-        // TODO
     }
 
     public boolean updateView(EffectiveTableModel tableModel) {
