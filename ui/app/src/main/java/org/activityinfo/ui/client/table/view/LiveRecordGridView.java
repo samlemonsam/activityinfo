@@ -60,6 +60,7 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
         ValueProvider vp = cm.getColumn(colIndex).getValueProvider();
         Store.StoreSortInfo sortInfo = new Store.StoreSortInfo(vp, dir);
         grid.getStore().clearSortInfo();
+        grid.getLoader().load();
         grid.getStore().addSortInfo(sortInfo);
     }
 
