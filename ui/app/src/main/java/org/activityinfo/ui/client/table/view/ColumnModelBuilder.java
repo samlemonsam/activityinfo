@@ -38,7 +38,6 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -119,7 +118,6 @@ public class ColumnModelBuilder {
 
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
-        config.setComparator(Comparator.naturalOrder());
         columnConfigs.add(config);
 
         StringFilter<Integer> filter = new StringFilter<>(valueProvider);
@@ -133,7 +131,6 @@ public class ColumnModelBuilder {
         ColumnConfig<Integer, Double> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         config.setHeader(tableColumn.getLabel());
-        config.setComparator(Comparator.naturalOrder());
         columnConfigs.add(config);
 
         NumericFilter<Integer, Double> filter = new NumericFilter<>(valueProvider,
@@ -148,7 +145,6 @@ public class ColumnModelBuilder {
 
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
-        config.setComparator(Comparator.naturalOrder());
         columnConfigs.add(config);
 
         addEnumFilter(valueProvider.getPath(), tableColumn, (EnumType) tableColumn.getType());
@@ -172,7 +168,6 @@ public class ColumnModelBuilder {
         ColumnConfig<Integer, Date> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
         config.setCell(new DateCell(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)));
-        config.setComparator(Comparator.naturalOrder());
         columnConfigs.add(config);
 
         DateFilter<Integer> filter = new DateFilter<>(valueProvider);
@@ -186,7 +181,6 @@ public class ColumnModelBuilder {
 
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
-        config.setComparator(Comparator.naturalOrder());
         columnConfigs.add(config);
 
         addEnumFilter(valueProvider.getPath(), tableColumn, (EnumType) tableColumn.getType());
@@ -204,13 +198,11 @@ public class ColumnModelBuilder {
         ColumnConfig<Integer, Double> latitudeConfig = new ColumnConfig<>(latProvider);
         latitudeConfig.setHeader(I18N.CONSTANTS.latitude());
         latitudeConfig.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        latitudeConfig.setSortable(false);
         columnConfigs.add(latitudeConfig);
 
         ColumnConfig<Integer, Double> longitudeConfig = new ColumnConfig<>(lngProvider);
         longitudeConfig.setHeader(I18N.CONSTANTS.longitude());
         longitudeConfig.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        longitudeConfig.setSortable(false);
         columnConfigs.add(longitudeConfig);
 
         HeaderGroupConfig groupConfig = new HeaderGroupConfig(SafeHtmlUtils.fromString(columnModel.getLabel()), 1, 2);
@@ -241,7 +233,6 @@ public class ColumnModelBuilder {
         config.setHeader(tableColumn.getLabel());
         config.setCell(new ErrorCell());
         config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
-        config.setSortable(false);
         columnConfigs.add(config);
 
         StringFilter<Integer> filter = new StringFilter<>(valueProvider);
