@@ -19,8 +19,7 @@
 package org.activityinfo.ui.client.page.entry;
 
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
-import com.extjs.gxt.ui.client.event.SelectionChangedListener;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
@@ -168,9 +167,15 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         tabPanel.add(attachmentsTab);
         tabPanel.add(siteHistoryTab);
         tabPanel.setSelection(detailTab);
+        tabPanel.addListener(Events.Select, this::monthlyReportsSelection);
         center.add(tabPanel, tabPanel.getBorderLayoutData());
         onNoSelection();
         add(center, new BorderLayoutData(LayoutRegion.CENTER));
+    }
+
+    private void monthlyReportsSelection(BaseEvent tabSelect) {
+        monthlyPanel.setActive(tabPanel.getSelectedItem().equals(monthlyTab));
+        monthlyPanel.loadIfActive();
     }
 
     private ActionToolBar createToolBar() {

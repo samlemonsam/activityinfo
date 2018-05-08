@@ -71,6 +71,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
     private MonthlyGrid grid;
     private ReportingPeriodProxy proxy;
     private MappingComboBox<Month> monthCombo;
+    private boolean active = false;
 
     private int currentSiteId;
     private ActivityFormDTO currentActivity;
@@ -212,7 +213,17 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         grid.setReadOnly(currentActivity.isAllowedToEdit(site));
         proxy.setStartMonth(currentMonth);
         proxy.setSiteId(site.getId());
-        loader.load();
+        loadIfActive();
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void loadIfActive() {
+        if (active) {
+            loader.load();
+        }
     }
 
     private Predicate<Month> createLockPredicate(final LockedPeriodSet lockedPeriodSet) {
@@ -226,7 +237,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         currentMonth = startMonth;
         proxy.setStartMonth(startMonth);
         grid.updateMonthColumns(startMonth);
-        loader.load();
+        loadIfActive();
     }
 
     private Month getInitialStartMonth(SiteDTO site) {
