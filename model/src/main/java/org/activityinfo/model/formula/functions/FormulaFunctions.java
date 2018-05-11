@@ -64,6 +64,7 @@ public final class FormulaFunctions {
             register(MaxFunction.INSTANCE);
             register(MinFunction.INSTANCE);
             register(CountFunction.INSTANCE);
+            register(CountDistinctFunction.INSTANCE);
 
             register(BoundingBoxFunction.XMIN);
             register(BoundingBoxFunction.YMIN);
