@@ -25,8 +25,10 @@ import org.activityinfo.model.query.ConstantColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.TextType;
 
 import java.util.List;
 
@@ -91,12 +93,26 @@ public class SearchFunction extends FormulaFunction implements ColumnFunction {
 
     @Override
     public FieldType resolveResultType(List<FieldType> argumentTypes) {
-        if(argumentTypes.size() != 1) {
-            throw new FormulaSyntaxException("Expected single argument");
+        checkArity(argumentTypes.size());
+        checkType(argumentTypes.get(0));
+        checkType(argumentTypes.get(1));
+        if (argumentTypes.size() == 3) {
+            checkIndexType(argumentTypes.get(2));
         }
         return new QuantityType();
     }
 
+    private void checkIndexType(FieldType arg) {
+        if (!(arg instanceof QuantityType)) {
+            throw new FormulaSyntaxException("SEARCH() expects a Quantity Field startIndex argument.");
+        }
+    }
+
+    private void checkType(FieldType arg) {
+        if (!(arg instanceof TextType || arg instanceof NarrativeType)) {
+            throw new FormulaSyntaxException("SEARCH() expects two Text/Narrative Field arguments.");
+        }
+    }
 
     private void checkArity(int count) {
         if(count < 2 || count > 3) {
