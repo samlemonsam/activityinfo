@@ -118,66 +118,6 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private final Stopwatch monthlyMergeTime = Stopwatch.createUnstarted();
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
 
-    private class SiteComparator implements Comparator<SiteDTO> {
-
-        private SortInfo sortInfo;
-
-        public SiteComparator(SortInfo sortInfo) {
-            assert(sortInfo != null);
-            this.sortInfo = sortInfo;
-        }
-
-        @Override
-        public int compare(SiteDTO o1, SiteDTO o2) {
-            assert(o1 != null);
-            assert(o2 != null);
-
-            if (sortInfo.getSortField() != null) {
-                Object f1 = o1.get(sortInfo.getSortField());
-                Object f2 = o2.get(sortInfo.getSortField());
-
-                if (f1 == null || f2 == null) {
-                    LOGGER.log(Level.WARNING,"Cannot retrieve referenced sort field: {0}", sortInfo.getSortField());
-                    return 0;
-                }
-
-                switch (sortInfo.getSortDir()) {
-                    case ASC:
-                        return compareFields(f1, f2);
-                    case DESC:
-                    default:
-                        return -compareFields(f1, f2);
-                }
-            }
-
-            return 0;
-        }
-
-        private int compareFields(Object f1, Object f2) {
-            if (f1 instanceof Integer && f2 instanceof Integer) {
-                return ((Integer) f1).compareTo((Integer) f2);
-            } else if (f1 instanceof LocalDate && f2 instanceof LocalDate) {
-                return ((LocalDate) f1).compareTo((LocalDate) f2);
-            } else if (f1 instanceof String && f2 instanceof String) {
-                return ((String) f1).compareTo((String) f2);
-            } else if (f1 instanceof Double && f2 instanceof Double) {
-                return ((Double) f1).compareTo((Double) f2);
-            } else if (f1 instanceof AdminEntityDTO && f2 instanceof AdminEntityDTO) {
-                return ((AdminEntityDTO) f1).getName().compareTo(((AdminEntityDTO) f2).getName());
-            } else if (f1 instanceof LocationDTO && f2 instanceof LocationDTO) {
-                return ((LocationDTO) f1).getName().compareTo(((LocationDTO) f2).getName());
-            } else if (f1 instanceof PartnerDTO && f2 instanceof PartnerDTO) {
-                return ((PartnerDTO) f1).getName().compareTo(((PartnerDTO) f2).getName());
-            } else if (f1 instanceof ProjectDTO && f2 instanceof ProjectDTO) {
-                return ((ProjectDTO) f1).getName().compareTo(((ProjectDTO) f2).getName());
-            } else {
-                LOGGER.log(Level.WARNING,"Unimplemented sort on GetSites: '{0}'", sortInfo.getSortField());
-                return 0;
-            }
-        }
-
-    }
-
     @Override
     public SiteResult execute(GetSites cmd, User user) {
 
@@ -194,10 +134,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             checkForLinkedActivities();
             queryFormTrees();
             buildQueries();
+            setQuerySort();
             batchQueries();
             executeBatch();
             mergeMonthlyRootSites();
-            sort();
         } catch (CommandException excp) {
             // If we catch a CommandException, lets try the legacy method
             // TODO: Strip this out once robustness is established, and the Linked Indicator feature is disabled
@@ -618,31 +558,23 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         Trace.endSpan(monthlyMergeTrace);
     }
 
-    private void sort() {
-        if (sortInfo != null && !siteList.isEmpty()) {
-            TraceContext sortTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/sortSites");
-            SiteComparator comparator = new SiteComparator(sortInfo);
-            siteList.sort(comparator);
-            Trace.endSpan(sortTrace);
+    private void setQuerySort() {
+        if (sortInfo == null) {
+            return;
         }
-    }
 
-    // Sorting on QueryEngine level
-    private void setQuerySort(QueryModel query) {
-        if (sortInfo != null) {
-            SortModel sortModel;
-            switch(sortInfo.getSortDir()) {
-                case ASC:
-                    sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortModel.Dir.ASC);
-                    query.addSortModel(sortModel);
-                    break;
-                case DESC:
-                default:
-                    sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortModel.Dir.DESC);
-                    query.addSortModel(sortModel);
-                    break;
-            }
+        SortModel sortModel;
+        switch(sortInfo.getSortDir()) {
+            case ASC:
+                sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortModel.Dir.ASC);
+                break;
+            case DESC:
+            default:
+                sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortModel.Dir.DESC);
+                break;
         }
+
+        queryMap.values().forEach(query -> query.addSortModel(sortModel));
     }
 
     // Transform from SortInfo fields to QueryEngine columns
