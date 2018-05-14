@@ -588,7 +588,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             return StartEndDateFieldBinding.END_DATE_COLUMN;
         } else if (sortField.equals("locationName")) {
             return LocationFieldBinding.LOCATION_NAME_COLUMN;
-        } else if (sortField.equals("partner")) {
+        } else if (sortField.equals("partner.name")) {
             return PartnerDimBinding.PARTNER_LABEL_COLUMN;
         } else if (sortField.equals("project")) {
             return ProjectDimBinding.PROJECT_LABEL_COLUMN;
