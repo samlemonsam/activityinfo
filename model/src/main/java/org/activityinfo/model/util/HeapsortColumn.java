@@ -38,6 +38,30 @@ public final class HeapsortColumn {
         }
     }
 
+    private static int compare(String[] labels, int enum1, int enum2) {
+        if (enum1 == enum2) {
+            return 0;
+        } else if (enum1 == -1) {
+            return -1;
+        } else if (enum2 == -1) {
+            return 1;
+        } else {
+            return labels[enum1].compareTo(labels[enum2]);
+        }
+    }
+
+    private static int compare(String[] labels, byte enum1, byte enum2) {
+        if (enum1 == enum2) {
+            return 0;
+        } else if (enum1 == -1) {
+            return -1;
+        } else if (enum2 == -1) {
+            return 1;
+        } else {
+            return labels[enum1].compareTo(labels[enum2]);
+        }
+    }
+
     /**
      * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
      * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
@@ -1320,7 +1344,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumAscending(int[] val, String[] labels, int[] index, int n, int[] range) {
         int l, j, ir, i;
-        String ra;
+        int ra;
         int ii;
 
         if (n <= 1 || n != range.length) {
@@ -1339,12 +1363,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[range[l]];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[range[ir]];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[range[ir]] = index[range[0]];
 
                 if (--ir == 0) {
@@ -1356,10 +1380,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[range[j]]]].compareTo(labels[val[index[range[j+1]]]])) < 0 || i == j) {
+                if (j < ir && compare(labels, val[index[range[j]]], val[index[range[j+1]]]) < 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[range[j]]]])) < 0) {
+                if (compare(labels, ra, val[index[range[j]]]) < 0) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -1382,7 +1406,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumAscending(int[] val, String[] labels, int[] index, int n) {
         int l, j, ir, i;
-        String ra;
+        int ra;
         int ii;
 
         if (n <= 1) {
@@ -1401,12 +1425,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[l];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[ir];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[ir] = index[0];
 
                 if (--ir == 0) {
@@ -1418,10 +1442,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[j]]].compareTo(labels[val[index[j+1]]])) < 0 || i == j) {
+                if (j < ir && compare(labels, val[index[j]], val[index[j+1]]) < 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[j]]])) < 0) {
+                if (compare(labels, ra, val[index[j]]) < 0) {
                     index[i] = index[j];
                     j += (i = j);
                 }
@@ -1446,7 +1470,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumDescending(int[] val, String[] labels, int[] index, int n, int[] range) {
         int l, j, ir, i;
-        String ra;
+        int ra;
         int ii;
 
         if (n <= 1 || n != range.length) {
@@ -1465,12 +1489,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[range[l]];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[range[ir]];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[range[ir]] = index[range[0]];
 
                 if (--ir == 0) {
@@ -1482,10 +1506,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[range[j]]]].compareTo(labels[val[index[range[j+1]]]])) > 0 || i == j) {
+                if (j < ir && compare(labels, val[index[range[j]]], val[index[range[j+1]]]) > 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[range[j]]]])) > 0) {
+                if (compare(labels, ra, val[index[range[j]]]) > 0) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -1508,7 +1532,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumDescending(int[] val, String[] labels, int[] index, int n) {
         int l, j, ir, i;
-        String ra;
+        int ra;
         int ii;
 
         if (n <= 1) {
@@ -1527,12 +1551,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[l];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[ir];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[ir] = index[0];
 
                 if (--ir == 0) {
@@ -1544,10 +1568,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[j]]].compareTo(labels[val[index[j+1]]])) > 0 || i == j) {
+                if (j < ir && compare(labels, val[index[j]], val[index[j+1]]) > 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[j]]])) > 0) {
+                if (compare(labels, ra, val[index[j]]) > 0) {
                     index[i] = index[j];
                     j += (i = j);
                 }
@@ -1574,7 +1598,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumAscending(byte[] val, String[] labels, int[] index, int n, int[] range) {
         int l, j, ir, i;
-        String ra;
+        byte ra;
         int ii;
 
         if (n <= 1 || n != range.length) {
@@ -1593,12 +1617,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[range[l]];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[range[ir]];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[range[ir]] = index[range[0]];
 
                 if (--ir == 0) {
@@ -1610,10 +1634,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[range[j]]]].compareTo(labels[val[index[range[j+1]]]])) < 0 || i == j) {
+                if (j < ir && compare(labels, val[index[range[j]]], val[index[range[j+1]]]) < 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[range[j]]]])) < 0) {
+                if (compare(labels, ra, val[index[range[j]]]) < 0) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -1636,7 +1660,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumAscending(byte[] val, String[] labels, int[] index, int n) {
         int l, j, ir, i;
-        String ra;
+        byte ra;
         int ii;
 
         if (n <= 1) {
@@ -1655,12 +1679,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[l];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[ir];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[ir] = index[0];
 
                 if (--ir == 0) {
@@ -1672,10 +1696,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[j]]].compareTo(labels[val[index[j+1]]])) < 0 || i == j) {
+                if (j < ir && compare(labels, val[index[j]], val[index[j+1]]) < 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[j]]])) < 0) {
+                if (compare(labels, ra, val[index[j]]) < 0) {
                     index[i] = index[j];
                     j += (i = j);
                 }
@@ -1700,7 +1724,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumDescending(byte[] val, String[] labels, int[] index, int n, int[] range) {
         int l, j, ir, i;
-        String ra;
+        byte ra;
         int ii;
 
         if (n <= 1 || n != range.length) {
@@ -1719,12 +1743,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[range[l]];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[range[ir]];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[range[ir]] = index[range[0]];
 
                 if (--ir == 0) {
@@ -1736,10 +1760,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[range[j]]]].compareTo(labels[val[index[range[j+1]]]])) > 0 || i == j) {
+                if (j < ir && compare(labels, val[index[range[j]]], val[index[range[j+1]]]) > 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[range[j]]]])) > 0) {
+                if (compare(labels, ra, val[index[range[j]]]) > 0) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -1762,7 +1786,7 @@ public final class HeapsortColumn {
      */
     public static void heapsortEnumDescending(byte[] val, String[] labels, int[] index, int n) {
         int l, j, ir, i;
-        String ra;
+        byte ra;
         int ii;
 
         if (n <= 1) {
@@ -1781,12 +1805,12 @@ public final class HeapsortColumn {
             if (l > 0) {
                 l = l - 1;
                 ii = index[l];
-                ra = labels[val[ii]];
+                ra = val[ii];
             }
 
             else {
                 ii = index[ir];
-                ra = labels[val[ii]];
+                ra = val[ii];
                 index[ir] = index[0];
 
                 if (--ir == 0) {
@@ -1798,10 +1822,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (labels[val[index[j]]].compareTo(labels[val[index[j+1]]])) > 0 || i == j) {
+                if (j < ir && compare(labels, val[index[j]], val[index[j+1]]) > 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(labels[val[index[j]]])) > 0) {
+                if (compare(labels, ra, val[index[j]]) > 0) {
                     index[i] = index[j];
                     j += (i = j);
                 }

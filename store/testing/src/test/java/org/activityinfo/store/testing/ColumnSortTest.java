@@ -92,10 +92,10 @@ public class ColumnSortTest {
         ColumnView pregnantColumn = columnSet.getColumnView("pregnant");
 
         assertThat(columnSet.getNumRows(), equalTo(Survey.getRowCount()));
-        //assertFalse(pregnantColumn.isMissing(0));
-        //assertTrue(pregnantColumn.isMissing(Survey.getRowCount()-1));
-        //assertThat(pregnantColumn.get(0), equalTo("Sue"));
-        //assertNull(pregnantColumn.get(Survey.getRowCount()-1));
+        assertFalse(pregnantColumn.isMissing(0));
+        assertTrue(pregnantColumn.isMissing(Survey.getRowCount()-1));
+        assertThat(pregnantColumn.get(0), equalTo(form.getPregnantYes().getLabel()));
+        assertNull(pregnantColumn.get(Survey.getRowCount()-1));
 
         queryModel.getSortModels().clear();
         queryModel.addSortModel(new SortModel("pregnant", SortModel.Dir.ASC));
@@ -103,10 +103,10 @@ public class ColumnSortTest {
         pregnantColumn = columnSet.getColumnView("pregnant");
 
         assertThat(columnSet.getNumRows(), equalTo(Survey.getRowCount()));
-        //assertTrue(pregnantColumn.isMissing(0));
-        //assertFalse(pregnantColumn.isMissing(Survey.getRowCount()-1));
-        //assertNull(pregnantColumn.get(0));
-        //assertThat(pregnantColumn.get(Survey.getRowCount()-1), equalTo("Sue"));
+        assertTrue(pregnantColumn.isMissing(0));
+        assertFalse(pregnantColumn.isMissing(Survey.getRowCount()-1));
+        assertNull(pregnantColumn.get(0));
+        assertThat(pregnantColumn.get(Survey.getRowCount()-1), equalTo(form.getPregnantYes().getLabel()));
 
     }
 
