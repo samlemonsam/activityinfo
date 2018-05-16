@@ -26,6 +26,18 @@ package org.activityinfo.model.util;
  */
 public final class HeapsortColumn {
 
+    private static int compare(String str1, String str2) {
+        if (str1 == str2) {
+            return 0;
+        } else if (str1 == null) {
+            return -1;
+        } else if (str2 == null) {
+            return 1;
+        } else {
+            return str1.compareTo(str2);
+        }
+    }
+
     /**
      * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
      * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
@@ -1090,10 +1102,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (val[index[range[j]]].compareTo(val[index[range[j+1]]])) < 0 || i == j) {
+                if (j < ir && compare(val[index[range[j]]], val[index[range[j+1]]]) < 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(val[index[range[j]]])) < 0) {
+                if (compare(ra, val[index[range[j]]]) < 0) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -1152,10 +1164,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (val[index[j]].compareTo(val[index[j+1]])) < 0 || i == j) {
+                if (j < ir && compare(val[index[j]], val[index[j+1]]) < 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(val[index[j]])) < 0) {
+                if (compare(ra, val[index[j]]) < 0) {
                     index[i] = index[j];
                     j += (i = j);
                 }
@@ -1216,10 +1228,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (val[index[range[j]]].compareTo(val[index[range[j+1]]])) > 0 || i == j) {
+                if (j < ir && compare(val[index[range[j]]], val[index[range[j+1]]]) > 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(val[index[range[j]]])) > 0) {
+                if (compare(ra, val[index[range[j]]]) > 0) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -1278,10 +1290,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && (val[index[j]].compareTo(val[index[j+1]])) > 0 || i == j) {
+                if (j < ir && compare(val[index[j]], val[index[j+1]]) > 0 || i == j) {
                     ++j;
                 }
-                if ((ra.compareTo(val[index[j]])) > 0) {
+                if (compare(ra, val[index[j]]) > 0) {
                     index[i] = index[j];
                     j += (i = j);
                 }
