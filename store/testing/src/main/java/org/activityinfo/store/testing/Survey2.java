@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * An example of a Survey Form
  */
-public class Survey implements TestForm {
+public class Survey2 implements TestForm {
 
 
     private static final int ROW_COUNT = 536;
@@ -70,13 +70,14 @@ public class Survey implements TestForm {
     private final EnumItem wealthRadio;
     private final EnumItem wealthFridge;
     private final FormField badCalculatedField;
+    private final FormField spouseField;
 
-    public Survey() {
+    public Survey2() {
         this(new UnitTestingIds());
     }
 
-    public Survey(Ids ids) {
-        formClass = new FormClass(ids.formId("SURVEY_FORM"));
+    public Survey2(Ids ids) {
+        formClass = new FormClass(ids.formId("SURVEY_FORM_2"));
         formClass.setLabel("Household Survey");
         formClass.setDatabaseId(ids.databaseId());
 
@@ -175,6 +176,14 @@ public class Survey implements TestForm {
                     wealthTv,
                     wealthRadio,
                     wealthFridge));
+
+        spouseField = formClass.addField(ids.fieldId("F13"))
+                .setCode("SPOUSENAME")
+                .setLabel("Respondent Spouse Name")
+                .setType(TextType.SIMPLE)
+                .setRelevanceConditionExpression("MARRIED==" + married.getId().asString())
+                .setRequired(false)
+                .setVisible(true);
 
         recordGenerator = new RecordGenerator(ids, formClass)
                 .distribution(ageField.getId(), new IntegerGenerator(15, 99, 0.05))
@@ -304,6 +313,10 @@ public class Survey implements TestForm {
 
     public EnumItem getPregnantNo() {
         return pregnantNo;
+    }
+
+    public ResourceId getSpouseFieldId() {
+        return spouseField.getId();
     }
 
     @Override

@@ -24,7 +24,7 @@ public class ColumnSortTest {
 
     @Test
     public void missingQuantityValues() {
-        Survey form = testingCatalog.getSurvey();
+        Survey2 form = testingCatalog.getSurvey2();
 
         QueryModel queryModel = new QueryModel(form.getFormId());
         queryModel.selectField(form.getChildrenFieldId()).as("children");
@@ -53,7 +53,7 @@ public class ColumnSortTest {
 
     @Test
     public void missingStringValues() {
-        Survey form = testingCatalog.getSurvey();
+        Survey2 form = testingCatalog.getSurvey2();
 
         QueryModel queryModel = new QueryModel(form.getFormId());
         queryModel.selectField(form.getSpouseFieldId()).as("spouse");
@@ -82,7 +82,7 @@ public class ColumnSortTest {
 
     @Test
     public void missingEnumValues() {
-        Survey form = testingCatalog.getSurvey();
+        Survey2 form = testingCatalog.getSurvey2();
 
         QueryModel queryModel = new QueryModel(form.getFormId());
         queryModel.selectField(form.getPregnantFieldId()).as("pregnant");
