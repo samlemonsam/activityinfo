@@ -91,6 +91,14 @@ public class SortModel {
             endIndex++;
         }
 
+        public int getStart() {
+            return endIndex == -1 ? -1 : rows[0];
+        }
+
+        public int getEnd() {
+            return endIndex == -1 ? -1 : rows[endIndex];
+        }
+
         private int[] copySubset(int[] array, int from, int to) {
             int[] subset = new int[to-from+1];
             for (int i=0; i<subset.length; i++) {
