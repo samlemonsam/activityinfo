@@ -183,7 +183,7 @@ public class QueryEvaluator {
         // group together like members
         // order within each group which has more than one member, after we transition to a new group
         for (int i=1; i<sortVector.length; i++) {
-            if (sortColumn.get(sortVector[i-1]).equals(sortColumn.get(sortVector[i]))) {
+            if (Objects.equals(sortColumn.get(sortVector[i-1]), sortColumn.get(sortVector[i]))) {
                 // same group - add to group's range
                 range.addToRange(i);
             } else if (range.getRangeSize() == 1){
