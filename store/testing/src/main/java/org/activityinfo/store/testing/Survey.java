@@ -70,6 +70,7 @@ public class Survey implements TestForm {
     private final EnumItem wealthRadio;
     private final EnumItem wealthFridge;
     private final FormField badCalculatedField;
+    private final FormField spouseField;
 
     public Survey() {
         this(new UnitTestingIds());
@@ -175,6 +176,14 @@ public class Survey implements TestForm {
                     wealthTv,
                     wealthRadio,
                     wealthFridge));
+
+        spouseField = formClass.addField(ids.fieldId("F13"))
+                .setCode("SPOUSENAME")
+                .setLabel("Respondent Spouse Name")
+                .setType(TextType.SIMPLE)
+                .setRelevanceConditionExpression("MARRIED==" + married.getId().asString())
+                .setRequired(false)
+                .setVisible(true);
 
         recordGenerator = new RecordGenerator(ids, formClass)
                 .distribution(ageField.getId(), new IntegerGenerator(15, 99, 0.05))
@@ -304,6 +313,10 @@ public class Survey implements TestForm {
 
     public EnumItem getPregnantNo() {
         return pregnantNo;
+    }
+
+    public ResourceId getSpouseFieldId() {
+        return spouseField.getId();
     }
 
     @Override
