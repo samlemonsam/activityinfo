@@ -199,6 +199,9 @@ public class EffectiveTableModel {
         if(tableModel.getFilter().isPresent()) {
             queryModel.setFilter(tableModel.getFilter().get());
         }
+        for (SortModel sortModel : tableModel.getSorting()) {
+            queryModel.addSortModel(sortModel);
+        }
         queryModel.selectResourceId().as(ID_COLUMN_ID);
         for (EffectiveTableColumn column : columns) {
             queryModel.addColumns(column.getQueryModel());
