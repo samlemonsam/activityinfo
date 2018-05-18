@@ -55,7 +55,7 @@
 
                 <div class="control-group">
                     <label class="checkbox">
-                        <input type="checkbox" checked="true" name="newsletter" value="true">
+                        <input type="checkbox" checked="false" name="newsletter" value="true">
                     ${label.newsletter}
                     </label>
                 </div>
