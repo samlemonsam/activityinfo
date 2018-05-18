@@ -24,6 +24,7 @@ import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.widget.Info;
+import com.extjs.gxt.ui.client.widget.Label;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.form.AdapterField;
 import com.extjs.gxt.ui.client.widget.form.CheckBox;
@@ -117,6 +118,11 @@ public class UserProfilePage extends FormPanel implements Page {
         localeLinkField.setVisible(false);
         localeLinkField.setLabelSeparator("");
         this.add(localeLinkField);
+
+        Label supportMessage = new Label("\n" + I18N.CONSTANTS.requestDeleteChangeEmail());
+        supportMessage.setStyleAttribute("font-family", "sans-serif");
+        supportMessage.setStyleAttribute("font-size", "small");
+        this.add(supportMessage);
         
         bindProfile();
     }
