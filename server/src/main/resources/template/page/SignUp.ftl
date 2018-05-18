@@ -69,7 +69,11 @@
 
                         <label>
                             <input type="checkbox" id="termsCheckbox" name="terms_accepted">
-                            I agree to ActivityInfo's <a href="/about/terms.html">terms and conditions</a>
+                            By ticking this box you agree to ActivityInfo's:
+                            <ul>
+                                <li><a href="/about/terms.html">Terms and Conditions</a></li>
+                                <li><a href="/about/privacy-policy.html">Privacy Policy</a></li>
+                            </ul>
                         </label>
 
                         <button type="submit">Get Free Account</button>
