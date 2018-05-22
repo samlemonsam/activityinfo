@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +53,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
         // First put the schema to the store
 
-        Snapshot snapshot = new Snapshot(
+        SnapshotDelta snapshot = new SnapshotDelta(
                 Collections.singletonList(surveyMetadata),
                 Collections.singletonList(toFormRecordSet(survey)));
 
@@ -192,6 +193,6 @@ public class OfflineStoreGwtTest extends GWTTestCase {
             array[i] = FormRecord.fromInstance(records.get(i));
         }
 
-        return FormSyncSet.incremental(survey.getFormId().asString(), new String[0], Arrays.asList(array));
+        return FormSyncSet.incremental(survey.getFormId().asString(), new String[0], Arrays.asList(array), Optional.empty());
     }
 }

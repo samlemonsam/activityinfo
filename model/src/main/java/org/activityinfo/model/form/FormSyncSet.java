@@ -127,6 +127,7 @@ public final class FormSyncSet {
         return reset;
     }
 
+    @JsOverlay
     public static FormSyncSet foldLeft(FormSyncSet a, FormSyncSet b) {
         assert a.formId.equals(b.formId);
 
@@ -139,6 +140,7 @@ public final class FormSyncSet {
         return merged;
     }
 
+    @JsOverlay
     private static String[] combine(String[] a, String[] b) {
         if(a.length == 0) {
             return b;
@@ -152,6 +154,7 @@ public final class FormSyncSet {
         return c;
     }
 
+    @JsOverlay
     private static UpdatedRecord[] combine(UpdatedRecord[] a, UpdatedRecord[] b) {
         if(a.length == 0) {
             return b;

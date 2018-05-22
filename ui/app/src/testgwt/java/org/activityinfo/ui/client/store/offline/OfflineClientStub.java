@@ -1,11 +1,11 @@
 package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.api.client.FormRecordSet;
 import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
@@ -19,11 +19,17 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
 import java.util.List;
+import java.util.Optional;
 
 public class OfflineClientStub implements ActivityInfoClientAsync {
 
     private <T> Promise<T> offline() {
         return Promise.rejected(new RuntimeException("offline"));
+    }
+
+    @Override
+    public Promise<UserDatabaseMeta> getDatabase(ResourceId databaseId) {
+        return offline();
     }
 
     @Override
@@ -52,7 +58,7 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion, Optional<String> cursor) {
         return offline();
     }
 
@@ -69,7 +75,6 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     @Override
     public Promise<FormMetadata> getFormMetadata(String formId) {
         return offline();
-
     }
 
     @Override
