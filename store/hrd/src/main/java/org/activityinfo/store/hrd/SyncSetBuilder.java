@@ -18,6 +18,7 @@
  */
 package org.activityinfo.store.hrd;
 
+import com.google.apphosting.api.ApiProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.FormSyncSet;
@@ -30,12 +31,18 @@ import java.util.function.Predicate;
 
 public class SyncSetBuilder {
 
+    private static final long BUFFER_MS = 5_000;
+    private static final int MAX_RESPONSE_SIZE = 200_000;
+
     private final FormClass formClass;
     private long localVersion;
     private Predicate<ResourceId> visibilityPredicate;
+    private Optional<String> cursor = Optional.empty();
 
     private Set<String> deleted = new HashSet<>();
     private Map<ResourceId, FormRecordSnapshotEntity> snapshots = new HashMap<>();
+
+    private long estimatedSizeInBytes = 0;
 
     SyncSetBuilder(FormClass formClass, long localVersion, Predicate<ResourceId> visibilityPredicate) {
         this.formClass = formClass;
@@ -43,16 +50,58 @@ public class SyncSetBuilder {
         this.visibilityPredicate = visibilityPredicate;
     }
 
-    public void add(FormRecordSnapshotEntity snapshot) {
+    /**
+     * Adds this snapshot to the {@link FormSyncSet}
+     * @param snapshot
+     * @return {@code true} if there is time and space left to continue adding more snapshots,
+     * or if we should stop here.
+     */
+    public boolean add(FormRecordSnapshotEntity snapshot) {
         if(visibilityPredicate.test(snapshot.getRecord().getRecordId())) {
             if (snapshot.getType() == RecordChangeType.DELETED) {
-                deleted.add(snapshot.getRecordId().asString());
-                snapshots.remove(snapshot.getRecordId());
+                String recordId = snapshot.getRecordId().asString();
+                if(deleted.add(recordId)) {
+                    estimatedSizeInBytes += recordId.length();
+                }
 
+                if(snapshots.remove(snapshot.getRecordId()) != null) {
+                    estimatedSizeInBytes -= estimateSizeInBytes(snapshot);
+                }
             } else {
-                snapshots.put(snapshot.getRecordId(), snapshot);
+                if(snapshots.put(snapshot.getRecordId(), snapshot) == null) {
+                    estimatedSizeInBytes += estimateSizeInBytes(snapshot);
+                }
             }
         }
+
+        // Do we have enough time left in this request to do any more work?
+        long timeRemaining = ApiProxy.getCurrentEnvironment().getRemainingMillis();
+        if(timeRemaining < BUFFER_MS) {
+            return false;
+        }
+
+        if(estimatedSizeInBytes > MAX_RESPONSE_SIZE) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @return a very rough estimate of how many bytes of JSON this response will require so far.
+     */
+    public long getEstimatedSizeInBytes() {
+        return estimatedSizeInBytes;
+    }
+
+    private long estimateSizeInBytes(FormRecordSnapshotEntity snapshot) {
+        int numFields = snapshot.getRecord().getFieldValues().getProperties().size();
+        return 200 + (numFields * 20);
+    }
+
+    public void stop(String cursor) {
+        this.cursor = Optional.of(cursor);
     }
 
     private String[] buildDeletedArray() {
@@ -71,9 +120,9 @@ public class SyncSetBuilder {
 
     public FormSyncSet build() {
         if(localVersion == 0) {
-            return FormSyncSet.complete(formClass.getId(), buildUpdateArrays());
+            return FormSyncSet.initial(formClass.getId(), buildUpdateArrays(), cursor);
         } else {
-            return FormSyncSet.incremental(formClass.getId().asString(), buildDeletedArray(), buildUpdateArrays());
+            return FormSyncSet.incremental(formClass.getId().asString(), buildDeletedArray(), buildUpdateArrays(), cursor);
         }
     }
 

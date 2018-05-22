@@ -215,7 +215,8 @@ public class FormResource {
     @Operation(summary = "Get the records that have changed between two versions of this form")
     public FormSyncSet getVersionRange(
             @QueryParam("localVersion") long localVersion,
-            @QueryParam("version") long version) {
+            @QueryParam("version") long version,
+            @QueryParam("cursor") String cursor) {
 
         FormStorage collection = assertVisible(formId);
 
@@ -226,7 +227,8 @@ public class FormResource {
 
         FormSyncSet syncSet;
         if(collection instanceof VersionedFormStorage) {
-            syncSet = ((VersionedFormStorage) collection).getVersionRange(localVersion, version, visibilityPredicate);
+            syncSet = ((VersionedFormStorage) collection).getVersionRange(localVersion, version, visibilityPredicate,
+                    java.util.Optional.ofNullable(cursor));
         } else {
             syncSet = FormSyncSet.emptySet(formId);
         }

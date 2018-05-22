@@ -25,7 +25,10 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.form.*;
+import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.FormSyncSet;
+import org.activityinfo.model.form.RecordHistory;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
@@ -37,19 +40,19 @@ import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.AnalysisChangeEvent;
 import org.activityinfo.ui.client.store.FormChange;
 import org.activityinfo.ui.client.store.FormChangeEvent;
 import org.activityinfo.ui.client.store.FormTreeLoader;
-import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.ui.client.store.tasks.NullWatcher;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 import org.activityinfo.ui.client.store.tasks.Watcher;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -125,8 +128,8 @@ public class HttpStore {
         return get(new QueryRequest(queryModel), new FormChangeWatcher(eventBus, change -> true));
     }
 
-    public Observable<FormSyncSet> getVersionRange(ResourceId formId, long localVersion, long version) {
-        return get(new VersionRangeRequest(formId, localVersion, version));
+    public Observable<FormSyncSet> getVersionRange(ResourceId formId, long localVersion, long version, Optional<String> cursor) {
+        return get(new VersionRangeRequest(formId, localVersion, version, cursor));
     }
 
     public Observable<Maybe<FormRecord>> getRecord(RecordRef ref) {

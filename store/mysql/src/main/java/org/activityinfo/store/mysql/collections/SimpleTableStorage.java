@@ -111,21 +111,21 @@ public class SimpleTableStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, java.util.Optional<String> cursor) {
         if(localVersion == mapping.getVersion()) {
             return FormSyncSet.emptySet(getFormClass().getId());
         }
 
         // Otherwise send the whole shebang...
-        RecordCursor cursor = new RecordCursor(mapping, executor);
-        Iterator<FormInstance> it = cursor.execute();
+        RecordCursor recordCursor = new RecordCursor(mapping, executor);
+        Iterator<FormInstance> it = recordCursor.execute();
 
         List<FormRecord> records = new ArrayList<>();
         while(it.hasNext()) {
             records.add(FormRecord.fromInstance(it.next()));
         }
 
-        return FormSyncSet.complete(getFormClass().getId(), records);
+        return FormSyncSet.initial(getFormClass().getId(), records, java.util.Optional.empty());
     }
 
     @Override

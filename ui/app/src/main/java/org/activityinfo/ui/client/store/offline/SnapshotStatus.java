@@ -42,7 +42,7 @@ public class SnapshotStatus {
     private SnapshotStatus() {
     }
 
-    public SnapshotStatus(Snapshot snapshot) {
+    public SnapshotStatus(SnapshotDelta snapshot) {
         for (FormMetadata metadata : snapshot.getForms()) {
             formVersions.put(metadata.getId(), metadata.getVersion());
         }
@@ -58,6 +58,10 @@ public class SnapshotStatus {
 
     public boolean isFormCached(ResourceId formId) {
         return formVersions.containsKey(formId);
+    }
+
+    public long getLocalVersion(ResourceId formId) {
+        return formVersions.getOrDefault(formId, 0L);
     }
 
     public JsonValue toJson() {

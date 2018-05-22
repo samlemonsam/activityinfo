@@ -345,7 +345,8 @@ public class HrdCatalogTest {
         // and the version range (0, 1] should be empty.
         assertThat(formStorage.cacheVersion(), equalTo(1L));
 
-        FormSyncSet updatedRecords = formStorage.getVersionRange(0, 1L, resourceId -> true);
+        FormSyncSet updatedRecords = formStorage.getVersionRange(0, 1L, resourceId -> true,
+                java.util.Optional.empty());
 
         assertTrue(updatedRecords.isEmpty());
 
@@ -362,7 +363,7 @@ public class HrdCatalogTest {
 
         assertThat(formStorage.cacheVersion(), equalTo(2L));
 
-        FormSyncSet updated = formStorage.getVersionRange(0, 2L, resourceId -> true);
+        FormSyncSet updated = formStorage.getVersionRange(0, 2L, resourceId -> true, java.util.Optional.empty());
         assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
         // Update the first record and add a new one
@@ -377,7 +378,7 @@ public class HrdCatalogTest {
 
         assertThat(formStorage.cacheVersion(), equalTo(3L));
 
-        updated = formStorage.getVersionRange(2L, 3L, resourceId -> true);
+        updated = formStorage.getVersionRange(2L, 3L, resourceId -> true, java.util.Optional.empty());
         assertThat(updated.getUpdatedRecordCount(), equalTo(1));
 
     }

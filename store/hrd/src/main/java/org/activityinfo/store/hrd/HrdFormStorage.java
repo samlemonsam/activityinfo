@@ -18,8 +18,10 @@
  */
 package org.activityinfo.store.hrd;
 
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.googlecode.objectify.cmd.Query;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
@@ -40,7 +42,9 @@ import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import static org.activityinfo.store.hrd.Hrd.ofy;
 
@@ -49,6 +53,8 @@ import static org.activityinfo.store.hrd.Hrd.ofy;
  * Accessor for forms backed by the AppEngine High-Replication Datastore (HRD)
  */
 public class HrdFormStorage implements VersionedFormStorage {
+
+    private static final Logger LOGGER = Logger.getLogger(HrdFormStorage.class.getName());
 
     private long version;
     private FormClass formClass;
@@ -128,10 +134,18 @@ public class HrdFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, java.util.Optional<String> cursor) {
+
+        LOGGER.info("Starting VersionRange query...");
+        Stopwatch stopwatch = Stopwatch.createStarted();
 
         Query<FormRecordSnapshotEntity> query = ofy().load().type(FormRecordSnapshotEntity.class)
-                .ancestor(FormEntity.key(formClass));
+                .ancestor(FormEntity.key(formClass))
+                .chunk(500);
+
+        if(cursor.isPresent()) {
+            query = query.startAt(Cursor.fromWebSafeString(cursor.get()));
+        }
 
         if(localVersion > 0) {
             query = query.filter("version >", localVersion);
@@ -142,8 +156,17 @@ public class HrdFormStorage implements VersionedFormStorage {
         QueryResultIterator<FormRecordSnapshotEntity> it = query.iterator();
         while(it.hasNext()) {
             FormRecordSnapshotEntity snapshot = it.next();
-            builder.add(snapshot);
+            if(snapshot.getVersion() <= toVersion) {
+                if(builder.add(snapshot)) {
+                    builder.stop(it.getCursor().toWebSafeString());
+                    break;
+                }
+            }
         }
+
+        LOGGER.info("VersionRange query complete in " + stopwatch.elapsed(TimeUnit.SECONDS) +
+            " with estimate size: " + builder.getEstimatedSizeInBytes() + " bytes");
+
         return builder.build();
     }
 }

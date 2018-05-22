@@ -396,8 +396,8 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, java.util.Optional<String> cursor) {
         HrdFormStorage delegate = new HrdFormStorage(getFormClass());
-        return delegate.getVersionRange(localVersion, toVersion, visibilityPredicate);
+        return delegate.getVersionRange(localVersion, toVersion, visibilityPredicate, cursor);
     }
 }

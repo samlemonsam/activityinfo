@@ -111,14 +111,14 @@ public class TestingFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate) {
+    public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, java.util.Optional<String> cursor) {
         List<FormRecord> records = new ArrayList<>();
         if(localVersion < version) {
             for (FormInstance record : records()) {
                 records.add(FormRecord.fromInstance(record));
             }
         }
-        return FormSyncSet.complete(testForm.getFormId(), records);
+        return FormSyncSet.initial(testForm.getFormId(), records, java.util.Optional.empty());
     }
 
     @Override

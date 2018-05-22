@@ -23,6 +23,8 @@ import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
+import java.util.Optional;
+
 /**
  * Requests a range of record versions for a given form.
  */
@@ -31,16 +33,18 @@ public class VersionRangeRequest implements HttpRequest<FormSyncSet> {
     private ResourceId formId;
     private long localVersion;
     private long version;
+    private final Optional<String> cursor;
 
-    public VersionRangeRequest(ResourceId formId, long localVersion, long version) {
+    public VersionRangeRequest(ResourceId formId, long localVersion, long version, Optional<String> cursor) {
         this.formId = formId;
         this.localVersion = localVersion;
         this.version = version;
+        this.cursor = cursor;
     }
 
     @Override
     public Promise<FormSyncSet> execute(ActivityInfoClientAsync client) {
-        return client.getRecordVersionRange(formId.asString(), localVersion, version);
+        return client.getRecordVersionRange(formId.asString(), localVersion, version, cursor);
     }
 
 

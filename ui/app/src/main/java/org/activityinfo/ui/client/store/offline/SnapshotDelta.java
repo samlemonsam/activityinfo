@@ -26,26 +26,26 @@ import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.http.HttpStore;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.activityinfo.observable.Observable.flatMap;
 
 
-public class Snapshot {
+/**
+ * Data structure which contains the deltas to update the local snapshot to a new version set.
+ *
+ */
+public class SnapshotDelta {
 
     private List<FormMetadata> forms;
     private List<FormSyncSet> recordSets;
 
-
-    public Snapshot(List<FormMetadata> forms, List<FormSyncSet> recordSets) {
+    public SnapshotDelta(List<FormMetadata> forms, List<FormSyncSet> recordSets) {
         this.forms = forms;
         this.recordSets = recordSets;
     }
 
-    public static Observable<Snapshot> compute(Observable<Set<ResourceId>> offlineForms, HttpStore httpStore) {
+    public static Observable<Optional<SnapshotDelta>> compute(HttpStore httpStore, Observable<Set<ResourceId>> offlineForms, Observable<SnapshotStatus> currentStatus) {
 
         // We start with the "offlineForm" set which contains the set
         // of forms the user has explicitly asked to cache.
@@ -72,13 +72,45 @@ public class Snapshot {
         Observable<List<FormMetadata>> metadata =  flatMap(completeSet, httpStore::getFormMetadata);
 
         // And finally fetch any difference between our current snapshot and the latest version of the new snapshot
-        return metadata.join(forms -> {
+        return Observable.join(currentStatus, metadata, (current, forms) -> {
             List<Observable<FormSyncSet>> recordSets = new ArrayList<>();
-            for (FormMetadata form : forms) {
-                recordSets.add(httpStore.getVersionRange(form.getId(), 0, form.getVersion()));
-            }
 
-            return Observable.flatten(recordSets).transform(x -> new Snapshot(forms, x));
+            for (FormMetadata form : forms) {
+                long localVersion = current.getLocalVersion(form.getId());
+                if(form.getVersion() > localVersion) {
+                    recordSets.add(versionRange(httpStore, current, form));
+                }
+            }
+            if(recordSets.isEmpty()) {
+                return Observable.just(Optional.empty());
+            } else {
+                return Observable.flatten(recordSets).transform(x -> Optional.of(new SnapshotDelta(forms, x)));
+            }
+        });
+    }
+
+    private static Observable<FormSyncSet> versionRange(HttpStore httpStore, SnapshotStatus current, FormMetadata form) {
+        long localVersion = current.getLocalVersion(form.getId());
+        long targetVersion = form.getVersion();
+
+        return fetchVersionRangeChunksRecursively(httpStore, form, localVersion, targetVersion, Optional.empty());
+    }
+
+    private static Observable<FormSyncSet> fetchVersionRangeChunksRecursively(
+            HttpStore httpStore,
+            FormMetadata form,
+            long localVersion,
+            long targetVersion,
+            Optional<String> cursor) {
+
+        Observable<FormSyncSet> chunk = httpStore.getVersionRange(form.getId(), localVersion, targetVersion, cursor);
+        return chunk.join(c -> {
+            if(c.isComplete()) {
+                return Observable.just(c);
+            } else {
+                Observable<FormSyncSet> nextChunk = fetchVersionRangeChunksRecursively(httpStore, form, localVersion, targetVersion, Optional.of(c.getCursor()));
+                return nextChunk.transform(n -> FormSyncSet.foldLeft(c, n));
+            }
         });
     }
 
@@ -88,7 +120,6 @@ public class Snapshot {
         }
         return false;
     }
-
 
     public List<FormMetadata> getForms() {
         return forms;

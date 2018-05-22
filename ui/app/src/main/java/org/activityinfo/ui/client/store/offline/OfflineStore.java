@@ -224,7 +224,7 @@ public class OfflineStore {
     /**
      * Stores a new snapshot to the remote store
      */
-    public Promise<Void> store(Snapshot snapshot) {
+    public Promise<Void> store(SnapshotDelta snapshot) {
 
         final SnapshotStatus status = new SnapshotStatus(snapshot);
 
@@ -259,7 +259,7 @@ public class OfflineStore {
         });
     }
 
-    private void applyRemoteUpdates(Snapshot snapshot, RecordStore recordStore) {
+    private void applyRemoteUpdates(SnapshotDelta snapshot, RecordStore recordStore) {
         for (FormSyncSet syncSet : snapshot.getSyncSets()) {
             applyRemoteUpdates(recordStore, syncSet);
         }

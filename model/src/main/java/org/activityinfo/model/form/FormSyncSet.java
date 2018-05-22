@@ -25,6 +25,7 @@ import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Set of updates to apply to a local copy of the database
@@ -36,17 +37,19 @@ public final class FormSyncSet {
     private boolean reset;
     private String[] deleted;
     private UpdatedRecord[] updatedRecords;
+    private String cursor;
 
     public FormSyncSet() {
     }
 
     @JsOverlay
-    public static FormSyncSet incremental(String formId, String[] deleted, List<FormRecord> records) {
+    public static FormSyncSet incremental(String formId, String[] deleted, List<FormRecord> records, Optional<String> cursor) {
         FormSyncSet syncSet = new FormSyncSet();
         syncSet.formId = formId;
         syncSet.reset = false;
         syncSet.deleted = deleted;
         syncSet.updatedRecords = new UpdatedRecord[records.size()];
+        syncSet.cursor = cursor.orElse(null);
         for (int i = 0; i < syncSet.updatedRecords.length; i++) {
             syncSet.updatedRecords[i] = UpdatedRecord.create(records.get(i));
         }
@@ -54,12 +57,13 @@ public final class FormSyncSet {
     }
 
     @JsOverlay
-    public static FormSyncSet complete(ResourceId formId, List<FormRecord> records) {
+    public static FormSyncSet initial(ResourceId formId, List<FormRecord> records, Optional<String> cursor) {
         FormSyncSet syncSet = new FormSyncSet();
         syncSet.formId = formId.asString();
         syncSet.reset = true;
         syncSet.deleted = new String[0];
         syncSet.updatedRecords = new UpdatedRecord[records.size()];
+        syncSet.cursor = cursor.orElse(null);
         for (int i = 0; i < syncSet.updatedRecords.length; i++) {
             syncSet.updatedRecords[i] = UpdatedRecord.create(records.get(i));
         }
@@ -105,9 +109,59 @@ public final class FormSyncSet {
         return updatedRecords[i];
     }
 
+    /**
+     * @return true if there are no remaining chunks to retrieve.
+     */
+    @JsOverlay
+    public boolean isComplete() {
+        return cursor == null;
+    }
+
+    @JsOverlay
+    public String getCursor() {
+        return cursor;
+    }
+
     @JsOverlay
     public boolean isReset() {
         return reset;
     }
 
+    public static FormSyncSet foldLeft(FormSyncSet a, FormSyncSet b) {
+        assert a.formId.equals(b.formId);
+
+        FormSyncSet merged = new FormSyncSet();
+        merged.formId = a.formId;
+        merged.reset = a.reset;
+        merged.deleted = combine(a.deleted, b.deleted);
+        merged.updatedRecords = combine(a.updatedRecords, b.updatedRecords);
+        merged.cursor = b.cursor;
+        return merged;
+    }
+
+    private static String[] combine(String[] a, String[] b) {
+        if(a.length == 0) {
+            return b;
+        }
+        if(b.length == 0) {
+            return a;
+        }
+        String[] c = new String[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
+    }
+
+    private static UpdatedRecord[] combine(UpdatedRecord[] a, UpdatedRecord[] b) {
+        if(a.length == 0) {
+            return b;
+        }
+        if(b.length == 0) {
+            return a;
+        }
+        UpdatedRecord[] c = new UpdatedRecord[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
+    }
 }

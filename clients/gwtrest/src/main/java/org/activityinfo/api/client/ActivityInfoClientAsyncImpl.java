@@ -48,6 +48,7 @@ import org.activityinfo.promise.Promise;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -169,11 +170,15 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, final long toVersion) {
+    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, final long toVersion, Optional<String> cursor) {
         String url = formUrl(formId) +
                 "/records/versionRange" +
                 "?localVersion=" + localVersion +
                 "&version=" + toVersion;
+
+        if(cursor.isPresent()) {
+            url = url + "&cursor=" + cursor.get();
+        }
 
         return get(url, value -> {
             try {

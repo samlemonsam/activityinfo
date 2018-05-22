@@ -227,7 +227,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion) {
+    public Promise<FormSyncSet> getRecordVersionRange(String formId, long localVersion, long toVersion, java.util.Optional<String> cursor) {
         return Promise.rejected(new UnsupportedOperationException());
     }
 

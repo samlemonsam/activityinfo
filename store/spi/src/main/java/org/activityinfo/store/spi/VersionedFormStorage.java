@@ -22,6 +22,7 @@ import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -38,6 +39,6 @@ public interface VersionedFormStorage extends FormStorage {
 
     List<RecordVersion> getVersionsForParent(ResourceId parentRecordId);
 
-    FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate);
+    FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, Optional<String> cursor);
 
 }
