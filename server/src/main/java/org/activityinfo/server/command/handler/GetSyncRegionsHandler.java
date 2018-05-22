@@ -141,7 +141,7 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
         
         if (!databases.isEmpty()) {
             List<Tuple> activities = entityManager
-                    .createQuery("SELECT A.id, A.version FROM Activity A WHERE A.database.id in :databaseIds",
+                    .createQuery("SELECT A.id, A.version FROM Activity A WHERE A.database.id in :databaseIds AND A.classicView=1",
                             Tuple.class)
                     .setParameter("databaseIds", databases)
                     .getResultList();
