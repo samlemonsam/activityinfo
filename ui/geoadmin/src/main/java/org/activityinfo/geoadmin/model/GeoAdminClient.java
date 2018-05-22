@@ -21,7 +21,6 @@ package org.activityinfo.geoadmin.model;
 import com.bedatadriven.geojson.GeoJsonModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
@@ -36,6 +35,7 @@ import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.geoadmin.source.FeatureSourceStorageProvider;
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -316,7 +316,7 @@ public class GeoAdminClient implements FormClassProvider {
         } else {
 
             String json = formResource(resourceId).path("tree").get(String.class);
-            JsonValue object = new Gson().fromJson(json, JsonValue.class);
+            JsonValue object = Json.parse(json);
             return JsonFormTreeBuilder.fromJson(object);
         }
     }
@@ -332,7 +332,6 @@ public class GeoAdminClient implements FormClassProvider {
             return builder.build(queryModel);
 
         } else {
-
             return remote.queryTable(queryModel);
         }
     }
