@@ -142,6 +142,7 @@ public class TestingFormStorage implements VersionedFormStorage {
         ensureWeHaveOwnCopy();
         records.add(newRecord);
         index.put(newRecord.getId(), newRecord);
+        version++;
     }
 
 

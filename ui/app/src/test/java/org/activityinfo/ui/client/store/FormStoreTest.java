@@ -314,7 +314,7 @@ public class FormStoreTest {
 
         // Now go online...
         setup.setConnected(true);
-        setup.getOfflineStore().syncChanges();;
+        setup.getOfflineStore().syncChanges();
         setup.runScheduled();
 
         // Check that the serial number has been updated with the value from the server
