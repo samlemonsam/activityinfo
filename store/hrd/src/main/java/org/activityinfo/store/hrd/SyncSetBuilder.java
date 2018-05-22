@@ -97,7 +97,7 @@ public class SyncSetBuilder {
 
     private long estimateSizeInBytes(FormRecordSnapshotEntity snapshot) {
         int numFields = snapshot.getRecord().getFieldValues().getProperties().size();
-        return 200 + (numFields * 20);
+        return 200L + (numFields * 20L);
     }
 
     public void stop(String cursor) {

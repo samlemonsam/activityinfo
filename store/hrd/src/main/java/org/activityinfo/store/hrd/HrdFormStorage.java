@@ -157,7 +157,7 @@ public class HrdFormStorage implements VersionedFormStorage {
         while(it.hasNext()) {
             FormRecordSnapshotEntity snapshot = it.next();
             if(snapshot.getVersion() <= toVersion) {
-                if(builder.add(snapshot)) {
+                if(!builder.add(snapshot)) {
                     builder.stop(it.getCursor().toWebSafeString());
                     break;
                 }
