@@ -535,7 +535,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
         assertThat(form.cacheVersion(), greaterThan(0L));
 
-        FormSyncSet versionRange = form.getVersionRange(0, form.cacheVersion(), resourceId -> true, cursor);
+        FormSyncSet versionRange = form.getVersionRange(0, form.cacheVersion(), resourceId -> true,
+                java.util.Optional.empty());
+
         assertThat(versionRange.getUpdatedRecordCount(), equalTo(3));
 
         System.out.println(versionRange);
