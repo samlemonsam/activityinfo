@@ -205,19 +205,21 @@ public class NodeMatcher {
 
     private Collection<NodeMatch> unionMatches(QueryPath path, FormTree.Node parentField) {
         List<NodeMatch> results = Lists.newArrayList();
-        for (ResourceId formClassId : parentField.getRange()) {
-            FormClass childForm = tree.getFormClass(formClassId);
-            Iterable<FormTree.Node> childFields = parentField.getChildren(formClassId);
+        for (ResourceId childFormId : parentField.getRange()) {
+            Optional<FormClass> childForm = tree.getFormClassIfPresent(childFormId);
+            if(childForm.isPresent()) {
+                Iterable<FormTree.Node> childFields = parentField.getChildren(childFormId);
 
-            if(path.matches(childForm) && path.peek().equals(ColumnModel.ID_SYMBOL)) {
-                results.add(NodeMatch.forId(parentField, childForm));
+                if (path.matches(childForm.get()) && path.peek().equals(ColumnModel.ID_SYMBOL)) {
+                    results.add(NodeMatch.forId(parentField, childForm.get()));
 
-            } else if(path.matches(childForm) || path.matches(parentField)) {
-                results.addAll(matchNodes(path.next(), childFields));
-                
-            } else {
-                // Descend the next level
-                results.addAll(matchNodes(path, childFields));
+                } else if (path.matches(childForm.get()) || path.matches(parentField)) {
+                    results.addAll(matchNodes(path.next(), childFields));
+
+                } else {
+                    // Descend the next level
+                    results.addAll(matchNodes(path, childFields));
+                }
             }
         }
         return results;
