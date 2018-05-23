@@ -27,7 +27,7 @@
             Add flag to migrate activities to HRD storage
         </comment>
         <sql>
-            ALTER TABLE indicator ADD COLUMN hrd bit(1) NOT null DEFAULT 0
+            ALTER TABLE activity ADD COLUMN hrd bit(1) NOT null DEFAULT 0
         </sql>
     </changeSet>
 </databaseChangeLog>
