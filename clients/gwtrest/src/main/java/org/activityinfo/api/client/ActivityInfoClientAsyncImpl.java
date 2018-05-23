@@ -232,7 +232,18 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<FormMetadata> getFormMetadata(String formId) {
-        return get(formUrl(formId), FormMetadata::fromJson);
+        return getRaw(formUrl(formId), response -> {
+            switch (response.getStatusCode()) {
+                case 200:
+                    return FormMetadata.fromJson(Json.parse(response.getText()));
+                case 403:
+                    return FormMetadata.forbidden(ResourceId.valueOf(formId));
+                case 404:
+                    return FormMetadata.notFound(ResourceId.valueOf(formId));
+                default:
+                    throw new ApiException(response.getStatusCode());
+            }
+        });
     }
 
     @Override
