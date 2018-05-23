@@ -167,6 +167,17 @@ appengineUpdateQueues {
     }
 }
 
+appengineUpdateCron {
+    extraOptions = ["--application=${environment.projectId}" ]
+    oauth2 = true
+
+    doFirst {
+        if(environment.local) {
+            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
+        }
+    }
+}
+
 task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
     description = "Rolls back a previous build to the staging environment"
     dependsOn appengineDownloadSdk

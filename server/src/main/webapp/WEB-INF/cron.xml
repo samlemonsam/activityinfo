@@ -31,4 +31,11 @@
     <schedule>every 1 minutes</schedule>
     <target>logging</target>
   </cron>
+
+  <cron>
+    <url>/bqlogging/logExportDirectToBigqueryStart?logsExportConfiguration=org.activityinfo.logging.AppCacheLoggingConfiguration</url>
+    <description>Export logs to BigQuery</description>
+    <schedule>every 1 minutes</schedule>
+    <target>logging</target>
+  </cron>
 </cronentries>
