@@ -45,7 +45,7 @@ public class MigrationServlet extends HttpServlet {
 
         String pipelineId;
         try {
-            pipelineId = startJob(resp, req.getParameter("job"));
+            pipelineId = startJob(resp, req);
         } catch (IllegalArgumentException e) {
             resp.setStatus(400);
             resp.getOutputStream().println(e.getMessage());
@@ -55,7 +55,8 @@ public class MigrationServlet extends HttpServlet {
         resp.sendRedirect("/_ah/pipeline/status.html?root=" + pipelineId);
     }
 
-    private String startJob(HttpServletResponse resp, String job) {
+    private String startJob(HttpServletResponse resp, HttpServletRequest req) {
+        String job = req.getParameter("job");
         if(job == null) {
             throw new IllegalArgumentException("missing job parameter");
         }
@@ -64,9 +65,22 @@ public class MigrationServlet extends HttpServlet {
                 return startPartnerMigration();
             case "snapshots":
                 return reindexSnapshots();
+            case "sites":
+                return migrateSites(Integer.parseInt(req.getParameter("activityId")));
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
+    }
+
+    private String migrateSites(int activityId) {
+        SiteInput input = new SiteInput(activityId);
+        SiteMigrator mapper = new SiteMigrator();
+
+        MapSpecification<Integer, Void, Void> spec = new MapSpecification.Builder<Integer, Void, Void>(input, mapper)
+                .setJobName("Migrate site records")
+                .build();
+
+        return MapJob.start(spec, getSettings());
     }
 
     private String reindexSnapshots() {

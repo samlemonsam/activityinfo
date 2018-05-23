@@ -30,7 +30,7 @@ public class ActivityVersion {
     }
 
     public String getSchemaCacheKey() {
-        return "activity:5:metadata:" + id + "@" + schemaVersion;
+        return "activity:6:metadata:" + id + "@" + schemaVersion;
     }
 
     public int getId() {

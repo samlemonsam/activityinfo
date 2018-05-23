@@ -16,29 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.ui.client.store.http;
+package org.activityinfo.store.migrate;
 
-import org.activityinfo.api.client.ActivityInfoClientAsync;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.FormChange;
+import com.google.appengine.tools.mapreduce.Input;
+import com.google.appengine.tools.mapreduce.InputReader;
 
-public class FormSchemaRequest implements HttpRequest<FormClass> {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-    private ResourceId formId;
+/**
+ * Set of all ids in the user database table.
+ */
+public class SiteInput extends Input<Integer> {
 
-    public FormSchemaRequest(ResourceId formId) {
-        this.formId = formId;
+    private int activityId;
+
+    public SiteInput(int activityId) {
+        this.activityId = activityId;
     }
 
     @Override
-    public Promise<FormClass> execute(ActivityInfoClientAsync client) {
-        return client.getFormSchema(formId.asString());
+    public List<? extends InputReader<Integer>> createReaders() throws IOException {
+        List<InputReader<Integer>> readers = new ArrayList<>();
+        readers.add(new SiteReader(activityId));
+        return readers;
     }
 
-    @Override
-    public int refreshInterval(FormClass result) {
-        return -1;
-    }
 }

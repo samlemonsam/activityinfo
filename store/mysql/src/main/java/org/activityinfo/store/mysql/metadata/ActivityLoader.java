@@ -288,7 +288,8 @@ public class ActivityLoader {
                             "(A.dateDeleted IS NOT NULL OR " +
                             " d.dateDeleted IS NOT NULL), " + // (17)
                             "d.ownerUserId, " +               // (18)
-                            "A.classicView " +                // (19)  
+                            "A.classicView, " +                // (19)
+                            "A.hrd " +                          // (20)
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -326,6 +327,9 @@ public class ActivityLoader {
                     // Only use json form for forms that are explicitly non-classicView,
                     // otherwise we miss aggregation method.
                     activity.classicView = rs.getBoolean(19);
+
+                    // Forms that are fully migrated to HRD
+                    activity.hrd = rs.getBoolean(20);
                     
                     FormClass serializedFormClass = null;
                     if(!activity.classicView) {

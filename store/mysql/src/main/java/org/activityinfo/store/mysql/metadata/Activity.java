@@ -91,6 +91,9 @@ public class Activity implements Serializable {
      */
     Map<Integer, LinkedActivity> linkedActivities = Maps.newHashMap();
 
+
+    public boolean hrd;
+
     public int getId() {
         return activityId;
     }
@@ -280,6 +283,10 @@ public class Activity implements Serializable {
     
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public boolean isMigratedToHrd() {
+        return hrd;
     }
     
     public LinkedActivity getSelfLink() {

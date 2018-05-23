@@ -49,6 +49,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import static org.activityinfo.store.hrd.Hrd.ofy;
 
@@ -57,7 +58,9 @@ import static org.activityinfo.store.hrd.Hrd.ofy;
  * Collection of Sites
  */
 public class SiteFormStorage implements VersionedFormStorage {
-    
+
+    private static final Logger LOGGER = Logger.getLogger(SiteFormStorage.class.getName());
+
     private final Activity activity;
     private final TableMapping baseMapping;
     private final QueryExecutor queryExecutor;
@@ -119,8 +122,13 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        RecordFetcher fetcher = new RecordFetcher(this);
-        return fetcher.get(resourceId);
+        if(activity.isMigratedToHrd()) {
+            LOGGER.info("Delegating record fetch to HRD...");
+            return delegateToHrd().get(resourceId);
+        } else {
+            RecordFetcher fetcher = new RecordFetcher(this);
+            return fetcher.get(resourceId);
+        }
     }
 
     @Override
@@ -371,7 +379,13 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
+        if(activity.isMigratedToHrd()) {
+            LOGGER.info("Delegating record fetch to HRD...");
+
+            return delegateToHrd().newColumnQuery();
+        } else {
+            return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
+        }
     }
     
     public long incrementSiteVersion() {
@@ -397,7 +411,10 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, java.util.Optional<String> cursor) {
-        HrdFormStorage delegate = new HrdFormStorage(getFormClass());
-        return delegate.getVersionRange(localVersion, toVersion, visibilityPredicate, cursor);
+        return delegateToHrd().getVersionRange(localVersion, toVersion, visibilityPredicate, cursor);
+    }
+
+    private HrdFormStorage delegateToHrd() {
+        return new HrdFormStorage(getFormClass());
     }
 }

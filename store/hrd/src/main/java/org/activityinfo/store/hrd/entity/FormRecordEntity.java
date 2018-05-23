@@ -68,6 +68,10 @@ public class FormRecordEntity {
         this.id = recordId.asString();
     }
 
+    public Key<FormRecordEntity> getKey() {
+        return Key.create(this);
+    }
+
     public ResourceId getFormId() {
         return ResourceId.valueOf(formKey.getName());
     }
