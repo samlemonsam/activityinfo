@@ -31,13 +31,13 @@
               ParentId="1" deleted="0"/>
 
   <locationType locationTypeId="1" countryId="1" name="localite"
-                reuse="1"/>
+                reuse="1" nullary="false"/>
   <locationType locationTypeId="2" countryId="1"
-                name="Health Center" reuse="1"/>
+                name="Health Center" reuse="1" nullary="false"/>
   <locationType locationTypeId="3" countryId="1" name="Territorie"
-                reuse="1" BoundAdminLevelId="2"/>
+                reuse="1" BoundAdminLevelId="2" nullary="false"/>
   
-  <locationType locationTypeId="9999" countryId="1" name="Country" reuse="1"/>
+  <locationType locationTypeId="9999" countryId="1" name="Country" reuse="1" nullary="true"/>
   <location locationId="9999" locationTypeId="9999" name="RDC" X="0" Y="0" timeEdited="0"/>
 
   <adminEntity adminLevelId="1" adminEntityId="1" name="Kinshasa"
