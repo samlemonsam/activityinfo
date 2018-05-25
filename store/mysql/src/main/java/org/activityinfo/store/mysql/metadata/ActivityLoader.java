@@ -290,7 +290,7 @@ public class ActivityLoader {
                             "d.ownerUserId, " +               // (18)
                             "A.classicView, " +               // (19)
                             "A.hrd, " +                       // (20)
-                            "(L.Name = 'Country' and L.databaseId IS NULL) " +  // (21)
+                            "L.nullary " +                    // (21)
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
