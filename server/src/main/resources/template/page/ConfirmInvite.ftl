@@ -69,14 +69,14 @@
                     <label>${label.newsletter}:</label>
                     <ul style="list-style-type: none">
                         <li>
-                            <label class="checkbox">
-                                <input type="checkbox" name="newsletterYes" id="newsletterYesInput" value="true">
+                            <label class="radio">
+                                <input type="radio" name="newsletter" id="newsletterYes" value="true">
                                 ${label.newsletterYes}
                             </label>
                         </li>
                         <li>
-                            <label class="checkbox">
-                                <input type="checkbox" name="newsletterNo" id="newsletterNoInput">
+                            <label class="radio">
+                                <input type="checkbox" name="newsletter" id="newsletterNo" value="false">
                                 ${label.newsletterNo}
                             </label>
                         </li>
@@ -93,27 +93,11 @@
     <script type="application/javascript">
         var theForm = document.getElementById("confirmForm");
         var theTerms = document.getElementById("termsCheckbox");
-        var newsletterYesInput = document.getElementById('newsletterYesInput');
-        var newsletterNoInput = document.getElementById('newsletterNoInput');
-
-        newsletterYesInput.addEventListener('input', function (event) {
-            var yes = newsletterYesInput.checked;
-            if (yes == true) {
-                newsletterNoInput.checked = false;
-            }
-        });
-        newsletterNoInput.addEventListener('input', function (event) {
-            var no = newsletterNoInput.checked;
-            if (no == true) {
-                newsletterYesInput.checked = false;
-            }
-        });
+        var newsletterYesInput = document.getElementById('newsletterYes');
+        var newsletterNoInput = document.getElementById('newsletterNo');
 
         theForm.addEventListener('submit', function(event) {
-            var yes = newsletterYesInput.checked;
-            var no = newsletterNoInput.checked;
-
-            if ((yes && no) || (!yes && !no)) {
+            if (!newsletterYesInput.checked && !newsletterNoInput.checked) {
                 event.preventDefault();
                 alert("Please choose whether you wish to receive emails from the ActivityInfo team.");
                 return;
