@@ -18,36 +18,69 @@
  */
 package org.activityinfo.store.hrd;
 
-import com.google.apphosting.api.ApiProxy;
+import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.datastore.QueryResultIterator;
+import com.google.common.base.Stopwatch;
+import com.googlecode.objectify.cmd.Query;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.spi.RecordChangeType;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
-public class SyncSetBuilder {
+import static org.activityinfo.store.hrd.Hrd.ofy;
 
-    private static final long BUFFER_MS = 5_000;
-    private static final int MAX_RESPONSE_SIZE = 200_000;
+public class DiffBuilder {
+
+    private static final Logger LOGGER = Logger.getLogger(DiffBuilder.class.getName());
 
     private final FormClass formClass;
-    private long localVersion;
     private Predicate<ResourceId> visibilityPredicate;
     private Optional<String> cursor = Optional.empty();
 
     private Set<String> deleted = new HashSet<>();
     private Map<ResourceId, FormRecordSnapshotEntity> snapshots = new HashMap<>();
 
-    private long estimatedSizeInBytes = 0;
+    private final SyncSizeEstimator sizeEstimator = new SyncSizeEstimator();
 
-    SyncSetBuilder(FormClass formClass, long localVersion, Predicate<ResourceId> visibilityPredicate) {
+    DiffBuilder(FormClass formClass, Predicate<ResourceId> visibilityPredicate) {
         this.formClass = formClass;
-        this.localVersion = localVersion;
         this.visibilityPredicate = visibilityPredicate;
+    }
+
+    public void query(long localVersion, long toVersion, Optional<String> startAt) {
+        LOGGER.info("Starting VersionRange query...");
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        Query<FormRecordSnapshotEntity> query = ofy().load().type(FormRecordSnapshotEntity.class)
+                .ancestor(FormEntity.key(formClass))
+                .filter("version >", localVersion)
+                .chunk(500);
+
+        if(startAt.isPresent()) {
+            query = query.startAt(Cursor.fromWebSafeString(startAt.get()));
+        }
+
+        QueryResultIterator<FormRecordSnapshotEntity> it = query.iterator();
+        while(it.hasNext()) {
+            FormRecordSnapshotEntity snapshot = it.next();
+            if(snapshot.getVersion() <= toVersion) {
+                if(!add(snapshot)) {
+                    stop(it.getCursor().toWebSafeString());
+                    break;
+                }
+            }
+        }
+
+        LOGGER.info("VersionRange query complete in " + stopwatch.elapsed(TimeUnit.SECONDS) +
+                " with estimate size: " + sizeEstimator.getEstimatedSizeInBytes() + " bytes");
     }
 
     /**
@@ -61,30 +94,20 @@ public class SyncSetBuilder {
             if (snapshot.getType() == RecordChangeType.DELETED) {
                 String recordId = snapshot.getRecordId().asString();
                 if(deleted.add(recordId)) {
-                    estimatedSizeInBytes += recordId.length();
+                    sizeEstimator.deleteRecord(recordId);
                 }
 
                 if(snapshots.remove(snapshot.getRecordId()) != null) {
-                    estimatedSizeInBytes -= estimateSizeInBytes(snapshot);
+                    sizeEstimator.minus(snapshot);
                 }
             } else {
                 if(snapshots.put(snapshot.getRecordId(), snapshot) == null) {
-                    estimatedSizeInBytes += estimateSizeInBytes(snapshot);
+                    sizeEstimator.plus(snapshot);
                 }
             }
         }
 
-        // Do we have enough time left in this request to do any more work?
-        long timeRemaining = ApiProxy.getCurrentEnvironment().getRemainingMillis();
-        if(timeRemaining < BUFFER_MS) {
-            return false;
-        }
-
-        if(estimatedSizeInBytes > MAX_RESPONSE_SIZE) {
-            return false;
-        }
-
-        return true;
+        return sizeEstimator.timeAndSpaceRemaining();
     }
 
     /**
@@ -92,12 +115,7 @@ public class SyncSetBuilder {
      * @return a very rough estimate of how many bytes of JSON this response will require so far.
      */
     public long getEstimatedSizeInBytes() {
-        return estimatedSizeInBytes;
-    }
-
-    private long estimateSizeInBytes(FormRecordSnapshotEntity snapshot) {
-        int numFields = snapshot.getRecord().getFieldValues().getProperties().size();
-        return 200L + (numFields * 20L);
+        return sizeEstimator.getEstimatedSizeInBytes();
     }
 
     public void stop(String cursor) {
@@ -119,11 +137,7 @@ public class SyncSetBuilder {
     }
 
     public FormSyncSet build() {
-        if(localVersion == 0) {
-            return FormSyncSet.initial(formClass.getId(), buildUpdateArrays(), cursor);
-        } else {
-            return FormSyncSet.incremental(formClass.getId().asString(), buildDeletedArray(), buildUpdateArrays(), cursor);
-        }
+        return FormSyncSet.incremental(formClass.getId().asString(), buildDeletedArray(), buildUpdateArrays(), cursor);
     }
 
 }

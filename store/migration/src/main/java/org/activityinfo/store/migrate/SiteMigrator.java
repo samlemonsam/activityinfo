@@ -39,9 +39,18 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
 
     private static final Logger LOGGER = Logger.getLogger(SiteMigrator.class.getName());
 
+    private boolean fix;
+
     private transient QueryExecutor queryExecutor;
     private transient ActivityLoader activityLoader;
 
+    public SiteMigrator(boolean fix) {
+        this.fix = fix;
+    }
+
+    public SiteMigrator() {
+        this(false);
+    }
 
     @Override
     public void beginSlice() {
@@ -124,9 +133,15 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
                 Key<FormRecordEntity> recordKey = recordEntity.getKey();
                 LoadResult<FormRecordEntity> existing = Hrd.ofy().load().key(recordKey);
                 if(existing.now() == null) {
-                    LOGGER.info("Found missing FormRecord entity: " + recordKey + stringify(recordEntity));
+                    LOGGER.info("Found missing FormRecord entity: " + recordKey + stringify(recordEntity)  +
+                            " fix = " + fix);
 
                     getContext().getCounter("missing").increment(1);
+
+                    if(fix) {
+                        Hrd.ofy().save().entity(recordEntity).now();
+                        LOGGER.info("Wrote missing FormRecord entity: " + Key.create(recordEntity));
+                    }
 
                 } else {
                     if(!fieldsIdentical(recordEntity, existing.now())) {

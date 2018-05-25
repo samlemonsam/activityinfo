@@ -18,11 +18,7 @@
  */
 package org.activityinfo.store.hrd;
 
-import com.google.appengine.api.datastore.Cursor;
-import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.base.Optional;
-import com.google.common.base.Stopwatch;
-import com.googlecode.objectify.cmd.Query;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormPermissions;
@@ -31,7 +27,6 @@ import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
-import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
 import org.activityinfo.store.hrd.op.QuerySubRecords;
@@ -42,7 +37,6 @@ import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -135,38 +129,14 @@ public class HrdFormStorage implements VersionedFormStorage {
 
     @Override
     public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, java.util.Optional<String> cursor) {
-
-        LOGGER.info("Starting VersionRange query...");
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        Query<FormRecordSnapshotEntity> query = ofy().load().type(FormRecordSnapshotEntity.class)
-                .ancestor(FormEntity.key(formClass))
-                .chunk(500);
-
-        if(cursor.isPresent()) {
-            query = query.startAt(Cursor.fromWebSafeString(cursor.get()));
+        if(localVersion == 0) {
+            InitialSyncBuilder initialSync = new InitialSyncBuilder(getFormClass(), visibilityPredicate);
+            initialSync.query(toVersion, cursor);
+            return initialSync.build();
+        } else {
+            DiffBuilder diff = new DiffBuilder(getFormClass(), visibilityPredicate);
+            diff.query(localVersion, toVersion, cursor);
+            return diff.build();
         }
-
-        if(localVersion > 0) {
-            query = query.filter("version >", localVersion);
-        }
-
-        SyncSetBuilder builder = new SyncSetBuilder(getFormClass(), localVersion, visibilityPredicate);
-
-        QueryResultIterator<FormRecordSnapshotEntity> it = query.iterator();
-        while(it.hasNext()) {
-            FormRecordSnapshotEntity snapshot = it.next();
-            if(snapshot.getVersion() <= toVersion) {
-                if(!builder.add(snapshot)) {
-                    builder.stop(it.getCursor().toWebSafeString());
-                    break;
-                }
-            }
-        }
-
-        LOGGER.info("VersionRange query complete in " + stopwatch.elapsed(TimeUnit.SECONDS) +
-            " with estimate size: " + builder.getEstimatedSizeInBytes() + " bytes");
-
-        return builder.build();
     }
 }

@@ -26,7 +26,6 @@ import com.google.appengine.tools.mapreduce.inputs.DatastoreInput;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,7 +40,7 @@ public class MigrationServlet extends HttpServlet {
 
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         String pipelineId;
         try {
@@ -66,15 +65,16 @@ public class MigrationServlet extends HttpServlet {
             case "snapshots":
                 return reindexSnapshots();
             case "sites":
-                return migrateSites(Integer.parseInt(req.getParameter("activityId")));
+                return migrateSites(Integer.parseInt(req.getParameter("activityId")),
+                        "true".equals(req.getParameter("fix")));
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
     }
 
-    private String migrateSites(int activityId) {
+    private String migrateSites(int activityId, boolean fix) {
         SiteInput input = new SiteInput(activityId);
-        SiteMigrator mapper = new SiteMigrator();
+        SiteMigrator mapper = new SiteMigrator(fix);
 
         MapSpecification<Integer, Void, Void> spec = new MapSpecification.Builder<Integer, Void, Void>(input, mapper)
                 .setJobName("Migrate site records")
