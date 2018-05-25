@@ -29,9 +29,9 @@
 
 
   <locationType locationTypeId="1" countryId="1" name="localite"
-                reuse="1"/>
+                reuse="1" nullary="false"/>
 
-  <locationType locationTypeId="2" countryId="1" name="Country" reuse="1"/>
+  <locationType locationTypeId="2" countryId="1" name="Country" reuse="1" nullary="true"/>
   <location locationTypeId="2" locationId="2" name="RDC"/>
   
   <!-- Indicators -->
