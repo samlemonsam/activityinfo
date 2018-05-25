@@ -72,7 +72,8 @@ public class DiffBuilder {
         while(it.hasNext()) {
             FormRecordSnapshotEntity snapshot = it.next();
             if(snapshot.getVersion() <= toVersion) {
-                if(!add(snapshot)) {
+                add(snapshot);
+                if(!sizeEstimator.timeAndSpaceRemaining()) {
                     stop(it.getCursor().toWebSafeString());
                     break;
                 }
@@ -85,11 +86,8 @@ public class DiffBuilder {
 
     /**
      * Adds this snapshot to the {@link FormSyncSet}
-     * @param snapshot
-     * @return {@code true} if there is time and space left to continue adding more snapshots,
-     * or if we should stop here.
      */
-    public boolean add(FormRecordSnapshotEntity snapshot) {
+    public void add(FormRecordSnapshotEntity snapshot) {
         if(visibilityPredicate.test(snapshot.getRecord().getRecordId())) {
             if (snapshot.getType() == RecordChangeType.DELETED) {
                 String recordId = snapshot.getRecordId().asString();
@@ -106,16 +104,6 @@ public class DiffBuilder {
                 }
             }
         }
-
-        return sizeEstimator.timeAndSpaceRemaining();
-    }
-
-    /**
-     *
-     * @return a very rough estimate of how many bytes of JSON this response will require so far.
-     */
-    public long getEstimatedSizeInBytes() {
-        return sizeEstimator.getEstimatedSizeInBytes();
     }
 
     public void stop(String cursor) {
@@ -125,7 +113,6 @@ public class DiffBuilder {
     private String[] buildDeletedArray() {
         return deleted.toArray(new String[deleted.size()]);
     }
-
 
     private List<FormRecord> buildUpdateArrays() {
         FormRecord[] records = new FormRecord[snapshots.size()];

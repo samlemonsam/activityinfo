@@ -12,6 +12,10 @@ class SyncSizeEstimator {
     private long estimatedSizeInBytes;
 
 
+    /**
+     * @return {@code true} if there is time and space left to continue adding more snapshots,
+     * or if we should stop here.
+     */
     public boolean timeAndSpaceRemaining() {
 
         // Do we have enough time left in this request to do any more work?

@@ -56,7 +56,8 @@ class InitialSyncBuilder {
         while(it.hasNext()) {
             FormRecordEntity record = it.next();
             if(visibilityPredicate.test(record.getRecordId())) {
-                if(add(record)) {
+                add(record);
+                if(!sizeEstimator.timeAndSpaceRemaining()) {
                     stop(it.getCursor().toWebSafeString());
                     break;
                 }
@@ -74,13 +75,11 @@ class InitialSyncBuilder {
      * @return {@code true} if there is time and space left to continue adding more records,
      * or if we should stop here.
      */
-    public boolean add(FormRecordEntity record) {
+    public void add(FormRecordEntity record) {
         if(visibilityPredicate.test(record.getRecordId())) {
             records.add(record.toFormRecord(formClass));
             sizeEstimator.plus(record);
         }
-
-        return sizeEstimator.timeAndSpaceRemaining();
     }
 
     public void stop(String cursor) {
@@ -91,7 +90,4 @@ class InitialSyncBuilder {
         return FormSyncSet.initial(formClass.getId(), records, cursor);
     }
 
-    public long getEstimatedSizeInBytes() {
-        return sizeEstimator.getEstimatedSizeInBytes();
-    }
 }
