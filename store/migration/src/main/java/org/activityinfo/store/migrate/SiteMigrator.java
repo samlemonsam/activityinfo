@@ -1,19 +1,20 @@
 package org.activityinfo.store.migrate;
 
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.tools.mapreduce.MapOnlyMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.LoadResult;
 import com.googlecode.objectify.VoidWork;
 import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonException;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.TypeRegistry;
+import org.activityinfo.model.type.*;
+import org.activityinfo.model.type.barcode.BarcodeType;
+import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
@@ -128,11 +129,7 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
                     getContext().getCounter("missing").increment(1);
 
                 } else {
-                    if(!fieldsIdentical(existing.now(), recordEntity)) {
-                        LOGGER.info("Found inconsistent FormRecord entity: " + recordKey +
-                                "\nMySQL: " + SiteMigrator.stringify(recordEntity) +
-                                "\nHRD: " + SiteMigrator.stringify(existing.now()));
-
+                    if(!fieldsIdentical(recordEntity, existing.now())) {
                         getContext().getCounter("inconsistent").increment(1);
                     } else {
                         getContext().getCounter("valid").increment(1);
@@ -147,27 +144,53 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
         Map<String, Object> mysqlProps = mysql.getFieldValues().getProperties();
         Map<String, Object> hrdProps = hrd.getFieldValues().getProperties();
 
-        Set<String> missingInHrd = Sets.difference(mysqlProps.keySet(), hrdProps.keySet());
-        Set<String> missingInMySQL = Sets.difference(hrdProps.keySet(), mysqlProps.keySet());
-
-        if(!missingInHrd.isEmpty()) {
-            LOGGER.warning("Fields missing in HRD: " + missingInHrd);
-            return false;
-        }
-        if(!missingInMySQL.isEmpty()) {
-            LOGGER.warning("Fields missing in MySQL: " + missingInMySQL);
-        }
+        StringBuilder diff = new StringBuilder();
+        boolean identical = true;
 
         for (String field : mysqlProps.keySet()) {
-            Object value1 = mysqlProps.get(field);
-            Object value2 = hrdProps.get(field);
-            if(!Objects.equals(value1, value2)) {
-                LOGGER.warning("Field " + field + " has unequal values: " + value1 + " != " + value2);
-                return false;
+
+            Object mysqlValue = mysqlProps.get(field);
+            Object hrdValue = hrdProps.get(field);
+
+            if(!fieldsIdentical(mysqlValue, hrdValue)) {
+                diff.append("\nField " + field + " has unequal values: MySQL = " + mysqlValue + ", HRD = " + hrdValue);
+                identical = false;
             }
         }
-        return true;
+
+        for (String field : hrdProps.keySet()) {
+            Object hrdValue = hrdProps.get(field);
+
+            if(!mysqlProps.containsKey(field)) {
+                diff.append("\nField " + field + " has unequal values: MySQL = null, HRD = " + hrdValue);
+                identical = false;
+            }
+        }
+
+        if(!identical) {
+            LOGGER.warning("Site " + mysql.getRecordId() + " in " + mysql.getFormId() + diff.toString());
+        }
+
+        return identical;
     }
+
+    private boolean fieldsIdentical(Object mysqlValue, Object hrdValue) {
+        if(mysqlValue instanceof Text) {
+            mysqlValue = ((Text) mysqlValue).getValue().trim();
+        }
+        if(hrdValue instanceof Text) {
+            hrdValue = ((Text) hrdValue).getValue().trim();
+        }
+        if(mysqlValue instanceof List && hrdValue instanceof List) {
+            return setsEquivalent(((List) mysqlValue), ((List) hrdValue));
+        }
+        return Objects.equals(mysqlValue, hrdValue);
+    }
+
+    private boolean setsEquivalent(List<Object> mysqlList, List<Object> hrdList) {
+        return mysqlList.containsAll(hrdList) && hrdList.containsAll(mysqlList);
+    }
+
 
     private static String stringify(FormRecordEntity recordEntity) {
         StringBuilder s = new StringBuilder();
@@ -213,8 +236,21 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
                             fieldValue = null;
                         } else if (typeClass == TextType.TYPE_CLASS) {
                             fieldValue = TextValue.valueOf(textValue);
+
+                        } else if (typeClass == NarrativeType.TYPE_CLASS) {
+                            fieldValue = NarrativeValue.valueOf(textValue);
+
+                        } else if (typeClass == BarcodeType.TYPE_CLASS) {
+                            fieldValue = BarcodeValue.valueOf(textValue);
+
                         } else {
-                            fieldValue = typeClass.createType().parseJsonValue(Json.parse(textValue));
+                            try {
+                                fieldValue = typeClass.createType().parseJsonValue(Json.parse(textValue));
+                            } catch (JsonException e) {
+                                LOGGER.severe("Failed to parse indicator " + indicatorId + " with type " + typeClass +
+                                    " (typeId = '" + typeId + "')");
+                                throw e;
+                            }
                         }
                     }
                     fieldValues.put(fieldId, fieldValue);
@@ -238,7 +274,7 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
     private void queryAttributes(Activity activity, Integer siteId, Map<ResourceId, FieldValue> fieldValues) {
         try(ResultSet rs = queryExecutor.query("select a.AttributeGroupId, av.AttributeId from attributevalue av " +
                 "left join attribute a on (av.attributeId = a.attributeId) " +
-                "where av.siteId=?", siteId)) {
+                "where av.siteId=? and av.value=1", siteId)) {
 
             Multimap<ResourceId, ResourceId> attributeValues = HashMultimap.create();
 
@@ -253,8 +289,9 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
                 } else {
                     fieldId = CuidAdapter.attributeGroupField(groupId);
                 }
-
-                attributeValues.put(fieldId, itemId);
+                if(fieldId != null) {
+                    attributeValues.put(fieldId, itemId);
+                }
             }
 
             for (ResourceId fieldId : attributeValues.keySet()) {
