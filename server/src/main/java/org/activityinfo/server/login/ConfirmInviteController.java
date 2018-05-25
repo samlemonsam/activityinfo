@@ -73,7 +73,7 @@ public class ConfirmInviteController {
                             @FormParam("locale") String locale,
                             @FormParam("password") String password,
                             @FormParam("name") String name,
-                            @FormParam("newsletter") boolean newsletter) throws Exception {
+                            @FormParam("newsletterYes") boolean newsletter) throws Exception {
 
         User user = null;
         try {

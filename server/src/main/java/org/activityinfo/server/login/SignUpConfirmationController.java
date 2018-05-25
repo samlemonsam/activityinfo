@@ -92,7 +92,7 @@ public class SignUpConfirmationController {
     public Response confirm(@Context UriInfo uri,
                             @FormParam("key") String key,
                             @FormParam("password") String password,
-                            @FormParam("newsletter") boolean newsletter) {
+                            @FormParam("newsletterYes") boolean newsletter) {
 
         entityManager.getTransaction().begin();
 

@@ -53,11 +53,22 @@
                     </div>
                 </div>
 
-                <div class="control-group">
-                    <label class="checkbox">
-                        <input type="checkbox" checked="false" name="newsletter" value="true">
-                    ${label.newsletter}
-                    </label>
+                <div>
+                    <label>${label.newsletter}:</label>
+                    <ul style="list-style-type: none">
+                        <li>
+                            <label class="checkbox">
+                                <input type="checkbox" name="newsletterYes" id="newsletterYesInput" value="true">
+                                ${label.newsletterYes}
+                            </label>
+                        </li>
+                        <li>
+                            <label class="checkbox">
+                                <input type="checkbox" name="newsletterNo" id="newsletterNoInput">
+                                ${label.newsletterNo}
+                            </label>
+                        </li>
+                    </ul>
                 </div>
 
                 <div class="control-group">
@@ -77,6 +88,34 @@
 
         var passwordInput = document.getElementById('passwordInput');
         var confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        var newsletterYesInput = document.getElementById('newsletterYesInput');
+        var newsletterNoInput = document.getElementById('newsletterNoInput');
+        var confirmForm = document.getElementById('confirmForm');
+
+        newsletterYesInput.addEventListener('input', function (event) {
+            var yes = newsletterYesInput.checked;
+            if (yes == true) {
+                newsletterNoInput.checked = false;
+            }
+        });
+        newsletterNoInput.addEventListener('input', function (event) {
+            var no = newsletterNoInput.checked;
+            if (no == true) {
+                newsletterYesInput.checked = false;
+            }
+        });
+
+        confirmForm.addEventListener('submit', function(event) {
+            var yes = newsletterYesInput.checked;
+            var no = newsletterNoInput.checked;
+
+            if ((yes && no) || (!yes && !no)) {
+                event.preventDefault();
+                alert("Please choose whether you wish to receive emails from the ActivityInfo team.");
+                return;
+            }
+        });
+
         var validatePass = function () {
             var pass1 = passwordInput.value;
             var pass2 = confirmPasswordInput.value;
