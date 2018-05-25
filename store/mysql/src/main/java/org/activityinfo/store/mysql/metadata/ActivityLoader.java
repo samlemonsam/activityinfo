@@ -288,8 +288,9 @@ public class ActivityLoader {
                             "(A.dateDeleted IS NOT NULL OR " +
                             " d.dateDeleted IS NOT NULL), " + // (17)
                             "d.ownerUserId, " +               // (18)
-                            "A.classicView, " +                // (19)
-                            "A.hrd " +                          // (20)
+                            "A.classicView, " +               // (19)
+                            "A.hrd, " +                       // (20)
+                            "(L.Name = 'Country' and L.databaseId IS NULL) " +  // (21)
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -306,6 +307,7 @@ public class ActivityLoader {
                     activity.databaseName = rs.getString(7);
                     activity.locationTypeId = rs.getInt(8);
                     activity.locationTypeName = rs.getString(9);
+                    activity.nullLocationType = rs.getBoolean(21);
                     activity.adminLevelId = rs.getInt(10);
                     if(rs.wasNull()) {
                         activity.adminLevelId = null;
