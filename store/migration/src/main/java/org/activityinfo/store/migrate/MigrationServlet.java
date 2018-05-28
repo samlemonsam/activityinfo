@@ -56,6 +56,7 @@ public class MigrationServlet extends HttpServlet {
 
     private String startJob(HttpServletResponse resp, HttpServletRequest req) {
         String job = req.getParameter("job");
+        boolean fix = "true".equals(req.getParameter("fix"));
         if(job == null) {
             throw new IllegalArgumentException("missing job parameter");
         }
@@ -65,8 +66,9 @@ public class MigrationServlet extends HttpServlet {
             case "snapshots":
                 return reindexSnapshots();
             case "sites":
-                return migrateSites(Integer.parseInt(req.getParameter("activityId")),
-                        "true".equals(req.getParameter("fix")));
+                return migrateSites(Integer.parseInt(req.getParameter("activityId")), fix);
+            case "deleted-sites":
+                return fixDeletedSites(fix);
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
@@ -78,6 +80,17 @@ public class MigrationServlet extends HttpServlet {
 
         MapSpecification<Integer, Void, Void> spec = new MapSpecification.Builder<Integer, Void, Void>(input, mapper)
                 .setJobName("Migrate site records")
+                .build();
+
+        return MapJob.start(spec, getSettings());
+    }
+
+    private String fixDeletedSites(boolean fix) {
+        DatastoreInput input = new DatastoreInput("FormRecord", 16);
+        DeletedSiteFixer fixer = new DeletedSiteFixer(fix);
+
+        MapSpecification<Entity, Void, Void> spec = new MapSpecification.Builder<Entity, Void, Void>(input, fixer)
+                .setJobName("Fix deleted site records")
                 .build();
 
         return MapJob.start(spec, getSettings());

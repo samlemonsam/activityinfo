@@ -292,7 +292,7 @@ public class Activity implements Serializable {
     }
 
     public boolean isMigratedToHrd() {
-        return hrd;
+        return true;
     }
     
     public LinkedActivity getSelfLink() {

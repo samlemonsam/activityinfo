@@ -35,8 +35,6 @@ import org.activityinfo.store.spi.SubFormPatch;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 
 class HrdQueryColumnBuilder implements ColumnQueryBuilder {
 
@@ -88,7 +86,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     @Override
     public void execute() {
 
-        Query<FormRecordEntity> query = ofy()
+        Query<FormRecordEntity> query = Hrd.ofy()
                 .load()
                 .type(FormRecordEntity.class)
                 .ancestor(FormEntity.key(formClass));
