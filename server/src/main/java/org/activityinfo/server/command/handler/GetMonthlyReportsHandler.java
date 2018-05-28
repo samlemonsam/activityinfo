@@ -73,8 +73,9 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
         LocalDateInterval endMonthInterval = cmd.getEndMonth().asInterval();
 
         List<ReportingPeriod> periods = em.createQuery(
-            "SELECT p from ReportingPeriod p " +
-                    "LEFT JOIN FETCH p.indicatorValues " +
+            "SELECT p FROM ReportingPeriod p " +
+                    "LEFT JOIN FETCH p.indicatorValues iv " +
+                    "LEFT JOIN FETCH iv.indicator i " +
                     "WHERE p.site.id = :siteId " +
                     "AND p.date1 >= :date1 " +
                     "AND p.date2 <= :date2", ReportingPeriod.class)
