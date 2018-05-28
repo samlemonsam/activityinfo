@@ -52,7 +52,7 @@ class SyncSizeEstimator {
 
     private long estimateSizeInBytes(FormRecordEntity entity) {
         int numFields = entity.getFieldValues().getProperties().size();
-        return 200L + (numFields * 20L);
+        return 40L + (numFields * 20L);
     }
 
 }
