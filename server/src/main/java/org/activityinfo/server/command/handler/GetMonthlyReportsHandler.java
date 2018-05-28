@@ -75,13 +75,19 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
             .setParameter("date2", endMonthInterval.getEndDate().atMidnightInMyTimezone())
             .getResultList();
 
+        List<Integer> activityIds = em.createQuery(
+                "SELECT s.activity.id FROM Site s  " +
+                        "WHERE s.id = :siteId", Integer.class)
+                .setParameter("siteId", cmd.getSiteId())
+                .getResultList();
+
         List<Indicator> indicators = em.createQuery(
             "SELECT i from Indicator i " +
-             "WHERE i.activity.id IN (SELECT s.activity.id FROM Site s WHERE s.id = :siteId) " + 
-               "AND i.dateDeleted IS NULL " +
-          "ORDER BY i.sortOrder", Indicator.class) 
-           .setParameter("siteId", cmd.getSiteId())
-           .getResultList();
+                    "WHERE i.activity.id IN :activities " +
+                    "AND i.dateDeleted IS NULL " +
+                    "ORDER BY i.sortOrder", Indicator.class)
+                .setParameter("activities", activityIds)
+                .getResultList();
 
         List<IndicatorRowDTO> list = new ArrayList<>();
 
