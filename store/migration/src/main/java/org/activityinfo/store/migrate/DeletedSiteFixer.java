@@ -78,6 +78,7 @@ public class DeletedSiteFixer extends MapOnlyMapper<Entity, Void> {
 
             if(dateDeleted != null) {
                 LOGGER.warning("Site deleted " + recordEntity.getKey());
+                getContext().getCounter("deleted").increment(1);
             }
 
         } catch (SQLException e) {
