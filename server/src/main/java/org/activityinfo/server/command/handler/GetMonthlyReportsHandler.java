@@ -55,7 +55,14 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
     @Override
     public CommandResult execute(GetMonthlyReports cmd, User user) throws CommandException {
 
-        Site site = em.find(Site.class, cmd.getSiteId());
+        Site site = em.createQuery(
+                "SELECT s FROM Site s " +
+                        "LEFT JOIN FETCH s.activity " +
+                        "LEFT JOIN FETCH s.partner " +
+                        "WHERE s.id = :siteId", Site.class)
+                .setParameter("siteId", cmd.getSiteId())
+                .getSingleResult();
+
         if(!permissionOracle.isViewAllowed(site, user)) {
             LOGGER.severe(() -> "User " + user.getEmail() + " has no view privs on site " + site.getId() + "," +
                           "partner = " + site.getPartner().getName() + " " + site.getPartner().getId());
@@ -67,6 +74,7 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
 
         List<ReportingPeriod> periods = em.createQuery(
             "SELECT p from ReportingPeriod p " +
+                    "LEFT JOIN FETCH p.indicatorValues " +
                     "WHERE p.site.id = :siteId " +
                     "AND p.date1 >= :date1 " +
                     "AND p.date2 <= :date2", ReportingPeriod.class)
@@ -86,7 +94,7 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
         List<IndicatorRowDTO> list = new ArrayList<>();
 
         for (Indicator indicator : indicators) {
-            IndicatorRowDTO dto = buildRowDTO(cmd, indicator);
+            IndicatorRowDTO dto = buildRowDTO(cmd, site.getActivity(), indicator);
             addValues(cmd, dto, periods);
             list.add(dto);
         }
@@ -94,13 +102,13 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
         return new MonthlyReportResult(list);
     }
 
-    private IndicatorRowDTO buildRowDTO(GetMonthlyReports cmd, Indicator indicator) {
+    private IndicatorRowDTO buildRowDTO(GetMonthlyReports cmd, Activity activity, Indicator indicator) {
         IndicatorRowDTO dto = new IndicatorRowDTO();
         dto.setIndicatorId(indicator.getId());
         dto.setSiteId(cmd.getSiteId());
         dto.setIndicatorName(indicator.getName());
         dto.setCategory(indicator.getCategory());
-        dto.setActivityName(indicator.getActivity().getName());
+        dto.setActivityName(activity.getName());
         dto.setExpression(indicator.getExpression());
         return dto;
     }
