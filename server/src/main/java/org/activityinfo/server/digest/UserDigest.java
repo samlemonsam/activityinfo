@@ -33,22 +33,15 @@ public class UserDigest {
     private final Date date;
     private final int days;
     private final long from;
-    private final String userSecureToken;
 
-    public UserDigest(User user, Date date, int days, String userSecureToken) {
+    public UserDigest(User user, Date date, int days) {
         Preconditions.checkNotNull(user);
         Preconditions.checkNotNull(date);
-        Preconditions.checkNotNull(userSecureToken);
 
         this.user = user;
         this.date = date;
         this.days = days;
         this.from = DateCalc.daysAgo(date, days).getTime();
-        this.userSecureToken = userSecureToken;
-    }
-
-    public String getUnsubscribeLink() {
-        return "https://www.activityinfo.org/subscribe?subscribe=false&token=" + userSecureToken;
     }
 
     public User getUser() {

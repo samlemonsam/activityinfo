@@ -20,9 +20,6 @@ package org.activityinfo.server.digest;
 
 import com.google.inject.Provider;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
-import org.activityinfo.server.authentication.UserToken;
-import org.activityinfo.server.authentication.UserTokenManager;
-import org.activityinfo.server.authentication.UserTokenScope;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
@@ -90,14 +87,12 @@ public abstract class UserDigestResource {
             return "user's email notification flag is set to false.";
         }
 
-        UserToken userToken = UserTokenManager.create(userId, UserTokenScope.SUBSCRIBE, UserTokenScope.UNSUBSCRIBE);
-
         authProvider.set(user);
 
         LOGGER.info("creating digest for " + user.getEmail() + " on " + DateFormatter.formatDateTime(date) +
                 " for activity period: " + days + " day(s)." + " (sending email: " + sendEmail + ")");
 
-        UserDigest userDigest = new UserDigest(user, date, days, userToken.getSecureToken());
+        UserDigest userDigest = new UserDigest(user, date, days);
         DigestMessageBuilder digest = new DigestMessageBuilder(digestModelBuilder, digestRenderer);
         digest.setUserDigest(userDigest);
 

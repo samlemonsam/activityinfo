@@ -102,7 +102,7 @@ public class GeoDigestModelBuilderTest {
         // only notification
         User user = em.find(User.class, 1);
         LocalDate today = new LocalDate(2041, 1, 1);
-        UserDigest userDigest = new UserDigest(user, today.atMidnightInMyTimezone(), 1, "testToken");
+        UserDigest userDigest = new UserDigest(user, today.atMidnightInMyTimezone(), 1);
         GeoDigestModel model = geoDigestModelBuilder.createModel(userDigest);
         assertThat(model.hasData(), equalTo(false));
     }
