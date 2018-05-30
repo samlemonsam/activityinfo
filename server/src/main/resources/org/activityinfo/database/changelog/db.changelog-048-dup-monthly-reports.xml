@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    ActivityInfo
+    Copyright (C) 2009-2013 UNICEF
+    Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="alex" id="048-01">
+        <comment>
+            Add flag to properly distinguish between nullary location types
+        </comment>
+        <sql>
+            SET innodb_lock_wait_timeout = 1000;
+
+            -- Find the "correct" reportingperiod id for each site-month-indicator
+            DROP TABLE IF EXISTS dup_iv;
+
+            CREATE TEMPORARY TABLE dup_iv AS
+            SELECT rp.siteId, rp.date1, rp.date2, iv.indicatorid, count(*) count, max(rp.reportingPeriodId) lastrpid
+            FROM reportingperiod rp
+            LEFT JOIN site s ON (s.siteid=rp.SiteId)
+            LEFT JOIN indicatorvalue iv on (rp.reportingperiodid=iv.reportingperiodid)
+            LEFT JOIN indicator i ON (i.IndicatorId=iv.indicatorid)
+            LEFT JOIN activity a ON (a.activityid=s.activityid)
+            GROUP BY rp.siteId, rp.date1, rp.date2, indicatorId
+            HAVING COUNT(*) > 1;
+
+            CREATE INDEX dup_iv_idx ON dup_iv (siteid, date1, date2, indicatorid);
+
+            -- Back up deleted indicator values
+            DROP TABLE IF EXISTS indicatorvalue_dup;
+            CREATE TABLE indicatorvalue_dup AS
+            SELECT iv.*
+            FROM indicatorvalue iv
+            LEFT JOIN reportingperiod rp ON (iv.reportingperiodid = rp.reportingperiodid)
+            LEFT JOIN site s ON (s.siteid = rp.siteid)
+            LEFT JOIN dup_iv d ON (d.siteid = rp.siteid
+            AND d.date1 = rp.date1
+            AND d.date2 = rp.date2
+            AND d.indicatorid = iv.indicatorid)
+            WHERE
+            (d.lastrpid != iv.reportingperiodid);
+
+            -- Find and remove all the duplicated indicator values
+            DELETE iv FROM indicatorvalue iv
+            LEFT JOIN reportingperiod rp ON (iv.reportingperiodid = rp.reportingperiodid)
+            LEFT JOIN site s ON (s.siteid = rp.siteid)
+            LEFT JOIN dup_iv d ON (d.siteid = rp.siteid
+            AND d.date1 = rp.date1
+            AND d.date2 = rp.date2
+            AND d.indicatorid = iv.indicatorid)
+            WHERE
+            (d.lastrpid != iv.reportingperiodid);
+
+            -- find the "correct" reporting period for each site-month
+            DROP TABLE IF EXISTS good_rp;
+
+            CREATE TEMPORARY TABLE good_rp AS
+            SELECT rp.siteId, rp.date1, rp.date2, count(*) count, max(rp.reportingPeriodId) lastrpid
+            FROM reportingperiod rp
+            LEFT JOIN site s ON (s.siteid=rp.siteid)
+            GROUP BY rp.siteId, rp.date1, rp.date2
+            HAVING count(*) > 1;
+
+            -- update indicator values to the "correct" reporitng period
+            UPDATE indicatorvalue iv
+            LEFT JOIN reportingperiod rp ON (rp.reportingperiodid = iv.reportingperiodid)
+            LEFT JOIN good_rp g ON (g.siteid = rp.siteid
+            AND g.date1 = rp.date1
+            AND g.date2 = rp.date2)
+            SET
+            iv.reportingperiodid = g.lastrpid
+            WHERE
+            g.lastrpid IS NOT NULL;
+
+            -- remove duplicate records
+            DELETE rp FROM reportingperiod rp
+            INNER JOIN good_rp g ON (g.siteid = rp.siteid
+            AND g.date1 = rp.date1
+            AND g.date2 = rp.date2)
+            WHERE
+            rp.reportingperiodid != g.lastrpid
+            AND g.lastrpid IS NOT NULL;
+        </sql>
+    </changeSet>
+    <changeSet id="048-02" author="alex">
+        <sql>
+            ALTER TABLE reportingperiod ADD UNIQUE site_period (siteId, date1, date2)
+        </sql>
+    </changeSet>
+</databaseChangeLog>
