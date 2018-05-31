@@ -70,6 +70,17 @@ public class PipelineResource {
         return Response.ok().entity(jobInfo.getJobState()).build();
     }
 
+    @GET
+    @Path("{pipelineId}/output")
+    public Response output(@PathParam("pipelineId") String pipelineId) throws Exception {
+        JobInfo jobInfo = pipeline.getJobInfo(pipelineId);
+        if (jobInfo.getJobState() == JobInfo.State.COMPLETED_SUCCESSFULLY) {
+            return Response.ok().entity(jobInfo.getOutput()).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+
     private boolean conflicts(PipelineJobRequest request) {
         // Get requester id
         // Check store for user's requested jobs

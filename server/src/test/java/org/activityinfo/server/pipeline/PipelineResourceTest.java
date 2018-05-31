@@ -77,6 +77,9 @@ public class PipelineResourceTest {
         response = resource.status(pipelineId);
         JobInfo.State status = (JobInfo.State) response.getEntity();
 
+        response = resource.output(pipelineId);
+        Integer output = (Integer) response.getEntity();
+
     }
 
 }
