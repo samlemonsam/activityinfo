@@ -89,8 +89,11 @@ dependencies {
     testCompile project(':tools:promises').sourceSets.test.output
 
     // For humanitarian iD
-    compile "com.google.oauth-client:google-oauth-client-appengine:1.20.0";
+    compile "com.google.oauth-client:google-oauth-client-appengine:1.20.0"
 
+    // Appengine Pipelines
+    compile "com.google.appengine.tools:appengine-pipeline:0.2.13"
+    testCompile "com.google.appengine.tools:appengine-pipeline:0.2.13"
 
     // To Remove:
     // tests should be moved to their respective units

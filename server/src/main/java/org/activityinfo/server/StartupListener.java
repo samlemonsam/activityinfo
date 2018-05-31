@@ -41,6 +41,7 @@ import org.activityinfo.server.geo.GeometryModule;
 import org.activityinfo.server.job.JobModule;
 import org.activityinfo.server.login.LoginModule;
 import org.activityinfo.server.mail.MailModule;
+import org.activityinfo.server.pipeline.PipelineModule;
 import org.activityinfo.server.report.ReportModule;
 import org.activityinfo.server.util.ObjectifyModule;
 import org.activityinfo.server.util.TemplateModule;
@@ -95,7 +96,8 @@ public class StartupListener extends GuiceServletContextListener {
                 new JaxRsModule(),
                 new RestApiModule(),
                 new OdkModule(),
-                new GcsBlobFieldStorageServiceModule());
+                new GcsBlobFieldStorageServiceModule(),
+                new PipelineModule());
     }
 
 }
