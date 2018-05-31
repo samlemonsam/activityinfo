@@ -66,16 +66,11 @@ public class PipelineResourceTest {
         final AuthenticatedUser requester = new AuthenticatedUser("XYZ", 1, "requester@gmail.com");
         final PipelineResource resource = new PipelineResource(Providers.of(requester), new PipelineJobFactory(entityManager));
 
-        final String jobId = ObjectifyService.run(new Work<String>() {
-            @Override
-            public String run() {
-                PipelineJobDescriptor descriptor = new AdditionJobDescriptor(1,1);
-                PipelineJobRequest request = new PipelineJobRequest(requester.getId(), descriptor);
+        PipelineJobDescriptor descriptor = new AdditionJobDescriptor(1,1);
+        PipelineJobRequest request = new PipelineJobRequest(requester.getId(), descriptor);
 
-                Response response = resource.start(request.toJson().toJson());
-                return (String) response.getEntity();
-            }
-        });
+        Response response = resource.start(request.toJson().toJson());
+        String pipelineId = (String) response.getEntity();
     }
 
 }
