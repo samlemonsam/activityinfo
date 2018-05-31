@@ -48,6 +48,8 @@ public class PipelineJobRequest {
         switch(type) {
             case AdditionJobDescriptor.TYPE:
                 return AdditionJobDescriptor.fromJson(descriptor);
+            case RequestDatabaseTransferJobDescriptor.TYPE:
+                return RequestDatabaseTransferJobDescriptor.fromJson(descriptor);
             default:
                 break;
         }

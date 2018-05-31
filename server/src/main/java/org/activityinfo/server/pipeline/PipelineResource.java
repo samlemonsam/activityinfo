@@ -1,5 +1,6 @@
 package org.activityinfo.server.pipeline;
 
+import com.google.appengine.tools.pipeline.JobInfo;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 import com.google.inject.Inject;
@@ -60,6 +61,13 @@ public class PipelineResource {
         LOGGER.info(() -> "Starting pipeline job " + request.getJobDescriptor().getType() + " for user " + request.getRequesterId());
 
         return Response.ok(Response.Status.CREATED).entity(pipelineKey).build();
+    }
+
+    @GET
+    @Path("{pipelineId}/status")
+    public Response status(@PathParam("pipelineId") String pipelineId) throws Exception {
+        JobInfo jobInfo = pipeline.getJobInfo(pipelineId);
+        return Response.ok().entity(jobInfo.getJobState()).build();
     }
 
     private boolean conflicts(PipelineJobRequest request) {

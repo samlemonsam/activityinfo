@@ -4,6 +4,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalModulesServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
+import com.google.appengine.tools.pipeline.JobInfo;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
@@ -66,11 +67,16 @@ public class PipelineResourceTest {
         final AuthenticatedUser requester = new AuthenticatedUser("XYZ", 1, "requester@gmail.com");
         final PipelineResource resource = new PipelineResource(Providers.of(requester), new PipelineJobFactory(entityManager));
 
+        // run an immediately returnable pipeline job
         PipelineJobDescriptor descriptor = new AdditionJobDescriptor(1,1);
         PipelineJobRequest request = new PipelineJobRequest(requester.getId(), descriptor);
 
         Response response = resource.start(request.toJson().toJson());
         String pipelineId = (String) response.getEntity();
+
+        response = resource.status(pipelineId);
+        JobInfo.State status = (JobInfo.State) response.getEntity();
+
     }
 
 }
