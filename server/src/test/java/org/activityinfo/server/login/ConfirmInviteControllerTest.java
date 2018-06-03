@@ -18,6 +18,8 @@
  */
 package org.activityinfo.server.login;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.util.Providers;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
@@ -56,8 +58,12 @@ public class ConfirmInviteControllerTest {
 
     private Closeable objectify;
 
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
     @Before
     public final void setup() {
+        helper.setUp();
 
         user = new User();
 
@@ -85,6 +91,7 @@ public class ConfirmInviteControllerTest {
     @After
     public void tearDown() {
         objectify.close();
+        helper.tearDown();
     }
 
     @Test
