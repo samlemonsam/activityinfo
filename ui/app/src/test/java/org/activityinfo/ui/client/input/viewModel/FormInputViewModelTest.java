@@ -26,15 +26,19 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.formTree.FormClassProviders;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.SerialNumber;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.primitive.TextType;
@@ -114,8 +118,78 @@ public class FormInputViewModelTest {
 
         assertThat("pregnant is not relevant", viewModel.isRelevant(survey.getPregnantFieldId()), equalTo(false));
         assertThat("prenatale is not relevant", viewModel.isRelevant(survey.getPrenataleCareFieldId()), equalTo(false));
-
     }
+
+    @Test
+    public void bugAI1918() {
+
+        // A = multiple select
+        // B = multiple select [relevant if: A.1]
+        // C = relevant if: A1 and B2
+
+        FormClass formClass = new FormClass(ResourceId.valueOf("GOKHAN"));
+        ResourceId fieldA = ResourceId.valueOf("A");
+        ResourceId fieldB = ResourceId.valueOf("B");
+        ResourceId fieldC = ResourceId.valueOf("C");
+
+        formClass.addField(fieldA)
+                .setLabel("Field A")
+                .setType(new EnumType(Cardinality.MULTIPLE,
+                        new EnumItem(ResourceId.valueOf("A1"), "Choice A1"),
+                        new EnumItem(ResourceId.valueOf("A2"), "Choice A2")));
+
+        formClass.addField(fieldB)
+                .setLabel("Field B")
+                .setType(new EnumType(Cardinality.MULTIPLE,
+                        new EnumItem(ResourceId.valueOf("B1"), "Choice B1"),
+                        new EnumItem(ResourceId.valueOf("B2"), "Choice B2")))
+                .setRelevanceConditionExpression("A.A2");
+
+        formClass.addField(fieldC)
+                .setLabel("Field C")
+                .setType(TextType.SIMPLE)
+                .setRelevanceConditionExpression("A.A2 && B.B2");
+
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(FormClassProviders.of(formClass));
+        FormTree formTree = treeBuilder.queryTree(formClass.getId());
+
+        RecordRef recordRef = new RecordRef(formClass.getId(), ResourceId.valueOf("R1"));
+        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(setup.getFormStore(), formTree, new TestingActivePeriodMemory());
+
+        // Case 1: No entry, B and C should be not relevant
+
+        FormInputModel model = new FormInputModel(recordRef);
+        FormInputViewModel viewModel = viewModelBuilder.build(model);
+
+        assertFalse(viewModel.isRelevant(fieldB));
+        assertFalse(viewModel.isRelevant(fieldC));
+
+        // Case 2: A is set to A1, so B and C are still not relevant
+
+        model =  model.update(fieldA, new FieldInput(new EnumValue(ResourceId.valueOf("A1"))));
+        viewModel = viewModelBuilder.build(model);
+
+        assertFalse(viewModel.isRelevant(fieldB));
+        assertFalse(viewModel.isRelevant(fieldC));
+
+        // Case 3: A is set to A2, so B is relevant (but empty) and C is still not relevant
+
+        model =  model.update(fieldA, new FieldInput(new EnumValue(ResourceId.valueOf("A2"))));
+        viewModel = viewModelBuilder.build(model);
+
+        assertTrue(viewModel.isRelevant(fieldB));
+        assertFalse(viewModel.isRelevant(fieldC));
+
+        // Case 4: A is set to A2 and B is set to B2
+
+        model =  model.update(fieldB, new FieldInput(new EnumValue(ResourceId.valueOf("B2"))));
+        viewModel = viewModelBuilder.build(model);
+
+        assertTrue(viewModel.isRelevant(fieldB));
+        assertTrue(viewModel.isRelevant(fieldC));
+    }
+
+
     @Test
     public void testSurveyEdit() {
 
