@@ -31,7 +31,6 @@ import com.sencha.gxt.widget.core.client.grid.HeaderGroupConfig;
 import com.sencha.gxt.widget.core.client.grid.filters.DateFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.ListFilter;
 import com.sencha.gxt.widget.core.client.grid.filters.NumericFilter;
-import com.sencha.gxt.widget.core.client.grid.filters.StringFilter;
 import org.activityinfo.analysis.table.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -120,7 +119,7 @@ public class ColumnModelBuilder {
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
-        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
+        FixedStringFilter filter = new FixedStringFilter(valueProvider);
         filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
@@ -234,9 +233,6 @@ public class ColumnModelBuilder {
         config.setCell(new ErrorCell());
         config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
         columnConfigs.add(config);
-
-        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
-        filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
 
