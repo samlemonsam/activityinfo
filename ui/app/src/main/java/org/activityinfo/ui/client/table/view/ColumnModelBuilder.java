@@ -18,14 +18,12 @@
  */
 package org.activityinfo.ui.client.table.view;
 
-import com.google.common.base.Strings;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
@@ -42,7 +40,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Constructs a GXT Grid column model from our EffectiveTableModel.
@@ -123,7 +120,7 @@ public class ColumnModelBuilder {
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
-        StringFilter<Integer> filter = new CachingStringFilter(valueProvider);
+        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
         filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
@@ -301,32 +298,4 @@ public class ColumnModelBuilder {
         }
     }
 
-    private static class CachingStringFilter extends StringFilter<Integer> {
-
-        public CachingStringFilter(ValueProvider<? super Integer, String> valueProvider) {
-            super(valueProvider);
-        }
-
-        @Override
-        public void setFilterConfig(List<FilterConfig> configs) {
-            // This event can be triggered by a change to the model caused by a user's keystroke.
-            // If we blindly apply the change, then the input will loose focus and the next keystroke
-            // will land elsewhere and close the popup.
-
-            // To avoid this, we can simply exit early if there is no difference
-            // between the model and the view's local state.
-
-            if (!configs.isEmpty()) {
-                String newValue = Strings.nullToEmpty(configs.get(0).getValue());
-                String oldValue = Strings.nullToEmpty((String)this.getValue());
-                if (Objects.equals(newValue, oldValue)) {
-                    return;
-                }
-            }
-
-            // Otherwise sync the view with our model.
-
-            super.setFilterConfig(configs);
-        }
-    }
 }
