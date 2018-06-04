@@ -1864,4 +1864,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("To request change of email address or account deletion, please contact support@activityinfo.org.")
     String requestDeleteChangeEmail();
 
+    @DefaultStringValue("Clear Sort")
+    String clearSort();
+
 }

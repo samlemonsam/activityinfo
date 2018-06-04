@@ -20,10 +20,13 @@ package org.activityinfo.analysis.table;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.query.SortModel;
 
 public interface TableUpdater {
 
     void updateFilter(Optional<FormulaNode> filterFormula);
 
     void updateColumnWidth(String columnId, int width);
+
+    void updateSort(Optional<SortModel> sortModel);
 }
