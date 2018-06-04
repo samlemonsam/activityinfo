@@ -20,9 +20,15 @@ package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.util.HeapsortColumn;
+import org.activityinfo.store.query.server.columns.IntColumnView8;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 
 import java.util.Arrays;
+
+import static org.junit.Assert.assertThat;
 
 public class HeapsortColumnTest {
 
@@ -59,7 +65,18 @@ public class HeapsortColumnTest {
         System.out.println("Original  (D): " + Arrays.toString(stringVals));
         System.out.println("Reordered (D): " + Arrays.toString(reorder(stringVals, stringIndex)));
         System.out.println("Index     (D): " + Arrays.toString(stringIndex));
+    }
 
+    @Test
+    public void int8sorting() {
+
+        double values[] = new double[] {0, Double.NaN, 50, 30, -33 };
+        IntColumnView8 columnView = new IntColumnView8(values);
+        int[] indexes = new int[] { 0, 1, 2, 3, 4 };
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+
+        assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, -33, 0, 30, 50));
     }
 
     @Test
@@ -77,7 +94,31 @@ public class HeapsortColumnTest {
         System.out.println("Reordered (A): " + Arrays.toString(reorder(values, id)));
         System.out.println("Index     (A): " + Arrays.toString(id));
 
+        assertThat(values, isArrayEqualTo( 50.0, 150, 90, 3, 9, 10, 30, 4, 5, 6 ));
+        assertThat(reorder(values, id), isArrayEqualTo(3.0, 4.0, 5.0, 6.0, 9.0, 10.0, 30.0, 50.0, 90.0, 150.0));
+        assertThat(id, isArrayEqualTo(3, 7, 8, 9, 4, 5, 6, 0, 2, 1));
     }
+
+    @Test
+    public void doubleColumnWithMissingSortedByValueAsc() {
+        int id[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        double values[] = { 50, Double.NaN, 90, 3, 9, 10, Double.NaN, 4, 5, 6 };
+
+        System.out.println(Arrays.toString(values));
+        System.out.println(Arrays.toString(id));
+
+        SortModel.Range range = new SortModel.Range(0,9);
+        HeapsortColumn.heapsortAscending(values, id, range.getRangeSize(), range.getRange());
+
+        System.out.println("Original  (A): " + Arrays.toString(values));
+        System.out.println("Reordered (A): " + Arrays.toString(reorder(values, id)));
+        System.out.println("Index     (A): " + Arrays.toString(id));
+
+        assertThat(values, isArrayEqualTo( 50, Double.NaN, 90, 3, 9, 10, Double.NaN, 4, 5, 6 ));
+        assertThat(reorder(values, id), isArrayEqualTo(Double.NaN, Double.NaN, 3.0, 4.0, 5.0, 6.0, 9.0, 10.0, 50.0, 90.0));
+        assertThat(id, isArrayEqualTo(1, 6, 3, 7, 8, 9, 4, 5, 0, 2));
+    }
+
 
     @Test
     public void doubleColumnSortedByValueDsc() {
@@ -94,7 +135,31 @@ public class HeapsortColumnTest {
         System.out.println("Reordered (D): " + Arrays.toString(reorder(values, id)));
         System.out.println("Index     (D): " + Arrays.toString(id));
 
+        assertThat(values, isArrayEqualTo( 50.0, 150, 90, 3, 9, 10, 30, 4, 5, 6 ));
+        assertThat(reorder(values, id), isArrayEqualTo(150.0, 90.0, 50.0, 30.0, 10.0, 9.0, 6.0, 5.0, 4.0, 3.0));
+        assertThat(id, isArrayEqualTo(1, 2, 0, 6, 5, 4, 9, 8, 7, 3));
     }
+
+    @Test
+    public void doubleColumnWithMissingValuesSortedByValueDsc() {
+        int id[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        double values[] = { Double.NaN, 150, 90, 3, 9, 10, 30, 4, Double.NaN, 6 };
+
+        System.out.println(Arrays.toString(values));
+        System.out.println(Arrays.toString(id));
+
+        SortModel.Range range = new SortModel.Range(0,9);
+        HeapsortColumn.heapsortDescending(values, id, range.getRangeSize(), range.getRange());
+
+        System.out.println("Original  (D): " + Arrays.toString(values));
+        System.out.println("Reordered (D): " + Arrays.toString(reorder(values, id)));
+        System.out.println("Index     (D): " + Arrays.toString(id));
+
+        assertThat(values, isArrayEqualTo(  Double.NaN, 150, 90, 3, 9, 10, 30, 4, Double.NaN, 6 ));
+        assertThat(reorder(values, id), isArrayEqualTo(150.0, 90.0, 30.0, 10.0, 9.0, 6.0, 4.0, 3.0, Double.NaN, Double.NaN));
+        assertThat(id, isArrayEqualTo(1, 2, 6, 5, 4, 9, 7, 3, 8, 0));
+    }
+
 
     @Test
     public void multipleSort() {
@@ -150,5 +215,34 @@ public class HeapsortColumnTest {
         return output;
     }
 
+    private static Matcher<double[]> isArrayEqualTo(double... expected) {
+        return new TypeSafeMatcher<double[]>() {
 
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+
+            @Override
+            protected boolean matchesSafely(double[] item) {
+                return Arrays.equals(expected, item);
+            }
+        };
+    }
+    private static Matcher<int[]> isArrayEqualTo(int... expected) {
+        return new TypeSafeMatcher<int[]>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+
+            @Override
+            protected boolean matchesSafely(int[] item) {
+                return Arrays.equals(expected, item);
+            }
+        };
+    }
 }
