@@ -21,7 +21,6 @@ package org.activityinfo.model.analysis;
 import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.immutables.value.Value;
 
@@ -40,8 +39,6 @@ public abstract class TableModel implements AnalysisModel  {
     public abstract List<TableColumn> getColumns();
 
     public abstract List<SortOrder> getOrdering();
-
-    public abstract List<SortModel> getSorting();
 
     /**
      * A boolean-valued formula that determines which rows to include in the
@@ -73,13 +70,6 @@ public abstract class TableModel implements AnalysisModel  {
         if (getFilter().isPresent()) {
             object.put("filter", getFilter().get());
         }
-        if (getSorting().size() != 0) {
-            JsonValue columnArray = Json.createArray();
-            for (SortModel sortModel : getSorting()) {
-                columnArray.add(sortModel.toJson());
-            }
-            object.put("columns", columnArray);
-        }
 
         return object;
     }
@@ -99,13 +89,6 @@ public abstract class TableModel implements AnalysisModel  {
             model.filter(Optional.of(object.getString("filter")));
         } else {
             model.filter(Optional.absent());
-        }
-
-        if (object.hasKey("sort")) {
-            JsonValue columnArray = object.get("sort");
-            for (int i = 0; i < columnArray.length(); i++) {
-                model.addSorting(SortModel.fromJson(columnArray.get(i)));
-            }
         }
 
         return model.build();

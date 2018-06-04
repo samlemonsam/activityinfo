@@ -21,7 +21,10 @@ package org.activityinfo.analysis.table;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.analysis.ParsedFormula;
-import org.activityinfo.model.analysis.*;
+import org.activityinfo.model.analysis.ImmutableTableColumn;
+import org.activityinfo.model.analysis.ImmutableTableModel;
+import org.activityinfo.model.analysis.TableColumn;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.formula.CompoundExpr;
@@ -29,7 +32,6 @@ import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
@@ -37,7 +39,10 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.query.shared.FormSource;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -188,18 +193,6 @@ public class TableViewModel implements TableUpdater {
         tableModel.updateIfNotSame(ImmutableTableModel.builder()
                 .from(model)
                 .columns(updatedColumns)
-                .build());
-    }
-
-    @Override
-    public void updateSort(Optional<SortModel> sortModel) {
-        TableModel model = this.tableModel.get();
-        tableModel.updateIfNotSame(ImmutableTableModel
-                .builder()
-                .from(model)
-                .sorting(sortModel.isPresent()
-                        ? Collections.singleton(sortModel.get())
-                        : Collections.EMPTY_LIST)
                 .build());
     }
 

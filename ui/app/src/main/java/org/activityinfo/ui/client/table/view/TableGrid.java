@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.table.view;
 
-import com.google.common.base.Optional;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -28,6 +27,7 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
 import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoader;
+import com.sencha.gxt.widget.core.client.event.SortChangeEvent;
 import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.Grid;
@@ -37,12 +37,10 @@ import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 
-import javax.swing.text.html.Option;
 import java.util.Collections;
 import java.util.logging.Logger;
 
@@ -87,7 +85,6 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         gridView.setColumnLines(true);
         gridView.setTrackMouseOver(false);
         gridView.addColumnResizeHandler(this::changeColumnWidth);
-        gridView.addSortChangeHandler(this::changeSort);
 
         CellSelectionModel<Integer> sm = new CellSelectionModel<>();
         sm.addCellSelectionChangedHandler(this::changeRowSelection);
@@ -110,6 +107,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         grid.setLoadMask(true);
         grid.setView(gridView);
         grid.setSelectionModel(sm);
+        grid.addSortChangeHandler(this::changeSort);
 
         // Setup grid filters
         filters = new TableGridFilters(tableUpdater);
@@ -149,11 +147,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
      * Changes the current sort order based on the user's input.
      */
     private void changeSort(SortChangeEvent event) {
-        Optional<SortModel> sortSelection = Optional.absent();
-        if (event.getField().isPresent()) {
-            sortSelection = Optional.of(new SortModel(event.getField().get(), event.getDir().get()));
-        }
-        tableUpdater.updateSort(sortSelection);
+        // TODO
     }
 
     public boolean updateView(EffectiveTableModel tableModel) {

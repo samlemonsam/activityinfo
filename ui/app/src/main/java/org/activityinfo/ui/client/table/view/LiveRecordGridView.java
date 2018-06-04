@@ -18,15 +18,19 @@
  */
 package org.activityinfo.ui.client.table.view;
 
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
 import com.sencha.gxt.widget.core.client.grid.LiveGridView;
+import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
-import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.query.SortModel;
 
 public class LiveRecordGridView extends LiveGridView<Integer> {
+
+    private static final boolean SORTING_IMPLEMENTED = false;
 
     /**
      * Creates a context menu for the given column, including sort menu items and column visibility sub-menu.
@@ -37,22 +41,27 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
     protected Menu createContextMenu(final int colIndex) {
         final Menu menu = new Menu();
 
-        if (cm.isSortable(colIndex)) {
+        if (SORTING_IMPLEMENTED && cm.isSortable(colIndex)) {
             MenuItem item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortAscText());
             item.setIcon(header.getAppearance().sortAscendingIcon());
-            item.addSelectionHandler(asc -> fireEvent(new SortChangeEvent(cm.getColumn(colIndex).getPath(), SortModel.Dir.ASC)));
+            item.addSelectionHandler(new SelectionHandler<Item>() {
+                @Override
+                public void onSelection(SelectionEvent<Item> event) {
+                    doSort(colIndex, SortDir.ASC);
+                }
+            });
             menu.add(item);
 
             item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortDescText());
             item.setIcon(header.getAppearance().sortDescendingIcon());
-            item.addSelectionHandler(desc -> fireEvent(new SortChangeEvent(cm.getColumn(colIndex).getPath(), SortModel.Dir.DESC)));
-            menu.add(item);
-
-            item = new MenuItem();
-            item.setText(I18N.CONSTANTS.clearSort());
-            item.addSelectionHandler(desc -> fireEvent(new SortChangeEvent()));
+            item.addSelectionHandler(new SelectionHandler<Item>() {
+                @Override
+                public void onSelection(SelectionEvent<Item> event) {
+                    doSort(colIndex, SortDir.DESC);
+                }
+            });
             menu.add(item);
         }
 
@@ -67,9 +76,4 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
     public HandlerRegistration addColumnResizeHandler(ColumnResizeHandler handler) {
         return addHandler(ColumnResizeEvent.getType(), handler);
     }
-
-    public HandlerRegistration addSortChangeHandler(SortChangeHandler handler) {
-        return addHandler(SortChangeEvent.getType(), handler);
-    }
-
 }

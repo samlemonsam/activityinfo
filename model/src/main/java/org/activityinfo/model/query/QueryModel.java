@@ -225,11 +225,6 @@ public class QueryModel implements JsonSerializable {
         if (!Strings.isNullOrEmpty(filter)) {
             queryModel.setFilter(filter);
         }
-
-        for (JsonValue sort : jsonObject.get("sort").values()) {
-            queryModel.addSortModel(SortModel.fromJson(sort));
-        }
-
         return queryModel;
     }
 
@@ -242,11 +237,6 @@ public class QueryModel implements JsonSerializable {
         if(filter != null) {
             object.put("filter", filter.asExpression());
         }
-
-        if(!sortModels.isEmpty()) {
-            object.put("sort", Json.toJson(sortModels));
-        }
-
         return object;
     }
 

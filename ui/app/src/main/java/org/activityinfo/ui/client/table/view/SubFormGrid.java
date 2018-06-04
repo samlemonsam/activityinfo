@@ -24,7 +24,6 @@ import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.formula.FormulaNode;
-import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
@@ -64,11 +63,6 @@ public class SubFormGrid extends VerticalLayoutContainer {
 
                     @Override
                     public void updateColumnWidth(String columnId, int width) {
-                        // TODO
-                    }
-
-                    @Override
-                    public void updateSort(Optional<SortModel> sortModel) {
                         // TODO
                     }
                 });
