@@ -24,6 +24,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
@@ -40,6 +41,7 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Constructs a GXT Grid column model from our EffectiveTableModel.
@@ -120,7 +122,7 @@ public class ColumnModelBuilder {
         config.setHeader(tableColumn.getLabel());
         columnConfigs.add(config);
 
-        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
+        StringFilter<Integer> filter = new CachingStringFilter(valueProvider);
         filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
@@ -234,9 +236,6 @@ public class ColumnModelBuilder {
         config.setCell(new ErrorCell());
         config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
         columnConfigs.add(config);
-
-        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
-        filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
 
@@ -298,6 +297,34 @@ public class ColumnModelBuilder {
         @Override
         public String toString() {
             return label;
+        }
+    }
+
+    private static class CachingStringFilter extends StringFilter<Integer> {
+
+        public CachingStringFilter(ValueProvider<? super Integer, String> valueProvider) {
+            super(valueProvider);
+        }
+
+        @Override
+        public void setFilterConfig(List<FilterConfig> configs) {
+            // This event can be triggered by a change to the model caused by a user's keystroke.
+            // If we blindly apply the change, then the input will loose focus and the next keystroke
+            // will land elsewhere and close the popup.
+
+            // To avoid this, we can simply exit early if there is no difference
+            // between the model and the view's local state.
+
+            if (!configs.isEmpty()) {
+                String newValue = configs.get(0).getValue();
+                if (Objects.equals(newValue, this.getValue())) {
+                    return;
+                }
+            }
+
+            // Otherwise sync the view with our model.
+
+            super.setFilterConfig(configs);
         }
     }
 }
