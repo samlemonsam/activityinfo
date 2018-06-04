@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client.table.view;
 
+import com.google.common.base.Strings;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -316,8 +317,9 @@ public class ColumnModelBuilder {
             // between the model and the view's local state.
 
             if (!configs.isEmpty()) {
-                String newValue = configs.get(0).getValue();
-                if (Objects.equals(newValue, this.getValue())) {
+                String newValue = Strings.nullToEmpty(configs.get(0).getValue());
+                String oldValue = Strings.nullToEmpty((String)this.getValue());
+                if (Objects.equals(newValue, oldValue)) {
                     return;
                 }
             }

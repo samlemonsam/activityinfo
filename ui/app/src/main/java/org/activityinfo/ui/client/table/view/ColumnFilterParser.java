@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.table.view;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -337,7 +338,7 @@ public class ColumnFilterParser {
 
     private static FormulaNode stringContains(FormulaNode field, FilterConfig filter) {
 
-        ConstantNode substring = new ConstantNode(filter.getValue());
+        ConstantNode substring = new ConstantNode(Strings.nullToEmpty(filter.getValue()));
         FormulaNode string = field;
 
         return new FunctionCallNode(IsNumberFunction.INSTANCE,
