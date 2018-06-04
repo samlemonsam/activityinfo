@@ -109,6 +109,9 @@ public class EffectiveTableModel {
         return getModel().getFilter();
     }
 
+    public List<SortModel> getSorting() {
+        return getModel().getSorting();
+    }
 
     private void addDefaultColumns(FormTree formTree) {
         if(!isSubTable() && formTree.getRootFormClass().isSubForm()) {

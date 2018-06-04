@@ -42,7 +42,6 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
 
-import javax.swing.text.html.Option;
 import java.util.Collections;
 import java.util.logging.Logger;
 
@@ -56,6 +55,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
 
     private final ListStore<Integer> store;
     private final Grid<Integer> grid;
+    private final LiveRecordGridView gridView;
 
     private Subscription subscription;
     private final ColumnSetProxy proxy;
@@ -83,7 +83,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         ColumnModelBuilder columns = new ColumnModelBuilder(proxy);
         columns.addAll(tableModel.getColumns());
 
-        LiveRecordGridView gridView = new LiveRecordGridView();
+        gridView = new LiveRecordGridView();
         gridView.setColumnLines(true);
         gridView.setTrackMouseOver(false);
         gridView.addColumnResizeHandler(this::changeColumnWidth);
@@ -188,8 +188,10 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
                 return false;
             }
         }
+        gridView.maybeUpdateSortingView(tableModel.getSorting());
         return true;
     }
+
 
     private void updateColumnView(Observable<ColumnSet> columnSet) {
         if(columnSet.isLoaded()) {
