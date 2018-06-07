@@ -207,6 +207,10 @@ public class AttachmentWidget implements FieldWidget, AttachmentRow.ValueChanged
         }
     }
 
+    @Override
+    public void focus() {
+    }
+
     private AttachmentValue getValue() {
         AttachmentValue value = new AttachmentValue();
         for (AttachmentRow row : rowsFromPanel()) {

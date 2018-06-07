@@ -68,6 +68,7 @@ public class DropDownEnumWidget implements FieldWidget {
                updater.update(new FieldInput(new EnumValue(event.getSelectedItem().getId())));
            }
         });
+        comboBox.addBlurHandler(event -> updater.touch());
     }
 
     @Override
@@ -87,6 +88,11 @@ public class DropDownEnumWidget implements FieldWidget {
     @Override
     public void setRelevant(boolean relevant) {
         comboBox.setEnabled(relevant);
+    }
+
+    @Override
+    public void focus() {
+        comboBox.focus();
     }
 
     @Override

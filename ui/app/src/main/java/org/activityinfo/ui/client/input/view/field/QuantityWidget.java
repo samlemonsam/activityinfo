@@ -45,6 +45,7 @@ public class QuantityWidget implements FieldWidget {
         this.field.addKeyUpHandler(event -> Scheduler.get().scheduleDeferred(() -> {
             updater.update(input());
         }));
+        this.field.addBlurHandler(event -> updater.touch());
 
     }
 
@@ -76,6 +77,11 @@ public class QuantityWidget implements FieldWidget {
     @Override
     public void setRelevant(boolean relevant) {
         this.field.setEnabled(relevant);
+    }
+
+    @Override
+    public void focus() {
+        field.focus();
     }
 
     @Override

@@ -57,4 +57,5 @@ public class FortnightWidget extends AbstractWeekWidget<FortnightValue> {
     protected FieldInput parseInput(int year, int periodIndex) {
         return new FieldInput(new EpiWeek(year, (periodIndex * 2) + 1));
     }
+
 }

@@ -88,6 +88,11 @@ abstract class AbstractWeekWidget<T extends PeriodValue> implements PeriodFieldW
         panel.add(weekBox, new CssFloatLayoutContainer.CssFloatData(0.5));
     }
 
+    @Override
+    public void focus() {
+        yearBox.focus();
+    }
+
     private void onDatePickerSelected(SelectEvent event) {
         FieldInput input = input();
         if(input.getState() == FieldInput.State.VALID) {

@@ -126,4 +126,11 @@ public class RadioGroupWidget implements FieldWidget {
             this.relevant = relevant;
         }
     }
+
+    @Override
+    public void focus() {
+        if(!radios.isEmpty()) {
+            radios.get(0).focus();
+        }
+    }
 }

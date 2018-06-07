@@ -58,6 +58,10 @@ public class SerialNumberWidget implements FieldWidget {
     }
 
     @Override
+    public void focus() {
+    }
+
+    @Override
     public Widget asWidget() {
         return field;
     }

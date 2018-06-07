@@ -25,6 +25,11 @@
 .field {
 }
 
+
+.fieldInvalid {
+
+}
+
 .fieldLabel {
     font-weight: bold;
 }
@@ -50,4 +55,10 @@
     color: white;
     font-weight: bold;
     cursor: help;
+}
+
+.validationMessage {
+    background-color: red;
+    color: white;
+    font-weight: bold;
 }

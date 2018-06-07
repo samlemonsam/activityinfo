@@ -40,7 +40,6 @@ import java.util.Set;
  */
 public class CheckBoxGroupWidget implements FieldWidget {
 
-
     private FlowPanel flowPanel;
     private Map<ResourceId, CheckBox> checkBoxes = new HashMap<>();
 
@@ -95,6 +94,13 @@ public class CheckBoxGroupWidget implements FieldWidget {
             for (CheckBox checkBox : checkBoxes.values()) {
                 checkBox.setEnabled(relevant);
             }
+        }
+    }
+
+    @Override
+    public void focus() {
+        if(!checkBoxes.isEmpty()) {
+            checkBoxes.get(0).focus();
         }
     }
 

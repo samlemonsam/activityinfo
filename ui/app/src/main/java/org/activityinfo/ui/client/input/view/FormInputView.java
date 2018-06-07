@@ -37,7 +37,10 @@ import org.activityinfo.observable.Subscription;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
-import org.activityinfo.ui.client.input.viewModel.*;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModelBuilder;
+import org.activityinfo.ui.client.input.viewModel.FormStructure;
+import org.activityinfo.ui.client.input.viewModel.LiveActivePeriodMemory;
 import org.activityinfo.ui.client.store.FormStore;
 
 import java.util.logging.Logger;
@@ -114,7 +117,6 @@ public class FormInputView implements IsWidget, InputHandler {
         formPanel.updateView(viewModel);
     }
 
-
     @Override
     public Widget asWidget() {
         return container;
@@ -145,6 +147,11 @@ public class FormInputView implements IsWidget, InputHandler {
         update(inputModel.updateSubForm(update));
     }
 
+    @Override
+    public void touchField(RecordRef recordRef, ResourceId fieldId) {
+        update(inputModel.touch(fieldId));
+    }
+
     private void update(FormInputModel updatedModel) {
         this.inputModel = updatedModel;
         this.viewModel = viewModelBuilder.build(inputModel, existingRecord);
@@ -165,9 +172,7 @@ public class FormInputView implements IsWidget, InputHandler {
         }
 
         if(!viewModel.isValid()) {
-            MessageBox box = new MessageBox(I18N.CONSTANTS.error(), I18N.CONSTANTS.pleaseFillInAllRequiredFields());
-            box.setModal(true);
-            box.show();
+            invalidFeedback();
             return;
         }
 
@@ -189,5 +194,18 @@ public class FormInputView implements IsWidget, InputHandler {
                 closeHandler.onClose(new CloseEvent(null));
             }
         });
+    }
+
+    private void invalidFeedback() {
+
+        update(inputModel.validationRequested());
+
+        formPanel.scrollToFirstError();
+
+        MessageBox box = new MessageBox(I18N.CONSTANTS.error(), I18N.CONSTANTS.pleaseFillInAllRequiredFields());
+        box.setModal(true);
+        box.show();
+
+
     }
 }

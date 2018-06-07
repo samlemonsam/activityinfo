@@ -81,7 +81,16 @@ public class KeyedSubFormPanel implements IsWidget {
         this.parentRef = parentRef;
         this.inputHandler = inputHandler;
 
-        selector = createSelector(subTree.getRootFormClass().getSubFormKind(), this::onPeriodSelected);
+        selector = createSelector(subTree.getRootFormClass().getSubFormKind(), new FieldUpdater() {
+            @Override
+            public void update(FieldInput input) {
+                onPeriodSelected(input);
+            }
+
+            @Override
+            public void touch() {
+            }
+        });
 
         TextButton previousButton = new TextButton();
         previousButton.setText("<");

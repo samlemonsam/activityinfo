@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client.input.view;
 
+import com.google.gwt.user.client.Window;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import org.activityinfo.i18n.shared.I18N;
@@ -36,9 +37,15 @@ public class FormDialog {
 
         FormInputView panel = new FormInputView(formStore, recordRef);
 
+        int width = Math.min(770, Window.getClientWidth() - 100);
+        int height = Window.getClientHeight() - 100;
+        int left = (Window.getClientWidth() - width) / 2;
+        int top = (Window.getClientHeight() - height) / 2;
+
         dialog = new Dialog();
         dialog.setHeading(I18N.CONSTANTS.form());
-        dialog.setPixelSize(640, 480);
+        dialog.setPixelSize(width, height);
+        dialog.setPosition(top, left);
         dialog.setModal(true);
         dialog.setWidget(panel);
         dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(new SelectEvent.SelectHandler() {

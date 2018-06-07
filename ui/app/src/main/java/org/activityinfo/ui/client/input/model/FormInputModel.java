@@ -34,6 +34,8 @@ public class FormInputModel {
 
     private final RecordRef recordRef;
     private final Map<ResourceId, FieldInput> fieldInputs;
+    private final Set<ResourceId> touchedFields;
+    private final boolean validationRequested;
     private final Map<RecordRef, FormInputModel> subRecords;
     private final Map<ResourceId, RecordRef> activeSubRecords;
     private final Set<RecordRef> deletedSubRecords;
@@ -44,15 +46,21 @@ public class FormInputModel {
         subRecords = Collections.emptyMap();
         activeSubRecords = Collections.emptyMap();
         deletedSubRecords = Collections.emptySet();
+        touchedFields = Collections.emptySet();
+        validationRequested = false;
     }
 
     private FormInputModel(RecordRef recordRef,
                            Map<ResourceId, FieldInput> fieldInputs,
                            Map<RecordRef, FormInputModel> subRecords,
                            Map<ResourceId, RecordRef> activeSubRecords,
-                           Set<RecordRef> deletedSubRecords) {
+                           Set<RecordRef> deletedSubRecords,
+                           Set<ResourceId> touchedFields,
+                           boolean validationRequested) {
         this.recordRef = recordRef;
         this.fieldInputs = fieldInputs;
+        this.touchedFields = touchedFields;
+        this.validationRequested = validationRequested;
         this.subRecords = subRecords;
         this.activeSubRecords = activeSubRecords;
         this.deletedSubRecords = deletedSubRecords;
@@ -89,7 +97,14 @@ public class FormInputModel {
             return this;
         }
 
-        return new FormInputModel(recordRef, fieldInputs, subRecords, updatedMap, deletedSubRecords);
+        return new FormInputModel(
+                recordRef,
+                fieldInputs,
+                subRecords,
+                updatedMap,
+                deletedSubRecords,
+                touchedFields,
+                validationRequested);
     }
 
     /**
@@ -102,6 +117,7 @@ public class FormInputModel {
      * @return a new copy of
      */
     public FormInputModel update(RecordRef recordRef, ResourceId fieldId, FieldInput input) {
+
 
         Map<ResourceId, FieldInput> updatedInputs = this.fieldInputs;
         Map<RecordRef, FormInputModel> updatedSubRecords = this.subRecords;
@@ -117,12 +133,15 @@ public class FormInputModel {
             }
             updatedSubRecords.put(recordRef, subRecord.update(recordRef, fieldId, input));
         }
+        Set<ResourceId> updatedTouchSet = add(this.touchedFields, fieldId);
 
         return new FormInputModel(this.recordRef,
                 updatedInputs,
                 updatedSubRecords,
                 activeSubRecords,
-                deletedSubRecords);
+                deletedSubRecords,
+                updatedTouchSet,
+                validationRequested);
     }
 
     public FormInputModel updateSubForm(FormInputModel subFormInputModel) {
@@ -136,7 +155,71 @@ public class FormInputModel {
             this.fieldInputs,
             updatedSubRecords,
             activeSubRecords,
-            deletedSubRecords);
+            deletedSubRecords,
+            touchedFields,
+            validationRequested);
+    }
+
+    public FormInputModel touch(ResourceId fieldId) {
+        if(this.touchedFields.contains(fieldId)) {
+            return this;
+        } else {
+            return new FormInputModel(
+                    recordRef,
+                    fieldInputs,
+                    subRecords,
+                    activeSubRecords,
+                    deletedSubRecords,
+                    add(touchedFields, fieldId),
+                    validationRequested);
+        }
+    }
+
+    public FormInputModel validationRequested() {
+
+        if(validationRequested && subRecords.isEmpty()) {
+            return this;
+        }
+
+        Map<RecordRef, FormInputModel> updatedSubRecords = new HashMap<>();
+        for (Map.Entry<RecordRef, FormInputModel> entry : subRecords.entrySet()) {
+            updatedSubRecords.put(entry.getKey(), entry.getValue().validationRequested());
+        }
+
+        return new FormInputModel(
+                recordRef,
+                fieldInputs,
+                updatedSubRecords,
+                activeSubRecords,
+                deletedSubRecords,
+                touchedFields,
+                true);
+    }
+
+    /**
+     * @return true if the user has explicitly requested validation for this form,
+     * by example clicking the save button.
+     */
+    public boolean isValidationRequested() {
+        return validationRequested;
+    }
+
+    /**
+     * @return true if the user has "touched" the given field in any way, and so should,
+     * for example, see a validation message of this field.
+     */
+    public boolean isTouched(ResourceId fieldId) {
+        return touchedFields.contains(fieldId);
+    }
+
+    private static Set<ResourceId> add(Set<ResourceId> set, ResourceId fieldId) {
+        if(set.contains(fieldId)) {
+            return set;
+        } else {
+            Set<ResourceId> newSet = new HashSet<>(set);
+            newSet.add(fieldId);
+            return newSet;
+        }
     }
 
     public FormInputModel deleteSubRecord(RecordRef recordRef) {
@@ -151,7 +234,9 @@ public class FormInputModel {
                 fieldInputs,
                 newSubRecords,
                 activeSubRecords,
-                newDeleted);
+                newDeleted,
+                touchedFields,
+                validationRequested);
     }
 
     public FormInputModel addSubRecord(RecordRef newRecordRef) {
@@ -168,7 +253,9 @@ public class FormInputModel {
                 fieldInputs,
                 updatedSubRecords,
                 activeSubRecords,
-                deletedSubRecords);
+                deletedSubRecords,
+                touchedFields,
+                validationRequested);
     }
 
     public Collection<FormInputModel> getSubRecords() {

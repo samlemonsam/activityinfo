@@ -27,7 +27,6 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.barcode.BarcodeValue;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.ui.client.input.model.FieldInput;
 
 /**
@@ -61,6 +60,7 @@ public class BarcodeWidget implements FieldWidget {
 
         field.addKeyUpHandler(event -> updater.update(input()));
         field.addValueChangeHandler(event -> updater.update(input()));
+        field.addBlurHandler(event -> updater.touch());
     }
 
     private FieldInput input() {
@@ -79,7 +79,7 @@ public class BarcodeWidget implements FieldWidget {
 
     @Override
     public void init(FieldValue value) {
-        field.setText(((TextValue) value).asString());
+        field.setText(((BarcodeValue) value).asString());
     }
 
     @Override
@@ -90,5 +90,10 @@ public class BarcodeWidget implements FieldWidget {
     @Override
     public void setRelevant(boolean relevant) {
         field.setEnabled(relevant);
+    }
+
+    @Override
+    public void focus() {
+        field.focus();
     }
 }

@@ -32,4 +32,5 @@ public interface FieldWidget extends IsWidget {
 
     void setRelevant(boolean relevant);
 
+    void focus();
 }

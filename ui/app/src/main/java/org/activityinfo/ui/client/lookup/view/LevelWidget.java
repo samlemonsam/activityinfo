@@ -22,10 +22,12 @@ import com.google.common.base.Optional;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.event.BeforeQueryEvent;
+import com.sencha.gxt.widget.core.client.event.BlurEvent;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
 import org.activityinfo.i18n.shared.I18N;
@@ -85,6 +87,10 @@ public class LevelWidget implements IsWidget {
         } else {
             subscriptionSet.unsubscribeAll();
         }
+    }
+
+    public HandlerRegistration addBlurHandler(BlurEvent.BlurHandler handler) {
+        return comboBox.addBlurHandler(handler);
     }
 
     private void onBeforeQuery(BeforeQueryEvent<String> event) {

@@ -39,6 +39,8 @@ public interface InputResources extends ClientBundle {
 
         String field();
 
+        String fieldInvalid();
+
         String fieldLabel();
 
         String fieldDescription();
@@ -52,5 +54,8 @@ public interface InputResources extends ClientBundle {
         String fieldUnits();
 
         String lockIcon();
+
+        String validationMessage();
+
     }
 }

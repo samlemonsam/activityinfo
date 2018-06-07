@@ -60,10 +60,9 @@ public class NarrativeWidget implements FieldWidget {
 
     public NarrativeWidget(TextAreaInputCell.TextAreaAppearance appearance, FieldUpdater updater) {
         textArea = new NarrativeTextArea(new TextAreaInputCell(appearance), updater);
-
         textArea.addKeyUpHandler(event -> updater.update(input()));
         textArea.addValueChangeHandler(event -> updater.update(input()));
-
+        textArea.addBlurHandler(event -> updater.touch());
         textArea.setWidth(-1);
     }
 
@@ -84,6 +83,11 @@ public class NarrativeWidget implements FieldWidget {
     @Override
     public void setRelevant(boolean relevant) {
         textArea.setEnabled(relevant);
+    }
+
+    @Override
+    public void focus() {
+        textArea.focus();
     }
 
     @Override

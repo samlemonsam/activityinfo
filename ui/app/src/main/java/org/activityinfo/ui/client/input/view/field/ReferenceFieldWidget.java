@@ -27,7 +27,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.FormSource;
@@ -81,6 +80,10 @@ public class ReferenceFieldWidget implements FieldWidget {
             }
             widget = panel;
         }
+
+        for (LevelWidget levelWidget : levelWidgets) {
+            levelWidget.addBlurHandler(event -> fieldUpdater.touch());
+        }
     }
 
     private void onSelection(SelectionEvent<String> event) {
@@ -118,6 +121,11 @@ public class ReferenceFieldWidget implements FieldWidget {
         for (LevelWidget levelWidget : levelWidgets) {
             levelWidget.setRelevant(relevant);
         }
+    }
+
+    @Override
+    public void focus() {
+        levelWidgets.get(0).getComboBox().focus();
     }
 
     @Override

@@ -18,10 +18,7 @@
  */
 package org.activityinfo.ui.client.input.view;
 
-import com.google.common.base.Strings;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.Dialog;
@@ -36,6 +33,7 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
+import org.activityinfo.ui.client.input.view.field.FieldUpdater;
 import org.activityinfo.ui.client.input.view.field.FieldView;
 import org.activityinfo.ui.client.input.view.field.FieldWidget;
 import org.activityinfo.ui.client.input.view.field.FieldWidgetFactory;
@@ -93,7 +91,18 @@ public class FormPanel implements IsWidget {
             } else if(node.isParentReference()) {
                 // ignore
             } else if(node.getField().isVisible() && !isSubFormKey(node)) {
-                FieldWidget fieldWidget = widgetFactory.create(node.getField(), input -> onInput(node, input));
+                FieldWidget fieldWidget = widgetFactory.create(node.getField(), new FieldUpdater() {
+                    @Override
+                    public void update(FieldInput input) {
+                        onInput(node, input);
+                    }
+
+                    @Override
+                    public void touch() {
+                        onTouch(node);
+                    }
+
+                });
 
                 if (fieldWidget != null) {
                     addField(node, fieldWidget);
@@ -171,32 +180,30 @@ public class FormPanel implements IsWidget {
         }
     }
 
+    private void onTouch(FormTree.Node node) {
+        inputHandler.touchField(recordRef, node.getFieldId());
+    }
+
     private void addField(FormTree.Node node, FieldWidget fieldWidget) {
 
-        Label fieldLabel = new Label(node.getField().getLabel());
-        fieldLabel.addStyleName(InputResources.INSTANCE.style().fieldLabel());
+        FieldView fieldView = new FieldView(node.getField(), fieldWidget, horizontalPadding);
 
-        HTML validationMessage = new HTML();
-        validationMessage.setVisible(false);
-
-        CssFloatLayoutContainer fieldPanel = new CssFloatLayoutContainer();
-        fieldPanel.setStyleName(InputResources.INSTANCE.style().field());
-        fieldPanel.add(fieldLabel, new CssFloatLayoutContainer.CssFloatData(1));
-        fieldPanel.add(fieldWidget, new CssFloatLayoutContainer.CssFloatData(1,
-                new Margins(5, horizontalPadding, 5, horizontalPadding)));
-
-        if (!Strings.isNullOrEmpty(node.getField().getDescription())) {
-            Label descriptionLabel = new Label(node.getField().getDescription());
-            descriptionLabel.addStyleName(InputResources.INSTANCE.style().fieldDescription());
-            fieldPanel.add(descriptionLabel,
-                    new CssFloatLayoutContainer.CssFloatData(1));
-        }
-
-        fieldPanel.add(validationMessage, new CssFloatLayoutContainer.CssFloatData(1));
-        panel.add(fieldPanel, new CssFloatLayoutContainer.CssFloatData(1,
+        panel.add(fieldView, new CssFloatLayoutContainer.CssFloatData(1,
                 new Margins(10, horizontalPadding, 10, horizontalPadding)));
 
-        fieldViews.add(new FieldView(node.getFieldId(), fieldWidget, validationMessage));
+        fieldViews.add(fieldView);
+    }
+
+    /**
+     * Scrolls to the first field with an error, and shifts focus to it.
+     */
+    public void scrollToFirstError() {
+        for (FieldView fieldView : fieldViews) {
+            if(!fieldView.isValid()) {
+                fieldView.focusTo();
+                break;
+            }
+        }
     }
 
     private void addSubForm(FormTree formTree, FormTree.Node node) {

@@ -65,6 +65,7 @@ public class TextWidget implements FieldWidget {
 
         field.addKeyUpHandler(event -> updater.update(input()));
         field.addValueChangeHandler(event -> updater.update(input()));
+        field.addBlurHandler(event -> updater.touch());
 
         if(textType.hasInputMask()) {
             field.setEmptyText(textType.getInputMask());
@@ -98,5 +99,10 @@ public class TextWidget implements FieldWidget {
     @Override
     public void setRelevant(boolean relevant) {
         field.setEnabled(relevant);
+    }
+
+    @Override
+    public void focus() {
+        field.focus();
     }
 }

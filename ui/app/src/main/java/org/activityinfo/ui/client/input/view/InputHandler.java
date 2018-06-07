@@ -30,6 +30,8 @@ public interface InputHandler {
 
     void updateModel(RecordRef record, ResourceId fieldId, FieldInput value);
 
+    void touchField(RecordRef recordRef, ResourceId fieldId);
+
     void addSubRecord(RecordRef subRecordRef);
 
     void deleteSubRecord(RecordRef recordRef);

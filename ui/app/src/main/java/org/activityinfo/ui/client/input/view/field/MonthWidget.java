@@ -105,6 +105,11 @@ public class MonthWidget implements PeriodFieldWidget {
     }
 
     @Override
+    public void focus() {
+        yearBox.focus();
+    }
+
+    @Override
     public Widget asWidget() {
         return panel;
     }
