@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.io.xform.XFormReader;
 import org.activityinfo.io.xform.form.XForm;
+import org.activityinfo.json.JsonParser;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
@@ -29,32 +30,56 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.database.transfer.RequestTransfer;
+import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.server.authentication.SecureTokenGenerator;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.database.hibernate.entity.Database;
+import org.activityinfo.server.database.hibernate.entity.Partner;
+import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.server.mail.MailSender;
+import org.activityinfo.server.mail.RequestDatabaseTransferMessage;
+import org.activityinfo.server.mail.SuccessfulDatabaseTransferMessage;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 
 public class DatabaseResource {
 
     private Provider<FormStorageProvider> catalog;
     private final DispatcherSync dispatcher;
     private final DatabaseProviderImpl databaseProvider;
+    private final Provider<EntityManager> entityManagerProvider;
+    private final MailSender mailSender;
     private final int databaseId;
+    private static final JsonParser PARSER = new JsonParser();
 
-    public DatabaseResource(Provider<FormStorageProvider> catalog, DispatcherSync dispatcher,
-                            DatabaseProviderImpl databaseProvider, int databaseId) {
+    public DatabaseResource(Provider<FormStorageProvider> catalog,
+                            DispatcherSync dispatcher,
+                            DatabaseProviderImpl databaseProvider,
+                            Provider<EntityManager> entityManagerProvider,
+                            MailSender mailSender,
+                            int databaseId) {
         this.catalog = catalog;
         this.dispatcher = dispatcher;
         this.databaseProvider = databaseProvider;
+        this.entityManagerProvider = entityManagerProvider;
+        this.mailSender = mailSender;
         this.databaseId = databaseId;
     }
 
@@ -147,4 +172,239 @@ public class DatabaseResource {
                 .build())
                 .build();
     }
+
+    private Database getDatabase() {
+        return entityManagerProvider.get().find(Database.class, databaseId);
+    }
+
+    private Optional<User> getUserByEmail(String userEmail) {
+        User user;
+        try {
+            user = entityManagerProvider.get().createQuery(
+                    "SELECT u FROM User u " +
+                            "WHERE u.email = :email", User.class)
+                    .setParameter("email", userEmail)
+                    .getSingleResult();
+            return Optional.of(user);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    @POST
+    @Path("/transfer/request")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response requestTransfer(@InjectParam AuthenticatedUser executingUser, RequestTransfer request) {
+        Database database = getDatabase();
+        User currentOwner = database.getOwner();
+        Optional<User> proposedOwner = getUserByEmail(request.getProposedOwnerEmail());
+
+        if (executingUser.isAnonymous()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if (executingUser.getUserId() != currentOwner.getId()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        if (database.getTransferToken() != null) {
+            return Response.status(Response.Status.CONFLICT).entity("There is a pending transfer on this database").build();
+        }
+        if (!proposedOwner.isPresent()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Proposed owner does not exist").build();
+        }
+        if (currentOwner.equals(proposedOwner.get())) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("User already owns database.").build();
+        }
+
+        startTransaction();
+        try {
+            generateTransferToken(database, proposedOwner.get());
+            sendRequestNotifications(currentOwner, proposedOwner.get(), database);
+        } catch (Exception e) {
+            rollbackTransaction();
+            throw new RuntimeException(e);
+        }
+        commitTransaction();
+
+        return Response.ok().entity("Request for transfer of database " + database.getName() + " has been sent.").build();
+    }
+
+    private void sendRequestNotifications(User currentOwner, User proposedOwner, Database database) {
+        mailSender.send(new RequestDatabaseTransferMessage(proposedOwner, currentOwner, database));
+    }
+
+    private String generateTransferToken(Database database, User proposedOwner) {
+        database.setTransferToken(SecureTokenGenerator.generate());
+        database.setTransferUser(proposedOwner);
+        database.setTransferRequestDate(new Date());
+        entityManagerProvider.get().persist(database);
+        return database.getTransferToken();
+    }
+
+    public Response startTransfer(AuthenticatedUser executingUser, TransferAuthorized transfer) {
+        Database database = getDatabase();
+        User currentOwner = database.getOwner();
+        User newOwner = database.getTransferUser();
+
+        if (executingUser.isAnonymous()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if (executingUser.getUserId() != newOwner.getId()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        if (database.getTransferToken() == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Database " + databaseId + " has no pending transfers").build();
+        }
+        if (!database.getTransferToken().equals(transfer.getToken())) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Incorrect Token: " + transfer.getToken()).build();
+        }
+        if (!matchingRequest(transfer, currentOwner, newOwner)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(transfer.toJson().toJson()).build();
+        }
+
+        startTransaction();
+        try {
+            removeUserPermissions(database, newOwner);
+            transferDatabase(database, newOwner);
+            clearTransferToken(database);
+            addUserPermissions(database, currentOwner);
+            sendSuccessNotifications(currentOwner, newOwner, database);
+        } catch (Exception e) {
+            rollbackTransaction();
+            throw new RuntimeException(e);
+        }
+        commitTransaction();
+
+        return Response.ok().entity("Database " + database.getName() + " successfully transferred.").build();
+    }
+
+    private void rollbackTransaction() {
+        entityManagerProvider.get().getTransaction().rollback();
+    }
+
+    private void commitTransaction() {
+        entityManagerProvider.get().getTransaction().commit();
+    }
+
+    private void startTransaction() {
+        if (!entityManagerProvider.get().getTransaction().isActive()) {
+            entityManagerProvider.get().getTransaction().begin();
+        }
+    }
+
+    private void addUserPermissions(Database database, User currentOwner) {
+        Partner defaultPartner = getDefaultPartner(database);
+        UserPermission userPermission = new UserPermission(database, currentOwner);
+        userPermission.setAllowView(true);
+        userPermission.setAllowViewAll(false);
+        userPermission.setAllowEdit(false);
+        userPermission.setAllowEditAll(false);
+        userPermission.setAllowDesign(false);
+        userPermission.setAllowManageUsers(false);
+        userPermission.setAllowManageAllUsers(false);
+        userPermission.setPartner(defaultPartner);
+        entityManagerProvider.get().persist(userPermission);
+    }
+
+    private Partner getDefaultPartner(Database database) {
+        Partner defaultPartner;
+        try {
+            defaultPartner = entityManagerProvider.get().createQuery(
+                    "SELECT p FROM Partner p " +
+                            "LEFT JOIN FETCH p.databases " +
+                            "WHERE p.name = :defaultName " +
+                            "AND :database MEMBER OF p.databases", Partner.class)
+                    .setParameter("defaultName", PartnerDTO.DEFAULT_PARTNER_NAME)
+                    .setParameter("database", database)
+                    .getSingleResult();
+            return defaultPartner;
+        } catch (NoResultException e) {
+            defaultPartner = new Partner();
+            defaultPartner.setName(PartnerDTO.DEFAULT_PARTNER_NAME);
+            defaultPartner.setDatabases(Collections.singleton(database));
+            entityManagerProvider.get().persist(defaultPartner);
+            return defaultPartner;
+        }
+    }
+
+    private void removeUserPermissions(Database database, User newOwner) {
+        UserPermission userPermission = getUserPermission(database, newOwner);
+        if (userPermission == null) {
+            return;
+        }
+        entityManagerProvider.get().remove(userPermission);
+    }
+
+    private UserPermission getUserPermission(Database database, User user) {
+        try {
+            UserPermission userPermission = entityManagerProvider.get().createQuery(
+                    "SELECT up FROM UserPermission up " +
+                            "WHERE up.user.id = :userId AND up.database.id = :databaseId", UserPermission.class)
+                    .setParameter("userId", user.getId())
+                    .setParameter("databaseId", database.getId())
+                    .getSingleResult();
+            return userPermission;
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    private boolean matchingRequest(TransferAuthorized transfer, User currentOwner, User newOwner) {
+        if (transfer.getCurrentOwner() != currentOwner.getId()) {
+            return false;
+        } else if (transfer.getProposedOwner() != newOwner.getId()) {
+            return false;
+        } else if (transfer.getDatabase() != databaseId) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void clearTransferToken(Database database) {
+        database.setTransferToken(null);
+        database.setTransferUser(null);
+        database.setTransferRequestDate(null);
+        entityManagerProvider.get().persist(database);
+    }
+
+    private void sendSuccessNotifications(User currentOwner, User newOwner, Database database) {
+        mailSender.send(new SuccessfulDatabaseTransferMessage(currentOwner, database));
+        mailSender.send(new SuccessfulDatabaseTransferMessage(newOwner, database));
+    }
+
+    private void transferDatabase(Database database, User newOwner) {
+        database.setOwner(newOwner);
+        entityManagerProvider.get().persist(database);
+    }
+
+    @POST
+    @Path("/transfer/cancel")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response cancelTransfer(@InjectParam AuthenticatedUser executingUser, String json) {
+        Database database = getDatabase();
+        User currentOwner = database.getOwner();
+        User proposedOwner = database.getTransferUser();
+
+        if (executingUser.isAnonymous()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if (executingUser.getUserId() != currentOwner.getId() && executingUser.getUserId() != proposedOwner.getId()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        if (database.getTransferToken() == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Database " + databaseId + " has no pending transfers").build();
+        }
+
+        startTransaction();
+        try {
+            clearTransferToken(database);
+        } catch (Exception e) {
+            rollbackTransaction();
+            throw new RuntimeException(e);
+        }
+        commitTransaction();
+
+        return Response.ok().entity("Database transfer cancelled").build();
+    }
+
 }

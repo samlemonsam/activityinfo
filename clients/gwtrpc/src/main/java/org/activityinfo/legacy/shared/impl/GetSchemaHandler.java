@@ -241,6 +241,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     .appendColumn("d.FullName")
                     .appendColumn("d.OwnerUserId")
                     .appendColumn("d.CountryId")
+                    .appendColumn("d.TransferToken IS NOT NULL", "pendingTransfer")
+                    .appendColumn("d.TransferUser", "transferUserId")
                     .appendColumn("o.Name", "OwnerName")
                     .appendColumn("o.Email", "OwnerEmail")
                     .appendColumn("p.AllowViewAll", "allowViewAll")
@@ -290,6 +292,10 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         db.setCountry(countries.get(row.getInt("CountryId")));
                         db.setOwnerName(row.getString("OwnerName"));
                         db.setOwnerEmail(row.getString("OwnerEmail"));
+
+                        if (db.getAmOwner()) {
+                            db.setHasPendingTransfer(row.getBoolean("pendingTransfer"));
+                        }
 
                         if (db.getAmOwner()) {
                             db.setViewAllAllowed(true);

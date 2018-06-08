@@ -49,6 +49,8 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
     private Button editButton;
     private Button uploadButton;
     private Button printButton;
+    private Button transferButton;
+    private Button cancelTransferButton;
 
     public ActionToolBar() {
     }
@@ -278,4 +280,23 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
         addButton(UIActions.IMPORT, I18N.CONSTANTS.importText(), IconImageBundle.ICONS.importIcon());
     }
 
+    public void addTransferButton() {
+        addButton(UIActions.TRANSFER_DATABASE, I18N.CONSTANTS.transferDatabase(), IconImageBundle.ICONS.user());
+    }
+
+    public void setTransferEnabled(boolean enabled) {
+        if (transferButton != null) {
+            transferButton.setEnabled(enabled);
+        }
+    }
+
+    public void addCancelTransferButton() {
+        addButton(UIActions.CANCEL_TRANSFER, I18N.CONSTANTS.cancelTransfer(), IconImageBundle.ICONS.deleteUser());
+    }
+
+    public void setCancelTransferEnabled(boolean enabled) {
+        if (transferButton != null) {
+            transferButton.setEnabled(enabled);
+        }
+    }
 }
