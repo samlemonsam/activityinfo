@@ -269,7 +269,7 @@ public class DatabaseResource {
         }
         commitTransaction();
 
-        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app#db/" + databaseId).build())
+        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").fragment("db/" + databaseId).build())
                 .cookie(authTokenProvider.createNewAuthCookies(newOwner))
                 .build();
     }
