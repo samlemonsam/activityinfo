@@ -2,9 +2,8 @@ package org.activityinfo.server.approval;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.sun.jersey.api.core.InjectParam;
-import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
+import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -16,7 +15,9 @@ import org.activityinfo.store.spi.FormStorageProvider;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.util.logging.Logger;
 
 /**
@@ -31,21 +32,24 @@ public class ApprovalResource {
     private DispatcherSync dispatcher;
     private Provider<FormStorageProvider> catalog;
     private MailSender mailSender;
+    private AuthTokenProvider authTokenProvider;
 
     @Inject
     public ApprovalResource(Provider<EntityManager> entityManager,
                             DispatcherSync dispatcher,
                             Provider<FormStorageProvider> catalog,
-                            MailSender mailSender) {
+                            MailSender mailSender,
+                            AuthTokenProvider authTokenProvider) {
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.catalog = catalog;
         this.mailSender = mailSender;
+        this.authTokenProvider = authTokenProvider;
     }
 
     @GET
     @Path("/accept")
-    public Response accept(@InjectParam AuthenticatedUser user, @QueryParam("token") String token) {
+    public Response accept(@Context UriInfo uri, @QueryParam("token") String token) {
         Database database;
         try {
             database = entityManager.get().createQuery("SELECT db FROM Database db " +
@@ -60,13 +64,6 @@ public class ApprovalResource {
         User currentOwner = database.getOwner();
         User proposedOwner = database.getTransferUser();
 
-        if (user.isAnonymous()) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
-        if (proposedOwner.getId() != user.getUserId()) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        }
-
         TransferAuthorized transfer = new TransferAuthorized(currentOwner.getId(), proposedOwner.getId(), database.getId(), token);
 
         DatabaseResource resource = new DatabaseResource(catalog,
@@ -76,12 +73,12 @@ public class ApprovalResource {
                 mailSender,
                 database.getId());
 
-        return resource.startTransfer(user, transfer);
+        return resource.startTransfer(uri, authTokenProvider, transfer);
     }
 
     @GET
     @Path("/reject")
-    public Response reject(@InjectParam AuthenticatedUser user, @QueryParam("token") String token) {
+    public Response reject(@QueryParam("token") String token) {
         Database database;
         try {
             database = entityManager.get().createQuery("SELECT db FROM Database db " +
@@ -95,13 +92,6 @@ public class ApprovalResource {
 
         User proposedOwner = database.getTransferUser();
 
-        if (user.isAnonymous()) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
-        if (proposedOwner.getId() != user.getUserId()) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        }
-
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
                 new DatabaseProviderImpl(entityManager),
@@ -109,7 +99,7 @@ public class ApprovalResource {
                 mailSender,
                 database.getId());
 
-        return resource.cancelTransfer(user, null);
+        return resource.cancelTransfer(proposedOwner.asAuthenticatedUser(), null);
     }
 
 }

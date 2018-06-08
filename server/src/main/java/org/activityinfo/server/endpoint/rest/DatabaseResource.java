@@ -34,6 +34,7 @@ import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.authentication.SecureTokenGenerator;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Database;
@@ -240,17 +241,11 @@ public class DatabaseResource {
         return database.getTransferToken();
     }
 
-    public Response startTransfer(AuthenticatedUser executingUser, TransferAuthorized transfer) {
+    public Response startTransfer(UriInfo uri, AuthTokenProvider authTokenProvider, TransferAuthorized transfer) {
         Database database = getDatabase();
         User currentOwner = database.getOwner();
         User newOwner = database.getTransferUser();
 
-        if (executingUser.isAnonymous()) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
-        if (executingUser.getUserId() != newOwner.getId()) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        }
         if (database.getTransferToken() == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Database " + databaseId + " has no pending transfers").build();
         }
@@ -274,7 +269,9 @@ public class DatabaseResource {
         }
         commitTransaction();
 
-        return Response.ok().entity("Database " + database.getName() + " successfully transferred.").build();
+        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app#db/" + databaseId).build())
+                .cookie(authTokenProvider.createNewAuthCookies(newOwner))
+                .build();
     }
 
     private void rollbackTransaction() {
