@@ -100,16 +100,16 @@ public class BooleanColumnView implements ColumnView {
         switch(direction) {
             case ASC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortAscending(values, sortVector, numRows);
+                    //HeapsortColumn.heapsortAscending(values, sortVector, numRows);
                 } else {
-                    HeapsortColumn.heapsortAscending(values, sortVector, range.length, range);
+                    //HeapsortColumn.heapsortAscending(values, sortVector, range.length, range);
                 }
                 break;
             case DESC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortDescending(values, sortVector, numRows);
+                    //HeapsortColumn.heapsortDescending(values, sortVector, numRows);
                 } else {
-                    HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
+                    //HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
                 }
                 break;
         }
