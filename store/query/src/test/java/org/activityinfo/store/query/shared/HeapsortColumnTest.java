@@ -75,8 +75,10 @@ public class HeapsortColumnTest {
         int[] indexes = new int[] { 0, 1, 2, 3, 4 };
 
         columnView.order(indexes, SortModel.Dir.ASC, null);
-
         assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, -33, 0, 30, 50));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(50, 30, 0, -33, Double.NaN));
     }
 
     @Test
