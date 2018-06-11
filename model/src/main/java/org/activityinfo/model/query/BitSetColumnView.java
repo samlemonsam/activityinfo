@@ -18,6 +18,8 @@
  */
 package org.activityinfo.model.query;
 
+import org.activityinfo.model.util.HeapsortColumn;
+
 import java.io.Serializable;
 import java.util.BitSet;
 
@@ -98,8 +100,22 @@ public class BitSetColumnView implements ColumnView, Serializable {
 
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
-        // TODO: BitSet Sorting
-        // Do not sort on column
+        switch(direction) {
+            case ASC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortBitSet(bitSet, sortVector, numRows, true);
+                } else {
+                    HeapsortColumn.heapsortBitSet(bitSet, sortVector, range.length, range, true);
+                }
+                break;
+            case DESC:
+                if (range == null || range.length == numRows) {
+                    HeapsortColumn.heapsortBitSet(bitSet, sortVector, numRows, false);
+                } else {
+                    HeapsortColumn.heapsortBitSet(bitSet, sortVector, range.length, range, false);
+                }
+                break;
+        }
         return sortVector;
     }
 

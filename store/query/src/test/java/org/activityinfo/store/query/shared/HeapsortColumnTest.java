@@ -30,6 +30,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.BitSet;
 
 import static org.junit.Assert.assertThat;
 
@@ -142,6 +143,23 @@ public class HeapsortColumnTest {
         assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
     }
 
+    @Test
+    public void bitSetSorting() {
+        BitSet values = new BitSet(4);
+        values.set(1, true);
+        values.set(2, false);
+        values.set(3, true);
+        values.set(4, false);
+        int indexes[] = {0, 1, 2, 3};
+        BitSetColumnView columnView = new BitSetColumnView(values.length(), values);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(false, false, true, true));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(true, true, false, false));
+    }
+
 //    @Test
 //    public void multipleSort() {
 //        int masterRowId[] = {0, 1, 2, 3, 4, 5, 6};
@@ -236,6 +254,14 @@ public class HeapsortColumnTest {
         return output;
     }
 
+    private boolean[] reorder(BitSet original, int[] sortVector) {
+        boolean[] output = new boolean[original.length()];
+        for (int i=0; i<output.length; i++) {
+            output[i] = original.get(sortVector[i]);
+        }
+        return output;
+    }
+
     private static Matcher<double[]> isArrayEqualTo(double... expected) {
         return new TypeSafeMatcher<double[]>() {
 
@@ -279,7 +305,22 @@ public class HeapsortColumnTest {
 
             @Override
             protected boolean matchesSafely(String[] item) {
+               return Arrays.equals(expected, item);
+            }
+        };
+    }
+
+    private static Matcher<boolean[]> isArrayEqualTo(boolean... expected) {
+        return new TypeSafeMatcher<boolean[]>() {
+            @Override
+            protected boolean matchesSafely(boolean[] item) {
                 return Arrays.equals(expected, item);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
             }
         };
     }
