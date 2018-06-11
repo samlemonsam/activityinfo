@@ -20,6 +20,7 @@
 package org.activityinfo.model.util;
 
 import com.google.common.primitives.UnsignedBytes;
+import com.google.gwt.core.shared.GwtIncompatible;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import org.activityinfo.model.query.ColumnView;
 
@@ -59,6 +60,7 @@ public final class HeapsortColumn {
      * @param ascending
      * @return
      */
+    @GwtIncompatible
     private static boolean isLessThan(byte bx, byte by, boolean ascending) {
         // Treat as unsigned
         int x = UnsignedBytes.toInt(bx);
@@ -1103,6 +1105,7 @@ public final class HeapsortColumn {
      * @param range The rows of {@code val} on which to sort (unmutated)
      * @param ascending
      */
+    @GwtIncompatible
     public static void heapsortSparseDouble(Int2DoubleOpenHashMap val, int[] index, int n, int[] range, boolean ascending) {
         int l, j, ir, i;
         double ra;
@@ -1165,6 +1168,7 @@ public final class HeapsortColumn {
      * @param n The length of {@code val} and {@code index}
      * @param ascending
      */
+    @GwtIncompatible
     public static void heapsortSparseDouble(Int2DoubleOpenHashMap val, int[] index, int n, boolean ascending) {
         int l, j, ir, i;
         double ra;
