@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * Compact storage for discrete string vectors with fewer than 128 values.
  */
-class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
+public class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
 
     static final int MAX_COUNT = Byte.MAX_VALUE;
 
@@ -38,7 +38,7 @@ class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
     public DiscreteStringColumnView8() {
     }
 
-    DiscreteStringColumnView8(String[] labels, byte[] values) {
+    public DiscreteStringColumnView8(String[] labels, byte[] values) {
         assert labels.length <= MAX_COUNT;
         this.labels = labels;
         this.values = values;
@@ -124,16 +124,16 @@ class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
         switch(direction) {
             case ASC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, numRows);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, numRows, true);
                 } else {
-                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, range.length, range);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, range.length, range, true);
                 }
                 break;
             case DESC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, numRows);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, numRows, false);
                 } else {
-                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, range.length, range);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, range.length, range, false);
                 }
                 break;
         }

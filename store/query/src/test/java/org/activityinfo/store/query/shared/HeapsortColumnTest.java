@@ -19,8 +19,10 @@
 package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.query.*;
+import org.activityinfo.store.query.server.columns.DiscreteStringColumnView8;
 import org.activityinfo.store.query.server.columns.IntColumnView16;
 import org.activityinfo.store.query.server.columns.IntColumnView8;
+import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -98,6 +100,34 @@ public class HeapsortColumnTest {
         assertThat(reorder(values, indexes), isArrayEqualTo("ccc", "Cba", "c", "Abc", "aaa", "a", "", null));
     }
 
+    @Test
+    public void enumSorting() {
+        String labels[] = {"a", "b", "c", ""};
+        int selections[] = {2, 1, 0, -1, 3, 1}; // c, b, a, null, "", b
+        int indexes[] = {0, 1, 2, 3, 4, 5};
+        DiscreteStringColumnView columnView = new DiscreteStringColumnView(labels, selections);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo(null, "", "a", "b", "b", "c"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
+    }
+
+    @Test
+    public void enum8Sorting() {
+        String labels[] = {"a", "b", "c", ""};
+        byte selections[] = {2, 1, 0, -1, 3, 1}; // c, b, a, null, "", b
+        int indexes[] = {0, 1, 2, 3, 4, 5};
+        DiscreteStringColumnView8 columnView = new DiscreteStringColumnView8(labels, selections);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo(null, "", "a", "b", "b", "c"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
+    }
+
 //    @Test
 //    public void multipleSort() {
 //        int masterRowId[] = {0, 1, 2, 3, 4, 5, 6};
@@ -136,9 +166,33 @@ public class HeapsortColumnTest {
 //
 //    }
 
+    private String[] labelledArray(int[] selection, String[] labels) {
+        String[] output = new String[selection.length];
+        for (int i=0; i < output.length; i++) {
+            output[i] = selection[i] < 0 ? null : labels[selection[i]];
+        }
+        return output;
+    }
+
+    private String[] labelledArray(byte[] selection, String[] labels) {
+        String[] output = new String[selection.length];
+        for (byte i=0; i < output.length; i++) {
+            output[i] = selection[i] < 0 ? null : labels[selection[i]];
+        }
+        return output;
+    }
+
     private int[] reorder(int[] original, int[] sortVector) {
         int[] output = new int[original.length];
         for (int i=0; i<output.length; i++) {
+            output[i] = original[sortVector[i]];
+        }
+        return output;
+    }
+
+    private byte[] reorder(byte[] original, int[] sortVector) {
+        byte[] output = new byte[original.length];
+        for (byte i=0; i<output.length; i++) {
             output[i] = original[sortVector[i]];
         }
         return output;

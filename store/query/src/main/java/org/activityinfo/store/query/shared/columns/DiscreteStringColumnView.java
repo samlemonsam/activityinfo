@@ -120,16 +120,16 @@ public class DiscreteStringColumnView implements EnumColumnView, ColumnView, Ser
         switch(direction) {
             case ASC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, numRows);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, numRows, true);
                 } else {
-                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, range.length, range);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, range.length, range, true);
                 }
                 break;
             case DESC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, numRows);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, numRows, false);
                 } else {
-                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, range.length, range);
+                    HeapsortColumn.heapsortEnum(values, labels, sortVector, range.length, range, false);
                 }
                 break;
         }
