@@ -35,11 +35,7 @@ public class IntColumnView8 extends AbstractNumberColumn {
     private byte[] values;
     private int delta;
 
-    public IntColumnView8(double... doubleValues) {
-        this(doubleValues, doubleValues.length, (int)Doubles.min(doubleValues));
-    }
-
-    IntColumnView8(double doubleValues[], int numRows, int minValue) {
+    public IntColumnView8(double doubleValues[], int numRows, int minValue) {
         this.values = new byte[numRows];
 
         // Reserve 0 for missing values

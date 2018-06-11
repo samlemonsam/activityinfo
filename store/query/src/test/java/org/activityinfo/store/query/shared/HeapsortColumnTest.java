@@ -71,7 +71,7 @@ public class HeapsortColumnTest {
     public void int8sorting() {
 
         double values[] = new double[] {0, Double.NaN, 50, 30, -33 };
-        IntColumnView8 columnView = new IntColumnView8(values);
+        IntColumnView8 columnView = new IntColumnView8(values, values.length, -33);
         int[] indexes = new int[] { 0, 1, 2, 3, 4 };
 
         columnView.order(indexes, SortModel.Dir.ASC, null);
