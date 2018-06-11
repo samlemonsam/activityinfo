@@ -19,6 +19,7 @@
 package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.query.*;
+import org.activityinfo.model.util.HeapsortColumn;
 import org.activityinfo.store.query.server.columns.DiscreteStringColumnView8;
 import org.activityinfo.store.query.server.columns.IntColumnView16;
 import org.activityinfo.store.query.server.columns.IntColumnView8;
@@ -183,43 +184,28 @@ public class HeapsortColumnTest {
         assertThat(reorder(values, missing, indexes), isBooleanArrayEqualTo(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null));
     }
 
-//    @Test
-//    public void multipleSort() {
-//        int masterRowId[] = {0, 1, 2, 3, 4, 5, 6};
-//        int sortVector[] = masterRowId.clone();
-//        String stringCol[] = {"C", "D", "A", "E", "B", "C", "C"};
-//        double doubleCol[] = {15, 17, 12, 13, 12, 12, 11};
-//
-//        SortModel.Range range = new SortModel.Range(0,6);
-//
-//        System.out.println("Original Ids: " + Arrays.toString(masterRowId));
-//        System.out.println("Sort Vector:  " + Arrays.toString(sortVector));
-//        System.out.println("String Col:   " + Arrays.toString(stringCol));
-//        System.out.println("Double Col:   " + Arrays.toString(doubleCol));
-//
-//        HeapsortColumn.heapsortAscending(stringCol, sortVector, range.getRangeSize(), range.getRange());
-//
-//        System.out.println("1st Sort on String Col");
-//        System.out.println("Original Ids:             " + Arrays.toString(masterRowId));
-//        System.out.println("Sort Vector:              " + Arrays.toString(sortVector));
-//        System.out.println("String Col:               " + Arrays.toString(stringCol));
-//        System.out.println("String Col (Reordered):   " + Arrays.toString(reorder(stringCol, sortVector)));
-//        System.out.println("Double Col:               " + Arrays.toString(doubleCol));
-//        System.out.println("Double Col (Reordered):   " + Arrays.toString(reorder(doubleCol, sortVector)));
-//
-//        range = new SortModel.Range(2,4);
-//
-//        //HeapsortColumn.heapsortAscending(doubleCol, sortVector, range.getRangeSize(), range.getRange());
-//
-//        System.out.println("2nd Sort on Double Col");
-//        System.out.println("Original Ids:             " + Arrays.toString(masterRowId));
-//        System.out.println("Sort Vector:              " + Arrays.toString(sortVector));
-//        System.out.println("String Col:               " + Arrays.toString(stringCol));
-//        System.out.println("String Col (Reordered):   " + Arrays.toString(reorder(stringCol, sortVector)));
-//        System.out.println("Double Col:               " + Arrays.toString(doubleCol));
-//        System.out.println("Double Col (Reordered):   " + Arrays.toString(reorder(doubleCol, sortVector)));
-//
-//    }
+    @Test
+    public void multipleSort() {
+        int masterRowId[] = {0,         1,      2,          3,      4,      5,      6};
+        String stringCol[] = {"A",      "A",    "A",        "C",    "B",    null,    "B"};
+        double doubleCol[] = {15.0,     17.0,   Double.NaN, 13.0,   12.0,   12.0,   11.0};
+        int sortVector[] = masterRowId.clone();
+
+        // Sort alphabetically
+        SortModel.Range range = new SortModel.Range(0,6);
+        HeapsortColumn.heapsortString(stringCol, sortVector, range.getRangeSize(), range.getRange(), true);
+        assertThat(reorder(stringCol, sortVector), isArrayEqualTo(null, "A", "A", "A", "B", "B", "C"));
+
+        // Sort within A (string column should remain in same order, but double values in A group should be in asc order)
+        range = new SortModel.Range(1,3);
+        HeapsortColumn.heapsortDouble(doubleCol, sortVector, range.getRangeSize(), range.getRange(), true);
+        // Sort within B (string column should remain in same order, but double values in A & B group should be in asc order)
+        range = new SortModel.Range(4,5);
+        HeapsortColumn.heapsortDouble(doubleCol, sortVector, range.getRangeSize(), range.getRange(), true);
+
+        assertThat(reorder(stringCol, sortVector), isArrayEqualTo(null, "A", "A", "A", "B", "B", "C"));
+        assertThat(reorder(doubleCol, sortVector), isArrayEqualTo(12.0, Double.NaN, 15.0, 17.0, 11.0, 12.0, 13.0));
+    }
 
     private String[] labelledArray(int[] selection, String[] labels) {
         String[] output = new String[selection.length];
