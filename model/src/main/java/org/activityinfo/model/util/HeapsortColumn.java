@@ -20,6 +20,7 @@
 package org.activityinfo.model.util;
 
 import com.google.common.primitives.UnsignedBytes;
+import org.activityinfo.model.query.ColumnView;
 
 /**
  * This utility heapsorts a column, reordering the given index arrays but leaving the value arrays unchanged.
@@ -125,6 +126,28 @@ public final class HeapsortColumn {
                 return true;
             }
             return y < x;
+        }
+    }
+
+    private static boolean isLessThanBoolean(int x, int y, boolean ascending) {
+        int a;
+        int b;
+
+        if(ascending) {
+            a = x;
+            b = y;
+        } else {
+            a = y;
+            b = x;
+        }
+
+        if (a == ColumnView.TRUE) {
+            return false;
+        } else if (a == ColumnView.FALSE) {
+            return b == ColumnView.TRUE;
+        } else {
+            // a == ColumnView.NA
+            return b != ColumnView.NA;
         }
     }
 
@@ -367,6 +390,131 @@ public final class HeapsortColumn {
                     ++j;
                 }
                 if (isLessThan(ra, val[index[j]], ascending)) {
+                    index[i] = index[j];
+                    j += (i = j);
+                }
+                else {
+                    j = ir + 1;
+                }
+            }
+
+            index[i] = ii;
+        }
+    }
+
+    /**
+     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) encoded as unsigned 8-bit integers,
+     * with zero as the missing value.
+     *
+     * @param val The value array to sort (unmutated)
+     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
+     * @param n The length of {@code val} and {@code index} - should be equal to the size of {@code range}
+     * @param range The rows of {@code val} on which to sort (unmutated)
+     */
+    public static void heapsortBooleanInt(int[] val, int[] index, int n, int[] range, boolean ascending) {
+        int l, j, ir, i;
+        int ra;
+        int ii;
+
+        if (n <= 1 || n != range.length) {
+            return;
+        }
+
+        l = (n >> 1) + 1;
+        ir = n-1;
+
+        while(true) {
+            // ==================================================
+            // Heapify a and ib and then sort them
+            // ==================================================
+
+            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
+            if (l > 0) {
+                l = l - 1;
+                ii = index[range[l]];
+                ra = val[ii];
+            }
+
+            else {
+                ii = index[range[ir]];
+                ra = val[ii];
+                index[range[ir]] = index[range[0]];
+
+                if (--ir == 0) {
+                    index[range[0]] = ii;
+                    return; // We're done
+                }
+            }
+
+            i = l;
+            j = (l << 1);
+            while (j <= ir) {
+                if (j < ir && isLessThanBoolean(val[index[range[j]]], val[index[range[j+1]]], ascending) || i == j) {
+                    ++j;
+                }
+                if (isLessThanBoolean(ra, val[index[range[j]]], ascending)) {
+                    index[range[i]] = index[range[j]];
+                    j += (i = j);
+                }
+                else {
+                    j = ir + 1;
+                }
+            }
+
+            index[range[i]] = ii;
+        }
+    }
+
+    /**
+     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) encoded as unsigned 8-bit integers,
+     * with zero as the missing value.
+     *
+     * @param val The value array to sort (unmutated)
+     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
+     * @param n The length of {@code val} and {@code index}
+     */
+    public static void heapsortBooleanInt(int[] val, int[] index, int n, boolean ascending) {
+        int l, j, ir, i;
+        int ra;
+        int ii;
+
+        if (n <= 1) {
+            return;
+        }
+
+        l = (n >> 1) + 1;
+        ir = n-1;
+
+        while(true) {
+            // ==================================================
+            // Heapify a and ib and then sort them
+            // ==================================================
+
+            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
+            if (l > 0) {
+                l = l - 1;
+                ii = index[l];
+                ra = val[ii];
+            }
+
+            else {
+                ii = index[ir];
+                ra = val[ii];
+                index[ir] = index[0];
+
+                if (--ir == 0) {
+                    index[0] = ii;
+                    return; // We're done
+                }
+            }
+
+            i = l;
+            j = (l << 1);
+            while (j <= ir) {
+                if (j < ir && isLessThanBoolean(val[index[j]], val[index[j+1]], ascending) || i == j) {
+                    ++j;
+                }
+                if (isLessThanBoolean(ra, val[index[j]], ascending)) {
                     index[i] = index[j];
                     j += (i = j);
                 }

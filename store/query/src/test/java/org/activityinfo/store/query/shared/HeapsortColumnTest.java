@@ -18,6 +18,8 @@
  */
 package org.activityinfo.store.query.shared;
 
+import org.activityinfo.model.query.BooleanColumnView;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.util.HeapsortColumn;
@@ -109,6 +111,19 @@ public class HeapsortColumnTest {
         assertThat(reorder(values, indexes), isArrayEqualTo(510.0, 51.0, 5.1, 0, -1.5, -15.0, -150.0, Double.NaN, Double.NaN));
     }
 
+    @Test
+    public void booleanSorting() {
+        int values[] = new int[] {0, ColumnView.NA, 1, 1, 0, ColumnView.NA };
+        int[] indexes = new int[] { 0, 1, 2, 3, 4, 5 };
+        BooleanColumnView columnView = new BooleanColumnView(values);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(ColumnView.NA, ColumnView.NA, 0, 0, 1, 1));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(1, 1, 0, 0, ColumnView.NA, ColumnView.NA));
+    }
+
 //    @Test
 //    public void multipleSort() {
 //        int masterRowId[] = {0, 1, 2, 3, 4, 5, 6};
@@ -146,6 +161,14 @@ public class HeapsortColumnTest {
 //        System.out.println("Double Col (Reordered):   " + Arrays.toString(reorder(doubleCol, sortVector)));
 //
 //    }
+
+    private int[] reorder(int[] original, int[] sortVector) {
+        int[] output = new int[original.length];
+        for (int i=0; i<output.length; i++) {
+            output[i] = original[sortVector[i]];
+        }
+        return output;
+    }
 
     private Object[] reorder(Object[] original, int[] sortVector) {
         Object[] output = new Object[original.length];
