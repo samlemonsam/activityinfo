@@ -21,7 +21,6 @@ package org.activityinfo.server.mail;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -40,7 +39,6 @@ public abstract class MailSender {
 
     public abstract void send(Message message) throws MessagingException;
 
-    @Timed(name = "mail.send")
     public void send(MessageModel model) {
         try {
             Message message = createMessage(model);
