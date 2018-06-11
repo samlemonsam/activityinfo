@@ -160,6 +160,29 @@ public class HeapsortColumnTest {
         assertThat(reorder(values, indexes), isArrayEqualTo(true, true, false, false));
     }
 
+    @Test
+    public void bitSetMissingSorting() {
+        BitSet values = new BitSet(5);
+        values.set(1, true);
+        values.set(2, false);
+        values.set(4, true);
+        values.set(5, false);
+        BitSet missing = new BitSet(5);
+        missing.set(1, false);
+        missing.set(2, false);
+        missing.set(3, true);
+        missing.set(4, false);
+        missing.set(5, false);
+        int indexes[] = {0, 1, 2, 3, 4};
+        BitSetWithMissingView columnView = new BitSetWithMissingView(values.length(), values, missing);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, missing, indexes), isBooleanArrayEqualTo(null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, missing, indexes), isBooleanArrayEqualTo(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null));
+    }
+
 //    @Test
 //    public void multipleSort() {
 //        int masterRowId[] = {0, 1, 2, 3, 4, 5, 6};
@@ -262,6 +285,14 @@ public class HeapsortColumnTest {
         return output;
     }
 
+    private Boolean[] reorder(BitSet original, BitSet missing, int[] sortVector) {
+        Boolean[] output = new Boolean[original.length()];
+        for (int i=0; i<output.length; i++) {
+            output[i] = missing.get(sortVector[i]) ? null : original.get(sortVector[i]);
+        }
+        return output;
+    }
+
     private static Matcher<double[]> isArrayEqualTo(double... expected) {
         return new TypeSafeMatcher<double[]>() {
 
@@ -314,6 +345,21 @@ public class HeapsortColumnTest {
         return new TypeSafeMatcher<boolean[]>() {
             @Override
             protected boolean matchesSafely(boolean[] item) {
+                return Arrays.equals(expected, item);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+        };
+    }
+
+    private static Matcher<Boolean[]> isBooleanArrayEqualTo(Boolean... expected) {
+        return new TypeSafeMatcher<Boolean[]>() {
+            @Override
+            protected boolean matchesSafely(Boolean[] item) {
                 return Arrays.equals(expected, item);
             }
 
