@@ -27,6 +27,7 @@ import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlRecordHistoryBuilder;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.server.PermissionsEnforcer;
@@ -77,6 +78,8 @@ public class ActivityInfoApiBackend implements ApiBackend {
         permissionOracle.assertDesignPrivileges(formClass, getAuthenticatedUser());
 
         ((MySqlStorageProvider) getStorage()).createOrUpdateFormSchema(formClass);
+
+        UsageTracker.track(getAuthenticatedUserId(), "create_form", formClass);
     }
 
     @Override

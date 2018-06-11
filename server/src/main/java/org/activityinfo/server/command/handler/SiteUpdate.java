@@ -27,10 +27,12 @@ import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.JsonUtil;
 import org.activityinfo.model.form.FormFieldType;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -65,7 +67,7 @@ public class SiteUpdate {
     public void createOrUpdateSite(User user, int siteId, PropertyMap propertyMap) throws CommandException {
 
         Site site = entityManager.find(Site.class, siteId);
-        
+
         if(site == null) {
             createSite(user, siteId, propertyMap);
 
@@ -301,6 +303,11 @@ public class SiteUpdate {
     }
 
     public void persistHistory(Site site, boolean isNew, User user, PropertyMap changes) {
+
+        UsageTracker.track(user.getId(), "update_site",
+                CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
+                CuidAdapter.activityFormClass(site.getActivity().getId()));
+
         SiteHistory history = new SiteHistory();
         history.setSite(site);
         history.setUser(user);

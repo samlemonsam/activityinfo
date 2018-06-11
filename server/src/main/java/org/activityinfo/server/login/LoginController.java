@@ -26,6 +26,7 @@ import org.activityinfo.server.database.hibernate.dao.UserDAO;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.exception.LoginException;
 import org.activityinfo.server.login.model.LoginPageModel;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
@@ -100,6 +101,9 @@ public class LoginController {
     }
 
     public Response loginAndRedirectToApp(URI baseUri, User user) {
+
+        UsageTracker.track(user.getId(), "login");
+
         URI appUri = UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build();
 
         return Response.seeOther(appUri)
