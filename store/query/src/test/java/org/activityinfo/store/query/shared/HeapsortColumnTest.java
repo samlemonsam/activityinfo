@@ -22,6 +22,7 @@ import org.activityinfo.model.query.*;
 import org.activityinfo.store.query.server.columns.DiscreteStringColumnView8;
 import org.activityinfo.store.query.server.columns.IntColumnView16;
 import org.activityinfo.store.query.server.columns.IntColumnView8;
+import org.activityinfo.store.query.server.columns.SparseNumberColumnView;
 import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -72,6 +73,19 @@ public class HeapsortColumnTest {
 
         columnView.order(indexes, SortModel.Dir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(510.0, 51.0, 5.1, 0, -1.5, -15.0, -150.0, Double.NaN, Double.NaN));
+    }
+
+    @Test
+    public void sparseDoubleSorting() {
+        double values[] = { Double.NaN, Double.NaN, Double.NaN, 1.0, -1.0, Double.NaN, 2.0, Double.NaN, 0.0 };
+        int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7, 8 };
+        SparseNumberColumnView columnView = new SparseNumberColumnView(values, 9, 5);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, -1.0, 0.0, 1.0, 2.0));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(2.0, 1.0, 0.0, -1.0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN));
     }
 
     @Test
