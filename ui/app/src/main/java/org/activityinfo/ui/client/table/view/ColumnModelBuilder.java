@@ -234,6 +234,7 @@ public class ColumnModelBuilder {
         config.setHeader(tableColumn.getLabel());
         config.setCell(new ErrorCell());
         config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
+        config.setSortable(false);
         columnConfigs.add(config);
     }
 
