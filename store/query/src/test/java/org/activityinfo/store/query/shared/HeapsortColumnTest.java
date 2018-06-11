@@ -18,11 +18,7 @@
  */
 package org.activityinfo.store.query.shared;
 
-import org.activityinfo.model.query.BooleanColumnView;
-import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.DoubleArrayColumnView;
-import org.activityinfo.model.query.SortModel;
-import org.activityinfo.model.util.HeapsortColumn;
+import org.activityinfo.model.query.*;
 import org.activityinfo.store.query.server.columns.IntColumnView16;
 import org.activityinfo.store.query.server.columns.IntColumnView8;
 import org.hamcrest.Description;
@@ -35,41 +31,6 @@ import java.util.Arrays;
 import static org.junit.Assert.assertThat;
 
 public class HeapsortColumnTest {
-
-    @Test
-    public void stringColumnSortedByValueAsc() {
-
-        String stringVals[] = {"c", "a", "b", "s"};
-        int stringIndex[] = {0, 1, 2, 3};
-
-        System.out.println(Arrays.toString(stringVals));
-        System.out.println(Arrays.toString(stringIndex));
-
-        SortModel.Range range = new SortModel.Range(0,3);
-        HeapsortColumn.heapsortAscending(stringVals, stringIndex, range.getRangeSize(), range.getRange());
-
-        System.out.println("Original  (A): " + Arrays.toString(stringVals));
-        System.out.println("Reordered (A): " + Arrays.toString(reorder(stringVals, stringIndex)));
-        System.out.println("Index     (A): " + Arrays.toString(stringIndex));
-
-    }
-
-    @Test
-    public void stringColumnSortedByValueDsc() {
-
-        String stringVals[] = {"c", "a", "b", "s"};
-        int stringIndex[] = {0, 1, 2, 3};
-
-        System.out.println(Arrays.toString(stringVals));
-        System.out.println(Arrays.toString(stringIndex));
-
-        SortModel.Range range = new SortModel.Range(0,3);
-        HeapsortColumn.heapsortDescending(stringVals, stringIndex, 4, range.getRange());
-
-        System.out.println("Original  (D): " + Arrays.toString(stringVals));
-        System.out.println("Reordered (D): " + Arrays.toString(reorder(stringVals, stringIndex)));
-        System.out.println("Index     (D): " + Arrays.toString(stringIndex));
-    }
 
     @Test
     public void int8sorting() {
@@ -122,6 +83,19 @@ public class HeapsortColumnTest {
 
         columnView.order(indexes, SortModel.Dir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(1, 1, 0, 0, ColumnView.NA, ColumnView.NA));
+    }
+
+    @Test
+    public void stringSorting() {
+        String values[] = {"Abc", "aaa", "Cba", "", "ccc", "a", "c", null};
+        int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7};
+        StringArrayColumnView columnView = new StringArrayColumnView(values);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(null, "", "a", "aaa", "Abc", "c", "Cba", "ccc"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo("ccc", "Cba", "c", "Abc", "aaa", "a", "", null));
     }
 
 //    @Test
@@ -178,6 +152,14 @@ public class HeapsortColumnTest {
         return output;
     }
 
+    private String[] reorder(String[] original, int[] sortVector) {
+        String[] output = new String[original.length];
+        for (int i=0; i<output.length; i++) {
+            output[i] = original[sortVector[i]];
+        }
+        return output;
+    }
+
     private double[] reorder(double[] original, int[] sortVector) {
         double[] output = new double[original.length];
         for (int i=0; i<output.length; i++) {
@@ -201,6 +183,7 @@ public class HeapsortColumnTest {
             }
         };
     }
+
     private static Matcher<int[]> isArrayEqualTo(int... expected) {
         return new TypeSafeMatcher<int[]>() {
 
@@ -212,6 +195,22 @@ public class HeapsortColumnTest {
 
             @Override
             protected boolean matchesSafely(int[] item) {
+                return Arrays.equals(expected, item);
+            }
+        };
+    }
+
+    private static Matcher<String[]> isArrayEqualTo(String... expected) {
+        return new TypeSafeMatcher<String[]>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+
+            @Override
+            protected boolean matchesSafely(String[] item) {
                 return Arrays.equals(expected, item);
             }
         };

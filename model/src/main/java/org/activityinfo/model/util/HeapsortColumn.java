@@ -28,17 +28,6 @@ import org.activityinfo.model.query.ColumnView;
  */
 public final class HeapsortColumn {
 
-    private static int compare(String str1, String str2) {
-        if (str1 == str2) {
-            return 0;
-        } else if (str1 == null) {
-            return -1;
-        } else if (str2 == null) {
-            return 1;
-        } else {
-            return str1.compareTo(str2);
-        }
-    }
 
     private static int compare(String[] labels, int enum1, int enum2) {
         if (enum1 == enum2) {
@@ -148,6 +137,35 @@ public final class HeapsortColumn {
         } else {
             // a == ColumnView.NA
             return b != ColumnView.NA;
+        }
+    }
+
+    private static boolean isLessThan(String str1, String str2, boolean ascending) {
+        String a;
+        String b;
+
+        if (ascending) {
+            a = toLower(str1);
+            b = toLower(str2);
+        } else {
+            a = toLower(str2);
+            b = toLower(str1);
+        }
+
+        if (a == null) {
+            return b != null;
+        } else if (b == null) {
+            return false;
+        } else {
+            return a.compareTo(b) < 0;
+        }
+    }
+
+    private static String toLower(String str) {
+        if (str == null) {
+            return null;
+        } else {
+            return str.toLowerCase();
         }
     }
 
@@ -657,13 +675,13 @@ public final class HeapsortColumn {
      * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
      * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
      * <p>Constricts the rows of {@code val}/{@code index} to be sorted to the indices given by {@code range}.</p>
-     *
-     * @param val The value array to sort (unmutated)
+     *  @param val The value array to sort (unmutated)
      * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
      * @param n The length of {@code val} and {@code index} - should be equal to the size of {@code range}
      * @param range The rows of {@code val} on which to sort (unmutated)
+     * @param ascending
      */
-    public static void heapsortAscending(String[] val, int[] index, int n, int[] range) {
+    public static void heapsortString(String[] val, int[] index, int n, int[] range, boolean ascending) {
         int l, j, ir, i;
         String ra;
         int ii;
@@ -701,10 +719,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && compare(val[index[range[j]]], val[index[range[j+1]]]) < 0 || i == j) {
+                if (j < ir && isLessThan(val[index[range[j]]], val[index[range[j+1]]], ascending) || i == j) {
                     ++j;
                 }
-                if (compare(ra, val[index[range[j]]]) < 0) {
+                if (isLessThan(ra, val[index[range[j]]], ascending)) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -720,12 +738,12 @@ public final class HeapsortColumn {
     /**
      * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
      * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
-     *
-     * @param val The value array to sort (unmutated)
+     *  @param val The value array to sort (unmutated)
      * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
      * @param n The length of {@code val} and {@code index}
+     * @param ascending
      */
-    public static void heapsortAscending(String[] val, int[] index, int n) {
+    public static void heapsortString(String[] val, int[] index, int n, boolean ascending) {
         int l, j, ir, i;
         String ra;
         int ii;
@@ -763,136 +781,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && compare(val[index[j]], val[index[j+1]]) < 0 || i == j) {
+                if (j < ir && isLessThan(val[index[j]], val[index[j+1]], ascending) || i == j) {
                     ++j;
                 }
-                if (compare(ra, val[index[j]]) < 0) {
-                    index[i] = index[j];
-                    j += (i = j);
-                }
-                else {
-                    j = ir + 1;
-                }
-            }
-
-            index[i] = ii;
-        }
-    }
-
-    /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
-     * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
-     * <p>Constricts the rows of {@code val}/{@code index} to be sorted to the indices given by {@code range}.</p>
-     *
-     * @param val The value array to sort (unmutated)
-     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
-     * @param n The length of {@code val} and {@code index} - should be equal to the size of {@code range}
-     * @param range The rows of {@code val} on which to sort (unmutated)
-     */
-    public static void heapsortDescending(String[] val, int[] index, int n, int[] range) {
-        int l, j, ir, i;
-        String ra;
-        int ii;
-
-        if (n <= 1 || n != range.length) {
-            return;
-        }
-
-        l = (n >> 1) + 1;
-        ir = n-1;
-
-        while(true) {
-            // ==================================================
-            // Heapify a and ib and then sort them
-            // ==================================================
-
-            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
-            if (l > 0) {
-                l = l - 1;
-                ii = index[range[l]];
-                ra = val[ii];
-            }
-
-            else {
-                ii = index[range[ir]];
-                ra = val[ii];
-                index[range[ir]] = index[range[0]];
-
-                if (--ir == 0) {
-                    index[range[0]] = ii;
-                    return; // We're done
-                }
-            }
-
-            i = l;
-            j = (l << 1);
-            while (j <= ir) {
-                if (j < ir && compare(val[index[range[j]]], val[index[range[j+1]]]) > 0 || i == j) {
-                    ++j;
-                }
-                if (compare(ra, val[index[range[j]]]) > 0) {
-                    index[range[i]] = index[range[j]];
-                    j += (i = j);
-                }
-                else {
-                    j = ir + 1;
-                }
-            }
-
-            index[range[i]] = ii;
-        }
-    }
-
-    /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
-     * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
-     *
-     * @param val The value array to sort (unmutated)
-     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
-     * @param n The length of {@code val} and {@code index}
-     */
-    public static void heapsortDescending(String[] val, int[] index, int n) {
-        int l, j, ir, i;
-        String ra;
-        int ii;
-
-        if (n <= 1) {
-            return;
-        }
-
-        l = (n >> 1) + 1;
-        ir = n-1;
-
-        while(true) {
-            // ==================================================
-            // Heapify a and ib and then sort them
-            // ==================================================
-
-            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
-            if (l > 0) {
-                l = l - 1;
-                ii = index[l];
-                ra = val[ii];
-            }
-
-            else {
-                ii = index[ir];
-                ra = val[ii];
-                index[ir] = index[0];
-
-                if (--ir == 0) {
-                    index[0] = ii;
-                    return; // We're done
-                }
-            }
-
-            i = l;
-            j = (l << 1);
-            while (j <= ir) {
-                if (j < ir && compare(val[index[j]], val[index[j+1]]) > 0 || i == j) {
-                    ++j;
-                }
-                if (compare(ra, val[index[j]]) > 0) {
+                if (isLessThan(ra, val[index[j]], ascending)) {
                     index[i] = index[j];
                     j += (i = j);
                 }
