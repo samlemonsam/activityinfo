@@ -49,18 +49,18 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
             MenuItem item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortAscText());
             item.setIcon(header.getAppearance().sortAscendingIcon());
-            item.addSelectionHandler(asc -> fireEvent(new SortChangeEvent(cm.getColumn(colIndex).getPath(), SortModel.Dir.ASC)));
+            item.addSelectionHandler(event -> doSort(colIndex, SortDir.ASC));
             menu.add(item);
 
             item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortDescText());
             item.setIcon(header.getAppearance().sortDescendingIcon());
-            item.addSelectionHandler(event -> doSort(colIndex, SortDir.ASC));
+            item.addSelectionHandler(event -> doSort(colIndex, SortDir.DESC));
             menu.add(item);
 
             item = new MenuItem();
             item.setText(I18N.CONSTANTS.clearSort());
-            item.addSelectionHandler(event -> doSort(colIndex, SortDir.DESC));
+            item.addSelectionHandler(event -> fireEvent(new SortChangeEvent()));
             menu.add(item);
         }
 
