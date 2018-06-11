@@ -91,16 +91,16 @@ public class IntColumnView16 extends AbstractNumberColumn {
         switch(direction) {
             case ASC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortAscending(values, sortVector, numRows);
+                    HeapsortColumn.heapsortCompact16(values, sortVector, numRows, true);
                 } else {
-                    HeapsortColumn.heapsortAscending(values, sortVector, range.length, range);
+                    HeapsortColumn.heapsortCompact16(values, sortVector, range.length, range, true);
                 }
                 break;
             case DESC:
                 if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortDescending(values, sortVector, numRows);
+                    HeapsortColumn.heapsortCompact16(values, sortVector, numRows, false);
                 } else {
-                    HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
+                    HeapsortColumn.heapsortCompact16(values, sortVector, range.length, range, false);
                 }
                 break;
         }
