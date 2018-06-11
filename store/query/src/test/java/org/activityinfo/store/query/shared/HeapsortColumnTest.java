@@ -20,6 +20,7 @@ package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.util.HeapsortColumn;
+import org.activityinfo.store.query.server.columns.IntColumnView16;
 import org.activityinfo.store.query.server.columns.IntColumnView8;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -79,6 +80,19 @@ public class HeapsortColumnTest {
 
         columnView.order(indexes, SortModel.Dir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(50, 30, 0, -33, Double.NaN));
+    }
+
+    @Test
+    public void int16sorting() {
+        double values[] = new double[] {0, Double.NaN, 500, 300, -330 };
+        IntColumnView16 columnView = new IntColumnView16(values, values.length, -330);
+        int[] indexes = new int[] { 0, 1, 2, 3, 4 };
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, -330, 0, 300, 500));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(500, 300, 0, -330, Double.NaN));
     }
 
     @Test
