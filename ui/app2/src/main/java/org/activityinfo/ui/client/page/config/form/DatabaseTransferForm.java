@@ -27,7 +27,10 @@ import com.extjs.gxt.ui.client.widget.form.*;
 import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.google.gwt.core.client.GWT;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
@@ -59,7 +62,7 @@ public class DatabaseTransferForm extends FormPanel {
         UiConstants constants = GWT.create(UiConstants.class);
 
         FormLayout layout = new FormLayout();
-        layout.setLabelWidth(90);
+        layout.setLabelWidth(75);
         this.setLayout(layout);
         this.setScrollMode(Style.Scroll.AUTOY);
 
@@ -79,12 +82,10 @@ public class DatabaseTransferForm extends FormPanel {
         userField = new ComboBox<>();
         userField.setName("user");
         userField.setFieldLabel(constants.newDatabaseOwner());
-        userField.setDisplayField("name");
         userField.setAllowBlank(false);
         userField.setStore(store);
         userField.setForceSelection(true);
-        userField.setAllowBlank(false);
-        userField.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
+        userField.setItemRenderer(new MultilineRenderer<>(new UserNameEmailRenderer()));
         this.add(userField);
 
         addUserWarning = new Text(I18N.CONSTANTS.addUserBeforeTransferWarning());
@@ -93,6 +94,30 @@ public class DatabaseTransferForm extends FormPanel {
         this.add(addUserWarning);
 
         doLayout();
+    }
+
+    public class UserNameEmailRenderer implements SafeHtmlRenderer<UserPermissionDTO> {
+
+        private final ModelPropertyRenderer nameRenderer = new ModelPropertyRenderer("name");
+        private final ModelPropertyRenderer emailRenderer = new ModelPropertyRenderer("email");
+
+        public UserNameEmailRenderer() {
+        }
+
+        @Override
+        public SafeHtml render(UserPermissionDTO object) {
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            render(object, builder);
+            return builder.toSafeHtml();
+        }
+
+        @Override
+        public void render(UserPermissionDTO object, SafeHtmlBuilder builder) {
+            builder.append(nameRenderer.render(object));
+            builder.appendEscaped(" (");
+            builder.append(emailRenderer.render(object));
+            builder.appendEscaped(")");
+        }
     }
 
     public UserPermissionDTO getUser() {
