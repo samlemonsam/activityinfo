@@ -28,6 +28,7 @@ import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.server.authentication.BasicAuthentication;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -72,6 +73,8 @@ public class KmlActivityServlet extends HttpServlet {
             res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
+
+        UsageTracker.track(user.getId(), "google_earth");
 
         String baseURL = (req.isSecure() ? "https" : "http") +  "://" + req.getServerName() + ":" + 
                 req.getServerPort() + "/earth/sites?activityId=";

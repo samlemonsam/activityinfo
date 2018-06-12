@@ -28,6 +28,7 @@ import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -332,6 +333,21 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     @Override
     public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
         return get(baseUrl + "/jobs/" + jobId, JobStatus::fromJson);
+    }
+
+    @Override
+    public Promise<Void> requestDatabaseTransfer(String newOwnerEmail, int databaseId) {
+        RequestTransfer request = new RequestTransfer(newOwnerEmail);
+        return post(RequestBuilder.POST,
+                baseUrl + "/database/" + databaseId + "/transfer/request",
+                request.toJson().toJson());
+    }
+
+    @Override
+    public Promise<Void> cancelDatabaseTransfer(int databaseId) {
+        return post(RequestBuilder.POST,
+                baseUrl + "/database/" + databaseId + "/transfer/cancel",
+                null);
     }
 
     private <R> Promise<R> getRaw(final String url, final Function<Response, R> parser) {

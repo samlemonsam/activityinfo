@@ -38,6 +38,7 @@ import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.endpoint.rest.usage.UsageResource;
+import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.query.server.Updater;
@@ -61,6 +62,7 @@ public class RootResource {
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
     private PermissionOracle permissionOracle;
+    private MailSender mailSender;
 
     private ApiBackend backend;
     
@@ -72,7 +74,8 @@ public class RootResource {
                         Provider<AuthenticatedUser> userProvider,
                         ServerSideAuthProvider authProvider,
                         PermissionOracle permissionOracle,
-                        ApiBackend backend) {
+                        ApiBackend backend,
+                        MailSender mailSender) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -82,6 +85,8 @@ public class RootResource {
         this.authProvider = authProvider;
         this.permissionOracle = permissionOracle;
         this.backend = backend;
+        this.mailSender = mailSender;
+
     }
 
     @Path("/adminEntity/{id}")
@@ -132,14 +137,17 @@ public class RootResource {
     @JsonView(DTOViews.List.class) 
     @Produces(MediaType.APPLICATION_JSON)
     public List<UserDatabaseDTO> getDatabases() {
-        List<UserDatabaseDTO> databases = dispatcher.execute(new GetSchema()).getDatabases();
-        return databases;
+        return dispatcher.execute(new GetSchema()).getDatabases();
     }
 
     @Path("/database/{id}")
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
-        return new DatabaseResource(catalog, dispatcher,
-                new DatabaseProviderImpl(entityManager), id);
+        return new DatabaseResource(catalog,
+                dispatcher,
+                new DatabaseProviderImpl(entityManager),
+                entityManager,
+                mailSender,
+                id);
     }
 
     @Path("/adminLevel/{id}")

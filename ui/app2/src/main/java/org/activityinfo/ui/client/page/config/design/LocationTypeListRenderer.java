@@ -25,6 +25,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import org.activityinfo.i18n.shared.I18N;
 
 import java.util.List;
 
@@ -38,8 +39,13 @@ class LocationTypeListRenderer implements SafeHtmlRenderer<List<LocationTypeEntr
         @Template("<div role=\"listitem\" class=\"{0}\">{1}</div>")
         SafeHtml item(String itemStyle, String contents);
 
+        @Template("<div role=\"listitem\" class=\"{0}\"><span class=\"{1}\">{2}</span></div>")
+        SafeHtml nullaryItem(String itemStyle, String nullaryStyle, String contents);
+
+
         @Template("<div role=\"listitem\" class=\"{0}\">{1} <span class=\"{2}\">{3}</div>")
         SafeHtml itemWithId(String itemStyle, String contents, String idStyle, int id);
+
 
     }
 
@@ -48,6 +54,7 @@ class LocationTypeListRenderer implements SafeHtmlRenderer<List<LocationTypeEntr
         String item();
         String header();
         String id();
+        String nullary();
     }
 
     interface Bundle extends ClientBundle {
@@ -82,7 +89,10 @@ class LocationTypeListRenderer implements SafeHtmlRenderer<List<LocationTypeEntr
                 html.append(TEMPLATES.header(BUNDLE.styles().header(), header));
                 currentHeader = header;
             }
-            if(entry.isPublic()) {
+            if(entry.isNullary()) {
+                html.append(TEMPLATES.nullaryItem(BUNDLE.styles().item(), BUNDLE.styles().nullary(),
+                        I18N.CONSTANTS.none()));
+            } else if(entry.isPublic()) {
                 html.append(TEMPLATES.itemWithId(BUNDLE.styles().item(), entry.getLocationTypeName(),
                         BUNDLE.styles().id(),
                         entry.getId()));

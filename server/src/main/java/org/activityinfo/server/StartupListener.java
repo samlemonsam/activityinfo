@@ -25,6 +25,7 @@ import org.activityinfo.server.attachment.AttachmentModule;
 import org.activityinfo.server.authentication.AuthenticationModule;
 import org.activityinfo.server.blob.GcsBlobFieldStorageServiceModule;
 import org.activityinfo.server.branding.BrandingModule;
+import org.activityinfo.server.approval.ApprovalModule;
 import org.activityinfo.server.csp.ContentSecurityModule;
 import org.activityinfo.server.database.ServerDatabaseModule;
 import org.activityinfo.server.database.hibernate.HibernateModule;
@@ -95,7 +96,8 @@ public class StartupListener extends GuiceServletContextListener {
                 new JaxRsModule(),
                 new RestApiModule(),
                 new OdkModule(),
-                new GcsBlobFieldStorageServiceModule());
+                new GcsBlobFieldStorageServiceModule(),
+                new ApprovalModule());
     }
 
 }

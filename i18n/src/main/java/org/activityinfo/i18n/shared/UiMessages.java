@@ -285,4 +285,10 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
     String columnLimit(int colLength, int colLimit, String exportType);
+
+    @DefaultMessage("Your Database Transfer request has been sent to User {0}. You will receive an email informing you of the Users decision to accept or reject ownership of your Database.")
+    String transferDatabase(String userName);
+
+    @DefaultMessage("User {0} does not exist in ActivityInfo system.")
+    String userNotInSystem(String userName);
 }

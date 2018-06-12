@@ -72,6 +72,8 @@ public class DbListPage extends ContentPanel implements DbListPresenter.View, Pa
         toolBar.addEditButton(IconImageBundle.ICONS.editDatabase());
         toolBar.addButton(UIActions.RENAME, I18N.CONSTANTS.renameDatabase(), IconImageBundle.ICONS.database());
         toolBar.addDeleteButton();
+        toolBar.addTransferButton();
+        toolBar.addCancelTransferButton();
         toolBar.setListener(presenter);
         this.setTopComponent(toolBar);
     }

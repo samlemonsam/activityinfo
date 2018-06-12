@@ -37,3 +37,8 @@
     font-size: 0.9em;
     font-family: monospace;
 }
+
+.nullary {
+    font-weight: bold;
+    font-style: italic;
+}

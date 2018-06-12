@@ -238,4 +238,13 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
         return Promise.rejected(new RuntimeException("Offline"));
     }
 
+    @Override
+    public Promise<Void> requestDatabaseTransfer(String s, int i) {
+        return Promise.rejected(new UnsupportedOperationException());
+    }
+
+    @Override
+    public Promise<Void> cancelDatabaseTransfer(int i) {
+        return Promise.rejected(new UnsupportedOperationException());
+    }
 }

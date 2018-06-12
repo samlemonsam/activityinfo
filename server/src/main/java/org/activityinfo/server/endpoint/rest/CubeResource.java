@@ -30,7 +30,6 @@ import org.activityinfo.model.date.DateUnit;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.report.util.DateUtilCalendarImpl;
-import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
@@ -49,7 +48,6 @@ public class CubeResource {
     }
 
     @GET
-    @Timed(name = "api.rest.sites.pivot")
     @Produces("application/json")
     public List<Bucket> pivot(@QueryParam("dimension") List<String> dimensions, @QueryParam("form") List<Integer> forms,
                               @QueryParam("month") String monthName) {

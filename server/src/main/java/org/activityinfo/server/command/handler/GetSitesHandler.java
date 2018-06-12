@@ -18,13 +18,11 @@
  */
 package org.activityinfo.server.command.handler;
 
-import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.data.SortInfo;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -35,7 +33,8 @@ import org.activityinfo.legacy.shared.command.OldGetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.impl.OldGetSitesHandler;
-import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.legacy.shared.model.IndicatorDTO;
+import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -52,7 +51,6 @@ import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.command.QueryFilter;
 import org.activityinfo.server.command.handler.binding.*;
 import org.activityinfo.server.command.handler.binding.dim.PartnerDimBinding;
 import org.activityinfo.server.command.handler.binding.dim.ProjectDimBinding;
@@ -95,6 +93,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private SortInfo sortInfo;
 
     private Map<ResourceId,FormTree> formTreeMap;
+    private AttributeFilterMap attributeFilters;
     private Map<ResourceId,QueryModel> queryMap = new LinkedHashMap<>();
     private Map<ResourceId,List<FieldBinding>> fieldBindingMap = new HashMap<>();
     private List<Runnable> queryResultHandlers = new ArrayList<>();
@@ -133,6 +132,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
             fetchActivityMetadata(cmd.getFilter());
             checkForLinkedActivities();
             queryFormTrees();
+            buildAttributeFilterMap();
             buildQueries();
             setQuerySort();
             batchQueries();
@@ -153,6 +153,10 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
         LOGGER.info("Exiting execute()");
         return result;
+    }
+
+    private void buildAttributeFilterMap() {
+        attributeFilters = new AttributeFilterMap(command.getFilter(), formTreeMap.values());
     }
 
     private boolean useLegacyMethod(GetSites command, User user) {
@@ -256,7 +260,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private FormulaNode determineQueryFilter(Filter commandFilter, FormTree formTree) {
-        QueryFilter queryFilter = new QueryFilter(commandFilter, HashMultimap.create());
+        QueryFilterBuilder queryFilter = new QueryFilterBuilder(commandFilter, attributeFilters);
         return queryFilter.composeFilter(formTree);
     }
 

@@ -25,9 +25,13 @@ import org.activityinfo.server.database.hibernate.dao.AuthenticationDAO;
 import org.activityinfo.server.database.hibernate.dao.Transactional;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.hrd.Hrd;
+import org.activityinfo.store.hrd.entity.AuthTokenEntity;
 
 import javax.inject.Provider;
 import javax.ws.rs.core.NewCookie;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class AuthTokenProvider {
 
@@ -47,6 +51,17 @@ public class AuthTokenProvider {
     public Authentication createNewAuthToken(User user) {
         Authentication auth = new Authentication(user);
         authDAO.get().persist(auth);
+
+        // Dual write to HRD
+        AuthTokenEntity entity = new AuthTokenEntity();
+        entity.setCreationTime(new Date());
+        entity.setUserId(user.getId());
+        entity.setEmail(user.getEmail());
+        entity.setToken(auth.getId());
+        entity.setExpireTime(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(5)));
+
+        Hrd.ofy().save().entity(entity).now();
+
         return auth;
     }
 

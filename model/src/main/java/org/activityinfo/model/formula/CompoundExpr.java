@@ -69,7 +69,7 @@ public class CompoundExpr extends FormulaNode {
             EnumValue enumValue = (EnumValue) baseValue;
             return evaluateEnumValue(enumValue);
         }
-        throw new FormulaSyntaxException(asExpression());
+        return BooleanFieldValue.FALSE;
     }
 
     private FieldValue evaluateEnumValue(EnumValue enumValue) {

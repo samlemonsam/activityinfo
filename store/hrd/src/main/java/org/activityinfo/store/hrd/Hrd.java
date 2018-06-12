@@ -21,6 +21,7 @@ package org.activityinfo.store.hrd;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Work;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.store.hrd.entity.*;
 
 /**
@@ -28,12 +29,14 @@ import org.activityinfo.store.hrd.entity.*;
  */
 public class Hrd {
     static {
+        LocaleProxy.initialize();
         ObjectifyService.register(FormEntity.class);
         ObjectifyService.register(FormRecordEntity.class);
         ObjectifyService.register(FormRecordSnapshotEntity.class);
         ObjectifyService.register(FormSchemaEntity.class);
         ObjectifyService.register(AnalysisEntity.class);
         ObjectifyService.register(AnalysisSnapshotEntity.class);
+        ObjectifyService.register(AuthTokenEntity.class);
     }
 
     public static Objectify ofy() {

@@ -55,7 +55,14 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
     @Override
     public CommandResult execute(GetMonthlyReports cmd, User user) throws CommandException {
 
-        Site site = em.find(Site.class, cmd.getSiteId());
+        Site site = em.createQuery(
+                "SELECT s FROM Site s " +
+                        "LEFT JOIN FETCH s.activity " +
+                        "LEFT JOIN FETCH s.partner " +
+                        "WHERE s.id = :siteId", Site.class)
+                .setParameter("siteId", cmd.getSiteId())
+                .getSingleResult();
+
         if(!permissionOracle.isViewAllowed(site, user)) {
             LOGGER.severe(() -> "User " + user.getEmail() + " has no view privs on site " + site.getId() + "," +
                           "partner = " + site.getPartner().getName() + " " + site.getPartner().getId());
@@ -66,7 +73,9 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
         LocalDateInterval endMonthInterval = cmd.getEndMonth().asInterval();
 
         List<ReportingPeriod> periods = em.createQuery(
-            "SELECT p from ReportingPeriod p " +
+            "SELECT p FROM ReportingPeriod p " +
+                    "LEFT JOIN FETCH p.indicatorValues iv " +
+                    "LEFT JOIN FETCH iv.indicator i " +
                     "WHERE p.site.id = :siteId " +
                     "AND p.date1 >= :date1 " +
                     "AND p.date2 <= :date2", ReportingPeriod.class)
@@ -77,16 +86,16 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
 
         List<Indicator> indicators = em.createQuery(
             "SELECT i from Indicator i " +
-             "WHERE i.activity.id IN (SELECT s.activity.id FROM Site s WHERE s.id = :siteId) " + 
-               "AND i.dateDeleted IS NULL " +
-          "ORDER BY i.sortOrder", Indicator.class) 
-           .setParameter("siteId", cmd.getSiteId())
-           .getResultList();
+                    "WHERE i.activity.id = :activityId " +
+                    "AND i.dateDeleted IS NULL " +
+                    "ORDER BY i.sortOrder", Indicator.class)
+                .setParameter("activityId", site.getActivity().getId())
+                .getResultList();
 
         List<IndicatorRowDTO> list = new ArrayList<>();
 
         for (Indicator indicator : indicators) {
-            IndicatorRowDTO dto = buildRowDTO(cmd, indicator);
+            IndicatorRowDTO dto = buildRowDTO(cmd, site.getActivity(), indicator);
             addValues(cmd, dto, periods);
             list.add(dto);
         }
@@ -94,13 +103,13 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
         return new MonthlyReportResult(list);
     }
 
-    private IndicatorRowDTO buildRowDTO(GetMonthlyReports cmd, Indicator indicator) {
+    private IndicatorRowDTO buildRowDTO(GetMonthlyReports cmd, Activity activity, Indicator indicator) {
         IndicatorRowDTO dto = new IndicatorRowDTO();
         dto.setIndicatorId(indicator.getId());
         dto.setSiteId(cmd.getSiteId());
         dto.setIndicatorName(indicator.getName());
         dto.setCategory(indicator.getCategory());
-        dto.setActivityName(indicator.getActivity().getName());
+        dto.setActivityName(activity.getName());
         dto.setExpression(indicator.getExpression());
         return dto;
     }

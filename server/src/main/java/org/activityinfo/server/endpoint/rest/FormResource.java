@@ -45,6 +45,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.InvalidUpdateException;
@@ -220,7 +221,10 @@ public class FormResource {
 
         FormStorage collection = assertVisible(formId);
 
-        // Compute a predicate that will tell us whether a given
+        UsageTracker.track(backend.getAuthenticatedUserId(), "sync", collection.getFormClass());
+
+
+                // Compute a predicate that will tell us whether a given
         // record should be visible to the user, based on their *current* permissions.
 
         java.util.function.Predicate<ResourceId> visibilityPredicate = computeVisibilityPredicate();

@@ -116,4 +116,14 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     public Promise<JobStatus<?, ?>> getJobStatus(String jobId) {
         return offline();
     }
+
+    @Override
+    public Promise<Void> requestDatabaseTransfer(String s, int i) {
+        return offline();
+    }
+
+    @Override
+    public Promise<Void> cancelDatabaseTransfer(int i) {
+        return offline();
+    }
 }

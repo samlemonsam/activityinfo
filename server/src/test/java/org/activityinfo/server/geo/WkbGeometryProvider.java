@@ -26,7 +26,6 @@ import com.vividsolutions.jts.io.InStream;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import freemarker.log.Logger;
-import org.activityinfo.server.util.monitoring.Timed;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -47,7 +46,6 @@ public class WkbGeometryProvider implements AdminGeometryProvider {
     }
 
     @Override
-    @Timed(name = "mapping.fetch_geometry")
     public List<AdminGeo> getGeometries(int adminLevelId) {
         try {
             List<AdminGeo> list = Lists.newArrayList();

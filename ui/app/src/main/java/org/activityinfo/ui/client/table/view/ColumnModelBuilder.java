@@ -234,9 +234,6 @@ public class ColumnModelBuilder {
         config.setCell(new ErrorCell());
         config.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LOCALE_END);
         columnConfigs.add(config);
-
-        StringFilter<Integer> filter = new StringFilter<>(valueProvider);
-        filters.add(new ColumnView(tableColumn.getFormula(), filter));
     }
 
 
@@ -300,4 +297,5 @@ public class ColumnModelBuilder {
             return label;
         }
     }
+
 }

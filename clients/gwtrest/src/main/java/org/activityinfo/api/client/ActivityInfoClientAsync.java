@@ -148,4 +148,8 @@ public interface ActivityInfoClientAsync {
 
     Promise<JobStatus<?, ?>> getJobStatus(String jobId);
 
+    Promise<Void> requestDatabaseTransfer(String newOwnerEmail, int databaseId);
+
+    Promise<Void> cancelDatabaseTransfer(int databaseId);
+
 }

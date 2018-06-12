@@ -30,7 +30,6 @@ import org.activityinfo.server.mail.Message;
 import org.activityinfo.server.report.ReportParserJaxb;
 import org.activityinfo.server.report.generator.ReportGenerator;
 import org.activityinfo.server.report.renderer.itext.RtfReportRenderer;
-import org.activityinfo.server.util.monitoring.Timed;
 import org.xml.sax.SAXException;
 
 import javax.mail.MessagingException;
@@ -93,7 +92,6 @@ public class ReportMailer {
         }
     }
 
-    @Timed(name = "mail.report")
     public void execute(Date today, ReportSubscription sub, Report report) throws IOException {
 
         // set up authentication for the subscriber of this report

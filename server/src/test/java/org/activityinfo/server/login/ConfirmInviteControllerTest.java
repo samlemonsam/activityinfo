@@ -18,7 +18,11 @@
  */
 package org.activityinfo.server.login;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.util.Providers;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.util.Closeable;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.database.hibernate.dao.AuthenticationDAO;
@@ -29,6 +33,7 @@ import org.activityinfo.server.login.model.ConfirmInvitePageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
 import org.activityinfo.server.util.MailingListClient;
 import org.easymock.EasyMock;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,16 +56,20 @@ public class ConfirmInviteControllerTest {
     private ConfirmInviteController resource;
     private User user;
 
+    private Closeable objectify;
+
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
     @Before
     public final void setup() {
+        helper.setUp();
 
         user = new User();
 
         userDAO = createMock(UserDAO.class);
-        expect(userDAO.findUserByChangePasswordKey(eq(VALID_KEY))).andReturn(
-                user);
-        expect(userDAO.findUserByChangePasswordKey(EasyMock.not(eq(VALID_KEY))))
-                .andThrow(new NoResultException());
+        expect(userDAO.findUserByChangePasswordKey(eq(VALID_KEY))).andReturn(user);
+        expect(userDAO.findUserByChangePasswordKey(EasyMock.not(eq(VALID_KEY)))).andThrow(new NoResultException());
         replay(userDAO);
 
         AuthenticationDAO authDAO = createMock(AuthenticationDAO.class);
@@ -75,6 +84,14 @@ public class ConfirmInviteControllerTest {
 
         resource = new ConfirmInviteController(
                 Providers.of(userDAO), authTokenProvider, mailingListClient);
+
+        objectify = ObjectifyService.begin();
+    }
+
+    @After
+    public void tearDown() {
+        objectify.close();
+        helper.tearDown();
     }
 
     @Test

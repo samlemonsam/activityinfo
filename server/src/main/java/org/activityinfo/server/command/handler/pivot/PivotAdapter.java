@@ -48,11 +48,10 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
-import org.activityinfo.model.type.enumerated.EnumItem;
-import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
-import org.activityinfo.server.command.QueryFilter;
+import org.activityinfo.server.command.handler.AttributeFilterMap;
+import org.activityinfo.server.command.handler.QueryFilterBuilder;
 import org.activityinfo.server.command.handler.binding.dim.*;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
@@ -99,7 +98,7 @@ public class PivotAdapter {
 
     private Optional<IndicatorDimBinding> indicatorDimension = Optional.absent();
 
-    private Multimap<String, String> attributeFilters = HashMultimap.create();
+    private AttributeFilterMap attributeFilters;
 
     private FormScanBatch batch;
     private List<Runnable> queryResultHandlers = new ArrayList<>();
@@ -136,7 +135,7 @@ public class PivotAdapter {
         // Query form trees: needed to determine attribute mapping
         formTrees = queryFormTrees();
 
-        findAttributeFilterNames();
+        attributeFilters = new AttributeFilterMap(filter, formTrees.values());
 
         // Define the dimensions we're pivoting by
         groupBy = new ArrayList<>();
@@ -188,39 +187,6 @@ public class PivotAdapter {
 
         return trees;
 
-    }
-
-    /**
-     * Maps attribute filter ids to their attribute group id and name.
-     *
-     * Attribute filters are _SERIALIZED_ as only the integer ids of the required attributes,
-     * but they are actually applied by _NAME_ to all forms in the query.
-     *
-     */
-    private void findAttributeFilterNames() {
-
-        Set<Integer> attributeIds = filter.getRestrictions(DimensionType.Attribute);
-        if(attributeIds.isEmpty()) {
-            return;
-        }
-
-        for (FormTree formTree : formTrees.values()) {
-            for (FormTree.Node node : formTree.getLeaves()) {
-                if(node.isEnum()) {
-                    EnumType type = (EnumType) node.getType();
-                    for (EnumItem enumItem : type.getValues()) {
-                        int attributeId = CuidAdapter.getLegacyIdFromCuid(enumItem.getId());
-                        if(attributeIds.contains(attributeId)) {
-                            attributeFilters.put(node.getField().getLabel(), enumItem.getLabel());
-                            attributeIds.remove(attributeId);
-                            if(attributeIds.isEmpty()) {
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
 
@@ -466,7 +432,7 @@ public class PivotAdapter {
         ResourceId targetFormClassId = CuidAdapter.cuid(CuidAdapter.TARGET_FORM_CLASS_DOMAIN, databaseId);
 
         QueryModel queryModel = new QueryModel(targetFormClassId);
-        QueryFilter queryFilter = new QueryFilter(filter, attributeFilters, LOGGER);
+        QueryFilterBuilder queryFilter = new QueryFilterBuilder(filter, attributeFilters);
         queryModel.setFilter(queryFilter.composeTargetFilter());
         final Collection<Activity> activities = databases.get(databaseId);
 
@@ -752,7 +718,7 @@ public class PivotAdapter {
     }
 
     private FormulaNode composeFilter(FormTree formTree) {
-        QueryFilter queryFilter = new QueryFilter(filter, attributeFilters, LOGGER);
+        QueryFilterBuilder queryFilter = new QueryFilterBuilder(filter, attributeFilters);
         return queryFilter.composeFilter(formTree);
     }
 

@@ -19,17 +19,16 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.sun.jersey.api.core.InjectParam;
-import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.LocationDTO;
+import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.Location;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.rest.model.NewLocation;
-import org.activityinfo.server.util.monitoring.Timed;
 import org.codehaus.jackson.JsonGenerator;
 
 import javax.persistence.EntityManager;
@@ -51,7 +50,6 @@ public class LocationsResource {
     }
 
     @GET 
-    @Timed(name = "api.rest.locations.get")
     @Produces(MediaType.APPLICATION_JSON)
     public Response query(@QueryParam("type") int typeId) throws IOException {
 
@@ -97,7 +95,6 @@ public class LocationsResource {
 
     @POST 
     @Path("/{typeId}")
-    @Timed(name = "api.rest.locations.post")
     public Response postNewLocations(@InjectParam EntityManager entityManager,
                                      @PathParam("typeId") int locationTypeId,
                                      List<NewLocation> locations) {

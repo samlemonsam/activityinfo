@@ -27,7 +27,7 @@ import static org.easymock.EasyMock.*;
 
 public class RestMockUtils {
 
-    static UriInfo mockUriInfo(String uri) throws URISyntaxException {
+    public static UriInfo mockUriInfo(String uri) throws URISyntaxException {
         UriInfo uriInfo = createMock(UriInfo.class);
         expect(uriInfo.getRequestUri()).andReturn(new URI(uri)).anyTimes();
         expect(uriInfo.getAbsolutePathBuilder()).andReturn(

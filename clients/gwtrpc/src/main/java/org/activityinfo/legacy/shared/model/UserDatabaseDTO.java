@@ -52,6 +52,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     private List<FolderDTO> folders = new ArrayList<>(0);
 
     private boolean hasFolderLimitation = false;
+    private boolean hasPendingTransfer = false;
 
     public static final String ENTITY_NAME = "UserDatabase";
 
@@ -329,6 +330,14 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return super.getPropertyNames();
     }
 
+    public boolean hasPendingTransfer() {
+        return hasPendingTransfer;
+    }
+
+    public void setHasPendingTransfer(boolean hasPendingTransfer) {
+        this.hasPendingTransfer = hasPendingTransfer;
+    }
+
     /////////////////////////////////////////////////// PERMISSIONS ///////////////////////////////////////////////////
 
     /**
@@ -533,6 +542,14 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             // If no match - return false
             return false;
         }
+    }
+
+    public boolean canTransferDatabase() {
+        return getAmOwner() && !hasPendingTransfer;
+    }
+
+    public boolean canCancelTransfer() {
+        return getAmOwner() && hasPendingTransfer;
     }
 
     /**

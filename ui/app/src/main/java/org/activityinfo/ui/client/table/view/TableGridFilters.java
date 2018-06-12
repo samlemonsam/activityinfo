@@ -94,6 +94,14 @@ public class TableGridFilters extends GridFilters<Integer> {
 
         LOGGER.info("Filter updated: " + filterFormula);
 
+        // Cache the current filter *before* updating the model.
+        // Updating the model will trigger another event which will update the view,
+        // and we need to avoid the call to update the view so that the inputs don't loose focus. (AI-1919)
+
+        currentFilter = filterFormula.transform(FormulaNode::asExpression);
+
+        // Update the model. (Will trigger a call to updateView)
+
         tableUpdater.updateFilter(filterFormula);
     }
 

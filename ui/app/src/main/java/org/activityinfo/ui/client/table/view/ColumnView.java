@@ -18,10 +18,12 @@
  */
 package org.activityinfo.ui.client.table.view;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sencha.gxt.data.shared.loader.FilterConfig;
 import com.sencha.gxt.widget.core.client.grid.filters.Filter;
 import org.activityinfo.analysis.ParsedFormula;
+import org.activityinfo.model.formula.ConstantNode;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.Formulas;
 
@@ -36,11 +38,6 @@ public class ColumnView {
 
     private final FormulaNode columnFormula;
     private final Filter<Integer, ?> filterView;
-
-    /**
-     * True if the view currently has no active filter set.
-     */
-    private boolean emptyFilter = true;
 
     public ColumnView(ParsedFormula formula, Filter<Integer, ?> filter) {
         this.columnFormula = formula.getRootNode();
@@ -66,24 +63,22 @@ public class ColumnView {
     public static FormulaNode toFormula(FormulaNode field, List<FilterConfig> filters) {
         List<FormulaNode> filterExprs = new ArrayList<>();
         for (FilterConfig filter : filters) {
-            filterExprs.add(ColumnFilterParser.toFormula(field, filter));
+            if(!isEmpty(filter)) {
+                filterExprs.add(ColumnFilterParser.toFormula(field, filter));
+            }
         }
-        return Formulas.allTrue(filterExprs);
+        if(filterExprs.isEmpty()) {
+            return new ConstantNode(true);
+        } else {
+            return Formulas.allTrue(filterExprs);
+        }
     }
 
+    private static boolean isEmpty(FilterConfig filter) {
+        return filter.getType().equals("string") && Strings.isNullOrEmpty(filter.getValue());
+    }
 
     public void updateView(Collection<FilterConfig> filterConfigs) {
-        boolean suppressEvents = true;
-        if(filterConfigs.isEmpty()) {
-            if(!emptyFilter) {
-                filterView.setActive(false, suppressEvents);
-                emptyFilter = true;
-            }
-        } else {
-            filterView.setActive(true, suppressEvents);
-            filterView.setFilterConfig(Lists.newArrayList(filterConfigs));
-            emptyFilter = false;
-        }
-
+        filterView.setFilterConfig(Lists.newArrayList(filterConfigs));
     }
 }

@@ -29,6 +29,7 @@ class LocationTypeEntry extends BaseModelData implements Comparable<LocationType
     private boolean builtin;
     private String databaseName;
     private String locationTypeName;
+    private boolean nullary;
 
     private LocationTypeEntry() {
     }
@@ -39,7 +40,12 @@ class LocationTypeEntry extends BaseModelData implements Comparable<LocationType
      */
     public LocationTypeEntry(LocationTypeDTO locationType) {
         set("id", locationType.getId());
-        set("label", locationType.getName());
+        if(locationType.isNationwide()) {
+            this.nullary = true;
+            set("label", I18N.CONSTANTS.none());
+        } else {
+            set("label", locationType.getName());
+        }
         this.locationTypeName = locationType.getName();
         this.databaseName = "";
         this.builtin = true;
@@ -67,7 +73,7 @@ class LocationTypeEntry extends BaseModelData implements Comparable<LocationType
     }
 
     public String getHeader() {
-        if(builtin) {
+        if(nullary || builtin) {
             return I18N.CONSTANTS.builtInLocationTypes();
         } else if(databaseName.isEmpty()) {
             return I18N.CONSTANTS.publicLocationTypes();
@@ -82,6 +88,12 @@ class LocationTypeEntry extends BaseModelData implements Comparable<LocationType
 
     @Override
     public int compareTo(LocationTypeEntry other) {
+
+        // Put the "nullary" location first.
+        if(this.nullary != other.nullary) {
+            return this.nullary ? -1 : +1;
+        }
+
         // "Reference" location types from our GeoDB come first...
         if(this.builtin != other.builtin) {
             return this.builtin ? -1 : +1;
@@ -102,4 +114,7 @@ class LocationTypeEntry extends BaseModelData implements Comparable<LocationType
         return this.locationTypeName.compareToIgnoreCase(other.locationTypeName);
     }
 
+    public boolean isNullary() {
+        return nullary;
+    }
 }

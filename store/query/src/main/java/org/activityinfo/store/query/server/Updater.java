@@ -47,6 +47,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.*;
 
 import java.util.*;
@@ -265,6 +266,8 @@ public class Updater {
         authorizeUpdate(form, existingResource, update);
 
         generateSerialNumbers(formClass, existingResource, update);
+
+        UsageTracker.track(userId, "update_record", formClass);
 
         if(existingResource.isPresent()) {
             form.update(update);

@@ -31,7 +31,6 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -55,7 +54,6 @@ public class SiteHistoryProcessor {
         this.dispatcher = dispatcher;
     }
 
-    @Timed(name = "updates.site_history")
     public void process(Command<?> cmd, final int userId, final int siteId) {
         assert (cmd instanceof SiteCommand);
 

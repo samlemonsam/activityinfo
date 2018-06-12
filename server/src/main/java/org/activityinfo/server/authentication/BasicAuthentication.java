@@ -77,7 +77,7 @@ public class BasicAuthentication {
     // This method checks the user information sent in the Authorization
     // header against the database of users maintained in the users Hashtable.
 
-    public User authenticate(String auth) throws IOException {
+    public User authenticate(String auth) {
         if (Strings.isNullOrEmpty(auth)) {
             // no auth
             return null;

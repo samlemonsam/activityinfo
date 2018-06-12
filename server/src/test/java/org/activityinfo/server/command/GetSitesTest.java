@@ -40,6 +40,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
@@ -303,6 +304,21 @@ public class GetSitesTest extends CommandTestCase2 {
         assertThat(result.getData().size(), equalTo(1));
         assertThat(result.getData().get(0).getId(), equalTo(9));
     }
+
+    @Test
+    public void filterByAttribute() throws CommandException {
+        setUser(1);
+
+        Filter filter = new Filter();
+        filter.addRestriction(DimensionType.Activity, 1);
+        filter.addRestriction(DimensionType.Attribute, 2);
+
+        SiteResult result = execute(new GetSites(filter));
+
+        assertThat(result.getData(), hasSize(1));
+        assertThat(result.getData().get(0).getAttributeValue(2), equalTo(true));
+    }
+
 
     @Test
     @Ignore
