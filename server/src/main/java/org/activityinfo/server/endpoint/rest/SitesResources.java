@@ -33,7 +33,6 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.util.monitoring.Timed;
 import org.codehaus.jackson.JsonGenerator;
 
 import javax.ws.rs.*;
@@ -55,7 +54,6 @@ public class SitesResources {
     }
 
     @GET 
-    @Timed(name = "api.rest.sites")
     @Produces(MediaType.APPLICATION_JSON)
     public String query(@QueryParam("activity") List<Integer> activityIds,
                         @QueryParam("database") List<Integer> databaseIds,
@@ -94,7 +92,6 @@ public class SitesResources {
 
     @GET 
     @Path("/points")
-    @Timed(name = "api.rest.sites.points")
     public Response queryPoints(@QueryParam("activity") List<Integer> activityIds,
                                 @QueryParam("database") List<Integer> databaseIds,
                                 @QueryParam("callback") String callback) throws IOException {
@@ -356,7 +353,6 @@ public class SitesResources {
     @GET
     @Path("{id}/monthlyReports")
     @Produces("application/json")
-    @Timed(name = "api.rest.sites.monthly_reports")
     public String queryMonthlyReports(@PathParam("id") int siteId) throws IOException {
 
         GetMonthlyReports command = new GetMonthlyReports(siteId, new Month(0,1), new Month(Integer.MAX_VALUE, 12));

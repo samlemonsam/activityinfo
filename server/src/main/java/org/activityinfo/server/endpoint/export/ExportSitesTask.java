@@ -29,7 +29,6 @@ import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
-import org.activityinfo.server.util.monitoring.Timed;
 
 import javax.inject.Provider;
 import javax.servlet.ServletException;
@@ -59,7 +58,6 @@ public class ExportSitesTask extends HttpServlet {
     }
 
     @Override
-    @Timed(name = "export", kind = "sites")
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String exportId = req.getParameter("exportId");

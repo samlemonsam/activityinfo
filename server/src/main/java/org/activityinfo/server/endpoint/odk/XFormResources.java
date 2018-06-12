@@ -27,6 +27,7 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.FormNotFoundException;
 
 import javax.inject.Provider;
@@ -90,6 +91,8 @@ public class XFormResources {
                      user.getEmail() + " (" + user.getId() + ")");
 
         FormClass formClass = fetchFormClass(id);
+
+        UsageTracker.track(user.getUserId(), "odk_download", formClass);
 
         String authenticationToken = authenticationTokenService
                 .createAuthenticationToken(user.getId(), formClass.getId());

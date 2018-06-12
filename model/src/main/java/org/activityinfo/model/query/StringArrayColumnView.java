@@ -21,7 +21,6 @@ package org.activityinfo.model.query;
 import org.activityinfo.model.util.HeapsortColumn;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -91,7 +90,24 @@ public class StringArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public String toString() {
-        return Arrays.toString(values);
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < Math.min(values.length, 5); i++) {
+            if(i > 0) {
+                sb.append(", ");
+            }
+            if(values[i] == null) {
+                sb.append("NULL");
+            } else {
+                sb.append("'");
+                sb.append(values[i]);
+                sb.append("'");
+            }
+        }
+        if(values.length > 5) {
+            sb.append("... length=").append(values.length);
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override

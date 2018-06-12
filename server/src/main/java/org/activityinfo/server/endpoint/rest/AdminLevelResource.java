@@ -31,7 +31,6 @@ import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.rest.model.NewAdminEntity;
 import org.activityinfo.server.endpoint.rest.model.NewAdminLevel;
-import org.activityinfo.server.util.monitoring.Timed;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -105,7 +104,6 @@ public class AdminLevelResource {
 
     @GET 
     @Path("/entities")
-    @Timed(name = "site.rest.admin.entities")
     @Produces(MediaType.APPLICATION_JSON)
     public List<AdminEntity> getEntities(@InjectParam EntityManager em) {
         return em.createQuery("select e  from AdminEntity e where e.deleted = false and e.level = :level")
@@ -115,7 +113,6 @@ public class AdminLevelResource {
 
 
     @GET 
-    @Timed(name = "site.rest.admin.features")
     @Path("/entities/features")
     public Response getFeatures(@InjectParam EntityManager em) throws IOException {
 
@@ -164,7 +161,6 @@ public class AdminLevelResource {
 
 
     @POST
-    @Timed(name = "site.rest.admin.child_levels")
     @Path("/childLevels") @Consumes(MediaType.APPLICATION_JSON)
     public Response postNewLevel(
             @InjectParam EntityManager em,

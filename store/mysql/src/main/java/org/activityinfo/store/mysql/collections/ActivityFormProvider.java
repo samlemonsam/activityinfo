@@ -65,7 +65,7 @@ public class ActivityFormProvider implements FormProvider {
             throw new FormNotFoundException(formId);
         }
         return new SiteFormStorage(activity, buildMapping(activity, formId), executor,
-                activityLoader.getPermissionCache());
+                activityLoader.getPermissionCache(), activityLoader);
     }
     
     
@@ -99,7 +99,7 @@ public class ActivityFormProvider implements FormProvider {
                     if (activity != null) {
                         collectionMap.put(collectionId,
                                 new SiteFormStorage(activity, buildMapping(activity, collectionId), executor,
-                                        activityLoader.getPermissionCache()));
+                                        activityLoader.getPermissionCache(), activityLoader));
                     }
                 }
             }

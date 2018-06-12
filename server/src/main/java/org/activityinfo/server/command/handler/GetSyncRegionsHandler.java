@@ -29,6 +29,7 @@ import org.activityinfo.server.command.handler.sync.TableDefinitionUpdateBuilder
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
@@ -48,6 +49,8 @@ public class GetSyncRegionsHandler implements CommandHandler<GetSyncRegions> {
 
     @Override
     public SyncRegions execute(GetSyncRegions cmd, User user) {
+
+        UsageTracker.track(user.getId(), "sync/classic");
 
         Set<Integer> countryIds = Sets.newHashSet();
         Set<Integer> visibleDatabaseIds = Sets.newHashSet();

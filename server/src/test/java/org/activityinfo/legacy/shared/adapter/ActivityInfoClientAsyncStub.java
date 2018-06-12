@@ -268,4 +268,14 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 
+    @Override
+    public Promise<Void> requestDatabaseTransfer(String s, int i) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
+    @Override
+    public Promise<Void> cancelDatabaseTransfer(int i) {
+        return Promise.rejected(new UnsupportedOperationException("TODO"));
+    }
+
 }

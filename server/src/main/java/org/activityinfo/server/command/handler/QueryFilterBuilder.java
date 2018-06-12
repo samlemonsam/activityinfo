@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.server.command;
+package org.activityinfo.server.command.handler;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.reports.model.DateRange;
@@ -43,20 +42,16 @@ import java.util.logging.Logger;
 import static java.util.Collections.*;
 import static org.activityinfo.model.formula.Formulas.*;
 
-public class QueryFilter {
+public class QueryFilterBuilder {
+
+    private static final Logger LOGGER = Logger.getLogger(QueryFilterBuilder.class.getName());
 
     private Filter filter;
-    private Multimap<String,String> attributeFilters;
-    private Logger LOGGER;
+    private AttributeFilterMap attributeFilters;
 
-    public QueryFilter(Filter filter, Multimap<String,String> attributeFilters) {
+    public QueryFilterBuilder(Filter filter, AttributeFilterMap attributeFilters) {
         this.filter = filter;
         this.attributeFilters = attributeFilters;
-    }
-
-    public QueryFilter(Filter filter, Multimap<String,String> attributeFilters, Logger LOGGER) {
-        this(filter,attributeFilters);
-        this.LOGGER = LOGGER;
     }
 
     public FormulaNode composeFilter(FormTree formTree) {
@@ -151,9 +146,9 @@ public class QueryFilter {
 
         List<FormulaNode> conditions = Lists.newArrayList();
 
-        for (String field : attributeFilters.keySet()) {
+        for (String field : attributeFilters.getFilteredFieldNames()) {
             List<FormulaNode> valueConditions = Lists.newArrayList();
-            for (String value : attributeFilters.get(field)) {
+            for (String value : attributeFilters.getFilteredValues(field)) {
                 valueConditions.add(new CompoundExpr(new SymbolNode(field), new SymbolNode(value)));
             }
             conditions.add(Formulas.anyTrue(valueConditions));

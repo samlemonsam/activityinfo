@@ -33,6 +33,7 @@ import com.google.common.base.Optional;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.HostController;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -198,7 +199,7 @@ public class HumanitarianId {
     }
 
     private Response createNewAccount(URI baseUri, HumanitarianIdAccount account) {
-        
+
         entityManager.get().getTransaction().begin();
         
         User user = new User();
@@ -214,6 +215,9 @@ public class HumanitarianId {
     }
 
     private Response redirectToApp(URI baseUri, User user) {
+
+        UsageTracker.track(user.getId(), "login/humanitarian_id");
+
         return Response.seeOther(UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build())
                 .cookie(authTokenProvider.createNewAuthCookies(user))
                 .build();

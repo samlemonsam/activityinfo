@@ -17,6 +17,7 @@
         <select name="job">
             <option value="projects">Migrate projects</option>
             <option value="snapshots">Reindex Snapshots</option>
+            <option value="usage">Export update events</option>
         </select>
 
         <input type="submit" value="Submit">
@@ -29,6 +30,15 @@
         ActivityId: <input type="text" name="activityId">
         <label for="fix-checkbox">
             <input type="checkbox" name="fix" id="fix-checkbox" value="true">Fix missing and inconsistent</label>
+        <input type="submit" value="submit">
+    </form>
+
+    <h2>Fix unsynced deleted sites in HRD</h2>
+    <form action="/migrate" method="post">
+        <input type="hidden" name="job" value="deleted-sites">
+        ActivityId: <input type="text" name="activityId">
+        <label>
+            <input type="checkbox" name="fix" value="true">Writes fixes</label>
         <input type="submit" value="submit">
     </form>
 

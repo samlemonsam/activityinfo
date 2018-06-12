@@ -55,6 +55,9 @@ public class Database implements java.io.Serializable, Deleteable {
     private Set<Target> targets = new HashSet<>(0);
     private Date dateDeleted;
     private long version;
+    private String transferToken;
+    private User transferUser;
+    private Date transferRequestDate;
 
     public Database() {
     }
@@ -286,5 +289,46 @@ public class Database implements java.io.Serializable, Deleteable {
 
     public void updateVersion() {
         setVersion(System.currentTimeMillis());
+    }
+
+    public boolean hasPendingTransfer() {
+        return getTransferToken() != null;
+    }
+
+    /**
+     * @return The pending transfer token on this database (if any)
+     */
+    @Column(name = "TransferToken", unique = true, length = 34)
+    @Offline(sync = false)
+    public String getTransferToken() {
+        return transferToken;
+    }
+
+    public void setTransferToken(String transferToken) {
+        this.transferToken = transferToken;
+    }
+
+    /**
+     * @return The user who owns this database
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "TransferUser")
+    @Offline(sync = false)
+    public User getTransferUser() {
+        return this.transferUser;
+    }
+
+    public void setTransferUser(User transferUser) {
+        this.transferUser = transferUser;
+    }
+
+    @Column(name = "TransferTokenIssueDate")
+    @Offline(sync = false)
+    public Date getTransferRequestDate() {
+        return transferRequestDate;
+    }
+
+    public void setTransferRequestDate(Date transferRequestDate) {
+        this.transferRequestDate = transferRequestDate;
     }
 }

@@ -336,7 +336,9 @@ public class DbEditor implements DbPage, IsWidget {
     }
     
     private void exportFormAsXlsForm() {
-        Window.open("/resources/form/" + getSelectedFormId() + "/form.xls", BLANK_WINDOW_TARGET, null);
+        getSelectedFormId().ifPresent(formId -> {
+            Window.open("/resources/form/" + formId.asString() + "/form.xls", BLANK_WINDOW_TARGET, null);
+        });
     }
 
     private void exportAuditLog() {

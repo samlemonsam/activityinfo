@@ -1867,4 +1867,21 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Clear Sort")
     String clearSort();
 
+    @DefaultStringValue("Transfer Database")
+    String transferDatabase();
+
+    @DefaultStringValue("New Owner")
+    String newDatabaseOwner();
+
+    @DefaultStringValue("Database Transfer Failed")
+    String transferFailed();
+
+    @DefaultStringValue("Cannot Find User")
+    String noUser();
+
+    @DefaultStringValue("There is a currently pending transfer for this Database. Do you wish to cancel?")
+    String pendingTransfer();
+
+    @DefaultStringValue("Cancel Transfer")
+    String cancelTransfer();
 }
