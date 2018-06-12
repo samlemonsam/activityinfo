@@ -18,6 +18,7 @@
  */
 package org.activityinfo.store.mysql.metadata;
 
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -292,7 +293,11 @@ public class Activity implements Serializable {
     }
 
     public boolean isMigratedToHrd() {
-        return !classicView;
+        return !classicView && isAppEngineProduction();
+    }
+
+    public static boolean isAppEngineProduction() {
+        return SystemProperty.environment.value() == SystemProperty.Environment.Value.Production;
     }
     
     public LinkedActivity getSelfLink() {
