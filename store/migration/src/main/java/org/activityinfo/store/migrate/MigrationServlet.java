@@ -117,7 +117,7 @@ public class MigrationServlet extends HttpServlet {
         SnapshotExporter mapper = new SnapshotExporter();
         GoogleCloudStorageFileOutput output = new GoogleCloudStorageFileOutput(
                 "activityinfoeu-bq-import",
-                "snapshots-%d.csv", "text/csv");
+                "update-snapshots-%d.csv", "text/csv");
 
         MapSpecification<Entity, ByteBuffer, GoogleCloudStorageFileSet> spec = new MapSpecification.Builder<>(input, mapper, output)
                 .setJobName("Export snapshot events")
