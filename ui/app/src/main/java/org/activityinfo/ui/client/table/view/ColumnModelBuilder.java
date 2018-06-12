@@ -181,7 +181,6 @@ public class ColumnModelBuilder {
 
         ColumnConfig<Integer, String> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
-        config.setSortable(false);
         columnConfigs.add(config);
 
         addEnumFilter(valueProvider.getPath(), tableColumn, (EnumType) tableColumn.getType());

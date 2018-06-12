@@ -20,11 +20,9 @@ package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.util.HeapsortColumn;
-import org.activityinfo.store.query.server.columns.DiscreteStringColumnView8;
-import org.activityinfo.store.query.server.columns.IntColumnView16;
-import org.activityinfo.store.query.server.columns.IntColumnView8;
-import org.activityinfo.store.query.server.columns.SparseNumberColumnView;
+import org.activityinfo.store.query.server.columns.*;
 import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
+import org.activityinfo.store.query.shared.columns.MultiDiscreteStringColumnView;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -142,6 +140,41 @@ public class HeapsortColumnTest {
 
         columnView.order(indexes, SortModel.Dir.DESC, null);
         assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
+    }
+
+    @Test
+    public void multiEnumSorting() {
+        String labels[] = {"a", "b", ""};
+        BitSet aSelections = new BitSet();
+        BitSet bSelections = new BitSet();
+        BitSet emptySelections = new BitSet();
+
+        // 0: null
+        // 1: a, b, ""
+        aSelections.set(1, true);
+        bSelections.set(1, true);
+        emptySelections.set(1, true);
+        // 2: a, b
+        aSelections.set(2, true);
+        bSelections.set(2, true);
+        // 3: a
+        aSelections.set(3, true);
+        // 4: "" == null
+        emptySelections.set(4,true);
+
+        int indexes[] = {0, 1, 2, 3, 4};
+
+        MultiDiscreteStringColumnView columnView = new MultiDiscreteStringColumnView(indexes.length, labels, new BitSet[] {aSelections, bSelections, emptySelections});
+        String[] concatenatedSelections = new String[indexes.length];
+        for (int i = 0; i < concatenatedSelections.length; i++) {
+            concatenatedSelections[i] = columnView.getString(i);
+        }
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(concatenatedSelections, indexes), isArrayEqualTo(null, null, "a", "a,b", "a,b,"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(concatenatedSelections, indexes), isArrayEqualTo("a,b,", "a,b", "a", null, null));
     }
 
     @Test
