@@ -37,9 +37,10 @@ import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.op.QueryVersions;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.cursor.RecordFetcher;
+import org.activityinfo.store.mysql.cursor.SiteFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
+import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.*;
@@ -65,14 +66,16 @@ public class SiteFormStorage implements VersionedFormStorage {
     private final TableMapping baseMapping;
     private final QueryExecutor queryExecutor;
     private final PermissionsCache permissionsCache;
+    private final ActivityLoader activityLoader;
 
     public SiteFormStorage(Activity activity, TableMapping baseMapping,
                            QueryExecutor queryExecutor,
-                           PermissionsCache permissionsCache) {
+                           PermissionsCache permissionsCache, ActivityLoader activityLoader) {
         this.activity = activity;
         this.baseMapping = baseMapping;
         this.queryExecutor = queryExecutor;
         this.permissionsCache = permissionsCache;
+        this.activityLoader = activityLoader;
     }
 
     @Override
@@ -121,13 +124,23 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     @Override
-    public Optional<FormRecord> get(ResourceId resourceId) {
+    public Optional<FormRecord> get(ResourceId recordId) {
         if(activity.isMigratedToHrd()) {
             LOGGER.info("Delegating record fetch to HRD...");
-            return delegateToHrd().get(resourceId);
+            return delegateToHrd().get(recordId);
         } else {
-            RecordFetcher fetcher = new RecordFetcher(this);
-            return fetcher.get(resourceId);
+            SiteFetcher fetcher = new SiteFetcher(activityLoader, queryExecutor);
+            Optional<FormRecord> record = fetcher.fetch(CuidAdapter.getLegacyIdFromCuid(recordId))
+                    .transform(FormRecord::fromInstance);
+
+            // Check to make sure that this site actually belongs to this form....
+            if (record.isPresent()) {
+                if(record.get().getFormId().equals(this.getFormClass().getId().asString())) {
+                    return Optional.absent();
+                }
+            }
+
+            return record;
         }
     }
 

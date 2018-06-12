@@ -1,6 +1,7 @@
 package org.activityinfo.store.migrate;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.tools.mapreduce.DatastoreMutationPool;
 import com.google.appengine.tools.mapreduce.MapOnlyMapper;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -22,6 +23,7 @@ public class DeletedSiteFixer extends MapOnlyMapper<Entity, Void> {
     private boolean fix;
 
     private transient QueryExecutor queryExecutor;
+    private transient DatastoreMutationPool mutationPool;
 
     public DeletedSiteFixer(boolean fix) {
         this.fix = fix;
@@ -39,6 +41,14 @@ public class DeletedSiteFixer extends MapOnlyMapper<Entity, Void> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        mutationPool = DatastoreMutationPool.create();
+    }
+
+    @Override
+    public void endSlice() {
+        super.endSlice();
+        mutationPool.flush();
     }
 
     @Override
@@ -68,6 +78,11 @@ public class DeletedSiteFixer extends MapOnlyMapper<Entity, Void> {
             if(!site.next()) {
                 LOGGER.warning("Site missing for " + recordEntity.getKey());
                 getContext().getCounter("missing").increment(1);
+
+                if(fix) {
+                    delete(recordEntity);
+                }
+
                 return;
             }
 
@@ -79,11 +94,20 @@ public class DeletedSiteFixer extends MapOnlyMapper<Entity, Void> {
             if(dateDeleted != null) {
                 LOGGER.warning("Site deleted " + recordEntity.getKey());
                 getContext().getCounter("deleted").increment(1);
+
+                if(fix) {
+                    delete(recordEntity);
+                }
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void delete(Entity recordEntity) {
+        LOGGER.warning("Deleting record " + recordEntity.getKey());
+        mutationPool.delete(recordEntity.getKey());
     }
 
     private boolean isSiteRecord(String formId, String recordId) {
