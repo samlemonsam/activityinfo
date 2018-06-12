@@ -137,4 +137,18 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
             currentSorting = sorting;
         }
     }
+
+    @Override
+    protected void initHeader() {
+        if (header == null) {
+            header = new CustomColumnHeader<Integer>(grid, cm);
+        }
+        header.setMenuFactory(new ColumnHeader.HeaderContextMenuFactory() {
+            @Override
+            public Menu getMenuForColumn(int columnIndex) {
+                return createContextMenu(columnIndex);
+            }
+        });
+        header.setSplitterWidth(splitterWidth);
+    }
 }
