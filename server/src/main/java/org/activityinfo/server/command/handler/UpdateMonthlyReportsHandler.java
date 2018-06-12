@@ -26,11 +26,13 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.exception.LockAcquisitionException;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.event.sitehistory.ChangeType;
 import org.activityinfo.server.event.sitehistory.SiteHistoryProcessor;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import java.util.Calendar;
@@ -87,6 +89,10 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
             if (!permissionOracle.isEditAllowed(site, user)) {
                 throw new IllegalAccessCommandException("Not authorized to modify sites");
             }
+
+            UsageTracker.track(user.getId(), "update_monthly",
+                    CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
+                    CuidAdapter.reportingPeriodFormClass(site.getActivity().getId()));
 
             Map<Month, ReportingPeriod> periods = Maps.newHashMap();
             Map<String, Object> siteHistoryChangeMap = createChangeMap();

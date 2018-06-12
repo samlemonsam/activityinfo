@@ -43,6 +43,7 @@ import org.activityinfo.server.blob.GcsBlobFieldStorageService;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstance;
 import org.activityinfo.server.endpoint.odk.xform.XFormInstanceImpl;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.BlobId;
 import org.w3c.dom.Element;
 
@@ -105,6 +106,8 @@ public class XFormSubmissionResource {
         String instanceId = instance.getId();
 
         LOGGER.log(Level.INFO, "Saving XForm " + instance.getId() + " as " + formId);
+
+        UsageTracker.track(user.getUserId(), "odk_submit", formClass);
 
         for (FormField formField : formClass.getFields()) {
             if(formField.getType().isUpdatable()) {
