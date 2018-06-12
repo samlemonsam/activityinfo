@@ -227,7 +227,7 @@ public class DbListPresenter implements ActionListener {
         DatabaseTransferForm form = new DatabaseTransferForm(selection, dispatcher);
         final FormDialogImpl dialog = new FormDialogImpl(form);
         dialog.setWidth(400);
-        dialog.setHeight(170);
+        dialog.setHeight(220);
         dialog.setHeadingText(I18N.CONSTANTS.transferDatabase());
 
         dialog.show(new FormDialogCallback() {

@@ -22,12 +22,14 @@ import com.extjs.gxt.ui.client.Style;
 
 import com.extjs.gxt.ui.client.data.*;
 import com.extjs.gxt.ui.client.store.ListStore;
-import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
+import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.form.*;
 import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.google.gwt.core.client.GWT;
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 
 import org.activityinfo.legacy.shared.command.GetUsers;
@@ -47,6 +49,9 @@ public class DatabaseTransferForm extends FormPanel {
     private UserDatabaseDTO database;
     private ComboBox<UserPermissionDTO> userField;
 
+    private Text addUserWarning;
+    private Text userInfo;
+
     public DatabaseTransferForm(UserDatabaseDTO database, Dispatcher dispatcher) {
         this.database = database;
         this.dispatcher = dispatcher;
@@ -65,6 +70,13 @@ public class DatabaseTransferForm extends FormPanel {
         store.setKeyProvider(userPermissionDTO -> userPermissionDTO.getEmail());
         store.sort("name", Style.SortDir.ASC);
 
+        userInfo = new Text(I18N.CONSTANTS.transferDatabaseUserInfo());
+        this.add(userInfo);
+
+        Html spacer = new Html();
+        spacer.setHtml(SafeHtmlUtils.fromSafeConstant("<br>"));
+        this.add(spacer);
+
         userField = new ComboBox<>();
         userField.setName("user");
         userField.setFieldLabel(constants.newDatabaseOwner());
@@ -75,6 +87,13 @@ public class DatabaseTransferForm extends FormPanel {
         userField.setAllowBlank(false);
         userField.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
         this.add(userField);
+
+        addUserWarning = new Text(I18N.CONSTANTS.addUserBeforeTransferWarning());
+        addUserWarning.setVisible(false);
+        addUserWarning.setStyleAttribute("color", "red");
+        this.add(addUserWarning);
+
+        doLayout();
     }
 
     public UserPermissionDTO getUser() {
@@ -92,11 +111,19 @@ public class DatabaseTransferForm extends FormPanel {
             dispatcher.execute(command, new AsyncCallback<UserResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
+                    userField.disable();
                     callback.onFailure(caught);
                 }
 
                 @Override
                 public void onSuccess(UserResult result) {
+                    if (result.getData().isEmpty()) {
+                        userField.disable();
+                        addUserWarning.setVisible(true);
+                    } else {
+                        userField.enable();
+                        addUserWarning.setVisible(false);
+                    }
                     callback.onSuccess(result);
                 }
             });

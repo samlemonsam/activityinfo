@@ -1881,4 +1881,10 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Cancel Transfer")
     String cancelTransfer();
+
+    @DefaultStringValue("You must add a User to your Database before you can transfer ownership.")
+    String addUserBeforeTransferWarning();
+
+    @DefaultStringValue("Please select a User to transfer ownership to. The selected User must accept responsibility for the Database before ownership will be transferred.")
+    String transferDatabaseUserInfo();
 }
