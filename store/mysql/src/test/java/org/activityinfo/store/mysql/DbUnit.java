@@ -93,7 +93,7 @@ public class DbUnit {
             public ResultSet query(String sql, List<?> parameters) {
                 try {
                     PreparedStatement statement = prepare(sql, parameters);
-                    return statement.executeQuery(sql);
+                    return statement.executeQuery();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
