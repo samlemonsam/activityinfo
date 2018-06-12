@@ -89,7 +89,8 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
         Query<FormRecordEntity> query = Hrd.ofy()
                 .load()
                 .type(FormRecordEntity.class)
-                .ancestor(FormEntity.key(formClass));
+                .ancestor(FormEntity.key(formClass))
+                .chunk(1000);
 
         for (FormRecordEntity entity : query.iterable()) {
 
