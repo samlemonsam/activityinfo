@@ -68,7 +68,6 @@ public class DatabaseTransferForm extends FormPanel {
 
         store = new ListStore<>(loader);
         store.setKeyProvider(userPermissionDTO -> userPermissionDTO.getEmail());
-        store.sort("name", Style.SortDir.ASC);
 
         userInfo = new Text(I18N.CONSTANTS.transferDatabaseUserInfo());
         this.add(userInfo);
@@ -105,9 +104,9 @@ public class DatabaseTransferForm extends FormPanel {
         @Override
         protected void load(Object loadConfig, final AsyncCallback<UserResult> callback) {
 
-            PagingLoadConfig config = (PagingLoadConfig) loadConfig;
             GetUsers command = new GetUsers(database.getId());
-            command.setSortInfo(config.getSortInfo());
+            command.setSortInfo(new SortInfo("name", Style.SortDir.ASC));
+
             dispatcher.execute(command, new AsyncCallback<UserResult>() {
                 @Override
                 public void onFailure(Throwable caught) {
