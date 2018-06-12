@@ -135,7 +135,7 @@ public class SiteFormStorage implements VersionedFormStorage {
 
             // Check to make sure that this site actually belongs to this form....
             if (record.isPresent()) {
-                if(record.get().getFormId().equals(this.getFormClass().getId().asString())) {
+                if(!record.get().getFormId().equals(this.getFormClass().getId().asString())) {
                     return Optional.absent();
                 }
             }
