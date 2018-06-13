@@ -18,8 +18,8 @@
  */
 package org.activityinfo.store.hrd;
 
+import com.google.appengine.api.datastore.*;
 import com.google.common.collect.Lists;
-import com.googlecode.objectify.cmd.Query;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -27,16 +27,20 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.hrd.entity.FormEntity;
-import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.CursorObserver;
 import org.activityinfo.store.spi.SubFormPatch;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 class HrdQueryColumnBuilder implements ColumnQueryBuilder {
+
+    private static final int BYTES_PER_MEGABYTE = 1024 * 1024;
+    private static final Logger LOGGER = Logger.getLogger(HrdQueryColumnBuilder.class.getName());
 
     private FormClass formClass;
     private List<CursorObserver<ResourceId>> idObservers = Lists.newArrayList();
@@ -86,32 +90,55 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
     @Override
     public void execute() {
 
-        Query<FormRecordEntity> query = Hrd.ofy()
-                .load()
-                .type(FormRecordEntity.class)
-                .ancestor(FormEntity.key(formClass))
-                .chunk(1000);
+        // This method is performance and memory critical.
+        // For large forms, (~40k records), it is easy to hit an OutOfMemory exception or
+        // exceed the request time limit.
 
-        for (FormRecordEntity entity : query.iterable()) {
+        // For this reason, we use the raw datastore API rather than the Objectify API which
+        // adds a layer of abstraction and additional memory allocation.
+
+        LOGGER.info("Starting query: " + megabytesFree() + "mb");
+
+        DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+        PreparedQuery preparedQuery = datastoreService.prepare(
+                new com.google.appengine.api.datastore.Query("FormRecord")
+                    .setAncestor(FormEntity.key(formClass).getRaw()));
+
+        FetchOptions fetchOptions = FetchOptions.Builder.withChunkSize(500).prefetchSize(500);
+        Iterator<Entity> it = preparedQuery.asIterator(fetchOptions);
+
+        while(it.hasNext()) {
+            Entity entity = it.next();
+            ResourceId recordId = ResourceId.valueOf(entity.getKey().getName());
 
             for (CursorObserver<ResourceId> idObserver : idObservers) {
-                idObserver.onNext(entity.getRecordId());
+                idObserver.onNext(recordId);
             }
+
+            EmbeddedEntity fieldValues = (EmbeddedEntity) entity.getProperty("fieldValues");
             for (FieldObserver fieldObserver : fieldObservers) {
-                fieldObserver.onNext(entity.getFieldValues());
+                fieldObserver.onNext(fieldValues);
             }
+
             if(parentFieldObservers != null) {
-                ResourceId parentRecordId = ResourceId.valueOf(entity.getParentRecordId());
-                RecordRef parentRef = new RecordRef(formClass.getParentFormId().get(), parentRecordId);
+                String parentRecordId = (String)entity.getProperty("parentRecordId");
+                RecordRef parentRef = new RecordRef(formClass.getParentFormId().get(), ResourceId.valueOf(parentRecordId));
                 ReferenceValue parent = new ReferenceValue(parentRef);
                 for (CursorObserver<FieldValue> parentFieldObserver : parentFieldObservers) {
                     parentFieldObserver.onNext(parent);
                 }
             }
         }
-        
+
         for (CursorObserver<?> observer : observers) {
             observer.done();
         }
+
+        LOGGER.info("Finished query: " + megabytesFree() + "mb");
+    }
+
+    private long megabytesFree() {
+        Runtime runtime = Runtime.getRuntime();
+        return (runtime.totalMemory() - runtime.freeMemory()) / BYTES_PER_MEGABYTE;
     }
 }
