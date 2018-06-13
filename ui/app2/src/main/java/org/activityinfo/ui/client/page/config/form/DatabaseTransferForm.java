@@ -21,7 +21,9 @@ package org.activityinfo.ui.client.page.config.form;
 import com.extjs.gxt.ui.client.Style;
 
 import com.extjs.gxt.ui.client.data.*;
+import com.extjs.gxt.ui.client.event.ComponentEvent;
 import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.form.*;
@@ -97,6 +99,25 @@ public class DatabaseTransferForm extends FormPanel {
     }
 
     public class UserComboBox extends ComboBox<UserPermissionDTO> {
+
+        @Override
+        protected void onTriggerClick(ComponentEvent ce) {
+            super.onTriggerClick(ce);
+            restrict();
+        }
+
+        @Override
+        protected void onKeyUp(FieldEvent fe) {
+            store.clearFilters();
+            if (!getRawValue().isEmpty()) {
+                store.filter("name", getRawValue());
+            }
+            if (!isExpanded()) {
+                expand();
+            } else {
+                restrict();
+            }
+        }
     }
 
     public class UserNameEmailRenderer implements SafeHtmlRenderer<UserPermissionDTO> {
