@@ -101,16 +101,32 @@ public class SiteFetcher {
 
 
     private void queryIndicatorValues(Activity activity, Integer siteId, Map<ResourceId, FieldValue> fieldValues) {
-        try(ResultSet rs = queryExecutor.query("select v.indicatorid, v.value, v.textValue, i.type from indicatorvalue v " +
-                "left join indicator i on (v.indicatorId = i.indicatorId) " +
-                "left join reportingperiod rp on (rp.reportingPeriodId = v.reportingPeriodId) " +
-                "where rp.siteId = ? and i.calculatedAutomatically != 1 and i.expression is null", siteId)) {
+        try(ResultSet rs = queryExecutor.query(
+                "SELECT " +
+                    "v.indicatorid, " +     // (1)
+                    "v.value, " +           // (2)
+                    "v.textValue, " +       // (3)
+                    "i.type, " +            // (4)
+                    "(i.calculatedAutomatically AND i.expression IS NOT NULL) calculated " + // (5)
+                "FROM indicatorvalue v " +
+                "LEFT JOIN indicator i ON (v.indicatorId = i.indicatorId) " +
+                "LEFT JOIN reportingperiod rp ON (rp.reportingPeriodId = v.reportingPeriodId) " +
+                "WHERE rp.siteId = ?", siteId)) {
 
             while(rs.next()) {
 
-                int indicatorId = rs.getInt("indicatorId");
+                int indicatorId = rs.getInt(1);
                 ResourceId fieldId = CuidAdapter.indicatorField(indicatorId);
-                String typeId = rs.getString("type");
+
+                // The classic interface allowed users to switch back and forth
+                // between calculated indicator and non-calculated, which leaves stray
+                // values in the database for calculated indicators. Skip these values.
+                boolean calculated = rs.getBoolean(5);
+                if(calculated || rs.wasNull()) {
+                    continue;
+                }
+
+                String typeId = rs.getString(4);
                 FieldTypeClass typeClass;
                 if(rs.wasNull()) {
                     typeClass = findTypeFromSchema(activity, fieldId);
@@ -121,12 +137,12 @@ public class SiteFetcher {
                 if(typeClass != null) {
                     FieldValue fieldValue;
                     if (typeClass == QuantityType.TYPE_CLASS) {
-                        fieldValue = new Quantity(rs.getDouble("value"));
+                        fieldValue = new Quantity(rs.getDouble(2));
                         if (rs.wasNull()) {
                             fieldValue = null;
                         }
                     } else {
-                        String textValue = rs.getString("TextValue");
+                        String textValue = rs.getString(3);
                         if (rs.wasNull()) {
                             fieldValue = null;
                         } else if (typeClass == TextType.TYPE_CLASS) {
