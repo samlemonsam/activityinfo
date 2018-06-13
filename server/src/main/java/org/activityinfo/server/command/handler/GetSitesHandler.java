@@ -419,7 +419,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private List<SiteDTO> extractMonthlySites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
         if (acceptResult(columnSet.getNumRows())) {
             totalResultLength = totalResultLength + columnSet.getNumRows();
-            SiteDTO[] extractedSiteArray = extractSiteData(fieldBindings, columnSet);
+            SiteDTO[] extractedSiteArray = extractSiteData(fieldBindings, columnSet, false);
             List<SiteDTO> extractedSiteList = Lists.newArrayList(extractedSiteArray);
             siteList.addAll(extractedSiteList);
             return extractedSiteList;
@@ -428,19 +428,21 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private List<SiteDTO> extractSites(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
-        if (acceptResult(columnSet.getNumRows())) {
-            SiteDTO[] sites;
-            if (command.isFetchAllReportingPeriods()) {
-                sites = extractSiteData(fieldBindings, columnSet);
-                addMonthlyRootSites(sites);
-                return Collections.emptyList();
-            } else {
-                totalResultLength = totalResultLength + columnSet.getNumRows();
-                sites = extractSiteData(fieldBindings, columnSet);
-                return Lists.newArrayList(sites);
-            }
+        SiteDTO[] sites;
+        if (command.isFetchAllReportingPeriods()) {
+            // If we are fetching all reporting periods, then these sites are roots for our monthly sites and do not
+            // contribute to the total site count
+            sites = extractSiteData(fieldBindings, columnSet, true);
+            addMonthlyRootSites(sites);
+            return Collections.emptyList();
+        } else if (acceptResult(columnSet.getNumRows())) {
+            // Otherwise these are normal sites and should count towards the total site count
+            totalResultLength = totalResultLength + columnSet.getNumRows();
+            sites = extractSiteData(fieldBindings, columnSet, false);
+            return Lists.newArrayList(sites);
+        } else {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
     }
 
     private boolean acceptResult(int numResults) {
@@ -454,11 +456,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         return true;
     }
 
-    private SiteDTO[] extractSiteData(List<FieldBinding> fieldBindings, ColumnSet columnSet) {
+    private SiteDTO[] extractSiteData(List<FieldBinding> fieldBindings, ColumnSet columnSet, boolean skipPagination) {
         ColumnSet finalColumnSet;
         SiteDTO[] sites;
 
-        if (offset > 0 || limit > 0) {
+        if (!skipPagination && (offset > 0 || limit > 0)) {
             Map<String,ColumnView> paginatedColumns = Maps.newHashMap();
             int[] index = generatePaginationIndex(columnSet.getNumRows());
             sites = initialiseSiteArray(index.length);
