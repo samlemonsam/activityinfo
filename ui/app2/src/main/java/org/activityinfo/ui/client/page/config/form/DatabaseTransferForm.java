@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.page.config.form;
 import com.extjs.gxt.ui.client.Style;
 
 import com.extjs.gxt.ui.client.data.*;
+import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.form.*;
@@ -50,7 +51,7 @@ public class DatabaseTransferForm extends FormPanel {
 
     private final Dispatcher dispatcher;
     private UserDatabaseDTO database;
-    private ComboBox<UserPermissionDTO> userField;
+    private UserComboBox userField;
 
     private Text addUserWarning;
     private Text userInfo;
@@ -79,21 +80,23 @@ public class DatabaseTransferForm extends FormPanel {
         spacer.setHtml(SafeHtmlUtils.fromSafeConstant("<br>"));
         this.add(spacer);
 
-        userField = new ComboBox<>();
+        userField = new UserComboBox();
         userField.setName("user");
         userField.setFieldLabel(constants.newDatabaseOwner());
         userField.setAllowBlank(false);
         userField.setStore(store);
         userField.setForceSelection(true);
         userField.setItemRenderer(new MultilineRenderer<>(new UserNameEmailRenderer()));
+        userField.addListener(Events.BeforeRender, rendering -> userField.doQuery(userField.getAllQuery(), true));
         this.add(userField);
 
         addUserWarning = new Text(I18N.CONSTANTS.addUserBeforeTransferWarning());
         addUserWarning.setVisible(false);
         addUserWarning.setStyleAttribute("color", "red");
         this.add(addUserWarning);
+    }
 
-        doLayout();
+    public class UserComboBox extends ComboBox<UserPermissionDTO> {
     }
 
     public class UserNameEmailRenderer implements SafeHtmlRenderer<UserPermissionDTO> {
