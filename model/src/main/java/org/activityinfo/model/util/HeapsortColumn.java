@@ -54,7 +54,8 @@ public final class HeapsortColumn {
     }
 
     /**
-     * Given two numbers encoded using
+     * Given two numbers encoded as unsigned bytes from 0x01-0xFF, with missing values encoded as zeroes
+     *
      * @param bx
      * @param by
      * @param ascending
@@ -65,32 +66,49 @@ public final class HeapsortColumn {
         // Treat as unsigned
         int x = UnsignedBytes.toInt(bx);
         int y = UnsignedBytes.toInt(by);
+
+        // Missing values encoded as zeroes
+        boolean xMissing = (x == 0);
+        boolean yMissing = (y == 0);
+
         if(ascending) {
-            if(x == 0 && y != 0) {
+            if(xMissing && !yMissing) {
                 return true;
             }
-            return UnsignedBytes.toInt(bx) < UnsignedBytes.toInt(by);
+            return x < y;
 
         } else {
-            if(y == 0 && x != 0) {
+            if(yMissing && !xMissing) {
                 return true;
             }
             return y < x;
         }
     }
 
+    /**
+     * Given two numbers encoded as unsigned shorts from 0x0001-0xFFFF, with missing values encoded as zeroes
+     *
+     * @param sx
+     * @param sy
+     * @param ascending
+     * @return
+     */
     private static boolean isLessThan(short sx, short sy, boolean ascending) {
         // Treat as unsigned - promote to int with a 16-bit mask
         int x = sx & 0xFFFF;
         int y = sy & 0xFFFF;
+
+        // Missing values encoded as zeroes
+        boolean xMissing = (x == 0);
+        boolean yMissing = (y == 0);
+
         if(ascending) {
-            if(x == 0 && y != 0) {
+            if(xMissing && !yMissing) {
                 return true;
             }
             return x < y;
-
         } else {
-            if(y == 0 && x != 0) {
+            if(yMissing && !xMissing) {
                 return true;
             }
             return y < x;
