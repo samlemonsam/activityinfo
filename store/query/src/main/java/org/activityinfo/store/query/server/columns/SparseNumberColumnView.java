@@ -65,21 +65,10 @@ public class SparseNumberColumnView extends AbstractNumberColumn {
 
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
-        switch(direction) {
-            case ASC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortSparseDouble(map, sortVector, numRows, true);
-                } else {
-                    HeapsortColumn.heapsortSparseDouble(map, sortVector, range.length, range, true);
-                }
-                break;
-            case DESC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortSparseDouble(map, sortVector, numRows, false);
-                } else {
-                    HeapsortColumn.heapsortSparseDouble(map, sortVector, range.length, range, false);
-                }
-                break;
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortSparseDouble(map, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortSparseDouble(map, sortVector, range.length, range, direction == SortModel.Dir.ASC);
         }
         return sortVector;
     }

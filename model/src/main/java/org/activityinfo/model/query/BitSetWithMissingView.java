@@ -119,21 +119,10 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
 
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
-        switch(direction) {
-            case ASC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, numRows, true);
-                } else {
-                    HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, range.length, range, true);
-                }
-                break;
-            case DESC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, numRows, false);
-                } else {
-                    HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, range.length, range, false);
-                }
-                break;
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, range.length, range, direction == SortModel.Dir.ASC);
         }
         return sortVector;
     }

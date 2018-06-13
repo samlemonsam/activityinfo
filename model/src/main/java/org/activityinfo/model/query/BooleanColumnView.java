@@ -97,21 +97,10 @@ public class BooleanColumnView implements ColumnView {
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
         int numRows = values.length;
-        switch(direction) {
-            case ASC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortBooleanInt(values, sortVector, numRows, true);
-                } else {
-                    HeapsortColumn.heapsortBooleanInt(values, sortVector, range.length, range, true);
-                }
-                break;
-            case DESC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortBooleanInt(values, sortVector, numRows, false);
-                } else {
-                    HeapsortColumn.heapsortBooleanInt(values, sortVector, range.length, range, false);
-                }
-                break;
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortBooleanInt(values, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortBooleanInt(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
         }
         return sortVector;
     }
