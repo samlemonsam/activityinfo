@@ -73,7 +73,7 @@ public class DatabaseTransferForm extends FormPanel {
         loader.setRemoteSort(true);
 
         store = new ListStore<>(loader);
-        store.setKeyProvider(userPermissionDTO -> userPermissionDTO.getEmail());
+        store.setKeyProvider(userPermissionDTO -> userPermissionDTO.getName());
 
         userInfo = new Text(I18N.CONSTANTS.transferDatabaseUserInfo());
         this.add(userInfo);
@@ -85,6 +85,7 @@ public class DatabaseTransferForm extends FormPanel {
         userField = new UserComboBox();
         userField.setName("user");
         userField.setFieldLabel(constants.newDatabaseOwner());
+        userField.setDisplayField("name");
         userField.setAllowBlank(false);
         userField.setStore(store);
         userField.setForceSelection(true);
