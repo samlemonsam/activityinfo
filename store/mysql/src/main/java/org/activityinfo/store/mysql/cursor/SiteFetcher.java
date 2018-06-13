@@ -104,7 +104,7 @@ public class SiteFetcher {
         try(ResultSet rs = queryExecutor.query("select v.indicatorid, v.value, v.textValue, i.type from indicatorvalue v " +
                 "left join indicator i on (v.indicatorId = i.indicatorId) " +
                 "left join reportingperiod rp on (rp.reportingPeriodId = v.reportingPeriodId) " +
-                "where rp.siteId = ?", siteId)) {
+                "where rp.siteId = ? and i.calculatedAutomatically != 1 and i.expression is null", siteId)) {
 
             while(rs.next()) {
 
