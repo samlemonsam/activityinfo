@@ -143,7 +143,9 @@ ext {
         immutables: [
             apt:            "org.immutables:value:2.4.4",
             annotations:    "org.immutables:value:2.4.4:annotations"
-        ]
+        ],
+
+        fastutil:           "it.unimi.dsi:fastutil:8.2.1"
     ]
 }
 

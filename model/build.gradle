@@ -14,11 +14,7 @@ dependencies {
     compile libraries.jackson.core
 
     compile libraries.swagger.annotations
-
-    // Primitive Collection Library for speed and lower-memory
-    // footprint
-    // UPGRADE to latest version when we can use Java 8
-    compile 'it.unimi.dsi:fastutil:7.2.1'
+    compile libraries.fastutil
 }
 
 jar {
