@@ -122,7 +122,7 @@ public class SiteFetcher {
                 // between calculated indicator and non-calculated, which leaves stray
                 // values in the database for calculated indicators. Skip these values.
                 boolean calculated = rs.getBoolean(5);
-                if(calculated || rs.wasNull()) {
+                if(calculated && !rs.wasNull()) {
                     continue;
                 }
 
