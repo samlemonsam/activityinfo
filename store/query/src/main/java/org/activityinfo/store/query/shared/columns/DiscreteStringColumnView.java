@@ -117,21 +117,10 @@ public class DiscreteStringColumnView implements EnumColumnView, ColumnView, Ser
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
         int numRows = values.length;
-        switch(direction) {
-            case ASC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, numRows);
-                } else {
-                    HeapsortColumn.heapsortEnumAscending(values, labels, sortVector, range.length, range);
-                }
-                break;
-            case DESC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, numRows);
-                } else {
-                    HeapsortColumn.heapsortEnumDescending(values, labels, sortVector, range.length, range);
-                }
-                break;
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortEnum(values, labels, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortEnum(values, labels, sortVector, range.length, range, direction == SortModel.Dir.ASC);
         }
         return sortVector;
     }

@@ -109,6 +109,9 @@ public class EffectiveTableModel {
         return getModel().getFilter();
     }
 
+    public List<SortModel> getSorting() {
+        return getModel().getSorting();
+    }
 
     private void addDefaultColumns(FormTree formTree) {
         if(!isSubTable() && formTree.getRootFormClass().isSubForm()) {
@@ -198,6 +201,9 @@ public class EffectiveTableModel {
         QueryModel queryModel = new QueryModel(formTree.getRootFormId());
         if(tableModel.getFilter().isPresent()) {
             queryModel.setFilter(tableModel.getFilter().get());
+        }
+        for (SortModel sortModel : tableModel.getSorting()) {
+            queryModel.addSortModel(sortModel);
         }
         queryModel.selectResourceId().as(ID_COLUMN_ID);
         for (EffectiveTableColumn column : columns) {

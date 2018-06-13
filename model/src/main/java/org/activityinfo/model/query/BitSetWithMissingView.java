@@ -18,6 +18,8 @@
  */
 package org.activityinfo.model.query;
 
+import org.activityinfo.model.util.HeapsortColumn;
+
 import java.io.Serializable;
 import java.util.BitSet;
 
@@ -117,8 +119,11 @@ public class BitSetWithMissingView implements ColumnView, Serializable {
 
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
-        // TODO: BitSet Sorting
-        // Do not sort on column
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortBitSetMissing(bitSet, missing, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+        }
         return sortVector;
     }
 }

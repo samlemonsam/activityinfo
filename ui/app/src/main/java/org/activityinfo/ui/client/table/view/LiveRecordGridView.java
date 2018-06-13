@@ -18,19 +18,23 @@
  */
 package org.activityinfo.ui.client.table.view;
 
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.messages.client.DefaultMessages;
+import com.sencha.gxt.widget.core.client.grid.ColumnHeader;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.LiveGridView;
-import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.query.SortModel;
+
+import java.util.Collections;
+import java.util.List;
 
 public class LiveRecordGridView extends LiveGridView<Integer> {
 
-    private static final boolean SORTING_IMPLEMENTED = false;
+    private List<SortModel> currentSorting = Collections.emptyList();
 
     /**
      * Creates a context menu for the given column, including sort menu items and column visibility sub-menu.
@@ -41,27 +45,22 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
     protected Menu createContextMenu(final int colIndex) {
         final Menu menu = new Menu();
 
-        if (SORTING_IMPLEMENTED && cm.isSortable(colIndex)) {
+        if (cm.isSortable(colIndex)) {
             MenuItem item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortAscText());
             item.setIcon(header.getAppearance().sortAscendingIcon());
-            item.addSelectionHandler(new SelectionHandler<Item>() {
-                @Override
-                public void onSelection(SelectionEvent<Item> event) {
-                    doSort(colIndex, SortDir.ASC);
-                }
-            });
+            item.addSelectionHandler(event -> doSort(colIndex, SortDir.ASC));
             menu.add(item);
 
             item = new MenuItem();
             item.setText(DefaultMessages.getMessages().gridView_sortDescText());
             item.setIcon(header.getAppearance().sortDescendingIcon());
-            item.addSelectionHandler(new SelectionHandler<Item>() {
-                @Override
-                public void onSelection(SelectionEvent<Item> event) {
-                    doSort(colIndex, SortDir.DESC);
-                }
-            });
+            item.addSelectionHandler(event -> doSort(colIndex, SortDir.DESC));
+            menu.add(item);
+
+            item = new MenuItem();
+            item.setText(I18N.CONSTANTS.clearSort());
+            item.addSelectionHandler(event -> fireEvent(new SortChangeEvent()));
             menu.add(item);
         }
 
@@ -75,5 +74,81 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
 
     public HandlerRegistration addColumnResizeHandler(ColumnResizeHandler handler) {
         return addHandler(ColumnResizeEvent.getType(), handler);
+    }
+
+    public HandlerRegistration addSortChangeHandler(SortChangeHandler handler) {
+        return addHandler(SortChangeEvent.getType(), handler);
+    }
+
+    @Override
+    protected void doSort(int colIndex, SortDir sortDir) {
+        String field = grid.getColumnModel().getValueProvider(colIndex).getPath();
+        SortModel.Dir dir;
+
+        // sortDir is null if the column header is clicked to
+        // toggle the sort direction
+
+        if(sortDir == null) {
+            if(isFieldSortedAscending(field)) {
+                dir = SortModel.Dir.DESC;
+            } else {
+                dir = SortModel.Dir.ASC;
+            }
+        } else if(sortDir == SortDir.ASC) {
+            dir = SortModel.Dir.ASC;
+        } else {
+            dir = SortModel.Dir.DESC;
+        }
+
+        fireEvent(new SortChangeEvent(field, dir));
+    }
+
+    private boolean isFieldSortedAscending(String field) {
+        if(!currentSorting.isEmpty()) {
+            SortModel sortModel = currentSorting.get(0);
+            if(sortModel.getField().equals(field) && sortModel.getDir() == SortModel.Dir.ASC) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void maybeUpdateSortingView(List<SortModel> sorting) {
+
+        if(!currentSorting.equals(sorting)) {
+
+            ColumnModel<Integer> columnModel = grid.getColumnModel();
+            ColumnHeader<Integer> tableHeading = grid.getView().getHeader();
+
+            if (sorting.isEmpty()) {
+                tableHeading.updateSortIcon(-1, SortDir.ASC);
+            } else {
+                SortModel sortModel = sorting.get(0);
+                for (int i = 0; i < columnModel.getColumnCount(); i++) {
+                    String path = columnModel.getValueProvider(i).getPath();
+                    if (path.equals(sortModel.getField())) {
+                        tableHeading.updateSortIcon(i,
+                                sortModel.getDir() == SortModel.Dir.ASC ?
+                                        SortDir.ASC : SortDir.DESC);
+                        break;
+                    }
+                }
+            }
+            currentSorting = sorting;
+        }
+    }
+
+    @Override
+    protected void initHeader() {
+        if (header == null) {
+            header = new CustomColumnHeader<Integer>(grid, cm);
+        }
+        header.setMenuFactory(new ColumnHeader.HeaderContextMenuFactory() {
+            @Override
+            public Menu getMenuForColumn(int columnIndex) {
+                return createContextMenu(columnIndex);
+            }
+        });
+        header.setSplitterWidth(splitterWidth);
     }
 }

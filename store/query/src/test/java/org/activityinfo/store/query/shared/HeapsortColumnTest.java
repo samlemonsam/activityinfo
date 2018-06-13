@@ -18,124 +18,270 @@
  */
 package org.activityinfo.store.query.shared;
 
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.util.HeapsortColumn;
+import org.activityinfo.store.query.server.columns.*;
+import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
+import org.activityinfo.store.query.shared.columns.MultiDiscreteStringColumnView;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.BitSet;
+
+import static org.junit.Assert.assertThat;
 
 public class HeapsortColumnTest {
 
     @Test
-    public void stringColumnSortedByValueAsc() {
+    public void int8sorting() {
 
-        String stringVals[] = {"c", "a", "b", "s"};
-        int stringIndex[] = {0, 1, 2, 3};
+        double values[] = new double[] {0, Double.NaN, 50, 30, -33 };
+        IntColumnView8 columnView = new IntColumnView8(values, values.length, -33);
+        int[] indexes = new int[] { 0, 1, 2, 3, 4 };
 
-        System.out.println(Arrays.toString(stringVals));
-        System.out.println(Arrays.toString(stringIndex));
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, -33, 0, 30, 50));
 
-        SortModel.Range range = new SortModel.Range(0,3);
-        HeapsortColumn.heapsortAscending(stringVals, stringIndex, range.getRangeSize(), range.getRange());
-
-        System.out.println("Original  (A): " + Arrays.toString(stringVals));
-        System.out.println("Reordered (A): " + Arrays.toString(reorder(stringVals, stringIndex)));
-        System.out.println("Index     (A): " + Arrays.toString(stringIndex));
-
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(50, 30, 0, -33, Double.NaN));
     }
 
     @Test
-    public void stringColumnSortedByValueDsc() {
+    public void int16sorting() {
+        double values[] = new double[] {0, Double.NaN, 500, 300, -330 };
+        IntColumnView16 columnView = new IntColumnView16(values, values.length, -330);
+        int[] indexes = new int[] { 0, 1, 2, 3, 4 };
 
-        String stringVals[] = {"c", "a", "b", "s"};
-        int stringIndex[] = {0, 1, 2, 3};
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, -330, 0, 300, 500));
 
-        System.out.println(Arrays.toString(stringVals));
-        System.out.println(Arrays.toString(stringIndex));
-
-        SortModel.Range range = new SortModel.Range(0,3);
-        HeapsortColumn.heapsortDescending(stringVals, stringIndex, 4, range.getRange());
-
-        System.out.println("Original  (D): " + Arrays.toString(stringVals));
-        System.out.println("Reordered (D): " + Arrays.toString(reorder(stringVals, stringIndex)));
-        System.out.println("Index     (D): " + Arrays.toString(stringIndex));
-
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(500, 300, 0, -330, Double.NaN));
     }
 
     @Test
-    public void doubleColumnSortedByValueAsc() {
-        int id[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        double values[] = { 50, 150, 90, 3, 9, 10, 30, 4, 5, 6 };
+    public void doubleSorting() {
+        double values[] = { Double.NaN, 51.0, -15.0, 5.1, -1.5, Double.NaN, 510.0, -150.0, 0.0 };
+        int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7, 8 };
+        DoubleArrayColumnView columnView = new DoubleArrayColumnView(values, values.length);
 
-        System.out.println(Arrays.toString(values));
-        System.out.println(Arrays.toString(id));
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, Double.NaN, -150.0, -15.0, -1.5, 0.0, 5.1, 51.0, 510.0));
 
-        SortModel.Range range = new SortModel.Range(0,9);
-        HeapsortColumn.heapsortAscending(values, id, range.getRangeSize(), range.getRange());
-
-        System.out.println("Original  (A): " + Arrays.toString(values));
-        System.out.println("Reordered (A): " + Arrays.toString(reorder(values, id)));
-        System.out.println("Index     (A): " + Arrays.toString(id));
-
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(510.0, 51.0, 5.1, 0, -1.5, -15.0, -150.0, Double.NaN, Double.NaN));
     }
 
     @Test
-    public void doubleColumnSortedByValueDsc() {
-        int id[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        double values[] = { 50, 150, 90, 3, 9, 10, 30, 4, 5, 6 };
+    public void sparseDoubleSorting() {
+        double values[] = { Double.NaN, Double.NaN, Double.NaN, 1.0, -1.0, Double.NaN, 2.0, Double.NaN, 0.0 };
+        int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7, 8 };
+        SparseNumberColumnView columnView = new SparseNumberColumnView(values, 9, 5);
 
-        System.out.println(Arrays.toString(values));
-        System.out.println(Arrays.toString(id));
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, -1.0, 0.0, 1.0, 2.0));
 
-        SortModel.Range range = new SortModel.Range(0,9);
-        HeapsortColumn.heapsortDescending(values, id, range.getRangeSize(), range.getRange());
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(2.0, 1.0, 0.0, -1.0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN));
+    }
 
-        System.out.println("Original  (D): " + Arrays.toString(values));
-        System.out.println("Reordered (D): " + Arrays.toString(reorder(values, id)));
-        System.out.println("Index     (D): " + Arrays.toString(id));
+    @Test
+    public void booleanSorting() {
+        int values[] = new int[] {0, ColumnView.NA, 1, 1, 0, ColumnView.NA };
+        int[] indexes = new int[] { 0, 1, 2, 3, 4, 5 };
+        BooleanColumnView columnView = new BooleanColumnView(values);
 
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(ColumnView.NA, ColumnView.NA, 0, 0, 1, 1));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(1, 1, 0, 0, ColumnView.NA, ColumnView.NA));
+    }
+
+    @Test
+    public void stringSorting() {
+        String values[] = {"Abc", "aaa", "Cba", "", "ccc", "a", "c", null};
+        int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7};
+        StringArrayColumnView columnView = new StringArrayColumnView(values);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(null, "", "a", "aaa", "Abc", "c", "Cba", "ccc"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo("ccc", "Cba", "c", "Abc", "aaa", "a", "", null));
+    }
+
+    @Test
+    public void enumSorting() {
+        String labels[] = {"a", "b", "c", ""};
+        int selections[] = {2, 1, 0, -1, 3, 1}; // c, b, a, null, "", b
+        int indexes[] = {0, 1, 2, 3, 4, 5};
+        DiscreteStringColumnView columnView = new DiscreteStringColumnView(labels, selections);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo(null, "", "a", "b", "b", "c"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
+    }
+
+    @Test
+    public void enum8Sorting() {
+        String labels[] = {"a", "b", "c", ""};
+        byte selections[] = {2, 1, 0, -1, 3, 1}; // c, b, a, null, "", b
+        int indexes[] = {0, 1, 2, 3, 4, 5};
+        DiscreteStringColumnView8 columnView = new DiscreteStringColumnView8(labels, selections);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo(null, "", "a", "b", "b", "c"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
+    }
+
+    @Test
+    public void multiEnumSorting() {
+        String labels[] = {"a", "b", ""};
+        BitSet aSelections = new BitSet();
+        BitSet bSelections = new BitSet();
+        BitSet emptySelections = new BitSet();
+
+        // 0: null
+        // 1: a, b, ""
+        aSelections.set(1, true);
+        bSelections.set(1, true);
+        emptySelections.set(1, true);
+        // 2: a, b
+        aSelections.set(2, true);
+        bSelections.set(2, true);
+        // 3: a
+        aSelections.set(3, true);
+        // 4: "" == null
+        emptySelections.set(4,true);
+
+        int indexes[] = {0, 1, 2, 3, 4};
+
+        MultiDiscreteStringColumnView columnView = new MultiDiscreteStringColumnView(indexes.length, labels, new BitSet[] {aSelections, bSelections, emptySelections});
+        String[] concatenatedSelections = new String[indexes.length];
+        for (int i = 0; i < concatenatedSelections.length; i++) {
+            concatenatedSelections[i] = columnView.getString(i);
+        }
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(concatenatedSelections, indexes), isArrayEqualTo(null, null, "a", "a,b", "a,b,"));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(concatenatedSelections, indexes), isArrayEqualTo("a,b,", "a,b", "a", null, null));
+    }
+
+    @Test
+    public void bitSetSorting() {
+        BitSet values = new BitSet(4);
+        values.set(1, true);
+        values.set(2, false);
+        values.set(3, true);
+        values.set(4, false);
+        int indexes[] = {0, 1, 2, 3};
+        BitSetColumnView columnView = new BitSetColumnView(values.length(), values);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(false, false, true, true));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, indexes), isArrayEqualTo(true, true, false, false));
+    }
+
+    @Test
+    public void bitSetMissingSorting() {
+        BitSet values = new BitSet(5);
+        values.set(1, true);
+        values.set(2, false);
+        values.set(4, true);
+        values.set(5, false);
+        BitSet missing = new BitSet(5);
+        missing.set(1, false);
+        missing.set(2, false);
+        missing.set(3, true);
+        missing.set(4, false);
+        missing.set(5, false);
+        int indexes[] = {0, 1, 2, 3, 4};
+        BitSetWithMissingView columnView = new BitSetWithMissingView(values.length(), values, missing);
+
+        columnView.order(indexes, SortModel.Dir.ASC, null);
+        assertThat(reorder(values, missing, indexes), isBooleanArrayEqualTo(null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE));
+
+        columnView.order(indexes, SortModel.Dir.DESC, null);
+        assertThat(reorder(values, missing, indexes), isBooleanArrayEqualTo(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null));
     }
 
     @Test
     public void multipleSort() {
-        int masterRowId[] = {0, 1, 2, 3, 4, 5, 6};
+        int masterRowId[] = {0,         1,      2,          3,      4,      5,      6};
+        String stringCol[] = {"A",      "A",    "A",        "C",    "B",    null,    "B"};
+        double doubleCol[] = {15.0,     17.0,   Double.NaN, 13.0,   12.0,   12.0,   11.0};
         int sortVector[] = masterRowId.clone();
-        String stringCol[] = {"C", "D", "A", "E", "B", "C", "C"};
-        double doubleCol[] = {15, 17, 12, 13, 12, 12, 11};
 
+        // Sort alphabetically
         SortModel.Range range = new SortModel.Range(0,6);
+        HeapsortColumn.heapsortString(stringCol, sortVector, range.getRangeSize(), range.getRange(), true);
+        assertThat(reorder(stringCol, sortVector), isArrayEqualTo(null, "A", "A", "A", "B", "B", "C"));
 
-        System.out.println("Original Ids: " + Arrays.toString(masterRowId));
-        System.out.println("Sort Vector:  " + Arrays.toString(sortVector));
-        System.out.println("String Col:   " + Arrays.toString(stringCol));
-        System.out.println("Double Col:   " + Arrays.toString(doubleCol));
+        // Sort within A (string column should remain in same order, but double values in A group should be in asc order)
+        range = new SortModel.Range(1,3);
+        HeapsortColumn.heapsortDouble(doubleCol, sortVector, range.getRangeSize(), range.getRange(), true);
+        // Sort within B (string column should remain in same order, but double values in A & B group should be in asc order)
+        range = new SortModel.Range(4,5);
+        HeapsortColumn.heapsortDouble(doubleCol, sortVector, range.getRangeSize(), range.getRange(), true);
 
-        HeapsortColumn.heapsortAscending(stringCol, sortVector, range.getRangeSize(), range.getRange());
+        assertThat(reorder(stringCol, sortVector), isArrayEqualTo(null, "A", "A", "A", "B", "B", "C"));
+        assertThat(reorder(doubleCol, sortVector), isArrayEqualTo(12.0, Double.NaN, 15.0, 17.0, 11.0, 12.0, 13.0));
+    }
 
-        System.out.println("1st Sort on String Col");
-        System.out.println("Original Ids:             " + Arrays.toString(masterRowId));
-        System.out.println("Sort Vector:              " + Arrays.toString(sortVector));
-        System.out.println("String Col:               " + Arrays.toString(stringCol));
-        System.out.println("String Col (Reordered):   " + Arrays.toString(reorder(stringCol, sortVector)));
-        System.out.println("Double Col:               " + Arrays.toString(doubleCol));
-        System.out.println("Double Col (Reordered):   " + Arrays.toString(reorder(doubleCol, sortVector)));
+    private String[] labelledArray(int[] selection, String[] labels) {
+        String[] output = new String[selection.length];
+        for (int i=0; i < output.length; i++) {
+            output[i] = selection[i] < 0 ? null : labels[selection[i]];
+        }
+        return output;
+    }
 
-        range = new SortModel.Range(2,4);
+    private String[] labelledArray(byte[] selection, String[] labels) {
+        String[] output = new String[selection.length];
+        for (byte i=0; i < output.length; i++) {
+            output[i] = selection[i] < 0 ? null : labels[selection[i]];
+        }
+        return output;
+    }
 
-        HeapsortColumn.heapsortAscending(doubleCol, sortVector, range.getRangeSize(), range.getRange());
+    private int[] reorder(int[] original, int[] sortVector) {
+        int[] output = new int[original.length];
+        for (int i=0; i<output.length; i++) {
+            output[i] = original[sortVector[i]];
+        }
+        return output;
+    }
 
-        System.out.println("2nd Sort on Double Col");
-        System.out.println("Original Ids:             " + Arrays.toString(masterRowId));
-        System.out.println("Sort Vector:              " + Arrays.toString(sortVector));
-        System.out.println("String Col:               " + Arrays.toString(stringCol));
-        System.out.println("String Col (Reordered):   " + Arrays.toString(reorder(stringCol, sortVector)));
-        System.out.println("Double Col:               " + Arrays.toString(doubleCol));
-        System.out.println("Double Col (Reordered):   " + Arrays.toString(reorder(doubleCol, sortVector)));
-
+    private byte[] reorder(byte[] original, int[] sortVector) {
+        byte[] output = new byte[original.length];
+        for (byte i=0; i<output.length; i++) {
+            output[i] = original[sortVector[i]];
+        }
+        return output;
     }
 
     private Object[] reorder(Object[] original, int[] sortVector) {
         Object[] output = new Object[original.length];
+        for (int i=0; i<output.length; i++) {
+            output[i] = original[sortVector[i]];
+        }
+        return output;
+    }
+
+    private String[] reorder(String[] original, int[] sortVector) {
+        String[] output = new String[original.length];
         for (int i=0; i<output.length; i++) {
             output[i] = original[sortVector[i]];
         }
@@ -150,5 +296,97 @@ public class HeapsortColumnTest {
         return output;
     }
 
+    private boolean[] reorder(BitSet original, int[] sortVector) {
+        boolean[] output = new boolean[original.length()];
+        for (int i=0; i<output.length; i++) {
+            output[i] = original.get(sortVector[i]);
+        }
+        return output;
+    }
 
+    private Boolean[] reorder(BitSet original, BitSet missing, int[] sortVector) {
+        Boolean[] output = new Boolean[original.length()];
+        for (int i=0; i<output.length; i++) {
+            output[i] = missing.get(sortVector[i]) ? null : original.get(sortVector[i]);
+        }
+        return output;
+    }
+
+    private static Matcher<double[]> isArrayEqualTo(double... expected) {
+        return new TypeSafeMatcher<double[]>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+
+            @Override
+            protected boolean matchesSafely(double[] item) {
+                return Arrays.equals(expected, item);
+            }
+        };
+    }
+
+    private static Matcher<int[]> isArrayEqualTo(int... expected) {
+        return new TypeSafeMatcher<int[]>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+
+            @Override
+            protected boolean matchesSafely(int[] item) {
+                return Arrays.equals(expected, item);
+            }
+        };
+    }
+
+    private static Matcher<String[]> isArrayEqualTo(String... expected) {
+        return new TypeSafeMatcher<String[]>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+
+            @Override
+            protected boolean matchesSafely(String[] item) {
+               return Arrays.equals(expected, item);
+            }
+        };
+    }
+
+    private static Matcher<boolean[]> isArrayEqualTo(boolean... expected) {
+        return new TypeSafeMatcher<boolean[]>() {
+            @Override
+            protected boolean matchesSafely(boolean[] item) {
+                return Arrays.equals(expected, item);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+        };
+    }
+
+    private static Matcher<Boolean[]> isBooleanArrayEqualTo(Boolean... expected) {
+        return new TypeSafeMatcher<Boolean[]>() {
+            @Override
+            protected boolean matchesSafely(Boolean[] item) {
+                return Arrays.equals(expected, item);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("array equal to ");
+                description.appendText(Arrays.toString(expected));
+            }
+        };
+    }
 }

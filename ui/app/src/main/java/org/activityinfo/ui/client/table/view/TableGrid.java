@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client.table.view;
 
+import com.google.common.base.Optional;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -27,7 +28,6 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.loader.PagingLoadConfig;
 import com.sencha.gxt.data.shared.loader.PagingLoadResult;
 import com.sencha.gxt.data.shared.loader.PagingLoader;
-import com.sencha.gxt.widget.core.client.event.SortChangeEvent;
 import com.sencha.gxt.widget.core.client.grid.CellSelectionModel;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.Grid;
@@ -37,6 +37,7 @@ import org.activityinfo.analysis.table.EffectiveTableColumn;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
@@ -54,6 +55,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
 
     private final ListStore<Integer> store;
     private final Grid<Integer> grid;
+    private final LiveRecordGridView gridView;
 
     private Subscription subscription;
     private final ColumnSetProxy proxy;
@@ -81,10 +83,11 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         ColumnModelBuilder columns = new ColumnModelBuilder(proxy);
         columns.addAll(tableModel.getColumns());
 
-        LiveRecordGridView gridView = new LiveRecordGridView();
+        gridView = new LiveRecordGridView();
         gridView.setColumnLines(true);
         gridView.setTrackMouseOver(false);
         gridView.addColumnResizeHandler(this::changeColumnWidth);
+        gridView.addSortChangeHandler(this::changeSort);
 
         CellSelectionModel<Integer> sm = new CellSelectionModel<>();
         sm.addCellSelectionChangedHandler(this::changeRowSelection);
@@ -107,7 +110,6 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
         grid.setLoadMask(true);
         grid.setView(gridView);
         grid.setSelectionModel(sm);
-        grid.addSortChangeHandler(this::changeSort);
 
         // Setup grid filters
         filters = new TableGridFilters(tableUpdater);
@@ -147,7 +149,11 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
      * Changes the current sort order based on the user's input.
      */
     private void changeSort(SortChangeEvent event) {
-        // TODO
+        Optional<SortModel> sortSelection = Optional.absent();
+        if (event.getField().isPresent()) {
+            sortSelection = Optional.of(new SortModel(event.getField().get(), event.getDir().get()));
+        }
+        tableUpdater.updateSort(sortSelection);
     }
 
     public boolean updateView(EffectiveTableModel tableModel) {
@@ -182,8 +188,10 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
                 return false;
             }
         }
+        gridView.maybeUpdateSortingView(tableModel.getSorting());
         return true;
     }
+
 
     private void updateColumnView(Observable<ColumnSet> columnSet) {
         if(columnSet.isLoaded()) {

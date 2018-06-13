@@ -18,6 +18,7 @@
  */
 package org.activityinfo.store.query.server.columns;
 
+import com.google.common.primitives.Doubles;
 import com.google.common.primitives.UnsignedBytes;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.SortModel;
@@ -26,7 +27,7 @@ import org.activityinfo.model.util.HeapsortColumn;
 /**
  * Compact ColumnView for numbers are all integers and have a range of less than 255
  */
-class IntColumnView8 extends AbstractNumberColumn {
+public class IntColumnView8 extends AbstractNumberColumn {
 
 
     static final int MAX_RANGE = 255;
@@ -34,7 +35,7 @@ class IntColumnView8 extends AbstractNumberColumn {
     private byte[] values;
     private int delta;
 
-    IntColumnView8(double doubleValues[], int numRows, int minValue) {
+    public IntColumnView8(double doubleValues[], int numRows, int minValue) {
         this.values = new byte[numRows];
 
         // Reserve 0 for missing values
@@ -88,21 +89,10 @@ class IntColumnView8 extends AbstractNumberColumn {
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
         int numRows = values.length;
-        switch(direction) {
-            case ASC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortAscending(values, sortVector, numRows);
-                } else {
-                    HeapsortColumn.heapsortAscending(values, sortVector, range.length, range);
-                }
-                break;
-            case DESC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortDescending(values, sortVector, numRows);
-                } else {
-                    HeapsortColumn.heapsortDescending(values, sortVector, range.length, range);
-                }
-                break;
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortCompact8(values, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortCompact8(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
         }
         return sortVector;
     }

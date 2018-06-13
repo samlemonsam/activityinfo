@@ -22,13 +22,14 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
 import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.util.HeapsortColumn;
 
-class SparseNumberColumnView extends AbstractNumberColumn {
+public class SparseNumberColumnView extends AbstractNumberColumn {
 
     private final int numRows;
     private final Int2DoubleOpenHashMap map;
 
-    SparseNumberColumnView(double[] elements, int numRows, int numMissing) {
+    public SparseNumberColumnView(double[] elements, int numRows, int numMissing) {
 
         this.numRows = numRows;
         this.map = new Int2DoubleOpenHashMap(numRows - numMissing);
@@ -64,8 +65,11 @@ class SparseNumberColumnView extends AbstractNumberColumn {
 
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
-        // TODO: SpareseNumberColumnView Sorting
-        // Do not sort on column
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortSparseDouble(map, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortSparseDouble(map, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+        }
         return sortVector;
     }
 

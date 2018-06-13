@@ -20,6 +20,7 @@ package org.activityinfo.store.query.shared.columns;
 
 import com.google.common.base.Strings;
 import org.activityinfo.model.query.*;
+import org.activityinfo.model.util.HeapsortColumn;
 
 import java.io.Serializable;
 import java.util.BitSet;
@@ -134,6 +135,17 @@ public class MultiDiscreteStringColumnView implements EnumColumnView, ColumnView
 
     @Override
     public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+        String[] concatenatedSelections = new String[numRows];
+        for (int i=0; i<concatenatedSelections.length; i++) {
+            concatenatedSelections[i] = getString(i);
+        }
+
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortString(concatenatedSelections, sortVector, numRows, direction == SortModel.Dir.ASC);
+        } else {
+            HeapsortColumn.heapsortString(concatenatedSelections, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+        }
+
         return sortVector;
     }
 }
