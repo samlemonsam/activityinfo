@@ -154,6 +154,7 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
             sortSelection = Optional.of(new SortModel(event.getField().get(), event.getDir().get()));
         }
         tableUpdater.updateSort(sortSelection);
+        gridView.refresh();
     }
 
     public boolean updateView(EffectiveTableModel tableModel) {
