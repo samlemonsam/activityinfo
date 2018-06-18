@@ -54,7 +54,7 @@ public class TableViewModel implements TableUpdater {
     private Observable<EffectiveTableModel> effectiveTable;
     private Observable<ColumnSet> columnSet;
 
-
+    private Map<ResourceId, StatefulValue<TableModel>> subTableModels = new HashMap<>();
     private Map<ResourceId, Observable<EffectiveTableModel>> effectiveSubTables = new HashMap<>();
 
     private StatefulValue<Optional<RecordRef>> selectedRecordRef = new StatefulValue<>(Optional.absent());
@@ -125,14 +125,13 @@ public class TableViewModel implements TableUpdater {
     public Observable<EffectiveTableModel> getEffectiveSubTable(final ResourceId subFormId) {
         Observable<EffectiveTableModel> effectiveSubTable = effectiveSubTables.get(subFormId);
         if(effectiveSubTable == null) {
-            final TableModel subModel = ImmutableTableModel.builder()
+            StatefulValue<TableModel> subModel = new StatefulValue<>(ImmutableTableModel.builder()
                     .formId(subFormId)
-                    .build();
+                    .build());
+            Observable<FormTree> subTree = formTree.transform(tree -> tree.subTree(subFormId));
+            effectiveSubTable = Observable.transform(subTree, subModel, (tree, model) -> new EffectiveTableModel(formStore, tree, model, Optional.of(getSelectedRecordRef())));
 
-            effectiveSubTable = formTree
-                    .transform(tree -> tree.subTree(subFormId))
-                    .transform(subTree -> new EffectiveTableModel(formStore, subTree, subModel, Optional.of(getSelectedRecordRef())));
-
+            subTableModels.put(subFormId, subModel);
             effectiveSubTables.put(subFormId, effectiveSubTable);
         }
         return effectiveSubTable;
@@ -197,6 +196,19 @@ public class TableViewModel implements TableUpdater {
         tableModel.updateIfNotSame(ImmutableTableModel
                 .builder()
                 .from(model)
+                .sorting(sortModel.isPresent()
+                        ? Collections.singleton(sortModel.get())
+                        : Collections.EMPTY_LIST)
+                .build());
+    }
+
+    public void updateSubFormSort(ResourceId subFormId, Optional<SortModel> sortModel) {
+        StatefulValue<TableModel> subModel = subTableModels.get(subFormId);
+        if (subModel == null) {
+            throw new IllegalArgumentException(subFormId.asString());
+        }
+        subModel.updateIfNotSame(ImmutableTableModel.builder()
+                .from(subModel.get())
                 .sorting(sortModel.isPresent()
                         ? Collections.singleton(sortModel.get())
                         : Collections.EMPTY_LIST)

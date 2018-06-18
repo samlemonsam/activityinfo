@@ -78,7 +78,7 @@ public abstract class TableModel implements AnalysisModel  {
             for (SortModel sortModel : getSorting()) {
                 columnArray.add(sortModel.toJson());
             }
-            object.put("columns", columnArray);
+            object.put("sort", columnArray);
         }
 
         return object;

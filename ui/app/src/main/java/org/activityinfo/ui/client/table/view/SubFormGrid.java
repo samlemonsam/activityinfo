@@ -19,11 +19,13 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.common.base.Optional;
+import com.google.gwt.core.client.Scheduler;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableUpdater;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.SortModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
@@ -38,6 +40,7 @@ public class SubFormGrid extends VerticalLayoutContainer {
     private TableViewModel viewModel;
     private ResourceId subFormId;
     private Subscription subscription;
+    private Observable<ColumnSet> columnSet;
 
     private TableGrid grid;
 
@@ -45,6 +48,7 @@ public class SubFormGrid extends VerticalLayoutContainer {
         this.viewModel = viewModel;
         this.subFormId = subFormId;
         this.tableModel = viewModel.getEffectiveSubTable(subFormId);
+        this.columnSet = tableModel.join(tm -> tm.getColumnSet());
     }
 
     @Override
@@ -53,28 +57,38 @@ public class SubFormGrid extends VerticalLayoutContainer {
         subscription = tableModel.subscribe(this::onModelChanged);
     }
 
-    private void onModelChanged(Observable<EffectiveTableModel> model) {
-        if(model.isLoaded()) {
-            if(grid == null) {
-                grid = new TableGrid(model.get(), model.get().getColumnSet(), new TableUpdater() {
-                    @Override
-                    public void updateFilter(Optional<FormulaNode> filterFormula) {
-                        // TODO
-                    }
-
-                    @Override
-                    public void updateColumnWidth(String columnId, int width) {
-                        // TODO
-                    }
-
-                    @Override
-                    public void updateSort(Optional<SortModel> sortModel) {
-                        // TODO
-                    }
-                });
-                add(grid, new VerticalLayoutData(1, 1));
-            }
+    private void onModelChanged(Observable<EffectiveTableModel> tableModel) {
+        if (tableModel.isLoading()) {
+            return;
         }
+
+        if (grid == null) {
+            Scheduler.get().scheduleDeferred(() -> {
+                grid = newGrid(tableModel.get());
+                add(grid, new VerticalLayoutData(1, 1));
+                });
+        } else {
+            grid.updateView(tableModel.get());
+        }
+    }
+
+    private TableGrid newGrid(EffectiveTableModel tableModel) {
+        return new TableGrid(tableModel, columnSet, new TableUpdater() {
+            @Override
+            public void updateFilter(Optional<FormulaNode> filterFormula) {
+                // TODO
+            }
+
+            @Override
+            public void updateColumnWidth(String columnId, int width) {
+                // TODO
+            }
+
+            @Override
+            public void updateSort(Optional<SortModel> sortModel) {
+                viewModel.updateSubFormSort(subFormId, sortModel);
+            }
+        });
     }
 
     @Override
