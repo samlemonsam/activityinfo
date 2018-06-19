@@ -44,16 +44,10 @@ public final class Aggregation {
     public static double[] sortAndAggregate(StatFunction statistic, int[] groupId, double[] values,
                                             int numValues, int numGroups) {
 
-
-        if(numValues == 0) {
-            return new double[] { statistic.compute(values, 0, 0) };
+        if(numValues > 1) {
+            HeapsortTandem.heapsortDescending(groupId, values, numValues);
         }
-
-        HeapsortTandem.heapsortDescending(groupId, values, numValues);
-
         return aggregateSorted(statistic, groupId, values, numValues, numGroups);
-
-
     }
 
 
@@ -70,28 +64,30 @@ public final class Aggregation {
     public static double[] aggregateSorted(StatFunction statistic, int[] groupId, double[] values, int numValues, int numGroups) {
         // Allocate the output for the results
         double result[] = new double[numGroups];
-        Arrays.fill(result, Double.NaN);
+        Arrays.fill(result, statistic.emptyValue());
 
-        // Start at the first group
-        int groupStart = 0;
+        if(numValues > 0) {
+            // Start at the first group
+            int groupStart = 0;
 
-        do {
-            int masterRow = groupId[groupStart];
+            do {
+                int masterRow = groupId[groupStart];
 
-            // Find where this group ends
-            int groupEnd = groupStart + 1;
-            while (groupEnd < numValues && masterRow == groupId[groupEnd]) {
-                groupEnd++;
-            }
+                // Find where this group ends
+                int groupEnd = groupStart + 1;
+                while (groupEnd < numValues && masterRow == groupId[groupEnd]) {
+                    groupEnd++;
+                }
 
-            // Compute the statistic over this group
-            if(masterRow != -1) {
-                result[masterRow] = statistic.compute(values, groupStart, groupEnd);
-            }
-            // Move to the next group
-            groupStart = groupEnd;
+                // Compute the statistic over this group
+                if (masterRow != -1) {
+                    result[masterRow] = statistic.compute(values, groupStart, groupEnd);
+                }
+                // Move to the next group
+                groupStart = groupEnd;
 
-        } while(groupStart < numValues);
+            } while (groupStart < numValues);
+        }
         return result;
     }
 }
