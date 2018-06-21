@@ -156,7 +156,7 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
         return factory.newStringBuilder(result, new SerialNumberReader(serialNumberType));
     }
 
-    private static class TextFieldReader implements StringReader {
+    public static class TextFieldReader implements StringReader {
         @Override
         public String readString(FieldValue value) {
             if(value instanceof HasStringValue) {
@@ -189,7 +189,7 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
         }
     }
 
-    private static class ReferenceIdReader implements StringReader {
+    public static class ReferenceIdReader implements StringReader {
         @Override
         public String readString(FieldValue value) {
             if(value instanceof ReferenceValue) {
@@ -202,7 +202,7 @@ public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<Field
         }
     }
 
-    private static class AttachmentBlobIdReader implements StringReader {
+    public static class AttachmentBlobIdReader implements StringReader {
         @Override
         public String readString(FieldValue value) {
             if(value instanceof AttachmentValue) {

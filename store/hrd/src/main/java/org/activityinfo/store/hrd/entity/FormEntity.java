@@ -24,6 +24,7 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Unindex;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.columns.RecordNumbering;
 
 /**
  * Parent entity of all entities related to a single form.
@@ -34,7 +35,7 @@ import org.activityinfo.model.resource.ResourceId;
  */
 @Entity(name = "Form")
 public class FormEntity {
-    
+
     @Id
     private String id;
 
@@ -52,6 +53,15 @@ public class FormEntity {
      */
     @Unindex
     private long schemaVersion;
+
+
+    /**
+     * Which of the two recordCount indexes is currently active, RED or BLUE. This allows records to be
+     * renumbered without locking the whole form for modifications.
+     */
+    @Unindex
+    private RecordNumbering activeColumnStorage;
+
 
     public FormEntity() {
     }
@@ -92,4 +102,11 @@ public class FormEntity {
         this.schemaVersion = schemaVersion;
     }
 
+    public RecordNumbering getActiveColumnStorage() {
+        return activeColumnStorage;
+    }
+
+    public void setActiveColumnStorage(RecordNumbering activeColumnStorage) {
+        this.activeColumnStorage = activeColumnStorage;
+    }
 }

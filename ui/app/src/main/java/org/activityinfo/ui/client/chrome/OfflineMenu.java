@@ -64,8 +64,6 @@ public class OfflineMenu implements IsWidget {
         syncNowItem = new MenuItem(I18N.CONSTANTS.syncNow());
         syncNowItem.addSelectionHandler(event -> offlineStore.syncChanges());
 
-        CheckMenuItem syncAutoItem = new CheckMenuItem(I18N.CONSTANTS.syncAutomatically());
-
         clearMenuItem = new MenuItem(I18N.CONSTANTS.clearOfflineMode());
         clearMenuItem.addSelectionHandler(this::confirmOfflineDelete);
 
@@ -73,7 +71,6 @@ public class OfflineMenu implements IsWidget {
         menu.add(pendingChangesItem);
         menu.add(new SeparatorMenuItem());
         menu.add(syncNowItem);
-        menu.add(syncAutoItem);
         menu.add(new SeparatorMenuItem());
         menu.add(clearMenuItem);
 

@@ -56,7 +56,6 @@ public class AnalysisEntity {
     private long version;
 
 
-
     public String getId() {
         return id;
     }

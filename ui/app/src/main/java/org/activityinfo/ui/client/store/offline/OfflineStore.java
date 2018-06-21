@@ -319,6 +319,10 @@ public class OfflineStore {
 
                     eventBus.fireEvent(new FormChangeEvent(FormChange.from(transaction)));
                     eventBus.fireEvent(new PendingStatusEvent());
+
+                    // Immediately try to synchronize changes
+                    syncChanges();
+
                     return null;
                 }
             });

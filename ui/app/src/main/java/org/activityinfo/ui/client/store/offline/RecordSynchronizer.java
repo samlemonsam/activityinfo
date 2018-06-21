@@ -20,6 +20,7 @@ package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.observable.Observable;
+import org.activityinfo.observable.Scheduler;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.HttpStore;
@@ -33,6 +34,8 @@ import java.util.logging.Logger;
 public class RecordSynchronizer {
 
     private static final Logger LOGGER = Logger.getLogger(RecordSynchronizer.class.getName());
+
+    private static final int SYNC_DELAY_MS = 5 * 60 * 1000;
 
     private FormStoreImpl formStore;
     private ActivityInfoClientAsync client;
@@ -56,5 +59,14 @@ public class RecordSynchronizer {
                 offlineStore.store(snapshot);
             });
         }
+    }
+
+    public void start() {
+        com.google.gwt.core.client.Scheduler.get().scheduleFixedDelay(new com.google.gwt.core.client.Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                offlineStore.syncChanges();
+            }
+        }, SYNC_DELAY_MS);
     }
 }

@@ -28,6 +28,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
+import org.activityinfo.store.hrd.columns.RecordNumbering;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +58,12 @@ public class FormRecordEntity {
     
     @Unindex
     private long schemaVersion;
+
+    @Index
+    private int blue;
+
+    @Index
+    private int red;
     
     private EmbeddedEntity fieldValues;
 
@@ -125,6 +132,7 @@ public class FormRecordEntity {
         }
     }
 
+
     public FormRecord toFormRecord(FormClass formClass) {
         FormRecord.Builder record = FormRecord.builder();
         record.setFormId(formClass.getId());
@@ -172,5 +180,21 @@ public class FormRecordEntity {
     
     public static Key<FormRecordEntity> key(FormClass formClass, ResourceId recordId) {
         return key(formClass.getId(), recordId);
+    }
+
+    public int getRecordNumber(RecordNumbering scheme) {
+        if(scheme == RecordNumbering.RED) {
+            return red;
+        } else {
+            return blue;
+        }
+    }
+
+    public void setRecordNumber(RecordNumbering scheme, int number) {
+        if(scheme == RecordNumbering.RED) {
+            this.red = number;
+        } else {
+            this.blue = number;
+        }
     }
 }
