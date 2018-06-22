@@ -3,7 +3,6 @@ package org.activityinfo.store.hrd.columns;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.QueryResultIterator;
-import com.google.common.base.Charsets;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
@@ -13,7 +12,6 @@ import org.activityinfo.store.query.shared.columns.StringReader;
 public class StringBlock implements BlockManager {
 
     private static final String POOL_PROPERTY = "strings";
-    private static final String OFFSETS_PROPERTY = "values";
 
     private final StringReader reader;
 
@@ -30,55 +28,23 @@ public class StringBlock implements BlockManager {
     public Entity update(Entity blockEntity, int recordOffset, FieldValue fieldValue) {
 
         // Map this string to an index in our string pool, or zero, if the field value is missing
-
-        char stringIndex = findOrInsertStringInPool(blockEntity, fieldValue);
+        char stringIndex = StringPools.findOrInsertStringInPool(blockEntity, POOL_PROPERTY, toString(fieldValue));
 
         // Now update the value in the array of "pointers" into our string panel
-        Blob values = (Blob) blockEntity.getProperty(OFFSETS_PROPERTY);
-        values = OffsetArray.update(values, recordOffset, stringIndex);
+        if(OffsetArray.updateOffset(blockEntity, recordOffset, stringIndex)) {
+            return blockEntity;
 
-        blockEntity.setProperty(OFFSETS_PROPERTY, values);
-
-        return blockEntity;
+        } else {
+            return null;
+        }
     }
 
-
-    private char findOrInsertStringInPool(Entity blockEntity, FieldValue fieldValue) {
-
-        // If this value is missing, encode the value as zero
+    private String toString(FieldValue fieldValue) {
         if(fieldValue == null) {
-            return 0;
+            return null;
+        } else {
+            return reader.readString(fieldValue);
         }
-
-        String newValue = reader.readString(fieldValue);
-
-        // Does a string pool already exist?
-        Blob strings = (Blob) blockEntity.getProperty(POOL_PROPERTY);
-        if(strings == null) {
-            blockEntity.setProperty(POOL_PROPERTY, new Blob(StringPools.newPool(newValue)));
-            return 1;
-        }
-
-
-        // Otherwise, look it up in the string pool
-        // Encode the search string to bytes and match against bytes to avoid having to
-        // decode the entire string pool
-
-        byte[] newValueBytes = newValue.getBytes(Charsets.UTF_8);
-
-        // Walk through the pool until we find matching bytes
-
-        int index = StringPools.find(strings.getBytes(), newValueBytes);
-        if(index < 0) {
-            byte[] updatedPool = StringPools.appendString(strings.getBytes(), newValueBytes);
-            index = StringPools.size(updatedPool);
-            if(index == StringPools.MAX_SIZE) {
-                throw new UnsupportedOperationException("TODO");
-            }
-            blockEntity.setProperty(POOL_PROPERTY, new Blob(updatedPool));
-        }
-
-        return (char) index;
     }
 
 
@@ -92,7 +58,7 @@ public class StringBlock implements BlockManager {
 
             String[] pool = StringPools.toArray((Blob) block.getProperty(POOL_PROPERTY));
             if(pool.length > 0) {
-                byte[] offsets = ((Blob)block.getProperty(OFFSETS_PROPERTY)).getBytes();
+                byte[] offsets = ((Blob)block.getProperty(OffsetArray.OFFSETS_PROPERTY)).getBytes();
                 int offsetCount = OffsetArray.length(offsets);
 
                 for (int i = 0; i < offsetCount; i++) {

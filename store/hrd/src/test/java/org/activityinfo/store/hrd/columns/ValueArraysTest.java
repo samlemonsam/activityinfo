@@ -17,7 +17,6 @@ public class ValueArraysTest {
         byte[] bytes = Longs.toByteArray(longValue);
 
         System.out.println(Arrays.toString(bytes));
-
     }
 
     @Test
@@ -30,7 +29,7 @@ public class ValueArraysTest {
 
     @Test
     public void testIntValues() {
-        Blob valueArray = ValueArrays.updateInt32(null, 3, 42);
+        Blob valueArray = IntValueArray.update(null, 3, 42);
 
         checkArray(ValueArrays.toIntArray(valueArray),
                 IntValueArray.MISSING,
@@ -38,7 +37,7 @@ public class ValueArraysTest {
                 IntValueArray.MISSING,
                 42);
 
-        valueArray = ValueArrays.updateInt32(valueArray, 0, 96);
+        valueArray = IntValueArray.update(valueArray, 0, 96);
 
         checkArray(ValueArrays.toIntArray(valueArray),
                 96,
@@ -46,7 +45,7 @@ public class ValueArraysTest {
                 IntValueArray.MISSING,
                 42);
 
-        valueArray = ValueArrays.updateInt32(valueArray, 5, 3024);
+        valueArray = IntValueArray.update(valueArray, 5, 3024);
 
         checkArray(ValueArrays.toIntArray(valueArray),
                 96,

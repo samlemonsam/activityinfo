@@ -92,7 +92,7 @@ public class NumberBlock implements BlockManager {
         Blob valueArray = (Blob) blockEntity.getProperty("intValues");
         int currentLength = ValueArrays.length(valueArray, IntValueArray.BYTES);
         if(recordOffset < currentLength) {
-            valueArray = ValueArrays.updateInt32(valueArray, recordOffset, IntValueArray.MISSING);
+            valueArray = IntValueArray.update(valueArray, recordOffset, IntValueArray.MISSING);
             blockEntity.setProperty("intValues", valueArray);
             return blockEntity;
 
@@ -104,7 +104,7 @@ public class NumberBlock implements BlockManager {
 
     private Entity updateInt(Entity blockEntity, int recordOffset, int read) {
         Blob valueArray = (Blob) blockEntity.getProperty("intValues");
-        valueArray = ValueArrays.updateInt32(valueArray, recordOffset, read);
+        valueArray = IntValueArray.update(valueArray, recordOffset, read);
 
         blockEntity.setUnindexedProperty("storage", INT32_STORAGE);
         blockEntity.setProperty("intValues", valueArray);

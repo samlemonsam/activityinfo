@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.Entity;
 
 /**
  * An array of 16-bit offsets encoded as one-based little-endian byte array.
@@ -12,6 +13,8 @@ import com.google.appengine.api.datastore.Blob;
  */
 public class OffsetArray {
 
+
+    static final String OFFSETS_PROPERTY = "values";
 
     public static Blob update(Blob values, int index, char offset) {
         if(offset == 0) {
@@ -30,7 +33,6 @@ public class OffsetArray {
      *
      * @param values the value blob
      * @param index the index within the blob
-     * @return
      */
     public static Blob updateToZero(Blob values, int index) {
         if(values == null) {
@@ -53,6 +55,14 @@ public class OffsetArray {
         return bytes.length / ValueArrays.UINT16;
     }
 
+    public static int length(Blob values) {
+        if(values == null) {
+            return 0;
+        } else {
+            return length(values.getBytes());
+        }
+    }
+
     /**
      * Retrieves the one-based offset from the byte array. Zero if the offset is missing.
      */
@@ -60,5 +70,31 @@ public class OffsetArray {
         int pos = index * ValueArrays.UINT16;
 
         return (char) ((bytes[pos+1] << 8) | (bytes[pos] & 0xFF));
+    }
+
+    /**
+     * Updates the offset array property of a block.
+     *
+     * @param blockEntity
+     * @param recordOffset
+     * @param value
+     *
+     * @return true if the offset array was updated, or false if there was no change.
+     */
+    static boolean updateOffset(Entity blockEntity, int recordOffset, char value) {
+
+        Blob values = (Blob) blockEntity.getProperty(OFFSETS_PROPERTY);
+        int existingLength = length(values);
+
+        if(value == 0 && recordOffset >= existingLength) {
+            /* No updated needed */
+            return false;
+
+        } else {
+            values = update(values, recordOffset, value);
+            blockEntity.setProperty(OFFSETS_PROPERTY, values);
+
+            return true;
+        }
     }
 }

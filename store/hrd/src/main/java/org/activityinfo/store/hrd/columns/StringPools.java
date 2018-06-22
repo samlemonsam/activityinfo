@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.PropertyContainer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.primitives.Chars;
@@ -40,6 +41,8 @@ public class StringPools {
             if (stringLength == newValue.length && equal(pool, newValue, pos, stringLength)) {
                 return index;
             }
+            pos += stringLength;
+            index ++;
         }
         return -1;
     }
@@ -53,7 +56,7 @@ public class StringPools {
     }
 
     /**
-     * Expands the pool to accomodate a new string
+     * Expands the pool to accommodate a new string
      *
      * @param stringPool
      * @param newValueBytes
@@ -65,6 +68,9 @@ public class StringPools {
 
         // Read the current size of the pool
         int poolSize = size(expandedPool);
+        if(poolSize == MAX_SIZE) {
+            throw new IllegalStateException("Maximum pool size reached!");
+        }
 
         // Update the size of the pool
         setLength(expandedPool, 0, (char)(poolSize + 1));
@@ -146,5 +152,49 @@ public class StringPools {
             return 0;
         }
         return size(pool.getBytes());
+    }
+
+    /**
+     * Finds the (one-based) index of the string pool if the newValue is already presents, or updates the pool to
+     * include the string if it does not.
+     *
+     * @param blockEntity
+     * @param property
+     * @param newValue
+     * @return the one-based index of the string in the pool
+     */
+    public static char findOrInsertStringInPool(PropertyContainer blockEntity, String property, String newValue) {
+
+        // If this value is missing, encode the value as zero
+        if(newValue == null) {
+            return 0;
+        }
+
+        // Does a string pool already exist?
+        Blob strings = (Blob) blockEntity.getProperty(property);
+        if(strings == null) {
+            blockEntity.setProperty(property, new Blob(newPool(newValue)));
+            return 1;
+        }
+
+        // Otherwise, look it up in the string pool
+        // Encode the search string to bytes and match against bytes to avoid having to
+        // decode the entire string pool
+
+        byte[] newValueBytes = newValue.getBytes(Charsets.UTF_8);
+
+        // Walk through the pool until wefind matching bytes
+
+        int index = find(strings.getBytes(), newValueBytes);
+        if(index >= 0) {
+            return (char) (index + 1);
+        }
+
+        byte[] updatedPool = appendString(strings.getBytes(), newValueBytes);
+        int newSize = size(updatedPool);
+
+        blockEntity.setProperty(property, new Blob(updatedPool));
+
+        return (char) newSize;
     }
 }

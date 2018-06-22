@@ -38,26 +38,6 @@ public class ValueArrays {
 
     /**
      * Allocates, if neccessary, a larger array to hold up to the element index. Unused space is
-     * initialized with the missing value (Integer.MIN_VALUE)
-     *
-     * @param values The existing values blob, or {@code null} if it is still uninitialized.
-     * @param index the value index to update
-     */
-    public static byte[] ensureCapacityInt32(Blob values, int index) {
-        int originalLength = length(values, IntValueArray.BYTES);
-        byte[] updatedArray = ensureCapacity(values, index, IntValueArray.BYTES);
-
-        // Fill empty spaces with missing value, which is encoded as 0x80000000
-        int pos = originalLength * IntValueArray.BYTES;
-        while(pos < updatedArray.length) {
-            updatedArray[pos+3] = (byte)-128;
-            pos += 4;
-        }
-        return updatedArray;
-    }
-
-    /**
-     * Allocates, if neccessary, a larger array to hold up to the element index. Unused space is
      * initialized with NaN
      *
      * @param values The existing values blob, or {@code null} if it is still uninitialized.
@@ -88,12 +68,6 @@ public class ValueArrays {
         return (index + 1) * elementSize;
     }
 
-    public static Blob updateInt32(Blob values, int index, int value) {
-        byte[] bytes = ensureCapacityInt32(values, index);
-        setInt(bytes, index, value);
-        return new Blob(bytes);
-    }
-
     public static Blob updateReal64(Blob values, int index, double value) {
         byte[] bytes = ensureCapacityReal64(values, index);
         setDouble(bytes, index, value);
@@ -111,14 +85,6 @@ public class ValueArrays {
         bytes[pos++] = (byte)(longValue >> 40);
         bytes[pos++] = (byte)(longValue >> 48);
         bytes[pos  ] = (byte)(longValue >> 56);
-    }
-
-    private static void setInt(byte[] bytes, int index, int value) {
-        int pos = index * IntValueArray.BYTES;
-        bytes[pos++] = (byte) value;
-        bytes[pos++] = (byte) (value >> 8);
-        bytes[pos++] = (byte) (value >> 16);
-        bytes[pos  ] = (byte) (value >> 24);
     }
 
 

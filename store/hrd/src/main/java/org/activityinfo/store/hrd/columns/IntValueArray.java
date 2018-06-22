@@ -61,13 +61,60 @@ public class IntValueArray {
         }
     }
 
+    /**
+     * @return the number of integer elements in this value array.
+     */
     public static int length(Blob valueArray) {
         return ValueArrays.length(valueArray, BYTES);
     }
 
+
+    /**
+     * Returns a view of this array as an {@link IntBuffer}
+     */
     public static IntBuffer asBuffer(Blob valueArray) {
         ByteBuffer buffer = ByteBuffer.wrap(valueArray.getBytes());
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         return buffer.asIntBuffer();
+    }
+
+    /**
+     * Allocates, if necessary, a larger array to hold up to the element index. Unused space is
+     * initialized with the missing value (Integer.MIN_VALUE)
+     *
+     * @param values The existing values blob, or {@code null} if it is still uninitialized.
+     * @param index the value index to update
+     */
+    public static byte[] ensureCapacity(Blob values, int index) {
+        int originalLength = length(values);
+        byte[] updatedArray = ValueArrays.ensureCapacity(values, index, BYTES);
+
+        // Fill empty spaces with missing value, which is encoded as 0x80000000
+        int pos = originalLength * BYTES;
+        while(pos < updatedArray.length) {
+            updatedArray[pos+3] = (byte)-128;
+            pos += 4;
+        }
+        return updatedArray;
+    }
+
+    /**
+     * Updates the value at the given {@code index} in the array, allocating a new, larger
+     * array only if necessary.
+     *
+     * @return
+     */
+    public static Blob update(Blob values, int index, int value) {
+        byte[] bytes = ensureCapacity(values, index);
+        setInt(bytes, index, value);
+        return new Blob(bytes);
+    }
+
+    private static void setInt(byte[] bytes, int index, int value) {
+        int pos = index * BYTES;
+        bytes[pos++] = (byte) value;
+        bytes[pos++] = (byte) (value >> 8);
+        bytes[pos++] = (byte) (value >> 16);
+        bytes[pos  ] = (byte) (value >> 24);
     }
 }

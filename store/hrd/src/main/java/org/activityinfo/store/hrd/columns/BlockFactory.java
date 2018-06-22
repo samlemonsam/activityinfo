@@ -66,7 +66,11 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitEnum(EnumType enumType) {
-        return new EnumBlock();
+        if(enumType.getCardinality() == Cardinality.MULTIPLE) {
+            return new MultiEnumBlock();
+        } else {
+            return new SingleEnumBlock(enumType);
+        }
     }
 
     @Override
