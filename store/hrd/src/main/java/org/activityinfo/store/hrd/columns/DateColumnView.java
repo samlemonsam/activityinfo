@@ -4,17 +4,21 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.SortModel;
 
-public class IntValueArrayView implements ColumnView {
+import java.util.function.IntFunction;
+
+public class DateColumnView implements ColumnView {
 
     private int[] values;
+    private IntFunction<String> renderer;
 
-    public IntValueArrayView(int[] values) {
+    public DateColumnView(int[] values, IntFunction<String> renderer) {
         this.values = values;
+        this.renderer = renderer;
     }
 
     @Override
     public ColumnType getType() {
-        return ColumnType.NUMBER;
+        return ColumnType.STRING;
     }
 
     @Override
@@ -24,22 +28,22 @@ public class IntValueArrayView implements ColumnView {
 
     @Override
     public Object get(int row) {
-        return getDouble(row);
+        return getString(row);
     }
 
     @Override
     public double getDouble(int row) {
-        int value = values[row];
-        if(value == IntValueArray.MISSING) {
-            return Double.NaN;
-        } else {
-            return value;
-        }
+        return Double.NaN;
     }
 
     @Override
     public String getString(int row) {
-        return null;
+        int encoded = values[row];
+        if(encoded == IntValueArray.MISSING) {
+            return null;
+        } else {
+            return renderer.apply(encoded);
+        }
     }
 
     @Override
@@ -49,7 +53,7 @@ public class IntValueArrayView implements ColumnView {
 
     @Override
     public ColumnView select(int[] rows) {
-        return new IntValueArrayView(IntValueArray.select(values, rows));
+        return new DateColumnView(values, renderer);
     }
 
     @Override

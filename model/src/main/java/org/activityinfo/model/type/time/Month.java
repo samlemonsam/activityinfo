@@ -136,6 +136,10 @@ public class Month implements Serializable, Comparable<Month>, PeriodValue {
      */
     @Override
     public String toString() {
+        return toString(year, month);
+    }
+
+    public static String toString(int year, int month) {
         return year + (month < 10 ? "-0" : "-") + month;
     }
 

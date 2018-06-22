@@ -117,4 +117,17 @@ public class IntValueArray {
         bytes[pos++] = (byte) (value >> 16);
         bytes[pos  ] = (byte) (value >> 24);
     }
+
+    public static int[] select(int[] source, int[] rows) {
+        int[] selected = new int[rows.length];
+        for (int i = 0; i < rows.length; i++) {
+            int row = rows[i];
+            if(row == -1) {
+                selected[i] = MISSING;
+            } else {
+                selected[i] = source[row];
+            }
+        }
+        return selected;
+    }
 }

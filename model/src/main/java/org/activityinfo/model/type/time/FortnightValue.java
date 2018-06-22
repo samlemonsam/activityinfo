@@ -91,8 +91,15 @@ public class FortnightValue implements PeriodValue {
     }
 
     public String toWeekString() {
-        int startWeekNumber = startWeek.getWeekInYear();
+        return toWeekString(startWeek.getWeekInYear());
+    }
+
+    public static String toWeekString(int startWeekNumber) {
         return "W" + startWeekNumber + "-W" + (startWeekNumber+1);
+    }
+
+    public static String toString(int year, int startWeekNumber) {
+        return year + toWeekString(startWeekNumber);
     }
 
     public int getWeekInYear() {

@@ -223,9 +223,11 @@ public class FormModelTest extends CommandTestCase2 {
         subFormClass.setSubFormKind(SubFormKind.MONTHLY);
         subFormChildField = subFormClass.addField();
         subFormChildField.setType(TextType.SIMPLE);
+        subFormChildField.setLabel("Child field");
 
         subFormField = masterFormClass.addField(CuidAdapter.generateIndicatorId());
         subFormField.setType(new SubFormReferenceType(subFormClass.getId()));
+        subFormField.setLabel("Sub form");
 
         assertResolves(locator.persist(subFormClass));
         assertResolves(locator.persist(masterFormClass));

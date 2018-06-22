@@ -1,5 +1,6 @@
 package org.activityinfo.store.hrd.columns;
 
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.barcode.BarcodeType;
@@ -85,12 +86,38 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitLocalDate(LocalDateType localDateType) {
+        IntReader reader = new IntReader() {
+            @Override
+            public int read(FieldValue value) {
+                return DateEncoding.encodeLocalDate(((LocalDate) value));
+            }
+        };
+        NumberBlock.IntColumnFactory columnFactory = new NumberBlock.IntColumnFactory() {
+            @Override
+            public ColumnView create(int[] values) {
+                return new DateColumnView(values, new LocalDateRender());
+            }
+        };
         return NullBlock.INSTANCE;
     }
 
     @Override
     public BlockManager visitMonth(MonthType monthType) {
-        throw new UnsupportedOperationException("TODO");
+        IntReader reader = new IntReader() {
+            @Override
+            public int read(FieldValue value) {
+                return DateEncoding.encodeMonth(((Month) value));
+            }
+        };
+
+        NumberBlock.IntColumnFactory columnFactory = new NumberBlock.IntColumnFactory() {
+            @Override
+            public ColumnView create(int[] values) {
+                return new DateColumnView(values, new MonthStringRenderer());
+            }
+        };
+
+        return new NumberBlock(reader, columnFactory);
     }
 
     @Override
@@ -100,12 +127,40 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitFortnight(FortnightType fortnightType) {
-        return NullBlock.INSTANCE;
+        IntReader reader = new IntReader() {
+            @Override
+            public int read(FieldValue value) {
+                return DateEncoding.encodeFortnight((FortnightValue) value);
+            }
+        };
+
+        NumberBlock.IntColumnFactory columnFactory = new NumberBlock.IntColumnFactory() {
+            @Override
+            public ColumnView create(int[] values) {
+                return new DateColumnView(values, new FortnightStringRenderer());
+            }
+        };
+
+        return new NumberBlock(reader, columnFactory);
     }
 
     @Override
     public BlockManager visitWeek(EpiWeekType epiWeekType) {
-        return NullBlock.INSTANCE;
+        IntReader reader = new IntReader() {
+            @Override
+            public int read(FieldValue value) {
+                return DateEncoding.encodeWeek(((EpiWeek) value));
+            }
+        };
+
+        NumberBlock.IntColumnFactory columnFactory = new NumberBlock.IntColumnFactory() {
+            @Override
+            public ColumnView create(int[] values) {
+                return new DateColumnView(values, new WeekColumnRenderer());
+            }
+        };
+
+        return new NumberBlock(reader, columnFactory);
     }
 
     @Override

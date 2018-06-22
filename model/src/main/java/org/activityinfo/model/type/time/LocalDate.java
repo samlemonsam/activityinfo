@@ -168,7 +168,11 @@ public class LocalDate implements FieldValue, PeriodValue {
      */
     @Override
     public String toString() {
-        StringBuilder s = new StringBuilder();
+        return toString(year, monthOfYear, dayOfMonth);
+    }
+
+    public static String toString(int year, int monthOfYear, int dayOfMonth) {
+        StringBuilder s = new StringBuilder(10);
         s.append(year);
         s.append("-");
         if(monthOfYear < 10) {
