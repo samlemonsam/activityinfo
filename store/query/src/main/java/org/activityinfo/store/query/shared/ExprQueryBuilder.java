@@ -34,10 +34,10 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
+import org.activityinfo.store.query.shared.columns.IdColumnBuilder;
+import org.activityinfo.store.query.shared.columns.RowCountBuilder;
 import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.CursorObserver;
-import org.activityinfo.store.spi.CursorObservers;
+import org.activityinfo.store.spi.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,12 +62,18 @@ public class ExprQueryBuilder {
 
 
     public void addExpr(FormulaNode expr, PendingSlot<ColumnView> target) {
-        
-        FieldType fieldType = computeType(symbolTable, expr);
-        CursorObserver<FieldValue> columnBuilder = ViewBuilderFactory.get(columnFactory, target, fieldType);
 
-        addExpr(expr, columnBuilder);
+        if(queryBuilder instanceof ColumnQueryBuilderV2) {
+            addExprV2(expr, target);
+        } else {
+
+            FieldType fieldType = computeType(symbolTable, expr);
+            CursorObserver<FieldValue> columnBuilder = ViewBuilderFactory.get(columnFactory, target, fieldType);
+
+            addExprV1(expr, columnBuilder);
+        }
     }
+
 
     private FieldType computeType(FormSymbolTable parent, FormulaNode expr) {
         if(expr instanceof SymbolNode) {
@@ -130,7 +136,7 @@ public class ExprQueryBuilder {
         }
     }
     
-    private void addExpr(FormulaNode expr, CursorObserver<FieldValue> target) {
+    private void addExprV1(FormulaNode expr, CursorObserver<FieldValue> target) {
 
         if (expr instanceof SymbolNode) {
 
@@ -152,7 +158,7 @@ public class ExprQueryBuilder {
                         CursorObservers.collect(target, call.getArguments().size(), call.getFunction());
 
                 for (int i = 0; i < call.getArgumentCount(); i++) {
-                    addExpr(call.getArgument(i), argumentObservers.get(i));
+                    addExprV1(call.getArgument(i), argumentObservers.get(i));
                 }
             }
 
@@ -166,7 +172,7 @@ public class ExprQueryBuilder {
                 reader = new ComponentReader(compoundExpr.getField().getName());
             }
             CursorObserver<FieldValue> valueObserver = CursorObservers.transform(reader, target);
-            addExpr(compoundExpr.getValue(), valueObserver);
+            addExprV1(compoundExpr.getValue(), valueObserver);
 
         } else if(expr instanceof ConstantNode) {
 
@@ -178,24 +184,76 @@ public class ExprQueryBuilder {
             queryBuilder.addResourceId(rowObserver);
 
         } else if(expr instanceof GroupNode) {
-            addExpr(((GroupNode) expr).getExpr(), target);
+            addExprV1(((GroupNode) expr).getExpr(), target);
             
         } else {
             throw new UnsupportedOperationException("TODO: " + expr);
         }
     }
 
+    private void addExprV2(FormulaNode expr, PendingSlot<ColumnView> target) {
+
+        ColumnQueryBuilderV2 qb = (ColumnQueryBuilderV2) queryBuilder;
+
+        if (expr instanceof SymbolNode) {
+            SymbolNode symbol = (SymbolNode) expr;
+            FormField field = symbolTable.resolveSymbol(symbol);
+
+            qb.addField(field.getId(), target);
+
+        } else if (expr instanceof FunctionCallNode) {
+
+            throw new UnsupportedOperationException("TODO");
+
+
+        } else if (expr instanceof CompoundExpr) {
+
+            CompoundExpr compoundExpr = (CompoundExpr) expr;
+            ResourceId fieldId = compoundExpr.getField().asResourceId();
+            ResourceId enumId = ((SymbolNode) compoundExpr.getValue()).asResourceId();
+
+            if(isEnumItemReference(compoundExpr)) {
+                qb.addEnumItem(fieldId, enumId, target);
+            } else {
+                qb.addFieldComponent(fieldId, enumId, target);
+            }
+
+        } else if(expr instanceof ConstantNode) {
+
+            throw new UnsupportedOperationException("TODO");
+
+        } else if(expr instanceof GroupNode) {
+            addExprV2(((GroupNode) expr).getExpr(), target);
+
+        } else {
+            throw new UnsupportedOperationException("TODO: " + expr);
+        }
+    }
+
+
     public void addField(ResourceId resourceId, CursorObserver<FieldValue> foreignKeyBuilder) {
         queryBuilder.addField(resourceId, foreignKeyBuilder);
     }
 
 
-    public void addResourceId(CursorObserver<ResourceId> cursorObserver) {
-        queryBuilder.addResourceId(cursorObserver);
+    public void addResourceId(PendingSlot<ColumnView> target) {
+        if(queryBuilder instanceof ColumnQueryBuilderV2) {
+            ((ColumnQueryBuilderV2) queryBuilder).addRecordId(target);
+        } else {
+            queryBuilder.addResourceId(new IdColumnBuilder(target));
+        }
     }
 
     public void execute() throws IOException {
         queryBuilder.execute();
+    }
+
+    public void addRowCount(PendingSlot<Integer> rowCount) {
+        if(queryBuilder instanceof ColumnQueryBuilderV2) {
+            ((ColumnQueryBuilderV2) queryBuilder).addRowCount(rowCount);
+        } else {
+            queryBuilder.addResourceId(new RowCountBuilder(rowCount));
+        }
     }
 
     private class ComponentReader implements Function<FieldValue, FieldValue> {

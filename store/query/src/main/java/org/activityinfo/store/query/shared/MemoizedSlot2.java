@@ -19,6 +19,7 @@
 package org.activityinfo.store.query.shared;
 
 import org.activityinfo.promise.BiFunction;
+import org.activityinfo.store.spi.Slot;
 
 public class MemoizedSlot2<X, Y, R> implements Slot<R> {
 

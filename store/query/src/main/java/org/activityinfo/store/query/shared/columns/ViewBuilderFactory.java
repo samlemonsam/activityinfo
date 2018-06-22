@@ -34,8 +34,8 @@ import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 
 public class ViewBuilderFactory implements FieldTypeVisitor<CursorObserver<FieldValue>> {

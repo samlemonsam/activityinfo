@@ -29,9 +29,7 @@ import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.*;
 
 import java.util.*;
 import java.util.concurrent.Future;

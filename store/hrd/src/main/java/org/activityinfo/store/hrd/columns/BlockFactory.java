@@ -13,6 +13,8 @@ import org.activityinfo.model.type.primitive.BooleanType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
+import org.activityinfo.store.query.shared.columns.DoubleReader;
+import org.activityinfo.store.query.shared.columns.IntReader;
 import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
 
 public class BlockFactory implements FieldTypeVisitor<BlockManager> {
@@ -49,7 +51,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitQuantity(QuantityType type) {
-        return new NumberBlock(fieldValue -> ((Quantity) fieldValue).getValue());
+        return new NumberBlock((DoubleReader) value -> ((Quantity) value).getValue());
     }
 
     @Override
@@ -89,7 +91,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitYear(YearType yearType) {
-        return new NumberBlock(fieldValue -> ((YearValue) fieldValue).getYear());
+        return new NumberBlock((IntReader) value -> ((YearValue) value).getYear());
     }
 
     @Override

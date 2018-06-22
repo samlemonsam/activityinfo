@@ -18,7 +18,7 @@ public class FormColumnStorage {
     private Key<FormEntity> formKey;
 
     @Id
-    private RecordNumbering scheme;
+    private String scheme;
 
     @Unindex
     private int recordCount;
@@ -32,10 +32,12 @@ public class FormColumnStorage {
     @Index
     private long version;
 
+    public FormColumnStorage() {
+    }
 
     public FormColumnStorage(ResourceId formId, RecordNumbering scheme) {
         this.formKey = FormEntity.key(formId);
-        this.scheme = scheme;
+        this.scheme = scheme.name();
     }
 
     public Key<FormEntity> getFormKey() {
@@ -47,7 +49,7 @@ public class FormColumnStorage {
     }
 
     public RecordNumbering getScheme() {
-        return scheme;
+        return RecordNumbering.valueOf(scheme);
     }
 
     public int getRecordCount() {

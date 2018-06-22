@@ -21,7 +21,7 @@ package org.activityinfo.store.query.shared.columns;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.ConstantColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.store.spi.Slot;
 
 
 public class ConstantColumnBuilder implements Slot<ColumnView> {

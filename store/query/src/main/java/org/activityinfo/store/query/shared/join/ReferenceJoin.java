@@ -19,7 +19,7 @@
 package org.activityinfo.store.query.shared.join;
 
 import org.activityinfo.store.query.shared.columns.ForeignKey;
-import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.store.spi.Slot;
 
 import java.util.Arrays;
 

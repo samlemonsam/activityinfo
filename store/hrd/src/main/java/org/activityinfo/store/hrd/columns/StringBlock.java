@@ -2,15 +2,18 @@ package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.base.Charsets;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.store.hrd.entity.FormColumnStorage;
 import org.activityinfo.store.query.shared.columns.StringReader;
-
-import java.util.Arrays;
 
 public class StringBlock implements BlockManager {
 
-    private static final int INDEX_LENGTH = 4;
+    private static final String POOL_PROPERTY = "strings";
+    private static final String OFFSETS_PROPERTY = "values";
 
     private final StringReader reader;
 
@@ -24,48 +27,44 @@ public class StringBlock implements BlockManager {
     }
 
     @Override
-    public Entity update(Entity blockEntity, int relativeIndex, FieldValue fieldValue) {
+    public Entity update(Entity blockEntity, int recordOffset, FieldValue fieldValue) {
 
-        int stringIndex = findOrInsertStringInPool(blockEntity, fieldValue);
+        // Map this string to an index in our string pool, or zero, if the field value is missing
+
+        char stringIndex = findOrInsertStringInPool(blockEntity, fieldValue);
 
         // Now update the value in the array of "pointers" into our string panel
-        Blob values = (Blob) blockEntity.getProperty("values");
-        byte[] valueArray = values.getBytes();
+        Blob values = (Blob) blockEntity.getProperty(OFFSETS_PROPERTY);
+        values = OffsetArray.update(values, recordOffset, stringIndex);
 
-        // Expand if necessary
-        int requiredLength = (relativeIndex + 1) * INDEX_LENGTH;
-        if(valueArray.length < requiredLength) {
-            valueArray = Arrays.copyOf(valueArray, requiredLength);
-        }
-
-        setInt(valueArray, relativeIndex, relativeIndex * INDEX_LENGTH, stringIndex);
-
-        blockEntity.setProperty("values", new Blob(valueArray));
+        blockEntity.setProperty(OFFSETS_PROPERTY, values);
 
         return blockEntity;
     }
 
-    private void setInt(byte[] valueArray, int relativeIndex, int index, int value) {
-        valueArray[index] =  (byte) (value >> 24);
-        valueArray[relativeIndex * INDEX_LENGTH + 1] =  (byte) (value >> 16);
-        valueArray[relativeIndex * INDEX_LENGTH + 2] = (byte) (value >> 8);
-        valueArray[relativeIndex * INDEX_LENGTH + 3] = (byte)value;
-    }
 
-    private int findOrInsertStringInPool(Entity blockEntity, FieldValue fieldValue) {
+    private char findOrInsertStringInPool(Entity blockEntity, FieldValue fieldValue) {
 
         // If this value is missing, encode the value as zero
-
         if(fieldValue == null) {
             return 0;
         }
 
-        // Otherwise, look it up in the string pool
-
         String newValue = reader.readString(fieldValue);
-        byte[] newValueBytes = newValue.getBytes(Charsets.UTF_8);
 
-        Blob strings = (Blob) blockEntity.getProperty("strings");
+        // Does a string pool already exist?
+        Blob strings = (Blob) blockEntity.getProperty(POOL_PROPERTY);
+        if(strings == null) {
+            blockEntity.setProperty(POOL_PROPERTY, new Blob(StringPools.newPool(newValue)));
+            return 1;
+        }
+
+
+        // Otherwise, look it up in the string pool
+        // Encode the search string to bytes and match against bytes to avoid having to
+        // decode the entire string pool
+
+        byte[] newValueBytes = newValue.getBytes(Charsets.UTF_8);
 
         // Walk through the pool until we find matching bytes
 
@@ -76,11 +75,35 @@ public class StringBlock implements BlockManager {
             if(index == StringPools.MAX_SIZE) {
                 throw new UnsupportedOperationException("TODO");
             }
-            blockEntity.setProperty("strings", updatedPool);
+            blockEntity.setProperty(POOL_PROPERTY, new Blob(updatedPool));
         }
 
-        return index + 1;
+        return (char) index;
     }
 
+
+    @Override
+    public ColumnView buildView(FormColumnStorage header, QueryResultIterator<Entity> blockIterator) {
+        String[] values = new String[header.getRecordCount()];
+        while (blockIterator.hasNext()) {
+            Entity block = blockIterator.next();
+            int blockIndex = (int)(block.getKey().getId() - 1);
+            int blockStart = blockIndex * getBlockSize();
+
+            String[] pool = StringPools.toArray((Blob) block.getProperty(POOL_PROPERTY));
+            if(pool.length > 0) {
+                byte[] offsets = ((Blob)block.getProperty(OFFSETS_PROPERTY)).getBytes();
+                int offsetCount = OffsetArray.length(offsets);
+
+                for (int i = 0; i < offsetCount; i++) {
+                    int offset = OffsetArray.get(offsets, i);
+                    if(offset != 0) {
+                        values[blockStart + i] = pool[offset - 1];
+                    }
+                }
+            }
+        }
+        return new StringArrayColumnView(values);
+    }
 
 }

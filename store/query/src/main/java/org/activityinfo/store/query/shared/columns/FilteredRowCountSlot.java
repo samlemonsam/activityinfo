@@ -18,8 +18,8 @@
  */
 package org.activityinfo.store.query.shared.columns;
 
-import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.query.shared.TableFilter;
+import org.activityinfo.store.spi.Slot;
 
 public class FilteredRowCountSlot implements Slot<Integer> {
     private final Slot<Integer> countSlot;

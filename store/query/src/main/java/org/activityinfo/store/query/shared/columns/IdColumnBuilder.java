@@ -22,8 +22,8 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 import java.util.List;
 

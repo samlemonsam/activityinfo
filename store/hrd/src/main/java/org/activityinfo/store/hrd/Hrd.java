@@ -33,6 +33,7 @@ public class Hrd {
         ObjectifyService.register(FormEntity.class);
         ObjectifyService.register(FormRecordEntity.class);
         ObjectifyService.register(FormRecordSnapshotEntity.class);
+        ObjectifyService.register(FormColumnStorage.class);
         ObjectifyService.register(FormSchemaEntity.class);
         ObjectifyService.register(AnalysisEntity.class);
         ObjectifyService.register(AnalysisSnapshotEntity.class);

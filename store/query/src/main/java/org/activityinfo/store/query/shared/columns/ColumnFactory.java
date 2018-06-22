@@ -22,9 +22,9 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 /**
  * Creates optimizing column builder.

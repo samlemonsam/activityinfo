@@ -136,9 +136,17 @@ public class HrdCatalogTest {
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+        assertThat(columnSet.getColumnView("id").getString(0), equalTo(village1.getRecordId().asString()));
+
+        assertThat(columnSet.getColumnView("village").getString(0), equalTo("Rutshuru"));
+        assertThat(columnSet.getColumnView("village").getString(1), equalTo("Beni"));
+
+        assertThat(columnSet.getColumnView("family_count").getDouble(0), equalTo(1000d));
+        assertThat(columnSet.getColumnView("family_count").getDouble(1), equalTo(230d));
+
 
         List<RecordVersion> versions1 = ((VersionedFormStorage) storage.get()).getVersions(village1.getRecordId());
-        
+
         assertThat(versions1, hasSize(1));
 
         RecordVersion version = versions1.get(0);

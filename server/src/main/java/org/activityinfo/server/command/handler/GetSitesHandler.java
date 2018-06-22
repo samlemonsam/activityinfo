@@ -64,8 +64,8 @@ import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
+import org.activityinfo.store.spi.Slot;
 
 import javax.inject.Provider;
 import javax.validation.constraints.NotNull;

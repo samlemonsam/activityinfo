@@ -28,10 +28,10 @@ import org.activityinfo.store.query.server.columns.CompactingEnumColumnBuilder;
 import org.activityinfo.store.query.server.columns.MultiEnumColumnBuilder;
 import org.activityinfo.store.query.server.join.FastPrimaryKeyMap;
 import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 
 public class ServerColumnFactory implements ColumnFactory {

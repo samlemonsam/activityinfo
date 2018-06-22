@@ -20,8 +20,8 @@ package org.activityinfo.store.query.shared.columns;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.store.query.server.join.FastPrimaryKeyMap;
-import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
+import org.activityinfo.store.spi.Slot;
 
 
 public class PrimaryKeySlot implements Slot<PrimaryKeyMap> {

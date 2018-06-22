@@ -70,6 +70,11 @@ public class FormEntity {
         return id;
     }
 
+
+    public ResourceId getResourceId() {
+        return ResourceId.valueOf(id);
+    }
+
     public void setId(ResourceId id) {
         this.id = id.asString();
     }
@@ -109,4 +114,5 @@ public class FormEntity {
     public void setActiveColumnStorage(RecordNumbering activeColumnStorage) {
         this.activeColumnStorage = activeColumnStorage;
     }
+
 }

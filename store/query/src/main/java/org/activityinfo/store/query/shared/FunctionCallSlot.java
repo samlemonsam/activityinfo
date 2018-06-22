@@ -24,6 +24,7 @@ import org.activityinfo.model.formula.functions.ColumnFunction;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EmptyColumnView;
+import org.activityinfo.store.spi.Slot;
 
 import java.util.List;
 

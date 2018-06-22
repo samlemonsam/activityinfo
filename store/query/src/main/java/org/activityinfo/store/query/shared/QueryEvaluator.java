@@ -33,6 +33,8 @@ import org.activityinfo.model.query.SortModel.Range;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
 import org.activityinfo.store.query.shared.columns.RelevanceViewMask;
+import org.activityinfo.store.spi.PendingSlot;
+import org.activityinfo.store.spi.Slot;
 
 import java.util.*;
 import java.util.logging.Level;

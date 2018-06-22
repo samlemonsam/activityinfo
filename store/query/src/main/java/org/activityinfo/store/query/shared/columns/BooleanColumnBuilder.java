@@ -23,8 +23,8 @@ import org.activityinfo.model.query.BitSetWithMissingView;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 import java.util.BitSet;
 

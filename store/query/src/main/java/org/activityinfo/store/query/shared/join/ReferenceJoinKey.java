@@ -18,9 +18,9 @@
  */
 package org.activityinfo.store.query.shared.join;
 
-import org.activityinfo.store.query.shared.columns.ForeignKey;
 import org.activityinfo.store.query.shared.FilterLevel;
-import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.store.query.shared.columns.ForeignKey;
+import org.activityinfo.store.spi.Slot;
 
 /**
  * Lookup key for JoinLinks in a Collection Scan

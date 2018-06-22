@@ -19,8 +19,8 @@
 package org.activityinfo.store.query.shared.columns;
 
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.query.shared.TableFilter;
+import org.activityinfo.store.spi.Slot;
 
 
 public class FilteredSlot implements Slot<ColumnView> {

@@ -7,5 +7,9 @@ package org.activityinfo.store.hrd.columns;
  */
 public enum RecordNumbering {
     BLUE,
-    RED
+    RED;
+
+    public String propertyName() {
+        return name().toLowerCase();
+    }
 }

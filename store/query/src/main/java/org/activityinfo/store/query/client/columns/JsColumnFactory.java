@@ -24,10 +24,10 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.store.query.client.join.SimpleForeignKeyBuilder;
 import org.activityinfo.store.query.client.join.SimplePrimaryKeyMap;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 /**
  * Column Factory optimized for translation to JavaScript

@@ -23,9 +23,9 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.columns.DoubleReader;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 /**
  * ColumnView builder for quantity-typed fields that adapts the resulting
