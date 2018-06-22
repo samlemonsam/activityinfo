@@ -19,9 +19,12 @@ import java.util.List;
 
 public class NumberBlock implements BlockManager {
 
+
     interface IntColumnFactory {
         ColumnView create(int[] values);
     }
+
+    private static final IntColumnFactory DEFAULT_COLUMN_BUILDER = IntValueArrayView::new;
 
     private static final int NO_STORAGE = 0;
     private static final int INT32_STORAGE = 1;
@@ -34,22 +37,20 @@ public class NumberBlock implements BlockManager {
     public NumberBlock(DoubleReader doubleReader) {
         this.doubleReader = doubleReader;
         this.intReader = null;
+        this.intColumnFactory = DEFAULT_COLUMN_BUILDER;
     }
 
     public NumberBlock(IntReader intReader) {
         this.intReader = intReader;
-        this.intColumnFactory = new IntColumnFactory() {
-            @Override
-            public ColumnView create(int[] values) {
-                return new IntValueArrayView(values);
-            }
-        };
+        this.intColumnFactory = DEFAULT_COLUMN_BUILDER;
         this.doubleReader = null;
     }
 
     public NumberBlock(IntReader intReader, IntColumnFactory intColumnFactory) {
         this.intReader = intReader;
         this.intColumnFactory = intColumnFactory;
+        this.doubleReader = null;
+
     }
 
     @Override
