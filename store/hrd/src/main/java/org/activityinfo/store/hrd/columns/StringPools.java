@@ -84,7 +84,7 @@ public class StringPools {
     }
 
     public static int size(byte[] stringPool) {
-        return (char)((stringPool[0] << 8) + stringPool[1]);
+        return (char)((stringPool[0] << 8) | (stringPool[1] & 0xFF));
     }
 
     public static String[] toArray(byte[] pool) {

@@ -1,7 +1,7 @@
 package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
-import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PropertyContainer;
 
 /**
  * An array of 16-bit offsets encoded as one-based little-endian byte array.
@@ -69,6 +69,10 @@ public class OffsetArray {
     public static int get(byte[] bytes, int index) {
         int pos = index * ValueArrays.UINT16;
 
+        if(pos >= bytes.length) {
+            return 0;
+        }
+
         return (char) ((bytes[pos+1] << 8) | (bytes[pos] & 0xFF));
     }
 
@@ -81,9 +85,23 @@ public class OffsetArray {
      *
      * @return true if the offset array was updated, or false if there was no change.
      */
-    static boolean updateOffset(Entity blockEntity, int recordOffset, char value) {
+    static boolean updateOffset(PropertyContainer blockEntity, int recordOffset, char value) {
+        return updateOffset(blockEntity, OFFSETS_PROPERTY, recordOffset, value);
+    }
 
-        Blob values = (Blob) blockEntity.getProperty(OFFSETS_PROPERTY);
+    /**
+     * Updates the offset array property of a block.
+     *
+     * @param blockEntity
+     * @param propertyName
+     * @param recordOffset
+     * @param value
+     *
+     * @return true if the offset array was updated, or false if there was no change.
+     */
+    static boolean updateOffset(PropertyContainer blockEntity, String propertyName, int recordOffset, char value) {
+
+        Blob values = (Blob) blockEntity.getProperty(propertyName);
         int existingLength = length(values);
 
         if(value == 0 && recordOffset >= existingLength) {
@@ -92,7 +110,7 @@ public class OffsetArray {
 
         } else {
             values = update(values, recordOffset, value);
-            blockEntity.setProperty(OFFSETS_PROPERTY, values);
+            blockEntity.setProperty(propertyName, values);
 
             return true;
         }

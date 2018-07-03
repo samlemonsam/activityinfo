@@ -42,8 +42,12 @@ public class StringPoolsTest {
         assertThat(index2, equalTo(2));
         assertThat(index3, equalTo(2));
         assertThat(index4, equalTo(3));
+    }
 
-
+    @Test
+    public void size() {
+        byte[] pool = StringPools.newPool("ABC");
+        assertThat(StringPools.size(pool), equalTo(1));
     }
 
 }

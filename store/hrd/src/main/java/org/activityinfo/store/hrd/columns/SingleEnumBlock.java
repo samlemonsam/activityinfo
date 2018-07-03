@@ -2,7 +2,6 @@ package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.activityinfo.model.query.ColumnView;
@@ -15,6 +14,7 @@ import org.activityinfo.store.hrd.entity.FormColumnStorage;
 import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +61,7 @@ public class SingleEnumBlock implements BlockManager {
 
     @Override
     public ColumnView buildView(FormColumnStorage header,
-                                QueryResultIterator<Entity> blockIterator) {
+                                Iterator<Entity> blockIterator) {
 
         Object2IntOpenHashMap<String> labelLookup = new Object2IntOpenHashMap<>();
         labelLookup.defaultReturnValue(-1);

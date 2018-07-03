@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.PropertyContainer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -68,6 +69,10 @@ public class IntValueArray {
         return ValueArrays.length(valueArray, BYTES);
     }
 
+    public static int length(byte[] bytes) {
+        return bytes.length / BYTES;
+    }
+
 
     /**
      * Returns a view of this array as an {@link IntBuffer}
@@ -106,16 +111,40 @@ public class IntValueArray {
      */
     public static Blob update(Blob values, int index, int value) {
         byte[] bytes = ensureCapacity(values, index);
-        setInt(bytes, index, value);
+        set(bytes, index, value);
         return new Blob(bytes);
     }
 
-    private static void setInt(byte[] bytes, int index, int value) {
+    public static boolean update(PropertyContainer blockEntity, String property, int index, int value) {
+        Blob blob = (Blob) blockEntity.getProperty(property);
+        if(value == MISSING && index >= length(blob)) {
+            // unallocated values at the end of the array are treated as missing,
+            // so no need to grow the array
+            return false;
+        }
+
+        blockEntity.setProperty(property, update(blob, index, value));
+
+        return true;
+    }
+
+    public static void set(byte[] bytes, int index, int value) {
         int pos = index * BYTES;
         bytes[pos++] = (byte) value;
         bytes[pos++] = (byte) (value >> 8);
         bytes[pos++] = (byte) (value >> 16);
         bytes[pos  ] = (byte) (value >> 24);
+    }
+
+    public static int get(byte[] bytes, int index) {
+        int pos = index * BYTES;
+        if(pos >= bytes.length) {
+            return MISSING;
+        }
+        return (bytes[pos] & 0xFF) |
+               ((bytes[pos+1] & 0xFF) << 8) |
+               ((bytes[pos+2] & 0xFF) << 16) |
+                (bytes[pos+3] << 24);
     }
 
     public static int[] select(int[] source, int[] rows) {
@@ -130,4 +159,5 @@ public class IntValueArray {
         }
         return selected;
     }
+
 }

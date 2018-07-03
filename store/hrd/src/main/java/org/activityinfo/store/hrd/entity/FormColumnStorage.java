@@ -32,6 +32,9 @@ public class FormColumnStorage {
     @Index
     private long version;
 
+    @Unindex
+    private long constructionStage;
+
     public FormColumnStorage() {
     }
 
@@ -77,11 +80,24 @@ public class FormColumnStorage {
     }
 
     public static Key<FormColumnStorage> key(FormEntity rootEntity) {
-        return Key.create(Key.create(rootEntity), FormColumnStorage.class, rootEntity.getActiveColumnStorage().name());
+        return key(rootEntity, rootEntity.getActiveColumnStorage());
     }
+
+    public static Key<FormColumnStorage> key(FormEntity rootEntity, RecordNumbering scheme) {
+        return Key.create(Key.create(rootEntity), FormColumnStorage.class, scheme.name());
+    }
+
 
     public void addDeletedIndex(int recordIndex) {
         this.deletedCount++;
         this.deletedRecordSet = RecordIndexSet.read(deletedRecordSet).add(recordIndex).toBlob();
+    }
+
+    public long getConstructionStage() {
+        return constructionStage;
+    }
+
+    public void setConstructionStage(long constructionStage) {
+        this.constructionStage = constructionStage;
     }
 }

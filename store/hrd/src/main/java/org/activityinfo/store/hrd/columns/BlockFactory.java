@@ -175,7 +175,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitSerialNumber(SerialNumberType serialNumberType) {
-        return NullBlock.INSTANCE;
+        return new SerialNumberBlock(serialNumberType);
     }
 
 }

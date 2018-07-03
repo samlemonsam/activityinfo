@@ -1,0 +1,71 @@
+package org.activityinfo.store.hrd.columns;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
+
+public class EnumBlockTest {
+
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+                    .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
+
+    @Before
+    public void setUp() throws Exception {
+        helper.setUp();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        helper.tearDown();
+    }
+
+    @Test
+    public void singleEnum() {
+
+        EnumItem blue = new EnumItem(ResourceId.valueOf("c342fjsfjkdd"), "Blue");
+        EnumItem green = new EnumItem(ResourceId.valueOf("df2345253xkd"), "Green");
+        EnumItem violet = new EnumItem(ResourceId.valueOf("abcdef344444"), "Violet");
+        EnumType enumType = new EnumType(Cardinality.SINGLE, blue, green, violet);
+
+
+        SingleEnumBlock block = (SingleEnumBlock) BlockFactory.get(enumType);
+
+        Entity blockEntity = new Entity("Block", 1);
+
+        block.update(blockEntity, 0, new EnumValue(blue.getId()));
+        block.update(blockEntity, 2, new EnumValue(green.getId()));
+        block.update(blockEntity, 2, new EnumValue(blue.getId()));
+        block.update(blockEntity, 2, new EnumValue(violet.getId()));
+        block.update(blockEntity, 2, new EnumValue(green.getId()));
+        block.update(blockEntity, 1, new EnumValue(violet.getId()));
+        block.update(blockEntity, 3, null);
+        block.update(blockEntity, 4, new EnumValue(blue.getId()));
+
+        FormColumnStorage header = new FormColumnStorage();
+        header.setRecordCount(5);
+
+        ColumnView view = block.buildView(header, Arrays.asList(blockEntity).iterator());
+        assertThat(view.getString(0), equalTo("Blue"));
+        assertThat(view.getString(1), equalTo("Violet"));
+        assertThat(view.getString(2), equalTo("Green"));
+        assertThat(view.getString(3), nullValue());
+        assertThat(view.getString(4), equalTo("Blue"));
+    }
+}

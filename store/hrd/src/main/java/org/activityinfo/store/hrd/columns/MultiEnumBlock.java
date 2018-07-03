@@ -1,12 +1,12 @@
 package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.QueryResultIterator;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.hrd.entity.FormColumnStorage;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 
 public class MultiEnumBlock implements BlockManager {
     @Override
@@ -20,7 +20,7 @@ public class MultiEnumBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, QueryResultIterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
         throw new UnsupportedOperationException("TODO");
     }
 }

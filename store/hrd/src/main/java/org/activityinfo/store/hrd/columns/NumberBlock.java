@@ -2,7 +2,6 @@ package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.QueryResultIterator;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EmptyColumnView;
@@ -15,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class NumberBlock implements BlockManager {
@@ -190,7 +190,7 @@ public class NumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, QueryResultIterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
 
         List<Entity> blocks = new ArrayList<>();
 

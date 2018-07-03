@@ -2,7 +2,6 @@ package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.QueryResultIterator;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.resource.ResourceId;
@@ -11,6 +10,7 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.entity.FormColumnStorage;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 
 public class RecordIdBlock implements BlockManager {
 
@@ -40,7 +40,7 @@ public class RecordIdBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, QueryResultIterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
 
         String[] ids = new String[header.getRecordCount()];
 

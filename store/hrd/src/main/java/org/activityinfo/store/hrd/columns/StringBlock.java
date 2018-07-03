@@ -2,12 +2,13 @@ package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.QueryResultIterator;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.hrd.entity.FormColumnStorage;
 import org.activityinfo.store.query.shared.columns.StringReader;
+
+import java.util.Iterator;
 
 public class StringBlock implements BlockManager {
 
@@ -49,7 +50,7 @@ public class StringBlock implements BlockManager {
 
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, QueryResultIterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
         String[] values = new String[header.getRecordCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();

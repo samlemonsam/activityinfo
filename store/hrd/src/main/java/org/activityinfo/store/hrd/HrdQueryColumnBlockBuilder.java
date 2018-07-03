@@ -124,9 +124,6 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
                 fieldTarget.set(columnView);
             }
         }
-
-
-
     }
 
     private QueryResultIterator<Entity> queryBlocks(DatastoreService datastore, ResourceId fieldId) {
