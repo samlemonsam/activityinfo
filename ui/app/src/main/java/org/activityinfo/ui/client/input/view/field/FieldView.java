@@ -41,6 +41,7 @@ public class FieldView implements IsWidget {
     private final CssFloatLayoutContainer container;
 
     private boolean valid = true;
+    private boolean visible = true;
 
     public FieldView(FormField field, FieldWidget fieldWidget, int horizontalPadding) {
 
@@ -86,8 +87,16 @@ public class FieldView implements IsWidget {
         return widget;
     }
 
-    public void updateView(FormInputViewModel viewModel) {
-        container.setVisible(viewModel.isRelevant(fieldId));
+    public boolean updateView(FormInputViewModel viewModel) {
+
+        boolean requiresLayout = false;
+        boolean newlyVisible = viewModel.isRelevant(fieldId);
+        if(newlyVisible != visible) {
+            visible = newlyVisible;
+            container.setVisible(visible);
+            requiresLayout = true;
+        }
+
         widget.setRelevant(!viewModel.isLocked());
 
         if(viewModel.isMissingErrorVisible(fieldId)) {
@@ -102,6 +111,8 @@ public class FieldView implements IsWidget {
                 container.removeStyleName(InputResources.INSTANCE.style().fieldInvalid());
             }
         }
+
+        return requiresLayout;
     }
 
     public void invalidate(String message) {
