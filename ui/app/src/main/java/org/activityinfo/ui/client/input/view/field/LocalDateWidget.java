@@ -39,7 +39,7 @@ public class LocalDateWidget implements PeriodFieldWidget {
         this.field = new DateField();
         // Ensure that no date can be selected which occurs before the minimum date set on LocalDate
         this.field.setMinValue(LocalDate.MIN_DATE.atMidnightInMyTimezone());
-        this.field.setPropertyEditor(new LocalDateTimePropertyEditor());
+        this.field.setPropertyEditor(new LocalDatePropertyEditor());
         this.field.addValueChangeHandler(event -> fieldUpdater.update(input()));
         this.field.addBlurHandler(event -> fieldUpdater.touch());
     }

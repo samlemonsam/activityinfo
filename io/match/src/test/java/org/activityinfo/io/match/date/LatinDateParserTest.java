@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 
@@ -42,6 +43,21 @@ public class LatinDateParserTest {
         assertThat(parser.parse("2011-01-15"), equalTo(ymd(2011,1,15)));
         assertThat(parser.parse("15 May 2049"), equalTo(ymd(2049,5,15)));
         assertThat(parser.parse("4/30/07"), equalTo(ymd(2007,4,30)));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidInput() {
+        LatinDateParser parser = new LatinDateParser();
+        assertThat(parser.parse("foo"), nullValue());
+    }
+
+    @Test
+    public void turkishDates() {
+        LatinDateParser parser = new LatinDateParser();
+
+        assertThat(parser.parse("3.12.2018"), equalTo(new LocalDate(2018, 12, 3)));
+        assertThat(parser.parse("3.ocak.2018"), equalTo(new LocalDate(2018, 1, 3)));
+        assertThat(parser.parse("15.mayıs.2018"), equalTo(new LocalDate(2018, 5, 15)));
     }
 
     @Test

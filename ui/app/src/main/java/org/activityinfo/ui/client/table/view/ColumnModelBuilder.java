@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.gwt.cell.client.DateCell;
-import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sencha.gxt.core.client.ValueProvider;
@@ -36,6 +35,7 @@ import org.activityinfo.analysis.table.*;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.ui.client.input.view.field.LocalDatePropertyEditor;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -167,7 +167,7 @@ public class ColumnModelBuilder {
 
         ColumnConfig<Integer, Date> config = new ColumnConfig<>(valueProvider, tableColumn.getWidth());
         config.setHeader(tableColumn.getLabel());
-        config.setCell(new DateCell(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)));
+        config.setCell(new DateCell(LocalDatePropertyEditor.FORMATTER));
         columnConfigs.add(config);
 
         DateFilter<Integer> filter = new DateFilter<>(valueProvider);

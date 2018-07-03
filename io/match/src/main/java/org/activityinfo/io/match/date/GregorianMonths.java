@@ -64,6 +64,35 @@ public class GregorianMonths {
      */
     public static int tryParseName(String string) {
         String lowered = string.toLowerCase();
+
+        // Some of the month names in turkish are not derived from
+        // latin, so require special handling
+        // https://en.wikipedia.org/wiki/Turkish_months
+        switch (lowered) {
+            case "ocak":
+                return JAN;
+            case "subat":
+            case "şubat":
+                return FEB;
+            case "nisan":
+                return APRIL;
+            case "haziran":
+                return JUNE;
+            case "temmuz":
+                return JULY;
+            case "eylül":
+            case "eylul":
+                return SEPT;
+            case "ekim":
+                return SEPT;
+            case "kasım":
+            case "kasim":
+                return NOV;
+            case "aralık":
+            case "aralik":
+                return DEC;
+        }
+
         switch(lowered.charAt(0)) {
             case 'e':
                 return JAN; // enero
