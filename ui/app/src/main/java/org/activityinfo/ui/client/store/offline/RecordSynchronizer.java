@@ -34,6 +34,8 @@ public class RecordSynchronizer {
 
     private static final Logger LOGGER = Logger.getLogger(RecordSynchronizer.class.getName());
 
+    private static final int SYNC_DELAY_MS = 5 * 60 * 1000;
+
     private FormStoreImpl formStore;
     private ActivityInfoClientAsync client;
 
@@ -56,5 +58,12 @@ public class RecordSynchronizer {
                 offlineStore.store(snapshot);
             });
         }
+    }
+
+    public void start() {
+        com.google.gwt.core.client.Scheduler.get().scheduleFixedDelay(() -> {
+            offlineStore.syncChanges();
+            return true;
+        }, SYNC_DELAY_MS);
     }
 }

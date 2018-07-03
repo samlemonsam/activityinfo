@@ -22,16 +22,16 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.Style;
-import com.sencha.gxt.widget.core.client.container.Container;
-import com.sencha.gxt.widget.core.client.container.HBoxLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.ResizeContainer;
-import com.sencha.gxt.widget.core.client.menu.*;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
@@ -64,8 +64,6 @@ public class OfflineMenu implements IsWidget {
         syncNowItem = new MenuItem(I18N.CONSTANTS.syncNow());
         syncNowItem.addSelectionHandler(event -> offlineStore.syncChanges());
 
-        CheckMenuItem syncAutoItem = new CheckMenuItem(I18N.CONSTANTS.syncAutomatically());
-
         clearMenuItem = new MenuItem(I18N.CONSTANTS.clearOfflineMode());
         clearMenuItem.addSelectionHandler(this::confirmOfflineDelete);
 
@@ -73,7 +71,6 @@ public class OfflineMenu implements IsWidget {
         menu.add(pendingChangesItem);
         menu.add(new SeparatorMenuItem());
         menu.add(syncNowItem);
-        menu.add(syncAutoItem);
         menu.add(new SeparatorMenuItem());
         menu.add(clearMenuItem);
 

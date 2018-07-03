@@ -97,6 +97,7 @@ public class AppEntryPoint implements EntryPoint {
 
         // Start synchronizer...
         RecordSynchronizer synchronizer = new RecordSynchronizer(httpStore, offlineStore);
+        synchronizer.start();
 
         viewport.add(appFrame);
 
