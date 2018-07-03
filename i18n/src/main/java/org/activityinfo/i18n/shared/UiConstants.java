@@ -1887,4 +1887,7 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please select a User to transfer ownership to. The selected User must accept responsibility for the Database before ownership will be transferred.")
     String transferDatabaseUserInfo();
+
+    @DefaultStringValue("Select a date (YYYY-MM-DD)")
+    String selectDatePlaceholder();
 }
