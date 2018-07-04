@@ -20,7 +20,6 @@ package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.Scheduler;
 import org.activityinfo.observable.Subscription;
 import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.HttpStore;
@@ -66,6 +65,7 @@ public class RecordSynchronizer {
             @Override
             public boolean execute() {
                 offlineStore.syncChanges();
+                return true;
             }
         }, SYNC_DELAY_MS);
     }

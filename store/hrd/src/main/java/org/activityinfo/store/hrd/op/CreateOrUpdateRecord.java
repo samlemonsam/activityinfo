@@ -28,10 +28,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.store.hrd.columns.BlockDescriptor;
-import org.activityinfo.store.hrd.columns.BlockFactory;
-import org.activityinfo.store.hrd.columns.BlockManager;
-import org.activityinfo.store.hrd.columns.RecordIdBlock;
+import org.activityinfo.store.hrd.columns.*;
 import org.activityinfo.store.hrd.entity.*;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.spi.RecordChangeType;
@@ -116,7 +113,8 @@ public class CreateOrUpdateRecord extends VoidWork {
                 toSave.add(updateRecordIdBlock(updated, newRecordIndex));
 
             } else if(changeType == RecordChangeType.DELETED) {
-                columnStorage.addDeletedIndex(existingEntity.getRecordNumber(columnStorage.getScheme()));
+                columnStorage.setDeletedCount(columnStorage.getDeletedCount() + 1);
+                toSave.add(updateTombstone(existingEntity.getRecordNumber(columnStorage.getScheme())));
                 toSave.add(columnStorage);
             }
 
@@ -186,5 +184,20 @@ public class CreateOrUpdateRecord extends VoidWork {
             blockEntity = new Entity(descriptor.key());
         }
         return blockManager.update(blockEntity, descriptor.getOffset(recordIndex), fieldValue);
+    }
+
+    private Entity updateTombstone(int recordIndex) {
+        TombstoneBlock tombstone = new TombstoneBlock();
+        BlockDescriptor descriptor = tombstone.getBlockDescriptor(formId, recordIndex);
+        Entity blockEntity;
+        try {
+            blockEntity = DatastoreServiceFactory.getDatastoreService().get(ofy().getTransaction(), descriptor.key());
+        } catch (EntityNotFoundException e) {
+            blockEntity = new Entity(descriptor.key());
+        }
+
+        tombstone.markDeleted(blockEntity, descriptor.getOffset(recordIndex));
+
+        return blockEntity;
     }
 }

@@ -61,7 +61,7 @@ public class SingleEnumBlock implements BlockManager {
 
     @Override
     public ColumnView buildView(FormColumnStorage header,
-                                Iterator<Entity> blockIterator) {
+                                TombstoneIndex deleted, Iterator<Entity> blockIterator) {
 
         Object2IntOpenHashMap<String> labelLookup = new Object2IntOpenHashMap<>();
         labelLookup.defaultReturnValue(-1);

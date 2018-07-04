@@ -50,22 +50,30 @@ public class StringBlock implements BlockManager {
 
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
         String[] values = new String[header.getRecordCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
             int blockStart = blockIndex * getBlockSize();
 
+            // Adjust start position depending on the number of records that have been deleted
+            // in preceding blocks.
+            int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
+
+            // Now fill the portion of the array needed
             String[] pool = StringPools.toArray((Blob) block.getProperty(POOL_PROPERTY));
             if(pool.length > 0) {
                 byte[] offsets = ((Blob)block.getProperty(OffsetArray.OFFSETS_PROPERTY)).getBytes();
                 int offsetCount = OffsetArray.length(offsets);
 
                 for (int i = 0; i < offsetCount; i++) {
-                    int offset = OffsetArray.get(offsets, i);
-                    if(offset != 0) {
-                        values[blockStart + i] = pool[offset - 1];
+                    if (!tombstones.isDeleted(blockStart + i)) {
+                        int offset = OffsetArray.get(offsets, i);
+                        if (offset != 0) {
+                            values[targetIndex] = pool[offset - 1];
+                        }
+                        targetIndex++;
                     }
                 }
             }

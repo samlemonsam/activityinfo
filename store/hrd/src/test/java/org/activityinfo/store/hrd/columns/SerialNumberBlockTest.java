@@ -45,7 +45,7 @@ public class SerialNumberBlockTest {
         FormColumnStorage header = new FormColumnStorage();
         header.setRecordCount(10);
 
-        ColumnView view = block.buildView(header, Arrays.asList(blockEntity).iterator());
+        ColumnView view = block.buildView(header, , Arrays.asList(blockEntity).iterator());
 
         assertThat(view.numRows(), equalTo(10));
         assertThat(view.getString(0), equalTo("00001"));
@@ -73,7 +73,7 @@ public class SerialNumberBlockTest {
         FormColumnStorage header = new FormColumnStorage();
         header.setRecordCount(6);
 
-        ColumnView view = block.buildView(header, Arrays.asList(blockEntity).iterator());
+        ColumnView view = block.buildView(header, , Arrays.asList(blockEntity).iterator());
 
         assertThat(view.numRows(), equalTo(6));
         assertThat(view.getString(0), equalTo("ABC-00001"));

@@ -190,7 +190,7 @@ public class NumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
 
         List<Entity> blocks = new ArrayList<>();
 

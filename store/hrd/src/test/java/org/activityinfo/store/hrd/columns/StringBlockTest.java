@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
+import static java.util.Collections.emptyIterator;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -24,12 +25,12 @@ public class StringBlockTest {
                     .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         helper.setUp();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         helper.tearDown();
     }
 
@@ -49,11 +50,31 @@ public class StringBlockTest {
         FormColumnStorage header = new FormColumnStorage();
         header.setRecordCount(10);
 
-        ColumnView view = block.buildView(header, Arrays.asList(blockEntity).iterator());
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
         assertThat(view.getString(0), equalTo("Hello World"));
         assertThat(view.getString(1), equalTo("Sue"));
         assertThat(view.getString(2), nullValue());
         assertThat(view.getString(8), equalTo("Bob"));
         assertThat(view.getString(9), equalTo("Dan"));
     }
+
+    @Test
+    public void deleted() {
+        StringBlock block = (StringBlock) BlockFactory.get(TextType.SIMPLE);
+        Entity blockEntity = new Entity("Block", 1);
+
+        block.update(blockEntity, 0, TextValue.valueOf("Hello World"));
+        block.update(blockEntity, 1, TextValue.valueOf("Goodbye World"));
+        block.update(blockEntity, 2, TextValue.valueOf("Hello Again"));
+
+        FormColumnStorage header = new FormColumnStorage();
+        header.setRecordCount(10);
+
+
+
+    }
+
+
 }

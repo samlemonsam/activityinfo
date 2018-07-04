@@ -38,6 +38,6 @@ public interface BlockManager {
      */
     Entity update(Entity blockEntity, int recordOffset, @Nullable FieldValue fieldValue);
 
-    ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator);
+    ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator);
 }
 

@@ -55,7 +55,7 @@ public class SerialNumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
         String[] values = new String[header.getRecordCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();

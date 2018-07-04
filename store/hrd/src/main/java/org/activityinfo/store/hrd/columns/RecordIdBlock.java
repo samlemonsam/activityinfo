@@ -40,7 +40,7 @@ public class RecordIdBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
 
         String[] ids = new String[header.getRecordCount()];
 

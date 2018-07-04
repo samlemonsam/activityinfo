@@ -61,7 +61,7 @@ public class EnumBlockTest {
         FormColumnStorage header = new FormColumnStorage();
         header.setRecordCount(5);
 
-        ColumnView view = block.buildView(header, Arrays.asList(blockEntity).iterator());
+        ColumnView view = block.buildView(header, , Arrays.asList(blockEntity).iterator());
         assertThat(view.getString(0), equalTo("Blue"));
         assertThat(view.getString(1), equalTo("Violet"));
         assertThat(view.getString(2), equalTo("Green"));

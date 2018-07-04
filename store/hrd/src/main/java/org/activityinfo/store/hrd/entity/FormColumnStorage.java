@@ -1,11 +1,8 @@
 package org.activityinfo.store.hrd.entity;
 
-import com.google.appengine.api.datastore.Blob;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.*;
-import com.googlecode.objectify.condition.IfNull;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.hrd.columns.RecordIndexSet;
 import org.activityinfo.store.hrd.columns.RecordNumbering;
 
 @Entity(name = "FormColumns")
@@ -26,14 +23,8 @@ public class FormColumnStorage {
     @Unindex
     private int deletedCount;
 
-    @IgnoreSave(IfNull.class)
-    private Blob deletedRecordSet;
-
     @Index
     private long version;
-
-    @Unindex
-    private long constructionStage;
 
     public FormColumnStorage() {
     }
@@ -88,16 +79,4 @@ public class FormColumnStorage {
     }
 
 
-    public void addDeletedIndex(int recordIndex) {
-        this.deletedCount++;
-        this.deletedRecordSet = RecordIndexSet.read(deletedRecordSet).add(recordIndex).toBlob();
-    }
-
-    public long getConstructionStage() {
-        return constructionStage;
-    }
-
-    public void setConstructionStage(long constructionStage) {
-        this.constructionStage = constructionStage;
-    }
 }
