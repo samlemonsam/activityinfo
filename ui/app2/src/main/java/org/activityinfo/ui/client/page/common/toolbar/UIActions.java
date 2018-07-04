@@ -74,7 +74,7 @@ public final class UIActions {
 
     public static final String RENAME = "rename";
 
-    public static final String TRANSFER_DATABASE = "transferDatabase";
+    public static final String TRANSFER_DATABASE = "transferDatabaseLabel";
 
     public static final String CANCEL_TRANSFER = "cancelTransfer";
 

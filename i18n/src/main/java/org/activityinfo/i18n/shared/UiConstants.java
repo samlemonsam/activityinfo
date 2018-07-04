@@ -1865,7 +1865,7 @@ public interface UiConstants extends Constants {
     String clearSort();
 
     @DefaultStringValue("Transfer Database")
-    String transferDatabase();
+    String transferDatabaseLabel();
 
     @DefaultStringValue("New Owner")
     String newDatabaseOwner();

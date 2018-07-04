@@ -28,7 +28,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.command.*;
+import org.activityinfo.legacy.shared.command.CreateEntity;
+import org.activityinfo.legacy.shared.command.Delete;
+import org.activityinfo.legacy.shared.command.GetSchema;
+import org.activityinfo.legacy.shared.command.UpdateEntity;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
@@ -228,7 +231,7 @@ public class DbListPresenter implements ActionListener {
         final FormDialogImpl dialog = new FormDialogImpl(form);
         dialog.setWidth(400);
         dialog.setHeight(220);
-        dialog.setHeadingText(I18N.CONSTANTS.transferDatabase());
+        dialog.setHeadingText(I18N.CONSTANTS.transferDatabaseLabel());
 
         dialog.show(new FormDialogCallback() {
             @Override
@@ -238,7 +241,7 @@ public class DbListPresenter implements ActionListener {
                     clearLocalCache();
                     loader.load();
                     dialog.hide();
-                    MessageBox.alert(I18N.CONSTANTS.transferDatabase(),
+                    MessageBox.alert(I18N.CONSTANTS.transferDatabaseLabel(),
                             I18N.MESSAGES.transferDatabase(user.getName()), null);
                     return null;
                 });
@@ -247,7 +250,7 @@ public class DbListPresenter implements ActionListener {
     }
 
     private void onCancelTransfer() {
-        MessageBox.confirm(I18N.CONSTANTS.transferDatabase(),
+        MessageBox.confirm(I18N.CONSTANTS.transferDatabaseLabel(),
                 I18N.CONSTANTS.pendingTransfer(),
                 new Listener<MessageBoxEvent>() {
                     @Override
