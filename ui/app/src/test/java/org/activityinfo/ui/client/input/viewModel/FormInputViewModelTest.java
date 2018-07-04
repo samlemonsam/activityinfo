@@ -488,6 +488,15 @@ public class FormInputViewModelTest {
 
         assertThat(viewModel.getSubForm(subFormFieldId).getActiveRecordRef(), equalTo(novemberId));
         assertThat(viewModel.getSubForm(subFormFieldId).isValid(), equalTo(true));
+
+        // Try deleting this record
+        inputModel = inputModel.deleteSubRecord(subForm.getActiveSubViewModel().getRecordRef());
+        viewModel = builder.build(inputModel);
+        subForm = viewModel.getSubForm(subFormFieldId);
+
+        assertThat(subForm.getActiveSubViewModel().isPlaceholder(), equalTo(true));
+        assertThat(subForm.getActiveSubViewModel().isEmpty(), equalTo(true));
+
     }
 
 

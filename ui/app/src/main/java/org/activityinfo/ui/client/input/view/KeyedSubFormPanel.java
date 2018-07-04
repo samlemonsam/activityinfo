@@ -73,6 +73,8 @@ public class KeyedSubFormPanel implements IsWidget {
 
     private SubFormViewModel viewModel;
 
+    private boolean empty = true;
+
     public KeyedSubFormPanel(RecordRef parentRef, FormSource formSource, FormTree.Node node,
                              FormTree subTree, InputHandler inputHandler) {
 
@@ -187,17 +189,24 @@ public class KeyedSubFormPanel implements IsWidget {
 
         LOGGER.info("activeRef = " + viewModel.getActiveRecordRef());
 
+        boolean nowEmpty = viewModel.getActiveSubViewModel().isEmpty();
+
         if(this.viewModel == null ||
             !this.viewModel.getActiveRecordRef().equals(viewModel.getActiveRecordRef())) {
 
             selector.init(viewModel.getActivePeriod());
             formPanel.init(viewModel.getActiveSubViewModel());
+
+        } else if(nowEmpty && !empty) {
+            formPanel.init(viewModel.getActiveSubViewModel());
         }
+
 
         formPanel.updateView(viewModel.getActiveSubViewModel());
         lockIndicator.setVisible(viewModel.getActiveSubViewModel().isLocked());
 
         this.viewModel = viewModel;
+        this.empty = nowEmpty;
     }
 
     private boolean canChangePeriod() {
@@ -205,10 +214,14 @@ public class KeyedSubFormPanel implements IsWidget {
           !viewModel.getActiveSubViewModel().isPlaceholder() &&
           !viewModel.getActiveSubViewModel().isValid()) {
 
+            inputHandler.validationRequested(viewModel.getActiveSubViewModel().getRecordRef());
+
             MessageBox box = new MessageBox(I18N.CONSTANTS.error(), I18N.CONSTANTS.pleaseFillInAllRequiredFields());
             box.setModal(true);
             box.show();
+
             return false;
+
         }
         return true;
     }
