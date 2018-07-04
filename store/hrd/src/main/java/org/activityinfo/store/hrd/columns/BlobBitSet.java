@@ -145,24 +145,29 @@ public class BlobBitSet {
 
             // ITERATE over BYTES
             while (remainingBits > 0 && byteIndex < (blockSize / 8)) {
+
+                int lastBit = Math.min(8, remainingBits);
+                int bitCount = lastBit - bitIndex;
+
                 if(byteIndex < block.length) {
                     int b = block[byteIndex];
 
                     // ITERATE over BITS
                     if (b != 0) {
-                        int bn = Math.min(8, remainingBits);
-                        for (int i = bitIndex; i < bn; i++) {
+                        for (int i = bitIndex; i < lastBit; i++) {
                             if ((b & (1 << i)) != 0) {
                                 bitSet.set(destBitIndex + i - bitIndex);
                             }
                         }
                     }
                 }
+
+                remainingBits -= bitCount;
+                destBitIndex += bitCount;
+
                 // Advance to next byte
                 bitIndex = 0;
                 byteIndex++;
-                remainingBits -= 8;
-                destBitIndex += 8;
             }
 
             // Advance to next block
