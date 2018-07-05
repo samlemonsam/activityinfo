@@ -165,6 +165,9 @@ public class SubFormAggregationTest {
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+        assertThat(columnSet.getColumnView("max_hh").getDouble(0), equalTo(40d));
+        assertThat(columnSet.getColumnView("max_hh").getDouble(1), equalTo(47d));
+
     }
 
 }

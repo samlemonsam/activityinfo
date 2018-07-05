@@ -112,10 +112,10 @@ public class CreateOrUpdateRecord extends VoidWork {
 
                 toSave.add(columnStorage);
                 toSave.add(updateRecordIdBlock(updated, newRecordIndex));
-//
-//                if(formClass.isSubForm()) {
-//                    toSave.add(updateParentIdBlock(updated, newRecordIndex));
-//                }
+
+                if(formClass.isSubForm()) {
+                    toSave.add(updateParentIdBlock(updated, newRecordIndex));
+                }
 
             } else if(changeType == RecordChangeType.DELETED) {
                 columnStorage.setDeletedCount(columnStorage.getDeletedCount() + 1);
