@@ -130,9 +130,9 @@ public class NumberBlock implements BlockManager {
 
     private Entity updateDoubleMissing(Entity blockEntity, int recordOffset) {
         Blob valueArray = (Blob) blockEntity.getProperty("doubleValues");
-        int currentLength = ValueArrays.length(valueArray, ValueArrays.REAL64);
+        int currentLength = ValueArrays.length(valueArray, DoubleValueArray.REAL64);
         if(recordOffset < currentLength) {
-            valueArray = ValueArrays.updateReal64(valueArray, recordOffset, Double.NaN);
+            valueArray = DoubleValueArray.update(valueArray, recordOffset, Double.NaN);
             blockEntity.setProperty("doubleValues", valueArray);
             return blockEntity;
 
@@ -144,7 +144,7 @@ public class NumberBlock implements BlockManager {
 
     private Entity updateDouble(Entity blockEntity, int recordOffset, double doubleValue) {
         Blob valueArray = (Blob) blockEntity.getProperty("doubleValues");
-        valueArray = ValueArrays.updateReal64(valueArray, recordOffset, doubleValue);
+        valueArray = DoubleValueArray.update(valueArray, recordOffset, doubleValue);
 
         blockEntity.setUnindexedProperty("storage", REAL64_STORAGE);
         blockEntity.setProperty("doubleValues", valueArray);
@@ -159,18 +159,18 @@ public class NumberBlock implements BlockManager {
         int previousLength = IntValueArray.length(valueArray);
         int length = Math.max(previousLength, recordOffset + 1);
 
-        byte[] updated = ValueArrays.allocate(length, ValueArrays.REAL64);
+        byte[] updated = ValueArrays.allocate(length, DoubleValueArray.REAL64);
 
         ByteBuffer source = ValueArrays.asBuffer(valueArray);
         ByteBuffer target = ValueArrays.asBuffer(updated);
 
         for (int i = 0; i < length; i++) {
             if(i == recordOffset) {
-                target.putDouble(i * ValueArrays.REAL64, doubleValue);
+                target.putDouble(i * DoubleValueArray.REAL64, doubleValue);
             } else if(i < previousLength) {
-                target.putDouble(i * ValueArrays.REAL64, IntValueArray.toDouble(source.getInt(i * IntValueArray.BYTES)));
+                target.putDouble(i * DoubleValueArray.REAL64, IntValueArray.toDouble(source.getInt(i * IntValueArray.BYTES)));
             } else {
-                target.putDouble(i * ValueArrays.REAL64, Double.NaN);
+                target.putDouble(i * DoubleValueArray.REAL64, Double.NaN);
             }
         }
 
