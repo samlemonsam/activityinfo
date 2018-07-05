@@ -30,7 +30,7 @@ public class TombstoneIndex {
 
         while(tombstoneBlocks.hasNext()) {
             Entity tombstone = tombstoneBlocks.next();
-            int blockIndex = (int) tombstone.getKey().getId();
+            int blockIndex = (int)(tombstone.getKey().getId() - 1);
             byte[] bitset = TombstoneBlock.getBitset(tombstone);
 
             blocks[blockIndex] = bitset;

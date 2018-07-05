@@ -10,6 +10,7 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.entity.FormColumnStorage;
 
 import javax.annotation.Nullable;
+import java.util.BitSet;
 import java.util.Iterator;
 
 public class RecordIdBlock implements BlockManager {
@@ -40,16 +41,24 @@ public class RecordIdBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormColumnStorage header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
 
-        String[] ids = new String[header.getRecordCount()];
+        String[] ids = new String[header.getRecordCount() - header.getDeletedCount()];
 
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
             int blockStart = blockIndex * getBlockSize();
 
-            StringPools.toArray((Blob) block.getProperty("ids"), ids, blockStart);
+            int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
+            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
+
+            String[] values = StringPools.toArray((Blob) block.getProperty("ids"));
+            for (int i = 0; i < values.length; i++) {
+                if(!deleted.get(i)) {
+                    ids[targetIndex++] = values[i];
+                }
+            }
         }
 
         return new StringArrayColumnView(ids);

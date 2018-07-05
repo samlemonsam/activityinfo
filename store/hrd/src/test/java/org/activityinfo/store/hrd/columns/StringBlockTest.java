@@ -65,15 +65,26 @@ public class StringBlockTest {
         StringBlock block = (StringBlock) BlockFactory.get(TextType.SIMPLE);
         Entity blockEntity = new Entity("Block", 1);
 
+
         block.update(blockEntity, 0, TextValue.valueOf("Hello World"));
         block.update(blockEntity, 1, TextValue.valueOf("Goodbye World"));
         block.update(blockEntity, 2, TextValue.valueOf("Hello Again"));
 
+
+        TombstoneBlock tombstoneBlock = new TombstoneBlock();
+        Entity tombstone = new Entity("Tombstone", 1);
+        tombstoneBlock.markDeleted(tombstone, 1);
+
         FormColumnStorage header = new FormColumnStorage();
-        header.setRecordCount(10);
+        header.setRecordCount(3);
+        header.setDeletedCount(1);
 
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Arrays.asList(tombstone).iterator());
 
-
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+        assertThat(view.numRows(), equalTo(2));
+        assertThat(view.getString(0), equalTo("Hello World"));
+        assertThat(view.getString(1), equalTo("Hello Again"));
     }
 
 
