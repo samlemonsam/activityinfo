@@ -34,10 +34,10 @@ public class BlobBitSetTest {
         assertThat(BlobBitSet.get(bytes, 3), equalTo(true));
         assertThat(BlobBitSet.get(bytes, 4), equalTo(false));
         assertThat(BlobBitSet.get(bytes, 50), equalTo(false));
+        assertThat(BlobBitSet.get(bytes, 230), equalTo(true));
         assertThat(BlobBitSet.get(bytes, 10240), equalTo(false));
 
-
-        assertThat(BlobBitSet.cardinality(bytes), equalTo(1));
+        assertThat(BlobBitSet.cardinality(bytes), equalTo(2));
     }
 
     @Test
@@ -71,15 +71,33 @@ public class BlobBitSetTest {
         assertThat(BlobBitSet.get(blocks[3], 15), equalTo(true));
 
         // Now convert the whole thing to a bit set
-//        BitSet bitSet = BlobBitSet.toBitSet(blocks, blockSize, 0, 16 * 4);
-//
-//        assertThat(toList(bitSet), contains(0, 1, 4, 8, 11, 23, 63));
+        BitSet bitSet = BlobBitSet.toBitSet(blocks, blockSize, 0, 16 * 4);
+
+        assertThat(toList(bitSet), contains(0, 1, 4, 8, 11, 23, 63));
 
         // Take a subset that straddles byte boundaries
         BitSet slice = BlobBitSet.toBitSet(blocks, blockSize, 10, 20);
 
         assertThat(toList(slice), contains(1, 13));
+    }
 
+    @Test
+    public void cardinality() {
+        byte[] a = new byte[] { 0b1001 };
+        byte[] b = new byte[] {(byte) 0xFF, 0b1 };
+
+        assertThat(BlobBitSet.cardinality(a), equalTo(2));
+        assertThat(BlobBitSet.cardinality(a, 3), equalTo(1));
+        assertThat(BlobBitSet.cardinality(a, 4), equalTo(2));
+        assertThat(BlobBitSet.cardinality(a, 8), equalTo(2));
+        assertThat(BlobBitSet.cardinality(a, 1047), equalTo(2));
+
+        assertThat(BlobBitSet.cardinality(b, 4), equalTo(4));
+        assertThat(BlobBitSet.cardinality(b, 8), equalTo(8));
+        assertThat(BlobBitSet.cardinality(b, 9), equalTo(9));
+        assertThat(BlobBitSet.cardinality(b, 10), equalTo(9));
+        assertThat(BlobBitSet.cardinality(b, 16), equalTo(9));
+        assertThat(BlobBitSet.cardinality(b, 18), equalTo(9));
     }
 
     private List<Integer> toList(BitSet bitSet) {

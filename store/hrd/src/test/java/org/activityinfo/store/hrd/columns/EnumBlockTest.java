@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -27,12 +28,12 @@ public class EnumBlockTest {
                     .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         helper.setUp();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         helper.tearDown();
     }
 
@@ -61,7 +62,9 @@ public class EnumBlockTest {
         FormColumnStorage header = new FormColumnStorage();
         header.setRecordCount(5);
 
-        ColumnView view = block.buildView(header, , Arrays.asList(blockEntity).iterator());
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Collections.emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
         assertThat(view.getString(0), equalTo("Blue"));
         assertThat(view.getString(1), equalTo("Violet"));
         assertThat(view.getString(2), equalTo("Green"));

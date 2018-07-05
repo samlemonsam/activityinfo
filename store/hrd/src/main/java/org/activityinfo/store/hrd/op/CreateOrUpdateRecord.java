@@ -31,6 +31,7 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.columns.*;
 import org.activityinfo.store.hrd.entity.*;
 import org.activityinfo.store.query.server.InvalidUpdateException;
+import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
 import org.activityinfo.store.spi.RecordChangeType;
 import org.activityinfo.store.spi.TypedRecordUpdate;
 
@@ -111,6 +112,10 @@ public class CreateOrUpdateRecord extends VoidWork {
 
                 toSave.add(columnStorage);
                 toSave.add(updateRecordIdBlock(updated, newRecordIndex));
+//
+//                if(formClass.isSubForm()) {
+//                    toSave.add(updateParentIdBlock(updated, newRecordIndex));
+//                }
 
             } else if(changeType == RecordChangeType.DELETED) {
                 columnStorage.setDeletedCount(columnStorage.getDeletedCount() + 1);
@@ -141,6 +146,8 @@ public class CreateOrUpdateRecord extends VoidWork {
     }
 
 
+
+
     private void updateColumnBlocks(FormClass formSchema,
                                     TypedRecordUpdate update,
                                     int recordIndex, List<Object> toSave) {
@@ -161,6 +168,13 @@ public class CreateOrUpdateRecord extends VoidWork {
         BlockDescriptor descriptor = blockManager.getBlockDescriptor(formId, RecordIdBlock.FIELD_NAME, recordIndex);
 
         return doUpdate(blockManager, descriptor, recordIndex, TextValue.valueOf(updated.getRecordId().asString()));
+    }
+
+    private Object updateParentIdBlock(FormRecordEntity updated, int newRecordIndex) {
+        BlockManager blockManager = new StringBlock(new ViewBuilderFactory.TextFieldReader());
+        BlockDescriptor descriptor = blockManager.getBlockDescriptor(formId, "@parent", newRecordIndex);
+
+        return doUpdate(blockManager, descriptor, newRecordIndex, TextValue.valueOf(updated.getParentRecordId()));
     }
 
     private Entity updateBlock(int recordIndex, FormField field, FieldValue fieldValue) {

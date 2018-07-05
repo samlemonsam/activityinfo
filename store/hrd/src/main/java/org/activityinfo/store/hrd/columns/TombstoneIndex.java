@@ -3,7 +3,9 @@ package org.activityinfo.store.hrd.columns;
 import com.google.appengine.api.datastore.Entity;
 import org.activityinfo.store.hrd.entity.FormColumnStorage;
 
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class TombstoneIndex {
@@ -18,9 +20,11 @@ public class TombstoneIndex {
     private final int[] deletedBefore;
 
     public TombstoneIndex(FormColumnStorage columnStorage, Iterator<Entity> tombstoneBlocks) {
-        this.blockCount = columnStorage.getRecordCount() / TombstoneBlock.BLOCK_SIZE;
+        this.blockCount = (columnStorage.getRecordCount() / TombstoneBlock.BLOCK_SIZE) + 1;
         this.blocks = new byte[blockCount][];
         this.deletedBefore = new int[blockCount];
+
+        Arrays.fill(this.blocks, BlobBitSet.EMPTY);
 
         int counts[] = new int[blockCount];
 
@@ -38,6 +42,10 @@ public class TombstoneIndex {
         }
     }
 
+    public TombstoneIndex(FormColumnStorage header) {
+        this(header, Collections.emptyIterator());
+    }
+
     /**
      * Counts the number of numbered records that have been deleted, prior to the zero-based {@code recordIndex}
      */
@@ -46,7 +54,7 @@ public class TombstoneIndex {
         int recordOffset = recordIndex % TombstoneBlock.BLOCK_SIZE;
         byte[] block = blocks[blockIndex];
 
-        return deletedBefore[blockIndex - 1] + BlobBitSet.cardinality(block, 0, recordOffset);
+        return deletedBefore[blockIndex] + BlobBitSet.cardinality(block, recordOffset);
     }
 
     private int blockIndex(int recordIndex) {

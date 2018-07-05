@@ -23,8 +23,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.geoadmin.model.GeoAdminClient;
 import org.activityinfo.geoadmin.model.Country;
+import org.activityinfo.geoadmin.model.GeoAdminClient;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -188,7 +188,7 @@ public class GeoAdmin extends JFrame {
         if(args.length == 1) {
             endpoint = args[0];
         } else {
-            endpoint = "https://www.activityinfo.org/resources";
+            endpoint = "http://localhost:8080/resources";
         }
 
         if(!tryLoadCredentialsFromHomeDir(endpoint)) {

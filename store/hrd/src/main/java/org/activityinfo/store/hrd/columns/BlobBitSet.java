@@ -8,7 +8,7 @@ import java.util.BitSet;
 
 public class BlobBitSet {
 
-    private final static byte[] EMPTY = new byte[0];
+    public final static byte[] EMPTY = new byte[0];
 
     private final static int ADDRESS_BITS_PER_WORD = 3;
 
@@ -109,29 +109,61 @@ public class BlobBitSet {
         }
     }
 
+    /**
+     * Counts the number of bits set in the byte-backed BitSet.
+     */
     public static int cardinality(byte[] bytes) {
-        return cardinality(bytes, 0, bytes.length);
-    }
-
-    public static int cardinality(byte[] bytes, int start, int length) {
         int count = 0;
-        int n = start + Math.min(bytes.length, length);
-        for (int i = start; i < n; i++) {
+        int n = bytes.length;
+        for (int i = 0; i < n; i++) {
             count += BIT_COUNT_LOOKUP[bytes[i] & 0xFF];
         }
         return count;
     }
 
     /**
+     * Counts the number of bits set in the first {@code bitCount}-bits.
      *
-     * @param blocks
+     * @param bytes a BitSet encoded as an array of bytes
+     * @param bitCount the number of bits to inspect.
+     * @return the number of bits set in the first bitCount bits.
+     */
+    public static int cardinality(byte[] bytes, int bitCount) {
+        int count = 0;
+
+        // Use the lookup table for the first
+        int byteCount = bitCount / 8;
+        int bytesToRead = Math.min(byteCount, bytes.length);
+        for (int i = 0; i < bytesToRead; i++) {
+            count += BIT_COUNT_LOOKUP[bytes[i] & 0xFF];
+        }
+        // Count any remaining bits one-by-one
+        if(bytes.length > byteCount) {
+            int bitIndex = (byteCount * 8);
+            while (bitIndex < bitCount) {
+                if (get(bytes, bitIndex)) {
+                    count++;
+                }
+                bitIndex++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Converts a subset of a partitioned BlobBitSet to a {@link BitSet}, which is backed by {@code long}s.
+     *
+     * Having this representation is useful when looping over a relatively smaller block of rows to see whether
+     * they are deleted.
+     *
+     * @param blocks an array of byte[] ar
      * @param blockSize the size of each block, in bits
      * @param startBitIndex the start bit index
      * @param length the number of bits to extract
      * @return
      */
     public static BitSet toBitSet(byte[][] blocks, int blockSize, int startBitIndex, int length) {
-        BitSet bitSet = new BitSet();
+        BitSet bitSet = new BitSet(length);
         int remainingBits = length;
         int blockIndex = startBitIndex / blockSize;
         int bitOffset = startBitIndex % blockSize;
