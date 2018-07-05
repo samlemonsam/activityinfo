@@ -10,6 +10,8 @@ dependencies {
     compile 'com.googlecode.objectify:objectify:5.1.13'
     compile libraries.appengine.mapreduce
 
+    testCompile project(":store:testing")
+
     testCompile libraries.dbunit
 
     testCompile libraries.appengine.testing
