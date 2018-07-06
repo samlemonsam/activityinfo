@@ -19,11 +19,13 @@
 package org.activityinfo.ui.client.page.entry.form;
 
 import com.extjs.gxt.ui.client.widget.form.DateField;
+import com.extjs.gxt.ui.client.widget.form.DateTimePropertyEditor;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.page.entry.form.field.PartnerComboBox;
 import org.activityinfo.ui.client.page.entry.form.field.ProjectComboBox;
 
@@ -70,6 +72,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
             dateField1.setName("date1");
             dateField1.setAllowBlank(false);
             dateField1.setFieldLabel(I18N.CONSTANTS.startDate());
+            dateField1.setPropertyEditor(new DateTimePropertyEditor(LocalDate.ISO_FORMAT));
             add(dateField1);
 
             dateField2 = new DateField();
@@ -77,6 +80,8 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
             dateField2.setAllowBlank(false);
             dateField2.setFieldLabel(I18N.CONSTANTS.endDate());
             dateField2.setValidator((field, value) -> validateDateRange(locks, activity));
+            dateField2.setPropertyEditor(new DateTimePropertyEditor(LocalDate.ISO_FORMAT));
+
             add(dateField2);
 
         }

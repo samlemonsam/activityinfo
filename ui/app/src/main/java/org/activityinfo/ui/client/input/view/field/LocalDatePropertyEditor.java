@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.input.view.field;
 import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.sencha.gxt.widget.core.client.form.PropertyEditor;
 import org.activityinfo.io.match.date.LatinDateParser;
+import org.activityinfo.model.type.time.LocalDate;
 
 import javax.annotation.Nonnull;
 import java.text.ParseException;
@@ -29,7 +30,7 @@ import java.util.Date;
 public class LocalDatePropertyEditor extends PropertyEditor<Date> {
 
     public static final LatinDateParser PARSER = new LatinDateParser();
-    public static final DateTimeFormat FORMATTER = DateTimeFormat.getFormat("yyyy-MM-dd");
+    public static final DateTimeFormat FORMATTER = DateTimeFormat.getFormat(LocalDate.ISO_FORMAT);
 
     @Override
     @SuppressWarnings("deprecation")
