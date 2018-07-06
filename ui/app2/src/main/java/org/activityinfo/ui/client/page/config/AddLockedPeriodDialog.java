@@ -32,6 +32,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.AddLockedPeriodView;
 import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
@@ -213,10 +214,12 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
         add(checkboxEnabled);
 
         datefieldToDate = new DateField();
+        datefieldToDate.setPropertyEditor(new DateTimePropertyEditor(LocalDate.ISO_FORMAT));
 
         datefieldFromDate = new DateField();
         datefieldFromDate.setFieldLabel(I18N.CONSTANTS.fromDate());
         datefieldFromDate.setAllowBlank(false);
+        datefieldFromDate.setPropertyEditor(new DateTimePropertyEditor(LocalDate.ISO_FORMAT));
         datefieldFromDate.setValidator((field, value) -> {
             if (datefieldFromDate.getValue().after(datefieldToDate.getValue())) {
                 return I18N.CONSTANTS.fromDateIsBeforeToDate();
