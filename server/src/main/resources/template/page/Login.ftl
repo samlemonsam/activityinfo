@@ -61,7 +61,7 @@
 
         <div class="login-problem"><a href="http://www.activityinfo.org/blog/posts/2017-08-16-humanitarian-id.html">What's this?</a></div>
 
-        <hr>
+        <hr style="margin: 2em auto">
 
         <p>Learn from best practices, join trainings, voice your questions and shape the future of ActivityInfo by
             joining our <strong>User Conference on September 26th-27th in Amman, Jordan</strong>. Seats are limited so
