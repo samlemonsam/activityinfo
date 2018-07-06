@@ -39,11 +39,19 @@ public class LocalDatePropertyEditor extends PropertyEditor<Date> {
         // Use a very lenient parser to allow for local input.
         // The result will always be formatted as a formatted string
 
+        Date date;
         try {
-            return PARSER.parse(text.toString()).atMidnightInMyTimezone();
+            date = PARSER.parse(text.toString()).atMidnightInMyTimezone();
         } catch (IllegalArgumentException e) {
             throw new ParseException(text.toString(), 0);
         }
+
+        LocalDate localDate = new LocalDate(date);
+        if(localDate.getYear() < 1000 || localDate.getYear() > 9999) {
+            throw new ParseException(text.toString(), 0);
+        }
+
+        return date;
     }
 
     @SuppressWarnings("deprecation")
