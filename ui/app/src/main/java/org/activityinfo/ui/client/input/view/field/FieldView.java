@@ -90,14 +90,8 @@ public class FieldView implements IsWidget {
     public boolean updateView(FormInputViewModel viewModel) {
 
         boolean requiresLayout = false;
-        boolean newlyVisible = viewModel.isRelevant(fieldId);
-        if(newlyVisible != visible) {
-            visible = newlyVisible;
-            container.setVisible(visible);
-            requiresLayout = true;
-        }
 
-        widget.setRelevant(!viewModel.isLocked());
+        widget.setRelevant(viewModel.isRelevant(fieldId) && !viewModel.isLocked());
 
         if(viewModel.isMissingErrorVisible(fieldId)) {
             invalidate(I18N.CONSTANTS.requiredFieldMessage());
