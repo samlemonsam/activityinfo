@@ -121,7 +121,7 @@ public class KeyedSubFormPanel implements IsWidget {
 
         VerticalLayoutContainer vlc = new VerticalLayoutContainer();
         vlc.add(toolBar, new VerticalLayoutContainer.VerticalLayoutData(1, -1));
-        vlc.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, 1,
+        vlc.add(formPanel, new VerticalLayoutContainer.VerticalLayoutData(1, -1,
                 new Margins(0, 5, 0, 5)));
 
         contentPanel = new ContentPanel();
