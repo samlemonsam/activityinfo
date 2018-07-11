@@ -20,6 +20,7 @@ package org.activityinfo.server.job;
 
 import com.google.inject.Inject;
 import org.activityinfo.analysis.table.EffectiveTableModel;
+import org.activityinfo.analysis.table.ExportViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.io.xls.XlsTableWriter;
 import org.activityinfo.model.analysis.TableModel;
@@ -34,8 +35,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResult> {
-
-    private static final int XLS_COLUMN_LIMITATION = 256;
 
     private final FormSource formSource;
     private final StorageProvider storageProvider;
@@ -59,8 +58,8 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();
         ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
 
-        if (effectiveTableModel.getColumns().size() > XLS_COLUMN_LIMITATION) {
-            throw new IOException("Current column length " + effectiveTableModel.getColumns().size() + " exceeds XLS Column Limitation of " + XLS_COLUMN_LIMITATION);
+        if (ExportViewModel.columnLimitExceeded(effectiveTableModel)) {
+            throw new IOException("Current column length " + ExportViewModel.exportedColumnSize(effectiveTableModel) + " exceeds XLS Column Limitation of " + ExportViewModel.XLS_COLUMN_LIMIT);
         }
 
         XlsTableWriter writer = new XlsTableWriter();
