@@ -59,7 +59,7 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();
         ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
 
-        if (columnSet.getColumns().size() > XLS_COLUMN_LIMITATION) {
+        if (effectiveTableModel.getColumns().size() > XLS_COLUMN_LIMITATION) {
             throw new IOException("Current column length " + columnSet.getColumns().size() + " exceeds XLS Column Limitation of " + XLS_COLUMN_LIMITATION);
         }
 
