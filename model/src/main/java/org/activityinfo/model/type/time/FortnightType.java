@@ -65,6 +65,15 @@ public class FortnightType implements PeriodType {
     }
 
     @Override
+    public PeriodValue parseString(String string) {
+        int dashIndex = string.indexOf("-");
+        if(dashIndex != -1) {
+            string = string.substring(0, dashIndex);
+        }
+        return new FortnightValue(EpiWeek.parse(string));
+    }
+
+    @Override
     public FortnightValue fromSubFormKey(RecordRef ref) {
         // s0417565614-2017W2-3
 
@@ -85,6 +94,7 @@ public class FortnightType implements PeriodType {
             return new FortnightValue(week);
         }
     }
+
 
 
 }

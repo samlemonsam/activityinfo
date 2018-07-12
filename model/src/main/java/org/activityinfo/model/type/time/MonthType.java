@@ -70,6 +70,11 @@ public class MonthType implements FieldType, PeriodType {
 
 
     @Override
+    public PeriodValue parseString(String string) {
+        return Month.parseMonth(string);
+    }
+
+    @Override
     public PeriodValue fromSubFormKey(RecordRef ref) {
         String recordId = ref.getRecordId().asString();
         String monthKey = recordId.substring(recordId.length() - 7);

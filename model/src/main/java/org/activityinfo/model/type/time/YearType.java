@@ -70,6 +70,11 @@ public class YearType implements FieldType, PeriodType {
     }
 
     @Override
+    public PeriodValue parseString(String string) {
+        return new YearValue(Integer.parseInt(string));
+    }
+
+    @Override
     public PeriodValue fromSubFormKey(RecordRef ref) {
         String subRecordId = ref.getRecordId().asString();
         String yearKey = subRecordId.substring(subRecordId.length() - 4);

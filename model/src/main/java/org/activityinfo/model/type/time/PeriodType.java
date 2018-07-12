@@ -26,6 +26,8 @@ import org.activityinfo.model.type.RecordRef;
  */
 public interface PeriodType extends FieldType {
 
+    PeriodValue parseString(String string);
+
     PeriodValue fromSubFormKey(RecordRef ref);
 
     /**

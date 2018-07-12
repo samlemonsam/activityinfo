@@ -27,6 +27,8 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 
+import java.util.Optional;
+
 /**
  * Constructs a series of updates to a FormClass
  */
@@ -97,6 +99,10 @@ public final class RecordUpdate {
     @JsOverlay
     public void setParentRecordId(String parentRecordId) {
         this.parentRecordId = parentRecordId;
+    }
+    @JsOverlay
+    public void setParentRecordId(Optional<String> parentRecordId) {
+        this.parentRecordId = parentRecordId.orElse(null);
     }
 
     @JsOverlay

@@ -149,7 +149,7 @@ public class EpiWeek implements Serializable, PeriodValue {
         //noinspection NonJREEmulationClassesInClientCode
         String[] tokens = epiWeekAsString.split("W");
         if (tokens.length != 2) {
-            throw new NumberFormatException();
+            throw new NumberFormatException(epiWeekAsString);
         }
         String year = tokens[0];
         String weekInYear = tokens[1];

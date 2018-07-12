@@ -32,6 +32,8 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.PeriodType;
+import org.activityinfo.model.type.time.PeriodValue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,6 +60,8 @@ public class FieldConverters {
             return GEO_POINT;
         } else if(type instanceof LocalDate) {
             return LOCAL_DATE;
+        } else if(type instanceof PeriodType) {
+            return new PeriodConverter(((PeriodType) type));
         } else {
             return recordType(type);
         }
@@ -105,6 +109,27 @@ public class FieldConverters {
         }
     };
 
+    private static class PeriodConverter implements FieldConverter<PeriodValue> {
+
+        private final PeriodType periodType;
+
+        private PeriodConverter(PeriodType periodType) {
+            this.periodType = periodType;
+        }
+
+        @Override
+        public Object toHrdProperty(PeriodValue value) {
+            return value.toString();
+        }
+
+        @Override
+        public PeriodValue toFieldValue(Object hrdValue) {
+            if(hrdValue instanceof String) {
+                return periodType.parseString((String) hrdValue);
+            }
+            return null;
+        }
+    }
 
     private static class ReferenceFieldConverter implements FieldConverter<ReferenceValue> {
 

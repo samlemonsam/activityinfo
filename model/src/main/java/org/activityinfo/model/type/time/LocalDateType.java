@@ -95,6 +95,11 @@ public class LocalDateType implements PeriodType {
     }
 
     @Override
+    public PeriodValue parseString(String string) {
+        return LocalDate.parse(string);
+    }
+
+    @Override
     public PeriodValue fromSubFormKey(RecordRef ref) {
         String subRecordId = ref.getRecordId().asString();
         String dateKey = subRecordId.substring(subRecordId.length() - 10);

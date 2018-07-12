@@ -26,6 +26,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
 
@@ -173,7 +174,7 @@ public class FormRecordEntity {
         Key<FormRecordEntity> recordKey = Key.create(formKey, FormRecordEntity.class, recordId.asString());
         return recordKey;
     }
-    
+
     public static Key<FormRecordEntity> key(FormClass formClass, ResourceId recordId) {
         return key(formClass.getId(), recordId);
     }
@@ -188,5 +189,9 @@ public class FormRecordEntity {
 
     public void setRecordNumber(int number) {
         this.number = number;
+    }
+
+    public RecordRef getRecordRef() {
+        return new RecordRef(getFormId(), getRecordId());
     }
 }
