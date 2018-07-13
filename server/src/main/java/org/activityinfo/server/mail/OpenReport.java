@@ -4,49 +4,10 @@ import org.activityinfo.json.JsonValue;
 
 public class OpenReport {
 
-    public static class Client {
-
-        private String name;
-        private String company;
-        private String family;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getCompany() {
-            return company;
-        }
-
-        public void setCompany(String company) {
-            this.company = company;
-        }
-
-        public String getFamily() {
-            return family;
-        }
-
-        public void setFamily(String family) {
-            this.family = family;
-        }
-
-        public static Client fromJson(JsonValue object) {
-            Client client = new Client();
-            client.setName(object.get("Name").asString());
-            client.setCompany(object.get("Company").asString());
-            client.setFamily(object.get("Family").asString());
-            return client;
-        }
-    }
-
     private String recordType;
     private boolean firstOpen;
-    private Client client;
-    private Client os;
+    private UserClient client;
+    private UserClient os;
     private String platform;
     private String UserAgent;
     private int readSeconds;
@@ -71,19 +32,19 @@ public class OpenReport {
         this.firstOpen = firstOpen;
     }
 
-    public Client getClient() {
+    public UserClient getClient() {
         return client;
     }
 
-    public void setClient(Client client) {
+    public void setClient(UserClient client) {
         this.client = client;
     }
 
-    public Client getOs() {
+    public UserClient getOs() {
         return os;
     }
 
-    public void setOs(Client os) {
+    public void setOs(UserClient os) {
         this.os = os;
     }
 
@@ -156,10 +117,10 @@ public class OpenReport {
         openReport.setRecordType(object.get("RecordType").asString());
         openReport.setFirstOpen(object.get("FirstOpen").asBoolean());
 
-        Client client = Client.fromJson(object.get("Client"));
+        UserClient client = UserClient.fromJson(object.get("Client"));
         openReport.setClient(client);
 
-        Client os = Client.fromJson(object.get("OS"));
+        UserClient os = UserClient.fromJson(object.get("OS"));
         openReport.setOs(os);
 
         openReport.setPlatform(object.get("Platform").asString());
