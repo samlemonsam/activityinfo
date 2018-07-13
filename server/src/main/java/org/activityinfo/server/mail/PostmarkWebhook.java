@@ -94,8 +94,14 @@ public class PostmarkWebhook {
     @POST
     @Path("/linkClick")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response link(@HeaderParam("X-Postmark-Token") String token) {
+    public Response link(@HeaderParam("X-Postmark-Token") String token, ClickReport clickReport) {
         checkToken(token);
+
+        LOGGER.info("Email = " + clickReport.getRecipient());
+        LOGGER.info("Link = " + clickReport.getOriginalLink());
+        LOGGER.info("ReceivedAt = " + clickReport.getReceivedAt());
+        LOGGER.info("Token = " + token);
+
         return Response.ok().build();
     }
 }
