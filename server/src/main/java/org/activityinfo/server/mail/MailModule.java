@@ -29,7 +29,7 @@ public class MailModule extends AbstractRestModule {
 
     @Override
     protected void configureResources() {
-        bindResource(BounceHook.class, "/postmark/*");
+        bindResource(BounceHook.class, "/postmark");
     }
 
     @Provides @Singleton
