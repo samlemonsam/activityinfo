@@ -49,8 +49,13 @@ public class PostmarkWebhook {
     @POST
     @Path("/delivery")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response delivery(@HeaderParam("X-Postmark-Token") String token) {
+    public Response delivery(@HeaderParam("X-Postmark-Token") String token, DeliveryReport deliveryReport) {
         checkToken(token);
+
+        LOGGER.info("Email = " + deliveryReport.getRecipient());
+        LOGGER.info("DeliveredAt = " + deliveryReport.getDeliveredAt());
+        LOGGER.info("Token = " + token);
+
         return Response.ok().build();
     }
 
