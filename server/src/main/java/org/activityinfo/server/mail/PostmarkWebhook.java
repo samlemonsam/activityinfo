@@ -58,9 +58,8 @@ public class PostmarkWebhook {
     public Response delivery(@HeaderParam("X-Postmark-Token") String token, DeliveryReport deliveryReport) {
         checkToken(token);
 
-        LOGGER.info("Email = " + deliveryReport.getRecipient());
+        LOGGER.info("MessageId = " + deliveryReport.getMessageId());
         LOGGER.info("DeliveredAt = " + deliveryReport.getDeliveredAt());
-        LOGGER.info("Token = " + token);
 
         return Response.ok().build();
     }
@@ -70,7 +69,10 @@ public class PostmarkWebhook {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response bounce(@HeaderParam("X-Postmark-Token") String token, BounceReport bounceReport) {
         checkToken(token);
+
+        LOGGER.info("MessageId = " + bounceReport.getMessageId());
         removeEmailNotifications(bounceReport.getEmail());
+
         return Response.ok().build();
     }
 
@@ -125,10 +127,8 @@ public class PostmarkWebhook {
     public Response spam(@HeaderParam("X-Postmark-Token") String token, BounceReport bounceReport) {
         checkToken(token);
 
+        LOGGER.info("MessageId = " + bounceReport.getMessageId());
         LOGGER.info("Subject = " + bounceReport.getSubject());
-        LOGGER.info("Email = " + bounceReport.getEmail());
-        LOGGER.info("Type = " + bounceReport.getType());
-        LOGGER.info("Token = " + token);
 
         return Response.ok().build();
     }
@@ -139,11 +139,10 @@ public class PostmarkWebhook {
     public Response open(@HeaderParam("X-Postmark-Token") String token, OpenReport openReport) {
         checkToken(token);
 
-        LOGGER.info("Email = " + openReport.getRecipient());
+        LOGGER.info("MessageId = " + openReport.getMessageId());
         LOGGER.info("ReadSeconds = " + openReport.getReadSeconds());
         LOGGER.info("FirstOpen = " + openReport.isFirstOpen());
         LOGGER.info("ReceivedAt = " + openReport.getReceivedAt());
-        LOGGER.info("Token = " + token);
 
         return Response.ok().build();
     }
@@ -154,10 +153,9 @@ public class PostmarkWebhook {
     public Response link(@HeaderParam("X-Postmark-Token") String token, ClickReport clickReport) {
         checkToken(token);
 
-        LOGGER.info("Email = " + clickReport.getRecipient());
+        LOGGER.info("MessageId = " + clickReport.getMessageId());
         LOGGER.info("Link = " + clickReport.getOriginalLink());
         LOGGER.info("ReceivedAt = " + clickReport.getReceivedAt());
-        LOGGER.info("Token = " + token);
 
         return Response.ok().build();
     }
