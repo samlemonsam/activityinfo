@@ -25,6 +25,7 @@ import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.User;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -74,9 +75,14 @@ public class PostmarkWebhook {
     }
 
     private void removeEmailNotifications(String bouncedUserEmail) {
+        User bouncedUser = getBouncedUser(bouncedUserEmail);
+        if (bouncedUser == null) {
+            LOGGER.info("User not found for bounced email.");
+            return;
+        }
+
         startTransaction();
         try {
-            User bouncedUser = getBouncedUser(bouncedUserEmail);
             LOGGER.info(() -> "Removing email notifications for user " + bouncedUser.getId());
             bouncedUser.setEmailNotification(false);
             entityManagerProvider.get().persist(bouncedUser);
@@ -88,11 +94,15 @@ public class PostmarkWebhook {
     }
 
     private User getBouncedUser(String bouncedUserEmail) {
-        return entityManagerProvider.get().createQuery(
-                "SELECT u FROM User u " +
-                        "WHERE u.email = :email", User.class)
-                .setParameter("email", bouncedUserEmail)
-                .getSingleResult();
+        try {
+            return entityManagerProvider.get().createQuery(
+                    "SELECT u FROM User u " +
+                            "WHERE u.email = :email", User.class)
+                    .setParameter("email", bouncedUserEmail)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     private void commitTransaction() {
