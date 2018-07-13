@@ -76,7 +76,7 @@ public class PostmarkWebhook {
         startTransaction();
         try {
             User bouncedUser = entityManager.get().createQuery(
-                    "SELECT u FROM User " +
+                    "SELECT u FROM User u " +
                             "WHERE u.email = :email", User.class)
                     .setParameter("email", bouncedUserEmail)
                     .getSingleResult();
