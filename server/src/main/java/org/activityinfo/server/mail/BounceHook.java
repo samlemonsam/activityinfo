@@ -28,30 +28,29 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.logging.Logger;
 
-@Path("/bounceHook")
+@Path("/postmark")
 public class BounceHook {
 
     private static final Logger LOGGER = Logger.getLogger(BounceHook.class.getName());
 
-    private final String bounceHookToken;
+    private final String postmarkToken;
 
     @Inject
     public BounceHook(DeploymentConfiguration config) {
-        bounceHookToken = config.getProperty("postmark.bouncehook.key");
+        postmarkToken = config.getProperty("postmark.bouncehook.key");
     }
 
     @POST 
-    @Path("/{token}") 
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response bounced(@PathParam("token") String token, Bounce bounce) {
+    public Response mailStatus(@HeaderParam("X-Postmark-Token") String token, MailReport mailReport) {
 
-        if (Strings.isNullOrEmpty(bounceHookToken) || !bounceHookToken.equals(token)) {
+        if (Strings.isNullOrEmpty(postmarkToken) || !postmarkToken.equals(token)) {
             throw new WebApplicationException(Status.UNAUTHORIZED);
         }
 
-        LOGGER.info("Subject = " + bounce.getSubject());
-        LOGGER.info("Email = " + bounce.getEmail());
-        LOGGER.info("Type = " + bounce.getType());
+        LOGGER.info("Subject = " + mailReport.getSubject());
+        LOGGER.info("Email = " + mailReport.getEmail());
+        LOGGER.info("Type = " + mailReport.getType());
         LOGGER.info("Token = " + token);
 
         return Response.ok().build();

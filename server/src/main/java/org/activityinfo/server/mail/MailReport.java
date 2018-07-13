@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Bounce {
+public class MailReport {
 
     @JsonProperty("ID")
     private String id;
