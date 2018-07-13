@@ -23,7 +23,7 @@ import org.activityinfo.json.JsonValue;
 public class BounceReport {
 
     private String recordType;
-    private String id;
+    private int id;
     private String type;
     private int typeCode;
     private String name;
@@ -46,11 +46,11 @@ public class BounceReport {
         this.recordType = recordType;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -169,7 +169,7 @@ public class BounceReport {
         }
 
         bounceReport.setRecordType(object.get("RecordType").asString());
-        bounceReport.setId(object.get("ID").asString());
+        bounceReport.setId(object.get("ID").asInt());
         bounceReport.setType(object.get("Type").asString());
         bounceReport.setTypeCode(object.get("TypeCode").asInt());
         bounceReport.setName(object.get("Name").asString());
