@@ -76,8 +76,14 @@ public class PostmarkWebhook {
     @POST
     @Path("/spamComplaint")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response spam(@HeaderParam("X-Postmark-Token") String token) {
+    public Response spam(@HeaderParam("X-Postmark-Token") String token, BounceReport bounceReport) {
         checkToken(token);
+
+        LOGGER.info("Subject = " + bounceReport.getSubject());
+        LOGGER.info("Email = " + bounceReport.getEmail());
+        LOGGER.info("Type = " + bounceReport.getType());
+        LOGGER.info("Token = " + token);
+
         return Response.ok().build();
     }
 
