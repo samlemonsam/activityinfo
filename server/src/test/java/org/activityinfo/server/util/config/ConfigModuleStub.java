@@ -35,6 +35,7 @@ public class ConfigModuleStub extends AbstractModule {
     public DeploymentConfiguration provideDeploymentConfig() {
         Properties properties = new Properties();
         properties.setProperty(DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME, "app_default_bucket");
+        properties.setProperty(DeploymentConfiguration.POSTMARK_WEBHOOK_TOKEN, "test_token");
         return new DeploymentConfiguration(properties);
     }
 

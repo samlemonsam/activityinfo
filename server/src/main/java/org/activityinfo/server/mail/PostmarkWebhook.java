@@ -20,10 +20,11 @@ package org.activityinfo.server.mail;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.activityinfo.server.DeploymentConfiguration;
-import org.activityinfo.server.database.hibernate.EntityManagerProvider;
 import org.activityinfo.server.database.hibernate.entity.User;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,12 +37,12 @@ public class PostmarkWebhook {
     private static final Logger LOGGER = Logger.getLogger(PostmarkWebhook.class.getName());
 
     private final String postmarkToken;
-    private final EntityManagerProvider entityManager;
+    private final Provider<EntityManager> entityManagerProvider;
 
     @Inject
-    public PostmarkWebhook(DeploymentConfiguration config, EntityManagerProvider entityManager) {
+    public PostmarkWebhook(DeploymentConfiguration config, Provider<EntityManager> entityManagerProvider) {
         postmarkToken = config.getProperty("postmark.bouncehook.key");
-        this.entityManager = entityManager;
+        this.entityManagerProvider = entityManagerProvider;
     }
 
     private void checkToken(String token) {
@@ -75,13 +76,10 @@ public class PostmarkWebhook {
     private void removeEmailNotifications(String bouncedUserEmail) {
         startTransaction();
         try {
-            User bouncedUser = entityManager.get().createQuery(
-                    "SELECT u FROM User u " +
-                            "WHERE u.email = :email", User.class)
-                    .setParameter("email", bouncedUserEmail)
-                    .getSingleResult();
+            User bouncedUser = getBouncedUser(bouncedUserEmail);
             LOGGER.info(() -> "Removing email notifications for user " + bouncedUser.getId());
             bouncedUser.setEmailNotification(false);
+            entityManagerProvider.get().persist(bouncedUser);
         } catch (Exception e) {
             rollbackTransaction();
             throw new RuntimeException(e);
@@ -89,17 +87,25 @@ public class PostmarkWebhook {
         commitTransaction();
     }
 
+    private User getBouncedUser(String bouncedUserEmail) {
+        return entityManagerProvider.get().createQuery(
+                "SELECT u FROM User u " +
+                        "WHERE u.email = :email", User.class)
+                .setParameter("email", bouncedUserEmail)
+                .getSingleResult();
+    }
+
     private void commitTransaction() {
-        entityManager.get().getTransaction().commit();
+        entityManagerProvider.get().getTransaction().commit();
     }
 
     private void rollbackTransaction() {
-        entityManager.get().getTransaction().rollback();
+        entityManagerProvider.get().getTransaction().rollback();
     }
 
     private void startTransaction() {
-        if(!entityManager.get().getTransaction().isActive()) {
-            entityManager.get().getTransaction().begin();
+        if(!entityManagerProvider.get().getTransaction().isActive()) {
+            entityManagerProvider.get().getTransaction().begin();
         }
     }
 
