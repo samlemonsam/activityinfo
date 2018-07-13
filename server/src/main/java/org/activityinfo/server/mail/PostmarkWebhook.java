@@ -21,6 +21,8 @@ package org.activityinfo.server.mail;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.activityinfo.server.DeploymentConfiguration;
+import org.activityinfo.server.database.hibernate.EntityManagerProvider;
+import org.activityinfo.server.database.hibernate.entity.User;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -34,10 +36,12 @@ public class PostmarkWebhook {
     private static final Logger LOGGER = Logger.getLogger(PostmarkWebhook.class.getName());
 
     private final String postmarkToken;
+    private final EntityManagerProvider entityManager;
 
     @Inject
-    public PostmarkWebhook(DeploymentConfiguration config) {
+    public PostmarkWebhook(DeploymentConfiguration config, EntityManagerProvider entityManager) {
         postmarkToken = config.getProperty("postmark.bouncehook.key");
+        this.entityManager = entityManager;
     }
 
     private void checkToken(String token) {
@@ -70,7 +74,39 @@ public class PostmarkWebhook {
         LOGGER.info("Type = " + bounceReport.getType());
         LOGGER.info("Token = " + token);
 
+        removeEmailNotifications(bounceReport.getEmail());
+
         return Response.ok().build();
+    }
+
+    private void removeEmailNotifications(String bouncedUserEmail) {
+        startTransaction();
+        try {
+            User bouncedUser = entityManager.get().createQuery(
+                    "SELECT u FROM User " +
+                            "WHERE u.email = :email", User.class)
+                    .setParameter("email", bouncedUserEmail)
+                    .getSingleResult();
+            bouncedUser.setEmailNotification(false);
+        } catch (Exception e) {
+            rollbackTransaction();
+            throw new RuntimeException(e);
+        }
+        commitTransaction();
+    }
+
+    private void commitTransaction() {
+        entityManager.get().getTransaction().commit();
+    }
+
+    private void rollbackTransaction() {
+        entityManager.get().getTransaction().rollback();
+    }
+
+    private void startTransaction() {
+        if(!entityManager.get().getTransaction().isActive()) {
+            entityManager.get().getTransaction().begin();
+        }
     }
 
     @POST
