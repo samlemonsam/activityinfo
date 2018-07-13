@@ -79,8 +79,15 @@ public class PostmarkWebhook {
     @POST
     @Path("/open")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response open(@HeaderParam("X-Postmark-Token") String token) {
+    public Response open(@HeaderParam("X-Postmark-Token") String token, OpenReport openReport) {
         checkToken(token);
+
+        LOGGER.info("Email = " + openReport.getRecipient());
+        LOGGER.info("ReadSeconds = " + openReport.getReadSeconds());
+        LOGGER.info("FirstOpen = " + openReport.isFirstOpen());
+        LOGGER.info("ReceivedAt = " + openReport.getReceivedAt());
+        LOGGER.info("Token = " + token);
+
         return Response.ok().build();
     }
 
