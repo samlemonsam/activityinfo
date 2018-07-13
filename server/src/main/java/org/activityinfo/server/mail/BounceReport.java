@@ -164,7 +164,7 @@ public class BounceReport {
         if (!object.hasKey("RecordType")) {
             throw new IllegalArgumentException("No RecordType defined");
         }
-        if (object.get("RecordType").isJsonNull() || object.get("RecordType").asString().equals("Bounce")) {
+        if (object.get("RecordType").isJsonNull() || !object.get("RecordType").asString().equals("Bounce")) {
             throw new IllegalArgumentException("RecordType is not Bounce");
         }
 
