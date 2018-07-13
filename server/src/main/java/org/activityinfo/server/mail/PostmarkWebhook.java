@@ -68,14 +68,7 @@ public class PostmarkWebhook {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response bounce(@HeaderParam("X-Postmark-Token") String token, BounceReport bounceReport) {
         checkToken(token);
-
-        LOGGER.info("Subject = " + bounceReport.getSubject());
-        LOGGER.info("Email = " + bounceReport.getEmail());
-        LOGGER.info("Type = " + bounceReport.getType());
-        LOGGER.info("Token = " + token);
-
         removeEmailNotifications(bounceReport.getEmail());
-
         return Response.ok().build();
     }
 
@@ -87,6 +80,7 @@ public class PostmarkWebhook {
                             "WHERE u.email = :email", User.class)
                     .setParameter("email", bouncedUserEmail)
                     .getSingleResult();
+            LOGGER.info(() -> "Removing email notifications for user " + bouncedUser.getId());
             bouncedUser.setEmailNotification(false);
         } catch (Exception e) {
             rollbackTransaction();
