@@ -168,6 +168,14 @@ public class PostmarkWebhook {
         LOGGER.info("FirstOpen = " + openReport.isFirstOpen());
         LOGGER.info("ReceivedAt = " + openReport.getReceivedAt());
 
+        User readingUser = getUser(openReport.getRecipient());
+        if (readingUser == null) {
+            LOGGER.warning("User not found for given email.");
+            return Response.ok().build();
+        }
+
+        LOGGER.info(() -> "TRACK User " + readingUser.getId() + " " + TRACK_OPEN);
+
         return Response.ok().build();
     }
 
