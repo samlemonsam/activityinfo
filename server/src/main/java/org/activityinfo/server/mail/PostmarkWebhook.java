@@ -37,6 +37,12 @@ public class PostmarkWebhook {
 
     private static final Logger LOGGER = Logger.getLogger(PostmarkWebhook.class.getName());
 
+    private static final String TRACK_BOUNCE = "postmark_bounce";
+    private static final String TRACK_OPEN = "postmark_open";
+    private static final String TRACK_DELIVERY = "postmark_delivery";
+    private static final String TRACK_SPAM_COMPLAINT = "postmark_spam";
+    private static final String TRACK_LINK_CLICK = "postmark_linkClick";
+
     private final String postmarkToken;
     private final Provider<EntityManager> entityManagerProvider;
 
@@ -71,18 +77,20 @@ public class PostmarkWebhook {
         checkToken(token);
 
         LOGGER.info("MessageId = " + bounceReport.getMessageId());
-        removeEmailNotifications(bounceReport.getEmail());
+
+        User bouncedUser = getBouncedUser(bounceReport.getEmail());
+        if (bouncedUser == null) {
+            LOGGER.info("User not found for bounced email.");
+            return Response.ok().build();
+        }
+
+        LOGGER.info(() -> "TRACK User " + bouncedUser.getId() + " " + TRACK_BOUNCE);
+        removeEmailNotifications(bouncedUser);
 
         return Response.ok().build();
     }
 
-    private void removeEmailNotifications(String bouncedUserEmail) {
-        User bouncedUser = getBouncedUser(bouncedUserEmail);
-        if (bouncedUser == null) {
-            LOGGER.info("User not found for bounced email.");
-            return;
-        }
-
+    private void removeEmailNotifications(User bouncedUser) {
         startTransaction();
         try {
             LOGGER.info(() -> "Removing email notifications for user " + bouncedUser.getId());
