@@ -65,12 +65,11 @@ public class PostmarkWebhook {
     public Response delivery(@HeaderParam("X-Postmark-Token") String token, DeliveryReport deliveryReport) {
         checkToken(token);
 
-        LOGGER.info("MessageId = " + deliveryReport.getMessageId());
-        LOGGER.info("DeliveredAt = " + deliveryReport.getDeliveredAt());
+        LOGGER.info(() -> "MessageId = " + deliveryReport.getMessageId() + "; DeliveredAt = " + deliveryReport.getDeliveredAt());
 
         User recipientUser = getUser(deliveryReport.getRecipient());
         if (recipientUser == null) {
-            LOGGER.warning("User not found for recipient.");
+            LOGGER.warning(() -> "User not found for recipient.");
             return Response.ok().build();
         }
 
@@ -85,11 +84,11 @@ public class PostmarkWebhook {
     public Response bounce(@HeaderParam("X-Postmark-Token") String token, BounceReport bounceReport) {
         checkToken(token);
 
-        LOGGER.info("MessageId = " + bounceReport.getMessageId());
+        LOGGER.info(() -> "MessageId = " + bounceReport.getMessageId());
 
         User bouncedUser = getUser(bounceReport.getEmail());
         if (bouncedUser == null) {
-            LOGGER.warning("User not found for bounced email.");
+            LOGGER.warning(() -> "User not found for bounced email.");
             return Response.ok().build();
         }
 
@@ -146,12 +145,11 @@ public class PostmarkWebhook {
     public Response spam(@HeaderParam("X-Postmark-Token") String token, BounceReport bounceReport) {
         checkToken(token);
 
-        LOGGER.info("MessageId = " + bounceReport.getMessageId());
-        LOGGER.info("Subject = " + bounceReport.getSubject());
+        LOGGER.info(() -> "MessageId = " + bounceReport.getMessageId() + "; Subject = " + bounceReport.getSubject());
 
         User complainant = getUser(bounceReport.getEmail());
         if (complainant == null) {
-            LOGGER.warning("User filing spam report not found.");
+            LOGGER.warning(() -> "User filing spam report not found.");
             return Response.ok().build();
         }
 
@@ -166,14 +164,15 @@ public class PostmarkWebhook {
     public Response open(@HeaderParam("X-Postmark-Token") String token, OpenReport openReport) {
         checkToken(token);
 
-        LOGGER.info("MessageId = " + openReport.getMessageId());
-        LOGGER.info("ReadSeconds = " + openReport.getReadSeconds());
-        LOGGER.info("FirstOpen = " + openReport.isFirstOpen());
-        LOGGER.info("ReceivedAt = " + openReport.getReceivedAt());
+        LOGGER.info(() ->
+                "MessageId = " + openReport.getMessageId() + "; " +
+                "ReadSeconds = " + openReport.getReadSeconds() + "; " +
+                "FirstOpen = " + openReport.isFirstOpen() + "; " +
+                "ReceivedAt = " + openReport.getReceivedAt());
 
         User readingUser = getUser(openReport.getRecipient());
         if (readingUser == null) {
-            LOGGER.warning("User not found for given email.");
+            LOGGER.warning(() -> "User not found for given email.");
             return Response.ok().build();
         }
 
@@ -188,13 +187,14 @@ public class PostmarkWebhook {
     public Response link(@HeaderParam("X-Postmark-Token") String token, ClickReport clickReport) {
         checkToken(token);
 
-        LOGGER.info("MessageId = " + clickReport.getMessageId());
-        LOGGER.info("Link = " + clickReport.getOriginalLink());
-        LOGGER.info("ReceivedAt = " + clickReport.getReceivedAt());
+        LOGGER.info(() ->
+                "MessageId = " + clickReport.getMessageId() + "; " +
+                "Link = " + clickReport.getOriginalLink() + "; " +
+                "ReceivedAt = " + clickReport.getReceivedAt());
 
         User clickThruUser = getUser(clickReport.getRecipient());
         if (clickThruUser == null) {
-            LOGGER.warning("User not found for given email.");
+            LOGGER.warning(() -> "User not found for given email.");
             return Response.ok().build();
         }
 
