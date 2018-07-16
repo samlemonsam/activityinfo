@@ -67,6 +67,14 @@ public class PostmarkWebhook {
         LOGGER.info("MessageId = " + deliveryReport.getMessageId());
         LOGGER.info("DeliveredAt = " + deliveryReport.getDeliveredAt());
 
+        User recipientUser = getUser(deliveryReport.getRecipient());
+        if (recipientUser == null) {
+            LOGGER.warning("User not found for recipient.");
+            return Response.ok().build();
+        }
+
+        LOGGER.info(() -> "TRACK User " + recipientUser.getId() + " " + TRACK_DELIVERY);
+
         return Response.ok().build();
     }
 
@@ -78,9 +86,9 @@ public class PostmarkWebhook {
 
         LOGGER.info("MessageId = " + bounceReport.getMessageId());
 
-        User bouncedUser = getBouncedUser(bounceReport.getEmail());
+        User bouncedUser = getUser(bounceReport.getEmail());
         if (bouncedUser == null) {
-            LOGGER.info("User not found for bounced email.");
+            LOGGER.warning("User not found for bounced email.");
             return Response.ok().build();
         }
 
@@ -103,12 +111,12 @@ public class PostmarkWebhook {
         commitTransaction();
     }
 
-    private User getBouncedUser(String bouncedUserEmail) {
+    private User getUser(String userEmail) {
         try {
             return entityManagerProvider.get().createQuery(
                     "SELECT u FROM User u " +
                             "WHERE u.email = :email", User.class)
-                    .setParameter("email", bouncedUserEmail)
+                    .setParameter("email", userEmail)
                     .getSingleResult();
         } catch (NoResultException e) {
             return null;
