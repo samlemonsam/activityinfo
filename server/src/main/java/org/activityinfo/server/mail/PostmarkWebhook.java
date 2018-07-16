@@ -189,6 +189,14 @@ public class PostmarkWebhook {
         LOGGER.info("Link = " + clickReport.getOriginalLink());
         LOGGER.info("ReceivedAt = " + clickReport.getReceivedAt());
 
+        User clickThruUser = getUser(clickReport.getRecipient());
+        if (clickThruUser == null) {
+            LOGGER.warning("User not found for given email.");
+            return Response.ok().build();
+        }
+
+        LOGGER.info(() -> "TRACK User " + clickThruUser.getId() + " " + TRACK_LINK_CLICK);
+
         return Response.ok().build();
     }
 }
