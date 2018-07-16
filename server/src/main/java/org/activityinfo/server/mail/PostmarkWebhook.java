@@ -146,6 +146,14 @@ public class PostmarkWebhook {
         LOGGER.info("MessageId = " + bounceReport.getMessageId());
         LOGGER.info("Subject = " + bounceReport.getSubject());
 
+        User complainant = getUser(bounceReport.getEmail());
+        if (complainant == null) {
+            LOGGER.warning("User filing spam report not found.");
+            return Response.ok().build();
+        }
+
+        LOGGER.info(() -> "TRACK User " + complainant.getId() + " " + TRACK_SPAM_COMPLAINT);
+
         return Response.ok().build();
     }
 
