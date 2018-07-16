@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -73,7 +74,7 @@ public class PostmarkWebhook {
             return Response.ok().build();
         }
 
-        LOGGER.info(() -> "TRACK User " + recipientUser.getId() + " " + TRACK_DELIVERY);
+        UsageTracker.track(recipientUser.getId(), TRACK_DELIVERY);
 
         return Response.ok().build();
     }
@@ -92,7 +93,7 @@ public class PostmarkWebhook {
             return Response.ok().build();
         }
 
-        LOGGER.info(() -> "TRACK User " + bouncedUser.getId() + " " + TRACK_BOUNCE);
+        UsageTracker.track(bouncedUser.getId(), TRACK_BOUNCE);
         markAsBounced(bouncedUser);
 
         return Response.ok().build();
@@ -154,7 +155,7 @@ public class PostmarkWebhook {
             return Response.ok().build();
         }
 
-        LOGGER.info(() -> "TRACK User " + complainant.getId() + " " + TRACK_SPAM_COMPLAINT);
+        UsageTracker.track(complainant.getId(), TRACK_SPAM_COMPLAINT);
 
         return Response.ok().build();
     }
@@ -176,7 +177,7 @@ public class PostmarkWebhook {
             return Response.ok().build();
         }
 
-        LOGGER.info(() -> "TRACK User " + readingUser.getId() + " " + TRACK_OPEN);
+        UsageTracker.track(readingUser.getId(), TRACK_OPEN);
 
         return Response.ok().build();
     }
@@ -197,7 +198,7 @@ public class PostmarkWebhook {
             return Response.ok().build();
         }
 
-        LOGGER.info(() -> "TRACK User " + clickThruUser.getId() + " " + TRACK_LINK_CLICK);
+        UsageTracker.track(clickThruUser.getId(), TRACK_LINK_CLICK);
 
         return Response.ok().build();
     }
