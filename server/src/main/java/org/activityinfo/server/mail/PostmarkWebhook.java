@@ -93,16 +93,18 @@ public class PostmarkWebhook {
         }
 
         LOGGER.info(() -> "TRACK User " + bouncedUser.getId() + " " + TRACK_BOUNCE);
-        removeEmailNotifications(bouncedUser);
+        markAsBounced(bouncedUser);
 
         return Response.ok().build();
     }
 
-    private void removeEmailNotifications(User bouncedUser) {
+    private void markAsBounced(User bouncedUser) {
         startTransaction();
         try {
             LOGGER.info(() -> "Removing email notifications for user " + bouncedUser.getId());
             bouncedUser.setEmailNotification(false);
+            LOGGER.info(() -> "Marking user " + bouncedUser.getId() + " as bounced");
+            bouncedUser.setBounced(true);
             entityManagerProvider.get().persist(bouncedUser);
         } catch (Exception e) {
             rollbackTransaction();

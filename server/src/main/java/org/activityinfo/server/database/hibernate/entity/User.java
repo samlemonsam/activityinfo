@@ -53,6 +53,7 @@ public class User implements java.io.Serializable {
     private User invitedBy;
     private Date dateCreated;
     private String features;
+    private boolean bounced;
 
     public User() {
         dateCreated = new Date();
@@ -203,6 +204,19 @@ public class User implements java.io.Serializable {
 
     public void setDateChangePasswordKeyIssued(Date dateChangePasswordKeyIssued) {
         this.dateChangePasswordKeyIssued = dateChangePasswordKeyIssued;
+    }
+
+    /**
+     * Flags user whose email address caused a bounced return
+     */
+    @Column(name = "bounced", nullable = false)
+    @Offline(sync = false)
+    public boolean isBounced() {
+        return this.bounced;
+    }
+
+    public void setBounced(boolean bounced) {
+        this.bounced = bounced;
     }
 
     public void clearChangePasswordKey() {

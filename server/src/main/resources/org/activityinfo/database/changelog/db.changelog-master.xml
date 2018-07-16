@@ -72,4 +72,5 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liqui
   <include file="org/activityinfo/database/changelog/db.changelog-047-null-location-types.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-048-dup-monthly-reports.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-049-db-transfer.xml"/>
+  <include file="org/activityinfo/database/changelog/db.changelog-050-bounced-users.xml"/>
 </databaseChangeLog>
