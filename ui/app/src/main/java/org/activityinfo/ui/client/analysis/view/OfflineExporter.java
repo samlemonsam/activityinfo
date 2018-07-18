@@ -64,7 +64,7 @@ public class OfflineExporter {
         var type = 'data:' + mimeType;
         if ($wnd.btoa) {
             type += ';base64';
-            data = $wnd.btoa(data);
+            data = $wnd.btoa(unescape(encodeURIComponent(data)));
         } else {
             data = $wnd.encodeURIComponent(data);
         }
