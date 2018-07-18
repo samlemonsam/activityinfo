@@ -74,12 +74,14 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
 
     private AppIdentityService appIdentityService;
     private final Provider<EntityManager> em;
-    private final FormStorageProvider formStorage;
+    private final Provider<FormStorageProvider> formStorage;
 
     private String bucketName;
 
     @Inject
-    public GcsBlobFieldStorageService(DeploymentConfiguration config, Provider<EntityManager> em, FormStorageProvider formStorage) {
+    public GcsBlobFieldStorageService(DeploymentConfiguration config,
+                                      Provider<EntityManager> em,
+                                      Provider<FormStorageProvider> formStorage) {
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
         this.formStorage = formStorage;
@@ -280,7 +282,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
         } else if (formId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
             // As Sub-Form is stored in HRD, FormPermissions are not set (only returns owner permissions),
             // so check user against database via PermissionOracle
-            Optional<FormStorage> subFormStorage = formStorage.getForm(formId);
+            Optional<FormStorage> subFormStorage = formStorage.get().getForm(formId);
             if (subFormStorage.isPresent()) {
                 FormStorage subForm = subFormStorage.get();
                 return viewAllowed(subForm.getFormClass().getDatabaseId(), userId);

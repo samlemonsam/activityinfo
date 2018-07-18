@@ -18,7 +18,7 @@
  */
 package org.activityinfo.server.endpoint.odk;
 
-import com.google.inject.Provider;
+import com.google.inject.util.Providers;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.resource.ResourceId;
@@ -35,15 +35,8 @@ import java.io.InputStream;
 
 public class TestBlobstoreService extends GcsBlobFieldStorageService implements BlobAuthorizer {
 
-    public TestBlobstoreService(DeploymentConfiguration config, final EntityManager em, FormStorageProvider formStorage) {
-        super(  config,
-                new Provider<EntityManager>() {
-                    @Override
-                    public EntityManager get() {
-                        return em;
-                    }
-                },
-                formStorage);
+    public TestBlobstoreService(DeploymentConfiguration config, final EntityManager em, final FormStorageProvider formStorage) {
+        super(config, Providers.of(em), Providers.of(formStorage));
     }
 
     @Override
