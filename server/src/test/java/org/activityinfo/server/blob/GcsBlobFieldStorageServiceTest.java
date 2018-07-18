@@ -37,14 +37,12 @@ import org.activityinfo.legacy.shared.adapter.ActivityInfoClientAsyncStub;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.attachment.AttachmentValue;
-import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.OnDataSet;
@@ -144,7 +142,7 @@ public class GcsBlobFieldStorageServiceTest {
     @Test
     public void image() throws IOException {
         Response response = blobService.getImage(user, blobId, resourceId);
-        assertEquals(200, response.getStatus());
+        assertEquals(response.getStatus(), 200);
 
         Object entity = response.getEntity();
 
@@ -167,7 +165,7 @@ public class GcsBlobFieldStorageServiceTest {
     public void servingImageUrl() throws IOException {
         Response response = blobService.getImageUrl(user, blobId, resourceId);
 
-        assertEquals(200, response.getStatus());
+        assertEquals(response.getStatus(), 200);
         assertTrue(!Strings.isNullOrEmpty((String) response.getEntity()));
     }
 
@@ -180,7 +178,7 @@ public class GcsBlobFieldStorageServiceTest {
     public void blobUrl() {
         Response response = blobService.getBlobUrl(user, blobId, resourceId);
 
-        assertEquals(303, response.getStatus());
+        assertEquals(response.getStatus(), 303);
         assertNotNull(response.getMetadata().getFirst("Location"));
     }
 
@@ -195,7 +193,7 @@ public class GcsBlobFieldStorageServiceTest {
         int height = 20;
 
         Response response = blobService.getThumbnail(user, blobId, resourceId, width, height);
-        assertEquals(200, response.getStatus());
+        assertEquals(response.getStatus(), 200);
 
         Object entity = response.getEntity();
 
@@ -300,71 +298,7 @@ public class GcsBlobFieldStorageServiceTest {
 
     private FormClass addAttachmentField(int activityId, ResourceId attachmentFieldId) {
         FormClass formClass = assertResolves(locator.getFormClass(CuidAdapter.activityFormClass(activityId)));
-        return addAttachmentField(formClass, attachmentFieldId);
-    }
 
-    private FormInstance assertInstanceExists(ResourceId formId, ResourceId instanceId) {
-        return assertResolves(locator.getFormInstance(formId, instanceId));
-    }
-
-    @Test
-    public void subformBlobUpload() throws IOException {
-        blobService.setTestBucketName();
-
-        FormClass subForm = setupFormWithSubformAttachmentField();
-
-        blobId = BlobId.generate();
-        blobService.put(user,
-                "attachment;filename=" + FILE_NAME,
-                MimeTypeUtil.mimeTypeFromFileName(FILE_NAME),
-                blobId, subForm.getId(),
-                GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"));
-    }
-
-    @Test(expected = WebApplicationException.class)
-    public void subformBlobUploadUnauthorized() throws IOException {
-        blobService.setTestBucketName();
-
-        FormClass subForm = setupFormWithSubformAttachmentField();
-
-        blobId = BlobId.generate();
-        blobService.put(noAccessUser,
-                "attachment;filename=" + FILE_NAME,
-                MimeTypeUtil.mimeTypeFromFileName(FILE_NAME),
-                blobId, subForm.getId(),
-                GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"));
-    }
-
-    private FormClass setupFormWithSubformAttachmentField() {
-        int databaseId = 1;
-
-        FormClass testForm = new FormClass(ResourceId.valueOf("TEST_FORM"));
-        testForm.setLabel("Test Form with Sub-Form");
-        testForm.setDatabaseId(databaseId);
-
-        FormClass testSubForm = new FormClass(ResourceId.generateId());
-        testSubForm.setLabel("Test Sub-Form");
-        testSubForm.setDatabaseId(databaseId);
-        testSubForm.setSubFormKind(SubFormKind.REPEATING);
-        testSubForm.setParentFormId(testForm.getId());
-
-        testForm.addElement(new FormField(ResourceId.valueOf("SF"))
-                .setLabel("Sub-Form")
-                .setType(new SubFormReferenceType(testSubForm.getId())));
-
-        assertResolves(locator.persist(testSubForm));
-        assertResolves(locator.persist(testForm));
-
-        ResourceId attachmentFieldId = ResourceId.generateFieldId(AttachmentType.TYPE_CLASS);
-        return addAttachmentField(testSubForm.getId(), attachmentFieldId);
-    }
-
-    private FormClass addAttachmentField(ResourceId formId, ResourceId attachmentFieldId) {
-        FormClass formClass = assertResolves(locator.getFormClass(formId));
-        return addAttachmentField(formClass, attachmentFieldId);
-    }
-
-    private FormClass addAttachmentField(FormClass formClass, ResourceId attachmentFieldId) {
         formClass.addElement(new FormField(attachmentFieldId)
                 .setLabel("Attachment")
                 .setType(AttachmentType.TYPE_CLASS.createType())
@@ -374,4 +308,7 @@ public class GcsBlobFieldStorageServiceTest {
         return assertResolves(locator.getFormClass(formClass.getId())); // re-fetch
     }
 
+    private FormInstance assertInstanceExists(ResourceId formId, ResourceId instanceId) {
+        return assertResolves(locator.getFormInstance(formId, instanceId));
+    }
 }
