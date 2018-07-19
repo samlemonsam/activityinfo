@@ -281,7 +281,7 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
     }
 
     public void addTransferButton() {
-        addButton(UIActions.TRANSFER_DATABASE, I18N.CONSTANTS.transferDatabase(), IconImageBundle.ICONS.user());
+        addButton(UIActions.TRANSFER_DATABASE, I18N.CONSTANTS.transferDatabaseLabel(), IconImageBundle.ICONS.user());
     }
 
     public void setTransferEnabled(boolean enabled) {

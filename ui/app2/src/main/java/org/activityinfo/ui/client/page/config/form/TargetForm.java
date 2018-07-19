@@ -27,6 +27,7 @@ import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
@@ -52,12 +53,14 @@ public class TargetForm extends FormPanel {
         final DateField fromDateField = new DateField();
         fromDateField.setFieldLabel(constants.fromDate());
         fromDateField.setAllowBlank(false);
+        fromDateField.setPropertyEditor(new DateTimePropertyEditor(LocalDate.ISO_FORMAT));
         binding.addFieldBinding(LocalDateBinding.create(fromDateField, "fromDate"));
         this.add(fromDateField);
 
         final DateField toDateField = new DateField();
         toDateField.setFieldLabel(constants.toDate());
         toDateField.setAllowBlank(false);
+        toDateField.setPropertyEditor(new DateTimePropertyEditor(LocalDate.ISO_FORMAT));
         toDateField.setValidator(new Validator() {
             @Override
             public String validate(Field<?> field, String value) {

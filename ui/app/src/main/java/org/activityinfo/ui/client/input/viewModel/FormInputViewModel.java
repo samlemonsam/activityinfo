@@ -84,7 +84,7 @@ public class FormInputViewModel {
     }
 
     public boolean isEmpty() {
-        return fieldValueMap.isEmpty();
+        return placeholder || fieldValueMap.isEmpty();
     }
 
     public boolean isPlaceholder() {

@@ -27,6 +27,10 @@ import com.google.gwt.dom.client.Style;
  */
 public class OfflineExporter {
 
+    private OfflineExporter() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static final String CSV_MIMETYPE = "text/csv;charset=utf-8";
 
     public static void export(String filename, String data, String mimeType) {
@@ -64,7 +68,7 @@ public class OfflineExporter {
         var type = 'data:' + mimeType;
         if ($wnd.btoa) {
             type += ';base64';
-            data = $wnd.btoa(data);
+            data = $wnd.btoa(unescape(encodeURIComponent(data)));
         } else {
             data = $wnd.encodeURIComponent(data);
         }

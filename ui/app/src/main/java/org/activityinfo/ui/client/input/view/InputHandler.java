@@ -39,4 +39,7 @@ public interface InputHandler {
     void changeActiveSubRecord(ResourceId fieldId, RecordRef newActiveRef);
 
     void updateSubModel(FormInputModel update);
+
+    void validationRequested(RecordRef recordRef);
 }
+

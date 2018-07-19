@@ -26,6 +26,7 @@ import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.images.*;
 import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
@@ -39,10 +40,13 @@ import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
+import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.BlobId;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
 
@@ -70,22 +74,26 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
 
     private AppIdentityService appIdentityService;
     private final Provider<EntityManager> em;
+    private final Provider<FormStorageProvider> formStorage;
 
     private String bucketName;
 
     @Inject
-    public GcsBlobFieldStorageService(DeploymentConfiguration config, Provider<EntityManager> em) {
+    public GcsBlobFieldStorageService(DeploymentConfiguration config,
+                                      Provider<EntityManager> em,
+                                      Provider<FormStorageProvider> formStorage) {
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
+        this.formStorage = formStorage;
 
         if (Strings.isNullOrEmpty(bucketName)) {
-            LOGGER.log(Level.SEVERE, "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property "
+            LOGGER.log(Level.SEVERE, () -> "Failed to start blob service. Bucket name is blank. Please provide bucket name in configuration file with property "
                     + DeploymentConfiguration.BLOBSERVICE_GCS_BUCKET_NAME);
             return;
         }
         this.appIdentityService = DeploymentEnvironment.isAppEngineDevelopment() ?
                 new DevAppIdentityService(config) : AppIdentityServiceFactory.getAppIdentityService();
-        LOGGER.info("Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
+        LOGGER.info(() -> "Service account: " + appIdentityService.getServiceAccountName() + ", bucketName: " + bucketName);
     }
 
     @GET
@@ -146,11 +154,13 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
         GcsFilename gcsFilename = new GcsFilename(bucketName, blobId.asString());
 
         GcsService gcsService = GcsServiceFactory.createGcsService();
-        GcsInputChannel gcsInputChannel = gcsService.openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE);
-        GcsFileMetadata metadata = gcsService.getMetadata(gcsFilename);
 
-        try (InputStream inputStream = Channels.newInputStream(gcsInputChannel)) {
-            return Response.ok(ByteStreams.toByteArray(inputStream)).type(metadata.getOptions().getMimeType()).build();
+        try (GcsInputChannel gcsInputChannel = gcsService.openPrefetchingReadChannel(gcsFilename, 0, ONE_MEGABYTE)) {
+            GcsFileMetadata metadata = gcsService.getMetadata(gcsFilename);
+
+            try (InputStream inputStream = Channels.newInputStream(gcsInputChannel)) {
+                return Response.ok(ByteStreams.toByteArray(inputStream)).type(metadata.getOptions().getMimeType()).build();
+            }
         }
     }
 
@@ -254,7 +264,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
         String ownerIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_OWNER);
         String creatorIdStr = metadata.getOptions().getUserMetadata().get(GcsUploadCredentialBuilder.X_CREATOR);
 
-        LOGGER.finest(String.format("Blob: %s, owner: %s, creator: %s", blobId.asString(), ownerIdStr, creatorIdStr));
+        LOGGER.finest(() -> String.format("Blob: %s, owner: %s, creator: %s", blobId.asString(), ownerIdStr, creatorIdStr));
 
         Preconditions.checkNotNull(ownerIdStr, "Owner of blob is null.");
         Preconditions.checkNotNull(creatorIdStr, "Creator of blob is null.");
@@ -268,15 +278,33 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     private boolean hasAccessToResource(ResourceId userId, ResourceId formId) {
         if (formId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(formId));
-
-            if (PermissionOracle.using(em.get()).isViewAllowed(activity.getDatabase(), em.get()
-                .getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId)))) {
-                return true;
+            return viewAllowed(activity.getDatabase(), userId);
+        } else if (formId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
+            // As Sub-Form is stored in HRD, FormPermissions are not set (only returns owner permissions),
+            // so check user against database via PermissionOracle
+            Optional<FormStorage> subFormStorage = formStorage.get().getForm(formId);
+            if (subFormStorage.isPresent()) {
+                FormStorage subForm = subFormStorage.get();
+                return viewAllowed(subForm.getFormClass().getDatabaseId(), userId);
             }
         } else {
             throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + formId);
         }
         return false;
+    }
+
+    private boolean viewAllowed(ResourceId databaseId, ResourceId userId) {
+        Database database = em.get().getReference(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+        return viewAllowed(database, userId);
+    }
+
+    private boolean viewAllowed(Database database, ResourceId userId) {
+        User user = em.get().getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId));
+        return viewAllowed(database, user);
+    }
+
+    private boolean viewAllowed(Database database, User user) {
+        return PermissionOracle.using(em.get()).isViewAllowed(database, user);
     }
 
     public void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {

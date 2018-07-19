@@ -157,8 +157,11 @@ public class FormPanel implements IsWidget {
         deleteButton.setEnabled(!viewModel.isLocked());
 
         // Update Field Views
+        boolean layoutRequired = false;
         for (FieldView fieldView : fieldViews) {
-            fieldView.updateView(viewModel);
+            if(fieldView.updateView(viewModel)) {
+                layoutRequired = true;
+            }
         }
 
         // Update Subforms
@@ -169,6 +172,9 @@ public class FormPanel implements IsWidget {
             subFormView.updateView(viewModel.getSubForm(subFormView.getFieldId()));
         }
 
+        if(layoutRequired) {
+            panel.forceLayout();
+        }
     }
 
     private void onInput(FormTree.Node node, FieldInput input) {

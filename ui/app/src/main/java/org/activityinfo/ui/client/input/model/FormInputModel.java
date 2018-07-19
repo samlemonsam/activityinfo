@@ -160,6 +160,29 @@ public class FormInputModel {
             validationRequested);
     }
 
+    public FormInputModel touch(RecordRef recordRef, ResourceId fieldId) {
+        if(this.recordRef.equals(recordRef)) {
+            return touch(fieldId);
+        }
+
+        HashMap<RecordRef, FormInputModel> updatedSubRecords = new HashMap<>();
+        for (Map.Entry<RecordRef, FormInputModel> entry : subRecords.entrySet()) {
+            if(entry.getKey().equals(recordRef)) {
+                updatedSubRecords.put(entry.getKey(), entry.getValue().touch(fieldId));
+            } else {
+                updatedSubRecords.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return new FormInputModel(this.recordRef,
+                this.fieldInputs,
+                updatedSubRecords,
+                activeSubRecords,
+                deletedSubRecords,
+                touchedFields,
+                validationRequested);
+    }
+
     public FormInputModel touch(ResourceId fieldId) {
         if(this.touchedFields.contains(fieldId)) {
             return this;
@@ -175,15 +198,24 @@ public class FormInputModel {
         }
     }
 
-    public FormInputModel validationRequested() {
 
-        if(validationRequested && subRecords.isEmpty()) {
-            return this;
+    public FormInputModel validationRequested() {
+        return validationRequested(getRecordRef());
+    }
+
+    public FormInputModel validationRequested(RecordRef ref) {
+
+        boolean validationRequested = this.validationRequested;
+
+        if(ref.equals(recordRef) && !validationRequested) {
+            validationRequested = true;
         }
 
         Map<RecordRef, FormInputModel> updatedSubRecords = new HashMap<>();
         for (Map.Entry<RecordRef, FormInputModel> entry : subRecords.entrySet()) {
-            updatedSubRecords.put(entry.getKey(), entry.getValue().validationRequested());
+            if(ref.equals(recordRef) || entry.getValue().getRecordRef().equals(ref)) {
+                updatedSubRecords.put(entry.getKey(), entry.getValue().validationRequested());
+            }
         }
 
         return new FormInputModel(
@@ -193,7 +225,7 @@ public class FormInputModel {
                 activeSubRecords,
                 deletedSubRecords,
                 touchedFields,
-                true);
+                validationRequested);
     }
 
     /**
@@ -273,4 +305,5 @@ public class FormInputModel {
     public boolean isDeleted(RecordRef ref) {
         return deletedSubRecords.contains(ref);
     }
+
 }

@@ -478,7 +478,7 @@ public final class SiteDTO extends BaseModelData implements EntityDTO, HasAdminE
 
         for (String admin : location.getPropertyNames()) {
             if (admin.startsWith(AdminLevelDTO.PROPERTY_PREFIX)) {
-                int id = Integer.parseInt(admin.substring(admin.length() - 1));
+                int id = Integer.parseInt(admin.substring(1, admin.length()));
                 setAdminEntity(id, location.getAdminEntity(id));
             }
         }

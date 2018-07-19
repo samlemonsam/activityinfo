@@ -31,6 +31,7 @@ public class DeploymentConfiguration {
 
     public static final String BLOBSERVICE_GCS_BUCKET_NAME = "blobservice.gcs.bucket.name";
     public static final String SERVICE_ACCOUNT_EMAIL = "service.account.email";
+    public static final String POSTMARK_WEBHOOK_TOKEN = "postmark.bouncehook.key";
 
     private final Properties properties;
 

@@ -28,13 +28,10 @@ import org.apache.commons.codec.binary.Base64;
 import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
+import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,7 +85,7 @@ public class PostmarkMailSender extends MailSender {
     }
 
     private void postMessage(JsonObject node) throws IOException {
-        URLConnection conn = url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
         conn.setRequestProperty("X-Postmark-Server-Token", apiKey);
         conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -99,15 +96,32 @@ public class PostmarkMailSender extends MailSender {
         OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream(), Charsets.UTF_8);
         writer.write(node.toString());
         writer.flush();
+
+        if (conn.getResponseCode() != 200) {
+            // Unsuccessful request
+            LOGGER.severe("Postmark returned bad response code " + conn.getResponseCode());
+            if (conn.getResponseCode() == 422) {
+                // Postmark encodes certain API error codes in the response body of 422 responses
+                // (see https://postmarkapp.com/developer/api/overview#error-codes) so we need to retrieve the
+                // ErrorStream and log the error response
+                logStream(conn.getErrorStream());
+            }
+            writer.close();
+            return;
+        }
+
+        logStream(conn.getInputStream());
+        writer.close();
+        LOGGER.info("Posted message to " + url);
+    }
+
+    private void logStream(InputStream stream) throws IOException {
         String line;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         while ((line = reader.readLine()) != null) {
             System.out.println(line);
         }
-        writer.close();
         reader.close();
-        
-        LOGGER.info("Posted message to " + url);
     }
 
     private JsonObject toJson(Message message) throws MessagingException, IOException {

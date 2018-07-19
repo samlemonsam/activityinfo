@@ -90,6 +90,10 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
                 throw new IllegalAccessCommandException("Not authorized to modify sites");
             }
 
+            if (site.isDeleted()) {
+                throw new CommandException(cmd, "site " + cmd.getSiteId() + " has been deleted");
+            }
+
             UsageTracker.track(user.getId(), "update_monthly",
                     CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
                     CuidAdapter.reportingPeriodFormClass(site.getActivity().getId()));

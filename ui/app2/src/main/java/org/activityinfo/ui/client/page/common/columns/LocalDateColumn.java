@@ -32,7 +32,8 @@ import java.util.Date;
 
 public class LocalDateColumn extends ReadTextColumn {
 
-    protected static final DateTimeFormat FORMAT = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
+    protected static final DateTimeFormat FORMAT = DateTimeFormat.getFormat(
+        org.activityinfo.model.type.time.LocalDate.ISO_FORMAT);
 
     public LocalDateColumn(String property, String header, int width) {
         super(property, header, width);

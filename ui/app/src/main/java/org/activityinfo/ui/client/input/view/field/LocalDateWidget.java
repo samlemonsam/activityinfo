@@ -18,9 +18,13 @@
  */
 package org.activityinfo.ui.client.input.view.field;
 
+import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Component;
 import com.sencha.gxt.widget.core.client.form.DateField;
+import com.sencha.gxt.widget.core.client.form.validator.MaxDateValidator;
+import com.sencha.gxt.widget.core.client.form.validator.MinDateValidator;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.input.model.FieldInput;
@@ -37,11 +41,10 @@ public class LocalDateWidget implements PeriodFieldWidget {
 
     public LocalDateWidget(FieldUpdater fieldUpdater) {
         this.field = new DateField();
-        // Ensure that no date can be selected which occurs before the minimum date set on LocalDate
-        this.field.setMinValue(LocalDate.MIN_DATE.atMidnightInMyTimezone());
         this.field.setPropertyEditor(new LocalDatePropertyEditor());
         this.field.addValueChangeHandler(event -> fieldUpdater.update(input()));
         this.field.addBlurHandler(event -> fieldUpdater.touch());
+        this.field.setEmptyText(I18N.CONSTANTS.selectDatePlaceholder());
     }
 
     private FieldInput input() {

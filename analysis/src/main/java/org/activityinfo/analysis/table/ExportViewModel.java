@@ -29,11 +29,15 @@ public class ExportViewModel {
     }
 
     public static boolean columnLimitExceeded(EffectiveTableModel effectiveTableModel) {
+        return exportedColumnSize(effectiveTableModel) > XLS_COLUMN_LIMIT;
+    }
+
+    public static int exportedColumnSize(EffectiveTableModel effectiveTableModel) {
         int count = 0;
         for (EffectiveTableColumn column : effectiveTableModel.getColumns()) {
             count += column.getExportedColumns();
         }
-        return count > XLS_COLUMN_LIMIT;
+        return count;
     }
 
     public String getErrorMessage() {

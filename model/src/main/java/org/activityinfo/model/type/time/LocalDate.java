@@ -32,6 +32,8 @@ import java.util.Date;
  */
 public class LocalDate implements FieldValue, PeriodValue {
 
+    public static final String ISO_FORMAT = "yyyy-MM-dd";
+
     public enum DayOfWeek {
         SUNDAY,
         MONDAY,
@@ -54,6 +56,7 @@ public class LocalDate implements FieldValue, PeriodValue {
      * To correct for this we set a minimum date for calendar entries of 1000-01-01 CE.
      */
     public static final LocalDate MIN_DATE = new LocalDate(1000, 1, 1);
+    public static final LocalDate MAX_DATE = new LocalDate(9999, 12, 31);
 
     private int year;
     private int monthOfYear;

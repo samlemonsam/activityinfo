@@ -18,15 +18,23 @@
  */
 package org.activityinfo.model.query;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.model.util.HeapsortColumn;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Simple Array of String values
  */
 public class StringArrayColumnView implements ColumnView, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private static final int FORMAT_UNCOMPRESSED = 0;
+    private static final int FORMAT_COMPRESSED = 1;
 
     private String[] values;
 
@@ -119,5 +127,65 @@ public class StringArrayColumnView implements ColumnView, Serializable {
             HeapsortColumn.heapsortString(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
         }
         return sortVector;
+    }
+
+    @GwtIncompatible
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        writeCompressed(out);
+    }
+
+    @GwtIncompatible
+    private void writeCompressed(ObjectOutputStream out) throws IOException {
+        DataOutputStream daos = new DataOutputStream(out);
+        daos.writeInt(FORMAT_COMPRESSED);
+
+        GZIPOutputStream gzout = new GZIPOutputStream(out);
+        DataOutputStream gzDataOut = new DataOutputStream(gzout);
+        writeArray(gzDataOut);
+        gzout.finish();
+    }
+
+    @GwtIncompatible
+    private void writeArray(DataOutputStream daos) throws IOException {
+        daos.writeInt(values.length);
+        for (int i = 0; i < values.length; i++) {
+            String value = values[i];
+            if(value == null) {
+                daos.writeUTF("");
+            } else {
+                daos.writeUTF(value);
+            }
+        }
+    }
+
+    @GwtIncompatible
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        DataInputStream dis = new DataInputStream(in);
+        int format = dis.readInt();
+        if(format == FORMAT_COMPRESSED) {
+            readCompressed(dis);
+        }
+    }
+
+    @GwtIncompatible
+    private void readCompressed(DataInputStream in) throws IOException {
+
+        GZIPInputStream gzin = new GZIPInputStream(in);
+        DataInputStream gzDataIn = new DataInputStream(gzin);
+
+        readArray(gzDataIn);
+    }
+
+    @GwtIncompatible
+    private void readArray(DataInputStream input) throws IOException {
+        int count = input.readInt();
+        this.values = new String[count];
+
+        for (int i = 0; i < count; i++) {
+            String s = input.readUTF();
+            if(!s.isEmpty()) {
+                values[i] = s;
+            }
+        }
     }
 }

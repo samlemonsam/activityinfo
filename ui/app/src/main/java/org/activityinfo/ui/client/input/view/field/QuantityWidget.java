@@ -46,7 +46,6 @@ public class QuantityWidget implements FieldWidget {
             updater.update(input());
         }));
         this.field.addBlurHandler(event -> updater.touch());
-
     }
 
     private FieldInput input() {
