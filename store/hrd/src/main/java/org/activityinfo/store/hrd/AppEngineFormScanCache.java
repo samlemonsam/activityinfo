@@ -67,12 +67,7 @@ public class AppEngineFormScanCache implements FormScanCache {
         Future<Set<String>> result = memcacheService.putAll(toPut, Expiration.byDeltaSeconds(3600),
                 MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 
-        return Futures.lazyTransform(result, new Function<Set<String>, Integer>() {
-            @Override
-            public Integer apply(Set<String> strings) {
-                return strings.size();
-            }
-        });
+        return Futures.lazyTransform(result, strings -> strings.size());
     }
 
 
@@ -106,7 +101,5 @@ public class AppEngineFormScanCache implements FormScanCache {
 
         LOGGER.info("Waited " + stopwatch + " for " + columnCount + " columns to finish caching.");
     }
-
-
 
 }

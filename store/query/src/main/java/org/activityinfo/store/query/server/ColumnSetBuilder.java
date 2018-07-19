@@ -165,10 +165,7 @@ public class ColumnSetBuilder {
         try {
             Map<String, Object> toPut = scan.getValuesToCache();
             if(!toPut.isEmpty()) {
-                Future<Integer> future = cache.enqueuePut(toPut);
-                if(!future.isDone()) {
-                    return Collections.singletonList(future);
-                }
+                return Collections.singletonList(cache.enqueuePut(toPut));
             }
         } catch (Exception e) {
             LOGGER.severe("Failed to start memcache put for " + scan);
