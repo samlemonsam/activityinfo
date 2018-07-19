@@ -21,8 +21,6 @@ package org.activityinfo.store.hrd.op;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.store.hrd.columns.RecordNumbering;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 
@@ -55,17 +53,12 @@ public class CreateOrUpdateForm extends VoidWork {
         rootEntity.setId(formClass.getId());
         rootEntity.setVersion(1);
         rootEntity.setSchemaVersion(1);
-        rootEntity.setActiveColumnStorage(RecordNumbering.BLUE);
+        rootEntity.setColumnStorageActive(true);
 
         FormSchemaEntity formClassEntity = new FormSchemaEntity(formClass);
         formClassEntity.setSchemaVersion(1);
 
-        FormColumnStorage formColumnStorage = new FormColumnStorage(formClass.getId(), RecordNumbering.BLUE);
-        formColumnStorage.setRecordCount(0);
-        formColumnStorage.setDeletedCount(0);
-        formColumnStorage.setVersion(1);
-
-        ofy().save().entities(rootEntity, formClassEntity, formColumnStorage);
+        ofy().save().entities(rootEntity, formClassEntity);
     }
 
     private void update(FormSchemaEntity formClassEntity) {

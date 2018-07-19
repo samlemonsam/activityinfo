@@ -62,6 +62,10 @@ public class ActivityUpdater {
         }
     }
 
+    public long getNewVersion() {
+        return newVersion;
+    }
+
     public ActivityUpdater(int newActivityid, int databaseId, QueryExecutor executor) {
         this.activityId = newActivityid;
         this.databaseId = databaseId;

@@ -7,7 +7,7 @@ import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 
 import javax.annotation.Nullable;
 import java.util.BitSet;
@@ -21,7 +21,7 @@ public class RecordIdBlock implements BlockManager {
 
     @Override
     public int getBlockSize() {
-        return 10_000;
+        return 1024 * 5;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class RecordIdBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
 
         String[] ids = new String[header.getRecordCount() - header.getDeletedCount()];
 

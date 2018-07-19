@@ -1,7 +1,7 @@
 package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Entity;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -19,8 +19,8 @@ public class TombstoneIndex {
      */
     private final int[] deletedBefore;
 
-    public TombstoneIndex(FormColumnStorage columnStorage, Iterator<Entity> tombstoneBlocks) {
-        this.blockCount = (columnStorage.getRecordCount() / TombstoneBlock.BLOCK_SIZE) + 1;
+    public TombstoneIndex(FormEntity formEntity, Iterator<Entity> tombstoneBlocks) {
+        this.blockCount = (formEntity.getRecordCount() / TombstoneBlock.BLOCK_SIZE) + 1;
         this.blocks = new byte[blockCount][];
         this.deletedBefore = new int[blockCount];
 
@@ -42,7 +42,7 @@ public class TombstoneIndex {
         }
     }
 
-    public TombstoneIndex(FormColumnStorage header) {
+    public TombstoneIndex(FormEntity header) {
         this(header, Collections.emptyIterator());
     }
 

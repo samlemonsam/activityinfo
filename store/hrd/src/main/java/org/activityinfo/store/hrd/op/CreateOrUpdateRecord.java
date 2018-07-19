@@ -28,6 +28,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.columns.*;
 import org.activityinfo.store.hrd.entity.*;
 import org.activityinfo.store.query.server.InvalidUpdateException;
@@ -98,36 +99,32 @@ public class CreateOrUpdateRecord extends VoidWork {
         List<Object> toSave = new ArrayList<>();
         List<Key> toDelete = new ArrayList<>();
 
-        // Update column-based storage, if active
-        if(rootEntity.getActiveColumnStorage() != null) {
+        // Update column-based storage
 
-            FormColumnStorage columnStorage = ofy().load().key(FormColumnStorage.key(rootEntity)).safe();
-            columnStorage.setVersion(newVersion);
+        ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(formClass, Hrd.ofy().getTransaction());
 
-            if(changeType == RecordChangeType.CREATED) {
-                int newRecordCount = columnStorage.getRecordCount() + 1;
-                int newRecordIndex = newRecordCount;
-                updated.setRecordNumber(columnStorage.getScheme(), newRecordIndex);
-                columnStorage.setRecordCount(newRecordCount);
+        if(changeType == RecordChangeType.CREATED) {
+            int newRecordCount = rootEntity.getRecordCount() + 1;
+            int newRecordNumber = newRecordCount;
+            updated.setRecordNumber(newRecordNumber);
+            rootEntity.setRecordCount(newRecordCount);
 
-                toSave.add(columnStorage);
-                toSave.add(updateRecordIdBlock(updated, newRecordIndex));
+            blockUpdater.updateId(newRecordNumber, updated.getRecordId().asString());
 
-                if(formClass.isSubForm()) {
-                    toSave.add(updateParentIdBlock(updated, newRecordIndex));
-                }
-
-            } else if(changeType == RecordChangeType.DELETED) {
-                columnStorage.setDeletedCount(columnStorage.getDeletedCount() + 1);
-                toSave.add(updateTombstone(existingEntity.getRecordNumber(columnStorage.getScheme())));
-                toSave.add(columnStorage);
+            if(formClass.isSubForm()) {
+                blockUpdater.updateParentId(newRecordNumber, updated.getParentRecordId());
             }
 
-            if(changeType != RecordChangeType.DELETED) {
-                int recordIndex = updated.getRecordNumber(columnStorage.getScheme());
-                updateColumnBlocks(formClass, update, recordIndex, toSave);
-            }
+        } else if(changeType == RecordChangeType.DELETED) {
+            rootEntity.setDeletedCount(rootEntity.getDeletedCount() + 1);
+            blockUpdater.updateTombstone(existingEntity.getRecordNumber());
         }
+
+        if(changeType != RecordChangeType.DELETED) {
+            blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
+        }
+
+        toSave.addAll(blockUpdater.getUpdatedBlocks());
 
         // Update record-based storage
         toSave.add(rootEntity);
@@ -147,71 +144,4 @@ public class CreateOrUpdateRecord extends VoidWork {
 
 
 
-
-    private void updateColumnBlocks(FormClass formSchema,
-                                    TypedRecordUpdate update,
-                                    int recordIndex, List<Object> toSave) {
-
-        Map<ResourceId, FieldValue> changed = update.getChangedFieldValues();
-        for (FormField field : formSchema.getFields()) {
-            if (changed.containsKey(field.getId())) {
-                Entity updatedBlock = updateBlock(recordIndex, field, changed.get(field.getId()));
-                if(updatedBlock != null) {
-                    toSave.add(updatedBlock);
-                }
-            }
-        }
-    }
-
-    private Entity updateRecordIdBlock(FormRecordEntity updated, int recordIndex) {
-        BlockManager blockManager = new RecordIdBlock();
-        BlockDescriptor descriptor = blockManager.getBlockDescriptor(formId, RecordIdBlock.FIELD_NAME, recordIndex);
-
-        return doUpdate(blockManager, descriptor, recordIndex, TextValue.valueOf(updated.getRecordId().asString()));
-    }
-
-    private Object updateParentIdBlock(FormRecordEntity updated, int newRecordIndex) {
-        BlockManager blockManager = new StringBlock(new ViewBuilderFactory.TextFieldReader());
-        BlockDescriptor descriptor = blockManager.getBlockDescriptor(formId, "@parent", newRecordIndex);
-
-        return doUpdate(blockManager, descriptor, newRecordIndex, TextValue.valueOf(updated.getParentRecordId()));
-    }
-
-    private Entity updateBlock(int recordIndex, FormField field, FieldValue fieldValue) {
-
-        BlockManager blockManager = BlockFactory.get(field.getType());
-        BlockDescriptor descriptor = blockManager.getBlockDescriptor(formId, field.getName(), recordIndex);
-
-        return doUpdate(blockManager, descriptor, recordIndex, fieldValue);
-    }
-
-    private Entity doUpdate(BlockManager blockManager, BlockDescriptor descriptor, int recordIndex, FieldValue fieldValue) {
-        com.google.appengine.api.datastore.Key blockKey = descriptor.key();
-
-        Entity blockEntity;
-        try {
-            blockEntity = DatastoreServiceFactory.getDatastoreService().get(ofy().getTransaction(), blockKey);
-        } catch (EntityNotFoundException e) {
-            blockEntity = null;
-        }
-        if(blockEntity == null) {
-            blockEntity = new Entity(descriptor.key());
-        }
-        return blockManager.update(blockEntity, descriptor.getOffset(recordIndex), fieldValue);
-    }
-
-    private Entity updateTombstone(int recordIndex) {
-        TombstoneBlock tombstone = new TombstoneBlock();
-        BlockDescriptor descriptor = tombstone.getBlockDescriptor(formId, recordIndex);
-        Entity blockEntity;
-        try {
-            blockEntity = DatastoreServiceFactory.getDatastoreService().get(ofy().getTransaction(), descriptor.key());
-        } catch (EntityNotFoundException e) {
-            blockEntity = new Entity(descriptor.key());
-        }
-
-        tombstone.markDeleted(blockEntity, descriptor.getOffset(recordIndex));
-
-        return blockEntity;
-    }
 }

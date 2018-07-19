@@ -4,7 +4,7 @@ import com.google.appengine.api.datastore.Entity;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.geo.GeoPoint;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -16,7 +16,7 @@ public class GeoPointBlock implements BlockManager {
     @Override
     public int getBlockSize() {
         // 5_120 * 16 = 80k per block
-        return 5120;
+        return 1024 * 5;
     }
 
     @Override
@@ -39,10 +39,9 @@ public class GeoPointBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
 
-
-
+        throw new UnsupportedOperationException("TODO");
 
     }
 }

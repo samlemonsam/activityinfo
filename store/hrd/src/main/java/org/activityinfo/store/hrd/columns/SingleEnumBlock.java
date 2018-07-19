@@ -10,7 +10,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 
 import java.util.Arrays;
@@ -29,7 +29,7 @@ public class SingleEnumBlock implements BlockManager {
 
     @Override
     public int getBlockSize() {
-        return 10_000;
+        return 1024 * 10;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SingleEnumBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header,
+    public ColumnView buildView(FormEntity header,
                                 TombstoneIndex deleted, Iterator<Entity> blockIterator) {
 
         Object2IntOpenHashMap<String> labelLookup = new Object2IntOpenHashMap<>();

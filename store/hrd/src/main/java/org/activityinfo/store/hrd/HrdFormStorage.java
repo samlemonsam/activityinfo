@@ -50,6 +50,8 @@ public class HrdFormStorage implements VersionedFormStorage {
 
     private static final Logger LOGGER = Logger.getLogger(HrdFormStorage.class.getName());
 
+    private static final boolean COLUMN_STORAGE_ENABLED = false;
+
     private long version;
     private FormClass formClass;
 
@@ -105,15 +107,18 @@ public class HrdFormStorage implements VersionedFormStorage {
     public void update(final TypedRecordUpdate update) {
         ofy().transact(new CreateOrUpdateRecord(formClass.getId(), update));
     }
-    
+
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        FormEntity formEntity = ofy().load().key(FormEntity.key(formClass.getId())).safe();
-        if(formEntity.getActiveColumnStorage() == null) {
-            return new HrdQueryColumnBuilder(formClass);
-        } else {
-            return new HrdQueryColumnBlockBuilder(formEntity);
+
+        if(COLUMN_STORAGE_ENABLED) {
+            FormEntity formEntity = ofy().load().key(FormEntity.key(formClass.getId())).safe();
+            if(formEntity.isColumnStorageActive()) {
+                return new HrdQueryColumnBlockBuilder(formEntity);
+            }
         }
+
+        return new HrdQueryColumnBuilder(formClass);
     }
 
     @Override

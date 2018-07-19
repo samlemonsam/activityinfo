@@ -5,7 +5,7 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class RecordIdBlockTest {
         block.update(blockEntity, 3, TextValue.valueOf("cadsffdxqw"));
         block.update(blockEntity, 4, TextValue.valueOf("c1dfd3552w"));
 
-        FormColumnStorage header = new FormColumnStorage();
+        FormEntity header = new FormEntity();
         header.setRecordCount(5);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());

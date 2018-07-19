@@ -68,13 +68,10 @@ public class HrdFormStorageTest {
 
         RecordGenerator generator = surveyForm.getGenerator();
 
-        int numRecords = 100_342;
+        int numRecords = 8;
 
         for (int i = 0; i < numRecords; i++) {
             storage.add(new TypedRecordUpdate(USER_ID, generator.get()));
         }
-
-
-
     }
 }

@@ -9,7 +9,7 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +59,7 @@ public class EnumBlockTest {
         block.update(blockEntity, 3, null);
         block.update(blockEntity, 4, new EnumValue(blue.getId()));
 
-        FormColumnStorage header = new FormColumnStorage();
+        FormEntity header = new FormEntity();
         header.setRecordCount(5);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Collections.emptyIterator());

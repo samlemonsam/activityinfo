@@ -4,7 +4,7 @@ import com.google.appengine.api.datastore.Entity;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -38,6 +38,6 @@ public interface BlockManager {
      */
     Entity update(Entity blockEntity, int recordOffset, @Nullable FieldValue fieldValue);
 
-    ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator);
+    ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator);
 }
 

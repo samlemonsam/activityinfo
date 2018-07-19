@@ -5,7 +5,7 @@ import com.google.appengine.api.datastore.Entity;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.query.shared.columns.StringReader;
 
 import java.util.BitSet;
@@ -53,7 +53,7 @@ public class StringBlock implements BlockManager {
 
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
         String[] values = new String[header.getRecordCount() - header.getDeletedCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();

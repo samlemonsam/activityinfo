@@ -57,7 +57,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitGeoPoint(GeoPointType geoPointType) {
-        throw new UnsupportedOperationException("TODO");
+        return new GeoPointBlock();
     }
 
     @Override

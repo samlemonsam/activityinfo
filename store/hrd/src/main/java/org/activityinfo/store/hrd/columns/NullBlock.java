@@ -3,7 +3,7 @@ package org.activityinfo.store.hrd.columns;
 import com.google.appengine.api.datastore.Entity;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 
 import java.util.Iterator;
 
@@ -25,7 +25,7 @@ public class NullBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
         throw new UnsupportedOperationException("TODO");
     }
 

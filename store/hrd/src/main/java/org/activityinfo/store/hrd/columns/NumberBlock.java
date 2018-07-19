@@ -6,7 +6,7 @@ import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EmptyColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.query.shared.columns.DoubleReader;
 import org.activityinfo.store.query.shared.columns.IntReader;
 
@@ -55,7 +55,7 @@ public class NumberBlock implements BlockManager {
 
     @Override
     public int getBlockSize() {
-        return 10_000;
+        return 1024 * 10;
     }
 
     @Override
@@ -130,7 +130,7 @@ public class NumberBlock implements BlockManager {
 
     private Entity updateDoubleMissing(Entity blockEntity, int recordOffset) {
         Blob valueArray = (Blob) blockEntity.getProperty("doubleValues");
-        int currentLength = ValueArrays.length(valueArray, DoubleValueArray.REAL64);
+        int currentLength = DoubleValueArray.length(valueArray);
         if(recordOffset < currentLength) {
             valueArray = DoubleValueArray.update(valueArray, recordOffset, Double.NaN);
             blockEntity.setProperty("doubleValues", valueArray);
@@ -159,18 +159,18 @@ public class NumberBlock implements BlockManager {
         int previousLength = IntValueArray.length(valueArray);
         int length = Math.max(previousLength, recordOffset + 1);
 
-        byte[] updated = ValueArrays.allocate(length, DoubleValueArray.REAL64);
+        byte[] updated = ValueArrays.allocate(length, DoubleValueArray.BYTES);
 
         ByteBuffer source = ValueArrays.asBuffer(valueArray);
         ByteBuffer target = ValueArrays.asBuffer(updated);
 
         for (int i = 0; i < length; i++) {
             if(i == recordOffset) {
-                target.putDouble(i * DoubleValueArray.REAL64, doubleValue);
+                target.putDouble(i * DoubleValueArray.BYTES, doubleValue);
             } else if(i < previousLength) {
-                target.putDouble(i * DoubleValueArray.REAL64, IntValueArray.toDouble(source.getInt(i * IntValueArray.BYTES)));
+                target.putDouble(i * DoubleValueArray.BYTES, IntValueArray.toDouble(source.getInt(i * IntValueArray.BYTES)));
             } else {
-                target.putDouble(i * DoubleValueArray.REAL64, Double.NaN);
+                target.putDouble(i * DoubleValueArray.BYTES, Double.NaN);
             }
         }
 
@@ -190,7 +190,7 @@ public class NumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
 
         List<Entity> blocks = new ArrayList<>();
 
@@ -214,7 +214,7 @@ public class NumberBlock implements BlockManager {
         throw new UnsupportedOperationException("storage: " + storage);
     }
 
-    private ColumnView buildIntView(FormColumnStorage header, List<Entity> blocks) {
+    private ColumnView buildIntView(FormEntity header, List<Entity> blocks) {
         int[] values = new int[header.getRecordCount()];
         Arrays.fill(values, IntValueArray.MISSING);
 

@@ -55,13 +55,20 @@ public class FormEntity {
     private long schemaVersion;
 
 
+    @Unindex
+    private boolean columnStorageActive;
+
     /**
-     * Which of the two recordCount indexes is currently active, RED or BLUE. This allows records to be
-     * renumbered without locking the whole form for modifications.
+     * The total number of records created (since we started counting)
      */
     @Unindex
-    private RecordNumbering activeColumnStorage;
+    private int recordCount;
 
+    /**
+     * The number of records that have been deleted (since we started counting)
+     */
+    @Unindex
+    private int deletedCount;
 
     public FormEntity() {
     }
@@ -107,12 +114,27 @@ public class FormEntity {
         this.schemaVersion = schemaVersion;
     }
 
-    public RecordNumbering getActiveColumnStorage() {
-        return activeColumnStorage;
+    public boolean isColumnStorageActive() {
+        return columnStorageActive;
     }
 
-    public void setActiveColumnStorage(RecordNumbering activeColumnStorage) {
-        this.activeColumnStorage = activeColumnStorage;
+    public void setColumnStorageActive(boolean columnStorageActive) {
+        this.columnStorageActive = columnStorageActive;
     }
 
+    public int getRecordCount() {
+        return recordCount;
+    }
+
+    public void setRecordCount(int recordCount) {
+        this.recordCount = recordCount;
+    }
+
+    public int getDeletedCount() {
+        return deletedCount;
+    }
+
+    public void setDeletedCount(int deletedCount) {
+        this.deletedCount = deletedCount;
+    }
 }

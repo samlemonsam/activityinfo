@@ -72,4 +72,7 @@ public class DoubleValueArray {
         bytes[pos  ] = (byte)(longValue >> 56);
     }
 
+    public static int length(Blob valueArray) {
+        return ValueArrays.length(valueArray, BYTES);
+    }
 }

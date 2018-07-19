@@ -6,7 +6,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class StringBlockTest {
         block.update(blockEntity, 8, TextValue.valueOf("Bob"));
         block.update(blockEntity, 9, TextValue.valueOf("Dan"));
 
-        FormColumnStorage header = new FormColumnStorage();
+        FormEntity header = new FormEntity();
         header.setRecordCount(10);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
@@ -75,7 +75,7 @@ public class StringBlockTest {
         Entity tombstone = new Entity("Tombstone", 1);
         tombstoneBlock.markDeleted(tombstone, 1);
 
-        FormColumnStorage header = new FormColumnStorage();
+        FormEntity header = new FormEntity();
         header.setRecordCount(3);
         header.setDeletedCount(1);
 

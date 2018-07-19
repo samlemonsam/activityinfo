@@ -7,7 +7,7 @@ import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -26,7 +26,7 @@ public class SerialNumberBlock implements BlockManager {
 
     @Override
     public int getBlockSize() {
-        return 5000;
+        return 1024 * 5;
     }
 
     /**
@@ -55,7 +55,7 @@ public class SerialNumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormColumnStorage header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
         String[] values = new String[header.getRecordCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();

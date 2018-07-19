@@ -10,7 +10,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.hrd.columns.*;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.spi.ColumnQueryBuilderV2;
@@ -74,12 +73,11 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
     @Override
     public void execute() {
 
-        LoadResult<FormColumnStorage> columnMap = Hrd.ofy().load().key(FormColumnStorage.key(formEntity));
         LoadResult<FormSchemaEntity> schema = Hrd.ofy().load().key(FormSchemaEntity.key(formEntity.getResourceId()));
 
         // Provide row counts
         for (PendingSlot<Integer> rowCountTarget : rowCountTargets) {
-            rowCountTarget.set(columnMap.safe().getRecordCount() - columnMap.safe().getDeletedCount());
+            rowCountTarget.set(formEntity.getRecordCount() - formEntity.getDeletedCount());
         }
 
         // Start queries for required blocks.
@@ -91,7 +89,7 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
         Iterator<Entity> tombstoneBlocks = Collections.emptyIterator();
-        if(columnMap.now().getDeletedCount() > 0) {
+        if(formEntity.getDeletedCount() > 0) {
             tombstoneBlocks = queryTombstoneBlocks(datastore);
         }
 
@@ -107,11 +105,11 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
         FormClass formSchema = schema.now().readFormClass();
 
-        TombstoneIndex tombstoneIndex = new TombstoneIndex(columnMap.now(), tombstoneBlocks);
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(formEntity, tombstoneBlocks);
 
         if(!idTargets.isEmpty()) {
             BlockManager blockManager = new RecordIdBlock();
-            ColumnView columnView = blockManager.buildView(columnMap.safe(), tombstoneIndex, queries.get(RecordIdBlock.FIELD_ID));
+            ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex, queries.get(RecordIdBlock.FIELD_ID));
             for (PendingSlot<ColumnView> idTarget : idTargets) {
                 idTarget.set(columnView);
             }
@@ -121,7 +119,7 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
             FormField field = formSchema.getField(fieldId);
             BlockManager blockManager = BlockFactory.get(field.getType());
 
-            ColumnView columnView = blockManager.buildView(columnMap.safe(), tombstoneIndex, queries.get(fieldId));
+            ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex, queries.get(fieldId));
             for (PendingSlot<ColumnView> fieldTarget : fieldTargets.get(fieldId)) {
                 fieldTarget.set(columnView);
             }

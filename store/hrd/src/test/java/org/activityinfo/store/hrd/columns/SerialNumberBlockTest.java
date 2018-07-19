@@ -6,7 +6,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
-import org.activityinfo.store.hrd.entity.FormColumnStorage;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,12 +23,12 @@ public class SerialNumberBlockTest {
                     .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         helper.setUp();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         helper.tearDown();
     }
 
@@ -42,7 +42,7 @@ public class SerialNumberBlockTest {
         block.update(blockEntity, 1, new SerialNumber(3));
         block.update(blockEntity, 8, new SerialNumber(4));
 
-        FormColumnStorage header = new FormColumnStorage();
+        FormEntity header = new FormEntity();
         header.setRecordCount(10);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header);
@@ -72,7 +72,7 @@ public class SerialNumberBlockTest {
         block.update(blockEntity, 4, new SerialNumber("ABC", 3));
         block.update(blockEntity, 5, new SerialNumber("ATC", 1));
 
-        FormColumnStorage header = new FormColumnStorage();
+        FormEntity header = new FormEntity();
         header.setRecordCount(6);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header);

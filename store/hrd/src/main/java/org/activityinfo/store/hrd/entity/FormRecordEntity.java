@@ -60,11 +60,8 @@ public class FormRecordEntity {
     private long schemaVersion;
 
     @Index
-    private int blue;
+    private int number;
 
-    @Index
-    private int red;
-    
     private EmbeddedEntity fieldValues;
 
     public FormRecordEntity() {
@@ -182,19 +179,11 @@ public class FormRecordEntity {
         return key(formClass.getId(), recordId);
     }
 
-    public int getRecordNumber(RecordNumbering scheme) {
-        if(scheme == RecordNumbering.RED) {
-            return red;
-        } else {
-            return blue;
-        }
+    public int getRecordNumber() {
+        return number;
     }
 
-    public void setRecordNumber(RecordNumbering scheme, int number) {
-        if(scheme == RecordNumbering.RED) {
-            this.red = number;
-        } else {
-            this.blue = number;
-        }
+    public void setRecordNumber(int number) {
+        this.number = number;
     }
 }
