@@ -23,6 +23,7 @@ import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
 import com.extjs.gxt.ui.client.event.SelectionChangedListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.ColumnConfig;
 import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
@@ -153,7 +154,18 @@ public class DbPartnerEditor implements IsWidget, ActionListener, DbPage {
     }
 
     private void confirmDelete(PartnerDTO selectedItem) {
+        MessageBox.confirm(
+                I18N.CONSTANTS.removePartner(),
+                I18N.MESSAGES.requestConfirmationToRemovePartner(selectedItem.getName()),
+                event -> {
+                    if(event.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                        delete(selectedItem);
+                    }
+                }
+        );
+    }
 
+    private void delete(PartnerDTO selectedItem) {
         dispatcher.execute(new RemovePartner(db.getId(), selectedItem.getId()),
                 new MaskingAsyncMonitor(grid, I18N.CONSTANTS.deletionInProgress()),
                 new AsyncCallback<RemoveResult>() {
