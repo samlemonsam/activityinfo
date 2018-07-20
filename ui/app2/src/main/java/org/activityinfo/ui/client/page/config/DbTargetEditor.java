@@ -22,6 +22,7 @@ import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
+import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -131,6 +132,18 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
 
     @Override
     protected void onDeleteConfirmed(final TargetDTO model) {
+        MessageBox.confirm(
+                I18N.CONSTANTS.deleteTarget(),
+                I18N.MESSAGES.requestConfirmationToDeleteTarget(model.getName()),
+                event -> {
+                    if (event.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                        delete(model);
+                    }
+                }
+        );
+    }
+
+    private void delete(TargetDTO model) {
         service.execute(new Delete(model), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
             @Override
             public void onFailure(Throwable caught) {
