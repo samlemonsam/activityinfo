@@ -298,4 +298,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Do you want to remove Partner {0} from your Database?")
     String requestConfirmationToRemovePartner(String partnerName);
 
+    @DefaultMessage("Do you want to remove Project {0} from your Database?")
+    String requestConfirmationToRemoveProject(String projectName);
+
 }

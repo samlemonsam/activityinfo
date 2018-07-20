@@ -1894,5 +1894,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Remove User")
     String removeUser();
 
+    @DefaultStringValue("Delete Project")
+    String deleteProject();
 
 }

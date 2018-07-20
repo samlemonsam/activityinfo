@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.page.config;
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -142,6 +143,18 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
 
     @Override
     protected void onDeleteConfirmed(final ProjectDTO project) {
+        MessageBox.confirm(
+                I18N.CONSTANTS.deleteProject(),
+                I18N.MESSAGES.requestConfirmationToRemoveProject(project.getName()),
+                event -> {
+                    if (event.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                        delete(project);
+                    }
+                }
+        );
+    }
+
+    private void delete(ProjectDTO project) {
         service.execute(RequestChange.delete(project), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
             @Override
             public void onFailure(Throwable caught) {
