@@ -82,7 +82,7 @@ public class ActivityUpdater {
         // find the nullary location type id
         int locationTypeId;
         try(ResultSet rs = executor.query("SELECT locationTypeId FROM locationtype " +
-                        "WHERE name = 'Country' AND boundAdminLevelid is NULL AND databaseID is NULL AND " +
+                        "WHERE nullary=1 AND " +
                             "countryId = (SELECT countryId FROM userdatabase WHERE databaseId=" + databaseId + ")")) {
 
             if(!rs.next()) {
