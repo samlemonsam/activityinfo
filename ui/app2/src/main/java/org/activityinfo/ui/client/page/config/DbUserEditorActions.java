@@ -175,14 +175,14 @@ public class DbUserEditorActions {
                 I18N.MESSAGES.requestConfirmationToRemoveUser(model.getEmail()),
                 event -> {
                     if(event.getButtonClicked().getItemId().equals(Dialog.YES)) {
-                        dispatch(model);
+                        delete(model);
                     } else {
                         panel.setModified(false);
                     }
                 });
     }
 
-    private void dispatch(UserPermissionDTO model) {
+    private void delete(UserPermissionDTO model) {
         dispatcher.execute(new UpdateUserPermissions(db.getId(), model),
                 new MaskingAsyncMonitor(panel, I18N.CONSTANTS.deleting()),
                 new AsyncCallback<VoidResult>() {
