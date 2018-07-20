@@ -23,6 +23,7 @@ import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
+import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.google.gwt.core.client.GWT;
@@ -169,6 +170,19 @@ public class DbUserEditorActions {
         model.setAllowManageAllUsers(false);
         model.setAllowManageUsers(false);
 
+        MessageBox.confirm(
+                I18N.CONSTANTS.removeUser(),
+                I18N.MESSAGES.requestConfirmationToRemoveUser(model.getEmail()),
+                event -> {
+                    if(event.getButtonClicked().getItemId().equals(Dialog.YES)) {
+                        dispatch(model);
+                    } else {
+                        panel.setModified(false);
+                    }
+                });
+    }
+
+    private void dispatch(UserPermissionDTO model) {
         dispatcher.execute(new UpdateUserPermissions(db.getId(), model),
                 new MaskingAsyncMonitor(panel, I18N.CONSTANTS.deleting()),
                 new AsyncCallback<VoidResult>() {

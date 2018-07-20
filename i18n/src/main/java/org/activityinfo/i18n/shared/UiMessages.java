@@ -291,4 +291,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("User {0} does not exist in ActivityInfo system.")
     String userNotInSystem(String userName);
+
+    @DefaultMessage("Do you want to remove User {0} from your Database?")
+    String requestConfirmationToRemoveUser(String userName);
+
 }

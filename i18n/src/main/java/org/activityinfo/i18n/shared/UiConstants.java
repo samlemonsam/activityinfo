@@ -1890,4 +1890,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Select a date (YYYY-MM-DD)")
     String selectDatePlaceholder();
+
+    @DefaultStringValue("Remove User")
+    String removeUser();
+
+
 }
