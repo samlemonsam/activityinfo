@@ -21,7 +21,7 @@
 <#-- @ftlvariable name="" type="org.activityinfo.server.mail.RejectDatabaseTransferMessage" -->
 Hi ${recipient.name},
 
-We regret to inform you that your request to transfer ownership of Database ${database.name} to User ${approver.name} has been rejected.
+The request to transfer ownership of Database ${database.name} to User ${approver.name} has been rejected, or the request was cancelled by the Database Owner.
 
 Best regards,
 

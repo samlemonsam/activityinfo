@@ -42,6 +42,7 @@ import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.mail.MailSender;
+import org.activityinfo.server.mail.RejectDatabaseTransferMessage;
 import org.activityinfo.server.mail.RequestDatabaseTransferMessage;
 import org.activityinfo.server.mail.SuccessfulDatabaseTransferMessage;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
@@ -395,6 +396,7 @@ public class DatabaseResource {
         startTransaction();
         try {
             clearTransferToken(database);
+            sendRejectionNotifications(currentOwner, proposedOwner, database);
         } catch (Exception e) {
             rollbackTransaction();
             throw new RuntimeException(e);
@@ -402,6 +404,11 @@ public class DatabaseResource {
         commitTransaction();
 
         return Response.ok().entity("Database transfer cancelled").build();
+    }
+
+    private void sendRejectionNotifications(User currentOwner, User proposedOwner, Database database) {
+        mailSender.send(new RejectDatabaseTransferMessage(currentOwner, proposedOwner, database));
+        mailSender.send(new RejectDatabaseTransferMessage(proposedOwner, proposedOwner, database));
     }
 
 }
