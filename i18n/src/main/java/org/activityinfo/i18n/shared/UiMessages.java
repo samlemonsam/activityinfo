@@ -292,16 +292,16 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("User {0} does not exist in ActivityInfo system.")
     String userNotInSystem(String userName);
 
-    @DefaultMessage("Do you want to remove User {0} from your Database?")
+    @DefaultMessage("Do you want to remove User: ''{0}'' from your Database?")
     String requestConfirmationToRemoveUser(String userName);
 
-    @DefaultMessage("Do you want to delete Partner {0} from your Database?")
+    @DefaultMessage("Do you want to delete Partner: ''{0}'' from your Database?")
     String requestConfirmationToDeletePartner(String partnerName);
 
-    @DefaultMessage("Do you want to delete Project {0} from your Database?")
+    @DefaultMessage("Do you want to delete Project: ''{0}'' from your Database?")
     String requestConfirmationToDeleteProject(String projectName);
 
-    @DefaultMessage("Do you want to delete Target {0} from your Database?")
+    @DefaultMessage("Do you want to delete Target: ''{0}'' from your Database?")
     String requestConfirmationToDeleteTarget(String targetName);
 
 }
