@@ -156,7 +156,7 @@ public class DbPartnerEditor implements IsWidget, ActionListener, DbPage {
     private void confirmDelete(PartnerDTO selectedItem) {
         MessageBox.confirm(
                 I18N.CONSTANTS.removePartner(),
-                I18N.MESSAGES.requestConfirmationToRemovePartner(selectedItem.getName()),
+                I18N.MESSAGES.requestConfirmationToDeletePartner(selectedItem.getName()),
                 event -> {
                     if(event.getButtonClicked().getItemId().equals(Dialog.YES)) {
                         delete(selectedItem);

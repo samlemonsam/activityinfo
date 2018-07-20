@@ -145,7 +145,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
     protected void onDeleteConfirmed(final ProjectDTO project) {
         MessageBox.confirm(
                 I18N.CONSTANTS.deleteProject(),
-                I18N.MESSAGES.requestConfirmationToRemoveProject(project.getName()),
+                I18N.MESSAGES.requestConfirmationToDeleteProject(project.getName()),
                 event -> {
                     if (event.getButtonClicked().getItemId().equals(Dialog.YES)) {
                         delete(project);
