@@ -14,6 +14,7 @@ import org.activityinfo.fixtures.Modules;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
+import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.CommandTestCase;
 import org.activityinfo.server.command.DispatcherSync;
@@ -204,7 +205,7 @@ public class DatabaseResourceTest extends CommandTestCase {
             throw new AssertionError("Could not generate request: { " + status + " }");
         }
 
-        response = resource.cancelTransfer(alex, null);
+        response = resource.cancelTransfer(alex, TransferDecision.cancelled());
 
         status = Response.Status.fromStatusCode(response.getStatus());
 
@@ -232,7 +233,7 @@ public class DatabaseResourceTest extends CommandTestCase {
             throw new AssertionError("Could not generate request: { " + status + " }");
         }
 
-        response = resource.cancelTransfer(bavon, null);
+        response = resource.cancelTransfer(bavon, TransferDecision.cancelled());
 
         status = Response.Status.fromStatusCode(response.getStatus());
 
@@ -260,7 +261,7 @@ public class DatabaseResourceTest extends CommandTestCase {
             throw new AssertionError("Could not generate request: { " + status + " }");
         }
 
-        response = resource.cancelTransfer(other, request.toJson().toJson());
+        response = resource.cancelTransfer(other, TransferDecision.cancelled());
 
         status = Response.Status.fromStatusCode(response.getStatus());
 
