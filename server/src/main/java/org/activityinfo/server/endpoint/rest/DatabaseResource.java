@@ -32,6 +32,7 @@ import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
+import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.authentication.AuthTokenProvider;
@@ -41,10 +42,7 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
-import org.activityinfo.server.mail.MailSender;
-import org.activityinfo.server.mail.RejectDatabaseTransferMessage;
-import org.activityinfo.server.mail.RequestDatabaseTransferMessage;
-import org.activityinfo.server.mail.SuccessfulDatabaseTransferMessage;
+import org.activityinfo.server.mail.*;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
@@ -378,7 +376,7 @@ public class DatabaseResource {
     @POST
     @Path("/transfer/cancel")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response cancelTransfer(@InjectParam AuthenticatedUser executingUser, String json) {
+    public Response cancelTransfer(@InjectParam AuthenticatedUser executingUser, TransferDecision decision) {
         Database database = getDatabase();
         User currentOwner = database.getOwner();
         User proposedOwner = database.getTransferUser();
@@ -396,7 +394,11 @@ public class DatabaseResource {
         startTransaction();
         try {
             clearTransferToken(database);
-            sendRejectionNotifications(currentOwner, proposedOwner, database);
+            if (decision.isRejected()) {
+                sendRejectionNotifications(currentOwner, proposedOwner, database);
+            } else {
+                sendCancelledNotifications(currentOwner, proposedOwner, database);
+            }
         } catch (Exception e) {
             rollbackTransaction();
             throw new RuntimeException(e);
@@ -404,6 +406,11 @@ public class DatabaseResource {
         commitTransaction();
 
         return Response.ok().entity("Database transfer cancelled").build();
+    }
+
+    private void sendCancelledNotifications(User currentOwner, User proposedOwner, Database database) {
+        mailSender.send(new CancelDatabaseTransferMessage(currentOwner, proposedOwner, database));
+        mailSender.send(new CancelDatabaseTransferMessage(proposedOwner, proposedOwner, database));
     }
 
     private void sendRejectionNotifications(User currentOwner, User proposedOwner, Database database) {

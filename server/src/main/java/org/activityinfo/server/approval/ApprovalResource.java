@@ -3,6 +3,7 @@ package org.activityinfo.server.approval;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
+import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Database;
@@ -99,7 +100,7 @@ public class ApprovalResource {
                 mailSender,
                 database.getId());
 
-        return resource.cancelTransfer(proposedOwner.asAuthenticatedUser(), null);
+        return resource.cancelTransfer(proposedOwner.asAuthenticatedUser(), TransferDecision.rejected());
     }
 
 }

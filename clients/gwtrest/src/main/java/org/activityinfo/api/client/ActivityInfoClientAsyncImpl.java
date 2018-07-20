@@ -30,6 +30,7 @@ import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
@@ -345,9 +346,10 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<Void> cancelDatabaseTransfer(int databaseId) {
+        TransferDecision decision = TransferDecision.cancelled();
         return post(RequestBuilder.POST,
                 baseUrl + "/database/" + databaseId + "/transfer/cancel",
-                null);
+                decision.toJson().toJson());
     }
 
     private <R> Promise<R> getRaw(final String url, final Function<Response, R> parser) {
