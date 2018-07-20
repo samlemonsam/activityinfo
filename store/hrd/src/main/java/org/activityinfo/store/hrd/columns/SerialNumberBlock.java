@@ -25,8 +25,18 @@ public class SerialNumberBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockSize() {
-        return 1024 * 5;
+    public int getBlockRowSize() {
+        return 1024 * 6;
+    }
+
+    @Override
+    public int getMaxFieldSize() {
+        return 1;
+    }
+
+    @Override
+    public String getBlockType() {
+        return "serial";
     }
 
     /**
@@ -60,7 +70,7 @@ public class SerialNumberBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockSize();
+            int blockStart = blockIndex * getBlockRowSize();
 
             String[] prefixPool = null;
             byte[] prefixOffsets = null;

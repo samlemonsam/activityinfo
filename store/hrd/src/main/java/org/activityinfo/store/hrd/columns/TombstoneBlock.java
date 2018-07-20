@@ -15,10 +15,10 @@ public class TombstoneBlock {
     private static final String BITSET_PROPERTY = "deleted";
 
 
-    public BlockDescriptor getBlockDescriptor(ResourceId formId, int recordIndex) {
+    public BlockId getBlockDescriptor(ResourceId formId, int recordIndex) {
         int blockIndex = recordIndex / BLOCK_SIZE;
         int blockSize =  BLOCK_SIZE;
-        return new BlockDescriptor(formId, COLUMN_NAME,
+        return new BlockId(formId, COLUMN_NAME,
                 blockIndex,
                 blockIndex * blockSize,
                 blockSize);
@@ -29,7 +29,7 @@ public class TombstoneBlock {
     }
 
     public static Key columnKey(ResourceId formId) {
-        return BlockDescriptor.columnKey(formId, COLUMN_NAME);
+        return BlockId.columnKey(formId, COLUMN_NAME);
     }
 
     public static byte[] getBitset(Entity entity) {

@@ -1,5 +1,6 @@
 package org.activityinfo.store.hrd.columns;
 
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -20,13 +21,19 @@ import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
 
 public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
-    public static BlockManager get(FieldType type) {
-        return type.accept(new BlockFactory());
+    private final String fieldName;
+
+    public BlockFactory(FormField field) {
+        this.fieldName = field.getName();
+    }
+
+    public static BlockManager get(FormField field) {
+        return field.getType().accept(new BlockFactory(field));
     }
 
     @Override
     public BlockManager visitAttachment(AttachmentType attachmentType) {
-        return new StringBlock(new ViewBuilderFactory.AttachmentBlobIdReader());
+        return new StringBlock(fieldName, new ViewBuilderFactory.AttachmentBlobIdReader());
     }
 
     @Override
@@ -37,12 +44,12 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitReference(ReferenceType referenceType) {
-        return new StringBlock(new ViewBuilderFactory.ReferenceIdReader());
+        return new StringBlock(fieldName, new ViewBuilderFactory.ReferenceIdReader());
     }
 
     @Override
     public BlockManager visitNarrative(NarrativeType narrativeType) {
-        return new StringBlock(new ViewBuilderFactory.ReferenceIdReader());
+        return new StringBlock(fieldName, new ViewBuilderFactory.ReferenceIdReader());
     }
 
     @Override
@@ -52,12 +59,12 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitQuantity(QuantityType type) {
-        return new NumberBlock((DoubleReader) value -> ((Quantity) value).getValue());
+        return new NumberBlock(fieldName, (DoubleReader) value -> ((Quantity) value).getValue());
     }
 
     @Override
     public BlockManager visitGeoPoint(GeoPointType geoPointType) {
-        return new GeoPointBlock();
+        return new GeoPointBlock(fieldName);
     }
 
     @Override
@@ -68,15 +75,15 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
     @Override
     public BlockManager visitEnum(EnumType enumType) {
         if(enumType.getCardinality() == Cardinality.MULTIPLE) {
-            return new MultiEnumBlock();
+            return new MultiEnumBlock(fieldName);
         } else {
-            return new SingleEnumBlock(enumType);
+            return new SingleEnumBlock(fieldName, enumType);
         }
     }
 
     @Override
     public BlockManager visitBarcode(BarcodeType barcodeType) {
-        return new StringBlock(new ViewBuilderFactory.TextFieldReader());
+        return new StringBlock(fieldName, new ViewBuilderFactory.TextFieldReader());
     }
 
     @Override
@@ -117,12 +124,12 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
             }
         };
 
-        return new NumberBlock(reader, columnFactory);
+        return new NumberBlock(fieldName, reader, columnFactory);
     }
 
     @Override
     public BlockManager visitYear(YearType yearType) {
-        return new NumberBlock((IntReader) value -> ((YearValue) value).getYear());
+        return new NumberBlock(fieldName, (IntReader) value -> ((YearValue) value).getYear());
     }
 
     @Override
@@ -141,7 +148,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
             }
         };
 
-        return new NumberBlock(reader, columnFactory);
+        return new NumberBlock(fieldName, reader, columnFactory);
     }
 
     @Override
@@ -160,7 +167,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
             }
         };
 
-        return new NumberBlock(reader, columnFactory);
+        return new NumberBlock(fieldName, reader, columnFactory);
     }
 
     @Override
@@ -170,7 +177,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitText(TextType textType) {
-        return new StringBlock(new ViewBuilderFactory.TextFieldReader());
+        return new StringBlock(fieldName, new ViewBuilderFactory.TextFieldReader());
     }
 
     @Override

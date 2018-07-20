@@ -15,27 +15,40 @@ public class StringBlock implements BlockManager {
 
     private static final int BLOCK_SIZE = 1024;
 
-    private static final String POOL_PROPERTY = "strings";
 
     private final StringReader reader;
+    private final String poolProperty;
+    private final String offsetProperty;
 
-    public StringBlock(StringReader reader) {
+    public StringBlock(String fieldName, StringReader reader) {
         this.reader = reader;
+        this.poolProperty = fieldName + ":strings";
+        this.offsetProperty = fieldName + ":offset";
     }
 
     @Override
-    public int getBlockSize() {
+    public int getBlockRowSize() {
         return BLOCK_SIZE;
+    }
+
+    @Override
+    public String getBlockType() {
+        return "string";
+    }
+
+    @Override
+    public int getMaxFieldSize() {
+        return 2;
     }
 
     @Override
     public Entity update(Entity blockEntity, int recordOffset, FieldValue fieldValue) {
 
         // Map this string to an index in our string pool, or zero, if the field value is missing
-        char stringIndex = StringPools.findOrInsertStringInPool(blockEntity, POOL_PROPERTY, toString(fieldValue));
+        char stringIndex = StringPools.findOrInsertStringInPool(blockEntity, poolProperty, toString(fieldValue));
 
         // Now update the value in the array of "pointers" into our string panel
-        if(OffsetArray.updateOffset(blockEntity, recordOffset, stringIndex)) {
+        if(OffsetArray.updateOffset(blockEntity, offsetProperty, recordOffset,  stringIndex)) {
             return blockEntity;
 
         } else {
@@ -58,7 +71,7 @@ public class StringBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockSize();
+            int blockStart = blockIndex * getBlockRowSize();
 
             // Which records have been deleted?
             BitSet deleted = tombstones.getDeletedBitSet(blockStart, BLOCK_SIZE);
@@ -68,10 +81,10 @@ public class StringBlock implements BlockManager {
             int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
 
             // Now fill the portion of the array needed
-            String[] pool = StringPools.toArray(block, POOL_PROPERTY);
+            String[] pool = StringPools.toArray(block, poolProperty);
             if (pool.length > 0) {
 
-                byte[] offsets = ((Blob) block.getProperty(OffsetArray.OFFSETS_PROPERTY)).getBytes();
+                byte[] offsets = ((Blob) block.getProperty(offsetProperty)).getBytes();
                 int offsetCount = OffsetArray.length(offsets);
 
                 for (int i = 0; i < offsetCount; i++) {

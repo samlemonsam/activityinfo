@@ -20,16 +20,29 @@ import java.util.Set;
 
 public class SingleEnumBlock implements BlockManager {
 
-    private static final String ITEM_ID_PROPERTY = "itemIds";
     private final EnumType enumType;
+    private final String itemIdProperty;
+    private final String offsetProperty;
 
-    public SingleEnumBlock(EnumType enumType) {
+    public SingleEnumBlock(String fieldName, EnumType enumType) {
         this.enumType = enumType;
+        this.itemIdProperty = fieldName + ":pool";
+        this.offsetProperty = fieldName;
     }
 
     @Override
-    public int getBlockSize() {
-        return 1024 * 10;
+    public int getBlockRowSize() {
+        return 1024 * 4;
+    }
+
+    @Override
+    public int getMaxFieldSize() {
+        return 4;
+    }
+
+    @Override
+    public String getBlockType() {
+        return "enum";
     }
 
     @Override
@@ -37,9 +50,9 @@ public class SingleEnumBlock implements BlockManager {
 
         String itemId = toItemId(fieldValue);
 
-        char itemIndex = StringPools.findOrInsertStringInPool(blockEntity, ITEM_ID_PROPERTY, itemId);
+        char itemIndex = StringPools.findOrInsertStringInPool(blockEntity, itemIdProperty, itemId);
 
-        if(OffsetArray.updateOffset(blockEntity, recordOffset, itemIndex)) {
+        if(OffsetArray.updateOffset(blockEntity, offsetProperty, recordOffset, itemIndex)) {
             return blockEntity;
         } else {
             /* no change */
@@ -82,11 +95,11 @@ public class SingleEnumBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockSize();
+            int blockStart = blockIndex * getBlockRowSize();
 
-            String[] pool = StringPools.toArray((Blob) block.getProperty(ITEM_ID_PROPERTY));
+            String[] pool = StringPools.toArray((Blob) block.getProperty(itemIdProperty));
             if(pool.length > 0) {
-                byte[] offsets = ((Blob)block.getProperty(OffsetArray.OFFSETS_PROPERTY)).getBytes();
+                byte[] offsets = ((Blob)block.getProperty(offsetProperty)).getBytes();
                 int offsetCount = OffsetArray.length(offsets);
 
                 for (int i = 0; i < offsetCount; i++) {

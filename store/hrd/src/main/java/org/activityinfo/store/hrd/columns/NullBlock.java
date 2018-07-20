@@ -15,8 +15,18 @@ public class NullBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockSize() {
+    public int getBlockRowSize() {
         return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public int getMaxFieldSize() {
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public String getBlockType() {
+        return "null";
     }
 
     @Override

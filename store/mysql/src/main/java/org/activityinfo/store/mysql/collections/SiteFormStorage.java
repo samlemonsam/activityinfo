@@ -263,7 +263,6 @@ public class SiteFormStorage implements VersionedFormStorage {
                 toSave.add(recordEntity);
                 toSave.add(snapshot);
 
-                ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(getFormClass(), Hrd.ofy().getTransaction());
                 if(changeType == RecordChangeType.DELETED)
 
 

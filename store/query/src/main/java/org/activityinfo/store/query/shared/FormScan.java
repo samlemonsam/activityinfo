@@ -27,6 +27,8 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
 import org.activityinfo.store.query.shared.columns.ForeignKey;
+import org.activityinfo.store.query.shared.columns.IdColumnBuilder;
+import org.activityinfo.store.query.shared.columns.RowCountBuilder;
 import org.activityinfo.store.query.shared.join.ForeignKeyId;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
 import org.activityinfo.store.spi.PendingSlot;
@@ -229,7 +231,7 @@ public class FormScan {
 
         for (Map.Entry<FormulaNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
             if (column.getKey().equals(PK_COLUMN_KEY)) {
-                queryBuilder.addResourceId(column.getValue());
+                queryBuilder.addResourceId(new IdColumnBuilder(column.getValue()));
             } else {
                 queryBuilder.addExpr(column.getKey(), column.getValue());
             }
@@ -237,8 +239,10 @@ public class FormScan {
 
         // Only add a row count observer IF it has been requested AND
         // it hasn't been loaded from the cache.
+        RowCountBuilder rowCountBuilder;
         if (rowCount != null && !rowCount.isSet()) {
-            queryBuilder.addRowCount(rowCount);
+            rowCountBuilder = new RowCountBuilder(rowCount);
+            queryBuilder.addResourceId(rowCountBuilder);
         }
 
         for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {

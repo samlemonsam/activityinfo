@@ -117,7 +117,7 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
         for (ResourceId fieldId : fieldTargets.keySet()) {
             FormField field = formSchema.getField(fieldId);
-            BlockManager blockManager = BlockFactory.get(field.getType());
+            BlockManager blockManager = BlockFactory.get(field);
 
             ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex, queries.get(fieldId));
             for (PendingSlot<ColumnView> fieldTarget : fieldTargets.get(fieldId)) {
@@ -128,7 +128,7 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
     private QueryResultIterator<Entity> queryTombstoneBlocks(DatastoreService datastore) {
         Key columnKey = TombstoneBlock.columnKey(formEntity.getResourceId());
-        Query query = new Query(BlockDescriptor.BLOCK_KIND, columnKey);
+        Query query = new Query(BlockId.BLOCK_KIND, columnKey);
         PreparedQuery preparedQuery = datastore.prepare(Hrd.ofy().getTransaction(), query);
 
         return preparedQuery.asQueryResultIterator(
@@ -139,8 +139,8 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
 
     private QueryResultIterator<Entity> queryBlocks(DatastoreService datastore, ResourceId fieldId) {
-        com.google.appengine.api.datastore.Key columnKey = BlockDescriptor.columnKey(formEntity.getResourceId(), fieldId);
-        Query query = new Query(BlockDescriptor.BLOCK_KIND, columnKey);
+        com.google.appengine.api.datastore.Key columnKey = BlockId.columnKey(formEntity.getResourceId(), fieldId);
+        Query query = new Query(BlockId.BLOCK_KIND, columnKey);
         PreparedQuery preparedQuery = datastore.prepare(Hrd.ofy().getTransaction(), query);
 
         return preparedQuery.asQueryResultIterator(

@@ -6,7 +6,7 @@ import com.google.common.base.Preconditions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.entity.FormEntity;
 
-public class BlockDescriptor {
+public class BlockId {
     public static final String BLOCK_KIND = "Block";
     public static final String COLUMN_KIND = "Column";
     private ResourceId formId;
@@ -15,7 +15,7 @@ public class BlockDescriptor {
     private int blockStart;
     private int blockLength;
 
-    public BlockDescriptor(ResourceId formId, String fieldId, int blockIndex, int blockStart, int blockLength) {
+    public BlockId(ResourceId formId, String fieldId, int blockIndex, int blockStart, int blockLength) {
         this.formId = formId;
         this.fieldId = fieldId;
         this.blockIndex = blockIndex;

@@ -10,7 +10,7 @@ public class BlockManagerTest {
     @Test
     public void test() {
 
-        StringBlock block = new StringBlock(x -> "");
+        StringBlock block = new StringBlock(fieldName, x -> "");
 
         assertThat(block.getBlockIndex(1), equalTo(0));
     }

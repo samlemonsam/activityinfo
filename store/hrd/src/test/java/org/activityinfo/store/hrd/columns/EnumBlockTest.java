@@ -3,6 +3,7 @@ package org.activityinfo.store.hrd.columns;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -44,9 +45,9 @@ public class EnumBlockTest {
         EnumItem green = new EnumItem(ResourceId.valueOf("df2345253xkd"), "Green");
         EnumItem violet = new EnumItem(ResourceId.valueOf("abcdef344444"), "Violet");
         EnumType enumType = new EnumType(Cardinality.SINGLE, blue, green, violet);
+        FormField enumField = new FormField(ResourceId.valueOf("FF")).setType(enumType);
 
-
-        SingleEnumBlock block = (SingleEnumBlock) BlockFactory.get(enumType);
+        SingleEnumBlock block = (SingleEnumBlock) BlockFactory.get(enumField);
 
         Entity blockEntity = new Entity("Block", 1);
 

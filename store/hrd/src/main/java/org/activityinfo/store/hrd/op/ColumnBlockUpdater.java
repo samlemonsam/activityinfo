@@ -7,6 +7,9 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.columns.*;
+import org.activityinfo.store.hrd.entity.ColumnDescriptor;
+import org.activityinfo.store.hrd.entity.FieldDescriptor;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
 
 import java.util.Collection;
@@ -14,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ColumnBlockUpdater {
+    private final FormEntity formEntity;
     private final ResourceId formId;
     private final FormClass formClass;
 
@@ -23,14 +27,14 @@ public class ColumnBlockUpdater {
     private final Map<Key, Entity> blockMap = new HashMap<>();
 
     private final DatastoreService datastore;
-    private Transaction transaction;
+    private final Transaction transaction;
 
-    public ColumnBlockUpdater(FormClass formClass, Transaction transaction) {
+    public ColumnBlockUpdater(FormEntity formEntity, FormClass formClass, Transaction transaction) {
+        this.formEntity = formEntity;
         this.formId = formClass.getId();
         this.formClass = formClass;
-        datastore = DatastoreServiceFactory.getDatastoreService();
+        this.datastore = DatastoreServiceFactory.getDatastoreService();
         this.transaction = transaction;
-
     }
 
     /**
@@ -41,7 +45,7 @@ public class ColumnBlockUpdater {
      */
     public void updateId(int recordNumber, String recordId) {
         BlockManager blockManager = new RecordIdBlock();
-        BlockDescriptor descriptor = blockManager.getBlockDescriptor(formClass.getId(), RecordIdBlock.FIELD_NAME, recordNumber);
+        BlockId descriptor = blockManager.getBlockDescriptor(formClass.getId(), RecordIdBlock.FIELD_NAME, recordNumber);
 
         updateBlock(blockManager, descriptor, recordNumber, TextValue.valueOf(recordId));
     }
@@ -61,8 +65,8 @@ public class ColumnBlockUpdater {
     }
 
     public void updateParentId(int recordNumber, String parentRecordId) {
-        BlockManager blockManager = new StringBlock(new ViewBuilderFactory.TextFieldReader());
-        BlockDescriptor descriptor = blockManager.getBlockDescriptor(formClass.getId(), "@parent", recordNumber);
+        BlockManager blockManager = new StringBlock("parent", new ViewBuilderFactory.TextFieldReader());
+        BlockId descriptor = blockManager.getBlockDescriptor(formClass.getId(), "@parent", recordNumber);
 
         updateBlock(blockManager, descriptor, recordNumber, TextValue.valueOf(parentRecordId));
     }
@@ -70,17 +74,53 @@ public class ColumnBlockUpdater {
 
     private void updateFieldBlock(int recordNumber, FormField field, FieldValue fieldValue) {
 
-        BlockManager blockManager = BlockFactory.get(field.getType());
-        BlockDescriptor descriptor = blockManager.getBlockDescriptor(formId, field.getName(), recordNumber);
+        BlockManager blockManager = BlockFactory.get(field);
+
+        FieldDescriptor fieldDescriptor = formEntity.getFieldDescriptor(field.getName());
+        fieldDescriptor.setVersion(formEntity.getVersion());
+
+        ColumnDescriptor block = blockForField(field, fieldDescriptor, blockManager);
+
+        BlockId descriptor = blockManager.getBlockDescriptor(formId, block.getColumnId(), recordNumber);
 
         updateBlock(blockManager, descriptor, recordNumber, fieldValue);
+    }
+
+    private ColumnDescriptor blockForField(FormField field, FieldDescriptor fieldDescriptor, BlockManager blockManager) {
+        if(fieldDescriptor.hasBlockAssignment()) {
+            return formEntity.getFieldBlock(fieldDescriptor.getColumnId());
+        } else {
+            return assignBlock(fieldDescriptor, field, blockManager);
+        }
+    }
+
+    private ColumnDescriptor assignBlock(FieldDescriptor fieldDescriptor, FormField field, BlockManager blockManager) {
+        for (ColumnDescriptor block : formEntity.getBlockColumns().values()) {
+            if(blockManager.canBeAssignedTo(block)) {
+                block.addField(field.getName());
+                fieldDescriptor.setColumnId(block.getColumnId());
+                return block;
+            }
+        }
+
+        // Need to allocate a new block
+        ColumnDescriptor block = new ColumnDescriptor();
+        block.setColumnId("col" + formEntity.getBlockColumns().size() + 1);
+        block.setBlockType(blockManager.getBlockType());
+        block.addField(field.getName());
+
+        formEntity.addFieldBlock(block);
+
+        fieldDescriptor.setColumnId(block.getColumnId());
+
+        return block;
     }
 
 
     public void updateTombstone(int recordNumber) {
 
         TombstoneBlock tombstone = new TombstoneBlock();
-        BlockDescriptor descriptor = tombstone.getBlockDescriptor(formId, recordNumber);
+        BlockId descriptor = tombstone.getBlockDescriptor(formId, recordNumber);
         Entity blockEntity = getOrCreateBlock(descriptor, descriptor.key());
 
         tombstone.markDeleted(blockEntity, descriptor.getOffset(recordNumber));
@@ -88,7 +128,7 @@ public class ColumnBlockUpdater {
         blockMap.put(blockEntity.getKey(), blockEntity);
     }
 
-    private void updateBlock(BlockManager blockManager, BlockDescriptor descriptor, int recordIndex, FieldValue fieldValue) {
+    private void updateBlock(BlockManager blockManager, BlockId descriptor, int recordIndex, FieldValue fieldValue) {
 
         Entity blockEntity = getOrCreateBlock(descriptor, descriptor.key());
 
@@ -99,7 +139,7 @@ public class ColumnBlockUpdater {
         }
     }
 
-    private Entity getOrCreateBlock(BlockDescriptor descriptor, Key blockKey) {
+    private Entity getOrCreateBlock(BlockId descriptor, Key blockKey) {
         Entity blockEntity = blockMap.get(blockKey);
         if(blockEntity == null) {
             try {

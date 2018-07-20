@@ -24,7 +24,11 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Unindex;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.hrd.columns.RecordNumbering;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Parent entity of all entities related to a single form.
@@ -69,6 +73,10 @@ public class FormEntity {
      */
     @Unindex
     private int deletedCount;
+
+    private Map<String, FieldDescriptor> fields;
+
+    private Map<String, ColumnDescriptor> blockColumns;
 
     public FormEntity() {
     }
@@ -137,4 +145,43 @@ public class FormEntity {
     public void setDeletedCount(int deletedCount) {
         this.deletedCount = deletedCount;
     }
+
+    public FieldDescriptor getFieldDescriptor(String fieldName) {
+        if(fields == null) {
+            fields = new HashMap<>();
+        }
+        FieldDescriptor descriptor = fields.get(fieldName);
+        if(descriptor == null) {
+            descriptor = new FieldDescriptor();
+            descriptor.setVersion(version);
+
+            fields.put(fieldName, descriptor);
+        }
+
+        return descriptor;
+    }
+
+    public Map<String, ColumnDescriptor> getBlockColumns() {
+        if(blockColumns == null) {
+            blockColumns = new HashMap<>();
+        }
+        return blockColumns;
+    }
+
+    public ColumnDescriptor getFieldBlock(String columnId) {
+        ColumnDescriptor descriptor = this.blockColumns.get(columnId);
+        if(descriptor == null) {
+            throw new IllegalArgumentException("No such block: " + columnId);
+        }
+        return descriptor;
+    }
+
+    public void addFieldBlock(ColumnDescriptor column) {
+        if(this.blockColumns == null) {
+            this.blockColumns = new HashMap<>();
+        }
+        this.blockColumns.put(column.getColumnId(), column);
+    }
 }
+
+

@@ -13,22 +13,47 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class MultiEnumBlock implements BlockManager {
+
+
+    private final String bitsetPrefix;
+
+    public MultiEnumBlock(String fieldName) {
+        this.bitsetPrefix = fieldName + ":";
+    }
+
     @Override
-    public int getBlockSize() {
+    public int getBlockRowSize() {
         return 1024 * 5;
+    }
+
+    @Override
+    public int getMaxFieldSize() {
+        return 2;
+    }
+
+    @Override
+    public String getBlockType() {
+        return "multienum";
     }
 
     @Override
     public Entity update(Entity blockEntity, int recordOffset, @Nullable FieldValue fieldValue) {
 
+        // Find the existing bitsets for this field
         Set<String> toUnset = new HashSet<>(blockEntity.getProperties().keySet());
+        for (String property : blockEntity.getProperties().keySet()) {
+            if(property.startsWith(bitsetPrefix)) {
+                toUnset.add(property);
+            }
+        }
+
 
         boolean dirty = false;
 
         if(fieldValue instanceof EnumValue) {
             EnumValue enumValue = (EnumValue) fieldValue;
             for (ResourceId enumId : enumValue.getResourceIds()) {
-                String propertyKey = "v:" + enumId.asString();
+                String propertyKey = bitsetPrefix + enumId.asString();
                 if (BlobBitSet.update(blockEntity, propertyKey, recordOffset, true)) {
                     dirty = true;
                 }

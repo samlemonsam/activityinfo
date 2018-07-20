@@ -33,29 +33,48 @@ public class NumberBlock implements BlockManager {
     private DoubleReader doubleReader;
     private IntReader intReader;
     private IntColumnFactory intColumnFactory;
+    
+    private String formatProperty;
+    private String valuesProperty;
 
-    public NumberBlock(DoubleReader doubleReader) {
+    public NumberBlock(String fieldName, DoubleReader doubleReader) {
         this.doubleReader = doubleReader;
         this.intReader = null;
         this.intColumnFactory = DEFAULT_COLUMN_BUILDER;
+        this.formatProperty = fieldName + ":format";
+        this.valuesProperty = fieldName;
     }
 
-    public NumberBlock(IntReader intReader) {
+    public NumberBlock(String fieldName, IntReader intReader) {
         this.intReader = intReader;
         this.intColumnFactory = DEFAULT_COLUMN_BUILDER;
         this.doubleReader = null;
+        this.formatProperty = fieldName + ":format";
+        this.valuesProperty = fieldName;
     }
 
-    public NumberBlock(IntReader intReader, IntColumnFactory intColumnFactory) {
+    public NumberBlock(String fieldName, IntReader intReader, IntColumnFactory intColumnFactory) {
         this.intReader = intReader;
         this.intColumnFactory = intColumnFactory;
         this.doubleReader = null;
-
+        this.formatProperty = fieldName + ":format";
+        this.valuesProperty = fieldName;
     }
 
     @Override
-    public int getBlockSize() {
+    public int getBlockRowSize() {
+        // Max size per field = 81 920
         return 1024 * 10;
+    }
+
+    @Override
+    public int getMaxFieldSize() {
+        return 4;
+    }
+
+    @Override
+    public String getBlockType() {
+        return "number";
     }
 
     @Override
@@ -106,11 +125,11 @@ public class NumberBlock implements BlockManager {
 
 
     private Entity updateIntMissing(Entity blockEntity, int recordOffset) {
-        Blob valueArray = (Blob) blockEntity.getProperty("intValues");
+        Blob valueArray = (Blob) blockEntity.getProperty(valuesProperty);
         int currentLength = ValueArrays.length(valueArray, IntValueArray.BYTES);
         if(recordOffset < currentLength) {
             valueArray = IntValueArray.update(valueArray, recordOffset, IntValueArray.MISSING);
-            blockEntity.setProperty("intValues", valueArray);
+            blockEntity.setProperty(valuesProperty, valueArray);
             return blockEntity;
 
         } else {
@@ -120,20 +139,20 @@ public class NumberBlock implements BlockManager {
     }
 
     private Entity updateInt(Entity blockEntity, int recordOffset, int read) {
-        Blob valueArray = (Blob) blockEntity.getProperty("intValues");
+        Blob valueArray = (Blob) blockEntity.getProperty(valuesProperty);
         valueArray = IntValueArray.update(valueArray, recordOffset, read);
 
         blockEntity.setUnindexedProperty("storage", INT32_STORAGE);
-        blockEntity.setProperty("intValues", valueArray);
+        blockEntity.setProperty(valuesProperty, valueArray);
         return blockEntity;
     }
 
     private Entity updateDoubleMissing(Entity blockEntity, int recordOffset) {
-        Blob valueArray = (Blob) blockEntity.getProperty("doubleValues");
+        Blob valueArray = (Blob) blockEntity.getProperty(valuesProperty);
         int currentLength = DoubleValueArray.length(valueArray);
         if(recordOffset < currentLength) {
             valueArray = DoubleValueArray.update(valueArray, recordOffset, Double.NaN);
-            blockEntity.setProperty("doubleValues", valueArray);
+            blockEntity.setProperty(valuesProperty, valueArray);
             return blockEntity;
 
         } else {
@@ -143,18 +162,18 @@ public class NumberBlock implements BlockManager {
     }
 
     private Entity updateDouble(Entity blockEntity, int recordOffset, double doubleValue) {
-        Blob valueArray = (Blob) blockEntity.getProperty("doubleValues");
+        Blob valueArray = (Blob) blockEntity.getProperty(valuesProperty);
         valueArray = DoubleValueArray.update(valueArray, recordOffset, doubleValue);
 
-        blockEntity.setUnindexedProperty("storage", REAL64_STORAGE);
-        blockEntity.setProperty("doubleValues", valueArray);
+        blockEntity.setUnindexedProperty(formatProperty, REAL64_STORAGE);
+        blockEntity.setProperty(valuesProperty, valueArray);
 
         return blockEntity;
     }
 
 
     private Entity migrateToDoubleAndUpdate(Entity blockEntity, int recordOffset, double doubleValue) {
-        Blob valueArray = (Blob) blockEntity.getProperty("doubleValues");
+        Blob valueArray = (Blob) blockEntity.getProperty(valuesProperty);
 
         int previousLength = IntValueArray.length(valueArray);
         int length = Math.max(previousLength, recordOffset + 1);
@@ -174,14 +193,14 @@ public class NumberBlock implements BlockManager {
             }
         }
 
-        blockEntity.setUnindexedProperty("storage", REAL64_STORAGE);
-        blockEntity.setProperty("doubleValues", valueArray);
+        blockEntity.setUnindexedProperty(formatProperty, REAL64_STORAGE);
+        blockEntity.setProperty(valuesProperty, valueArray);
 
         return blockEntity;
     }
 
     private int getStorageMode(Entity blockEntity) {
-        Number mode = (Number) blockEntity.getProperty("storage");
+        Number mode = (Number) blockEntity.getProperty(formatProperty);
         if(mode == null) {
             return NO_STORAGE;
         } else {
@@ -220,9 +239,9 @@ public class NumberBlock implements BlockManager {
 
         for (Entity block : blocks) {
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockSize();
+            int blockStart = blockIndex * getBlockRowSize();
 
-            Blob blob = (Blob) block.getProperty("intValues");
+            Blob blob = (Blob) block.getProperty(valuesProperty);
             if(blob != null) {
                 int length = IntValueArray.length(blob);
                 IntBuffer buffer = IntValueArray.asBuffer(blob);

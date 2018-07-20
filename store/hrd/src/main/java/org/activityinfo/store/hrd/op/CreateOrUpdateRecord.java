@@ -101,7 +101,7 @@ public class CreateOrUpdateRecord extends VoidWork {
 
         // Update column-based storage
 
-        ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(formClass, Hrd.ofy().getTransaction());
+        ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(rootEntity, formClass, Hrd.ofy().getTransaction());
 
         if(changeType == RecordChangeType.CREATED) {
             int newRecordCount = rootEntity.getRecordCount() + 1;

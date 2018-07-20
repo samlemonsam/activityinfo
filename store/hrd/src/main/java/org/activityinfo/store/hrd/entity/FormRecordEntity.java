@@ -28,7 +28,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
-import org.activityinfo.store.hrd.columns.RecordNumbering;
 
 import java.util.HashMap;
 import java.util.Map;

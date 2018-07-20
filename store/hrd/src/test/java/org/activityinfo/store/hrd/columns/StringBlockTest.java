@@ -3,7 +3,9 @@ package org.activityinfo.store.hrd.columns;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.entity.FormEntity;
@@ -37,7 +39,8 @@ public class StringBlockTest {
 
     @Test
     public void strings() {
-        StringBlock block = (StringBlock) BlockFactory.get(TextType.SIMPLE);
+        FormField stringField = new FormField(ResourceId.valueOf("F")).setType(TextType.SIMPLE);
+        StringBlock block = (StringBlock) BlockFactory.get(stringField);
 
         Entity blockEntity = new Entity("Block", 1);
 
@@ -62,7 +65,8 @@ public class StringBlockTest {
 
     @Test
     public void deleted() {
-        StringBlock block = (StringBlock) BlockFactory.get(TextType.SIMPLE);
+        FormField stringField = new FormField(ResourceId.valueOf("F")).setType(TextType.SIMPLE);
+        StringBlock block = (StringBlock) BlockFactory.get(stringField);
         Entity blockEntity = new Entity("Block", 1);
 
 

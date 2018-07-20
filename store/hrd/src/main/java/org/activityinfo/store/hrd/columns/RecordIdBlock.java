@@ -20,8 +20,18 @@ public class RecordIdBlock implements BlockManager {
     public static final ResourceId FIELD_ID = ResourceId.valueOf(FIELD_NAME);
 
     @Override
-    public int getBlockSize() {
+    public int getBlockRowSize() {
         return 1024 * 5;
+    }
+
+    @Override
+    public int getMaxFieldSize() {
+        return 1;
+    }
+
+    @Override
+    public String getBlockType() {
+        return "id";
     }
 
     @Override
@@ -48,10 +58,10 @@ public class RecordIdBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockSize();
+            int blockStart = blockIndex * getBlockRowSize();
 
             int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
-            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
+            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockRowSize());
 
             String[] values = StringPools.toArray((Blob) block.getProperty("ids"));
             for (int i = 0; i < values.length; i++) {
