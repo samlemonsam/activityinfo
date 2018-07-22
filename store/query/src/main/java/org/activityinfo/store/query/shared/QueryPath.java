@@ -98,8 +98,12 @@ public class QueryPath {
     public boolean matches(FormTree.Node fieldNode) {
         
         String symbolName = path.get(0);
-        
+        return match(fieldNode, symbolName);
 
+
+    }
+
+    public static boolean match(FormTree.Node fieldNode, String symbolName) {
         // Match against label and code case insensitively
         if (symbolName.equalsIgnoreCase(fieldNode.getField().getCode()) ||
                 symbolName.equalsIgnoreCase(fieldNode.getField().getLabel())) {

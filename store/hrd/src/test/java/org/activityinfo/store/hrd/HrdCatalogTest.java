@@ -43,12 +43,15 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
+import org.activityinfo.store.query.shared.plan.QueryPlan;
+import org.activityinfo.store.query.shared.plan.QueryPlanBuilder;
 import org.activityinfo.store.spi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -85,7 +88,7 @@ public class HrdCatalogTest {
     }
     
     @Test
-    public void simpleFormTest() {
+    public void simpleFormTest() throws IOException {
 
         ResourceId collectionId = ResourceId.generateId();
         ResourceId villageField = ResourceId.valueOf("FV");
@@ -142,7 +145,11 @@ public class HrdCatalogTest {
         queryModel.selectField("BENE").as("family_count");
         queryModel.selectExpr("BENE*5").as("individual_count");
         queryModel.selectExpr("POP").as("pop");
-        
+
+        QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder(catalog);
+        QueryPlan plan = queryPlanBuilder.build(queryModel);
+        plan.dumpGraph();
+
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
         
