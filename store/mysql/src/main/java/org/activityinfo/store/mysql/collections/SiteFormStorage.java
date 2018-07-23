@@ -392,7 +392,13 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public ColumnQueryBuilder newColumnQuery() {
-        return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
+        if(activity.isMigratedToHrd()) {
+            LOGGER.info("Delegating record fetch to HRD...");
+
+            return delegateToHrd().newColumnQuery();
+        } else {
+            return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
+        }
     }
     
     public long incrementSiteVersion() {
