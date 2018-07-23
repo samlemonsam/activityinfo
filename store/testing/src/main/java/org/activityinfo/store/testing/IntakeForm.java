@@ -26,6 +26,7 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -59,6 +60,7 @@ public class IntakeForm implements TestForm {
     private final FormField nationalityField;
     private final FormField problemField;
     private final FormField dobField;
+    private final FormField quantityField;
     private final EnumItem palestinian;
     private final EnumItem jordanian;
     private final EnumItem syrian;
@@ -113,6 +115,11 @@ public class IntakeForm implements TestForm {
                     documents,
                     access));
 
+        quantityField = formClass.addField(ids.fieldId("Q1"))
+                .setLabel("How many people do you take care of?")
+                .setRequired(true)
+                .setType(new QuantityType("people"));
+
 
         dobField = formClass.addField(ids.fieldId("F5"))
                 .setCode("DOB")
@@ -128,7 +135,8 @@ public class IntakeForm implements TestForm {
                 .distribution(dobField.getId(), new DateGenerator(dobField, 1950, 1991))
                 .distribution(nationalityField.getId(), new MultiEnumGenerator(nationalityField, 0.85, 0.30, 0.15))
                 .distribution(problemField.getId(), new MultiEnumGenerator(problemField, 0.65, 0.75))
-                .distribution(regNumberField.getId(), new InputMaskGenerator(new InputMask("000"), 0.15, 0.30));
+                .distribution(regNumberField.getId(), new InputMaskGenerator(new InputMask("000"), 0.15, 0.30))
+                .distribution(quantityField.getId(), new IntegerGenerator( 0, 10, 0d));
     }
 
     public ResourceId getProtectionCodeFieldId() {

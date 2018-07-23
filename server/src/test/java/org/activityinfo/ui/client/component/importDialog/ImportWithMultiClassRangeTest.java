@@ -190,7 +190,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
         assertResolves(importer.persist(importModel));
 
         QueryModel resultQuery = new QueryModel(SCHOOL_FORM_CLASS);
-        resultQuery.selectResourceId().as("id");
+        resultQuery.selectRecordId().as("id");
         resultQuery.selectField(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.NAME_FIELD)).as("name");
 
         resultSet = assertResolves(locator.queryTable(resultQuery));

@@ -72,7 +72,7 @@ public class SubFormSummaryTest {
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormScanCache(), new NullFormSupervisor());
 
         QueryModel queryModel = new QueryModel(clinicForm.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectExpr("MIN(NUM_CONSULT)").as("min");
         queryModel.selectExpr("MAX(NUM_CONSULT)").as("max");
 

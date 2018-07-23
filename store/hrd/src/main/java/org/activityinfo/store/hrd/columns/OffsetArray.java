@@ -14,13 +14,15 @@ import com.google.appengine.api.datastore.PropertyContainer;
 public class OffsetArray {
 
 
+    public static final int BYTES = 2;
+
     static final String OFFSETS_PROPERTY = "values";
 
     public static Blob update(Blob values, int index, char offset) {
         if(offset == 0) {
             return updateToZero(values, index);
         } else {
-            byte[] bytes = ValueArrays.ensureCapacity(values, index, ValueArrays.UINT16);
+            byte[] bytes = ValueArrays.ensureCapacity(values, index, BYTES);
             ValueArrays.setChar(bytes, index, offset);
 
             return new Blob(bytes);
@@ -40,11 +42,11 @@ public class OffsetArray {
         }
         byte[] bytes = values.getBytes();
 
-        if(bytes.length >= ValueArrays.requiredSize(index, ValueArrays.UINT16)) {
+        if(bytes.length >= ValueArrays.requiredSize(index, BYTES)) {
             return new Blob(bytes);
         }
 
-        int pos = index * ValueArrays.UINT16;
+        int pos = index * BYTES;
         bytes[pos] = 0;
         bytes[pos+1] = 0;
 
@@ -52,7 +54,7 @@ public class OffsetArray {
     }
 
     public static int length(byte[] bytes) {
-        return bytes.length / ValueArrays.UINT16;
+        return bytes.length / BYTES;
     }
 
     public static int length(Blob values) {
@@ -67,7 +69,7 @@ public class OffsetArray {
      * Retrieves the one-based offset from the byte array. Zero if the offset is missing.
      */
     public static int get(byte[] bytes, int index) {
-        int pos = index * ValueArrays.UINT16;
+        int pos = index * BYTES;
 
         if(pos >= bytes.length) {
             return 0;

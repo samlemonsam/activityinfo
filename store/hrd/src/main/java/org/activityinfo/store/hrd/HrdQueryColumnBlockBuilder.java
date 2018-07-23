@@ -19,8 +19,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
+
+    private static final Logger LOGGER = Logger.getLogger(HrdQueryColumnBuilder.class.getName());
 
     private final FormEntity formEntity;
     private Multimap<FieldComponent, PendingSlot<ColumnView>> fieldTargets = HashMultimap.create();
@@ -78,6 +83,9 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
         blockResolver.load();
 
+        // Start caching in background, while we are building columns
+        Future<Void> caching = blockResolver.cacheBlocks();
+
         // Now construct column views from blocks
 
         FormClass formSchema = schema.now().readFormClass();
@@ -86,7 +94,9 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
         if(!idTargets.isEmpty()) {
             BlockManager blockManager = new RecordIdBlock();
-            ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex, blockResolver.getBlocks(RecordIdBlock.BLOCK_NAME));
+            ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex,
+                    blockResolver.getBlocks(RecordIdBlock.BLOCK_NAME));
+
             for (PendingSlot<ColumnView> idTarget : idTargets) {
                 idTarget.set(columnView);
             }
@@ -97,10 +107,19 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
             FieldDescriptor descriptor = formEntity.getFieldDescriptor(field.getName());
             BlockManager blockManager = BlockFactory.get(field);
 
-            ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex, blockResolver.getBlocks(descriptor));
+            ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex,
+                    blockResolver.getBlocks(descriptor),
+                    fieldComponent.getComponent());
+
             for (PendingSlot<ColumnView> fieldTarget : fieldTargets.get(fieldComponent)) {
                 fieldTarget.set(columnView);
             }
+        }
+
+        try {
+            caching.get();
+        } catch (Exception e ){
+            LOGGER.log(Level.SEVERE, "Failed to cache fetched blocks", e);
         }
     }
 }

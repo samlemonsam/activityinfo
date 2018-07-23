@@ -1,6 +1,5 @@
 package org.activityinfo.store.migrate;
 
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.appengine.tools.pipeline.ImmediateValue;
 import com.google.appengine.tools.pipeline.Job0;
@@ -69,7 +68,7 @@ public class BuildBlockJobs extends Job0<Void> {
 
         List<FormRecordEntity> updatedRecords = new ArrayList<>();
 
-        ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(formSchema, Hrd.ofy().getTransaction());
+        ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(rootEntity, formSchema, Hrd.ofy().getTransaction());
 
         // Loop through all the records, looking for ones that have not been assigned
         // a record number yet.

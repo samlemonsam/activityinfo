@@ -1,6 +1,7 @@
 package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import org.activityinfo.store.hrd.entity.ColumnDescriptor;
@@ -8,6 +9,7 @@ import org.activityinfo.store.hrd.entity.FieldDescriptor;
 import org.activityinfo.store.hrd.entity.FormEntity;
 
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +22,7 @@ public class BlockResolver {
         private BlockId blockId;
         private long version;
 
+        private boolean cached;
         private Entity block;
 
         public Fetch(BlockId blockId, long version) {
@@ -27,8 +30,8 @@ public class BlockResolver {
             this.version = version;
         }
 
-        private String memcacheKey() {
-            return blockId.getFormId() + "." + blockId.getColumnId() + "." + blockId.getBlockIndex() + "@" + version;
+        public String memcacheKey() {
+            return blockId.memcacheKey(version);
         }
     }
 
@@ -122,6 +125,7 @@ public class BlockResolver {
             }
             if(blockEntity != null) {
                 fetch.block = blockEntity;
+                fetch.cached = true;
             } else {
                 datastoreKeys.add(fetch.blockId.key());
             }
@@ -158,6 +162,16 @@ public class BlockResolver {
         }
     }
 
+    public Future<Void> cacheBlocks() {
+        AsyncMemcacheService memcache = MemcacheServiceFactory.getAsyncMemcacheService();
+        Map<String, Entity> toCache = new HashMap<>();
+        for (Fetch fetch : toFetch) {
+            if(fetch.block != null && !fetch.cached) {
+                toCache.put(fetch.memcacheKey(), fetch.block);
+            }
+        }
+        return memcache.putAll(toCache);
+    }
 
 }
 

@@ -35,7 +35,7 @@ public class NullBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator, String component) {
         throw new UnsupportedOperationException("TODO");
     }
 

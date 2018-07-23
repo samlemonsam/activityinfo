@@ -24,12 +24,8 @@ public interface BlockManager {
 
     String getBlockType();
 
-    default BlockId getBlockDescriptor(ResourceId formId, String columnId, int recordIndex) {
-        int blockIndex = getBlockIndex(recordIndex);
-        int blockSize =  getRecordCount();
-        return new BlockId(formId, columnId,
-                blockIndex
-        );
+    default BlockId getBlockId(ResourceId formId, String columnId, int recordIndex) {
+        return new BlockId(formId, columnId, getBlockIndex(recordIndex));
 
     }
 
@@ -46,7 +42,12 @@ public interface BlockManager {
      */
     Entity update(Entity blockEntity, int recordOffset, @Nullable FieldValue fieldValue);
 
-    ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator);
+    ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator, String component);
+
+    default ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
+        return buildView(header, tombstones, blockIterator, null);
+    }
+
 
     /**
      * @return true if this field can be assigned to the given column block.

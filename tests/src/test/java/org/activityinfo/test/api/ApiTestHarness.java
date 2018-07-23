@@ -29,7 +29,6 @@ import org.activityinfo.test.driver.ApiApplicationDriver;
 import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.Server;
 import org.activityinfo.test.sut.UserAccount;
-import org.junit.rules.TestRule;
 
 /**
  * Harness for tests written directly against the API.
@@ -46,6 +45,8 @@ public class ApiTestHarness {
     private final DevServerAccounts accounts;
     private final Server server;
     private final AliasTable aliasTable;
+
+    private boolean classic = true;
 
     public ApiTestHarness() {
         server = new Server();
@@ -78,7 +79,7 @@ public class ApiTestHarness {
 
         // Query list of partners
         QueryModel queryModel = new QueryModel(CuidAdapter.partnerFormId(id));
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
 
         ColumnSet columnSet = client.queryTable(queryModel);
         ColumnView partnerIdView = columnSet.getColumnView("id");

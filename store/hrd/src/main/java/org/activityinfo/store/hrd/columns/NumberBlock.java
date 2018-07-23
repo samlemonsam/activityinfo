@@ -209,7 +209,7 @@ public class NumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator, String component) {
 
         List<Entity> blocks = new ArrayList<>();
 

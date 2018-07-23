@@ -155,7 +155,7 @@ public class SubFormAggregationTest {
         monthCollection.get().add(month3);
 
         QueryModel queryModel = new QueryModel(siteForm.getId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("Village Name").as("village");
         queryModel.selectField("BENE").as("max_hh");
 

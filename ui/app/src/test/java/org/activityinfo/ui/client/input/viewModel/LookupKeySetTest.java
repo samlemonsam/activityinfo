@@ -198,7 +198,7 @@ public class LookupKeySetTest {
         Map<LookupKey, FormulaNode> formulas = lookupKeySet.getKeyFormulas(localiteForm.getAdminField().getId());
 
         QueryModel queryModel = new QueryModel(localiteForm.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectExpr(formulas.get(lookupKeySet.getKey(0))).as("province");
         queryModel.selectExpr(formulas.get(lookupKeySet.getKey(1))).as("territory");
         queryModel.selectExpr(formulas.get(lookupKeySet.getKey(2))).as("zs");

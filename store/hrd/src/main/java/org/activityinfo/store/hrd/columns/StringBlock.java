@@ -66,7 +66,7 @@ public class StringBlock implements BlockManager {
 
 
     @Override
-    public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator, String component) {
         String[] values = new String[header.getRecordCount() - header.getDeletedCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();

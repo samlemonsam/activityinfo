@@ -13,8 +13,6 @@ import java.util.Arrays;
  */
 public class ValueArrays {
 
-    public static final int UINT16 = 2;
-
     /**
      * @param blob The existing values blob, or {@code null} if it is still uninitialized.
      * @param index the value index to update
@@ -48,7 +46,7 @@ public class ValueArrays {
 
 
     public static void setChar(byte[] bytes, int index, char value) {
-        int pos = index * UINT16;
+        int pos = index * OffsetArray.BYTES;
         bytes[pos] = (byte)value;
         bytes[pos+1] = (byte) (value >> 8);
     }

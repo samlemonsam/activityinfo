@@ -178,7 +178,7 @@ public class QueryModel implements JsonSerializable {
      * Adds the {@code ResourceId} as a string column to the table model with
      * the given column id
      */
-    public ColumnModel selectResourceId() {
+    public ColumnModel selectRecordId() {
         ColumnModel columnModel = new ColumnModel();
         columnModel.setFormula(new SymbolNode(ColumnModel.ID_SYMBOL));
         columns.add(columnModel);

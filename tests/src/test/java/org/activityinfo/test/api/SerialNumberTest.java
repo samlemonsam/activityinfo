@@ -30,7 +30,6 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.TextType;
-import org.junit.Rule;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -138,7 +137,7 @@ public class SerialNumberTest {
         // Now verify that we can query a table with serial numbers
 
         QueryModel queryModel = new QueryModel(formClass.getId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("SN");
 
         ColumnSet columnSet = client.queryTable(queryModel);

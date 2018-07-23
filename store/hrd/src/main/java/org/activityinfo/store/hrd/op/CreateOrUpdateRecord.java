@@ -18,27 +18,21 @@
  */
 package org.activityinfo.store.hrd.op;
 
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.Hrd;
-import org.activityinfo.store.hrd.columns.*;
-import org.activityinfo.store.hrd.entity.*;
+import org.activityinfo.store.hrd.entity.FormEntity;
+import org.activityinfo.store.hrd.entity.FormRecordEntity;
+import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
+import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.query.server.InvalidUpdateException;
-import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
 import org.activityinfo.store.spi.RecordChangeType;
 import org.activityinfo.store.spi.TypedRecordUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -125,6 +119,8 @@ public class CreateOrUpdateRecord extends VoidWork {
         }
 
         toSave.addAll(blockUpdater.getUpdatedBlocks());
+
+        blockUpdater.cacheUpdatedBlocks();
 
         // Update record-based storage
         toSave.add(rootEntity);

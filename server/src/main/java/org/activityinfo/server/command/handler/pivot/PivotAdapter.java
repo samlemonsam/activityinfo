@@ -676,7 +676,7 @@ public class PivotAdapter {
 
     private void addSiteIdToQuery(Activity activity, QueryModel queryModel) {
         if(activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            queryModel.selectResourceId().as(SITE_ID_KEY);
+            queryModel.selectRecordId().as(SITE_ID_KEY);
         } else {
             queryModel.selectField(CuidAdapter.field(activity.getLeafFormClassId(), CuidAdapter.SITE_FIELD)).as(SITE_ID_KEY);
         }

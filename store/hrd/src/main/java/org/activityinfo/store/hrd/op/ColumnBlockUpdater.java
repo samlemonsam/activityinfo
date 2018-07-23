@@ -1,6 +1,8 @@
 package org.activityinfo.store.hrd.op;
 
 import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
@@ -24,7 +26,7 @@ public class ColumnBlockUpdater {
     /**
      * Map of changed blocks
      */
-    private final Map<Key, Entity> blockMap = new HashMap<>();
+    private final Map<BlockId, Entity> blockMap = new HashMap<>();
 
     private final DatastoreService datastore;
     private final Transaction transaction;
@@ -45,7 +47,7 @@ public class ColumnBlockUpdater {
      */
     public void updateId(int recordNumber, String recordId) {
         BlockManager blockManager = new RecordIdBlock();
-        BlockId descriptor = blockManager.getBlockDescriptor(formClass.getId(), RecordIdBlock.BLOCK_NAME, recordNumber);
+        BlockId descriptor = blockManager.getBlockId(formClass.getId(), RecordIdBlock.BLOCK_NAME, recordNumber);
 
         formEntity.setTailIdBlockVersion(formEntity.getVersion());
 
@@ -68,7 +70,7 @@ public class ColumnBlockUpdater {
 
     public void updateParentId(int recordNumber, String parentRecordId) {
         BlockManager blockManager = new StringBlock("parent", new ViewBuilderFactory.TextFieldReader());
-        BlockId descriptor = blockManager.getBlockDescriptor(formClass.getId(), "@parent", recordNumber);
+        BlockId descriptor = blockManager.getBlockId(formClass.getId(), "@parent", recordNumber);
 
         updateBlock(blockManager, descriptor, recordNumber, TextValue.valueOf(parentRecordId));
     }
@@ -82,7 +84,7 @@ public class ColumnBlockUpdater {
 
         ColumnDescriptor block = blockForField(field, fieldDescriptor, blockManager);
 
-        BlockId descriptor = blockManager.getBlockDescriptor(formId, block.getColumnId(), recordNumber);
+        BlockId descriptor = blockManager.getBlockId(formId, block.getColumnId(), recordNumber);
 
         block.setBlockVersion(descriptor.getBlockIndex(), formEntity.getVersion());
 
@@ -124,44 +126,51 @@ public class ColumnBlockUpdater {
     public void updateTombstone(int recordNumber) {
 
         TombstoneBlock tombstone = new TombstoneBlock();
-        BlockId descriptor = tombstone.getBlockDescriptor(formId, recordNumber);
-        Entity blockEntity = getOrCreateBlock(descriptor, descriptor.key());
+        BlockId blockId = tombstone.getBlockDescriptor(formId, recordNumber);
+        Entity blockEntity = getOrCreateBlock(blockId);
 
-        tombstone.markDeleted(blockEntity, descriptor.getOffset(recordNumber, TombstoneBlock.BLOCK_SIZE));
+        tombstone.markDeleted(blockEntity, blockId.getOffset(recordNumber, TombstoneBlock.BLOCK_SIZE));
 
-        formEntity.setTombstoneBlockVersion(descriptor.getBlockIndex(), formEntity.getVersion());
+        formEntity.setTombstoneBlockVersion(blockId.getBlockIndex(), formEntity.getVersion());
 
-        blockMap.put(blockEntity.getKey(), blockEntity);
+        blockMap.put(blockId, blockEntity);
     }
 
-    private void updateBlock(BlockManager blockManager, BlockId descriptor, int recordIndex, FieldValue fieldValue) {
+    private void updateBlock(BlockManager blockManager, BlockId blockId, int recordIndex, FieldValue fieldValue) {
 
-        Entity blockEntity = getOrCreateBlock(descriptor, descriptor.key());
+        Entity blockEntity = getOrCreateBlock(blockId);
 
         Entity updatedEntity = blockManager.update(blockEntity,
-                descriptor.getOffset(recordIndex, blockManager.getRecordCount()), fieldValue);
+                blockId.getOffset(recordIndex, blockManager.getRecordCount()), fieldValue);
 
         if(updatedEntity != null) {
-            blockMap.put(updatedEntity.getKey(), updatedEntity);
+            blockMap.put(blockId, updatedEntity);
         }
     }
 
-    private Entity getOrCreateBlock(BlockId descriptor, Key blockKey) {
-        Entity blockEntity = blockMap.get(blockKey);
+    private Entity getOrCreateBlock(BlockId blockId) {
+        Entity blockEntity = blockMap.get(blockId);
         if(blockEntity == null) {
             try {
-                blockEntity = datastore.get(transaction, blockKey);
+                blockEntity = datastore.get(transaction, blockId.key());
             } catch (EntityNotFoundException e) {
                 blockEntity = null;
             }
         }
         if(blockEntity == null) {
-            blockEntity = new Entity(descriptor.key());
+            blockEntity = new Entity(blockId.key());
         }
         return blockEntity;
     }
 
     public Collection<Entity> getUpdatedBlocks() {
         return blockMap.values();
+    }
+
+    public void cacheUpdatedBlocks() {
+        MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+        for (Map.Entry<BlockId, Entity> entry : blockMap.entrySet()) {
+            memcache.put(entry.getKey().memcacheKey(formEntity.getVersion()), entry.getValue());
+        }
     }
 }

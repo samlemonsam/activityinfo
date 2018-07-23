@@ -105,7 +105,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
                 return new DateColumnView(values, new LocalDateRender());
             }
         };
-        return NullBlock.INSTANCE;
+        return new NumberBlock(fieldName, reader, columnFactory);
     }
 
     @Override

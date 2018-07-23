@@ -161,7 +161,7 @@ class Presenter {
     private Supplier<Promise<List<Choice>>> choices(final Level level) {
 
         final QueryModel queryModel = new QueryModel(level.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectExpr("label").as("label");
 
         if(!level.isRoot()) {

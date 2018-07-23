@@ -220,4 +220,8 @@ public class BlobBitSet {
 
         return bitSet;
     }
+
+    public static int length(byte[] bytes) {
+        return bytes.length * 8;
+    }
 }

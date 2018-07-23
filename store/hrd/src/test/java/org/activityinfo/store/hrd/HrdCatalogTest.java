@@ -140,7 +140,7 @@ public class HrdCatalogTest {
         storage.get().add(village2);
 
         QueryModel queryModel = new QueryModel(collectionId);
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("VILLAGE").as("village");
         queryModel.selectField("BENE").as("family_count");
         queryModel.selectExpr("BENE*5").as("individual_count");
@@ -249,7 +249,7 @@ public class HrdCatalogTest {
 
 
         QueryModel queryModel = new QueryModel(formClass.getId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("VILLAGE").as("village");
 
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
@@ -332,7 +332,7 @@ public class HrdCatalogTest {
         memberCollection.get().add(father2);
         
         QueryModel queryModel = new QueryModel(memberForm.getId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("Household ID").as("hh_id");
         queryModel.selectField("Name").as("member_name");
         queryModel.selectField("Age").as("member_age");

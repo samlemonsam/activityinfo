@@ -78,7 +78,7 @@ public class SingleClassImporter implements FieldImporter {
     public Promise<Void> prepare(ResourceLocator locator, List<? extends SourceRow> batch) {
 
         QueryModel queryModel = new QueryModel(rangeFormId);
-        queryModel.selectResourceId().as("_id");
+        queryModel.selectRecordId().as("_id");
         for (FieldPath fieldPath : referenceFields.keySet()) {
             queryModel.selectField(fieldPath).as(fieldPath.toString());
         }
