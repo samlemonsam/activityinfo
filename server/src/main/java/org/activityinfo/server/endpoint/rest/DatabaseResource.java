@@ -409,13 +409,13 @@ public class DatabaseResource {
     }
 
     private void sendCancelledNotifications(User currentOwner, User proposedOwner, Database database) {
-        mailSender.send(new CancelDatabaseTransferMessage(currentOwner, proposedOwner, database));
-        mailSender.send(new CancelDatabaseTransferMessage(proposedOwner, proposedOwner, database));
+        mailSender.send(new CancelDatabaseTransferOwnerMessage(currentOwner, proposedOwner, database));
+        mailSender.send(new CancelDatabaseTransferApproverMessage(proposedOwner, proposedOwner, database));
     }
 
     private void sendRejectionNotifications(User currentOwner, User proposedOwner, Database database) {
-        mailSender.send(new RejectDatabaseTransferMessage(currentOwner, proposedOwner, database));
-        mailSender.send(new RejectDatabaseTransferMessage(proposedOwner, proposedOwner, database));
+        mailSender.send(new RejectDatabaseTransferOwnerMessage(currentOwner, proposedOwner, database));
+        mailSender.send(new RejectDatabaseTransferApproverMessage(proposedOwner, proposedOwner, database));
     }
 
 }

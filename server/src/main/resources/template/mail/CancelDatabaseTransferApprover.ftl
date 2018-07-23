@@ -18,10 +18,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<#-- @ftlvariable name="" type="org.activityinfo.server.mail.RejectDatabaseTransferMessage" -->
+<#-- @ftlvariable name="" type="org.activityinfo.server.mail.CancelDatabaseTransferApproverMessage" -->
 Hi ${recipient.name},
 
-The request to transfer ownership of Database ${database.name} to User ${approver.name} has been rejected by ${approver.name}.
+The request to transfer ownership of Database ${database.name} to you has been cancelled by the Database Owner.
 
 Best regards,
 

@@ -3,13 +3,13 @@ package org.activityinfo.server.mail;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
 
-public class RejectDatabaseTransferMessage extends MessageModel {
+public class RejectDatabaseTransferOwnerMessage extends MessageModel {
 
     private User recipient;
     private User approver;
     private Database database;
 
-    public RejectDatabaseTransferMessage(User recipient, User approver, Database database) {
+    public RejectDatabaseTransferOwnerMessage(User recipient, User approver, Database database) {
         this.recipient = recipient;
         this.approver = approver;
         this.database = database;
