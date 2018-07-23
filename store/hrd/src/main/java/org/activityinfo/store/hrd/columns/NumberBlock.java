@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.model.query.EmptyColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.hrd.entity.FormEntity;
@@ -11,11 +12,9 @@ import org.activityinfo.store.query.shared.columns.DoubleReader;
 import org.activityinfo.store.query.shared.columns.IntReader;
 
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class NumberBlock implements BlockManager {
 
@@ -33,7 +32,7 @@ public class NumberBlock implements BlockManager {
     private DoubleReader doubleReader;
     private IntReader intReader;
     private IntColumnFactory intColumnFactory;
-    
+
     private String formatProperty;
     private String valuesProperty;
 
@@ -62,7 +61,7 @@ public class NumberBlock implements BlockManager {
     }
 
     @Override
-    public int getRecordCount() {
+    public int getBlockSize() {
         // Max size per field = 81 920
         return 1024 * 10;
     }
@@ -209,7 +208,7 @@ public class NumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator, String component) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator, String component) {
 
         List<Entity> blocks = new ArrayList<>();
 
@@ -227,19 +226,27 @@ public class NumberBlock implements BlockManager {
                 return new EmptyColumnView(ColumnType.STRING, header.getRecordCount());
 
             case INT32_STORAGE:
-                return buildIntView(header, blocks);
+                return buildIntView(header, tombstones, blocks);
+
+            case REAL64_STORAGE:
+                return buildDoubleView(header, tombstones, blocks);
+
         }
 
         throw new UnsupportedOperationException("storage: " + storage);
     }
 
-    private ColumnView buildIntView(FormEntity header, List<Entity> blocks) {
+
+    private ColumnView buildIntView(FormEntity header, TombstoneIndex tombstones, List<Entity> blocks) {
         int[] values = new int[header.getRecordCount()];
         Arrays.fill(values, IntValueArray.MISSING);
 
         for (Entity block : blocks) {
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getRecordCount();
+            int blockStart = blockIndex * getBlockSize();
+
+            int targetIndex = tombstones.countDeletedBefore(blockStart);
+            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
 
             Blob blob = (Blob) block.getProperty(valuesProperty);
             if(blob != null) {
@@ -247,11 +254,76 @@ public class NumberBlock implements BlockManager {
                 IntBuffer buffer = IntValueArray.asBuffer(blob);
 
                 for (int i = 0; i < length; i++) {
-                    values[blockStart + i] = buffer.get(i);
+                    if(!deleted.get(i)) {
+                        values[targetIndex++] = buffer.get(i);
+                    }
                 }
             }
         }
 
         return intColumnFactory.create(values);
     }
+
+    private ColumnView buildDoubleView(FormEntity header, TombstoneIndex tombstones, List<Entity> blocks) {
+        double[] values = new double[header.getRecordCount()];
+        Arrays.fill(values, Double.NaN);
+
+        for (Entity block : blocks) {
+            int blockIndex = (int)(block.getKey().getId() - 1);
+            int blockStart = blockIndex * getBlockSize();
+
+            int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
+            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
+
+            int storage = getStorageMode(block);
+            switch (storage) {
+                case NO_STORAGE:
+                    break;
+                case INT32_STORAGE:
+                    readIntBlock(values, block, targetIndex, deleted);
+                    break;
+                case REAL64_STORAGE:
+                    readDoubleBlock(values, block, targetIndex, deleted);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("storage: " + storage);
+            }
+        }
+
+        return new DoubleArrayColumnView(values);
+
+    }
+
+    private void readDoubleBlock(double[] values, Entity block, int targetIndex, BitSet deleted) {
+        Blob blob = (Blob) block.getProperty(valuesProperty);
+        if(blob != null) {
+            int length = DoubleValueArray.length(blob);
+            DoubleBuffer buffer = DoubleValueArray.asBuffer(blob);
+
+            for (int i = 0; i < length; i++) {
+                if(!deleted.get(i)) {
+                    values[targetIndex++] = buffer.get(i);
+                }
+            }
+        }
+    }
+
+    private void readIntBlock(double[] values, Entity block, int targetIndex, BitSet deleted) {
+        Blob blob = (Blob) block.getProperty(valuesProperty);
+        if(blob != null) {
+            int length = IntValueArray.length(blob);
+            IntBuffer buffer = IntValueArray.asBuffer(blob);
+
+            for (int i = 0; i < length; i++) {
+                if(!deleted.get(i)) {
+                    int intValue = buffer.get(i);
+                    if(intValue != IntValueArray.MISSING) {
+                        values[targetIndex] = intValue;
+                    }
+                    targetIndex++;
+                }
+            }
+        }
+    }
+
 }

@@ -66,7 +66,7 @@ public class FormEntity {
      * The total number of records created (since we started counting)
      */
     @Unindex
-    private int recordCount;
+    private int numberedRecordCount;
 
     /**
      * The number of records that have been deleted (since we started counting)
@@ -143,12 +143,15 @@ public class FormEntity {
         this.columnStorageActive = columnStorageActive;
     }
 
-    public int getRecordCount() {
-        return recordCount;
+    /**
+     * @return the total number of records that have been numbered (including deleted records!)
+     */
+    public int getNumberedRecordCount() {
+        return numberedRecordCount;
     }
 
-    public void setRecordCount(int recordCount) {
-        this.recordCount = recordCount;
+    public void setNumberedRecordCount(int numberedRecordCount) {
+        this.numberedRecordCount = numberedRecordCount;
     }
 
     public int getDeletedCount() {
@@ -157,6 +160,10 @@ public class FormEntity {
 
     public void setDeletedCount(int deletedCount) {
         this.deletedCount = deletedCount;
+    }
+
+    public int getRecordCount() {
+        return numberedRecordCount - deletedCount;
     }
 
     public FieldDescriptor getFieldDescriptor(String fieldName) {

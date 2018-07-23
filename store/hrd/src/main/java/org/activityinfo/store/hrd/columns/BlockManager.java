@@ -15,7 +15,7 @@ public interface BlockManager {
     /**
      * @return the number of records stored in this block
      */
-    int getRecordCount();
+    int getBlockSize();
 
     /**
      * @return the maximum number of fields that can be mapped to this column of blocks
@@ -30,7 +30,7 @@ public interface BlockManager {
     }
 
     default int getBlockIndex(int recordIndex) {
-        return Math.floorDiv(recordIndex - 1, getRecordCount());
+        return Math.floorDiv(recordIndex - 1, getBlockSize());
     }
 
     /**

@@ -25,7 +25,7 @@ public class MultiEnumBlock implements BlockManager {
     }
 
     @Override
-    public int getRecordCount() {
+    public int getBlockSize() {
         return 1024 * 5;
     }
 
@@ -88,10 +88,10 @@ public class MultiEnumBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getRecordCount();
+            int blockStart = blockIndex * getBlockSize();
 
             // Which records have been deleted?
-            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getRecordCount());
+            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
 
             // Adjust start position depending on the number of records that have been deleted
             // in preceding blocks.
@@ -114,6 +114,6 @@ public class MultiEnumBlock implements BlockManager {
                 }
             }
         }
-        return new BitSetColumnView(header.getRecordCount() - header.getDeletedCount(), result);
+        return new BitSetColumnView(header.getRecordCount(), result);
     }
 }

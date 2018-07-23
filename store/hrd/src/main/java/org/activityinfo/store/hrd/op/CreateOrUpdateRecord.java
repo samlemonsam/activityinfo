@@ -98,10 +98,10 @@ public class CreateOrUpdateRecord extends VoidWork {
         ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(rootEntity, formClass, Hrd.ofy().getTransaction());
 
         if(changeType == RecordChangeType.CREATED) {
-            int newRecordCount = rootEntity.getRecordCount() + 1;
+            int newRecordCount = rootEntity.getNumberedRecordCount() + 1;
             int newRecordNumber = newRecordCount;
             updated.setRecordNumber(newRecordNumber);
-            rootEntity.setRecordCount(newRecordCount);
+            rootEntity.setNumberedRecordCount(newRecordCount);
 
             blockUpdater.updateId(newRecordNumber, updated.getRecordId().asString());
 

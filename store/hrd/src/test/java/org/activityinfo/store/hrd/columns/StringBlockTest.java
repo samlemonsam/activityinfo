@@ -51,7 +51,7 @@ public class StringBlockTest {
         block.update(blockEntity, 9, TextValue.valueOf("Dan"));
 
         FormEntity header = new FormEntity();
-        header.setRecordCount(10);
+        header.setNumberedRecordCount(10);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
 
@@ -75,12 +75,11 @@ public class StringBlockTest {
         block.update(blockEntity, 2, TextValue.valueOf("Hello Again"));
 
 
-        TombstoneBlock tombstoneBlock = new TombstoneBlock();
         Entity tombstone = new Entity("Tombstone", 1);
-        tombstoneBlock.markDeleted(tombstone, 1);
+        TombstoneBlock.markDeleted(tombstone, 1);
 
         FormEntity header = new FormEntity();
-        header.setRecordCount(3);
+        header.setNumberedRecordCount(3);
         header.setDeletedCount(1);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Arrays.asList(tombstone).iterator());

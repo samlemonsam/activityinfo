@@ -3,6 +3,10 @@ package org.activityinfo.store.hrd.columns;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+
 public class DoubleValueArray {
 
     public static final int BYTES = 8;
@@ -75,4 +79,14 @@ public class DoubleValueArray {
     public static int length(Blob valueArray) {
         return ValueArrays.length(valueArray, BYTES);
     }
+
+    /**
+     * Returns a view of this array as an {@link DoubleBuffer}
+     */
+    public static DoubleBuffer asBuffer(Blob valueArray) {
+        ByteBuffer buffer = ByteBuffer.wrap(valueArray.getBytes());
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        return buffer.asDoubleBuffer();
+    }
+
 }

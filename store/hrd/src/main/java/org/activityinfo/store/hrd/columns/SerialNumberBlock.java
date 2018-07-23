@@ -10,6 +10,7 @@ import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.store.hrd.entity.FormEntity;
 
 import javax.annotation.Nullable;
+import java.util.BitSet;
 import java.util.Iterator;
 
 public class SerialNumberBlock implements BlockManager {
@@ -25,7 +26,7 @@ public class SerialNumberBlock implements BlockManager {
     }
 
     @Override
-    public int getRecordCount() {
+    public int getBlockSize() {
         return 1024 * 6;
     }
 
@@ -44,7 +45,6 @@ public class SerialNumberBlock implements BlockManager {
      * @param blockEntity the data store entity for the block
      * @param recordOffset the zero-based index of the record, relative to the start of the block
      * @param fieldValue the new field value
-     * @return
      */
     public Entity update(Entity blockEntity, int recordOffset, @Nullable FieldValue fieldValue) {
 
@@ -65,12 +65,15 @@ public class SerialNumberBlock implements BlockManager {
     }
 
     @Override
-    public ColumnView buildView(FormEntity header, TombstoneIndex deleted, Iterator<Entity> blockIterator, String component) {
+    public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator, String component) {
         String[] values = new String[header.getRecordCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getRecordCount();
+            int blockStart = blockIndex * getBlockSize();
+
+            int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
+            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
 
             String[] prefixPool = null;
             byte[] prefixOffsets = null;
@@ -83,20 +86,23 @@ public class SerialNumberBlock implements BlockManager {
             int numberLength = IntValueArray.length(numbers);
 
             for (int i = 0; i < numberLength; i++) {
-                int prefixOffset = 0;
-                if(prefixOffsets != null) {
-                    prefixOffset = OffsetArray.get(prefixOffsets, i);
-                }
-                String prefix;
-                if(prefixOffset == 0) {
-                    prefix = null;
-                } else {
-                    prefix = prefixPool[prefixOffset - 1];
-                }
+                if(!deleted.get(i)) {
+                    int prefixOffset = 0;
+                    if (prefixOffsets != null) {
+                        prefixOffset = OffsetArray.get(prefixOffsets, i);
+                    }
+                    String prefix;
+                    if (prefixOffset == 0) {
+                        prefix = null;
+                    } else {
+                        prefix = prefixPool[prefixOffset - 1];
+                    }
 
-                int number = IntValueArray.get(numbers, i);
-                if(number != IntValueArray.MISSING) {
-                    values[blockStart + i] = type.format(prefix, number);
+                    int number = IntValueArray.get(numbers, i);
+                    if (number != IntValueArray.MISSING) {
+                        values[targetIndex] = type.format(prefix, number);
+                    }
+                    targetIndex++;
                 }
             }
         }

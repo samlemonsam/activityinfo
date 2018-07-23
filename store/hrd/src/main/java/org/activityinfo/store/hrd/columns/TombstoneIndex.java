@@ -20,7 +20,7 @@ public class TombstoneIndex {
     private final int[] deletedBefore;
 
     public TombstoneIndex(FormEntity formEntity, Iterator<Entity> tombstoneBlocks) {
-        this.blockCount = (formEntity.getRecordCount() / TombstoneBlock.BLOCK_SIZE) + 1;
+        this.blockCount = (formEntity.getNumberedRecordCount() / TombstoneBlock.BLOCK_SIZE) + 1;
         this.blocks = new byte[blockCount][];
         this.deletedBefore = new int[blockCount];
 

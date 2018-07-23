@@ -22,7 +22,7 @@ public class RecordIdBlock implements BlockManager {
     public static final int BLOCK_SIZE = 1024 * 4;
 
     @Override
-    public int getRecordCount() {
+    public int getBlockSize() {
         return BLOCK_SIZE;
     }
 
@@ -55,15 +55,15 @@ public class RecordIdBlock implements BlockManager {
     @Override
     public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator, String component) {
 
-        String[] ids = new String[header.getRecordCount() - header.getDeletedCount()];
+        String[] ids = new String[header.getRecordCount()];
 
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getRecordCount();
+            int blockStart = blockIndex * getBlockSize();
 
             int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
-            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getRecordCount());
+            BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
 
             String[] values = StringPools.toArray((Blob) block.getProperty("ids"));
             for (int i = 0; i < values.length; i++) {

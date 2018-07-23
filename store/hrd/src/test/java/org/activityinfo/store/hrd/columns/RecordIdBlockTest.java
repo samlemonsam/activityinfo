@@ -46,7 +46,7 @@ public class RecordIdBlockTest {
         block.update(blockEntity, 4, TextValue.valueOf("c1dfd3552w"));
 
         FormEntity header = new FormEntity();
-        header.setRecordCount(5);
+        header.setNumberedRecordCount(5);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
 
@@ -60,10 +60,9 @@ public class RecordIdBlockTest {
 
         // Delete two records
 
-        TombstoneBlock tombstoneBlock = new TombstoneBlock();
         Entity tombstone = new Entity("Tombstone", 1);
-        tombstoneBlock.markDeleted(tombstone, 2);
-        tombstoneBlock.markDeleted(tombstone, 4);
+        TombstoneBlock.markDeleted(tombstone, 2);
+        TombstoneBlock.markDeleted(tombstone, 4);
 
         header.setDeletedCount(2);
 

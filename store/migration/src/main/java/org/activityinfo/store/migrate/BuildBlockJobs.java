@@ -107,11 +107,11 @@ public class BuildBlockJobs extends Job0<Void> {
     }
 
     private void updateBlock(FormClass formSchema, FormEntity rootEntity, FormRecordEntity record, ColumnBlockUpdater blockUpdater) {
-        int newRecordCount = rootEntity.getRecordCount() + 1;
+        int newRecordCount = rootEntity.getNumberedRecordCount() + 1;
         int newRecordNumber = newRecordCount;
 
         record.setRecordNumber(newRecordNumber);
-        rootEntity.setRecordCount(newRecordCount);
+        rootEntity.setNumberedRecordCount(newRecordCount);
 
         blockUpdater.updateId(newRecordNumber, record.getRecordId().asString());
 

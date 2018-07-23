@@ -60,7 +60,7 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
         // Provide row counts
         for (PendingSlot<Integer> rowCountTarget : rowCountTargets) {
-            rowCountTarget.set(formEntity.getRecordCount() - formEntity.getDeletedCount());
+            rowCountTarget.set(formEntity.getRecordCount());
         }
 
         BlockResolver blockResolver = new BlockResolver(null, formEntity);

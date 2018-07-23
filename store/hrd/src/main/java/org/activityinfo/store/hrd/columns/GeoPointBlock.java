@@ -18,7 +18,7 @@ public class GeoPointBlock implements BlockManager {
     }
 
     @Override
-    public int getRecordCount() {
+    public int getBlockSize() {
         // 5_120 * 16 = 80k per block
         return 1024 * 5;
     }

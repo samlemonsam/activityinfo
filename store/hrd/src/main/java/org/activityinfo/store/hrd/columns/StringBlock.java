@@ -27,7 +27,7 @@ public class StringBlock implements BlockManager {
     }
 
     @Override
-    public int getRecordCount() {
+    public int getBlockSize() {
         return BLOCK_SIZE;
     }
 
@@ -67,11 +67,11 @@ public class StringBlock implements BlockManager {
 
     @Override
     public ColumnView buildView(FormEntity header, TombstoneIndex tombstones, Iterator<Entity> blockIterator, String component) {
-        String[] values = new String[header.getRecordCount() - header.getDeletedCount()];
+        String[] values = new String[header.getRecordCount()];
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getRecordCount();
+            int blockStart = blockIndex * getBlockSize();
 
             // Which records have been deleted?
             BitSet deleted = tombstones.getDeletedBitSet(blockStart, BLOCK_SIZE);

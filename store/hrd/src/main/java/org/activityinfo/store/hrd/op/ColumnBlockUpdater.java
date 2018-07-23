@@ -112,7 +112,7 @@ public class ColumnBlockUpdater {
         ColumnDescriptor block = new ColumnDescriptor();
         block.setColumnId("col" + (formEntity.getBlockColumns().size() + 1));
         block.setBlockType(blockManager.getBlockType());
-        block.setRecordCount(blockManager.getRecordCount());
+        block.setRecordCount(blockManager.getBlockSize());
         block.addField(field.getName());
 
         formEntity.addFieldBlock(block);
@@ -125,11 +125,10 @@ public class ColumnBlockUpdater {
 
     public void updateTombstone(int recordNumber) {
 
-        TombstoneBlock tombstone = new TombstoneBlock();
-        BlockId blockId = tombstone.getBlockDescriptor(formId, recordNumber);
+        BlockId blockId = TombstoneBlock.getBlockDescriptor(formId, recordNumber);
         Entity blockEntity = getOrCreateBlock(blockId);
 
-        tombstone.markDeleted(blockEntity, blockId.getOffset(recordNumber, TombstoneBlock.BLOCK_SIZE));
+        TombstoneBlock.markDeleted(blockEntity, blockId.getOffset(recordNumber, TombstoneBlock.BLOCK_SIZE));
 
         formEntity.setTombstoneBlockVersion(blockId.getBlockIndex(), formEntity.getVersion());
 
@@ -141,7 +140,7 @@ public class ColumnBlockUpdater {
         Entity blockEntity = getOrCreateBlock(blockId);
 
         Entity updatedEntity = blockManager.update(blockEntity,
-                blockId.getOffset(recordIndex, blockManager.getRecordCount()), fieldValue);
+                blockId.getOffset(recordIndex, blockManager.getBlockSize()), fieldValue);
 
         if(updatedEntity != null) {
             blockMap.put(blockId, updatedEntity);

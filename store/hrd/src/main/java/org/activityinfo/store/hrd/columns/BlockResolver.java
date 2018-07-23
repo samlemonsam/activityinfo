@@ -47,7 +47,7 @@ public class BlockResolver {
     }
 
     public void fetchRecordIds() {
-        if(formEntity.getRecordCount() > 0) {
+        if(formEntity.getNumberedRecordCount() > 0) {
             int numBlocks = numBlocks(RecordIdBlock.BLOCK_SIZE);
 
             // Record Ids cannot change, so all blocks except the last one
@@ -79,7 +79,7 @@ public class BlockResolver {
     }
 
     public void fetchFieldBlock(String fieldBlockId) {
-        if(formEntity.getRecordCount() > 0) {
+        if(formEntity.getNumberedRecordCount() > 0) {
             ColumnDescriptor descriptor = formEntity.getFieldBlock(fieldBlockId);
             int numBlocks = numBlocks(descriptor.getRecordCount());
             for (int i = 0; i < numBlocks; i++) {
@@ -96,8 +96,8 @@ public class BlockResolver {
     }
 
     private int numBlocks(int blockSize) {
-        int num = formEntity.getRecordCount() / blockSize;
-        if(formEntity.getRecordCount() != blockSize) {
+        int num = formEntity.getNumberedRecordCount() / blockSize;
+        if(formEntity.getNumberedRecordCount() != blockSize) {
             num++;
         }
         return num;

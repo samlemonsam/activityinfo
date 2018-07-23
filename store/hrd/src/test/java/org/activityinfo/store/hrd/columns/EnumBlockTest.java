@@ -61,7 +61,7 @@ public class EnumBlockTest {
         block.update(blockEntity, 4, new EnumValue(blue.getId()));
 
         FormEntity header = new FormEntity();
-        header.setRecordCount(5);
+        header.setNumberedRecordCount(5);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Collections.emptyIterator());
 

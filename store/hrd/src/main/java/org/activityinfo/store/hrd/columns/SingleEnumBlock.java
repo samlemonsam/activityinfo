@@ -13,10 +13,7 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class SingleEnumBlock implements BlockManager {
 
@@ -31,7 +28,7 @@ public class SingleEnumBlock implements BlockManager {
     }
 
     @Override
-    public int getRecordCount() {
+    public int getBlockSize() {
         return 1024 * 4;
     }
 
@@ -74,7 +71,7 @@ public class SingleEnumBlock implements BlockManager {
 
     @Override
     public ColumnView buildView(FormEntity header,
-                                TombstoneIndex deleted, Iterator<Entity> blockIterator, String component) {
+                                TombstoneIndex tombstones, Iterator<Entity> blockIterator, String component) {
 
         Object2IntOpenHashMap<String> labelLookup = new Object2IntOpenHashMap<>();
         labelLookup.defaultReturnValue(-1);
@@ -89,24 +86,33 @@ public class SingleEnumBlock implements BlockManager {
             labelLookup.put(enumItem.getId().asString(), i);
         }
 
-        int[] values = new int[header.getRecordCount()];
+        int[] values = new int[header.getNumberedRecordCount()];
         Arrays.fill(values, -1);
 
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getRecordCount();
+            int blockStart = blockIndex * getBlockSize();
+
+            // Adjust start position depending on the number of records that have been deleted
+            // in preceding blocks.
+            int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
 
             String[] pool = StringPools.toArray((Blob) block.getProperty(itemIdProperty));
             if(pool.length > 0) {
                 byte[] offsets = ((Blob)block.getProperty(offsetProperty)).getBytes();
                 int offsetCount = OffsetArray.length(offsets);
 
+                BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
+
                 for (int i = 0; i < offsetCount; i++) {
-                    int offset = OffsetArray.get(offsets, i);
-                    if(offset != 0) {
-                        String itemId = pool[offset - 1];
-                        values[blockStart + i] = labelLookup.getInt(itemId);
+                    if(!deleted.get(i)) {
+                        int offset = OffsetArray.get(offsets, i);
+                        if (offset != 0) {
+                            String itemId = pool[offset - 1];
+                            values[targetIndex] = labelLookup.getInt(itemId);
+                        }
+                        targetIndex++;
                     }
                 }
             }

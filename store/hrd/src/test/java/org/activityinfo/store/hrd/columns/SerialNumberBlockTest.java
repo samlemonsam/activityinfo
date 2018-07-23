@@ -43,7 +43,7 @@ public class SerialNumberBlockTest {
         block.update(blockEntity, 8, new SerialNumber(4));
 
         FormEntity header = new FormEntity();
-        header.setRecordCount(10);
+        header.setNumberedRecordCount(10);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header);
 
@@ -73,7 +73,7 @@ public class SerialNumberBlockTest {
         block.update(blockEntity, 5, new SerialNumber("ATC", 1));
 
         FormEntity header = new FormEntity();
-        header.setRecordCount(6);
+        header.setNumberedRecordCount(6);
 
         TombstoneIndex tombstoneIndex = new TombstoneIndex(header);
 
@@ -87,4 +87,5 @@ public class SerialNumberBlockTest {
         assertThat(view.getString(4), equalTo("ABC-00003"));
         assertThat(view.getString(5), equalTo("ATC-00001"));
     }
+
 }
