@@ -25,8 +25,21 @@ public class BlobBitSet {
 
     public static boolean update(PropertyContainer blockEntity, String propertyName, int index, boolean value) {
         Blob blob = (Blob) blockEntity.getProperty(propertyName);
-        if(blob == null && !value) {
+
+        Blob updated = update(blob, index, value);
+
+        if(blob == updated) {
             return false;
+
+        } else {
+            blockEntity.setProperty(propertyName, updated);
+            return true;
+        }
+    }
+
+    public static Blob update(Blob blob, int index, boolean value) {
+        if(blob == null && !value) {
+            return null;
         }
 
         int capacity = 0;
@@ -36,15 +49,13 @@ public class BlobBitSet {
 
         // Unallocated bits at the end of the blob are assumed to be false
         if(index >= capacity && !value) {
-            return false;
+            return blob;
         }
 
         byte[] bytes = ensureCapacity(blob, index);
         set(bytes, index, value);
 
-        blockEntity.setProperty(propertyName, new Blob(bytes));
-
-        return true;
+        return new Blob(bytes);
     }
 
 

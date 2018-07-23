@@ -62,7 +62,7 @@ public class NumberBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockRowSize() {
+    public int getRecordCount() {
         // Max size per field = 81 920
         return 1024 * 10;
     }
@@ -142,7 +142,7 @@ public class NumberBlock implements BlockManager {
         Blob valueArray = (Blob) blockEntity.getProperty(valuesProperty);
         valueArray = IntValueArray.update(valueArray, recordOffset, read);
 
-        blockEntity.setUnindexedProperty("storage", INT32_STORAGE);
+        blockEntity.setUnindexedProperty(formatProperty, INT32_STORAGE);
         blockEntity.setProperty(valuesProperty, valueArray);
         return blockEntity;
     }
@@ -239,7 +239,7 @@ public class NumberBlock implements BlockManager {
 
         for (Entity block : blocks) {
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockRowSize();
+            int blockStart = blockIndex * getRecordCount();
 
             Blob blob = (Blob) block.getProperty(valuesProperty);
             if(blob != null) {

@@ -6,29 +6,28 @@ import com.google.common.base.Preconditions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.entity.FormEntity;
 
+/**
+ * Identifies a single block
+ */
 public class BlockId {
     public static final String BLOCK_KIND = "Block";
     public static final String COLUMN_KIND = "Column";
     private ResourceId formId;
-    private String fieldId;
+    private String columnId;
     private int blockIndex;
-    private int blockStart;
-    private int blockLength;
 
-    public BlockId(ResourceId formId, String fieldId, int blockIndex, int blockStart, int blockLength) {
+    public BlockId(ResourceId formId, String columnId, int blockIndex) {
         this.formId = formId;
-        this.fieldId = fieldId;
+        this.columnId = columnId;
         this.blockIndex = blockIndex;
-        this.blockStart = blockStart;
-        this.blockLength = blockLength;
     }
 
     public ResourceId getFormId() {
         return formId;
     }
 
-    public String getFieldId() {
-        return fieldId;
+    public String getColumnId() {
+        return columnId;
     }
 
     /**
@@ -40,26 +39,13 @@ public class BlockId {
 
 
     /**
-     * @return zero-based record index of the first record contained in this block
+     * Computes the zero-based offset of the record within this block from a one-based record number.
      */
-    public int getBlockStart() {
-        return blockStart;
-    }
+    public int getOffset(int recordNumber, int blockLength) {
+        Preconditions.checkArgument(recordNumber >= 1, "expected one-based index");
 
-    /**
-     * @return number of records contained in this block
-     */
-    public int getBlockLength() {
-        return blockLength;
-    }
-
-    /**
-     * Computes the zero-based offset of the record within this block from a one-based record index.
-     */
-    public int getOffset(int recordIndex) {
-        Preconditions.checkArgument(recordIndex >= 1, "expected one-based index");
-
-        int zeroBasedRecordIndex = recordIndex - 1;
+        int blockStart = blockIndex * blockLength;
+        int zeroBasedRecordIndex = recordNumber - 1;
         int recordOffset = zeroBasedRecordIndex - blockStart;
 
         Preconditions.checkArgument(recordOffset >= 0 && recordOffset < blockLength,
@@ -69,7 +55,7 @@ public class BlockId {
     }
 
     public Key key() {
-        return KeyFactory.createKey(columnKey(formId, fieldId), BLOCK_KIND, blockIndex + 1);
+        return KeyFactory.createKey(columnKey(formId, columnId), BLOCK_KIND, blockIndex + 1);
     }
 
     public static Key columnKey(ResourceId formId, String fieldId) {

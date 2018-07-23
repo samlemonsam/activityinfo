@@ -15,7 +15,7 @@ public class NullBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockRowSize() {
+    public int getRecordCount() {
         return Integer.MAX_VALUE;
     }
 

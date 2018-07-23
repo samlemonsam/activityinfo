@@ -4,7 +4,6 @@ import com.google.appengine.api.datastore.Entity;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.geo.GeoPoint;
-import org.activityinfo.store.hrd.entity.ColumnDescriptor;
 import org.activityinfo.store.hrd.entity.FormEntity;
 
 import javax.annotation.Nullable;
@@ -19,7 +18,7 @@ public class GeoPointBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockRowSize() {
+    public int getRecordCount() {
         // 5_120 * 16 = 80k per block
         return 1024 * 5;
     }

@@ -26,14 +26,12 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.formula.functions.BoundingBoxFunction;
-import org.activityinfo.model.formula.functions.FormulaFunction;
 import org.activityinfo.model.formula.functions.FormulaFunctions;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
-import org.activityinfo.model.type.geo.GeoArea;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
@@ -229,9 +227,7 @@ public class FormScan {
     public void prepare(ColumnQueryBuilder columnQueryBuilder)  {
         
         // check to see if we still need to hit the database after being populated by the cache
-        if(columnMap.isEmpty() && 
-           foreignKeyMap.isEmpty() &&
-           rowCount == null) {
+        if(allQueriesResolved()) {
             return;
         }
 
@@ -263,6 +259,42 @@ public class FormScan {
             columnQueryBuilder.addField(fk.getKey().getFieldId(),
                 columnFactory.newForeignKeyBuilder(fk.getKey().getRightFormId(), fk.getValue()));
         }
+    }
+
+    private boolean allQueriesResolved() {
+        return columnMap.isEmpty() &&
+           foreignKeyMap.isEmpty() &&
+           rowCount == null;
+    }
+
+    public void prepare(ColumnQueryBuilderV2 columnQueryBuilder) {
+        // check to see if we still need to hit the database after being populated by the cache
+        if(allQueriesResolved()) {
+            return;
+        }
+
+
+        // Build the query
+
+        for (Map.Entry<FieldComponent, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
+            if (column.getKey().equals(PK_COLUMN_KEY)) {
+                columnQueryBuilder.addRecordId(column.getValue());
+            } else {
+                columnQueryBuilder.addField(column.getKey(), column.getValue());
+            }
+        }
+
+        // Only add a row count observer IF it has been requested AND
+        // it hasn't been loaded from the cache.
+        if (rowCount != null && !rowCount.isSet()) {
+            columnQueryBuilder.addRowCount(rowCount);
+        }
+
+        for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        columnQueryBuilder.execute();
     }
 
     private CursorObserver<FieldValue> buildObserver(FieldComponent fieldComponent, PendingSlot<ColumnView> slot) {
@@ -342,6 +374,6 @@ public class FormScan {
     }
 
     public boolean isEmpty() {
-        return columnMap.isEmpty() && foreignKeyMap.isEmpty() && rowCount == null;
+        return allQueriesResolved();
     }
 }

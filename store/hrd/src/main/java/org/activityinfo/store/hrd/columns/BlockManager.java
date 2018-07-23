@@ -12,9 +12,10 @@ import java.util.Iterator;
 
 public interface BlockManager {
 
-    int MAX_ENTITY_SIZE = 1_048_000;
-
-    int getBlockRowSize();
+    /**
+     * @return the number of records stored in this block
+     */
+    int getRecordCount();
 
     /**
      * @return the maximum number of fields that can be mapped to this column of blocks
@@ -25,16 +26,15 @@ public interface BlockManager {
 
     default BlockId getBlockDescriptor(ResourceId formId, String columnId, int recordIndex) {
         int blockIndex = getBlockIndex(recordIndex);
-        int blockSize =  getBlockRowSize();
+        int blockSize =  getRecordCount();
         return new BlockId(formId, columnId,
-                blockIndex,
-                blockIndex * blockSize,
-                blockSize);
+                blockIndex
+        );
 
     }
 
     default int getBlockIndex(int recordIndex) {
-        return Math.floorDiv(recordIndex - 1, getBlockRowSize());
+        return Math.floorDiv(recordIndex - 1, getRecordCount());
     }
 
     /**

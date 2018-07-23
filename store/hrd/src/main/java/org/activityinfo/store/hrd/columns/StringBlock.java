@@ -27,7 +27,7 @@ public class StringBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockRowSize() {
+    public int getRecordCount() {
         return BLOCK_SIZE;
     }
 
@@ -71,7 +71,7 @@ public class StringBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockRowSize();
+            int blockStart = blockIndex * getRecordCount();
 
             // Which records have been deleted?
             BitSet deleted = tombstones.getDeletedBitSet(blockStart, BLOCK_SIZE);

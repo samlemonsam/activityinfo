@@ -36,6 +36,7 @@ import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.*;
+import org.activityinfo.store.spi.FieldComponent;
 import org.activityinfo.store.spi.FormVersionProvider;
 import org.activityinfo.store.spi.PendingSlot;
 import org.activityinfo.store.spi.Slot;

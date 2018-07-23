@@ -25,7 +25,7 @@ public class SerialNumberBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockRowSize() {
+    public int getRecordCount() {
         return 1024 * 6;
     }
 
@@ -70,7 +70,7 @@ public class SerialNumberBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockRowSize();
+            int blockStart = blockIndex * getRecordCount();
 
             String[] prefixPool = null;
             byte[] prefixOffsets = null;

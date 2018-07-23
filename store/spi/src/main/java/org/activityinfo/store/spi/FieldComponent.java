@@ -1,9 +1,21 @@
-package org.activityinfo.store.query.shared;
+package org.activityinfo.store.spi;
 
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Objects;
 
+/**
+ * References a specific field and, optionally, a component of that field.
+ *
+ * Field components are elements of more complex fields that can be atomically
+ * fetched. They include:
+ *
+ * <ul>
+ *  <li>Latitude and longitude coordinates of GeoPoint fields</li>
+ *  <li>Bounding boxes limits (M</li>
+ * </ul>
+ *
+ */
 public class FieldComponent {
     private String fieldName;
     private String component;

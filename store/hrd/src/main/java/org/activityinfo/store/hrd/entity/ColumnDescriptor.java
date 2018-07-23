@@ -1,9 +1,9 @@
 package org.activityinfo.store.hrd.entity;
 
 import com.google.appengine.api.datastore.Blob;
+import org.activityinfo.store.hrd.columns.IntValueArray;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,6 +12,7 @@ import java.util.Set;
 public class ColumnDescriptor {
     private String columnId;
     private String blockType;
+    private int recordCount;
 
     /**
      * The names of the fields assigned to this block
@@ -19,10 +20,10 @@ public class ColumnDescriptor {
     private Set<String> fields;
 
     /**
-     * A {@link org.activityinfo.store.hrd.columns.BlobBitSet} indicating which
-     * blocks are in use.
+     * An {@link org.activityinfo.store.hrd.columns.IntValueArray} containing the current
+     * version of each block that has been written.
      */
-    private Blob bitset;
+    private Blob versionMap;
 
     public String getColumnId() {
         return columnId;
@@ -30,10 +31,6 @@ public class ColumnDescriptor {
 
     public void setColumnId(String columnId) {
         this.columnId = columnId;
-    }
-
-    public Blob getBitset() {
-        return bitset;
     }
 
     public String getBlockType() {
@@ -57,5 +54,27 @@ public class ColumnDescriptor {
             fields = new HashSet<>();
         }
         fields.add(name);
+    }
+
+    public void setRecordCount(int recordCount) {
+        this.recordCount = recordCount;
+    }
+
+    /**
+     * @return the number of records stored per block
+     */
+    public int getRecordCount() {
+        return recordCount;
+    }
+
+    public long getBlockVersion(int blockIndex) {
+        return IntValueArray.get(versionMap, blockIndex);
+    }
+
+    public void setBlockVersion(int blockIndex, long version) {
+        if(version > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Version " + version + " exceeds " + Integer.MAX_VALUE);
+        }
+        this.versionMap = IntValueArray.update(versionMap, blockIndex, (int) version);
     }
 }

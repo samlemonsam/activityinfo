@@ -22,7 +22,7 @@ public class MultiEnumBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockRowSize() {
+    public int getRecordCount() {
         return 1024 * 5;
     }
 

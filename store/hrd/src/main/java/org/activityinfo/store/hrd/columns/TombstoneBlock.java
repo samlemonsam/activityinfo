@@ -11,7 +11,7 @@ public class TombstoneBlock {
 
     public static final int BLOCK_SIZE = 1024 * 8 * 8;
 
-    private static final String COLUMN_NAME = "__DELETED";
+    public static final String COLUMN_NAME = "__DELETED";
     private static final String BITSET_PROPERTY = "deleted";
 
 
@@ -19,9 +19,8 @@ public class TombstoneBlock {
         int blockIndex = recordIndex / BLOCK_SIZE;
         int blockSize =  BLOCK_SIZE;
         return new BlockId(formId, COLUMN_NAME,
-                blockIndex,
-                blockIndex * blockSize,
-                blockSize);
+                blockIndex
+        );
     }
 
     public void markDeleted(Entity blockEntity, int recordOffset) {

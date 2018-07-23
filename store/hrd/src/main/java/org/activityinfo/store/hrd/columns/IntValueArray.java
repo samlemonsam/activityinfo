@@ -136,6 +136,14 @@ public class IntValueArray {
         bytes[pos  ] = (byte) (value >> 24);
     }
 
+    public static int get(Blob blob, int index) {
+        if(blob == null) {
+            return MISSING;
+        } else {
+            return get(blob.getBytes(), index);
+        }
+    }
+
     public static int get(byte[] bytes, int index) {
         int pos = index * BYTES;
         if(pos >= bytes.length) {

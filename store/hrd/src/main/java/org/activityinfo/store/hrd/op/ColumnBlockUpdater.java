@@ -45,7 +45,9 @@ public class ColumnBlockUpdater {
      */
     public void updateId(int recordNumber, String recordId) {
         BlockManager blockManager = new RecordIdBlock();
-        BlockId descriptor = blockManager.getBlockDescriptor(formClass.getId(), RecordIdBlock.FIELD_NAME, recordNumber);
+        BlockId descriptor = blockManager.getBlockDescriptor(formClass.getId(), RecordIdBlock.BLOCK_NAME, recordNumber);
+
+        formEntity.setTailIdBlockVersion(formEntity.getVersion());
 
         updateBlock(blockManager, descriptor, recordNumber, TextValue.valueOf(recordId));
     }
@@ -71,7 +73,6 @@ public class ColumnBlockUpdater {
         updateBlock(blockManager, descriptor, recordNumber, TextValue.valueOf(parentRecordId));
     }
 
-
     private void updateFieldBlock(int recordNumber, FormField field, FieldValue fieldValue) {
 
         BlockManager blockManager = BlockFactory.get(field);
@@ -82,6 +83,8 @@ public class ColumnBlockUpdater {
         ColumnDescriptor block = blockForField(field, fieldDescriptor, blockManager);
 
         BlockId descriptor = blockManager.getBlockDescriptor(formId, block.getColumnId(), recordNumber);
+
+        block.setBlockVersion(descriptor.getBlockIndex(), formEntity.getVersion());
 
         updateBlock(blockManager, descriptor, recordNumber, fieldValue);
     }
@@ -105,8 +108,9 @@ public class ColumnBlockUpdater {
 
         // Need to allocate a new block
         ColumnDescriptor block = new ColumnDescriptor();
-        block.setColumnId("col" + formEntity.getBlockColumns().size() + 1);
+        block.setColumnId("col" + (formEntity.getBlockColumns().size() + 1));
         block.setBlockType(blockManager.getBlockType());
+        block.setRecordCount(blockManager.getRecordCount());
         block.addField(field.getName());
 
         formEntity.addFieldBlock(block);
@@ -123,7 +127,9 @@ public class ColumnBlockUpdater {
         BlockId descriptor = tombstone.getBlockDescriptor(formId, recordNumber);
         Entity blockEntity = getOrCreateBlock(descriptor, descriptor.key());
 
-        tombstone.markDeleted(blockEntity, descriptor.getOffset(recordNumber));
+        tombstone.markDeleted(blockEntity, descriptor.getOffset(recordNumber, TombstoneBlock.BLOCK_SIZE));
+
+        formEntity.setTombstoneBlockVersion(descriptor.getBlockIndex(), formEntity.getVersion());
 
         blockMap.put(blockEntity.getKey(), blockEntity);
     }
@@ -132,7 +138,8 @@ public class ColumnBlockUpdater {
 
         Entity blockEntity = getOrCreateBlock(descriptor, descriptor.key());
 
-        Entity updatedEntity = blockManager.update(blockEntity, descriptor.getOffset(recordIndex), fieldValue);
+        Entity updatedEntity = blockManager.update(blockEntity,
+                descriptor.getOffset(recordIndex, blockManager.getRecordCount()), fieldValue);
 
         if(updatedEntity != null) {
             blockMap.put(updatedEntity.getKey(), updatedEntity);

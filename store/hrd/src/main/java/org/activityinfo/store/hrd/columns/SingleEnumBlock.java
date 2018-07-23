@@ -31,7 +31,7 @@ public class SingleEnumBlock implements BlockManager {
     }
 
     @Override
-    public int getBlockRowSize() {
+    public int getRecordCount() {
         return 1024 * 4;
     }
 
@@ -95,7 +95,7 @@ public class SingleEnumBlock implements BlockManager {
         while (blockIterator.hasNext()) {
             Entity block = blockIterator.next();
             int blockIndex = (int)(block.getKey().getId() - 1);
-            int blockStart = blockIndex * getBlockRowSize();
+            int blockStart = blockIndex * getRecordCount();
 
             String[] pool = StringPools.toArray((Blob) block.getProperty(itemIdProperty));
             if(pool.length > 0) {

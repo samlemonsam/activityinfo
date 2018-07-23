@@ -146,6 +146,16 @@ public class ColumnSetBuilder {
             throw new IllegalStateException("No storage for form " + scan.getFormId());
         }
 
+        FormStorage storage = form.get();
+        if (storage instanceof FormStorageV2) {
+            ColumnQueryBuilderV2 queryBuilderV2 = ((FormStorageV2) storage).newColumnQueryV2();
+            if(queryBuilderV2 != null) {
+                executeScanV2(scan, queryBuilderV2);
+                return;
+            }
+        }
+
+
         ColumnQueryBuilder queryBuilder = form.get().newColumnQuery();
 
         scan.prepare(queryBuilder);
@@ -157,6 +167,9 @@ public class ColumnSetBuilder {
         LOGGER.info(() -> "Form scan of " + scan.getFormId() + " completed in " + stopwatch);
     }
 
+    private void executeScanV2(FormScan scan, ColumnQueryBuilderV2 queryBuilder) {
+        scan.prepare(queryBuilder);
+    }
 
 
     public List<Future<Integer>> cache(FormScan scan) {

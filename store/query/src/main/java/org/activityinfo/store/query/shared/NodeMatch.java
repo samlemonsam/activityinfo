@@ -30,7 +30,6 @@ import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -38,6 +37,7 @@ import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.shared.join.JoinNode;
 import org.activityinfo.store.query.shared.join.JoinType;
+import org.activityinfo.store.spi.FieldComponent;
 
 import java.util.Iterator;
 import java.util.LinkedList;

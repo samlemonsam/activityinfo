@@ -18,16 +18,16 @@
  */
 package org.activityinfo.store.hrd.entity;
 
+import com.google.appengine.api.datastore.Blob;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Unindex;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.columns.IntValueArray;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,6 +77,19 @@ public class FormEntity {
     private Map<String, FieldDescriptor> fields;
 
     private Map<String, ColumnDescriptor> blockColumns;
+
+
+    /**
+     * Tracks the version of each tombstone block
+     */
+    private Blob tombstoneVersionMap;
+
+    /**
+     * The version number of last record od block version. Only the (currently)
+     * last record block will change, the rest are essentially immutable.
+     */
+    private long tailIdBlockVersion;
+
 
     public FormEntity() {
     }
@@ -181,6 +194,26 @@ public class FormEntity {
             this.blockColumns = new HashMap<>();
         }
         this.blockColumns.put(column.getColumnId(), column);
+    }
+
+
+    public long getTombstoneBlockVersion(int blockIndex) {
+        return IntValueArray.get(tombstoneVersionMap, blockIndex);
+    }
+
+    public void setTombstoneBlockVersion(int blockIndex, long version) {
+        if(version > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Version " + version + " exceeds " + Integer.MAX_VALUE);
+        }
+        this.tombstoneVersionMap = IntValueArray.update(tombstoneVersionMap, blockIndex, (int) version);
+    }
+
+    public long getTailIdBlockVersion() {
+        return tailIdBlockVersion;
+    }
+
+    public void setTailIdBlockVersion(long tailIdBlockVersion) {
+        this.tailIdBlockVersion = tailIdBlockVersion;
     }
 }
 
