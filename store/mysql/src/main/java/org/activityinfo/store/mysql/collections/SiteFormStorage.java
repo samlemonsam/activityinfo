@@ -241,7 +241,6 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     private void dualWriteToHrd(final RecordChangeType changeType, final TypedRecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
-        ofy().transact(new CreateOrUpdateRecord(getFormClass().getId(), update));
         ofy().transact(new VoidWork() {
             @Override
             public void vrun() {
@@ -257,14 +256,6 @@ public class SiteFormStorage implements VersionedFormStorage {
                 recordEntity.setFieldValues(getFormClass(), values);
 
                 FormRecordSnapshotEntity snapshot = new FormRecordSnapshotEntity(update.getUserId(), changeType, recordEntity);
-
-                List<Object> toSave = new ArrayList<>();
-                toSave.add(rootEntity);
-                toSave.add(recordEntity);
-                toSave.add(snapshot);
-
-                if(changeType == RecordChangeType.DELETED)
-
 
                 if (changeType == RecordChangeType.DELETED) {
                     ofy().save().entities(rootEntity, snapshot);

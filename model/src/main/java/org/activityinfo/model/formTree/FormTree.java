@@ -31,7 +31,6 @@ import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -169,8 +168,6 @@ public class FormTree implements FormClassProvider, FormMetadataProvider {
                 ResourceId subFormClassId = subFormType.getClassId();
                 return Collections.singleton(subFormClassId);
 
-            } else if(field.getType() instanceof RecordFieldType) {
-                return Collections.singleton(((RecordFieldType) field.getType()).getFormClass().getId());
             } else {
                 return Collections.emptySet();
             }

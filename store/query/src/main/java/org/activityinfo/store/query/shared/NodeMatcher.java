@@ -34,6 +34,7 @@ import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.geo.GeoPointType;
 
 import java.util.*;
 
@@ -115,14 +116,18 @@ public class NodeMatcher {
         List<Collection<NodeMatch>> matches = Lists.newArrayList();
 
         for (FormTree.Node field : fields) {
-            if(field.getType() instanceof ReferenceType || 
-               field.getType() instanceof RecordFieldType) {
+            if(field.getType() instanceof ReferenceType) {
                 Collection<NodeMatch> result = unionMatches(queryPath, field);
                 if (!result.isEmpty()) {
                     matches.add(result);
                 }
             } else if(field.getType() instanceof EnumType) {
                 Optional<NodeMatch> result = matchEnum(queryPath, field);
+                if(result.isPresent()) {
+                    matches.add(Collections.singleton(result.get()));
+                }
+            } else if(field.getType() instanceof GeoPointType) {
+                Optional<NodeMatch> result = matchCoordinate(queryPath, field);
                 if(result.isPresent()) {
                     matches.add(Collections.singleton(result.get()));
                 }
@@ -156,11 +161,20 @@ public class NodeMatcher {
                     }
                 }
                 if(matchingItems.size() == 1) {
-                    return Optional.of(NodeMatch.forEnumItem(field, matchingItems.get(0)));
+                    return Optional.of(NodeMatch.forFieldComponent(field, matchingItems.get(0).getId().asString()));
                 } 
             }
         }
         return Optional.absent();
+    }
+
+    private Optional<NodeMatch> matchCoordinate(QueryPath queryPath, FormTree.Node field) {
+        String symbol = queryPath.peek().toLowerCase();
+        if(symbol.equals("latitude") || symbol.equals("longitude")) {
+            return Optional.of(NodeMatch.forFieldComponent(field, symbol));
+        } else {
+            return Optional.absent();
+        }
     }
 
 

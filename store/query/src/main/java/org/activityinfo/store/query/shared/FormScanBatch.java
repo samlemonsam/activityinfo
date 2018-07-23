@@ -28,9 +28,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
-import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.formula.functions.SumFunction;
-import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -87,10 +85,6 @@ public class FormScanBatch {
         this.supervisor = supervisor;
     }
 
-    public FormScan getTable(FormClass formClass) {
-        return getTable(formClass.getId());
-    }
-
     public FormScan getTable(ResourceId formId) {
         FormScan scan = tableMap.get(formId);
         if(scan == null) {
@@ -109,7 +103,7 @@ public class FormScanBatch {
     /**
      * Adds a ResourceId to the batch
      */
-    public Slot<ColumnView> addResourceIdColumn(FilterLevel filterLevel, ResourceId formId) {
+    public Slot<ColumnView> addRecordIdColumn(FilterLevel filterLevel, ResourceId formId) {
         return filter(filterLevel, formId, getTable(formId).addResourceId());
     }
 
@@ -131,22 +125,11 @@ public class FormScanBatch {
         } else {
             // id column, simple root column or embedded form
             if (match.isRootId()) {
-                return addIdColumn(filterLevel, match);
-            } else {
-                return getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
-            }
-        }
-    }
+                return addRecordIdColumn(filterLevel, match.getFormClass().getId());
 
-    public Slot<ColumnView> addIdColumn(FilterLevel filterLevel, NodeMatch match) {
-        SymbolNode matchExpr = (SymbolNode) match.getExpr();
-        switch (matchExpr.getName()) {
-            case ColumnModel.ID_SYMBOL:
-                return addResourceIdColumn(filterLevel, match.getFormClass().getId());
-            case ColumnModel.CLASS_SYMBOL:
-                return addConstantColumn(filterLevel, match.getFormClass(), match.getFormClass().getId().asString());
-            default:
-                throw new UnsupportedOperationException("type: " + match.getType());
+            } else {
+                return getDataColumn(filterLevel, match.getFormClass().getId(), match.getFieldComponent());
+            }
         }
     }
 
@@ -183,10 +166,10 @@ public class FormScanBatch {
         Slot<ColumnView> column;
         switch (match.getType()) {
             case FIELD:
-                column = getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
+                column = getDataColumn(filterLevel, match.getFormClass().getId(), match.getFieldComponent());
                 break;
             case ID:
-                column = addResourceIdColumn(filterLevel, match.getFormClass().getId());
+                column = addRecordIdColumn(filterLevel, match.getFormClass().getId());
                 break;
             default:
                 throw new UnsupportedOperationException("type: " + match.getType());
@@ -206,7 +189,7 @@ public class FormScanBatch {
         JoinNode node = match.getJoins().get(0);
         Slot<PrimaryKeyMap> primaryKey =  addPrimaryKey(filterLevel, node.getLeftFormId());
         Slot<ColumnView> parentColumn = addParentColumn(filterLevel, node.getRightFormId());
-        Slot<ColumnView> dataColumn = getDataColumn(filterLevel, match.getFormClass().getId(), match.getExpr());
+        Slot<ColumnView> dataColumn = getDataColumn(filterLevel, match.getFormClass().getId(), match.getFieldComponent());
 
         SubFormJoin join = new SubFormJoin(primaryKey, parentColumn);
 
@@ -215,7 +198,7 @@ public class FormScanBatch {
     }
 
     private Slot<ColumnView> addParentColumn(FilterLevel filterLevel, ResourceId formId) {
-        return getDataColumn(filterLevel, formId, new SymbolNode("@parent"));
+        return getDataColumn(filterLevel, formId, new FieldComponent("@parent"));
     }
 
     private ReferenceJoin addJoinLink(FilterLevel filterLevel, JoinNode node) {
@@ -234,7 +217,7 @@ public class FormScanBatch {
 
 
     private Slot<PrimaryKeyMap> addPrimaryKey(FilterLevel filterLevel, ResourceId formId) {
-        Slot<ColumnView> filteredIdSlot = addResourceIdColumn(filterLevel, formId);
+        Slot<ColumnView> filteredIdSlot = addRecordIdColumn(filterLevel, formId);
 
         return new MemoizedSlot<>(filteredIdSlot, new Function<ColumnView, PrimaryKeyMap>() {
             @Override
@@ -256,8 +239,8 @@ public class FormScanBatch {
         });
     }
 
-    public Slot<ColumnView> getDataColumn(FilterLevel filterLevel, ResourceId formId, FormulaNode fieldExpr) {
-        return filter(filterLevel, formId, getTable(formId).addField(fieldExpr));
+    public Slot<ColumnView> getDataColumn(FilterLevel filterLevel, ResourceId formId, FieldComponent match) {
+        return filter(filterLevel, formId, getTable(formId).addField(match));
     }
 
     /**
@@ -280,10 +263,6 @@ public class FormScanBatch {
      */
     public Slot<ColumnView> addConstantColumn(FilterLevel filterLevel, FormClass rootFormClass, String value) {
         return new ConstantColumnBuilder(addRowCount(filterLevel, rootFormClass), TextValue.valueOf(value));
-    }
-
-    public Slot<ColumnView> addExpression(FilterLevel filterLevel, FormClass formClass, FormulaNode node) {
-        return filter(filterLevel, formClass.getId(), getTable(formClass).addField(node));
     }
 
     public Slot<Integer> addRowCount(FilterLevel filterLevel, ResourceId formId) {

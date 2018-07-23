@@ -30,8 +30,10 @@ import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
+import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.shared.join.JoinNode;
@@ -46,19 +48,19 @@ import java.util.List;
  */
 public class NodeMatch {
 
-    
+
+
     public enum Type {
         ID,
         CLASS,
         FIELD
     }
 
+    private Type type;
     private List<JoinNode> joins;
     private FormClass formClass;
-    private FormulaNode fieldExpr;
     private FormTree.Node fieldNode;
-    private Type type;
-    private EnumItem enumItem;
+    private FieldComponent fieldComponent;
 
     private NodeMatch() {}
     
@@ -71,20 +73,25 @@ public class NodeMatch {
 
         List<List<FormTree.Node>> partitions = partitionOnJoins(fieldNode);
         List<FormTree.Node> leaf = partitions.get(partitions.size() - 1);
-        
+
         NodeMatch match = new NodeMatch();
         match.joins = joinsTo(partitions, aggregation);
         match.type = Type.FIELD;
         match.formClass = leaf.get(0).getDefiningFormClass();
-        match.fieldExpr = toExpr(leaf);
         match.fieldNode = fieldNode;
+        match.fieldComponent = new FieldComponent(fieldNode.getField().getName());
+
+        FormulaNode leafFormula = toExpr(leaf);
+        if(!(leafFormula instanceof SymbolNode)) {
+            throw new UnsupportedOperationException("TODO: " + leafFormula);
+        }
+
         return match;
     }
 
-    public static NodeMatch forEnumItem(FormTree.Node fieldNode, EnumItem item) {
+    public static NodeMatch forFieldComponent(FormTree.Node fieldNode, String component) {
         NodeMatch match = forField(fieldNode, Optional.<StatFunction>absent());
-        match.fieldExpr = new CompoundExpr(match.fieldExpr, new SymbolNode(item.getId()));
-        match.enumItem = item;
+        match.fieldComponent = new FieldComponent(fieldNode.getFieldId(), component);
         return match;
     }
 
@@ -92,14 +99,13 @@ public class NodeMatch {
         NodeMatch match = new NodeMatch();
         match.formClass = formClass;
         match.type = Type.ID;
-        match.fieldExpr = new SymbolNode(idSymbol);
         match.joins = Lists.newLinkedList();
         return match;
     }
 
     public boolean isRootId() {
         // only return true for unjoined ID types - i.e. root form/record ids
-        return type == Type.ID && joins.isEmpty() && fieldExpr != null;
+        return type == Type.ID && joins.isEmpty();
     }
     
     public static NodeMatch forId(FormTree.Node parent, FormClass formClass) {
@@ -208,17 +214,22 @@ public class NodeMatch {
         return expr;
     }
 
+    public NodeMatch withComponent(String component) {
+        NodeMatch nodeMatch = new NodeMatch();
+        nodeMatch.type = type;
+        nodeMatch.joins = joins;
+        nodeMatch.formClass = formClass;
+        nodeMatch.fieldNode = fieldNode;
+        nodeMatch.fieldComponent = new FieldComponent(fieldComponent.getFieldId(), component);
+        return nodeMatch;
+    }
+
     public List<JoinNode> getJoins() {
         return joins;
     }
 
     public boolean isRoot() {
         return fieldNode.isRoot();
-    }
-
-    public FormulaNode getExpr() {
-        Preconditions.checkArgument(type == Type.FIELD || type == Type.ID, NodeMatch.class.getName() + " is of type " + type);
-        return fieldExpr;
     }
 
     public Type getType() {
@@ -231,7 +242,7 @@ public class NodeMatch {
 
     public String getCalculation() {
         if(!isCalculated()) {
-            throw new UnsupportedOperationException(fieldExpr + " is not a calculated field");
+            throw new UnsupportedOperationException(getFieldComponent() + " is not a calculated field");
         }
         CalculatedFieldType type = (CalculatedFieldType) fieldNode.getField().getType();
         return type.getExpression();
@@ -262,7 +273,7 @@ public class NodeMatch {
                 s.append("@class");
                 break;
             case FIELD:
-                s.append(fieldExpr.toString());
+                s.append(fieldComponent);
                 break;
         }
         return s.toString();
@@ -273,11 +284,25 @@ public class NodeMatch {
     }
 
     public boolean isEnumBoolean() {
-        return enumItem != null;
+        return fieldNode.getType() instanceof EnumType && fieldComponent.hasComponent();
     }
 
     public EnumItem getEnumItem() {
-        return enumItem;
+        EnumType enumType = (EnumType) fieldNode.getType();
+        for (EnumItem enumItem : enumType.getValues()) {
+            if(enumItem.getId().asString().equals(fieldComponent.getComponent())) {
+                return enumItem;
+            }
+        }
+        throw new IllegalArgumentException("No such item " + fieldComponent.getComponent());
+    }
+
+    public FieldComponent getFieldComponent() {
+        return fieldComponent;
+    }
+
+    public String getDescription() {
+        return fieldNode.getField().getLabel();
     }
 
     @Override
