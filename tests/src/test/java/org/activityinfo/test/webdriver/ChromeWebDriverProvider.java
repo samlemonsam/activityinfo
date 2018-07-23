@@ -100,9 +100,12 @@ public class ChromeWebDriverProvider implements WebDriverProvider {
     }
 
 
+    public WebDriver start() {
+        return POOL.get(PROFILE);
+    }
 
     @Override
     public WebDriver start(String name, BrowserProfile profile) {
-       return POOL.get(PROFILE);
+        return start();
     }
 }

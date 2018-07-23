@@ -1,16 +1,6 @@
 @web
 Feature: New User Sign Up
 
-  Scenario: New User Sign Up
-    When I sign up for a new user account
-    Then I should receive an email with a link to confirm my address
-    When I follow the link
-     And I choose the password "MySecretPassword123"
-    Then my dashboard should open
-    When I logout
-     And I login with the password "MySecretPassword123"
-    Then my dashboard should open
-
   Scenario: Sign up links cannot be re-used
     Given I have signed up for a new account
       And I have confirmed my account

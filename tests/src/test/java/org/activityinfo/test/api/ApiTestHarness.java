@@ -52,6 +52,8 @@ public class ApiTestHarness {
         aliasTable = new AliasTable();
         accounts = new DevServerAccounts(server);
         this.driver = new ApiApplicationDriver(server, accounts, aliasTable);
+
+        System.out.println("Server: " + server.getRootUrl());
     }
 
     private UserAccount currentUser() {

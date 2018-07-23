@@ -29,7 +29,6 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 class Message {
     private String id;
-    private final Map<String, String> headers = new HashMap<>();
     private String subject;
 
     @JsonProperty("fromfull")
@@ -46,9 +45,8 @@ class Message {
         this.id = id;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
+
+
 
     public String getSubject() {
         return subject;
