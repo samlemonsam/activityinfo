@@ -49,7 +49,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitNarrative(NarrativeType narrativeType) {
-        return new StringBlock(fieldName, new ViewBuilderFactory.ReferenceIdReader());
+        return new StringBlock(fieldName, new ViewBuilderFactory.TextFieldReader());
     }
 
     @Override
