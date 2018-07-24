@@ -32,10 +32,7 @@ import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.activityinfo.store.testing.IntakeForm;
 import org.activityinfo.store.testing.RecordGenerator;
 import org.activityinfo.store.testing.Survey;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import static org.activityinfo.store.testing.ColumnSetMatchers.hasValues;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,6 +65,7 @@ public class HrdFormStorageTest {
     }
 
     @Test
+    @Ignore("Requires column block queries to be enabled")
     public void surveyTest() {
 
         Survey surveyForm = new Survey();
