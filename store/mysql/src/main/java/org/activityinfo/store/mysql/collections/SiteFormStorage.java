@@ -71,6 +71,8 @@ public class SiteFormStorage implements VersionedFormStorage {
     private final PermissionsCache permissionsCache;
     private final ActivityLoader activityLoader;
 
+    private FormEntity formEntity;
+
     public SiteFormStorage(Activity activity, TableMapping baseMapping,
                            QueryExecutor queryExecutor,
                            PermissionsCache permissionsCache, ActivityLoader activityLoader) {
@@ -79,6 +81,11 @@ public class SiteFormStorage implements VersionedFormStorage {
         this.queryExecutor = queryExecutor;
         this.permissionsCache = permissionsCache;
         this.activityLoader = activityLoader;
+
+        if(activity.isMigratedToHrd()) {
+            formEntity = Hrd.ofy().load().key(FormEntity.key(activity.getSiteFormClassId())).safe();
+        }
+
     }
 
     @Override
@@ -433,7 +440,11 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public long cacheVersion() {
-        return activity.getVersion();
+        if(activity.isMigratedToHrd()) {
+            return formEntity.getVersion();
+        } else {
+            return activity.getVersion();
+        }
     }
 
     @Override
