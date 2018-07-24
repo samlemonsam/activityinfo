@@ -50,7 +50,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.activityinfo.model.legacy.CuidAdapter.*;
-import static org.activityinfo.store.mysql.ColumnSetMatchers.hasValues;
+import static org.activityinfo.store.testing.ColumnSetMatchers.hasValues;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 

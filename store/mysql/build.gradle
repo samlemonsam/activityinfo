@@ -12,6 +12,7 @@ dependencies {
     compile libraries.jdbc.mysql
 
     testCompile libraries.dbunit
+    compile project(':store:testing')
 
     testCompile libraries.appengine.api
     testCompile libraries.appengine.testing
