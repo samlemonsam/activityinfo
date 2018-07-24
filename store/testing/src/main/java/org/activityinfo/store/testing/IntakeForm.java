@@ -188,6 +188,10 @@ public class IntakeForm implements TestForm {
         return access.getId();
     }
 
+    public FormField getQuantityField() {
+        return quantityField;
+    }
+
     public QueryModel queryAll() {
         QueryModel model = new QueryModel(getFormId());
         model.selectRecordId().as("$id");

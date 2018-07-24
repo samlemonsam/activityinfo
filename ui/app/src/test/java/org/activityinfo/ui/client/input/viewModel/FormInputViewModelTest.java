@@ -332,7 +332,8 @@ public class FormInputViewModelTest {
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(intakeForm.getFormId(), ResourceId.generateId()))
                 .update(intakeForm.getOpenDateFieldId(), new LocalDate(2017,1,1))
-                .update(intakeForm.getNationalityFieldId(), new EnumValue(intakeForm.getPalestinianId(), intakeForm.getJordanianId()));
+                .update(intakeForm.getNationalityFieldId(), new EnumValue(intakeForm.getPalestinianId(), intakeForm.getJordanianId()))
+                .update(intakeForm.getQuantityField().getId(), new Quantity(10));
 
         FormInputViewModel viewModel = builder.build(inputModel);
         assertThat(viewModel.isValid(), equalTo(true));
