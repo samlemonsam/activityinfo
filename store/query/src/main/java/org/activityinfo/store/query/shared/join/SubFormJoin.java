@@ -19,7 +19,7 @@
 package org.activityinfo.store.query.shared.join;
 
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.store.spi.Slot;
 
 /**
  * Join between a master and sub form.

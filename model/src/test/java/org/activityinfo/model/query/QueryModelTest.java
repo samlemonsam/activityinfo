@@ -27,8 +27,8 @@ public class QueryModelTest {
     @Test
     public void clientSideSerialization() {
         QueryModel model = new QueryModel(ResourceId.valueOf("XYZ"));
-        model.selectResourceId().as("id");
-        model.selectResourceId();
+        model.selectRecordId().as("id");
+        model.selectRecordId();
         model.selectExpr("foo").as("foo_column");
 
         String json = model.toJsonString();

@@ -18,7 +18,7 @@
  */
 package org.activityinfo.test.capacity.action;
 
-import org.activityinfo.test.driver.ApiApplicationDriver;
+import org.activityinfo.test.driver.ApplicationDriver;
 
 import java.util.Arrays;
 
@@ -35,7 +35,7 @@ public class CompositeAction implements UserAction {
     }
 
     @Override
-    public void execute(ApiApplicationDriver driver) throws Exception {
+    public void execute(ApplicationDriver driver) throws Exception {
         for(UserAction action : actions) {
             action.execute(driver);
         }

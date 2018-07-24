@@ -31,10 +31,13 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
+import org.activityinfo.store.hrd.entity.FormSchemaEntity;
+import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
 import org.activityinfo.store.hrd.op.QueryVersions;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.SiteFetcher;
@@ -183,10 +186,22 @@ public class SiteFormStorage implements VersionedFormStorage {
     public void updateFormClass(FormClass formClass) {
         ActivityUpdater updater = new ActivityUpdater(activity, queryExecutor);
         updater.update(formClass);
+
+        FormSchemaEntity formSchemaEntity = new FormSchemaEntity(formClass);
+        formSchemaEntity.setSchemaVersion(updater.getNewVersion());
+
+        Hrd.ofy().save().entity(formSchemaEntity).now();
+
     }
 
     @Override
     public void add(TypedRecordUpdate update) {
+
+        if(activity.isMigratedToHrd()) {
+            Hrd.ofy().transact(new CreateOrUpdateRecord(getFormClass().getId(), update));
+            return;
+        }
+
         ResourceId formClassId = getFormClass().getId();
         BaseTableInserter baseTable = new BaseTableInserter(baseMapping, update.getRecordId());
         baseTable.addValue("ActivityId", activity.getId());
@@ -231,7 +246,6 @@ public class SiteFormStorage implements VersionedFormStorage {
     }
 
     private void dualWriteToHrd(final RecordChangeType changeType, final TypedRecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {
-
         ofy().transact(new VoidWork() {
             @Override
             public void vrun() {
@@ -340,6 +354,11 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public void update(TypedRecordUpdate update) {
+
+        if(activity.isMigratedToHrd()) {
+            Hrd.ofy().transact(new CreateOrUpdateRecord(getFormClass().getId(), update));
+            return;
+        }
 
         FormRecord formRecord = get(update.getRecordId()).get();
         FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);

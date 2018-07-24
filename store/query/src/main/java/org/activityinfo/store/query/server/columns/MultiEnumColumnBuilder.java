@@ -26,9 +26,9 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.columns.MultiDiscreteStringColumnView;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 import java.util.BitSet;
 import java.util.Map;

@@ -20,6 +20,7 @@ package org.activityinfo.store.spi;
 
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
@@ -27,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Describes an update to a Resource
+ * Describes an update to a Record
  */
 public class TypedRecordUpdate {
     
@@ -37,6 +38,17 @@ public class TypedRecordUpdate {
     private ResourceId parentId;
     private boolean deleted = false;
     private Map<ResourceId, FieldValue> changedFieldValues = new HashMap<>();
+
+    public TypedRecordUpdate() {
+    }
+
+    public TypedRecordUpdate(long userId, FormInstance record) {
+        this.userId = userId;
+        this.formId = record.getFormId();
+        this.recordId = record.getRef().getRecordId();
+        this.parentId = record.getParentRecordId();
+        this.changedFieldValues.putAll(record.getFieldValueMap());
+    }
 
     public long getUserId() {
         return userId;

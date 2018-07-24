@@ -48,7 +48,7 @@ public class SubFormDeletionTest {
     public void deleteParent() {
 
         QueryModel queryModel = new QueryModel(ReferralSubForm.FORM_ID);
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectExpr(new CompoundExpr(IncidentForm.FORM_ID, ColumnModel.ID_SYMBOL)).as("parent");
         queryModel.selectExpr(new ConstantNode(1)).as("count");
 
@@ -70,7 +70,7 @@ public class SubFormDeletionTest {
     @Test
     public void parentQueries() {
         QueryModel queryModel = new QueryModel(ReferralSubForm.FORM_ID);
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectExpr("URGENCY").as("Urgency");
 
         ColumnSet columnSet = query(queryModel);

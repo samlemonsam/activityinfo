@@ -21,8 +21,8 @@ package org.activityinfo.store.query.shared.columns;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.ConstantColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 
 public class UnsupportedColumnTypeBuilder implements CursorObserver<FieldValue> {

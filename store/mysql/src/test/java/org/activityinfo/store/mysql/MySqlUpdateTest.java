@@ -347,7 +347,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         // Query results
 
         QueryModel queryModel = new QueryModel(formClass.getId());
-        queryModel.selectResourceId();
+        queryModel.selectRecordId();
         queryModel.selectExpr("Num").as("num");
         queryModel.selectExpr("Calculation").as("calc");
 

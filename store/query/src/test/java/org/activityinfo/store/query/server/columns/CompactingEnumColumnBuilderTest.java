@@ -24,7 +24,7 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.store.query.shared.PendingSlot;
+import org.activityinfo.store.spi.PendingSlot;
 import org.junit.Test;
 
 import java.util.Objects;

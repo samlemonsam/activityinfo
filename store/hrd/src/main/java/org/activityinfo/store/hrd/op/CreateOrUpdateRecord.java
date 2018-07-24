@@ -18,9 +18,11 @@
  */
 package org.activityinfo.store.hrd.op;
 
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.VoidWork;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
@@ -28,6 +30,9 @@ import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.spi.RecordChangeType;
 import org.activityinfo.store.spi.TypedRecordUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -41,7 +46,6 @@ public class CreateOrUpdateRecord extends VoidWork {
         this.formId = formId;
         this.update = update;
     }
-
 
     @Override
     public void vrun() {
@@ -57,7 +61,7 @@ public class CreateOrUpdateRecord extends VoidWork {
         FormRecordEntity existingEntity = ofy().load().key(FormRecordEntity.key(formClass, update.getRecordId())).now();
         FormRecordEntity updated;
         RecordChangeType changeType;
-        
+
         if(existingEntity != null) {
             updated = existingEntity;
             changeType = update.isDeleted() ? RecordChangeType.DELETED : RecordChangeType.UPDATED;
@@ -81,17 +85,61 @@ public class CreateOrUpdateRecord extends VoidWork {
         updated.setVersion(newVersion);
         updated.setSchemaVersion(rootEntity.getSchemaVersion());
         updated.setFieldValues(formClass, update.getChangedFieldValues());
-        
+
         // Store a copy as a snapshot
         FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), changeType, updated);
 
-        if (update.isDeleted()) {
-            ofy().save().entities(rootEntity, snapshotEntity);
-            ofy().delete().entities(updated);
-        } else {
-            ofy().save().entities(rootEntity, updated, snapshotEntity);
+        // Queue up batch
+        List<Object> toSave = new ArrayList<>();
+        List<Key> toDelete = new ArrayList<>();
+
+        // Update column-based storage
+
+
+        ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(rootEntity, formClass, Hrd.ofy().getTransaction());
+
+        if(changeType == RecordChangeType.CREATED) {
+            int newRecordCount = rootEntity.getNumberedRecordCount() + 1;
+            int newRecordNumber = newRecordCount;
+            updated.setRecordNumber(newRecordNumber);
+            rootEntity.setNumberedRecordCount(newRecordCount);
+
+            blockUpdater.updateId(newRecordNumber, updated.getRecordId().asString());
+
+            if(formClass.isSubForm()) {
+                blockUpdater.updateParentId(newRecordNumber, updated.getParentRecordId());
+            }
+
+        } else if(changeType == RecordChangeType.DELETED) {
+            rootEntity.setDeletedCount(rootEntity.getDeletedCount() + 1);
+            blockUpdater.updateTombstone(existingEntity.getRecordNumber());
         }
 
+        if(changeType == RecordChangeType.CREATED ||
+                (changeType == RecordChangeType.UPDATED && updated.hasRecordNumber())) {
+            blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
+        }
+
+        toSave.addAll(blockUpdater.getUpdatedBlocks());
+
+        blockUpdater.cacheUpdatedBlocks();
+
+        // Update record-based storage
+        toSave.add(rootEntity);
+        toSave.add(snapshotEntity);
+
+        if (update.isDeleted()) {
+            toDelete.add(Key.create(updated));
+        } else {
+            toSave.add(updated);
+        }
+
+        ofy().save().entities(toSave);
+        if(!toDelete.isEmpty()) {
+            ofy().delete().entities(toDelete);
+        }
     }
+
+
 
 }

@@ -23,7 +23,7 @@ import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
 import org.activityinfo.store.query.shared.Aggregation;
-import org.activityinfo.store.query.shared.Slot;
+import org.activityinfo.store.spi.Slot;
 
 import java.util.List;
 

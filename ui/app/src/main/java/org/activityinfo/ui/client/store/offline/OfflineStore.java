@@ -320,7 +320,7 @@ public class OfflineStore {
                     eventBus.fireEvent(new FormChangeEvent(FormChange.from(transaction)));
                     eventBus.fireEvent(new PendingStatusEvent());
 
-                    // Try to synchronize immediately so that changes don't pile up.
+                    // Immediately try to synchronize changes
                     syncChanges();
 
                     return null;

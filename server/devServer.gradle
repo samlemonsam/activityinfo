@@ -1,4 +1,3 @@
-import com.google.appengine.task.RunTask
 import org.activityinfo.store.mysql.MySqlDatabase
 
 
@@ -24,19 +23,6 @@ def writeConfiguration(MySqlDatabase database) {
     }
 }
 
-def healthCheck() {
-    // Verify that the server actually started
-    try {
-        URL url = new URL("http://localhost:${devServerPort}/login")
-        def connection = url.openConnection() as HttpURLConnection
-
-        println("DevServer started successfully: ${connection.responseCode}")
-
-    } catch(IOException e) {
-        throw new RuntimeException("AppEngine DevServer failed to start: ${e.message}", e)
-    }
-}
-
 task appengineExplodeDevMode(type: Copy) {
     group = "Google App Engine"
     description = "Creates a partial, exploded web app layout for GWT Dev Mode"
@@ -56,18 +42,16 @@ task appengineExplodeDevMode(type: Copy) {
     into "$buildDir/explodedDevMode"
 }
 
-
 task appengineDevMode(type: JavaExec) {
-    dependsOn appengineDownloadSdk
     dependsOn appengineExplodeDevMode
     dependsOn compileJava
     dependsOn project(':ui:app').tasks.getByName("compileJava")
     dependsOn project(':ui:app2').tasks.getByName("compileJava")
 
+
     main = 'com.google.gwt.dev.DevMode'
 
-
-    classpath project(":ui:app2").configurations.gwtSdk
+    classpath configurations.devServer
 
     // Java sources first, so that changes get picked up on refresh
     def sourceProjects = [":ui:app", ":ui:app2", ":i18n", ":clients:gwtrest", ":tools:json", ":model", ":analysis"];
@@ -99,9 +83,18 @@ task appengineDevMode(type: JavaExec) {
     args 'org.activityinfo.ui.AppDev'
 
     doFirst {
-        // The SDK root is only available after appengineDownloadSdk runs
-        def sdkRoot = System.getProperty('appengine.sdk.root')
-        classpath "${sdkRoot}/lib/appengine-tools-api.jar"
+
+        writeConfiguration  mysql.localAT
+
+        def cloudSdkHome = new File('/usr/lib/google-cloud-sdk')
+        if(!cloudSdkHome.exists()) {
+            throw new RuntimeException("Google Cloud SDK not present in /usr/lib/google-cloud-sdk.\n" +
+                    "Run sudo apt-get install google-cloud-sdk-app-engine-java");
+        }
+
+        def cloudSdkGaeJava = "${cloudSdkHome.absolutePath}/platform/google_appengine/google/appengine/tools/java"
+        classpath "${cloudSdkGaeJava}/lib/appengine-tools-api.jar"
+
 
         // The appengine agent is a runtime agent that makes sure
         // we don't use any classes that are forbidden in the AppEngine environment.
@@ -111,7 +104,7 @@ task appengineDevMode(type: JavaExec) {
         // will throw an error if it is not on the classpath. So, as a workaround,
         // place it on the classpath, but don't install it as an agent.
 
-        classpath "${sdkRoot}/lib/agent/appengine-agent.jar"
+        classpath "${cloudSdkGaeJava}/lib/agent/appengine-agent.jar"
 
         // Write the application configuration pointing to the development database
         writeConfiguration mysql.localDev
@@ -121,51 +114,6 @@ task appengineDevMode(type: JavaExec) {
 
         for(File classpathEntry : classpath) {
             logger.lifecycle("Classpath: " + classpathEntry)
-        }
-
-    }
-}
-
-
-appengineRun {
-    ext.database = mysql.localDev
-    
-    // Bind to all address so that we can test ODK from the local network
-    // For example, http://192.168.1.1
-    httpAddress = "0.0.0.0"
-}
-
-task appengineStartAT(type: RunTask) {
-    group = "Google App Engine"
-    description = "Starts a local AppEngine Development Server for Acceptance Testing in the background"
-
-    dependsOn 'appengineExplodeApp', 'setupDatabaseAT'
-
-    daemon = true
-    ext.database = mysql.localAT
-}
-
-task appengineRunAT(type: RunTask) {
-    group = "Google App Engine"
-    description = "Runs a local AppEngine Development Server for Acceptance Testing"
-
-    dependsOn 'appengineExplodeApp', 'setupDatabaseAT', 'classes', 'compileGwt'
-    ext.database = mysql.localAT
-}
-
-tasks.withType(RunTask) {
-
-    // Provide a configuration for the server
-    jvmFlags += ["-Dactivityinfo.config=${configFile}", '-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000']
-
-    doFirst {
-        writeConfiguration ext.database
-    }
-    
-    doLast {
-        if(daemon) {
-            // Make sure the server successfully started
-            healthCheck()    
         }
     }
 }

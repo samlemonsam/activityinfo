@@ -61,9 +61,9 @@ import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.query.shared.Slot;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.Slot;
 
 import javax.annotation.Nullable;
 import java.sql.SQLException;
@@ -676,7 +676,7 @@ public class PivotAdapter {
 
     private void addSiteIdToQuery(Activity activity, QueryModel queryModel) {
         if(activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE) {
-            queryModel.selectResourceId().as(SITE_ID_KEY);
+            queryModel.selectRecordId().as(SITE_ID_KEY);
         } else {
             queryModel.selectField(CuidAdapter.field(activity.getLeafFormClassId(), CuidAdapter.SITE_FIELD)).as(SITE_ID_KEY);
         }

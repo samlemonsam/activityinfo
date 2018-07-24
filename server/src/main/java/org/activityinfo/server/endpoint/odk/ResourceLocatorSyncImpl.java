@@ -39,8 +39,8 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import java.util.Collection;
 import java.util.List;
@@ -80,7 +80,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
         ResourceId formId = Iterables.getOnlyElement(range);
         QueryModel queryModel = new QueryModel(formId);
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectExpr("label").as("label");
         
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), new NullFormSupervisor());

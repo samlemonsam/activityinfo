@@ -131,7 +131,7 @@ public class InstanceScoreTest extends AbstractImporterTest {
     private Promise<ColumnSet> query(Map<FieldPath, Integer> referenceFields, int adminLevel) {
         ResourceId formId = CuidAdapter.adminLevelFormClass(adminLevel);
         QueryModel queryModel = new QueryModel(formId);
-        queryModel.selectResourceId().as("_id");
+        queryModel.selectRecordId().as("_id");
         for (FieldPath fieldPath : referenceFields.keySet()) {
             queryModel.selectField(fieldPath).as(fieldPath.toString());
         }

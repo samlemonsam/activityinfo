@@ -5,7 +5,7 @@ evaluationDependsOn ":clients:gwtrest"
 evaluationDependsOn ":clients:docs"
 
 apply plugin: 'war'
-apply plugin: 'appengine'
+apply plugin: 'com.google.cloud.tools.appengine'
 
 apply from: './dependencies.gradle'
 apply from: './databaseSetup.gradle'
@@ -16,23 +16,20 @@ description = 'ActivityInfo Server'
 
 
 ext {
-    // The location of the configuration file to be used 
+    // The location of the configuration file to be used
     // for the app engine dev server
     configFile = project.file("$buildDir/config.properties")
 }
 
 
 appengine {
-    downloadSdk = true
-    
-    // This defines the default value for the httpPort
-    // property for all appengine-related tasks.
-    // ==> To change this port for your own workstation,
-    // set a new value in your personal
-    // gradle.properties file
-    httpPort = Integer.parseInt(devServerPort)
-}
+    deploy {
+        project = environment.projectId
+        version = 'columns'
+        promote = false
 
+    }
+}
 
 war {
     archiveName = "activityinfo-b${buildNumber}.war"
@@ -41,7 +38,7 @@ war {
                 !file.name.startsWith('gwt-user')
     }
     from(project(':clients:docs').outputDir) {
-        into 'apidocs'   
+        into 'apidocs'
     }
     from(project(':ui:app').outputDir) {
         exclude("**/*.symbolMap")
@@ -71,14 +68,14 @@ test {
 }
 
 compileJava {
-    
+
     doLast {
         ant.taskdef(name: 'hibernateInstrumentation',
                 classpath: project.sourceSets.main.compileClasspath.asPath,
                 classname: 'org.hibernate.tool.instrument.javassist.InstrumentTask') {
 
         }
-        
+
         ant.hibernateInstrumentation() {
             fileset(
                     dir: destinationDir,
@@ -126,62 +123,4 @@ task downloadBuild {
         ant.unzip(src: warFile, dest: warDir)
 
     }
-}
-
-task deploy(type: com.google.appengine.task.appcfg.UpdateTask) {
-    description = "Deploys a build to the staging environment"
-    
-    def appVersion;
-
-    if(project.buildNumber != 'dev') {
-        dependsOn downloadBuild
-        explodedAppDirectory = project.file(downloadBuild.warDir)
-        appVersion = "b${project.buildNumber}"
-        
-    } else {
-        dependsOn 'appengineExplodeApp'
-        appVersion = 'new-website'
-    }
-    
-    dependsOn appengineDownloadSdk
-
-
-    extraOptions = ["--application=${environment.projectId}", "--version=hrd"]
-    oauth2 = true
-    
-    doFirst {
-        if(environment.local) {
-            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
-        }
-    }
-}
-
-appengineUpdateQueues {
-    extraOptions = ["--application=${environment.projectId}" ]
-    oauth2 = true
-
-    doFirst {
-        if(environment.local) {
-            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
-        }
-    }
-}
-
-appengineUpdateCron {
-    extraOptions = ["--application=${environment.projectId}" ]
-    oauth2 = true
-
-    doFirst {
-        if(environment.local) {
-            throw new IllegalStateException("You must be provide a target environment using -Penv=<PROJECT_ID>")
-        }
-    }
-}
-
-task rollback(type: com.google.appengine.task.appcfg.RollbackTask) {
-    description = "Rolls back a previous build to the staging environment"
-    dependsOn appengineDownloadSdk
-
-    extraOptions = ["--application=${environment.projectId}", '--version=qa']
-    oauth2 = true
 }

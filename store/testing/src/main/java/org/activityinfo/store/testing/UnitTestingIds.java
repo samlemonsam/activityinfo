@@ -71,7 +71,7 @@ public class UnitTestingIds implements Ids {
         return Collections.emptyMap();
     }
 
-    private String makeId(String label) {
+    public static String makeId(String label) {
         return label.toUpperCase().replace(" ", "_");
     }
 }

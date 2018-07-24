@@ -61,9 +61,12 @@ public class RecordSynchronizer {
     }
 
     public void start() {
-        com.google.gwt.core.client.Scheduler.get().scheduleFixedDelay(() -> {
-            offlineStore.syncChanges();
-            return true;
+        com.google.gwt.core.client.Scheduler.get().scheduleFixedDelay(new com.google.gwt.core.client.Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                offlineStore.syncChanges();
+                return true;
+            }
         }, SYNC_DELAY_MS);
     }
 }

@@ -164,7 +164,7 @@ public class FormStoreTest {
         assertTrue(snapshot.assertLoaded().isFormCached(survey.getFormId()));
 
         QueryModel queryModel = new QueryModel(survey.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField(survey.getNameFieldId()).as("name");
         queryModel.selectField(survey.getAgeFieldId()).as("age");
 
@@ -214,7 +214,7 @@ public class FormStoreTest {
         // Open a query on a set of records
 
         QueryModel queryModel = new QueryModel(survey.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
 
         Connection<ColumnSet> tableView = connect(formStore.query(queryModel));
         tableView.assertLoaded();
@@ -301,7 +301,7 @@ public class FormStoreTest {
 
         // Verify that we can read the new record offline
         QueryModel queryModel = new QueryModel(intakeForm.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField(intakeForm.getProtectionCodeFieldId()).as("serial");
         queryModel.setFilter(Formulas.equals(
             new SymbolNode("_id"),

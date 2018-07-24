@@ -53,10 +53,11 @@ public class CreateOrUpdateForm extends VoidWork {
         rootEntity.setId(formClass.getId());
         rootEntity.setVersion(1);
         rootEntity.setSchemaVersion(1);
-        
+        rootEntity.setColumnStorageActive(true);
+
         FormSchemaEntity formClassEntity = new FormSchemaEntity(formClass);
         formClassEntity.setSchemaVersion(1);
-        
+
         ofy().save().entities(rootEntity, formClassEntity);
     }
 

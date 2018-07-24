@@ -21,11 +21,14 @@ package org.activityinfo.store.testing;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.time.LocalDateType;
@@ -59,6 +62,8 @@ public class IntakeForm implements TestForm {
     private final FormField nationalityField;
     private final FormField problemField;
     private final FormField dobField;
+    private final FormField quantityField;
+    private final FormField addressField;
     private final EnumItem palestinian;
     private final EnumItem jordanian;
     private final EnumItem syrian;
@@ -77,6 +82,7 @@ public class IntakeForm implements TestForm {
     public IntakeForm(Ids ids) {
         formClass = new FormClass(ids.formId("INTAKE_FORM"))
                 .setLabel("Intake Form");
+        formClass.setDatabaseId(ids.databaseId());
 
         codeField = formClass.addField(ids.fieldId("F1"))
                 .setCode("CODE")
@@ -113,6 +119,11 @@ public class IntakeForm implements TestForm {
                     documents,
                     access));
 
+        quantityField = formClass.addField(ids.fieldId("Q1"))
+                .setLabel("How many people do you take care of?")
+                .setRequired(true)
+                .setType(new QuantityType("people"));
+
 
         dobField = formClass.addField(ids.fieldId("F5"))
                 .setCode("DOB")
@@ -123,12 +134,18 @@ public class IntakeForm implements TestForm {
                 .setLabel("Registration Number")
                 .setType(TextType.SIMPLE.withInputMask("000"));
 
+        addressField = formClass.addField(ids.fieldId("F10"))
+                .setLabel("Address")
+                .setType(NarrativeType.INSTANCE);
+
         generator = new RecordGenerator(ids, formClass)
                 .distribution(openDateField.getId(), new DateGenerator(openDateField, 2016, 2017))
                 .distribution(dobField.getId(), new DateGenerator(dobField, 1950, 1991))
                 .distribution(nationalityField.getId(), new MultiEnumGenerator(nationalityField, 0.85, 0.30, 0.15))
                 .distribution(problemField.getId(), new MultiEnumGenerator(problemField, 0.65, 0.75))
-                .distribution(regNumberField.getId(), new InputMaskGenerator(new InputMask("000"), 0.15, 0.30));
+                .distribution(regNumberField.getId(), new InputMaskGenerator(new InputMask("000"), 0.15, 0.30))
+                .distribution(quantityField.getId(), new IntegerGenerator( 0, 10, 0d))
+                .distribution(addressField.getId(), new AddressGenerator());
     }
 
     public ResourceId getProtectionCodeFieldId() {
@@ -171,6 +188,18 @@ public class IntakeForm implements TestForm {
         return access.getId();
     }
 
+    public QueryModel queryAll() {
+        QueryModel model = new QueryModel(getFormId());
+        model.selectRecordId().as("$id");
+        model.selectField(codeField.getId()).as("code");
+        model.selectField(openDateField.getId()).as("open_date");
+        model.selectExpr("NAT.palestinian").as("palestinian");
+        model.selectExpr("NAT.jordianian").as("jordanian");
+        model.selectExpr("NAT.syrian").as("syrian");
+        model.selectExpr("dob").as("dob");
+        model.selectExpr("address").as("address");
+        return model;
+    }
 
     @Override
     public ResourceId getFormId() {

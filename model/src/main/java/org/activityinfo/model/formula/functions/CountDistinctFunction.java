@@ -52,4 +52,9 @@ public class CountDistinctFunction extends StatFunction {
         }
         return count;
     }
+
+    @Override
+    public double emptyValue() {
+        return 0;
+    }
 }

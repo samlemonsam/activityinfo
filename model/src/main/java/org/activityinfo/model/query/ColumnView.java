@@ -42,7 +42,16 @@ public interface ColumnView extends Serializable {
      * @param row
      * @return ColumnView#TRUE, ColumnView#FALSE, or ColumnView#NA if the value is not null or missing
      */
-    int getBoolean(int row);
+    default int getBoolean(int row) {
+        double x = getDouble(row);
+        if(Double.isNaN(x)) {
+            return NA;
+        } else if(x == 0) {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    }
 
     boolean isMissing(int row);
 

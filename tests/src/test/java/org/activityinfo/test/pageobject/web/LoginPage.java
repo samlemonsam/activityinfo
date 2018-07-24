@@ -36,8 +36,8 @@ import java.util.List;
 public class LoginPage {
     public static final By EMAIL_INPUT = By.name("email");
     public static final By PASSWORD_INPUT = By.name("password");
-    public static final By LOGIN_BUTTON = By.id("loginButton");
-    public static final By LOGIN_ALERT = By.id("loginAlert");
+    public static final By LOGIN_BUTTON = By.cssSelector("form > button");
+    public static final By LOGIN_ALERT = By.className("alert--error");
     
     private final Server server;
     private final FluentElement page;
@@ -60,7 +60,7 @@ public class LoginPage {
         return this;
     }
 
-    public ApplicationPage andExpectSuccess() {
+    public void andExpectSuccess() {
         page.waitUntil(new Predicate<WebDriver>() {
             @Override
             public boolean apply(WebDriver input) {
@@ -79,11 +79,9 @@ public class LoginPage {
                     throw new RuntimeException("Unsupported browser");
                 }
 
-                return currentUri.getPath().equals("/");
+                return currentUri.getPath().equals("/app");
             }
         });
-        
-        return new ApplicationPage(page);
     }
 
 

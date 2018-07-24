@@ -10,9 +10,8 @@ ext {
     rebarVersion = '2.5.31'
     gwtVersion = '2.8.0-bdd4'
     jerseyVersion = '1.19.4'
-    gaeVersion = '1.9.59'
+    gaeVersion = '1.9.64'
     jacksonVersion = '1.9.2'
-    cucumberVersion = '1.2.2'
     libraries = [
 
         guava:              "com.google.guava:guava:${guavaVersion}",
@@ -134,12 +133,6 @@ ext {
         ],            
         prettytime:         'org.ocpsoft.prettytime:prettytime:2.1.2.Final' ,
         jsr305:             'com.google.code.findbugs:jsr305:3.0.0',
-            
-        cucumber: [
-            java:           "info.cukes:cucumber-java:${cucumberVersion}",
-            junit:          "info.cukes:cucumber-junit:${cucumberVersion}",
-            guice:          "info.cukes:cucumber-guice:${cucumberVersion}"
-        ],
         immutables: [
             apt:            "org.immutables:value:2.4.4",
             annotations:    "org.immutables:value:2.4.4:annotations"

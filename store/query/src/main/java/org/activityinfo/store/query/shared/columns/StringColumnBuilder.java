@@ -21,8 +21,8 @@ package org.activityinfo.store.query.shared.columns;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 import java.util.List;
 

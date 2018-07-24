@@ -141,10 +141,15 @@ public class SerialNumberType implements ParametrizedFieldType {
 
 
     public String format(SerialNumber value) {
-        String formatted = Strings.padStart(Integer.toString(value.getNumber()), digits, '0');
-        if(value.hasPrefix()) {
-            formatted = value.getPrefix() + "-" + formatted;
+        return format(value.getPrefix(), value.getNumber());
+    }
+
+    public String format(String prefix, int number) {
+        String formatted = Strings.padStart(Integer.toString(number), digits, '0');
+        if(prefix != null) {
+            formatted = prefix + "-" + formatted;
         }
         return formatted;
     }
+
 }

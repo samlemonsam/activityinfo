@@ -116,7 +116,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
     private Promise<Void> verifyWeCanQueryRecords(Void input) {
 
         QueryModel queryModel = new QueryModel(survey.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField(survey.getNameFieldId()).as("name");
         queryModel.selectField(survey.getAgeFieldId()).as("age");
 
@@ -167,7 +167,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
     private Promise<Void> verifyWeCanQuery(Void input) {
 
         QueryModel queryModel = new QueryModel(survey.getFormId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectExpr(survey.getGenderFieldId().asString()).as("gender");
         queryModel.selectExpr(survey.getAgeFieldId().asString()).as("age");
         queryModel.selectExpr(survey.getNameFieldId().asString()).as("name");

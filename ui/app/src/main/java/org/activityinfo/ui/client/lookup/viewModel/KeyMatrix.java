@@ -68,7 +68,7 @@ class KeyMatrix {
 
             QueryModel queryModel = new QueryModel(formId);
             queryModel.setFilter(f);
-            queryModel.selectResourceId().as(ID_COLUMN);
+            queryModel.selectRecordId().as(ID_COLUMN);
             for (Map.Entry<LookupKey, FormulaNode> entry : keyFormulas.entrySet()) {
                 queryModel.selectExpr(entry.getValue()).as(keyColumn(entry.getKey()));
             }

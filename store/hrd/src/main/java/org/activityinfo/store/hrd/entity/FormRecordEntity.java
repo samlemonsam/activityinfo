@@ -57,7 +57,10 @@ public class FormRecordEntity {
     
     @Unindex
     private long schemaVersion;
-    
+
+    @Index
+    private int number;
+
     private EmbeddedEntity fieldValues;
 
     public FormRecordEntity() {
@@ -125,6 +128,7 @@ public class FormRecordEntity {
         }
     }
 
+
     public FormRecord toFormRecord(FormClass formClass) {
         FormRecord.Builder record = FormRecord.builder();
         record.setFormId(formClass.getId());
@@ -172,5 +176,17 @@ public class FormRecordEntity {
     
     public static Key<FormRecordEntity> key(FormClass formClass, ResourceId recordId) {
         return key(formClass.getId(), recordId);
+    }
+
+    public int getRecordNumber() {
+        return number;
+    }
+
+    public boolean hasRecordNumber() {
+        return number != 0;
+    }
+
+    public void setRecordNumber(int number) {
+        this.number = number;
     }
 }

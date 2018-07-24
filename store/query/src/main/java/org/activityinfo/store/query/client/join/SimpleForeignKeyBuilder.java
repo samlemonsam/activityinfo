@@ -21,12 +21,11 @@ package org.activityinfo.store.query.client.join;
 import com.google.common.annotations.VisibleForTesting;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
-import org.activityinfo.store.query.shared.columns.ForeignKey32;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.columns.ForeignKey;
+import org.activityinfo.store.query.shared.columns.ForeignKey32;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.PendingSlot;
 
 import java.util.ArrayList;
 import java.util.HashMap;

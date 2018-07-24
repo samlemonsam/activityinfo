@@ -72,7 +72,7 @@ public class HierarchyClassImporter implements FieldImporter {
             if(isMatchableAtLevel(formId, referenceFields.keySet())) {
 
                 QueryModel queryModel = new QueryModel(formId);
-                queryModel.selectResourceId().as("_id");
+                queryModel.selectRecordId().as("_id");
 
                 for (FieldPath referenceFieldPath : referenceFields.keySet()) {
                     queryModel.selectField(referenceFieldPath).as(referenceFieldPath.toString());

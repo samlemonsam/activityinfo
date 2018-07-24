@@ -66,6 +66,13 @@ public abstract class StatFunction extends FormulaFunction implements ColumnFunc
     public abstract double compute(double[] values, int start, int end);
 
 
+    /**
+     * @return the result of this function given an empty set of input values.
+     */
+    public double emptyValue() {
+        return Double.NaN;
+    }
+
     @Override
     public final FieldValue apply(List<FieldValue> arguments) {
         double argumentValues[] = new double[arguments.size()];

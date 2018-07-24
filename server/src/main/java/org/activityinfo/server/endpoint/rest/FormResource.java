@@ -249,7 +249,7 @@ public class FormResource {
         }
 
         QueryModel queryModel = new QueryModel(formId);
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
 
         ColumnSet columnSet = executeQuery(queryModel);
         ColumnView id = columnSet.getColumnView("id");

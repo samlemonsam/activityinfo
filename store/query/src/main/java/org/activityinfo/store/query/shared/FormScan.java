@@ -18,19 +18,27 @@
  */
 package org.activityinfo.store.query.shared;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.BoundingBoxFunction;
+import org.activityinfo.model.formula.functions.FormulaFunctions;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.query.shared.columns.ColumnFactory;
-import org.activityinfo.store.query.shared.columns.ForeignKey;
-import org.activityinfo.store.query.shared.columns.IdColumnBuilder;
-import org.activityinfo.store.query.shared.columns.RowCountBuilder;
+import org.activityinfo.model.type.FieldType;
+import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
+import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.ForeignKeyId;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
+import org.activityinfo.store.spi.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -51,13 +59,13 @@ public class FormScan {
     private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
 
 
-    private static final SymbolNode PK_COLUMN_KEY = new SymbolNode("@id");
+    private static final FieldComponent PK_COLUMN_KEY = new FieldComponent("@id");
 
     private final ResourceId formId;
     private final long cacheVersion;
     private final FormClass formClass;
 
-    private Map<FormulaNode, PendingSlot<ColumnView>> columnMap = Maps.newHashMap();
+    private Map<FieldComponent, PendingSlot<ColumnView>> columnMap = Maps.newHashMap();
     private Map<ForeignKeyId, PendingSlot<ForeignKey>> foreignKeyMap = Maps.newHashMap();
 
     private PendingSlot<Integer> rowCount = null;
@@ -102,15 +110,16 @@ public class FormScan {
      *
      * @return a slot where the value can be found after the query completes
      */
-    public Slot<ColumnView> addField(FormulaNode fieldExpr) {
+    public Slot<ColumnView> addField(FieldComponent fieldComponent) {
 
         // if the column's already been added, just return
-        if(columnMap.containsKey(fieldExpr)) {
-            return columnMap.get(fieldExpr);
+        if(columnMap.containsKey(fieldComponent)) {
+            return columnMap.get(fieldComponent);
         }
 
+
         PendingSlot<ColumnView> slot = new PendingSlot<>();
-        columnMap.put(fieldExpr, slot);
+        columnMap.put(fieldComponent, slot);
         return slot;
     }
 
@@ -158,7 +167,7 @@ public class FormScan {
         // Otherwise, try to retrieve all of the ColumnView and ForeignKeyMaps we need 
         // from the Memcache service
         Set<String> toFetch = new HashSet<>();
-        for (FormulaNode fieldId : columnMap.keySet()) {
+        for (FieldComponent fieldId : columnMap.keySet()) {
             toFetch.add(fieldCacheKey(fieldId));
         }
         for (ForeignKeyId fk : foreignKeyMap.keySet()) {
@@ -176,7 +185,7 @@ public class FormScan {
     public void updateFromCache(Map<String, Object> cached) {
 
         // See which columns we could retrieve from cache
-        for (FormulaNode fieldId : Lists.newArrayList(columnMap.keySet())) {
+        for (FieldComponent fieldId : Lists.newArrayList(columnMap.keySet())) {
             ColumnView view = (ColumnView) cached.get(fieldCacheKey(fieldId));
             if (view != null) {
                 // populate the pending result slot with the view from the cache
@@ -218,20 +227,23 @@ public class FormScan {
     public void prepare(ColumnQueryBuilder columnQueryBuilder)  {
         
         // check to see if we still need to hit the database after being populated by the cache
-        if(columnMap.isEmpty() && 
-           foreignKeyMap.isEmpty() &&
-           rowCount == null) {
+        if(allQueriesResolved()) {
             return;
         }
 
         // Build the query
-        ExprQueryBuilder queryBuilder = new ExprQueryBuilder(columnFactory, formClass, columnQueryBuilder);
 
-        for (Map.Entry<FormulaNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
+        for (Map.Entry<FieldComponent, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
             if (column.getKey().equals(PK_COLUMN_KEY)) {
-                queryBuilder.addResourceId(new IdColumnBuilder(column.getValue()));
+                columnQueryBuilder.addResourceId(new IdColumnBuilder(column.getValue()));
             } else {
-                queryBuilder.addExpr(column.getKey(), column.getValue());
+
+                FieldComponent fieldComponent = column.getKey();
+
+                CursorObserver<FieldValue> fieldObserver = buildObserver(column.getKey(), column.getValue());
+
+                columnQueryBuilder.addField(fieldComponent.getFieldId(), fieldObserver);
+
             }
         }
 
@@ -240,18 +252,90 @@ public class FormScan {
         RowCountBuilder rowCountBuilder;
         if (rowCount != null && !rowCount.isSet()) {
             rowCountBuilder = new RowCountBuilder(rowCount);
-            queryBuilder.addResourceId(rowCountBuilder);
+            columnQueryBuilder.addResourceId(rowCountBuilder);
         }
 
         for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {
-            queryBuilder.addField(fk.getKey().getFieldId(),
+            columnQueryBuilder.addField(fk.getKey().getFieldId(),
                 columnFactory.newForeignKeyBuilder(fk.getKey().getRightFormId(), fk.getValue()));
         }
     }
 
+    private boolean allQueriesResolved() {
+        return columnMap.isEmpty() &&
+           foreignKeyMap.isEmpty() &&
+           rowCount == null;
+    }
+
+    public void prepare(ColumnQueryBuilderV2 columnQueryBuilder) {
+        // check to see if we still need to hit the database after being populated by the cache
+        if(allQueriesResolved()) {
+            return;
+        }
+
+
+        // Build the query
+
+        for (Map.Entry<FieldComponent, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
+            if (column.getKey().equals(PK_COLUMN_KEY)) {
+                columnQueryBuilder.addRecordId(column.getValue());
+            } else {
+                columnQueryBuilder.addField(column.getKey(), column.getValue());
+            }
+        }
+
+        // Only add a row count observer IF it has been requested AND
+        // it hasn't been loaded from the cache.
+        if (rowCount != null && !rowCount.isSet()) {
+            columnQueryBuilder.addRowCount(rowCount);
+        }
+
+        for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        columnQueryBuilder.execute();
+    }
+
+    private CursorObserver<FieldValue> buildObserver(FieldComponent fieldComponent, PendingSlot<ColumnView> slot) {
+        FormField field = formClass.getField(fieldComponent.getFieldId());
+
+        // Simple case
+        if (!fieldComponent.hasComponent()) {
+            return ViewBuilderFactory.get(columnFactory, slot, field.getType());
+        }
+
+        // Handle field components like latitude, longitdue, etc
+        if (field.getType() instanceof GeoPointType) {
+            QuantityType coordinateType = new QuantityType("degrees");
+            CursorObserver<FieldValue> coordinateObserver = ViewBuilderFactory.get(columnFactory, slot, coordinateType);
+            CoordinateReader reader = new CoordinateReader(fieldComponent.getComponent());
+
+            return CursorObservers.transform(reader, coordinateObserver);
+        }
+
+        if (field.getType() instanceof EnumType) {
+            FieldType resultType = BooleanType.INSTANCE;
+            CursorObserver<FieldValue> booleanObserver = ViewBuilderFactory.get(columnFactory, slot, resultType);
+            EnumItemReader reader = new EnumItemReader(ResourceId.valueOf(fieldComponent.getComponent()));
+
+            return CursorObservers.transform(reader, booleanObserver);
+
+        } else if(field.getType() instanceof GeoAreaType) {
+            QuantityType coordinateType = new QuantityType("degrees");
+            BoundingBoxFunction function = (BoundingBoxFunction) FormulaFunctions.get(fieldComponent.getComponent());
+            Function<FieldValue, FieldValue> reader = value -> function.apply(Collections.singletonList(value));
+            CursorObserver<FieldValue> coordinateObserver = ViewBuilderFactory.get(columnFactory, slot, coordinateType);
+
+            return CursorObservers.transform(reader, coordinateObserver);
+        }
+
+        throw new UnsupportedOperationException("Unknown component: " + fieldComponent.getComponent());
+    }
+
     public Map<String, Object> getValuesToCache() {
         Map<String, Object> toPut = new HashMap<>();
-        for (Map.Entry<FormulaNode, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
+        for (Map.Entry<FieldComponent, PendingSlot<ColumnView>> column : columnMap.entrySet()) {
             ColumnView value;
             try {
                 value = column.getValue().get();
@@ -272,7 +356,7 @@ public class FormScan {
         return toPut;
     }
     
-    private int rowCountFromColumn(Map<FormulaNode, PendingSlot<ColumnView>> columnMap) {
+    private int rowCountFromColumn(Map<FieldComponent, PendingSlot<ColumnView>> columnMap) {
         return columnMap.values().iterator().next().get().numRows();
     }
 
@@ -281,7 +365,7 @@ public class FormScan {
         return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + "#COUNT";
     }
 
-    private String fieldCacheKey(FormulaNode fieldId) {
+    private String fieldCacheKey(FieldComponent fieldId) {
         return CACHE_KEY_VERSION + formId.asString() + "@" + cacheVersion + "." + fieldId;
     }
 
@@ -290,6 +374,6 @@ public class FormScan {
     }
 
     public boolean isEmpty() {
-        return columnMap.isEmpty() && foreignKeyMap.isEmpty() && rowCount == null;
+        return allQueriesResolved();
     }
 }

@@ -11,15 +11,12 @@ dependencies {
     compile libraries.guava
     compile libraries.jersey.client
     compile libraries.jersey.json
-    compile libraries.cucumber.java
-    compile libraries.cucumber.guice
 
 
     compile libraries.jsr305
 
     compile 'org.seleniumhq.selenium:selenium-java:2.43.0'
     compile 'com.saucelabs:sauce_junit:2.1.13'
-    compile 'com.github.detro:phantomjsdriver:1.2.0'
     compile 'org.yaml:snakeyaml:1.14'
     compile 'org.apache.commons:commons-pool2:2.0'
     compile 'joda-time:joda-time:2.5'
@@ -32,8 +29,6 @@ dependencies {
     compile libraries.jersey.server
     compile libraries.jersey.simpleServer
 
-    compile 'io.appium:java-client:2.2.0'
-    
     compile project(':model')
     compile project(':i18n')
     compile project(':store:testing')
@@ -127,14 +122,6 @@ tasks.each { task ->
             // listen for postmark mail sending requests at the given port
             if (project.environment.local) {
                 systemProperty 'postmarkStubPort', project.property('postmarkStubPort')
-            }
-
-            if (project.hasProperty('mailinatorApiKey')) {
-                systemProperty 'mailinatorApiKey', project.property('mailinatorApiKey')
-            }
-
-            if (project.hasProperty("phantomjsPath")) {
-                systemProperty "phantomjsPath", project.property("phantomjsPath")
             }
         }
     }

@@ -134,6 +134,10 @@ public class EpiWeek implements Serializable, PeriodValue {
 
     @Override
     public String toString() {
+        return toString(year, weekInYear);
+    }
+
+    public static String toString(int year, int weekInYear) {
         return year + "W" + weekInYear;
     }
 

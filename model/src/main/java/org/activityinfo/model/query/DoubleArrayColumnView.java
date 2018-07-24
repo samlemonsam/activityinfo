@@ -68,17 +68,7 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
         return null;
     }
 
-    @Override
-    public int getBoolean(int row) {
-        double x = getDouble(row);
-        if(Double.isNaN(x)) {
-            return NA;
-        } else if(x == 0) {
-            return FALSE;
-        } else {
-            return TRUE;
-        }
-    }
+
 
     @Override
     public boolean isMissing(int row) {

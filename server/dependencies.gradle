@@ -9,6 +9,7 @@ configurations.all {
 
 configurations {
     toolCompile.extendsFrom testCompile
+    devServer
 }
 
 dependencies {
@@ -31,7 +32,6 @@ dependencies {
     testCompile project(':model').sourceSets.test.output
 
     // AppEngine
-    appengineSdk libraries.appengine.sdk
     compile libraries.appengine.api
     compile libraries.appengine.gcs
     testCompile libraries.appengine.testing
@@ -91,6 +91,7 @@ dependencies {
     // For humanitarian iD
     compile "com.google.oauth-client:google-oauth-client-appengine:1.20.0";
 
+    devServer libraries.gwt.dev
 
     // To Remove:
     // tests should be moved to their respective units

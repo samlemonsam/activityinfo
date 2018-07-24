@@ -19,6 +19,7 @@
 package org.activityinfo.store.query.shared;
 
 import com.google.common.base.Function;
+import org.activityinfo.store.spi.Slot;
 
 public class MemoizedSlot<T, R> implements Slot<R> {
 

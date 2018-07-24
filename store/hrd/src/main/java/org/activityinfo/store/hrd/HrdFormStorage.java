@@ -31,10 +31,7 @@ import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
 import org.activityinfo.store.hrd.op.QuerySubRecords;
 import org.activityinfo.store.hrd.op.QueryVersions;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.RecordVersion;
-import org.activityinfo.store.spi.TypedRecordUpdate;
-import org.activityinfo.store.spi.VersionedFormStorage;
+import org.activityinfo.store.spi.*;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -46,9 +43,11 @@ import static org.activityinfo.store.hrd.Hrd.ofy;
 /**
  * Accessor for forms backed by the AppEngine High-Replication Datastore (HRD)
  */
-public class HrdFormStorage implements VersionedFormStorage {
+public class HrdFormStorage implements VersionedFormStorage, FormStorageV2 {
 
     private static final Logger LOGGER = Logger.getLogger(HrdFormStorage.class.getName());
+
+    private static final boolean COLUMN_STORAGE_ENABLED = false;
 
     private long version;
     private FormClass formClass;
@@ -105,10 +104,20 @@ public class HrdFormStorage implements VersionedFormStorage {
     public void update(final TypedRecordUpdate update) {
         ofy().transact(new CreateOrUpdateRecord(formClass.getId(), update));
     }
-    
+
     @Override
     public ColumnQueryBuilder newColumnQuery() {
         return new HrdQueryColumnBuilder(formClass);
+    }
+
+    @Override
+    public ColumnQueryBuilderV2 newColumnQueryV2() {
+//        FormEntity formEntity = ofy().load().key(FormEntity.key(formClass.getId())).safe();
+//        if(formEntity.isColumnStorageActive()) {
+//            return new HrdQueryColumnBlockBuilder(formEntity);
+//        }
+
+        return null;
     }
 
     @Override

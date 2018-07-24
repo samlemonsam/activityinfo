@@ -25,6 +25,7 @@ import com.google.appengine.tools.mapreduce.MapSettings;
 import com.google.appengine.tools.mapreduce.MapSpecification;
 import com.google.appengine.tools.mapreduce.inputs.DatastoreInput;
 import com.google.appengine.tools.mapreduce.outputs.GoogleCloudStorageFileOutput;
+import com.google.appengine.tools.pipeline.JobSetting;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 
@@ -74,10 +75,13 @@ public class MigrationServlet extends HttpServlet {
                 return fixDeletedSites(fix);
             case "usage":
                 return usageExport();
+            case "blocks":
+                return buildBlocks(req.getParameter("formId"));
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
     }
+
 
     private String migrateSites(int activityId, boolean fix) {
         SiteInput input = new SiteInput(activityId);
@@ -137,6 +141,12 @@ public class MigrationServlet extends HttpServlet {
                 .build();
 
         return MapJob.start(spec, getSettings());
+    }
+
+
+    private String buildBlocks(String formId) {
+        PipelineService pipelineService = PipelineServiceFactory.newPipelineService();
+        return pipelineService.startNewPipeline(new BuildBlockJobs(formId), new JobSetting.MaxAttempts(1));
     }
 
 

@@ -25,6 +25,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
+import org.activityinfo.store.spi.Slot;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;

@@ -20,8 +20,8 @@ package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldValue;
-import org.activityinfo.store.query.shared.PendingSlot;
 import org.activityinfo.store.query.shared.columns.DoubleReader;
+import org.activityinfo.store.spi.PendingSlot;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.equalTo;

@@ -26,6 +26,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
+import org.activityinfo.model.formula.functions.BoundingBoxFunction;
 import org.activityinfo.model.formula.functions.CoalesceFunction;
 import org.activityinfo.model.formula.functions.ColumnFunction;
 import org.activityinfo.model.query.*;
@@ -33,10 +34,13 @@ import org.activityinfo.model.query.SortModel.Range;
 import org.activityinfo.promise.BiFunction;
 import org.activityinfo.store.query.shared.columns.FilteredSlot;
 import org.activityinfo.store.query.shared.columns.RelevanceViewMask;
+import org.activityinfo.store.spi.PendingSlot;
+import org.activityinfo.store.spi.Slot;
 
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Constructs a set of rows from a given RowSource model.
@@ -319,8 +323,20 @@ public class QueryEvaluator {
                 } else {
                     return createFunctionCall(call);
                 }
+            } else if(call.getFunction() instanceof BoundingBoxFunction) {
+                FormulaNode geometry = call.getArgument(0);
+                Collection<NodeMatch> nodes;
+                if(geometry instanceof SymbolNode) {
+                    nodes = resolver.resolveSymbol(((SymbolNode) geometry));
+                } else if(geometry instanceof CompoundExpr) {
+                    nodes = resolver.resolveCompoundExpr((CompoundExpr) geometry);
+                } else {
+                    throw new QuerySyntaxException("Function " + call.getFunction().getId() + " can only be applied" +
+                            " to an argument of type GeoArea.");
+                }
+                return addColumn(nodes.stream().map(n -> n.withComponent(call.getFunction().getId())).collect(Collectors.toList()));
             } else {
-                return batch.addExpression(filterLevel, rootFormClass, call);
+                throw new UnsupportedOperationException("TODO: " + call.getFunction().getId());
             }
         }
 
@@ -404,7 +420,7 @@ public class QueryEvaluator {
                 }
             } catch (FormulaException e) {
                 LOGGER.log(Level.WARNING, "Exception in calculated field " +
-                        node.getFormClass().getId() + "." + node.getExpr() + " = " +
+                        node.getFormClass().getId() + "." + node.getFieldComponent() + " = " +
                         node.getCalculation() + ": " + e.getMessage(), e);
             
                 return batch.addEmptyColumn(filterLevel, node.getFormClass());

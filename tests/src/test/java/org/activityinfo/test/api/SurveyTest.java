@@ -20,6 +20,7 @@ package org.activityinfo.test.api;
 
 import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
@@ -27,6 +28,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.store.testing.RecordGenerator;
 import org.activityinfo.store.testing.Survey;
+import org.activityinfo.test.driver.ApplicationDriver;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,10 +46,11 @@ public class SurveyTest {
 
     @Before
     public void setupForm() {
-        TestDatabase database = harness.createDatabase();
-        client = harness.client();
+        ApplicationDriver driver = harness.newUser();
+        TestDatabase database = driver.createDatabase();
+        client = driver.getClient();
 
-        survey = new Survey(new SiteIds(database));
+        survey = new Survey(new Cuids(database));
 
         client.createForm(survey.getFormClass());
     }
@@ -68,7 +71,9 @@ public class SurveyTest {
         RecordGenerator generator = survey.getGenerator();
         int numRows = 20;
         for (int i = 0; i < numRows; i++) {
-            client.createRecord(generator.get());
+            FormInstance newRecord = generator.get();
+            System.out.println(newRecord);
+            client.createRecord(newRecord);
         }
 
         // Now query a few records
@@ -86,6 +91,7 @@ public class SurveyTest {
         assertThat(gender.getType(), equalTo(ColumnType.STRING));
 
         assertThat(age.numRows(), equalTo(numRows));
+
     }
 
     @Test

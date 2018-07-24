@@ -164,7 +164,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     public void siteDeletion() {
 
         QueryModel query = new QueryModel(NFI_DIST_FORM_CLASS);
-        query.selectResourceId().as("id");
+        query.selectRecordId().as("id");
         query.selectField(CuidAdapter.field(VILLAGE_CLASS, CuidAdapter.NAME_FIELD));
 
         ColumnSet columnSet = assertResolves(locator.queryTable(query));
@@ -230,7 +230,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertResolves(locator.remove(CuidAdapter.locationFormClass(1), instanceToDelete));
 
         QueryModel queryModel = new QueryModel(CuidAdapter.locationFormClass(1));
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
 
         ColumnSet columnSet = assertResolves(locator.queryTable(queryModel));
         ColumnView idColumn = columnSet.getColumnView("id");

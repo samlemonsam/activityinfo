@@ -54,7 +54,7 @@ public class OptionSetProvider {
             public Promise<OptionSet> apply(FormTree formTree) {
 
                 QueryModel queryModel = new QueryModel(formId);
-                queryModel.selectResourceId().as("id");
+                queryModel.selectRecordId().as("id");
                 queryModel.selectExpr(findLabelExpression(formTree.getRootFields())).as("label");
 
                 return resourceLocator

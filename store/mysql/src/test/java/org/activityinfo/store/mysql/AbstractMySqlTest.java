@@ -102,7 +102,7 @@ public abstract class AbstractMySqlTest {
 
     protected final void query(ResourceId formClassId, String... fields) {
         QueryModel queryModel = new QueryModel(formClassId);
-        queryModel.selectResourceId().as("_id");
+        queryModel.selectRecordId().as("_id");
         for(String field : fields) {
             queryModel.selectExpr(field).setId(field);
         }
@@ -111,7 +111,7 @@ public abstract class AbstractMySqlTest {
 
     protected final void queryWhere(ResourceId formClassId, List<String> fields, String filter) {
         QueryModel queryModel = new QueryModel(formClassId);
-        queryModel.selectResourceId().as("_id");
+        queryModel.selectRecordId().as("_id");
         for(String field : fields) {
             queryModel.selectExpr(field).setId(field);
         }

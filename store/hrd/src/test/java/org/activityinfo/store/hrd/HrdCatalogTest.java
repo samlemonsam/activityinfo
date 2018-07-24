@@ -34,6 +34,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -42,16 +43,20 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
+import org.activityinfo.store.query.shared.plan.QueryPlan;
+import org.activityinfo.store.query.shared.plan.QueryPlanBuilder;
 import org.activityinfo.store.spi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -83,11 +88,12 @@ public class HrdCatalogTest {
     }
     
     @Test
-    public void simpleFormTest() {
+    public void simpleFormTest() throws IOException {
 
         ResourceId collectionId = ResourceId.generateId();
         ResourceId villageField = ResourceId.valueOf("FV");
         ResourceId countField = ResourceId.valueOf("FC");
+        ResourceId popTypeField = ResourceId.valueOf("PT");
         
         FormClass formClass = new FormClass(collectionId);
         formClass.setParentFormId(ResourceId.valueOf("foo"));
@@ -100,7 +106,14 @@ public class HrdCatalogTest {
                 .setLabel("Number of Beneficiaries")
                 .setCode("BENE")
                 .setType(new QuantityType("Beneficiaries"));
-        
+
+        formClass.addField(popTypeField)
+                .setLabel("Population type")
+                .setCode("POP")
+                .setType(new EnumType(Cardinality.SINGLE,
+                        new EnumItem(ResourceId.valueOf("POP1"), "Refugees"),
+                        new EnumItem(ResourceId.valueOf("POP2"), "IDPs")));
+
         
         HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(formClass);
@@ -115,30 +128,47 @@ public class HrdCatalogTest {
         village1.set(villageField, TextValue.valueOf("Rutshuru"));
         village1.set(countField, new Quantity(1000));
 
+
         TypedRecordUpdate village2 = new TypedRecordUpdate();
         village2.setUserId(userId);
         village2.setRecordId(ResourceId.generateSubmissionId(formClass));
         village2.set(villageField, TextValue.valueOf("Beni"));
         village2.set(countField, new Quantity(230));
+        village2.set(popTypeField, new EnumValue(ResourceId.valueOf("POP2")));
 
         storage.get().add(village1);
         storage.get().add(village2);
 
         QueryModel queryModel = new QueryModel(collectionId);
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("VILLAGE").as("village");
         queryModel.selectField("BENE").as("family_count");
         queryModel.selectExpr("BENE*5").as("individual_count");
-        
+        queryModel.selectExpr("POP").as("pop");
+
+        QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder(catalog);
+        QueryPlan plan = queryPlanBuilder.build(queryModel);
+        plan.dumpGraph();
+
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
         
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+        assertThat(columnSet.getColumnView("id").getString(0), equalTo(village1.getRecordId().asString()));
+
+        assertThat(columnSet.getColumnView("village").getString(0), equalTo("Rutshuru"));
+        assertThat(columnSet.getColumnView("village").getString(1), equalTo("Beni"));
+
+        assertThat(columnSet.getColumnView("family_count").getDouble(0), equalTo(1000d));
+        assertThat(columnSet.getColumnView("family_count").getDouble(1), equalTo(230d));
+
+        assertThat(columnSet.getColumnView("pop").getString(0), nullValue());
+        assertThat(columnSet.getColumnView("pop").getString(1), equalTo("IDPs"));
 
         List<RecordVersion> versions1 = ((VersionedFormStorage) storage.get()).getVersions(village1.getRecordId());
-        
+
         assertThat(versions1, hasSize(1));
 
         RecordVersion version = versions1.get(0);
@@ -219,7 +249,7 @@ public class HrdCatalogTest {
 
 
         QueryModel queryModel = new QueryModel(formClass.getId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("VILLAGE").as("village");
 
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog, new NullFormSupervisor());
@@ -302,7 +332,7 @@ public class HrdCatalogTest {
         memberCollection.get().add(father2);
         
         QueryModel queryModel = new QueryModel(memberForm.getId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("Household ID").as("hh_id");
         queryModel.selectField("Name").as("member_name");
         queryModel.selectField("Age").as("member_age");

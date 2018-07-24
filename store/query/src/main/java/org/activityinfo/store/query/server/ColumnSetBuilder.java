@@ -29,9 +29,7 @@ import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.query.shared.columns.ColumnFactory;
-import org.activityinfo.store.spi.ColumnQueryBuilder;
-import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.*;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -148,6 +146,16 @@ public class ColumnSetBuilder {
             throw new IllegalStateException("No storage for form " + scan.getFormId());
         }
 
+        FormStorage storage = form.get();
+        if (storage instanceof FormStorageV2) {
+            ColumnQueryBuilderV2 queryBuilderV2 = ((FormStorageV2) storage).newColumnQueryV2();
+            if(queryBuilderV2 != null) {
+                executeScanV2(scan, queryBuilderV2);
+                return;
+            }
+        }
+
+
         ColumnQueryBuilder queryBuilder = form.get().newColumnQuery();
 
         scan.prepare(queryBuilder);
@@ -159,6 +167,9 @@ public class ColumnSetBuilder {
         LOGGER.info(() -> "Form scan of " + scan.getFormId() + " completed in " + stopwatch);
     }
 
+    private void executeScanV2(FormScan scan, ColumnQueryBuilderV2 queryBuilder) {
+        scan.prepare(queryBuilder);
+    }
 
 
     public List<Future<Integer>> cache(FormScan scan) {

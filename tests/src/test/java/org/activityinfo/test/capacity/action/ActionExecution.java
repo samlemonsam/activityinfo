@@ -26,7 +26,7 @@ import com.google.common.collect.Sets;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.capacity.model.UserRole;
-import org.activityinfo.test.driver.ApiApplicationDriver;
+import org.activityinfo.test.driver.ApplicationDriver;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import static com.codahale.metrics.MetricRegistry.name;
 
 /**
-* Runs a {@code UserAction} with the ApiApplicationDriver
+* Runs a {@code UserAction} with the ApplicationDriver
 */
 public class ActionExecution implements Runnable {
     
@@ -104,12 +104,12 @@ public class ActionExecution implements Runnable {
     private static final Clock CLOCK = Clock.defaultClock();
     
     private final ScenarioContext context;
-    private final UserRole user;
+    private final UserRole role;
     private final UserAction action;
 
-    public ActionExecution(ScenarioContext context, UserRole user, UserAction action) {
+    public ActionExecution(ScenarioContext context, UserRole role, UserAction action) {
         this.context = context;
-        this.user = user;
+        this.role = role;
         this.action = action;
     }
     
@@ -149,18 +149,16 @@ public class ActionExecution implements Runnable {
             Thread.currentThread().setName("UserAction " + action.toString());
             try {
 
-                ApiApplicationDriver driver = new ApiApplicationDriver(
+                ApplicationDriver driver = new ApplicationDriver(
                         context.getServer(),
-                        context.getAccounts(),
-                        context.getAliasTable());
+                        context.getAliasTable(),
+                        context.getAccounts().ensureAccountExists(role.getNickName()));
 
-                driver.login(context.getAccounts().ensureAccountExists(user.getNickName()));
-
-                LOGGER.fine(String.format("%s: %s Starting", user.getNickName(), action.toString()));
+                LOGGER.fine(String.format("%s: %s Starting", role.getNickName(), action.toString()));
 
                 action.execute(driver);
 
-                LOGGER.fine(String.format("%s: %s Completed.", user.getNickName(), action.toString()));
+                LOGGER.fine(String.format("%s: %s Completed.", role.getNickName(), action.toString()));
 
                 actionMetrics.succeeded(started);
 
@@ -176,7 +174,7 @@ public class ActionExecution implements Runnable {
             } catch (Exception e) {
                 actionMetrics.failed();
                 LOGGER.log(Level.FINE, String.format("%s: %s Failed [%s]",
-                        user.getNickName(), action.toString(), e.getMessage()), e);
+                        role.getNickName(), action.toString(), e.getMessage()), e);
                 return false;
                 
             }

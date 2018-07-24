@@ -45,4 +45,9 @@ public class CountFunction extends StatFunction {
         }
         return count;
     }
+
+    @Override
+    public double emptyValue() {
+        return 0;
+    }
 }

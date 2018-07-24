@@ -257,6 +257,9 @@ public class FormClass implements FormElementContainer, JsonSerializable {
     }
 
     public FormField getField(ResourceId fieldId) {
+        if (fieldId.equals(PARENT_FIELD_ID)) {
+            return getParentField().get();
+        }
         Optional<FormField> field = getFieldIfPresent(fieldId);
         if(field.isPresent()) {
             return field.get();

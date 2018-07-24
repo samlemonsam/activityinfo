@@ -155,7 +155,7 @@ public class SubFormAggregationTest {
         monthCollection.get().add(month3);
 
         QueryModel queryModel = new QueryModel(siteForm.getId());
-        queryModel.selectResourceId().as("id");
+        queryModel.selectRecordId().as("id");
         queryModel.selectField("Village Name").as("village");
         queryModel.selectField("BENE").as("max_hh");
 
@@ -165,6 +165,9 @@ public class SubFormAggregationTest {
         System.out.println(columnSet);
 
         assertThat(columnSet.getNumRows(), equalTo(2));
+        assertThat(columnSet.getColumnView("max_hh").getDouble(0), equalTo(40d));
+        assertThat(columnSet.getColumnView("max_hh").getDouble(1), equalTo(47d));
+
     }
 
 }

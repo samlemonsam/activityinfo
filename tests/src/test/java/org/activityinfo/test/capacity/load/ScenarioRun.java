@@ -18,7 +18,6 @@
  */
 package org.activityinfo.test.capacity.load;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.test.capacity.CapacityTest;
 import org.activityinfo.test.capacity.TestContext;
@@ -68,9 +67,9 @@ public class ScenarioRun implements Runnable {
 
         // Enumerate all the tasks that users need to accomplish today
         for(UserRole user : scenario.getUsers()) {
-            Optional<UserAction> task = user.getTask(dayNumber);
-            if (task.isPresent()) {
-                tasks.add(new ActionExecution(context, user, task.get()));
+            List<UserAction> actions = user.getTask(dayNumber);
+            for (UserAction action : actions) {
+                tasks.add(new ActionExecution(context, user, action));
             }
         }
 

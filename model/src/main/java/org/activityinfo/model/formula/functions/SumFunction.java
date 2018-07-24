@@ -47,4 +47,9 @@ public class SumFunction extends StatFunction {
         }
         return sum;
     }
+
+    @Override
+    public double emptyValue() {
+        return 0;
+    }
 }

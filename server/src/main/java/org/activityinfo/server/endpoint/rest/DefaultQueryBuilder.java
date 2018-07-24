@@ -68,7 +68,7 @@ public class DefaultQueryBuilder {
         addFields("", new FieldPath(), tree.getRootFields());
 
         this.queryModel = new QueryModel(tree.getRootFormId());
-        this.queryModel.selectResourceId().as("@id");
+        this.queryModel.selectRecordId().as("@id");
 
         for (ColumnModel columnModel : columns.values()) {
             this.queryModel.addColumn(columnModel);

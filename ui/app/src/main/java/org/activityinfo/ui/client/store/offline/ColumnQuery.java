@@ -29,6 +29,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.client.columns.JsColumnFactory;
 import org.activityinfo.store.query.shared.*;
 import org.activityinfo.store.spi.NullFormVersionProvider;
+import org.activityinfo.store.spi.Slot;
 import org.activityinfo.ui.client.store.tasks.Task;
 import org.activityinfo.ui.client.store.tasks.TaskExecution;
 
