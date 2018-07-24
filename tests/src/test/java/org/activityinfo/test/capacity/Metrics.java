@@ -18,7 +18,10 @@
  */
 package org.activityinfo.test.capacity;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.CsvReporter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricRegistry;
 
 import java.io.File;
 import java.util.Locale;
@@ -63,10 +66,6 @@ public class Metrics {
         }
     }
 
-    public static void log(String label, Timer timer) {
-        LOGGER.log(Level.INFO, String.format("%20s: %0f", label, timer.getMeanRate()));
-    }
-    
     private static boolean timeForUpdate(Metric metric) {
         Long lastUpdate = LAST_UPDATE.get(metric);
         if(lastUpdate == null) {

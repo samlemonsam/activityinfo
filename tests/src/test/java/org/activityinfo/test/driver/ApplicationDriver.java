@@ -51,7 +51,11 @@ public class ApplicationDriver {
     }
 
     public TestDatabase createDatabase() {
-        String name = aliasTable.createAlias("db");
+        return createDatabase("db");
+    }
+
+    public TestDatabase createDatabase(String databaseName) {
+        String name = aliasTable.createAlias(databaseName);
 
         ResourceId databaseId = client.createDatabase(name);
         int id = CuidAdapter.getLegacyIdFromCuid(databaseId);

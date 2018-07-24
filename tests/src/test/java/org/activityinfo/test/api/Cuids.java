@@ -13,15 +13,15 @@ import java.util.Map;
 
 public class Cuids implements Ids {
 
-    private TestDatabase testDatabase;
+    private TestDatabase database;
 
-    public Cuids(TestDatabase testDatabase) {
-        this.testDatabase = testDatabase;
+    public Cuids(TestDatabase databaseId) {
+        this.database = databaseId;
     }
 
     @Override
     public int databaseId() {
-        return testDatabase.getId();
+        return database.getId();
     }
 
     @Override
