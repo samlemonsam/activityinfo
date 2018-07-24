@@ -105,19 +105,21 @@ public class CreateOrUpdateRecord extends VoidWork {
             rootEntity.setNumberedRecordCount(newRecordCount);
 
             blockUpdater.updateId(newRecordNumber, updated.getRecordId().asString());
+            blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
 
             if(formClass.isSubForm()) {
                 blockUpdater.updateParentId(newRecordNumber, updated.getParentRecordId());
             }
 
         } else if(changeType == RecordChangeType.DELETED) {
-            rootEntity.setDeletedCount(rootEntity.getDeletedCount() + 1);
-            blockUpdater.updateTombstone(existingEntity.getRecordNumber());
-        }
-
-        if(changeType == RecordChangeType.CREATED ||
-                (changeType == RecordChangeType.UPDATED && updated.hasRecordNumber())) {
-            blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
+            if(updated.hasRecordNumber()) {
+                rootEntity.setDeletedCount(rootEntity.getDeletedCount() + 1);
+                blockUpdater.updateTombstone(existingEntity.getRecordNumber());
+            }
+        } else if(changeType == RecordChangeType.UPDATED) {
+            if(updated.hasRecordNumber()) {
+                blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
+            }
         }
 
         toSave.addAll(blockUpdater.getUpdatedBlocks());
