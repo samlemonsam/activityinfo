@@ -95,6 +95,7 @@ public class CreateOrUpdateRecord extends VoidWork {
 
         // Update column-based storage
 
+
         ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(rootEntity, formClass, Hrd.ofy().getTransaction());
 
         if(changeType == RecordChangeType.CREATED) {
@@ -114,7 +115,8 @@ public class CreateOrUpdateRecord extends VoidWork {
             blockUpdater.updateTombstone(existingEntity.getRecordNumber());
         }
 
-        if(changeType != RecordChangeType.DELETED) {
+        if(changeType == RecordChangeType.CREATED ||
+                (changeType == RecordChangeType.UPDATED && updated.hasRecordNumber())) {
             blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
         }
 

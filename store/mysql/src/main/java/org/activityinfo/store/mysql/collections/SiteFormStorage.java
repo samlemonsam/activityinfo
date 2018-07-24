@@ -37,6 +37,7 @@ import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
+import org.activityinfo.store.hrd.op.CreateOrUpdateRecord;
 import org.activityinfo.store.hrd.op.QueryVersions;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.cursor.SiteFetcher;
@@ -195,6 +196,12 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public void add(TypedRecordUpdate update) {
+
+        if(activity.isMigratedToHrd()) {
+            Hrd.ofy().transact(new CreateOrUpdateRecord(getFormClass().getId(), update));
+            return;
+        }
+
         ResourceId formClassId = getFormClass().getId();
         BaseTableInserter baseTable = new BaseTableInserter(baseMapping, update.getRecordId());
         baseTable.addValue("ActivityId", activity.getId());
@@ -347,6 +354,11 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     @Override
     public void update(TypedRecordUpdate update) {
+
+        if(activity.isMigratedToHrd()) {
+            Hrd.ofy().transact(new CreateOrUpdateRecord(getFormClass().getId(), update));
+            return;
+        }
 
         FormRecord formRecord = get(update.getRecordId()).get();
         FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);

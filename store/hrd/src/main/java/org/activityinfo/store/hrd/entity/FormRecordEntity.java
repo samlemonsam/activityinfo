@@ -182,6 +182,10 @@ public class FormRecordEntity {
         return number;
     }
 
+    public boolean hasRecordNumber() {
+        return number != 0;
+    }
+
     public void setRecordNumber(int number) {
         this.number = number;
     }
