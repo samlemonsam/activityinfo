@@ -18,14 +18,18 @@
  */
 package org.activityinfo.model.formula.functions;
 
+import org.activityinfo.model.query.BitSetColumnView;
+import org.activityinfo.model.query.BitSetWithMissingView;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.model.type.primitive.BooleanType;
 
+import java.util.BitSet;
 import java.util.List;
 
-public class NotFunction extends FormulaFunction {
+public class NotFunction extends FormulaFunction implements ColumnFunction {
 
     public static final NotFunction INSTANCE = new NotFunction();
 
@@ -51,5 +55,29 @@ public class NotFunction extends FormulaFunction {
     @Override
     public FieldType resolveResultType(List<FieldType> argumentTypes) {
         return BooleanType.INSTANCE;
+    }
+
+    @Override
+    public ColumnView columnApply(int numRows, List<ColumnView> arguments) {
+
+        ColumnView argument = arguments.get(0);
+
+        BitSet bitSet = new BitSet();
+        BitSet missing = new BitSet();
+
+        for (int i = 0; i < argument.numRows(); i++) {
+            int value = argument.getBoolean(i);
+            if(value == ColumnView.NA) {
+                missing.set(i);
+            } else {
+                bitSet.set( i, value != ColumnView.TRUE );
+            }
+        }
+
+        if(missing.isEmpty()) {
+            return new BitSetColumnView(numRows, bitSet);
+        } else {
+            return new BitSetWithMissingView(numRows, bitSet, missing);
+        }
     }
 }
