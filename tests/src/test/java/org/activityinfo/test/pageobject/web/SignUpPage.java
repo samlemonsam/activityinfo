@@ -64,9 +64,9 @@ public class SignUpPage {
         return this;
 
 
-        }
+    }
 
-            }
+}
 
 
 

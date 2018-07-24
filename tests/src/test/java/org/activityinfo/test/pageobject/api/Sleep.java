@@ -16,14 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.test.driver.mail;
+package org.activityinfo.test.pageobject.api;
 
-import com.google.inject.AbstractModule;
-import org.activityinfo.test.driver.mail.mailinator.MailinatorClient;
+/**
+ * @author yuriyz on 10/02/2015.
+ */
+public class Sleep {
 
-public class EmailModule extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(EmailDriver.class).to(MailinatorClient.class);
+    private Sleep() {
     }
+
+    public static void sleepSeconds(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

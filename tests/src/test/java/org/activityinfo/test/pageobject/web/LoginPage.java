@@ -60,7 +60,7 @@ public class LoginPage {
         return this;
     }
 
-    public ApplicationPage andExpectSuccess() {
+    public void andExpectSuccess() {
         page.waitUntil(new Predicate<WebDriver>() {
             @Override
             public boolean apply(WebDriver input) {
@@ -82,8 +82,6 @@ public class LoginPage {
                 return currentUri.getPath().equals("/app");
             }
         });
-        
-        return new ApplicationPage(page);
     }
 
 

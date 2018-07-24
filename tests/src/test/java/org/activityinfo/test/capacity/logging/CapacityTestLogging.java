@@ -22,8 +22,7 @@ import com.google.common.base.Joiner;
 import com.google.common.io.Resources;
 import org.activityinfo.test.capacity.Metrics;
 import org.activityinfo.test.capacity.action.ActionExecution;
-import org.activityinfo.test.capacity.action.SynchronizeAction;
-import org.activityinfo.test.driver.ApiApplicationDriver;
+import org.activityinfo.test.driver.ApplicationDriver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,15 +63,13 @@ public class CapacityTestLogging {
         
         private Logger logger = Logger.getLogger(Metrics.class.getName());
 
-        private ActionExecution.ActionMetrics syncMetrics;
-        
+
         public MetricLogger() {
-            syncMetrics = ActionExecution.getMetrics(SynchronizeAction.class);
         }
 
         @Override
         public void run() {
-            logger.log(Level.INFO, Joiner.on("   ").join(concurrentUsers(), throughput(), sync(), failure()));
+            logger.log(Level.INFO, Joiner.on("   ").join(concurrentUsers(), throughput(), failure()));
                 
         }
         
@@ -81,24 +78,17 @@ public class CapacityTestLogging {
         }
         
         private String throughput() {
-            return String.format("throughput[%4.1f qps]",  ApiApplicationDriver.COMMAND_RATE.getOneMinuteRate());
+            return String.format("throughput[%4.1f qps]",  ApplicationDriver.COMMAND_RATE.getOneMinuteRate());
         }
         
         private String failure() {
-            long count = ApiApplicationDriver.ERROR_RATE.getTotalErrorCount();
+            long count = ApplicationDriver.ERROR_RATE.getTotalErrorCount();
             if(count == 0) {
                 return "";
             } else {
                 return String.format("errors[%4d]", count);
             }
         }
-        
-        private String sync() {
-            long concurrentUser = ActionExecution.CONCURRENT_USERS.getCount();
-            double meanSizeKb = SynchronizeAction.TOTAL_SIZE_METRIC.getSnapshot().getMedian() / 1024d;
-            long latency = syncMetrics.getOneMinuteLatencySeconds();
-            double successRate = syncMetrics.getOneMinuteSuccessRate();
-            return String.format("sync[ %3d %4.0fkb %2ds %2.0f%%]", concurrentUser, meanSizeKb, latency, successRate);
-        }
+
     }
 }

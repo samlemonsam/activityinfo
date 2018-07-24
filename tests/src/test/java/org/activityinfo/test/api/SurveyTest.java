@@ -28,6 +28,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.store.testing.RecordGenerator;
 import org.activityinfo.store.testing.Survey;
+import org.activityinfo.test.driver.ApplicationDriver;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,8 +46,9 @@ public class SurveyTest {
 
     @Before
     public void setupForm() {
-        TestDatabase database = harness.createDatabase();
-        client = harness.client();
+        ApplicationDriver driver = harness.newUser();
+        TestDatabase database = driver.createDatabase();
+        client = driver.getClient();
 
         survey = new Survey(new Cuids(database));
 

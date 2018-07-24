@@ -23,6 +23,7 @@ import org.activityinfo.test.capacity.TestContext;
 import org.activityinfo.test.driver.AliasTable;
 import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.Server;
+import org.activityinfo.test.sut.UserAccount;
 
 import java.util.List;
 
@@ -57,7 +58,8 @@ public class ScenarioContext {
     }
 
     public User user(UserRole role) {
-        User user = new User(this, role);
+        UserAccount userAccount = accounts.ensureAccountExists(role.getNickName());
+        User user = new User(this, userAccount, role);
         users.add(user);
         return user;
     }

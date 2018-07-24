@@ -20,8 +20,8 @@ package org.activityinfo.test.webdriver;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import gherkin.deps.com.google.gson.Gson;
-import gherkin.deps.com.google.gson.annotations.SerializedName;
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

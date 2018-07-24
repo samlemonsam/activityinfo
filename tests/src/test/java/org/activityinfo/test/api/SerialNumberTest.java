@@ -30,6 +30,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.test.driver.ApplicationDriver;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -45,8 +46,9 @@ public class SerialNumberTest {
     @Test
     public void simpleTest() {
 
-        TestDatabase database = harness.createDatabase();
-        ActivityInfoClient client = harness.client();
+        ApplicationDriver driver = harness.newUser();
+        TestDatabase database = driver.createDatabase();
+        ActivityInfoClient client = driver.getClient();
 
         FormClass formClass = new FormClass(harness.newFormId());
         formClass.setLabel("Test Form");
@@ -87,8 +89,9 @@ public class SerialNumberTest {
     @Test
     public void testWithPrefix() {
 
-        TestDatabase database = harness.createDatabase();
-        ActivityInfoClient client = harness.client();
+        ApplicationDriver driver = harness.newUser();
+        TestDatabase database = driver.createDatabase();
+        ActivityInfoClient client = driver.getClient();
 
         FormClass formClass = new FormClass(harness.newFormId());
         formClass.setLabel("Test Prefix");

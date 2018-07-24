@@ -27,7 +27,7 @@ import org.activityinfo.test.capacity.model.Scenario;
 import org.activityinfo.test.capacity.model.ScenarioContext;
 import org.activityinfo.test.capacity.model.UserRole;
 import org.activityinfo.test.capacity.scripts.CapacityTestScript;
-import org.activityinfo.test.capacity.scripts.DatabaseStress;
+import org.activityinfo.test.capacity.scripts.NullScript;
 import org.activityinfo.test.sut.DevServerAccounts;
 import org.activityinfo.test.sut.UserAccount;
 
@@ -111,7 +111,7 @@ public class CapacityTest {
         CapacityTestLogging.setup();
         Metrics.start();
 
-        CapacityTestScript script = new DatabaseStress();
+        CapacityTestScript script = new NullScript();
 
         CapacityTest capacityTest = new CapacityTest();
         capacityTest.setupScenarios(script);

@@ -20,6 +20,7 @@ package org.activityinfo.test.capacity.model;
 
 import org.activityinfo.test.capacity.action.ActionExecution;
 import org.activityinfo.test.capacity.action.UserAction;
+import org.activityinfo.test.sut.UserAccount;
 
 import javax.annotation.Nonnull;
 
@@ -29,16 +30,22 @@ import javax.annotation.Nonnull;
 public class User {
 
     private final ScenarioContext scenarioContext;
+    private final UserAccount userAccount;
     private final UserRole role;
 
 
-    public User(ScenarioContext scenarioContext, @Nonnull UserRole role) {
+    public User(ScenarioContext scenarioContext, UserAccount userAccount, @Nonnull UserRole role) {
         this.scenarioContext = scenarioContext;
+        this.userAccount = userAccount;
         this.role = role;
     }
 
     public String getNickname() {
         return role.getNickName();
+    }
+
+    public UserAccount getUserAccount() {
+        return userAccount;
     }
 
     public UserRole getRole() {

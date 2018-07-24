@@ -1,13 +1,9 @@
 package org.activityinfo.test.ui;
 
-import org.activityinfo.test.TestRailCase;
 import org.activityinfo.test.sut.UserAccount;
-import org.junit.Assert;
+import org.activityinfo.test.testrail.TestRailCase;
 import org.junit.Rule;
 import org.junit.Test;
-import org.openqa.selenium.interactions.SendKeysAction;
-
-import java.net.PasswordAuthentication;
 
 /**
  * Tests that users can log in

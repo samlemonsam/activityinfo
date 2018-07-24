@@ -1,11 +1,11 @@
 package org.activityinfo.test.ui;
 
 import com.google.common.base.Optional;
-import org.activityinfo.test.TestRailCase;
 import org.activityinfo.test.driver.mail.NotificationEmail;
 import org.activityinfo.test.pageobject.web.ApplicationPage;
 import org.activityinfo.test.pageobject.web.ConfirmPage;
 import org.activityinfo.test.sut.UserAccount;
+import org.activityinfo.test.testrail.TestRailCase;
 import org.junit.Rule;
 import org.junit.Test;
 
