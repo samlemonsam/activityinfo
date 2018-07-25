@@ -92,7 +92,7 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue> {
         }
     }
 
-    public void onNext(String recordId) {
+    public void onNextId(String recordId) {
         if(recordId == null) {
             keys.add(-1);
         } else {

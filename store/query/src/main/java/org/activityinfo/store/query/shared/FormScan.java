@@ -299,7 +299,7 @@ public class FormScan {
                 public void set(ColumnView column) {
                     ForeignKeyBuilder builder = new ForeignKeyBuilder(foreignKey.getRightFormId(), keySlot);
                     for (int i = 0; i < column.numRows(); i++) {
-                        builder.onNext(column.getString(i));
+                        builder.onNextId(column.getString(i));
                     }
                     builder.done();
                 }
