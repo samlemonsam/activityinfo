@@ -124,6 +124,7 @@ public class HrdFormStorageTest {
         queryModel.selectField("DOB").as("DOB");
         queryModel.selectExpr("nationality.Palestinian").as("PAL");
         queryModel.selectExpr("nationality.syrian").as("SYR");
+        queryModel.selectExpr("address").as("ADR");
 
         ColumnSetBuilder builder = new ColumnSetBuilder(storageProvider, new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);
@@ -131,6 +132,13 @@ public class HrdFormStorageTest {
         assertThat(columnSet.getColumnView("OPENED"), hasValues("2016-11-07", "2016-11-23", "2017-10-27", "2017-07-06", "2017-10-12"));
         assertThat(columnSet.getColumnView("DOB"), hasValues("1971-11-07", null, null, "1987-12-18", "1978-01-23"));
         assertThat(columnSet.getColumnView("PAL"), hasValues(false, true, true, true, true));
+
+        assertThat(columnSet.getColumnView("ADR"), hasValues(
+                "1534 Tualco Ave\nPenny, EG 69609",
+                "1154 Northeast Keswick Boulevard\nNorth Dogwood, CH 81482",
+                "1150 West Entwistle St.\nCedar Valley, BT 70636",
+                "1258 Scenic St.\nWestridge, OW 62470",
+                "1090 Lawton Ave\nEast Galer, FH  1834"));
 
     }
 }

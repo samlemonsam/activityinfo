@@ -36,6 +36,7 @@ import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
+import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.ForeignKeyId;
 import org.activityinfo.store.spi.*;
@@ -54,7 +55,7 @@ public class FormScan {
      * This can be changed to ensure that new versions do not use results cached by earlier versions
      * of ActivityInfo.
      */
-    private static final String CACHE_KEY_VERSION = "14:";
+    private static final String CACHE_KEY_VERSION = "17:";
 
     private static final Logger LOGGER = Logger.getLogger(FormScan.class.getName());
 
@@ -291,7 +292,21 @@ public class FormScan {
         }
 
         for (Map.Entry<ForeignKeyId, PendingSlot<ForeignKey>> fk : foreignKeyMap.entrySet()) {
-            throw new UnsupportedOperationException("TODO");
+            final ForeignKeyId foreignKey = fk.getKey();
+            PendingSlot<ForeignKey> keySlot = fk.getValue();
+            PendingSlot<ColumnView> columnSlot = new PendingSlot<ColumnView>() {
+                @Override
+                public void set(ColumnView column) {
+                    ForeignKeyBuilder builder = new ForeignKeyBuilder(foreignKey.getRightFormId(), keySlot);
+                    for (int i = 0; i < column.numRows(); i++) {
+                        builder.onNext(column.getString(i));
+                    }
+                    builder.done();
+                }
+            };
+            columnQueryBuilder.addField(
+                    new FieldComponent(foreignKey.getFieldName(), foreignKey.getRightFormId().asString()),
+                    columnSlot);
         }
 
         columnQueryBuilder.execute();

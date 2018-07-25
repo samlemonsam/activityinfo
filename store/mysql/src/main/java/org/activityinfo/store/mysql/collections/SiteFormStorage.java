@@ -33,6 +33,7 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.HrdFormStorage;
+import org.activityinfo.store.hrd.HrdQueryColumnBlockBuilder;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
@@ -61,7 +62,7 @@ import static org.activityinfo.store.hrd.Hrd.ofy;
 /**
  * Collection of Sites
  */
-public class SiteFormStorage implements VersionedFormStorage {
+public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
 
     private static final Logger LOGGER = Logger.getLogger(SiteFormStorage.class.getName());
 
@@ -459,5 +460,14 @@ public class SiteFormStorage implements VersionedFormStorage {
 
     private HrdFormStorage delegateToHrd() {
         return new HrdFormStorage(getFormClass());
+    }
+
+    @Override
+    public ColumnQueryBuilderV2 newColumnQueryV2() {
+        if(activity.isMigratedToHrd()) {
+            return new HrdQueryColumnBlockBuilder(formEntity);
+        } else {
+            return null;
+        }
     }
 }

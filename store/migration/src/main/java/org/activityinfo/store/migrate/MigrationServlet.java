@@ -25,7 +25,6 @@ import com.google.appengine.tools.mapreduce.MapSettings;
 import com.google.appengine.tools.mapreduce.MapSpecification;
 import com.google.appengine.tools.mapreduce.inputs.DatastoreInput;
 import com.google.appengine.tools.mapreduce.outputs.GoogleCloudStorageFileOutput;
-import com.google.appengine.tools.pipeline.JobSetting;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 
@@ -54,8 +53,11 @@ public class MigrationServlet extends HttpServlet {
             resp.getOutputStream().println(e.getMessage());
             return;
         }
-
-        resp.sendRedirect("/_ah/pipeline/status.html?root=" + pipelineId);
+        if(pipelineId != null) {
+            resp.sendRedirect("/_ah/pipeline/status.html?root=" + pipelineId);
+        } else {
+            resp.getWriter().println("Enqueued");
+        }
     }
 
     private String startJob(HttpServletResponse resp, HttpServletRequest req) {
@@ -145,12 +147,11 @@ public class MigrationServlet extends HttpServlet {
 
 
     private String buildBlocks(String formId) {
-        PipelineService pipelineService = PipelineServiceFactory.newPipelineService();
-        return pipelineService.startNewPipeline(new BuildBlockJobs(formId), new JobSetting.MaxAttempts(1));
+        return PipelineServiceFactory.newPipelineService().startNewPipeline(new BlockJob(formId));
     }
 
 
-    private MapSettings getSettings() {
+    public static MapSettings getSettings() {
         MapSettings settings = new MapSettings.Builder()
                 .setWorkerQueueName("default")
                 .setModule("migration")

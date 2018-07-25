@@ -168,8 +168,10 @@ public class ColumnBlockUpdater {
 
     public void cacheUpdatedBlocks() {
         MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+        Map<String, Entity> blocks = new HashMap<>();
         for (Map.Entry<BlockId, Entity> entry : blockMap.entrySet()) {
-            memcache.put(entry.getKey().memcacheKey(formEntity.getVersion()), entry.getValue());
+            blocks.put(entry.getKey().memcacheKey(formEntity.getVersion()), entry.getValue());
         }
+        memcache.putAll(blocks, BlockResolver.BLOCK_EXPIRATION);
     }
 }

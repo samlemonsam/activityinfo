@@ -92,11 +92,23 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue> {
         }
     }
 
+    public void onNext(String recordId) {
+        if(recordId == null) {
+            keys.add(-1);
+        } else {
+            keys.add(keyId(recordId));
+        }
+    }
+
     /**
      * Finds or creates an integer key id for this String key.
      */
     private int keyId(RecordRef id) {
         String stringKey = id.getRecordId().asString();
+        return keyId(stringKey);
+    }
+
+    private int keyId(String stringKey) {
         int keyIndex = keyMap.getInt(stringKey);
         if(keyIndex == -1) {
             keyIndex = keyMap.size();

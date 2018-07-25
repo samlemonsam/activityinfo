@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static java.util.Collections.emptyIterator;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -73,6 +74,34 @@ public class RecordIdBlockTest {
         assertThat(view.getString(0), equalTo("c143535xqw"));
         assertThat(view.getString(1), equalTo("c1adssdxqw"));
         assertThat(view.getString(2), equalTo("cadsffdxqw"));
+    }
+
+    @Test
+    public void deleted() {
+        RecordIdBlock block = new RecordIdBlock();
+
+        Entity blockEntity1 = new Entity("Block", 1);
+        for (int i = 0; i < block.getBlockSize(); i++) {
+            block.update(blockEntity1, i, TextValue.valueOf("a" + i));
+        }
+
+        Entity blockEntity2 = new Entity("Block", 2);
+        for (int i = 0; i < block.getBlockSize(); i++) {
+            block.update(blockEntity2, i, TextValue.valueOf("b" + i));
+        }
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(block.getBlockSize() * 2);
+        header.setDeletedCount(1);
+
+        Entity tombstone = new Entity("Tombstone", 1);
+        TombstoneBlock.markDeleted(tombstone, 11);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Collections.singleton(tombstone).iterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity1, blockEntity2).iterator());
+        assertThat(view.numRows(), equalTo(block.getBlockSize() * 2 - 1));
+
     }
 
 }

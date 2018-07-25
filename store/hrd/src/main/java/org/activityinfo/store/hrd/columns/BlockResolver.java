@@ -2,6 +2,7 @@ package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.memcache.AsyncMemcacheService;
+import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import org.activityinfo.store.hrd.entity.ColumnDescriptor;
@@ -14,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BlockResolver {
+
+    public static final Expiration BLOCK_EXPIRATION = Expiration.byDeltaSeconds(60 * 60 * 3);
 
     private static final Logger LOGGER = Logger.getLogger(BlockResolver.class.getName());
 
@@ -131,6 +134,10 @@ public class BlockResolver {
             }
         }
 
+        LOGGER.info(String.format("Fetched %d/%d blocks from memcache",
+                toFetch.size() - datastoreKeys.size(),
+                toFetch.size()));
+
         Map<Key, Entity> fetched = datastoreService.get(datastoreKeys);
         for (Fetch fetch : toFetch) {
             if(fetch.block == null) {
@@ -170,7 +177,7 @@ public class BlockResolver {
                 toCache.put(fetch.memcacheKey(), fetch.block);
             }
         }
-        return memcache.putAll(toCache);
+        return memcache.putAll(toCache, BLOCK_EXPIRATION);
     }
 
 }

@@ -112,11 +112,6 @@ public class HrdFormStorage implements VersionedFormStorage, FormStorageV2 {
 
     @Override
     public ColumnQueryBuilderV2 newColumnQueryV2() {
-//        FormEntity formEntity = ofy().load().key(FormEntity.key(formClass.getId())).safe();
-//        if(formEntity.isColumnStorageActive()) {
-//            return new HrdQueryColumnBlockBuilder(formEntity);
-//        }
-
         return null;
     }
 
