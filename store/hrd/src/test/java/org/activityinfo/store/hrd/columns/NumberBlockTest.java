@@ -9,14 +9,18 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
+import org.activityinfo.model.type.time.LocalDate;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static java.util.Collections.emptyIterator;
 import static org.activityinfo.store.testing.ColumnSetMatchers.hasValues;
@@ -130,5 +134,44 @@ public class NumberBlockTest {
 
     }
 
+    @Test
+    public void dates() {
+        FormField quantityField = new FormField(ResourceId.valueOf("F")).setType(LocalDateType.INSTANCE);
+        NumberBlock block = (NumberBlock) BlockFactory.get(quantityField);
+
+        LocalDate startDate = new LocalDate(1980, 1, 1);
+        LocalDate date = startDate;
+
+        List<Entity> blocks = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Entity blockEntity = new Entity("Block", i + 1);
+            for (int j = 0; j < block.getBlockSize(); j++) {
+                block.update(blockEntity, j, date);
+                date = date.plusDays(1);
+            }
+            blocks.add(blockEntity);
+        }
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(block.getBlockSize() * 3);
+        header.setDeletedCount(1);
+
+        Entity tombstone = new Entity("Tombstone", 1);
+        TombstoneBlock.markDeleted(tombstone, 2);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Collections.singleton(tombstone).iterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, blocks.iterator());
+        assertThat(view.numRows(), equalTo(block.getBlockSize() * 3 - 1));
+        assertThat(view.getString(0), equalTo(startDate.toString()));
+        assertThat(view.getString(1), equalTo(startDate.plusDays(1).toString()));
+        // Deleted record
+        assertThat(view.getString(2), equalTo(startDate.plusDays(3).toString()));
+        assertThat(view.getString(3), equalTo(startDate.plusDays(4).toString()));
+
+        // Start of block 2
+        assertThat(view.getString(block.getBlockSize()), equalTo(startDate.plusDays(block.getBlockSize() + 1).toString()));
+
+    }
 
 }

@@ -68,9 +68,8 @@ public class StringBlockTest {
     public void deleted() {
         FormField stringField = new FormField(ResourceId.valueOf("F")).setType(TextType.SIMPLE);
         StringBlock block = (StringBlock) BlockFactory.get(stringField);
+
         Entity blockEntity = new Entity("Block", 1);
-
-
         block.update(blockEntity, 0, TextValue.valueOf("Hello World"));
         block.update(blockEntity, 1, TextValue.valueOf("Goodbye World"));
         block.update(blockEntity, 2, TextValue.valueOf("Hello Again"));
@@ -90,6 +89,36 @@ public class StringBlockTest {
         assertThat(view.getString(0), equalTo("Hello World"));
         assertThat(view.getString(1), equalTo("Hello Again"));
     }
+
+
+    @Test
+    public void multiBlockDeleted() {
+        FormField stringField = new FormField(ResourceId.valueOf("F")).setType(TextType.SIMPLE);
+        StringBlock block = (StringBlock) BlockFactory.get(stringField);
+
+        Entity blockEntity1 = new Entity("Block", 1);
+        block.update(blockEntity1, 0, TextValue.valueOf("Hello World"));
+        block.update(blockEntity1, 1, TextValue.valueOf("Goodbye World"));
+
+        Entity blockEntity2 = new Entity("Block", 2);
+        block.update(blockEntity2, 0, TextValue.valueOf("Hello Again"));
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(block.getBlockSize() * 2);
+        header.setDeletedCount(1);
+
+        Entity tombstone = new Entity("Tombstone", 1);
+        TombstoneBlock.markDeleted(tombstone, 0);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Arrays.asList(tombstone).iterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity1, blockEntity2).iterator());
+        assertThat(view.numRows(), equalTo(block.getBlockSize() * 2 - 1));
+        assertThat(view.getString(0), equalTo("Goodbye World"));
+        assertThat(view.getString(1), nullValue());
+        assertThat(view.getString(block.getBlockSize() - 1), equalTo("Hello Again"));
+    }
+
 
     @Test
     public void update() {

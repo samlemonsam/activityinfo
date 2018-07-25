@@ -88,7 +88,7 @@ public class StringBlock implements BlockManager {
                 int offsetCount = OffsetArray.length(offsets);
 
                 for (int i = 0; i < offsetCount; i++) {
-                    if (!deleted.get(blockStart + i)) {
+                    if (!deleted.get(i)) {
                         int offset = OffsetArray.get(offsets, i);
                         if (offset != 0) {
                             values[targetIndex] = pool[offset - 1];

@@ -245,7 +245,7 @@ public class NumberBlock implements BlockManager {
             int blockIndex = (int)(block.getKey().getId() - 1);
             int blockStart = blockIndex * getBlockSize();
 
-            int targetIndex = tombstones.countDeletedBefore(blockStart);
+            int targetIndex = blockStart - tombstones.countDeletedBefore(blockStart);
             BitSet deleted = tombstones.getDeletedBitSet(blockStart, getBlockSize());
 
             Blob blob = (Blob) block.getProperty(valuesProperty);
