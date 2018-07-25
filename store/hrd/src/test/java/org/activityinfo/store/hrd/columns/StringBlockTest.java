@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static java.util.Collections.emptyIterator;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -90,5 +91,25 @@ public class StringBlockTest {
         assertThat(view.getString(1), equalTo("Hello Again"));
     }
 
+    @Test
+    public void update() {
+        FormField stringField = new FormField(ResourceId.valueOf("F")).setType(TextType.SIMPLE);
+        StringBlock block = (StringBlock) BlockFactory.get(stringField);
+        Entity blockEntity = new Entity("Block", 1);
+
+        block.update(blockEntity, 0, TextValue.valueOf("Hello World"));
+        block.update(blockEntity, 1, TextValue.valueOf("Goodbye World"));
+        block.update(blockEntity, 1, null);
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(2);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, Collections.<Entity>emptyList().iterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+        assertThat(view.numRows(), equalTo(2));
+        assertThat(view.getString(0), equalTo("Hello World"));
+        assertThat(view.getString(1), nullValue());
+    }
 
 }

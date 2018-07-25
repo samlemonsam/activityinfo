@@ -42,13 +42,12 @@ public class OffsetArray {
         }
         byte[] bytes = values.getBytes();
 
-        if(bytes.length >= ValueArrays.requiredSize(index, BYTES)) {
-            return new Blob(bytes);
-        }
-
         int pos = index * BYTES;
-        bytes[pos] = 0;
-        bytes[pos+1] = 0;
+
+        if(pos < bytes.length) {
+            bytes[pos] = 0;
+            bytes[pos + 1] = 0;
+        }
 
         return new Blob(bytes);
     }
@@ -62,6 +61,25 @@ public class OffsetArray {
             return 0;
         } else {
             return length(values.getBytes());
+        }
+    }
+
+
+    /**
+     * Retrieves the one-based offset from the entity. Zero if the offset is missing.
+     */
+    public static int get(PropertyContainer entity, String propertyName, int index) {
+        return get(((Blob) entity.getProperty(propertyName)), index);
+    }
+
+    /**
+     * Retrieves the one-based offset from the blob. Zero if the offset is missing.
+     */
+    public static int get(Blob blob, int index) {
+        if(blob == null) {
+            return 0;
+        } else {
+            return get(blob.getBytes(), index);
         }
     }
 
