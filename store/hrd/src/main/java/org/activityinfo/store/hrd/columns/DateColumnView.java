@@ -53,7 +53,7 @@ public class DateColumnView implements ColumnView {
 
     @Override
     public ColumnView select(int[] rows) {
-        return new DateColumnView(values, renderer);
+        return new DateColumnView(IntValueArray.select(values, rows), renderer);
     }
 
     @Override

@@ -27,11 +27,16 @@ import com.google.appengine.tools.mapreduce.inputs.DatastoreInput;
 import com.google.appengine.tools.mapreduce.outputs.GoogleCloudStorageFileOutput;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.VoidWork;
+import org.activityinfo.store.hrd.Hrd;
+import org.activityinfo.store.hrd.entity.FormEntity;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 
 /**
@@ -44,6 +49,8 @@ public class MigrationServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+
 
         String pipelineId;
         try {
@@ -79,9 +86,30 @@ public class MigrationServlet extends HttpServlet {
                 return usageExport();
             case "blocks":
                 return buildBlocks(req.getParameter("formId"));
+            case "listsubforms":
+                return listsubforms(resp);
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
+    }
+
+    private String listsubforms(HttpServletResponse resp) {
+        ObjectifyService.run(new VoidWork() {
+            @Override
+            public void vrun() {
+                try {
+                    PrintWriter writer = resp.getWriter();
+                    for (FormEntity formEntity : Hrd.ofy().load().type(FormEntity.class)) {
+                        if(formEntity.getId().startsWith("c")) {
+                            writer.println(formEntity.getId() + "," + formEntity.isColumnStorageActive());
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        return null;
     }
 
 

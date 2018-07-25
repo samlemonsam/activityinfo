@@ -172,6 +172,12 @@ public class NumberBlockTest {
         // Start of block 2
         assertThat(view.getString(block.getBlockSize()), equalTo(startDate.plusDays(block.getBlockSize() + 1).toString()));
 
+
+        // Verify that filtering works...
+        ColumnView selected = view.select(new int[]{1});
+        assertThat(selected.numRows(), equalTo(1));
+        assertThat(selected.getString(0), equalTo(startDate.plusDays(1).toString()));
+
     }
 
 }
