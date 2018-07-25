@@ -86,7 +86,7 @@ public class SingleEnumBlock implements BlockManager {
             labelLookup.put(enumItem.getId().asString(), i);
         }
 
-        int[] values = new int[header.getNumberedRecordCount()];
+        int[] values = new int[header.getRecordCount()];
         Arrays.fill(values, -1);
 
         while (blockIterator.hasNext()) {
