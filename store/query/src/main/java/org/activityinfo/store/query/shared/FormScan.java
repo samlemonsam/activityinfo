@@ -36,7 +36,6 @@ import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.BooleanType;
-import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.ForeignKeyId;
 import org.activityinfo.store.spi.*;
@@ -297,7 +296,7 @@ public class FormScan {
             PendingSlot<ColumnView> columnSlot = new PendingSlot<ColumnView>() {
                 @Override
                 public void set(ColumnView column) {
-                    ForeignKeyBuilder builder = new ForeignKeyBuilder(foreignKey.getRightFormId(), keySlot);
+                    ForeignKeyBuilder builder = columnFactory.newForeignKeyBuilder(foreignKey.getRightFormId(), keySlot);
                     for (int i = 0; i < column.numRows(); i++) {
                         builder.onNextId(column.getString(i));
                     }

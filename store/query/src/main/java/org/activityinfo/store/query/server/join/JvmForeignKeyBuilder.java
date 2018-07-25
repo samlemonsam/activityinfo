@@ -28,14 +28,14 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.query.shared.columns.ForeignKey;
 import org.activityinfo.store.query.shared.columns.ForeignKey32;
-import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.ForeignKeyBuilder;
 import org.activityinfo.store.spi.PendingSlot;
 
 /**
  * Constructs a ForeignKey by listening for a cursor.
  *
  */
-public class ForeignKeyBuilder implements CursorObserver<FieldValue> {
+public class JvmForeignKeyBuilder implements ForeignKeyBuilder {
 
 
     /**
@@ -65,7 +65,7 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue> {
 
 
 
-    public ForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> result) {
+    public JvmForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> result) {
         this.result = result;
         this.rightFormId = rightFormId;
         keyMap.defaultReturnValue(-1);
@@ -92,6 +92,7 @@ public class ForeignKeyBuilder implements CursorObserver<FieldValue> {
         }
     }
 
+    @Override
     public void onNextId(String recordId) {
         if(recordId == null) {
             keys.add(-1);

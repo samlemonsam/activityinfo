@@ -41,7 +41,7 @@ public class ForeignKeyTest {
         // Build the unfiltered foreign key map
         // That maps row indexes to foreign keys
         ResourceId formId = ResourceId.valueOf("a00001");
-        ForeignKeyBuilder builder = new ForeignKeyBuilder(formId, new PendingSlot<ForeignKey>());
+        JvmForeignKeyBuilder builder = new JvmForeignKeyBuilder(formId, new PendingSlot<ForeignKey>());
         builder.onNext(new ReferenceValue(new RecordRef(formId, ResourceId.valueOf("s0272548382"))));
         builder.onNext(new ReferenceValue(new RecordRef(formId, ResourceId.valueOf("s0272548382"))));
         builder.onNext(new ReferenceValue(new RecordRef(formId, ResourceId.valueOf("s0362622291"))));
@@ -74,7 +74,7 @@ public class ForeignKeyTest {
         // Build the unfiltered foreign key map
         // That maps row indexes to foreign keys
         ResourceId formId = ResourceId.valueOf("a00001");
-        ForeignKeyBuilder builder = new ForeignKeyBuilder(formId, new PendingSlot<ForeignKey>());
+        JvmForeignKeyBuilder builder = new JvmForeignKeyBuilder(formId, new PendingSlot<ForeignKey>());
         builder.onNext(null);
         builder.onNext(new ReferenceValue(new RecordRef(formId, ResourceId.valueOf("s0272548382"))));
         builder.onNext(null);
@@ -94,7 +94,7 @@ public class ForeignKeyTest {
         ResourceId province = ResourceId.valueOf("g00001");
         ResourceId territory = ResourceId.valueOf("g00002");
 
-        ForeignKeyBuilder builder = new ForeignKeyBuilder(province, new PendingSlot<ForeignKey>());
+        JvmForeignKeyBuilder builder = new JvmForeignKeyBuilder(province, new PendingSlot<ForeignKey>());
 
         // Row 0: Missing
         builder.onNext(null);

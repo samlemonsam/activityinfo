@@ -24,6 +24,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.ForeignKeyBuilder;
 import org.activityinfo.store.spi.PendingSlot;
 
 /**
@@ -40,7 +41,7 @@ public interface ColumnFactory {
 
     CursorObserver<FieldValue> newEnumBuilder(PendingSlot<ColumnView> result, EnumType enumType);
 
-    CursorObserver<FieldValue> newForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> value);
+    ForeignKeyBuilder newForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> value);
 
     PrimaryKeyMap newPrimaryKeyMap(ColumnView columnView);
 }

@@ -27,10 +27,11 @@ import org.activityinfo.store.query.server.columns.CompactingDoubleColumnBuilder
 import org.activityinfo.store.query.server.columns.CompactingEnumColumnBuilder;
 import org.activityinfo.store.query.server.columns.MultiEnumColumnBuilder;
 import org.activityinfo.store.query.server.join.FastPrimaryKeyMap;
-import org.activityinfo.store.query.server.join.ForeignKeyBuilder;
+import org.activityinfo.store.query.server.join.JvmForeignKeyBuilder;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.ForeignKeyBuilder;
 import org.activityinfo.store.spi.PendingSlot;
 
 
@@ -61,8 +62,8 @@ public class ServerColumnFactory implements ColumnFactory {
     }
 
     @Override
-    public CursorObserver<FieldValue> newForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> value) {
-        return new ForeignKeyBuilder(rightFormId, value);
+    public ForeignKeyBuilder newForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> value) {
+        return new JvmForeignKeyBuilder(rightFormId, value);
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.activityinfo.store.query.client.join.SimplePrimaryKeyMap;
 import org.activityinfo.store.query.shared.columns.*;
 import org.activityinfo.store.query.shared.join.PrimaryKeyMap;
 import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.ForeignKeyBuilder;
 import org.activityinfo.store.spi.PendingSlot;
 
 /**
@@ -52,7 +53,7 @@ public class JsColumnFactory implements ColumnFactory {
     }
 
     @Override
-    public CursorObserver<FieldValue> newForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> value) {
+    public ForeignKeyBuilder newForeignKeyBuilder(ResourceId rightFormId, PendingSlot<ForeignKey> value) {
         return new SimpleForeignKeyBuilder(rightFormId, value);
     }
 

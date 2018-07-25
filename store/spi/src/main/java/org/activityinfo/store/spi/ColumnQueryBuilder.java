@@ -46,6 +46,7 @@ public interface ColumnQueryBuilder {
      */
     void addField(ResourceId fieldId, CursorObserver<FieldValue> observer);
 
+
     /**
      * Fetches the requested columns.
      */

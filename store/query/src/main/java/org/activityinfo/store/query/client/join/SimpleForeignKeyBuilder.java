@@ -24,7 +24,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.store.query.shared.columns.ForeignKey;
 import org.activityinfo.store.query.shared.columns.ForeignKey32;
-import org.activityinfo.store.spi.CursorObserver;
+import org.activityinfo.store.spi.ForeignKeyBuilder;
 import org.activityinfo.store.spi.PendingSlot;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * Super simple foreign key builder that can be translated to JavaScript
  */
-public class SimpleForeignKeyBuilder implements CursorObserver<FieldValue> {
+public class SimpleForeignKeyBuilder implements ForeignKeyBuilder {
 
 
     /**
@@ -80,6 +80,16 @@ public class SimpleForeignKeyBuilder implements CursorObserver<FieldValue> {
             }
         }
         keys.add(keyId);
+    }
+
+
+    @Override
+    public void onNextId(String id) {
+        if(id == null) {
+            keys.add(-1);
+        } else {
+            keys.add(keyId(id));
+        }
     }
 
 
