@@ -83,21 +83,21 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
     @Override
     protected void doSort(int colIndex, SortDir sortDir) {
         String field = grid.getColumnModel().getValueProvider(colIndex).getPath();
-        SortModel.Dir dir;
+        org.activityinfo.model.query.SortDir dir;
 
         // sortDir is null if the column header is clicked to
         // toggle the sort direction
 
         if(sortDir == null) {
             if(isFieldSortedAscending(field)) {
-                dir = SortModel.Dir.DESC;
+                dir = org.activityinfo.model.query.SortDir.DESC;
             } else {
-                dir = SortModel.Dir.ASC;
+                dir = org.activityinfo.model.query.SortDir.ASC;
             }
         } else if(sortDir == SortDir.ASC) {
-            dir = SortModel.Dir.ASC;
+            dir = org.activityinfo.model.query.SortDir.ASC;
         } else {
-            dir = SortModel.Dir.DESC;
+            dir = org.activityinfo.model.query.SortDir.DESC;
         }
 
         fireEvent(new SortChangeEvent(field, dir));
@@ -106,7 +106,7 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
     private boolean isFieldSortedAscending(String field) {
         if(!currentSorting.isEmpty()) {
             SortModel sortModel = currentSorting.get(0);
-            if(sortModel.getField().equals(field) && sortModel.getDir() == SortModel.Dir.ASC) {
+            if(sortModel.getField().equals(field) && sortModel.getDir() == org.activityinfo.model.query.SortDir.ASC) {
                 return true;
             }
         }
@@ -128,7 +128,7 @@ public class LiveRecordGridView extends LiveGridView<Integer> {
                     String path = columnModel.getValueProvider(i).getPath();
                     if (path.equals(sortModel.getField())) {
                         tableHeading.updateSortIcon(i,
-                                sortModel.getDir() == SortModel.Dir.ASC ?
+                                sortModel.getDir() == org.activityinfo.model.query.SortDir.ASC ?
                                         SortDir.ASC : SortDir.DESC);
                         break;
                     }

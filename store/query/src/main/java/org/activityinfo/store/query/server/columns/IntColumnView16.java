@@ -19,7 +19,7 @@
 package org.activityinfo.store.query.server.columns;
 
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 import org.activityinfo.model.util.HeapsortColumn;
 
 /**
@@ -86,12 +86,12 @@ public class IntColumnView16 extends AbstractNumberColumn {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         int numRows = values.length;
         if (range == null || range.length == numRows) {
-            HeapsortColumn.heapsortCompact16(values, sortVector, numRows, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortCompact16(values, sortVector, numRows, direction == SortDir.ASC);
         } else {
-            HeapsortColumn.heapsortCompact16(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortCompact16(values, sortVector, range.length, range, direction == SortDir.ASC);
         }
         return sortVector;
     }

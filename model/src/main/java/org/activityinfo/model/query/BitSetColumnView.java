@@ -99,11 +99,11 @@ public class BitSetColumnView implements ColumnView, Serializable {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         if (range == null || range.length == numRows) {
-            HeapsortColumn.heapsortBitSet(bitSet, sortVector, numRows, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortBitSet(bitSet, sortVector, numRows, direction == SortDir.ASC);
         } else {
-            HeapsortColumn.heapsortBitSet(bitSet, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortBitSet(bitSet, sortVector, range.length, range, direction == SortDir.ASC);
         }
         return sortVector;
     }

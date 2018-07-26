@@ -18,17 +18,15 @@
  */
 package org.activityinfo.store.query.server.columns;
 
-import com.google.common.primitives.Doubles;
 import com.google.common.primitives.UnsignedBytes;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 import org.activityinfo.model.util.HeapsortColumn;
 
 /**
  * Compact ColumnView for numbers are all integers and have a range of less than 255
  */
 public class IntColumnView8 extends AbstractNumberColumn {
-
 
     static final int MAX_RANGE = 255;
 
@@ -87,13 +85,35 @@ public class IntColumnView8 extends AbstractNumberColumn {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         int numRows = values.length;
         if (range == null || range.length == numRows) {
-            HeapsortColumn.heapsortCompact8(values, sortVector, numRows, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortByte(values, sortVector, numRows,
+                    HeapsortColumn.withDirection(IntColumnView8::isLessThan, direction));
         } else {
-            HeapsortColumn.heapsortCompact8(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortByte(values, sortVector, range.length, range,
+                    HeapsortColumn.withDirection(IntColumnView8::isLessThan, direction));
         }
         return sortVector;
     }
+
+    /**
+     * Given two numbers encoded as unsigned bytes from 0x01-0xFF, with missing values encoded as zeroes
+     *
+     */
+    private static boolean isLessThan(byte bx, byte by) {
+        // Treat as unsigned
+        int x = UnsignedBytes.toInt(bx);
+        int y = UnsignedBytes.toInt(by);
+
+        // Missing values encoded as zeroes
+        boolean xMissing = (x == 0);
+        boolean yMissing = (y == 0);
+
+        if(xMissing && !yMissing) {
+            return true;
+        }
+        return x < y;
+    }
+
 }

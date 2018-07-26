@@ -21,7 +21,7 @@ package org.activityinfo.store.query.server.columns;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 import org.activityinfo.model.util.HeapsortColumn;
 
 public class SparseNumberColumnView extends AbstractNumberColumn {
@@ -64,11 +64,11 @@ public class SparseNumberColumnView extends AbstractNumberColumn {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         if (range == null || range.length == numRows) {
-            HeapsortColumn.heapsortSparseDouble(map, sortVector, numRows, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortSparseDouble(map, sortVector, numRows, direction == SortDir.ASC);
         } else {
-            HeapsortColumn.heapsortSparseDouble(map, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortSparseDouble(map, sortVector, range.length, range, direction == SortDir.ASC);
         }
         return sortVector;
     }

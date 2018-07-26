@@ -95,13 +95,31 @@ public class BooleanColumnView implements ColumnView {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
+
         int numRows = values.length;
         if (range == null || range.length == numRows) {
-            HeapsortColumn.heapsortBooleanInt(values, sortVector, numRows, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortInt(values, sortVector, numRows,
+                    HeapsortColumn.withIntDirection(BooleanColumnView::isLessThan, direction));
         } else {
-            HeapsortColumn.heapsortBooleanInt(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+
+            HeapsortColumn.heapsortInt(values, sortVector, range.length, range,
+                    HeapsortColumn.withIntDirection(BooleanColumnView::isLessThan, direction));
         }
         return sortVector;
     }
+
+
+    private static boolean isLessThan(int a, int b) {
+        if (a == ColumnView.TRUE) {
+            return false;
+        } else if (a == ColumnView.FALSE) {
+            return b == ColumnView.TRUE;
+        } else {
+            // a == ColumnView.NA
+            return b != ColumnView.NA;
+        }
+    }
+
+
 }

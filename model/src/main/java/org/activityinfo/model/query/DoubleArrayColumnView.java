@@ -112,11 +112,11 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         if (range == null || range.length == numRows) {
-            HeapsortColumn.heapsortDouble(values, sortVector, numRows, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortDouble(values, sortVector, numRows, direction == SortDir.ASC);
         } else {
-            HeapsortColumn.heapsortDouble(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortDouble(values, sortVector, range.length, range, direction == SortDir.ASC);
         }
         return sortVector;
     }

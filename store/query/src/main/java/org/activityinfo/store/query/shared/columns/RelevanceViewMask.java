@@ -20,7 +20,7 @@ package org.activityinfo.store.query.shared.columns;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 
 /**
  * ColumnView that is conditioned on relevance expression
@@ -93,7 +93,7 @@ public class RelevanceViewMask implements ColumnView {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         return view.order(sortVector, direction, range);
     }
 }

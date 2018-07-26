@@ -27,19 +27,7 @@ import java.util.List;
 public class SortModel implements JsonSerializable {
 
     private String field;
-    private Dir dir = Dir.NONE;
-
-    /**
-     * {@code Dir} gives the direction of ordering:
-     *  {@code ASC} (Ascending);
-     *  {@code DSC} (Descending); or
-     *  {@code NONE} (Undefined)
-     */
-    public enum Dir {
-        ASC,
-        DESC,
-        NONE
-    }
+    private SortDir dir = SortDir.ASC;
 
     /**
      * The {@code Range} stores the indices of a group's member elements.
@@ -114,7 +102,7 @@ public class SortModel implements JsonSerializable {
 
     public SortModel() {}
 
-    public SortModel(String field, Dir dir) {
+    public SortModel(String field, SortDir dir) {
         this.field = field;
         this.dir = dir;
     }
@@ -123,7 +111,7 @@ public class SortModel implements JsonSerializable {
         this.field = field;
     }
 
-    public void setDir(Dir dir) {
+    public void setDir(SortDir dir) {
         this.dir = dir;
     }
 
@@ -131,7 +119,7 @@ public class SortModel implements JsonSerializable {
         return field;
     }
 
-    public Dir getDir() {
+    public SortDir getDir() {
         return dir;
     }
 
@@ -150,7 +138,7 @@ public class SortModel implements JsonSerializable {
             sortModel.setField(object.getString("field"));
         }
         if (object.hasKey("dir")) {
-            sortModel.setDir(Dir.valueOf(object.getString("dir")));
+            sortModel.setDir(SortDir.valueOf(object.getString("dir")));
         }
         return sortModel;
     }

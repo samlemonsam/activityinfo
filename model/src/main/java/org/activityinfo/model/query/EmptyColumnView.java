@@ -79,7 +79,7 @@ public class EmptyColumnView implements ColumnView, Serializable {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         return sortVector;
     }
 }

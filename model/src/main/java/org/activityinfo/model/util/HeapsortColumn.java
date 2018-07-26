@@ -19,10 +19,11 @@
 
 package org.activityinfo.model.util;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.google.gwt.core.shared.GwtIncompatible;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
-import org.activityinfo.model.query.ColumnView;
+import org.activityinfo.model.query.ByteOrder;
+import org.activityinfo.model.query.IntOrder;
+import org.activityinfo.model.query.SortDir;
 
 import java.util.BitSet;
 
@@ -31,6 +32,42 @@ import java.util.BitSet;
  * Also allows for selection of a specific row range to sort on.
  */
 public final class HeapsortColumn {
+
+    /**
+     * Combines a {@link ByteOrder} function with a sort direction. If {@code direction} is
+     * {@link SortDir#DESC}, a new function is returned that reverses the ordering.
+     */
+    public static ByteOrder withDirection(ByteOrder order, SortDir direction) {
+        if(direction == SortDir.ASC) {
+            return order;
+        } else {
+            return (a, b) -> order.isLessThan(b, a);
+        }
+    }
+
+    /**
+     * Combines a {@link IntOrder} function with a sort direction. If {@code direction} is
+     * {@link SortDir#DESC}, a new function is returned that reverses the ordering.
+     */
+    public static IntOrder withIntDirection(IntOrder order, SortDir direction) {
+        if(direction == SortDir.ASC) {
+            return order;
+        } else {
+            return (a, b) -> order.isLessThan(b, a);
+        }
+    }
+
+    /**
+     * Creates an {@link IntOrder} function that orders integers in their natural order.
+     */
+    public static IntOrder withIntDirection(SortDir direction) {
+        if(direction == SortDir.ASC) {
+            return (a, b) -> a < b;
+        } else {
+            return (a, b) -> b < a;
+        }
+    }
+
 
     private static boolean isLessThan(double x, double y, boolean ascending) {
         if(ascending) {
@@ -53,37 +90,6 @@ public final class HeapsortColumn {
         }
     }
 
-    /**
-     * Given two numbers encoded as unsigned bytes from 0x01-0xFF, with missing values encoded as zeroes
-     *
-     * @param bx
-     * @param by
-     * @param ascending
-     * @return
-     */
-    @GwtIncompatible
-    private static boolean isLessThan(byte bx, byte by, boolean ascending) {
-        // Treat as unsigned
-        int x = UnsignedBytes.toInt(bx);
-        int y = UnsignedBytes.toInt(by);
-
-        // Missing values encoded as zeroes
-        boolean xMissing = (x == 0);
-        boolean yMissing = (y == 0);
-
-        if(ascending) {
-            if(xMissing && !yMissing) {
-                return true;
-            }
-            return x < y;
-
-        } else {
-            if(yMissing && !xMissing) {
-                return true;
-            }
-            return y < x;
-        }
-    }
 
     /**
      * Given two numbers encoded as unsigned shorts from 0x0001-0xFFFF, with missing values encoded as zeroes
@@ -115,27 +121,6 @@ public final class HeapsortColumn {
         }
     }
 
-    private static boolean isLessThanIntBoolean(int x, int y, boolean ascending) {
-        int a;
-        int b;
-
-        if(ascending) {
-            a = x;
-            b = y;
-        } else {
-            a = y;
-            b = x;
-        }
-
-        if (a == ColumnView.TRUE) {
-            return false;
-        } else if (a == ColumnView.FALSE) {
-            return b == ColumnView.TRUE;
-        } else {
-            // a == ColumnView.NA
-            return b != ColumnView.NA;
-        }
-    }
 
     private static boolean isLessThan(String str1, String str2, boolean ascending) {
         String a;
@@ -163,29 +148,6 @@ public final class HeapsortColumn {
             return null;
         } else {
             return str.toLowerCase();
-        }
-    }
-
-    private static boolean isLessThan(String[] labels, int enum1, int enum2, boolean ascending) {
-        int a;
-        int b;
-
-        if (ascending) {
-            a = enum1;
-            b = enum2;
-        } else {
-            a = enum2;
-            b = enum1;
-        }
-
-        if (a == b) {
-            return false;
-        } else if (a < 0 && b >= 0) {
-            return true;
-        } else if (b < 0) {
-            return false;
-        } else {
-            return toLower(labels[a]).compareTo(toLower(labels[b])) < 0;
         }
     }
 
@@ -226,131 +188,6 @@ public final class HeapsortColumn {
             return b == Boolean.TRUE;
         } else {
             return b != null;
-        }
-    }
-
-    /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) encoded as unsigned 8-bit integers,
-     * with zero as the missing value.
-     *
-     * @param val The value array to sort (unmutated)
-     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
-     * @param n The length of {@code val} and {@code index} - should be equal to the size of {@code range}
-     * @param range The rows of {@code val} on which to sort (unmutated)
-     */
-    public static void heapsortCompact8(byte[] val, int[] index, int n, int[] range, boolean ascending) {
-        int l, j, ir, i;
-        byte ra;
-        int ii;
-
-        if (n <= 1 || n != range.length) {
-            return;
-        }
-
-        l = (n >> 1) + 1;
-        ir = n-1;
-
-        while(true) {
-            // ==================================================
-            // Heapify a and ib and then sort them
-            // ==================================================
-
-            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
-            if (l > 0) {
-                l = l - 1;
-                ii = index[range[l]];
-                ra = val[ii];
-            }
-
-            else {
-                ii = index[range[ir]];
-                ra = val[ii];
-                index[range[ir]] = index[range[0]];
-
-                if (--ir == 0) {
-                    index[range[0]] = ii;
-                    return; // We're done
-                }
-            }
-
-            i = l;
-            j = (l << 1);
-            while (j <= ir) {
-                if (j < ir && isLessThan(val[index[range[j]]], val[index[range[j+1]]], ascending) || i == j) {
-                    ++j;
-                }
-                if (isLessThan(ra, val[index[range[j]]], ascending)) {
-                    index[range[i]] = index[range[j]];
-                    j += (i = j);
-                }
-                else {
-                    j = ir + 1;
-                }
-            }
-
-            index[range[i]] = ii;
-        }
-    }
-
-    /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) encoded as unsigned 8-bit integers,
-     * with zero as the missing value.
-     *
-     * @param val The value array to sort (unmutated)
-     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
-     * @param n The length of {@code val} and {@code index}
-     */
-    public static void heapsortCompact8(byte[] val, int[] index, int n, boolean ascending) {
-        int l, j, ir, i;
-        byte ra;
-        int ii;
-
-        if (n <= 1) {
-            return;
-        }
-
-        l = (n >> 1) + 1;
-        ir = n-1;
-
-        while(true) {
-            // ==================================================
-            // Heapify a and ib and then sort them
-            // ==================================================
-
-            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
-            if (l > 0) {
-                l = l - 1;
-                ii = index[l];
-                ra = val[ii];
-            }
-
-            else {
-                ii = index[ir];
-                ra = val[ii];
-                index[ir] = index[0];
-
-                if (--ir == 0) {
-                    index[0] = ii;
-                    return; // We're done
-                }
-            }
-
-            i = l;
-            j = (l << 1);
-            while (j <= ir) {
-                if (j < ir && isLessThan(val[index[j]], val[index[j+1]], ascending) || i == j) {
-                    ++j;
-                }
-                if (isLessThan(ra, val[index[j]], ascending)) {
-                    index[i] = index[j];
-                    j += (i = j);
-                }
-                else {
-                    j = ir + 1;
-                }
-            }
-
-            index[i] = ii;
         }
     }
 
@@ -480,16 +317,18 @@ public final class HeapsortColumn {
         }
     }
 
+
+
     /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) encoded as unsigned 8-bit integers,
-     * with zero as the missing value.
+     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}), using the provided order function
      *
      * @param val The value array to sort (unmutated)
      * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
      * @param n The length of {@code val} and {@code index} - should be equal to the size of {@code range}
      * @param range The rows of {@code val} on which to sort (unmutated)
+     * @param order a function which provides an ordering over the integers
      */
-    public static void heapsortBooleanInt(int[] val, int[] index, int n, int[] range, boolean ascending) {
+    public static void heapsortInt(int[] val, int[] index, int n, int[] range, IntOrder order) {
         int l, j, ir, i;
         int ra;
         int ii;
@@ -527,10 +366,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && isLessThanIntBoolean(val[index[range[j]]], val[index[range[j+1]]], ascending) || i == j) {
+                if (j < ir && order.isLessThan(val[index[range[j]]], val[index[range[j+1]]]) || i == j) {
                     ++j;
                 }
-                if (isLessThanIntBoolean(ra, val[index[range[j]]], ascending)) {
+                if (order.isLessThan(ra, val[index[range[j]]])) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -544,14 +383,13 @@ public final class HeapsortColumn {
     }
 
     /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) encoded as unsigned 8-bit integers,
-     * with zero as the missing value.
+     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}), using the provided order function.
      *
      * @param val The value array to sort (unmutated)
      * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
      * @param n The length of {@code val} and {@code index}
      */
-    public static void heapsortBooleanInt(int[] val, int[] index, int n, boolean ascending) {
+    public static void heapsortInt(int[] val, int[] index, int n, IntOrder ordering) {
         int l, j, ir, i;
         int ra;
         int ii;
@@ -589,10 +427,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && isLessThanIntBoolean(val[index[j]], val[index[j+1]], ascending) || i == j) {
+                if (j < ir && ordering.isLessThan(val[index[j]], val[index[j+1]]) || i == j) {
                     ++j;
                 }
-                if (isLessThanIntBoolean(ra, val[index[j]], ascending)) {
+                if (ordering.isLessThan(ra, val[index[j]])) {
                     index[i] = index[j];
                     j += (i = j);
                 }
@@ -863,140 +701,11 @@ public final class HeapsortColumn {
      * <p>Constricts the rows of {@code val}/{@code index} to be sorted to the indices given by {@code range}.</p>
      *
      * @param val The value array to sort (unmutated)
-     * @param labels the associated String labels of the value array (unmutated)
      * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
      * @param n The length of {@code val} and {@code index} - should be equal to the size of {@code range}
      * @param range The rows of {@code val} on which to sort (unmutated)
      */
-    public static void heapsortEnum(int[] val, String[] labels, int[] index, int n, int[] range, boolean ascending) {
-        int l, j, ir, i;
-        int ra;
-        int ii;
-
-        if (n <= 1 || n != range.length) {
-            return;
-        }
-
-        l = (n >> 1) + 1;
-        ir = n-1;
-
-        while(true) {
-            // ==================================================
-            // Heapify a and ib and then sort them
-            // ==================================================
-
-            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
-            if (l > 0) {
-                l = l - 1;
-                ii = index[range[l]];
-                ra = val[ii];
-            }
-
-            else {
-                ii = index[range[ir]];
-                ra = val[ii];
-                index[range[ir]] = index[range[0]];
-
-                if (--ir == 0) {
-                    index[range[0]] = ii;
-                    return; // We're done
-                }
-            }
-
-            i = l;
-            j = (l << 1);
-            while (j <= ir) {
-                if (j < ir && isLessThan(labels, val[index[range[j]]], val[index[range[j+1]]], ascending) || i == j) {
-                    ++j;
-                }
-                if (isLessThan(labels, ra, val[index[range[j]]], ascending)) {
-                    index[range[i]] = index[range[j]];
-                    j += (i = j);
-                }
-                else {
-                    j = ir + 1;
-                }
-            }
-
-            index[range[i]] = ii;
-        }
-    }
-
-    /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
-     * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
-     * @param val The value array to sort (unmutated)
-     * @param labels the associated String labels of the value array (unmutated)
-     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
-     * @param n The length of {@code val} and {@code index}
-     * @param ascending
-     */
-    public static void heapsortEnum(int[] val, String[] labels, int[] index, int n, boolean ascending) {
-        int l, j, ir, i;
-        int ra;
-        int ii;
-
-        if (n <= 1) {
-            return;
-        }
-
-        l = (n >> 1) + 1;
-        ir = n-1;
-
-        while(true) {
-            // ==================================================
-            // Heapify a and ib and then sort them
-            // ==================================================
-
-            // If the child node index is greater than 0, there must be a right node, so choose the right for swapping
-            if (l > 0) {
-                l = l - 1;
-                ii = index[l];
-                ra = val[ii];
-            }
-
-            else {
-                ii = index[ir];
-                ra = val[ii];
-                index[ir] = index[0];
-
-                if (--ir == 0) {
-                    index[0] = ii;
-                    return; // We're done
-                }
-            }
-
-            i = l;
-            j = (l << 1);
-            while (j <= ir) {
-                if (j < ir && isLessThan(labels, val[index[j]], val[index[j+1]], ascending) || i == j) {
-                    ++j;
-                }
-                if (isLessThan(labels, ra, val[index[j]], ascending)) {
-                    index[i] = index[j];
-                    j += (i = j);
-                }
-                else {
-                    j = ir + 1;
-                }
-            }
-
-            index[i] = ii;
-        }
-    }
-
-    /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
-     * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
-     * <p>Constricts the rows of {@code val}/{@code index} to be sorted to the indices given by {@code range}.</p>
-     *
-     * @param val The value array to sort (unmutated)
-     * @param labels the associated String labels of the value array (unmutated)
-     * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
-     * @param n The length of {@code val} and {@code index} - should be equal to the size of {@code range}
-     * @param range The rows of {@code val} on which to sort (unmutated)
-     */
-    public static void heapsortEnum(byte[] val, String[] labels, int[] index, int n, int[] range, boolean ascending) {
+    public static void heapsortByte(byte[] val, int[] index, int n, int[] range, ByteOrder order) {
         int l, j, ir, i;
         byte ra;
         int ii;
@@ -1034,10 +743,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && isLessThan(labels, val[index[range[j]]], val[index[range[j+1]]], ascending) || i == j) {
+                if (j < ir && order.isLessThan(val[index[range[j]]], val[index[range[j+1]]]) || i == j) {
                     ++j;
                 }
-                if (isLessThan(labels, ra, val[index[range[j]]], ascending)) {
+                if (order.isLessThan(ra, val[index[range[j]]])) {
                     index[range[i]] = index[range[j]];
                     j += (i = j);
                 }
@@ -1051,15 +760,14 @@ public final class HeapsortColumn {
     }
 
     /**
-     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using using GNU R's 'revsort' heapsort
-     * algorithm ( sort.c ).The row value array is not mutated during sorting. </p>
+     * <p>Sorts a column index vector ({@code index}) by row values ({@code val}) using the heapsort
+     * algorithm. The row value array is not mutated during sorting. </p>
      * @param val The value array to sort (unmutated)
-     * @param labels the associated String labels of the value array (unmutated)
      * @param index The index array to sort in tandem (mutated). This array gives the current order indices of {@code val}
      * @param n The length of {@code val} and {@code index}
-     * @param ascending
+     * @param order a function providing and ordering between bytes
      */
-    public static void heapsortEnum(byte[] val, String[] labels, int[] index, int n, boolean ascending) {
+    public static void heapsortByte(byte[] val, int[] index, int n, ByteOrder order) {
         int l, j, ir, i;
         byte ra;
         int ii;
@@ -1097,10 +805,10 @@ public final class HeapsortColumn {
             i = l;
             j = (l << 1);
             while (j <= ir) {
-                if (j < ir && isLessThan(labels, val[index[j]], val[index[j+1]], ascending) || i == j) {
+                if (j < ir && order.isLessThan(val[index[j]], val[index[j+1]]) || i == j) {
                     ++j;
                 }
-                if (isLessThan(labels, ra, val[index[j]], ascending)) {
+                if (order.isLessThan(ra, val[index[j]])) {
                     index[i] = index[j];
                     j += (i = j);
                 }

@@ -21,7 +21,7 @@ package org.activityinfo.geoadmin.merge2.view.match;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 
 
 public abstract class MappedView implements ColumnView {
@@ -91,7 +91,7 @@ public abstract class MappedView implements ColumnView {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         return source.order(sortVector, direction, range);
     }
 }

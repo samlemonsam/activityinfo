@@ -1,9 +1,6 @@
 package org.activityinfo.store.testing;
 
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.*;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
@@ -31,7 +28,7 @@ public class ColumnSortTest {
         QueryModel queryModel = new QueryModel(form.getFormId());
         queryModel.selectField(form.getChildrenFieldId()).as("children");
 
-        queryModel.addSortModel(new SortModel("children", SortModel.Dir.DESC));
+        queryModel.addSortModel(new SortModel("children", SortDir.DESC));
         ColumnSet columnSet = query(queryModel);
         ColumnView childColumn = columnSet.getColumnView("children");
 
@@ -42,7 +39,7 @@ public class ColumnSortTest {
         assertThat(childColumn.get(numRows-1), equalTo(Double.NaN));
 
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("children", SortModel.Dir.ASC));
+        queryModel.addSortModel(new SortModel("children", SortDir.ASC));
         columnSet = query(queryModel);
         childColumn = columnSet.getColumnView("children");
 
@@ -58,7 +55,7 @@ public class ColumnSortTest {
         QueryModel queryModel = new QueryModel(form.getFormId());
         queryModel.selectField(form.getSpouseFieldId()).as("spouse");
 
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.DESC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.DESC));
         ColumnSet columnSet = query(queryModel);
         ColumnView spouseColumn = columnSet.getColumnView("spouse");
 
@@ -69,7 +66,7 @@ public class ColumnSortTest {
         assertNull(spouseColumn.get(numRows-1));
 
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.ASC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.ASC));
         columnSet = query(queryModel);
         spouseColumn = columnSet.getColumnView("spouse");
 
@@ -85,7 +82,7 @@ public class ColumnSortTest {
         QueryModel queryModel = new QueryModel(form.getFormId());
         queryModel.selectField(form.getPregnantFieldId()).as("pregnant");
 
-        queryModel.addSortModel(new SortModel("pregnant", SortModel.Dir.DESC));
+        queryModel.addSortModel(new SortModel("pregnant", SortDir.DESC));
         ColumnSet columnSet = query(queryModel);
         ColumnView pregnantColumn = columnSet.getColumnView("pregnant");
 
@@ -96,7 +93,7 @@ public class ColumnSortTest {
         assertNull(pregnantColumn.get(numRows-1));
 
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("pregnant", SortModel.Dir.ASC));
+        queryModel.addSortModel(new SortModel("pregnant", SortDir.ASC));
         columnSet = query(queryModel);
         pregnantColumn = columnSet.getColumnView("pregnant");
 
@@ -138,14 +135,14 @@ public class ColumnSortTest {
         // Sorted by:
         // - Name, ASC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.ASC));
+        queryModel.addSortModel(new SortModel("name", SortDir.ASC));
         columnSet = query(queryModel);
         checkNameAsc(columnSet);
 
         // Sorted by:
         // - Name, DESC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.DESC));
+        queryModel.addSortModel(new SortModel("name", SortDir.DESC));
         columnSet = query(queryModel);
         checkNameDesc(columnSet);
 
@@ -153,8 +150,8 @@ public class ColumnSortTest {
         // - Name, DESC
         // - Spouse, ASC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.ASC));
+        queryModel.addSortModel(new SortModel("name", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.ASC));
         columnSet = query(queryModel);
         checkNameDesc(columnSet);
         checkNameDescSpouseAsc(columnSet);
@@ -163,8 +160,8 @@ public class ColumnSortTest {
         // - Name, DESC
         // - Spouse, DESC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.DESC));
+        queryModel.addSortModel(new SortModel("name", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.DESC));
         columnSet = query(queryModel);
         checkNameDesc(columnSet);
         checkNameDescSpouseDesc(columnSet);
@@ -174,9 +171,9 @@ public class ColumnSortTest {
         // - Spouse, DESC
         // - Children, ASC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("children", SortModel.Dir.ASC));
+        queryModel.addSortModel(new SortModel("name", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("children", SortDir.ASC));
         columnSet = query(queryModel);
         checkNameDesc(columnSet);
         checkNameDescSpouseDesc(columnSet);
@@ -187,9 +184,9 @@ public class ColumnSortTest {
         // - Spouse, DESC
         // - Children, DESC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("children", SortModel.Dir.DESC));
+        queryModel.addSortModel(new SortModel("name", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("children", SortDir.DESC));
         columnSet = query(queryModel);
         checkNameDesc(columnSet);
         checkNameDescSpouseDesc(columnSet);
@@ -201,10 +198,10 @@ public class ColumnSortTest {
         // --- Children, DESC
         // ---- Pregnant, ASC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("children", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("pregnant", SortModel.Dir.ASC));
+        queryModel.addSortModel(new SortModel("name", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("children", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("pregnant", SortDir.ASC));
         columnSet = query(queryModel);
         checkNameDesc(columnSet);
         checkNameDescSpouseDesc(columnSet);
@@ -217,10 +214,10 @@ public class ColumnSortTest {
         // --- Children, DESC
         // ---- Pregnant, DESC
         queryModel.getSortModels().clear();
-        queryModel.addSortModel(new SortModel("name", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("spouse", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("children", SortModel.Dir.DESC));
-        queryModel.addSortModel(new SortModel("pregnant", SortModel.Dir.DESC));
+        queryModel.addSortModel(new SortModel("name", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("spouse", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("children", SortDir.DESC));
+        queryModel.addSortModel(new SortModel("pregnant", SortDir.DESC));
         columnSet = query(queryModel);
         checkNameDesc(columnSet);
         checkNameDescSpouseDesc(columnSet);

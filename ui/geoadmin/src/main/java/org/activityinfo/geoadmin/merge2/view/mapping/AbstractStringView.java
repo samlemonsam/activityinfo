@@ -21,7 +21,7 @@ package org.activityinfo.geoadmin.merge2.view.mapping;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 
 public abstract class AbstractStringView implements ColumnView {
 
@@ -56,7 +56,7 @@ public abstract class AbstractStringView implements ColumnView {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
-        return sortVector;
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
+        throw new UnsupportedOperationException();
     }
 }

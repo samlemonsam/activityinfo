@@ -23,7 +23,7 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.FilteredColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 
 
 public class ColumnViewWrapper implements ColumnView {
@@ -99,7 +99,7 @@ public class ColumnViewWrapper implements ColumnView {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         // TODO: ColumnViewWrapper Sorting
         // Do not sort on column
         return sortVector;

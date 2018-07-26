@@ -22,7 +22,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EnumColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.SortDir;
 
 
 @SuppressWarnings("GwtInconsistentSerializableClass")
@@ -120,7 +120,7 @@ class ColumnArrayView implements EnumColumnView, ColumnView {
     }-*/;
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         // TODO: Enum Sorting
         // Do not sort on column
         return sortVector;

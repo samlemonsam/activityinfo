@@ -20,7 +20,10 @@ package org.activityinfo.store.query.shared;
 
 import org.activityinfo.model.query.*;
 import org.activityinfo.model.util.HeapsortColumn;
-import org.activityinfo.store.query.server.columns.*;
+import org.activityinfo.store.query.server.columns.DiscreteStringColumnView8;
+import org.activityinfo.store.query.server.columns.IntColumnView16;
+import org.activityinfo.store.query.server.columns.IntColumnView8;
+import org.activityinfo.store.query.server.columns.SparseNumberColumnView;
 import org.activityinfo.store.query.shared.columns.DiscreteStringColumnView;
 import org.activityinfo.store.query.shared.columns.MultiDiscreteStringColumnView;
 import org.hamcrest.Description;
@@ -42,10 +45,10 @@ public class HeapsortColumnTest {
         IntColumnView8 columnView = new IntColumnView8(values, values.length, -33);
         int[] indexes = new int[] { 0, 1, 2, 3, 4 };
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, -33, 0, 30, 50));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(50, 30, 0, -33, Double.NaN));
     }
 
@@ -55,10 +58,10 @@ public class HeapsortColumnTest {
         IntColumnView16 columnView = new IntColumnView16(values, values.length, -330);
         int[] indexes = new int[] { 0, 1, 2, 3, 4 };
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, -330, 0, 300, 500));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(500, 300, 0, -330, Double.NaN));
     }
 
@@ -68,10 +71,10 @@ public class HeapsortColumnTest {
         int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7, 8 };
         DoubleArrayColumnView columnView = new DoubleArrayColumnView(values, values.length);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, Double.NaN, -150.0, -15.0, -1.5, 0.0, 5.1, 51.0, 510.0));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(510.0, 51.0, 5.1, 0, -1.5, -15.0, -150.0, Double.NaN, Double.NaN));
     }
 
@@ -81,10 +84,10 @@ public class HeapsortColumnTest {
         int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7, 8 };
         SparseNumberColumnView columnView = new SparseNumberColumnView(values, 9, 5);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, -1.0, 0.0, 1.0, 2.0));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(2.0, 1.0, 0.0, -1.0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN));
     }
 
@@ -94,10 +97,10 @@ public class HeapsortColumnTest {
         int[] indexes = new int[] { 0, 1, 2, 3, 4, 5 };
         BooleanColumnView columnView = new BooleanColumnView(values);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(ColumnView.NA, ColumnView.NA, 0, 0, 1, 1));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(1, 1, 0, 0, ColumnView.NA, ColumnView.NA));
     }
 
@@ -107,10 +110,10 @@ public class HeapsortColumnTest {
         int indexes[] = {0, 1, 2, 3, 4, 5, 6, 7};
         StringArrayColumnView columnView = new StringArrayColumnView(values);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(null, "", "a", "aaa", "Abc", "c", "Cba", "ccc"));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo("ccc", "Cba", "c", "Abc", "aaa", "a", "", null));
     }
 
@@ -121,10 +124,10 @@ public class HeapsortColumnTest {
         int indexes[] = {0, 1, 2, 3, 4, 5};
         DiscreteStringColumnView columnView = new DiscreteStringColumnView(labels, selections);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo(null, "", "a", "b", "b", "c"));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
     }
 
@@ -135,10 +138,10 @@ public class HeapsortColumnTest {
         int indexes[] = {0, 1, 2, 3, 4, 5};
         DiscreteStringColumnView8 columnView = new DiscreteStringColumnView8(labels, selections);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo(null, "", "a", "b", "b", "c"));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(labelledArray(reorder(selections, indexes), labels), isArrayEqualTo("c", "b", "b", "a", "", null));
     }
 
@@ -170,10 +173,10 @@ public class HeapsortColumnTest {
             concatenatedSelections[i] = columnView.getString(i);
         }
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(concatenatedSelections, indexes), isArrayEqualTo(null, null, "a", "a,b", "a,b,"));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(concatenatedSelections, indexes), isArrayEqualTo("a,b,", "a,b", "a", null, null));
     }
 
@@ -187,10 +190,10 @@ public class HeapsortColumnTest {
         int indexes[] = {0, 1, 2, 3};
         BitSetColumnView columnView = new BitSetColumnView(values.length(), values);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(false, false, true, true));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, indexes), isArrayEqualTo(true, true, false, false));
     }
 
@@ -210,10 +213,10 @@ public class HeapsortColumnTest {
         int indexes[] = {0, 1, 2, 3, 4};
         BitSetWithMissingView columnView = new BitSetWithMissingView(values.length(), values, missing);
 
-        columnView.order(indexes, SortModel.Dir.ASC, null);
+        columnView.order(indexes, SortDir.ASC, null);
         assertThat(reorder(values, missing, indexes), isBooleanArrayEqualTo(null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE));
 
-        columnView.order(indexes, SortModel.Dir.DESC, null);
+        columnView.order(indexes, SortDir.DESC, null);
         assertThat(reorder(values, missing, indexes), isBooleanArrayEqualTo(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null));
     }
 

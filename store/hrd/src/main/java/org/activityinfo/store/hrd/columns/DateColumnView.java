@@ -2,7 +2,9 @@ package org.activityinfo.store.hrd.columns;
 
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.IntOrder;
+import org.activityinfo.model.query.SortDir;
+import org.activityinfo.model.util.HeapsortColumn;
 
 import java.util.function.IntFunction;
 
@@ -57,7 +59,19 @@ public class DateColumnView implements ColumnView {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
-        throw new UnsupportedOperationException("TODO");
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
+
+        // We can use natural order, as we have chosen an encoding that preserves
+        // the order of dates under transformation
+
+        IntOrder order = HeapsortColumn.withIntDirection(direction);
+
+        int numRows = values.length;
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortInt(values, sortVector, numRows, order);
+        } else {
+            HeapsortColumn.heapsortInt(values, sortVector, range.length, range, order);
+        }
+        return sortVector;
     }
 }

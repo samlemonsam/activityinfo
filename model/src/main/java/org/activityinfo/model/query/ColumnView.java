@@ -72,6 +72,6 @@ public interface ColumnView extends Serializable {
      * @param range of rows to order
      * @return int array of the reordered row index
      */
-    int[] order(int[] sortVector, SortModel.Dir direction, int[] range);
+    int[] order(int[] sortVector, SortDir direction, int[] range);
 
 }

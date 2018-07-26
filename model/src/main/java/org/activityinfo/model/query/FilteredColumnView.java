@@ -124,7 +124,7 @@ public class FilteredColumnView implements ColumnView {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         // TODO: FilteredColumnViews - order before filter? Currently sorts on all values
         return view.order(sortVector, direction, range);
     }

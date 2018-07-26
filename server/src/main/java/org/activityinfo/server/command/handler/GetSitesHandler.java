@@ -42,10 +42,7 @@ import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.query.ColumnView;
-import org.activityinfo.model.query.QueryModel;
-import org.activityinfo.model.query.SortModel;
+import org.activityinfo.model.query.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.ReferenceType;
@@ -572,11 +569,11 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         SortModel sortModel;
         switch(sortInfo.getSortDir()) {
             case ASC:
-                sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortModel.Dir.ASC);
+                sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortDir.ASC);
                 break;
             case DESC:
             default:
-                sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortModel.Dir.DESC);
+                sortModel = new SortModel(parseSortColumn(sortInfo.getSortField()), SortDir.DESC);
                 break;
         }
 

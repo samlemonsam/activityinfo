@@ -18,8 +18,10 @@
  */
 package org.activityinfo.store.query.server.columns;
 
-import org.activityinfo.model.query.*;
+import org.activityinfo.model.query.ColumnType;
+import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.EnumColumnView;
+import org.activityinfo.model.query.SortDir;
 import org.activityinfo.model.util.HeapsortColumn;
 
 import java.io.Serializable;
@@ -119,24 +121,28 @@ public class DiscreteStringColumnView8 implements EnumColumnView, Serializable {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         int numRows = values.length;
-        switch(direction) {
-            case ASC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnum(values, labels, sortVector, numRows, true);
-                } else {
-                    HeapsortColumn.heapsortEnum(values, labels, sortVector, range.length, range, true);
-                }
-                break;
-            case DESC:
-                if (range == null || range.length == numRows) {
-                    HeapsortColumn.heapsortEnum(values, labels, sortVector, numRows, false);
-                } else {
-                    HeapsortColumn.heapsortEnum(values, labels, sortVector, range.length, range, false);
-                }
-                break;
+        if (range == null || range.length == numRows) {
+            HeapsortColumn.heapsortByte(values, sortVector, numRows,
+                    HeapsortColumn.withDirection(this::isLessThan, direction));
+        } else {
+            HeapsortColumn.heapsortByte(values, sortVector, range.length, range,
+                    HeapsortColumn.withDirection(this::isLessThan, direction));
         }
         return sortVector;
     }
+
+    private boolean isLessThan(byte a, byte b) {
+        if (a == b) {
+            return false;
+        } else if (a < 0 && b >= 0) {
+            return true;
+        } else if (b < 0) {
+            return false;
+        } else {
+            return labels[a].compareToIgnoreCase(labels[b]) < 0;
+        }
+    }
+
 }

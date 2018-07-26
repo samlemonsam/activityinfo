@@ -119,12 +119,12 @@ public class StringArrayColumnView implements ColumnView, Serializable {
     }
 
     @Override
-    public int[] order(int[] sortVector, SortModel.Dir direction, int[] range) {
+    public int[] order(int[] sortVector, SortDir direction, int[] range) {
         int numRows = values.length;
         if (range == null || range.length == numRows) {
-            HeapsortColumn.heapsortString(values, sortVector, numRows, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortString(values, sortVector, numRows, direction == SortDir.ASC);
         } else {
-            HeapsortColumn.heapsortString(values, sortVector, range.length, range, direction == SortModel.Dir.ASC);
+            HeapsortColumn.heapsortString(values, sortVector, range.length, range, direction == SortDir.ASC);
         }
         return sortVector;
     }
