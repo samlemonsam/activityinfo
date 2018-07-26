@@ -96,12 +96,18 @@ public class MySqlRecordHistoryBuilder implements RecordHistoryProvider {
 
     private RecordHistory getRecordHistory2(VersionedFormStorage storage, RecordRef recordRef) throws SQLException {
 
+        List<RecordVersion> versions;
+        try {
+            versions = storage.getVersions(recordRef.getRecordId());
+        } catch (UnsupportedOperationException e) {
+            return RecordHistory.unavailable();
+        }
 
         FormClass formClass = storage.getFormClass();
         Map<ResourceId, String> monthlyFieldLabels = getMonthlyFieldLabels(formClass);
 
         List<RecordDelta> deltas = computeDeltas(formClass, null,
-                storage.getVersions(recordRef.getRecordId()), monthlyFieldLabels);
+                versions, monthlyFieldLabels);
 
         // Now add deltas from sub forms...
         for (FormField field : formClass.getFields()) {
