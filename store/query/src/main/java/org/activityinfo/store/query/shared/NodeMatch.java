@@ -284,7 +284,7 @@ public class NodeMatch {
     }
 
     public boolean isEnumBoolean() {
-        return fieldNode.getType() instanceof EnumType && fieldComponent.hasComponent();
+        return fieldNode != null && fieldNode.getType() instanceof EnumType && fieldComponent.hasComponent();
     }
 
     public EnumItem getEnumItem() {
