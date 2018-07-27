@@ -1,6 +1,5 @@
 package org.activityinfo.server.job;
 
-import com.google.cloud.sql.jdbc.internal.Charsets;
 import com.google.inject.Inject;
 import org.activityinfo.analysis.pivot.viewModel.*;
 import org.activityinfo.model.analysis.pivot.*;
@@ -34,7 +33,7 @@ public class ExportPivotTableExecutor implements JobExecutor<ExportPivotTableJob
         PivotTable pivotTable = viewModel.getPivotTable().waitFor();
         GeneratedResource export = storageProvider.create(CSV_UTF8_MIME, "PivotTable.csv");
 
-        try (OutputStreamWriter writer = new OutputStreamWriter(export.openOutputStream(), Charsets.UTF_8)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(export.openOutputStream(), "UTF-8")) {
             writer.write(PivotTableRenderer.renderDelimited(pivotTable, ","));
         }
 
