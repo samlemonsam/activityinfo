@@ -51,8 +51,8 @@ public class NodeMatch {
 
 
     public enum Type {
-        ID,
-        CLASS,
+        RECORD_ID,
+        FORM_ID,
         FIELD
     }
 
@@ -98,14 +98,20 @@ public class NodeMatch {
     public static NodeMatch forId(String idSymbol, FormClass formClass) {
         NodeMatch match = new NodeMatch();
         match.formClass = formClass;
-        match.type = Type.ID;
+        if(idSymbol.equals(ColumnModel.RECORD_ID_SYMBOL)) {
+            match.type = Type.RECORD_ID;
+        } else if(idSymbol.equals(ColumnModel.FORM_ID_SYMBOL)){
+            match.type = Type.FORM_ID;
+        } else {
+            throw new IllegalArgumentException(idSymbol);
+        }
         match.joins = Lists.newLinkedList();
         return match;
     }
 
     public boolean isRootId() {
         // only return true for unjoined ID types - i.e. root form/record ids
-        return type == Type.ID && joins.isEmpty();
+        return (type == Type.RECORD_ID || type == Type.FORM_ID) && joins.isEmpty();
     }
     
     public static NodeMatch forId(FormTree.Node parent, FormClass formClass) {
@@ -122,7 +128,7 @@ public class NodeMatch {
         match.joins = joinsTo(partitions, Optional.<StatFunction>absent());
         match.joins.add(new JoinNode(JoinType.REFERENCE, leaf.get(0).getDefiningFormClass().getId(), toExpr(leaf), formClass.getId()));
         match.formClass = formClass;
-        match.type = Type.ID;
+        match.type = Type.RECORD_ID;
         return match;
     }
 
@@ -193,7 +199,7 @@ public class NodeMatch {
                 joins.add(new JoinNode(
                         JoinType.SUBFORM,
                                 leftFormId,
-                                new SymbolNode(ColumnModel.ID_SYMBOL),
+                                new SymbolNode(ColumnModel.RECORD_ID_SYMBOL),
                                 rightFormId,
                                 aggregation));
 
@@ -264,11 +270,11 @@ public class NodeMatch {
             s.append('>');
         }
         switch (type) {
-            case ID:
+            case RECORD_ID:
                 s.append(formClass.getId());
                 s.append("@id");
                 break;
-            case CLASS:
+            case FORM_ID:
                 s.append(formClass.getId());
                 s.append("@class");
                 break;
@@ -307,8 +313,10 @@ public class NodeMatch {
 
     @Override
     public String toString() {
-        if(type == Type.ID) {
+        if(type == Type.RECORD_ID) {
             return formClass.getId() + ":" + "@id";
+        } else if(type == Type.FORM_ID) {
+            return formClass.getId() + ":" + "@formId";
         } else {
             return fieldNode.debugPath();
         }

@@ -59,7 +59,7 @@ public class CountDistinctNode extends MeasureTreeNode {
         return ImmutableMeasureModel.builder()
             .label(I18N.MESSAGES.countDistinctMeasure(formClass.getLabel()))
             .formId(rootFormId)
-            .formula(new CompoundExpr(formClass.getId(), ColumnModel.ID_SYMBOL).asExpression())
+            .formula(new CompoundExpr(formClass.getId(), ColumnModel.RECORD_ID_SYMBOL).asExpression())
             .addStatistics(Statistic.COUNT_DISTINCT)
             .build();
     }

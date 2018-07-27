@@ -49,7 +49,7 @@ public class SubFormDeletionTest {
 
         QueryModel queryModel = new QueryModel(ReferralSubForm.FORM_ID);
         queryModel.selectRecordId().as("id");
-        queryModel.selectExpr(new CompoundExpr(IncidentForm.FORM_ID, ColumnModel.ID_SYMBOL)).as("parent");
+        queryModel.selectExpr(new CompoundExpr(IncidentForm.FORM_ID, ColumnModel.RECORD_ID_SYMBOL)).as("parent");
         queryModel.selectExpr(new ConstantNode(1)).as("count");
 
         ColumnSet columnSet = query(queryModel);

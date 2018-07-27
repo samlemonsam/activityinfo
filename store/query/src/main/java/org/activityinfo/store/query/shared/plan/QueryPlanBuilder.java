@@ -103,9 +103,9 @@ public class QueryPlanBuilder {
         }
 
         switch (match.getType()) {
-            case ID:
+            case RECORD_ID:
                 return new IdFetchOp(match.getFormClass().getId());
-            case CLASS:
+            case FORM_ID:
                 throw new UnsupportedOperationException("TODO: class");
             default:
                 throw new UnsupportedOperationException("type: " + match.getType());

@@ -78,7 +78,7 @@ public class SiteDimBinding extends DimBinding {
 
     private SymbolNode siteId(FormTree formTree) {
         if(formTree.getRootFormId().getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-            return new SymbolNode(ColumnModel.ID_SYMBOL);
+            return new SymbolNode(ColumnModel.RECORD_ID_SYMBOL);
         } else {
             return new SymbolNode("site");
         }

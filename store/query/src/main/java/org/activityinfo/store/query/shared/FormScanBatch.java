@@ -125,11 +125,15 @@ public class FormScanBatch {
 
         } else {
             // id column, simple root column or embedded form
-            if (match.isRootId()) {
-                return addRecordIdColumn(filterLevel, match.getFormClass().getId());
-
-            } else {
-                return getDataColumn(filterLevel, match.getFormClass().getId(), match.getFieldComponent());
+            switch (match.getType()) {
+                case RECORD_ID:
+                    return addRecordIdColumn(filterLevel, match.getFormClass().getId());
+                case FORM_ID:
+                    return addConstantColumn(filterLevel, match.getFormClass(), match.getFormClass().getId().asString());
+                case FIELD:
+                    return getDataColumn(filterLevel, match.getFormClass().getId(), match.getFieldComponent());
+                default:
+                    throw new UnsupportedOperationException("Type: " + match.getType());
             }
         }
     }
@@ -169,7 +173,7 @@ public class FormScanBatch {
             case FIELD:
                 column = getDataColumn(filterLevel, match.getFormClass().getId(), match.getFieldComponent());
                 break;
-            case ID:
+            case RECORD_ID:
                 column = addRecordIdColumn(filterLevel, match.getFormClass().getId());
                 break;
             default:

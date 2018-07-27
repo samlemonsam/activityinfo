@@ -379,11 +379,10 @@ public class QueryEvaluator {
             List<Slot<ColumnView>> expandedNodes = Lists.newArrayList();
             for (NodeMatch node : nodes) {
                 switch (node.getType()) {
-                    case ID:
+                    case RECORD_ID:
+                    case FORM_ID:
                         expandedNodes.add(batch.addColumn(filterLevel, node));
                         break;
-                    case CLASS:
-                        throw new UnsupportedOperationException();
                     case FIELD:
                         if (node.isCalculated()) {
                             expandedNodes.add(expandCalculatedField(node));

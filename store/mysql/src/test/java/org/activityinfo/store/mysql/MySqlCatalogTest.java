@@ -184,10 +184,11 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void testSiteSimple() {
-        query(CuidAdapter.activityFormClass(1), "_id", "date1", "date2", "partner",
+        query(CuidAdapter.activityFormClass(1), "_id", "_class", "date1", "date2", "partner",
                 "partner.label", "location.label", "location.visible", "BENE", "cause", "project", "project.name");
 
         assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
+        assertThat(column("_class"), hasValues("a0000000001", "a0000000001", "a0000000001"));
         assertThat(column("partner"), hasValues(partnerRecordId(1), partnerRecordId(1), partnerRecordId(2)));
         assertThat(column("partner.label"), hasValues("NRC", "NRC", "Solidarites"));
         assertThat(column("location.label"), hasValues("Penekusu Kivu", "Ngshwe", "Boga"));
@@ -285,9 +286,9 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
 
     @Test
     public void testReportingPeriodWithDateFilter() {
-        queryWhere(CuidAdapter.reportingPeriodFormClass(3), Arrays.asList(ColumnModel.ID_SYMBOL, "date1"),
+        queryWhere(CuidAdapter.reportingPeriodFormClass(3), Arrays.asList(ColumnModel.RECORD_ID_SYMBOL, "date1"),
                 "date1 > '2009-01-15'");
-        assertThat(column(ColumnModel.ID_SYMBOL), hasValues("m0000000092", "m0000000093"));
+        assertThat(column(ColumnModel.RECORD_ID_SYMBOL), hasValues("m0000000092", "m0000000093"));
         assertThat(column("date1"), hasValues("2009-02-01", "2009-03-01"));
     }
 

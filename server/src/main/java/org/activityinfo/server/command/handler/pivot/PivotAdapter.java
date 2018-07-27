@@ -689,7 +689,7 @@ public class PivotAdapter {
         ResourceId rootFormClassId = formTree.getRootFormId();
         if(rootFormClassId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Root form class is the site, we need to compare against the ID
-            return ColumnModel.ID_SYMBOL;
+            return ColumnModel.RECORD_ID_SYMBOL;
         } else {
             // ROot form class is monhtly report, filter against the site id
             return CuidAdapter.field(rootFormClassId, CuidAdapter.SITE_FIELD).asString();

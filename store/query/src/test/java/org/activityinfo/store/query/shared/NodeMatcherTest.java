@@ -72,6 +72,13 @@ public class NodeMatcherTest {
 
     }
 
+    @Test
+    public void formId() {
+        givenRootForm("Contact Form", field("A", "Name"), field("B", "Phone Number"));
+
+        assertThat(resolve("_class"), contains("A"));
+
+    }
 
     @Test(expected = AmbiguousSymbolException.class)
     public void ambiguousRootField() {

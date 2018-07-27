@@ -84,7 +84,7 @@ public class QueryFilterBuilder {
         ResourceId rootFormClassId = formTree.getRootFormId();
         if(rootFormClassId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             // Root form class is the site, we need to compare against the ID
-            return ColumnModel.ID_SYMBOL;
+            return ColumnModel.RECORD_ID_SYMBOL;
         } else {
             // ROot form class is monhtly report, filter against the site id
             return CuidAdapter.field(rootFormClassId, CuidAdapter.SITE_FIELD).asString();
@@ -136,7 +136,7 @@ public class QueryFilterBuilder {
 
         for (FormMetadata form : formTree.getForms()) {
             if (form.getId().getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN) {
-                expressions.add(new CompoundExpr(form.getId(), ColumnModel.ID_SYMBOL));
+                expressions.add(new CompoundExpr(form.getId(), ColumnModel.RECORD_ID_SYMBOL));
             }
         }
         return expressions;

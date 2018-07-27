@@ -77,7 +77,7 @@ public class Formulas {
     }
     
     public static FormulaNode idEqualTo(ResourceId id) {
-        return equals(symbol(ColumnModel.ID_SYMBOL), idConstant(id));
+        return equals(symbol(ColumnModel.RECORD_ID_SYMBOL), idConstant(id));
     }
     
     public static FormulaNode idEqualTo(Set<ResourceId> ids) {

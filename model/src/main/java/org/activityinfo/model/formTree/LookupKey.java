@@ -118,7 +118,7 @@ public class LookupKey {
      * Constructs a new LookupKey for the given form using the raw record id.
      */
     LookupKey(int keyIndex, FormClass formClass) {
-        this(keyIndex, null, null, formClass, new SymbolNode(ColumnModel.ID_SYMBOL), "ID");
+        this(keyIndex, null, null, formClass, new SymbolNode(ColumnModel.RECORD_ID_SYMBOL), "ID");
     }
 
     public int getKeyIndex() {
@@ -212,7 +212,7 @@ public class LookupKey {
     }
 
     public String label(FormInstance record) {
-        if(fieldId.getName().equals(ColumnModel.ID_SYMBOL)) {
+        if(fieldId.getName().equals(ColumnModel.RECORD_ID_SYMBOL)) {
             return record.getId().asString();
         }
 

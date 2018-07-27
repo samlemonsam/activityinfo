@@ -30,7 +30,6 @@ import org.activityinfo.model.formula.functions.FormulaFunction;
 import org.activityinfo.model.formula.functions.StatFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.RecordFieldType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -186,7 +185,7 @@ public class NodeMatcher {
         List<NodeMatch> matches = Lists.newLinkedList();
 
         // Check for a reference to a form record id or the form id
-        if (path.isLeaf() && path.head().equals(ColumnModel.ID_SYMBOL) || path.head().equals(ColumnModel.CLASS_SYMBOL)) {
+        if (path.isLeaf() && path.head().equals(ColumnModel.RECORD_ID_SYMBOL) || path.head().equals(ColumnModel.FORM_ID_SYMBOL)) {
             matches.add(NodeMatch.forId(path.head(), tree.getRootFormClass()));
         }
 
@@ -224,7 +223,7 @@ public class NodeMatcher {
             if(childForm.isPresent()) {
                 Iterable<FormTree.Node> childFields = parentField.getChildren(childFormId);
 
-                if (path.matches(childForm.get()) && path.peek().equals(ColumnModel.ID_SYMBOL)) {
+                if (path.matches(childForm.get()) && path.peek().equals(ColumnModel.RECORD_ID_SYMBOL)) {
                     results.add(NodeMatch.forId(parentField, childForm.get()));
 
                 } else if (path.matches(childForm.get()) || path.matches(parentField)) {

@@ -96,9 +96,9 @@ public class PermissionFilters {
 
         for (FieldReference reference : references) {
             switch (reference.getMatch().getType()) {
-                case ID:
+                case RECORD_ID:
                     return Optional.absent();
-                case CLASS:
+                case FORM_ID:
                     return Optional.absent();
                 case FIELD:
                     rootFields.add(reference.getMatch().getFieldNode().getPath().getRoot());
@@ -129,7 +129,7 @@ public class PermissionFilters {
 
         return Optional.of(filter.transform(x -> {
             if(x.equals(fieldExpr)) {
-                return new SymbolNode(ColumnModel.ID_SYMBOL);
+                return new SymbolNode(ColumnModel.RECORD_ID_SYMBOL);
             } else {
                 return x;
             }

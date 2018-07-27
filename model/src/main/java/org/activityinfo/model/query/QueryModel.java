@@ -180,14 +180,14 @@ public class QueryModel implements JsonSerializable {
      */
     public ColumnModel selectRecordId() {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setFormula(new SymbolNode(ColumnModel.ID_SYMBOL));
+        columnModel.setFormula(new SymbolNode(ColumnModel.RECORD_ID_SYMBOL));
         columns.add(columnModel);
         return columnModel;
     }
 
     public ColumnModel selectClassId() {
         ColumnModel columnModel = new ColumnModel();
-        columnModel.setFormula(new SymbolNode(ColumnModel.CLASS_SYMBOL));
+        columnModel.setFormula(new SymbolNode(ColumnModel.FORM_ID_SYMBOL));
         columns.add(columnModel);
         return columnModel;
     }

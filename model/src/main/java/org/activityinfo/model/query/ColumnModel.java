@@ -36,8 +36,8 @@ import static org.activityinfo.json.Json.createObject;
  */
 public class ColumnModel implements JsonSerializable {
 
-    public static final String ID_SYMBOL = "_id";
-    public static final String CLASS_SYMBOL = "_class";
+    public static final String RECORD_ID_SYMBOL = "_id";
+    public static final String FORM_ID_SYMBOL = "_class";
     public static final String PARENT_SYMBOL = "@parent";
 
 

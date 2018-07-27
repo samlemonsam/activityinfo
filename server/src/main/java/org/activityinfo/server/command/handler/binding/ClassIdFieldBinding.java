@@ -29,7 +29,7 @@ import java.util.List;
 
 public abstract class ClassIdFieldBinding implements FieldBinding {
 
-    public static final String CLASS_ID_COLUMN = ColumnModel.CLASS_SYMBOL;
+    public static final String CLASS_ID_COLUMN = ColumnModel.FORM_ID_SYMBOL;
 
     @Override
     public BaseModelData[] extractFieldData(BaseModelData[] dataArray, ColumnSet columnSet) {

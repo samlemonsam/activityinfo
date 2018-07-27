@@ -419,7 +419,7 @@ public class FormClass implements FormElementContainer, JsonSerializable {
         }
 
         // Otherwise fall back to the generated id
-        return new SymbolNode(ColumnModel.ID_SYMBOL);
+        return new SymbolNode(ColumnModel.RECORD_ID_SYMBOL);
     }
 
     public static FormClass fromJson(JsonValue object) {

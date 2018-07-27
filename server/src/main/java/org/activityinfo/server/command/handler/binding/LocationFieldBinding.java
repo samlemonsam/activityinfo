@@ -40,7 +40,7 @@ import static org.activityinfo.server.command.handler.GetSitesHandler.getRange;
 
 public class LocationFieldBinding implements FieldBinding {
 
-    public static final SymbolNode ID_SYMBOL = new SymbolNode(ColumnModel.ID_SYMBOL);
+    public static final SymbolNode ID_SYMBOL = new SymbolNode(ColumnModel.RECORD_ID_SYMBOL);
     public static final SymbolNode LOCATION_SYMBOL = new SymbolNode("location");
     public static final SymbolNode NAME_SYMBOL = new SymbolNode("name");
     public static final SymbolNode CODE_SYMBOL = new SymbolNode("axe");

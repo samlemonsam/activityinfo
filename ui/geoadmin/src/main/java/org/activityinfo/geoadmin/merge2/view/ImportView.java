@@ -177,7 +177,6 @@ public class ImportView {
         } catch (IOException e) {
             throw new RuntimeException("Exception updating geometry");
         }
-
     }
 
     private void updateGeometry(GeoAdminClient client, Map<ResourceId, ResourceId> idMap) throws IOException {
@@ -220,9 +219,7 @@ public class ImportView {
                 }
             }
         }
-
     }
-
 }
 
 

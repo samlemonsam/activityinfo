@@ -38,12 +38,12 @@ public class IdNode extends MeasureTreeNode {
 
     public IdNode(FormClass formClass) {
         this.formClass = formClass;
-        this.formula = new SymbolNode(ColumnModel.ID_SYMBOL);
+        this.formula = new SymbolNode(ColumnModel.RECORD_ID_SYMBOL);
     }
 
     @Override
     public String getId() {
-        return ColumnModel.ID_SYMBOL;
+        return ColumnModel.RECORD_ID_SYMBOL;
     }
 
     @Override

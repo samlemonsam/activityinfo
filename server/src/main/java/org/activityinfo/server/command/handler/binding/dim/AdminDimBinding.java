@@ -65,7 +65,7 @@ public class AdminDimBinding extends DimBinding {
         
         if(adminClass.isPresent()) {
             ColumnModel id = new ColumnModel();
-            id.setFormula(new CompoundExpr(levelClassId, ColumnModel.ID_SYMBOL));
+            id.setFormula(new CompoundExpr(levelClassId, ColumnModel.RECORD_ID_SYMBOL));
             id.setId(idColumn);
             
             ColumnModel label = new ColumnModel();
