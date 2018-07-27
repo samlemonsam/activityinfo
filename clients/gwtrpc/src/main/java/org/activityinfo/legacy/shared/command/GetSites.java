@@ -46,7 +46,7 @@ public class GetSites extends PagingGetCommand<SiteResult> implements Command<Si
     private boolean fetchDates = true;
     private boolean fetchAllReportingPeriods = false;
 
-    private boolean legacyFetch = true;
+    private boolean legacyFetch = false;
 
     public GetSites() {
     }
