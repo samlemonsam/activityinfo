@@ -75,13 +75,7 @@ public class GetSitesTest extends CommandTestCase2 {
 
         Assert.assertEquals("entityName", "Ituri", s.getAdminEntity(1)
                 .getName());
-        try {
-            Assert.assertNotNull("admin bounds", s.getAdminEntity(1).getBounds());
-            throw new CommandException("Admin Bounds Location extraction enabled - remove AssertionError catch");
-        } catch (AssertionError err) {
-            // TODO: Admin Bounds Location extraction disabled until "ST_" functions corrected on QueryEngine
-            // Remove try{} catch{} when enabled and I start throwing CommandExceptions
-        }
+
         Assert.assertThat("indicator", s.getIndicatorValue(1), equalTo(10000.0));
         Assert.assertNull("site x", s.getX());
 
