@@ -45,12 +45,13 @@ public class AnalysisViewModel {
 
     private String id;
 
+    private final PivotViewModel pivotViewModel;
+
     private final StatefulValue<Optional<PivotModel>> draftModel;
     private final StatefulValue<DraftMetadata> draftMetadata;
 
     private final Observable<Maybe<TypedAnalysis<PivotModel>>> saved;
     private final Observable<WorkingModel<PivotModel>> workingModel;
-    private final Observable<PivotViewModel> pivotViewModel;
 
     public AnalysisViewModel(FormStore formStore) {
         this(formStore, ResourceId.generateCuid());
@@ -73,8 +74,8 @@ public class AnalysisViewModel {
 
         // Before anything else, we need to fetch/compute the metadata required to even
         // plan the computation
-        Observable<PivotModel> pivotModel = workingModel.transform(m -> m.getModel());
-        this.pivotViewModel = pivotModel.transform(pm -> new PivotViewModel(pivotModel, formStore));
+        Observable<PivotModel> pivotModel = workingModel.transform(wm -> wm.getModel());
+        this.pivotViewModel = new PivotViewModel(pivotModel, formStore);
     }
 
     public String getId() {
@@ -90,9 +91,7 @@ public class AnalysisViewModel {
     }
 
     public Observable<EffectiveModel> getEffectiveModel() {
-        return pivotViewModel
-                .transform(PivotViewModel::getEffectiveModel)
-                .transform(Observable::get);
+        return pivotViewModel.getEffectiveModel();
     }
 
     public PivotModel updateModel(PivotModel model) {
@@ -112,15 +111,11 @@ public class AnalysisViewModel {
     }
 
     public Observable<List<EffectiveDimension>> getDimensionListItems() {
-        return pivotViewModel
-                .transform(PivotViewModel::getDimensions)
-                .transform(Observable::get);
+        return pivotViewModel.getDimensions();
     }
 
     public Observable<FormForest> getFormForest() {
-        return pivotViewModel
-                .transform(PivotViewModel::getFormForest)
-                .transform(Observable::get);
+        return pivotViewModel.getFormForest();
     }
 
     public void addMeasure(MeasureModel measure) {
@@ -134,15 +129,11 @@ public class AnalysisViewModel {
 
 
     public Observable<AnalysisResult> getResultTable() {
-        return pivotViewModel
-                .transform(PivotViewModel::getResultTable)
-                .transform(Observable::get);
+        return pivotViewModel.getResultTable();
     }
 
     public Observable<PivotTable> getPivotTable() {
-        return pivotViewModel
-                .transform(PivotViewModel::getPivotTable)
-                .transform(Observable::get);
+        return pivotViewModel.getPivotTable();
     }
 
     public void updateTitle(String title) {
