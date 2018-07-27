@@ -76,7 +76,7 @@ public class NodeMatcherTest {
     public void formId() {
         givenRootForm("Contact Form", field("A", "Name"), field("B", "Phone Number"));
 
-        assertThat(resolve("_class"), contains("A"));
+        assertThat(resolve("_class"), contains("Contact Form@formId"));
 
     }
 

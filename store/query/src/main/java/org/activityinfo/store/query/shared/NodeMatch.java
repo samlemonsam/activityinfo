@@ -276,7 +276,7 @@ public class NodeMatch {
                 break;
             case FORM_ID:
                 s.append(formClass.getId());
-                s.append("@class");
+                s.append("@formId");
                 break;
             case FIELD:
                 s.append(fieldComponent);
