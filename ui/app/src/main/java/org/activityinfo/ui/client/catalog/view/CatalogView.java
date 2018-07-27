@@ -29,7 +29,6 @@ import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.chrome.HasTitle;
 import org.activityinfo.ui.client.measureDialog.view.CatalogTreeView;

@@ -46,7 +46,7 @@ import org.activityinfo.ui.client.store.http.CatalogRequest;
 import org.activityinfo.ui.client.store.http.DatabaseRequest;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.http.SubRecordsRequest;
-import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
+import org.activityinfo.store.query.shared.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 

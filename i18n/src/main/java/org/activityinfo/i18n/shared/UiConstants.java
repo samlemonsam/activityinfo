@@ -1891,6 +1891,18 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Select a date (YYYY-MM-DD)")
     String selectDatePlaceholder();
 
+    @DefaultStringValue("Wide Format")
+    String wideFormat();
+
+    @DefaultStringValue("Each Form and Activity is exported as a separate worksheet. <br> <br> All Fields appear in columns, with each Record in separate rows.")
+    String wideFormatDescription();
+
+    @DefaultStringValue("Long Format")
+    String longFormat();
+
+    @DefaultStringValue("All Forms and Activities are exported as a single worksheet. <br> <br> Each Quantity Field and Value appear in a separate row.")
+    String longFormatDescription();
+
     @DefaultStringValue("Remove User")
     String removeUser();
 

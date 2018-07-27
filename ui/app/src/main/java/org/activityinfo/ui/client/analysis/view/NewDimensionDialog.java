@@ -40,9 +40,9 @@ import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.Subscription;
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.FormForest;
+import org.activityinfo.model.analysis.pivot.DimensionModel;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
+import org.activityinfo.analysis.pivot.viewModel.FormForest;
 
 import java.util.ArrayList;
 import java.util.List;

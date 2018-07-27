@@ -20,7 +20,7 @@ package org.activityinfo.ui.client.analysis.view;
 
 import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
+import org.activityinfo.model.analysis.pivot.DimensionModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 

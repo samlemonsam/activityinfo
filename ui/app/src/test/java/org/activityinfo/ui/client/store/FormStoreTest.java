@@ -35,6 +35,7 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.store.query.shared.FormOfflineStatus;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.*;

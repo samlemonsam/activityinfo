@@ -22,6 +22,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.model.job.ExportAuditLog;
 import org.activityinfo.model.job.ExportFormJob;
+import org.activityinfo.model.job.ExportLongFormatJob;
+import org.activityinfo.model.job.ExportPivotTableJob;
 
 /**
  * Creates Jobs based on their type id
@@ -40,6 +42,10 @@ public class ExecutorFactory {
             return injector.getInstance(ExportFormExecutor.class);
         } else if(type.equals(ExportAuditLog.TYPE)) {
             return injector.getInstance(ExportAuditLogExecutor.class);
+        } else if (type.equals(ExportPivotTableJob.TYPE)) {
+            return injector.getInstance(ExportPivotTableExecutor.class);
+        } else if (type.equals(ExportLongFormatJob.TYPE)) {
+            return injector.getInstance(ExportLongFormatExecutor.class);
         }
         throw new IllegalArgumentException("No such type " + type);
     }

@@ -20,7 +20,7 @@ package org.activityinfo.ui.client.measureDialog.view;
 
 import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 public class ReferenceNode extends MeasureTreeNode {

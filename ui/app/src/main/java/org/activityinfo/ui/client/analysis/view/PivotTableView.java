@@ -34,10 +34,10 @@ import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.info.InfoConfig;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.EffectiveDimension;
-import org.activityinfo.ui.client.analysis.viewModel.PivotTable;
-import org.activityinfo.ui.client.analysis.viewModel.PivotTableRenderer;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
+import org.activityinfo.analysis.pivot.viewModel.EffectiveDimension;
+import org.activityinfo.analysis.pivot.viewModel.PivotTable;
+import org.activityinfo.analysis.pivot.viewModel.PivotTableRenderer;
 
 import java.util.ArrayList;
 import java.util.Arrays;

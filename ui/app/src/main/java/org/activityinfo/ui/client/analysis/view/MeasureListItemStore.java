@@ -20,9 +20,9 @@ package org.activityinfo.ui.client.analysis.view;
 
 import com.sencha.gxt.data.shared.ListStore;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.EffectiveMeasure;
-import org.activityinfo.ui.client.analysis.viewModel.EffectiveModel;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
+import org.activityinfo.analysis.pivot.viewModel.EffectiveMeasure;
+import org.activityinfo.analysis.pivot.viewModel.EffectiveModel;
 
 import java.util.ArrayList;
 import java.util.List;

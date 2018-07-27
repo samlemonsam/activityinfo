@@ -20,10 +20,8 @@ package org.activityinfo.ui.client.measureDialog.view;
 
 import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.analysis.TableColumn;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
-import org.activityinfo.ui.client.table.ColumnDialog;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
 
-import java.util.Collection;
 import java.util.Optional;
 
 

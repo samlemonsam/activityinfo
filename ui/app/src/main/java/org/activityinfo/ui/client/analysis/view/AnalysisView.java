@@ -36,10 +36,10 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.analysis.model.Axis;
-import org.activityinfo.ui.client.analysis.model.PivotModel;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.WorkingModel;
+import org.activityinfo.model.analysis.pivot.Axis;
+import org.activityinfo.model.analysis.pivot.PivotModel;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
+import org.activityinfo.analysis.pivot.viewModel.WorkingModel;
 import org.activityinfo.ui.client.chrome.HasTitle;
 
 public class AnalysisView implements IsWidget, HasTitle {

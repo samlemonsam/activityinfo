@@ -25,8 +25,8 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.query.ColumnModel;
-import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.model.analysis.pivot.ImmutableMeasureModel;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 import java.util.Optional;

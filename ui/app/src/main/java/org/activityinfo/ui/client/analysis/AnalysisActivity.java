@@ -22,7 +22,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.activityinfo.ui.client.analysis.view.AnalysisView;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.store.FormStore;
 
 

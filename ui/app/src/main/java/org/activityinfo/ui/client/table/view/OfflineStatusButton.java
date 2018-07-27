@@ -26,7 +26,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.FormStore;
-import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
+import org.activityinfo.store.query.shared.FormOfflineStatus;
 
 
 public class OfflineStatusButton implements IsWidget {

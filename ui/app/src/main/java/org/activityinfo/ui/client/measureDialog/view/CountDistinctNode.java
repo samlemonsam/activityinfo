@@ -24,9 +24,9 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
-import org.activityinfo.ui.client.analysis.model.Statistic;
+import org.activityinfo.model.analysis.pivot.ImmutableMeasureModel;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
+import org.activityinfo.model.analysis.pivot.Statistic;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 public class CountDistinctNode extends MeasureTreeNode {

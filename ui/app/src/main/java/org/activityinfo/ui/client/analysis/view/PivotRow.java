@@ -18,8 +18,8 @@
  */
 package org.activityinfo.ui.client.analysis.view;
 
-import org.activityinfo.ui.client.analysis.viewModel.PivotTable;
-import org.activityinfo.ui.client.analysis.viewModel.Point;
+import org.activityinfo.analysis.pivot.viewModel.PivotTable;
+import org.activityinfo.analysis.pivot.viewModel.Point;
 
 public class PivotRow {
     private final String[] rowHeaders;

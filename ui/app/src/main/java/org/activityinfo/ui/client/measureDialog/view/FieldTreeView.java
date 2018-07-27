@@ -35,7 +35,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.analysis.viewModel.FormForest;
+import org.activityinfo.analysis.pivot.viewModel.FormForest;
 
 public class FieldTreeView implements IsWidget {
 

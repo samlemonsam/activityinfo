@@ -37,10 +37,10 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
-import org.activityinfo.ui.client.analysis.model.Statistic;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
+import org.activityinfo.model.analysis.pivot.ImmutableMeasureModel;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
+import org.activityinfo.model.analysis.pivot.Statistic;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.formulaDialog.FormulaDialog;
 import org.activityinfo.ui.client.measureDialog.view.MeasureDialog;
 

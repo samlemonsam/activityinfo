@@ -29,11 +29,14 @@ import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.job.ExportLongFormatJob;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.ClientContext;
@@ -51,6 +54,7 @@ import org.activityinfo.ui.client.page.common.dialog.SavePromptMessageBox;
 import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
+import org.activityinfo.ui.client.page.config.design.ExportJobTask;
 import org.activityinfo.ui.client.page.entry.column.DefaultColumnModelProvider;
 import org.activityinfo.ui.client.page.entry.form.PrintDataEntryForm;
 import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
@@ -59,6 +63,7 @@ import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.report.ExportSitesTask;
+import org.activityinfo.ui.client.page.report.ExportTypeDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
@@ -76,6 +81,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private final Dispatcher dispatcher;
     private final EventBus eventBus;
+    private final ActivityInfoClientAsync client;
 
     private GroupingComboBox groupingComboBox;
 
@@ -105,6 +111,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         this.eventBus = eventBus;
         this.dispatcher = dispatcher;
         this.resourceLocator = resourceLocator;
+
+        this.client = new ActivityInfoClientAsyncImpl();
 
         setLayout(new BorderLayout());
 
@@ -468,12 +476,38 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
             form.print(activityId);
 
         } else if (UIActions.EXPORT.equals(actionId)) {
-            ExportDialog dialog = new ExportDialog();
-            dialog.start(new ExportSitesTask(dispatcher, filter));
-
+            onExport(filter);
         } else if (UIActions.IMPORT.equals(actionId)) {
             doImport();
         }
+    }
+
+    private void onExport(Filter filter) {
+        if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
+            ExportTypeDialog dialog = new ExportTypeDialog();
+            dialog.setCallback(selection -> {
+                if (ExportTypeDialog.LONG_FORMAT.equals(selection)) {
+                    exportLongFormat(filter);
+                } else if (ExportTypeDialog.WIDE_FORMAT.equals(selection)) {
+                    exportSites(filter);
+                }
+                return null;
+            });
+            dialog.show();
+        } else {
+            exportSites(filter);
+        }
+    }
+
+    private void exportLongFormat(Filter filter) {
+        ExportDialog dialog = new ExportDialog();
+        ExportLongFormatJob job = new ExportLongFormatJob(filter.getRestrictedCategory(DimensionType.Database));
+        dialog.start(new ExportJobTask(client, job));
+    }
+
+    private void exportSites(Filter filter) {
+        ExportDialog dialog = new ExportDialog();
+        dialog.start(new ExportSitesTask(dispatcher, filter));
     }
 
     private void editSite(SiteDTO site) {

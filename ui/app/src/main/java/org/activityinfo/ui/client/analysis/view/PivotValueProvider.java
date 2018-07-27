@@ -19,7 +19,7 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import com.sencha.gxt.core.client.ValueProvider;
-import org.activityinfo.ui.client.analysis.viewModel.PivotTable;
+import org.activityinfo.analysis.pivot.viewModel.PivotTable;
 
 public class PivotValueProvider implements ValueProvider<PivotRow, String> {
 

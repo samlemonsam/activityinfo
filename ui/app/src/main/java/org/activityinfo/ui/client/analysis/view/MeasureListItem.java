@@ -18,8 +18,8 @@
  */
 package org.activityinfo.ui.client.analysis.view;
 
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
-import org.activityinfo.ui.client.analysis.viewModel.EffectiveMeasure;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
+import org.activityinfo.analysis.pivot.viewModel.EffectiveMeasure;
 
 public class MeasureListItem {
     private EffectiveMeasure model;

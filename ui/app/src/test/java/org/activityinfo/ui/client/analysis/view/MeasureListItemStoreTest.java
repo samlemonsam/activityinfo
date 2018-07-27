@@ -19,9 +19,9 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
+import org.activityinfo.model.analysis.pivot.ImmutableMeasureModel;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.junit.Before;
 import org.junit.Test;

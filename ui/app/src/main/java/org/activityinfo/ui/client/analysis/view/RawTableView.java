@@ -27,10 +27,10 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisResult;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.DimensionSet;
-import org.activityinfo.ui.client.analysis.viewModel.Point;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisResult;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
+import org.activityinfo.analysis.pivot.viewModel.DimensionSet;
+import org.activityinfo.analysis.pivot.viewModel.Point;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -19,7 +19,7 @@
 package org.activityinfo.ui.client.analysis.view;
 
 import com.sencha.gxt.core.client.ValueProvider;
-import org.activityinfo.ui.client.analysis.viewModel.Point;
+import org.activityinfo.analysis.pivot.viewModel.Point;
 
 class PointValueProvider implements ValueProvider<Point, Double> {
     @Override

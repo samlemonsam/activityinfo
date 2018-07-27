@@ -5,6 +5,7 @@ import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.analysis.pivot.PivotModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
@@ -126,4 +127,5 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     public Promise<Void> cancelDatabaseTransfer(int i) {
         return offline();
     }
+
 }

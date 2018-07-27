@@ -40,7 +40,7 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.testing.TestingStorageProvider;
-import org.activityinfo.ui.client.store.offline.FormOfflineStatus;
+import org.activityinfo.store.query.shared.FormOfflineStatus;
 
 import java.util.*;
 import java.util.function.Supplier;

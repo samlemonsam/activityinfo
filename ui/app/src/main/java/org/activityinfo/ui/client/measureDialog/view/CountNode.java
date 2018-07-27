@@ -22,8 +22,8 @@ import com.google.gwt.resources.client.ImageResource;
 import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.ui.client.analysis.model.ImmutableMeasureModel;
-import org.activityinfo.ui.client.analysis.model.MeasureModel;
+import org.activityinfo.model.analysis.pivot.ImmutableMeasureModel;
+import org.activityinfo.model.analysis.pivot.MeasureModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 import java.util.Optional;

@@ -40,7 +40,7 @@ import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.ui.client.analysis.viewModel.FormForest;
+import org.activityinfo.analysis.pivot.viewModel.FormForest;
 import org.activityinfo.ui.client.measureDialog.view.FieldTreeView;
 import org.activityinfo.ui.client.measureDialog.view.MeasureTreeNode;
 import org.activityinfo.ui.client.table.view.Dialogs;

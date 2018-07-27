@@ -24,9 +24,9 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.ui.client.analysis.model.DimensionMapping;
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
+import org.activityinfo.model.analysis.pivot.DimensionMapping;
+import org.activityinfo.model.analysis.pivot.DimensionModel;
+import org.activityinfo.model.analysis.pivot.ImmutableDimensionModel;
 import org.activityinfo.ui.client.icons.IconBundle;
 
 

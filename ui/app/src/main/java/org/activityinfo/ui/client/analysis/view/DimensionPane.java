@@ -41,12 +41,12 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import com.sencha.gxt.widget.core.client.tree.Tree;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.ui.client.analysis.model.Axis;
-import org.activityinfo.ui.client.analysis.model.DateLevel;
-import org.activityinfo.ui.client.analysis.model.DimensionModel;
-import org.activityinfo.ui.client.analysis.model.ImmutableDimensionModel;
-import org.activityinfo.ui.client.analysis.viewModel.AnalysisViewModel;
-import org.activityinfo.ui.client.analysis.viewModel.EffectiveDimension;
+import org.activityinfo.model.analysis.pivot.Axis;
+import org.activityinfo.model.analysis.pivot.DateLevel;
+import org.activityinfo.model.analysis.pivot.DimensionModel;
+import org.activityinfo.model.analysis.pivot.ImmutableDimensionModel;
+import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
+import org.activityinfo.analysis.pivot.viewModel.EffectiveDimension;
 
 import java.util.ArrayList;
 import java.util.List;
