@@ -483,21 +483,20 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     }
 
     private void onExport(Filter filter) {
-        exportSites(filter);
-//        if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
-//            ExportTypeDialog dialog = new ExportTypeDialog();
-//            dialog.setCallback(selection -> {
-//                if (ExportTypeDialog.LONG_FORMAT.equals(selection)) {
-//                    exportLongFormat(filter);
-//                } else if (ExportTypeDialog.WIDE_FORMAT.equals(selection)) {
-//                    exportSites(filter);
-//                }
-//                return null;
-//            });
-//            dialog.show();
-//        } else {
-//            exportSites(filter);
-//        }
+        if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
+            ExportTypeDialog dialog = new ExportTypeDialog();
+            dialog.setCallback(selection -> {
+                if (ExportTypeDialog.LONG_FORMAT.equals(selection)) {
+                    exportLongFormat(filter);
+                } else if (ExportTypeDialog.WIDE_FORMAT.equals(selection)) {
+                    exportSites(filter);
+                }
+                return null;
+            });
+            dialog.show();
+        } else {
+            exportSites(filter);
+        }
     }
 
     private void exportLongFormat(Filter filter) {
