@@ -10,6 +10,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.util.Pair;
 
@@ -24,7 +25,7 @@ public class LongFormatTableBuilder {
     }
 
     public static Predicate<FormField> measureFilter() {
-        return field -> field.getType() instanceof QuantityType;
+        return field -> field.getType() instanceof QuantityType || field.getType() instanceof CalculatedFieldType;
     }
 
     public static Predicate<FormField> dimensionFilter() {
