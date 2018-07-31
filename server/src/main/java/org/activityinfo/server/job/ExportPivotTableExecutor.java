@@ -1,6 +1,7 @@
 package org.activityinfo.server.job;
 
 import com.google.inject.Inject;
+import org.activityinfo.analysis.pivot.PivotTableWriter;
 import org.activityinfo.analysis.pivot.viewModel.*;
 import org.activityinfo.model.analysis.pivot.*;
 import org.activityinfo.model.job.ExportPivotTableJob;
@@ -30,11 +31,13 @@ public class ExportPivotTableExecutor implements JobExecutor<ExportPivotTableJob
     public ExportResult execute(ExportPivotTableJob descriptor) throws IOException {
         PivotModel pivotModel = descriptor.getPivotModel();
         PivotViewModel viewModel = new PivotViewModel(Observable.just(pivotModel), formSource);
-        PivotTable pivotTable = viewModel.getPivotTable().waitFor();
+        AnalysisResult pivotTable = viewModel.getResultTable().waitFor();
         GeneratedResource export = storageProvider.create(CSV_UTF8_MIME, "PivotTable.csv");
 
-        try (OutputStreamWriter writer = new OutputStreamWriter(export.openOutputStream(), "UTF-8")) {
-            writer.write(PivotTableRenderer.renderDelimited(pivotTable, ","));
+        try (PivotTableWriter writer = new PivotTableWriter(new OutputStreamWriter(export.openOutputStream(), "UTF-8"))) {
+            writer.write(pivotTable);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return new ExportResult(export.getDownloadUri());
