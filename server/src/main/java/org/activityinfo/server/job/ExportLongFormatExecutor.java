@@ -1,6 +1,5 @@
 package org.activityinfo.server.job;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.activityinfo.analysis.pivot.LongFormatTableBuilder;
@@ -11,6 +10,7 @@ import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.analysis.pivot.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.ExportLongFormatJob;
 import org.activityinfo.model.job.ExportPivotTableJob;
 import org.activityinfo.model.job.ExportResult;
@@ -70,67 +70,65 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
             throw new IllegalStateException("Database " + databaseId + " could not be found");
         }
 
-        List<FormClass> formScope = getFormScope(database);
+        List<FormTree> formScope = getFormScope(database);
         PivotModel longFormatModel = LongFormatTableBuilder.build(formScope);
         ExportPivotTableExecutor pivotTableExport = new ExportPivotTableExecutor(storageProvider, formSource);
         ExportPivotTableJob exportJob = new ExportPivotTableJob(longFormatModel);
         return pivotTableExport.execute(exportJob);
     }
 
-    private List<FormClass> getFormScope(UserDatabaseDTO database) {
-        List<FormClass> scope = Lists.newArrayList();
+    private List<FormTree> getFormScope(UserDatabaseDTO database) {
+        List<FormTree> scope = Lists.newArrayList();
         scope.addAll(getActivityForms(database));
         scope.addAll(getMonthlyActivityForms(database));
         scope.addAll(getForms(database));
         return scope;
     }
 
-    private List<FormClass> getActivityForms(UserDatabaseDTO database) {
+    private List<FormTree> getActivityForms(UserDatabaseDTO database) {
         return database.getActivities().stream()
                 .filter(activity())
                 .map(ActivityDTO::getFormId)
-                .map(formStorageProvider::getForm)
-                .filter(Optional::isPresent)
-                .map(presentForm -> presentForm.get().getFormClass())
+                .map(this::getFormTree)
                 .collect(Collectors.toList());
     }
 
-    private List<FormClass> getMonthlyActivityForms(UserDatabaseDTO database) {
+    private FormTree getFormTree(ResourceId rootForm) {
+        return formSource.getFormTree(rootForm).waitFor();
+    }
+
+    private List<FormTree> getMonthlyActivityForms(UserDatabaseDTO database) {
         return database.getActivities().stream()
                 .filter(monthlyActivity())
                 .map(ActivityDTO::getId)
                 .map(CuidAdapter::reportingPeriodFormClass)
-                .map(formStorageProvider::getForm)
-                .filter(Optional::isPresent)
-                .map(presentForm -> presentForm.get().getFormClass())
+                .map(this::getFormTree)
                 .collect(Collectors.toList());
     }
 
-    private List<FormClass> getForms(UserDatabaseDTO database) {
-        List<FormClass> scope = Lists.newArrayList();
-        scope.addAll(getParentForms(database));
-        scope.addAll(getSubForms(scope));
-        return scope;
+    private List<FormTree> getForms(UserDatabaseDTO database) {
+        List<FormTree> formScope = Lists.newArrayList();
+        formScope.addAll(getParentForms(database));
+        formScope.addAll(getSubForms(formScope));
+        return formScope;
     }
 
-    private List<FormClass> getParentForms(UserDatabaseDTO database) {
+    private List<FormTree> getParentForms(UserDatabaseDTO database) {
         return database.getActivities().stream()
                 .filter(form())
                 .map(ActivityDTO::getFormId)
-                .map(formStorageProvider::getForm)
-                .filter(Optional::isPresent)
-                .map(presentForm -> presentForm.get().getFormClass())
+                .map(this::getFormTree)
                 .collect(Collectors.toList());
     }
 
-    private List<FormClass> getSubForms(List<FormClass> parentForms) {
+    private List<FormTree> getSubForms(List<FormTree> parentForms) {
         return parentForms.stream()
-                .flatMap(form -> form.getFields().stream())
+                .map(FormTree::getRootFormClass)
+                .map(FormClass::getFields)
+                .flatMap(List::stream)
                 .filter(subFormField())
                 .map(ExportLongFormatExecutor::subFormId)
-                .map(formStorageProvider::getForm)
-                .filter(Optional::isPresent)
-                .map(presentForm -> presentForm.get().getFormClass())
+                .map(this::getFormTree)
                 .collect(Collectors.toList());
     }
 
