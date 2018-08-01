@@ -167,7 +167,7 @@ subprojects {
 
         // Exclude CGLIB which is actually repackaged by guice
         exclude group: 'org.sonatype.sisu.inject', module:'cglib'
-        
+
         resolutionStrategy {
 
             force libraries.jts
@@ -191,6 +191,8 @@ subprojects {
                     details.useVersion gwtVersion
                 } else if(details.requested.group == 'com.sun.jersey') {
                     details.useVersion jerseyVersion
+                } else if(details.requested.group == 'com.google.http-client') {
+                    details.useVersion '1.23.0'
                 }
             }
         }
