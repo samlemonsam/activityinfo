@@ -13,6 +13,8 @@ import org.activityinfo.store.query.shared.FormSource;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ExportPivotTableExecutor implements JobExecutor<ExportPivotTableJob, ExportResult> {
 
@@ -32,7 +34,7 @@ public class ExportPivotTableExecutor implements JobExecutor<ExportPivotTableJob
         PivotModel pivotModel = descriptor.getPivotModel();
         PivotViewModel viewModel = new PivotViewModel(Observable.just(pivotModel), formSource);
         AnalysisResult pivotTable = viewModel.getResultTable().waitFor();
-        GeneratedResource export = storageProvider.create(CSV_UTF8_MIME, "PivotTable.csv");
+        GeneratedResource export = storageProvider.create(CSV_UTF8_MIME, fileName());
 
         try (PivotTableWriter writer = new PivotTableWriter(new OutputStreamWriter(export.openOutputStream(), "UTF-8"))) {
             writer.write(pivotTable);
@@ -41,6 +43,11 @@ public class ExportPivotTableExecutor implements JobExecutor<ExportPivotTableJob
         }
 
         return new ExportResult(export.getDownloadUri());
+    }
+
+    private String fileName() {
+        String date = new SimpleDateFormat("YYYY-MM-dd_HHmmss").format(new Date());
+        return ("ActivityInfo_Export_" + date + ".csv").replace(" ", "_");
     }
 
 }
