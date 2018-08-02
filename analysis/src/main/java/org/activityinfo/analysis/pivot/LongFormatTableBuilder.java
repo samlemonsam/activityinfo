@@ -183,6 +183,7 @@ public class LongFormatTableBuilder {
 
     private static List<ImmutableDimensionModel> buildModels(Multimap<String, DimensionMapping> dimensionGroups) {
         return dimensionGroups.asMap().entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
                 .map(dimensionGroup -> ImmutableDimensionModel.builder()
                         .id(ResourceId.generateCuid())
                         .label(dimensionGroup.getKey())
