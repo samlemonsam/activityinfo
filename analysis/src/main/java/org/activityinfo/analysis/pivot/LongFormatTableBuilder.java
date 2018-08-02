@@ -43,7 +43,7 @@ public class LongFormatTableBuilder {
             }
             if (field.getType() instanceof EnumType) {
                 EnumType enumType = (EnumType) field.getType();
-                return enumType.getCardinality() != Cardinality.SINGLE;
+                return enumType.getCardinality() == Cardinality.SINGLE;
             }
             if (field.getType() instanceof AttachmentType) {
                 return false;
