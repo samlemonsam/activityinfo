@@ -1,12 +1,12 @@
 package org.activityinfo.analysis.pivot;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import org.activityinfo.analysis.pivot.viewModel.*;
 import org.activityinfo.model.analysis.pivot.Axis;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PivotTableWriter implements AutoCloseable {
@@ -22,8 +22,8 @@ public class PivotTableWriter implements AutoCloseable {
 
     private final Writer writer;
 
-    Map<String,Integer> rowDims = Maps.newHashMap();
-    Map<String,Integer> colDims = Maps.newHashMap();
+    List<Integer> rowDims = Lists.newArrayList();
+    List<Integer> colDims = Lists.newArrayList();
 
     public PivotTableWriter(Writer writer) throws IOException {
         this.writer = writer;
@@ -31,31 +31,30 @@ public class PivotTableWriter implements AutoCloseable {
     }
 
     public void write(AnalysisResult pivotTable) throws IOException {
-        constructDimensionIndexMapping(pivotTable);
-        writeRowDimensionHeaders();
-        writeColDimensionHeaders();
+        constructDimensionIndexMapping(pivotTable.getDimensionSet());
+        writeRowDimensionHeaders(pivotTable.getDimensionSet());
+        writeColDimensionHeaders(pivotTable.getDimensionSet());
         writePoints(pivotTable);
     }
 
-    private void constructDimensionIndexMapping(AnalysisResult pivotTable) {
-        rowDims = extractDimensionIndex(pivotTable, Axis.ROW);
-        colDims = extractDimensionIndex(pivotTable, Axis.COLUMN);
+    private void constructDimensionIndexMapping(DimensionSet dimensionSet) {
+        rowDims = extractDimensionIndex(dimensionSet, Axis.ROW);
+        colDims = extractDimensionIndex(dimensionSet, Axis.COLUMN);
     }
 
-    private Map<String,Integer> extractDimensionIndex(AnalysisResult pivotTable, Axis axis) {
-        return pivotTable.getDimensionSet().getList().stream()
+    private List<Integer> extractDimensionIndex(DimensionSet dimensionSet, Axis axis) {
+        return dimensionSet.getList().stream()
                 .filter(dimension -> axis.equals(dimension.getAxis()))
-                .collect(Collectors.toMap(
-                        dimension -> dimension.getLabel(),
-                        dimension -> pivotTable.getDimensionSet().getIndex(dimension)));
+                .map(dimensionSet::getIndex)
+                .collect(Collectors.toList());
     }
 
-    private void writeRowDimensionHeaders() {
-        rowDims.keySet().forEach(this::writeDelimited);
+    private void writeRowDimensionHeaders(DimensionSet dimensionSet) {
+        rowDims.forEach(rowDim -> writeDelimited(dimensionSet.getDimension(rowDim).getLabel()));
     }
 
-    private void writeColDimensionHeaders() {
-        colDims.keySet().forEach(this::writeDelimited);
+    private void writeColDimensionHeaders(DimensionSet dimensionSet) {
+        colDims.forEach(colDim -> writeDelimited(dimensionSet.getDimension(colDim).getLabel()));
         writeValueColumnHeader();
     }
 
@@ -80,8 +79,8 @@ public class PivotTableWriter implements AutoCloseable {
         write(LINE_ENDING);
     }
 
-    private void writeDims(Map<String, Integer> dims, Point point) {
-        dims.values().stream()
+    private void writeDims(List<Integer> dims, Point point) {
+        dims.stream()
                 .map(point::getCategory)
                 .forEach(this::writeDelimited);
     }
