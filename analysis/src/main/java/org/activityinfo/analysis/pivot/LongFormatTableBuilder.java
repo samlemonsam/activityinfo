@@ -8,6 +8,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -46,6 +47,9 @@ public class LongFormatTableBuilder {
                 return enumType.getCardinality() == Cardinality.SINGLE;
             }
             if (field.getType() instanceof AttachmentType) {
+                return false;
+            }
+            if (field.getType() instanceof NarrativeType) {
                 return false;
             }
             return true;
