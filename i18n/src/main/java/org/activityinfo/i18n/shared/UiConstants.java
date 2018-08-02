@@ -1894,7 +1894,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Wide Format")
     String wideFormat();
 
-    @DefaultStringValue("Each Form and Activity is exported as a separate worksheet. <br> <br> All Fields appear in columns, with each Record in separate rows.")
+    @DefaultStringValue("Each Activity is exported as a separate worksheet. <br> <br> All Fields appear as columns, with each Record in  a separate row. <br> <br> NOTE: Only Activities will be exported via this method.")
     String wideFormatDescription();
 
     @DefaultStringValue("Long Format")

@@ -45,7 +45,7 @@ public class ExportTypeDialog extends Dialog {
 
     private void initializeComponent() {
         setWidth(400);
-        setHeight(175);
+        setHeight(225);
         setHeadingText(I18N.CONSTANTS.export());
         setButtonAlign(Style.HorizontalAlignment.RIGHT);
         HBoxLayout layout = new HBoxLayout();
