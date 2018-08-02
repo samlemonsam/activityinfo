@@ -22,7 +22,6 @@ import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.ui.client.store.http.HttpStore;
 
@@ -60,9 +59,7 @@ public class SnapshotDelta {
             Set<ResourceId> set = new HashSet<>();
             for (FormTree tree : trees) {
                 for (FormMetadata form : tree.getForms()) {
-                    if(!isBuiltinForm(form.getId())) {
-                        set.add(form.getId());
-                    }
+                    set.add(form.getId());
                 }
             }
             return set;
@@ -112,13 +109,6 @@ public class SnapshotDelta {
                 return nextChunk.transform(n -> FormSyncSet.foldLeft(c, n));
             }
         });
-    }
-
-    private static boolean isBuiltinForm(ResourceId formId) {
-        if(formId.equals(GeoPointType.INSTANCE.getFormClass().getId())) {
-            return true;
-        }
-        return false;
     }
 
     public List<FormMetadata> getForms() {
