@@ -65,7 +65,7 @@ public class DoubleArrayColumnView implements ColumnView, Serializable {
 
     @Override
     public String getString(int row) {
-        return null;
+        return isMissing(row) ? null : Double.toString(values[row]);
     }
 
 

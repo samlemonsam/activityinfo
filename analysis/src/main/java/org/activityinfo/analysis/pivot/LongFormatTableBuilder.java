@@ -1,5 +1,6 @@
 package org.activityinfo.analysis.pivot;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import org.activityinfo.model.analysis.pivot.*;
 import org.activityinfo.model.form.FormClass;
@@ -13,6 +14,8 @@ import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.geo.GeoAreaType;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.util.Pair;
@@ -50,6 +53,9 @@ public class LongFormatTableBuilder {
                 return false;
             }
             if (field.getType() instanceof NarrativeType) {
+                return false;
+            }
+            if (field.getType() instanceof GeoPointType || field.getType() instanceof GeoAreaType) {
                 return false;
             }
             return true;
@@ -134,11 +140,25 @@ public class LongFormatTableBuilder {
         if (dimensionFilter().test(node.getField())) {
             return Stream.of(mapDimension(node));
         }
+        if (node.getField().getType() instanceof GeoPointType) {
+            return mapGeoDimension(node);
+        }
         return Stream.empty();
     }
 
     private static Pair<String,DimensionMapping> mapDimension(FormTree.Node node) {
         return Pair.newPair(label(node), map(node));
+    }
+
+    private static Stream<Pair<String,DimensionMapping>> mapGeoDimension(FormTree.Node node) {
+        return Stream.of(Pair.newPair(label(node, GeoPointType.LATITUDE), geoMap(node, GeoPointType.LATITUDE)),
+                Pair.newPair(label(node, GeoPointType.LONGITUDE), geoMap(node, GeoPointType.LONGITUDE)));
+    }
+
+    private static String label(FormTree.Node node, String suffix) {
+        return suffix == null
+                ? label(node)
+                : label(node) + "." + suffix;
     }
 
     private static String label(FormTree.Node node) {
@@ -155,6 +175,10 @@ public class LongFormatTableBuilder {
 
     private static DimensionMapping map(FormTree.Node node) {
         return new DimensionMapping(node.getRootFormClass().getId(), node.getPath().toString());
+    }
+
+    private static DimensionMapping geoMap(FormTree.Node node, String pointAxis) {
+        return new DimensionMapping(node.getRootFormClass().getId(), node.getPath().toString() + "." + pointAxis);
     }
 
     private static List<ImmutableDimensionModel> buildModels(Multimap<String, DimensionMapping> dimensionGroups) {
