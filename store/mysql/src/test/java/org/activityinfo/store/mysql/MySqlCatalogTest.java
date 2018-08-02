@@ -198,6 +198,15 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     }
 
     @Test
+    public void testSiteLocation() {
+        query(CuidAdapter.activityFormClass(1), "_id", "location.latitude", "location.longitude");
+
+        assertThat(column("_id"), hasValues(cuid(SITE_DOMAIN, 1), cuid(SITE_DOMAIN, 2), cuid(SITE_DOMAIN, 3)));
+        assertThat(column("location.latitude"), hasValues(27.323, 28.232, null));
+        assertThat(column("location.longitude"), hasValues(1.532,  1.323, null));
+    }
+
+    @Test
     public void testAttributeBoolean() {
         query(CuidAdapter.activityFormClass(1), "_id", "[Contenu du Kit].Casserole", "[Contenu du Kit].Soap");
 

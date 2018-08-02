@@ -25,7 +25,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.RecordFieldType;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -87,8 +86,6 @@ public class FormTreeBuilder {
             FormTree.Node node = tree.addRootField(root, field);
             if(node.isReference()) {
                 fetchChildren(stack, tree, node, node.getRange());
-            } else if(field.getType() instanceof RecordFieldType) {
-                addChildren(stack, tree, node, embeddedForm(node));
             }
         }
         return tree;
@@ -115,20 +112,11 @@ public class FormTreeBuilder {
                 FormTree.Node childNode = parent.addChild(childForm, field);
                 if (childNode.isReference()) {
                     fetchChildren(stack, tree, childNode, childNode.getRange());
-                } else if (childNode.getType() instanceof RecordFieldType) {
-                    addChildren(stack, tree, childNode, embeddedForm(childNode));
                 }
             }
         } finally {
             stack.remove(stack.size() - 1);
         }
-    }
-
-    private FormMetadata embeddedForm(FormTree.Node childNode) {
-        FormClass embeddedFormSchema = ((RecordFieldType) childNode.getType()).getFormClass();
-        long formVersion = 1L;
-
-        return FormMetadata.of(formVersion, embeddedFormSchema, FormPermissions.readonly());
     }
 
 }

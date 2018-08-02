@@ -107,6 +107,27 @@ public class NodeMatcherTest {
     }
 
     @Test
+    public void childMatchPoint() {
+        givenRootForm("Project Site",
+                field("A", "Name"),
+                referenceField("B", "Location",
+                        formClass("LocationForm",
+                                field("LA", "Name"),
+                                field("LB", "Population"),
+                                pointField("P", "Point"))));
+
+
+        assertThat(resolve("Name"), contains("A"));
+        assertThat(resolve("Location.Name"), contains("B>LA"));
+        assertThat(resolve("Location.Latitude"), contains("B>P.latitude"));
+        assertThat(resolve("Location.Longitude"), contains("B>P.longitude"));
+
+        assertThat(resolve("Latitude"), contains("B>P.latitude"));
+
+    }
+
+
+    @Test
     public void childUnionMatch() {
         givenRootForm("Site",
                 field("A", "Name"),

@@ -126,10 +126,9 @@ public class NodeMatcher {
                     matches.add(Collections.singleton(result.get()));
                 }
             } else if(field.getType() instanceof GeoPointType) {
-                Optional<NodeMatch> result = matchCoordinate(queryPath, field);
-                if(result.isPresent()) {
-                    matches.add(Collections.singleton(result.get()));
-                }
+                matchCoordinate(queryPath, field).ifPresent(match -> {
+                    matches.add(Collections.singleton(match));
+                });
             }
         }
         if(matches.size() > 0) {
@@ -167,12 +166,12 @@ public class NodeMatcher {
         return Optional.absent();
     }
 
-    private Optional<NodeMatch> matchCoordinate(QueryPath queryPath, FormTree.Node field) {
+    private java.util.Optional<NodeMatch> matchCoordinate(QueryPath queryPath, FormTree.Node field) {
         String symbol = queryPath.peek().toLowerCase();
         if(symbol.equals("latitude") || symbol.equals("longitude")) {
-            return Optional.of(NodeMatch.forFieldComponent(field, symbol));
+            return java.util.Optional.of(NodeMatch.forFieldComponent(field, symbol));
         } else {
-            return Optional.absent();
+            return java.util.Optional.empty();
         }
     }
 
@@ -193,6 +192,11 @@ public class NodeMatcher {
         for (FormTree.Node field : fields) {
             if(path.matches(field)) {
                 matches.add(NodeMatch.forField(field, currentAggregation()));
+            } else if(field.getType() instanceof GeoPointType) {
+                String symbol = path.head().toLowerCase();
+                if(symbol.equals("latitude") || symbol.equals("longitude")) {
+                    matches.add(NodeMatch.forFieldComponent(field, symbol));
+                }
             }
         }
 
