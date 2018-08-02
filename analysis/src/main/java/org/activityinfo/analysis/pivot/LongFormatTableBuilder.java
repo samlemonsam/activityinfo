@@ -69,8 +69,9 @@ public class LongFormatTableBuilder {
     public static PivotModel build(List<FormTree> formScope) {
         return ImmutablePivotModel.builder()
                 .measures(extractAllMeasures(formScope))
-                .addDimensions(extractIdDimension(formScope))
+                .addDimensions(extractFormNameDimension(formScope))
                 .addDimensions(extractFormIdDimension(formScope))
+                .addDimensions(extractIdDimension(formScope))
                 .addAllDimensions(extractAllDimensions(formScope))
                 .build();
     }
@@ -106,6 +107,15 @@ public class LongFormatTableBuilder {
                 .map(FormTree::getRootFormClass)
                 .map(form -> new DimensionMapping(form.getId(), "_id"))
                 .collect(Collectors.toList());
+    }
+
+    private static ImmutableDimensionModel extractFormNameDimension(List<FormTree> formScope) {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("Form")
+                .addMappings(DimensionMapping.formMapping())
+                .axis(Axis.ROW)
+                .build();
     }
 
     private static ImmutableDimensionModel extractFormIdDimension(List<FormTree> formScope) {
