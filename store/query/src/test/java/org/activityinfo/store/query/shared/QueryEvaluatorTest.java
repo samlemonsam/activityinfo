@@ -65,7 +65,7 @@ public class QueryEvaluatorTest {
         assertThat(a.get().numRows(), equalTo(10));
         assertThat(a.get().getString(0), nullValue());
 
-        assertThat(aPlusOne.get().getString(0), nullValue());
+        assertThat(aPlusOne.get().getString(0), equalTo(Double.toString(1d)));
         assertThat(aPlusOne.get().getDouble(0), equalTo(1d));
 
     }
