@@ -112,6 +112,7 @@ public class DimensionMapping {
             object.put("formId", formId.asString());
         }
         object.put("formula", formula);
+        object.put("type", type.toString());
         return object;
     }
 
@@ -121,7 +122,8 @@ public class DimensionMapping {
             formId = ResourceId.valueOf(object.getString("formId"));
         }
         String formula = object.getString("formula");
-        return new DimensionMapping(formId, formula);
+        Type type = Type.valueOf(object.getString("type"));
+        return new DimensionMapping(formId, formula, type);
     }
 
     @Override
