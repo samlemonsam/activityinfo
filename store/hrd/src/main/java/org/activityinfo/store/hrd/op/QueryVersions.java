@@ -22,8 +22,11 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Work;
 import com.googlecode.objectify.cmd.Query;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
+\import org.activityinfo.store.hrd.FieldConverter;
+import org.activityinfo.store.hrd.FieldConverters;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
 import org.activityinfo.store.hrd.entity.FormRecordSnapshotEntity;
@@ -100,8 +103,10 @@ public class QueryVersions implements Work<List<RecordVersion>> {
         if (formClass.getSubFormKind() == SubFormKind.REPEATING) {
             return "";
         } else { // period
-            int indexOf = snapshot.getRecordId().asString().indexOf(snapshot.getParentRecordId());
-            return snapshot.getRecordId().asString().substring(indexOf + snapshot.getParentRecordId().length() + 1);
+            FormField periodField = formClass.getField(ResourceId.valueOf("period"));
+            FieldConverter converter = FieldConverters.forType(periodField.getType());
+            Object periodValue = snapshot.getRecord().getFieldValues().getProperty(periodField.getName());
+            return converter.toFieldValue(periodValue).toString();
         }
     }
 }
