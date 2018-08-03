@@ -23,7 +23,6 @@ import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -134,9 +133,7 @@ public class SubFormViewModel {
 
 
     public PeriodValue getActivePeriod() {
-        RecordRef ref = getActiveRecordRef();
-        PeriodType periodType = subFormKind.getPeriodType();
-        return periodType.fromSubFormKey(ref);
+        return (PeriodValue) getActiveSubViewModel().getField(ResourceId.valueOf("period"));
     }
 
     public Set<RecordRef> getDeletedRecords() {
