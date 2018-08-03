@@ -35,11 +35,13 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.view.field.*;
+import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.SubFormViewModel;
 
 import java.util.logging.Logger;
@@ -169,10 +171,20 @@ public class KeyedSubFormPanel implements IsWidget {
             selector.init(viewModel.getActivePeriod());
             return;
         }
-
         inputHandler.changeActiveSubRecord(fieldId,
                 new RecordRef(subFormId,
-                     ResourceId.periodSubRecordId(parentRef, periodValue)));
+                        findSubRecordRef(periodValue)));
+    }
+
+    private ResourceId findSubRecordRef(PeriodValue periodValue) {
+
+        for (FormInputViewModel subRecord : viewModel.getSubRecords()) {
+            FieldValue subRecordPeriod = subRecord.getField(ResourceId.valueOf("period"));
+            if(subRecordPeriod.equals(periodValue)) {
+                return subRecord.getRecordRef().getRecordId();
+            }
+        }
+        return ResourceId.periodSubRecordId(parentRef, periodValue);
     }
 
 
