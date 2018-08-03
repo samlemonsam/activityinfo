@@ -50,6 +50,10 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
         return field -> field.getType() instanceof SubFormReferenceType;
     }
 
+    private static Predicate<FormTree> valid() {
+        return formTree -> formTree.getRootState() == FormTree.State.VALID;
+    }
+
     @Inject
     public ExportLongFormatExecutor(FormStorageProvider formStorageProvider,
                                     StorageProvider storageProvider,
@@ -90,6 +94,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                 .filter(activity())
                 .map(ActivityDTO::getFormId)
                 .map(this::getFormTree)
+                .filter(valid())
                 .collect(Collectors.toList());
     }
 
@@ -103,6 +108,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                 .map(ActivityDTO::getId)
                 .map(CuidAdapter::reportingPeriodFormClass)
                 .map(this::getFormTree)
+                .filter(valid())
                 .collect(Collectors.toList());
     }
 
@@ -118,6 +124,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                 .filter(form())
                 .map(ActivityDTO::getFormId)
                 .map(this::getFormTree)
+                .filter(valid())
                 .collect(Collectors.toList());
     }
 
@@ -129,6 +136,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                 .filter(subFormField())
                 .map(ExportLongFormatExecutor::subFormId)
                 .map(this::getFormTree)
+                .filter(valid())
                 .collect(Collectors.toList());
     }
 
