@@ -15,7 +15,12 @@ public class PivotTableWriter implements AutoCloseable {
      * Writes a byte order mark that should help spreadsheet software detect the UTF-8 character set.
      */
     public static final char BYTEORDER_MARK = '\ufeff';
+
+    // Chars to escape
     public static final String DELIMITER = ",";
+    public static final String DOUBLE_QUOTE = "\"";
+    public static final String NEW_LINE = "\n";
+
     public static final String LINE_ENDING = "\r\n";
 
     private static final String VALUE_COL = "Value";
@@ -96,11 +101,24 @@ public class PivotTableWriter implements AutoCloseable {
 
     private void write(String data) {
         try {
-            writer.append(data);
+            writer.append(escapeIfNecessary(data));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private String escapeIfNecessary(String data) {
+        if (data.contains(DELIMITER) || data.contains(DOUBLE_QUOTE) || data.contains(NEW_LINE)) {
+            return enquote(data);
+        } else {
+            return data;
+        }
+    }
+
+    private String enquote(String data) {
+        return DOUBLE_QUOTE + data + DOUBLE_QUOTE;
+    }
+
 
     public Writer getWriter() {
         return writer;
