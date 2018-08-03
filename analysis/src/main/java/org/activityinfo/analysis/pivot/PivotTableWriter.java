@@ -1,5 +1,6 @@
 package org.activityinfo.analysis.pivot;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.activityinfo.analysis.pivot.viewModel.*;
 import org.activityinfo.model.analysis.pivot.Axis;
@@ -16,11 +17,8 @@ public class PivotTableWriter implements AutoCloseable {
      */
     public static final char BYTEORDER_MARK = '\ufeff';
 
-    // Chars to escape
     public static final String DELIMITER = ",";
     public static final String DOUBLE_QUOTE = "\"";
-    public static final String NEW_LINE = "\n";
-
     public static final String LINE_ENDING = "\r\n";
 
     private static final String VALUE_COL = "Value";
@@ -64,13 +62,13 @@ public class PivotTableWriter implements AutoCloseable {
     }
 
     private void writeValueColumnHeader() {
-        write(VALUE_COL);
-        write(LINE_ENDING);
+        write(VALUE_COL, false);
+        write(LINE_ENDING, true);
     }
 
     private void writePoints(AnalysisResult pivotTable) {
         pivotTable.getPoints().forEach(this::writePoint);
-        write(LINE_ENDING);
+        write(LINE_ENDING, true);
     }
 
     private void writePoint(Point point) {
@@ -80,8 +78,8 @@ public class PivotTableWriter implements AutoCloseable {
     }
 
     private void writeValue(Point point) {
-        write(point.getFormattedValue());
-        write(LINE_ENDING);
+        write(point.getFormattedValue(), false);
+        write(LINE_ENDING, true);
     }
 
     private void writeDims(List<Integer> dims, Point point) {
@@ -94,21 +92,27 @@ public class PivotTableWriter implements AutoCloseable {
         writer.append(BYTEORDER_MARK);
     }
 
-    private void writeDelimited(String data) {
-        write(data);
-        write(DELIMITER);
+    @VisibleForTesting
+    protected void writeDelimited(String data) {
+        write(data, false);
+        write(DELIMITER, true);
     }
 
-    private void write(String data) {
+
+    private void write(String data, boolean specialChar) {
         try {
-            writer.append(escapeIfNecessary(data));
+            if (specialChar) {
+                writer.append(data);
+            } else {
+                writer.append(escapeIfNecessary(data));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private String escapeIfNecessary(String data) {
-        if (data.contains(DELIMITER) || data.contains(DOUBLE_QUOTE) || data.contains(NEW_LINE)) {
+        if (data.contains(DELIMITER) || data.contains(DOUBLE_QUOTE) || data.contains(LINE_ENDING)) {
             return enquote(data);
         } else {
             return data;
@@ -118,7 +122,6 @@ public class PivotTableWriter implements AutoCloseable {
     private String enquote(String data) {
         return DOUBLE_QUOTE + data + DOUBLE_QUOTE;
     }
-
 
     public Writer getWriter() {
         return writer;
