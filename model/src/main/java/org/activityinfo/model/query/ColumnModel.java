@@ -38,6 +38,7 @@ public class ColumnModel implements JsonSerializable {
 
     public static final String RECORD_ID_SYMBOL = "_id";
     public static final String FORM_ID_SYMBOL = "_class";
+    public static final String FORM_NAME_SYMBOL = "_class_label";
     public static final String PARENT_SYMBOL = "@parent";
 
 

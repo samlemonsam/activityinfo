@@ -124,8 +124,10 @@ public class FormScanBatch {
             return addJoinedColumn(filterLevel, match);
 
         } else {
-            // id column, simple root column or embedded form
+            // form label column, id column, simple root column or embedded form
             switch (match.getType()) {
+                case FORM_NAME:
+                    return addConstantColumn(filterLevel, match.getFormClass(), match.getFormClass().getLabel());
                 case RECORD_ID:
                     return addRecordIdColumn(filterLevel, match.getFormClass().getId());
                 case FORM_ID:

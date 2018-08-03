@@ -127,7 +127,7 @@ public class FormulaValidator {
             return BooleanType.INSTANCE;
         } else if(match.isCalculated()) {
             return findCalculatedFieldType(match.getFieldNode());
-        } else if (match.isRootId()) {
+        } else if (match.isRootId() || match.isFormLabel()) {
             return TextType.SIMPLE;
         } else {
             return match.getFieldNode().getType();

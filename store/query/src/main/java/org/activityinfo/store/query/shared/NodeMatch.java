@@ -53,6 +53,7 @@ public class NodeMatch {
     public enum Type {
         RECORD_ID,
         FORM_ID,
+        FORM_NAME,
         FIELD
     }
 
@@ -95,10 +96,24 @@ public class NodeMatch {
         return match;
     }
 
+    public static NodeMatch forLabel(String labelSymbol, FormClass formClass) {
+        NodeMatch match = new NodeMatch();
+        match.formClass = formClass;
+        if(labelSymbol.equals(ColumnModel.FORM_NAME_SYMBOL)) {
+            match.type = Type.FORM_NAME;
+        } else {
+            throw new IllegalArgumentException(labelSymbol);
+        }
+        match.joins = Lists.newLinkedList();
+        return match;
+    }
+
     public static NodeMatch forId(String idSymbol, FormClass formClass) {
         NodeMatch match = new NodeMatch();
         match.formClass = formClass;
-        if(idSymbol.equals(ColumnModel.RECORD_ID_SYMBOL)) {
+        if(idSymbol.equals(ColumnModel.FORM_NAME_SYMBOL)) {
+            match.type = Type.FORM_NAME;
+        } else if(idSymbol.equals(ColumnModel.RECORD_ID_SYMBOL)) {
             match.type = Type.RECORD_ID;
         } else if(idSymbol.equals(ColumnModel.FORM_ID_SYMBOL)){
             match.type = Type.FORM_ID;
@@ -107,6 +122,10 @@ public class NodeMatch {
         }
         match.joins = Lists.newLinkedList();
         return match;
+    }
+
+    public boolean isFormLabel() {
+        return (type == Type.FORM_NAME);
     }
 
     public boolean isRootId() {
@@ -270,6 +289,9 @@ public class NodeMatch {
             s.append('>');
         }
         switch (type) {
+            case FORM_NAME:
+                s.append(formClass.getLabel());
+                break;
             case RECORD_ID:
                 s.append(formClass.getId());
                 s.append("@id");
@@ -313,7 +335,9 @@ public class NodeMatch {
 
     @Override
     public String toString() {
-        if(type == Type.RECORD_ID) {
+        if (type == Type.FORM_NAME) {
+            return formClass.getLabel();
+        } else if(type == Type.RECORD_ID) {
             return formClass.getId() + ":" + "@id";
         } else if(type == Type.FORM_ID) {
             return formClass.getId() + ":" + "@formId";

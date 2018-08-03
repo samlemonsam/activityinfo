@@ -183,6 +183,11 @@ public class NodeMatcher {
 
         List<NodeMatch> matches = Lists.newLinkedList();
 
+        // Check for a reference to a form label
+        if(path.isLeaf() && path.head().equals(ColumnModel.FORM_NAME_SYMBOL)) {
+            matches.add(NodeMatch.forLabel(path.head(), tree.getRootFormClass()));
+        }
+
         // Check for a reference to a form record id or the form id
         if (path.isLeaf() && path.head().equals(ColumnModel.RECORD_ID_SYMBOL) || path.head().equals(ColumnModel.FORM_ID_SYMBOL)) {
             matches.add(NodeMatch.forId(path.head(), tree.getRootFormClass()));

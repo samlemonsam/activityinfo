@@ -22,6 +22,7 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 
 /**
@@ -92,7 +93,7 @@ public class DimensionMapping {
     }
 
     public static DimensionMapping formMapping() {
-        return new DimensionMapping(null, null, Type.FORM);
+        return new DimensionMapping(null, ColumnModel.FORM_NAME_SYMBOL, Type.FORM);
     }
 
     public ResourceId getFormId() {
