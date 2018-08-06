@@ -22,7 +22,9 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.model.type.time.PeriodValue;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.model.FormInputModel;
@@ -133,7 +135,25 @@ public class SubFormViewModel {
 
 
     public PeriodValue getActivePeriod() {
-        return (PeriodValue) getActiveSubViewModel().getField(ResourceId.valueOf("period"));
+        Optional<PeriodValue> activePeriod = getActivePeriodFromField();
+        if (activePeriod.isPresent()) {
+            return activePeriod.get();
+        } else {
+            return getActivePeriodFromRecordId();
+        }
+    }
+
+    private Optional<PeriodValue> getActivePeriodFromField() {
+        FieldValue activePeriod = getActiveSubViewModel().getField(ResourceId.valueOf("period"));
+        return activePeriod == null
+                ? Optional.absent()
+                : Optional.of((PeriodValue) activePeriod);
+    }
+
+    private PeriodValue getActivePeriodFromRecordId() {
+        RecordRef ref = getActiveRecordRef();
+        PeriodType periodType = subFormKind.getPeriodType();
+        return periodType.fromSubFormKey(ref);
     }
 
     public Set<RecordRef> getDeletedRecords() {
