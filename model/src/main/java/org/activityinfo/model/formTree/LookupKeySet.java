@@ -134,7 +134,7 @@ public class LookupKeySet {
         Optional<FormField> referenceKey = findReferenceKey(formClass);
         if(referenceKey.isPresent()) {
             ReferenceType referenceType = (ReferenceType) referenceKey.get().getType();
-            if (referenceType.getRange().size() < 1) {
+            if (!referenceType.getRange().isEmpty() && referenceType.getRange().size() == 1) {
                 ResourceId referencedFormId = Iterables.getOnlyElement(referenceType.getRange());
                 FormClass referencedFormClass = formTree.getFormClass(referencedFormId);
                 parentMap.put(formId, referencedFormId);
