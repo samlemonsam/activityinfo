@@ -27,6 +27,7 @@ public class UserPermission implements Serializable {
     boolean editAll;
     int partnerId;
     boolean design;
+    String model;
 
     public boolean isView() {
         return view;
@@ -46,6 +47,10 @@ public class UserPermission implements Serializable {
 
     public boolean isEditAll() {
         return editAll;
+    }
+
+    public String getModel() {
+        return model;
     }
 
     public static UserPermission viewAll() {

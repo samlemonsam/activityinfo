@@ -18,19 +18,25 @@
  */
 package org.activityinfo.store.mysql;
 
+import com.google.common.base.Strings;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.json.Json;
+import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
+import org.activityinfo.store.mysql.metadata.UserPermission;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DatabasesFolder {
 
@@ -39,7 +45,8 @@ public class DatabasesFolder {
     private ActivityLoader activityLoader;
     private final QueryExecutor executor;
 
-    public DatabasesFolder( QueryExecutor executor) {
+    public DatabasesFolder(ActivityLoader activityLoader, QueryExecutor executor) {
+        this.activityLoader = activityLoader;
         this.executor = executor;
     }
 
@@ -52,7 +59,7 @@ public class DatabasesFolder {
             return queryDatabases(userId);
         } else if (ResourceId.valueOf(parentId).getDomain() == CuidAdapter.DATABASE_DOMAIN) {
             List<CatalogEntry> children = new ArrayList<>();
-            children.addAll(queryForms(ResourceId.valueOf(parentId)));
+            children.addAll(queryForms(ResourceId.valueOf(parentId), userId));
             children.addAll(queryLocationTypes(ResourceId.valueOf(parentId)));
             return children;
         }
@@ -79,24 +86,47 @@ public class DatabasesFolder {
     }
 
 
-    private List<CatalogEntry> queryForms(ResourceId databaseId) throws SQLException {
+    private List<CatalogEntry> queryForms(ResourceId databaseId, int userId) throws SQLException {
         List<CatalogEntry> entries = new ArrayList<>();
+        List<Integer> folderGrants = queryFolderGrants(CuidAdapter.getLegacyIdFromCuid(databaseId), userId);
         try(ResultSet rs = executor.query("SELECT " +
             "ActivityId, " +
             "name, " +
-            "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms " +
+            "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms, " +
+            "folderId " +
             "FROM activity " +
                 "WHERE dateDeleted IS NULL AND databaseId = ? ", CuidAdapter.getLegacyIdFromCuid(databaseId))) {
             while(rs.next()) {
                 String formId = CuidAdapter.activityFormClass(rs.getInt(1)).asString();
                 String label = rs.getString(2);
                 boolean hasSubForms = rs.getBoolean(3);
+                int folderId = rs.getInt(4);
+                if (folderId == 0 && !folderGrants.isEmpty()) {
+                    // form requires ALL folder permission
+                    continue;
+                }
+                if (!folderGrants.isEmpty() && !folderGrants.contains(folderId)) {
+                    // user has no grants set on folder
+                    continue;
+                }
                 CatalogEntry entry = new CatalogEntry(formId, label, CatalogEntryType.FORM);
                 entry.setLeaf(!hasSubForms);
                 entries.add(entry);
             }
         }
         return entries;
+    }
+
+    private List<Integer> queryFolderGrants(int databaseId, int userId) {
+        UserPermission permission = activityLoader.getPermissionCache().getPermission(userId, databaseId);
+        if (Strings.isNullOrEmpty(permission.getModel())) {
+            return Collections.emptyList();
+        }
+        UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(permission.getModel()));
+        return model.getGrants().stream()
+                .map(GrantModel::getResourceId)
+                .map(CuidAdapter::getLegacyIdFromCuid)
+                .collect(Collectors.toList());
     }
 
     private List<CatalogEntry> queryLocationTypes(ResourceId databaseId) throws SQLException {

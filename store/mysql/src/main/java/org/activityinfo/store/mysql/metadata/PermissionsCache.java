@@ -76,7 +76,7 @@ public class PermissionsCache {
             throw new RuntimeException(e);
         }
 
-        String query = format("select partnerId, AllowViewAll, AllowView, AllowEditAll, AllowEdit " +
+        String query = format("select partnerId, AllowViewAll, AllowView, AllowEditAll, AllowEdit, model " +
                         " from userpermission where databaseId=%d and UserId = %d",
                 databaseId,
                 userId);
@@ -105,6 +105,7 @@ public class PermissionsCache {
                 if(rs.getBoolean(5)) {
                     permission.design = true;
                 }
+                permission.model = rs.getString(6);
             }
 
         } catch (SQLException e) {
