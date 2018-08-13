@@ -76,7 +76,7 @@
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="checkbox" name="newsletter" id="newsletterNo" value="false">
+                                <input type="radio" name="newsletter" id="newsletterNo" value="false">
                                 ${label.newsletterNo}
                             </label>
                         </li>
