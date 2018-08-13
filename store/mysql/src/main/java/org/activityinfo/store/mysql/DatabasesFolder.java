@@ -59,14 +59,17 @@ public class DatabasesFolder {
             return queryDatabases(userId);
         } else if (ResourceId.valueOf(parentId).getDomain() == CuidAdapter.DATABASE_DOMAIN) {
             List<CatalogEntry> children = new ArrayList<>();
-            children.addAll(queryForms(ResourceId.valueOf(parentId), userId));
+            children.addAll(queryFolders(ResourceId.valueOf(parentId), userId));
+            children.addAll(queryRootForms(ResourceId.valueOf(parentId), userId));
             children.addAll(queryLocationTypes(ResourceId.valueOf(parentId)));
+            return children;
+        } else if (ResourceId.valueOf(parentId).getDomain() == CuidAdapter.FOLDER_DOMAIN) {
+            List<CatalogEntry> children = new ArrayList<>();
+            children.addAll(queryFolderForms(ResourceId.valueOf(parentId), userId));
             return children;
         }
         return Collections.emptyList();
     }
-
-
 
     private List<CatalogEntry> queryDatabases(int userId) throws SQLException {
         List<CatalogEntry> entries = new ArrayList<>();
@@ -85,36 +88,83 @@ public class DatabasesFolder {
         return entries;
     }
 
-
-    private List<CatalogEntry> queryForms(ResourceId databaseId, int userId) throws SQLException {
+    private List<CatalogEntry> queryFolders(ResourceId databaseId, int userId) throws SQLException {
         List<CatalogEntry> entries = new ArrayList<>();
         List<Integer> folderGrants = queryFolderGrants(CuidAdapter.getLegacyIdFromCuid(databaseId), userId);
-        try(ResultSet rs = executor.query("SELECT " +
-            "ActivityId, " +
-            "name, " +
-            "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms, " +
-            "folderId " +
-            "FROM activity " +
-                "WHERE dateDeleted IS NULL AND databaseId = ? ", CuidAdapter.getLegacyIdFromCuid(databaseId))) {
-            while(rs.next()) {
-                String formId = CuidAdapter.activityFormClass(rs.getInt(1)).asString();
+        try(ResultSet rs = executor.query("SELECT f.folderId, f.name " +
+                "FROM folder f " +
+                "WHERE f.databaseId = ? " +
+                "ORDER BY f.sortOrder ASC", CuidAdapter.getLegacyIdFromCuid(databaseId))) {
+            while (rs.next()) {
+                int folderId = rs.getInt(1);
                 String label = rs.getString(2);
-                boolean hasSubForms = rs.getBoolean(3);
-                int folderId = rs.getInt(4);
-                if (folderId == 0 && !folderGrants.isEmpty()) {
-                    // form requires ALL folder permission
+                if (!hasFolderAccess(folderId, folderGrants)) {
                     continue;
                 }
-                if (!folderGrants.isEmpty() && !folderGrants.contains(folderId)) {
-                    // user has no grants set on folder
-                    continue;
-                }
-                CatalogEntry entry = new CatalogEntry(formId, label, CatalogEntryType.FORM);
-                entry.setLeaf(!hasSubForms);
-                entries.add(entry);
+                entries.add(new CatalogEntry(CuidAdapter.folderId(folderId).asString(), label, CatalogEntryType.FOLDER));
             }
         }
         return entries;
+    }
+
+    private List<CatalogEntry> queryRootForms(ResourceId databaseId, int userId) throws SQLException {
+        List<CatalogEntry> entries = new ArrayList<>();
+        List<Integer> folderGrants = queryFolderGrants(CuidAdapter.getLegacyIdFromCuid(databaseId), userId);
+        if (!folderGrants.isEmpty()) {
+            // user does not have root database folder access rights
+            return entries;
+        }
+        try(ResultSet rs = executor.query("SELECT " +
+                    "ActivityId, " +
+                    "name, " +
+                    "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms " +
+                "FROM activity " +
+                "WHERE dateDeleted IS NULL " +
+                "AND databaseId = ? " +
+                "AND folderId IS NULL", CuidAdapter.getLegacyIdFromCuid(databaseId))) {
+            while(rs.next()) {
+                entries.add(formEntry(rs));
+            }
+        }
+        return entries;
+    }
+
+    private List<CatalogEntry> queryFolderForms(ResourceId folderId, int userId) throws SQLException {
+        List<CatalogEntry> entries = new ArrayList<>();
+        try(ResultSet rs = executor.query("SELECT " +
+                "ActivityId, " +
+                "name, " +
+                "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms " +
+            "FROM activity " +
+            "WHERE dateDeleted IS NULL " +
+            "AND folderId = ?", CuidAdapter.getLegacyIdFromCuid(folderId))) {
+            while(rs.next()) {
+                entries.add(formEntry(rs));
+            }
+        }
+        return entries;
+    }
+
+    private CatalogEntry formEntry(ResultSet rs) throws SQLException {
+        String formId = CuidAdapter.activityFormClass(rs.getInt(1)).asString();
+        String label = rs.getString(2);
+        boolean hasSubForms = rs.getBoolean(3);
+        CatalogEntry entry = new CatalogEntry(formId, label, CatalogEntryType.FORM);
+        entry.setLeaf(!hasSubForms);
+        return entry;
+    }
+
+    private boolean hasFolderAccess(int folderId, List<Integer> folderGrants) {
+        if (folderGrants.isEmpty()) {
+            // User has ALL folder permission - access granted
+            return true;
+        } else if (folderId == 0) {
+            // Root database folder, requires ALL folder permission - access denied
+            return false;
+        } else {
+            // Check whether user has been granted access to folder
+            return folderGrants.contains(folderId);
+        }
     }
 
     private List<Integer> queryFolderGrants(int databaseId, int userId) {
