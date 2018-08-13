@@ -88,6 +88,7 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
             "SELECT i from Indicator i " +
                     "WHERE i.activity.id = :activityId " +
                     "AND i.dateDeleted IS NULL " +
+                    "AND i.visible = true " +
                     "ORDER BY i.sortOrder", Indicator.class)
                 .setParameter("activityId", site.getActivity().getId())
                 .getResultList();
