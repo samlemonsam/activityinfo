@@ -19,23 +19,29 @@
 package org.activityinfo.store.mysql;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.json.Json;
 import org.activityinfo.model.database.GrantModel;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.UserPermission;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DatabasesFolder {
@@ -44,10 +50,12 @@ public class DatabasesFolder {
 
     private ActivityLoader activityLoader;
     private final QueryExecutor executor;
+    private final FormStorageProvider formStorageProvider;
 
-    public DatabasesFolder(ActivityLoader activityLoader, QueryExecutor executor) {
+    public DatabasesFolder(ActivityLoader activityLoader, QueryExecutor executor, FormStorageProvider formStorageProvider) {
         this.activityLoader = activityLoader;
         this.executor = executor;
+        this.formStorageProvider = formStorageProvider;
     }
 
     public CatalogEntry getRootEntry() {
@@ -65,7 +73,7 @@ public class DatabasesFolder {
             return children;
         } else if (ResourceId.valueOf(parentId).getDomain() == CuidAdapter.FOLDER_DOMAIN) {
             List<CatalogEntry> children = new ArrayList<>();
-            children.addAll(queryFolderForms(ResourceId.valueOf(parentId), userId));
+            children.addAll(queryFolderForms(ResourceId.valueOf(parentId)));
             return children;
         }
         return Collections.emptyList();
@@ -108,50 +116,66 @@ public class DatabasesFolder {
     }
 
     private List<CatalogEntry> queryRootForms(ResourceId databaseId, int userId) throws SQLException {
-        List<CatalogEntry> entries = new ArrayList<>();
+        Map<ResourceId,CatalogEntry> formEntries = Maps.newHashMap();
         List<Integer> folderGrants = queryFolderGrants(CuidAdapter.getLegacyIdFromCuid(databaseId), userId);
         if (!folderGrants.isEmpty()) {
             // user does not have root database folder access rights
-            return entries;
+            return Collections.emptyList();
         }
         try(ResultSet rs = executor.query("SELECT " +
                     "ActivityId, " +
-                    "name, " +
-                    "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms " +
+                    "name " +
                 "FROM activity " +
                 "WHERE dateDeleted IS NULL " +
                 "AND databaseId = ? " +
                 "AND folderId IS NULL", CuidAdapter.getLegacyIdFromCuid(databaseId))) {
             while(rs.next()) {
-                entries.add(formEntry(rs));
+                formEntries.put(CuidAdapter.activityFormClass(rs.getInt(1)), formEntry(rs));
             }
         }
-        return entries;
+        checkFormLeafStatus(formEntries);
+        return new ArrayList<>(formEntries.values());
     }
 
-    private List<CatalogEntry> queryFolderForms(ResourceId folderId, int userId) throws SQLException {
-        List<CatalogEntry> entries = new ArrayList<>();
+    private void checkFormLeafStatus(Map<ResourceId, CatalogEntry> formEntries) {
+        Map<ResourceId,FormClass> formClasses = formStorageProvider.getFormClasses(formEntries.keySet());
+        formClasses.forEach((formId,formClass) -> {
+            if (hasSubForm(formClass)) {
+                formEntries.get(formId).setLeaf(false);
+            }
+        });
+    }
+
+
+    private boolean hasSubForm(FormClass formClass) {
+        for (FormField field : formClass.getFields()) {
+            if (field.getType() instanceof SubFormReferenceType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<CatalogEntry> queryFolderForms(ResourceId folderId) throws SQLException {
+        Map<ResourceId,CatalogEntry> formEntries = Maps.newHashMap();
         try(ResultSet rs = executor.query("SELECT " +
                 "ActivityId, " +
-                "name, " +
-                "(ActivityId IN (SELECT ActivityId FROM indicator WHERE indicator.type='subform')) subforms " +
+                "name " +
             "FROM activity " +
             "WHERE dateDeleted IS NULL " +
             "AND folderId = ?", CuidAdapter.getLegacyIdFromCuid(folderId))) {
             while(rs.next()) {
-                entries.add(formEntry(rs));
+                formEntries.put(CuidAdapter.activityFormClass(rs.getInt(1)), formEntry(rs));
             }
         }
-        return entries;
+        checkFormLeafStatus(formEntries);
+        return new ArrayList<>(formEntries.values());
     }
 
     private CatalogEntry formEntry(ResultSet rs) throws SQLException {
         String formId = CuidAdapter.activityFormClass(rs.getInt(1)).asString();
         String label = rs.getString(2);
-        boolean hasSubForms = rs.getBoolean(3);
-        CatalogEntry entry = new CatalogEntry(formId, label, CatalogEntryType.FORM);
-        entry.setLeaf(!hasSubForms);
-        return entry;
+        return new CatalogEntry(formId, label, CatalogEntryType.FORM);
     }
 
     private boolean hasFolderAccess(int folderId, List<Integer> folderGrants) {

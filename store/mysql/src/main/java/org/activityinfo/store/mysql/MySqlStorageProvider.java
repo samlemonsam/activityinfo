@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 
 public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, TransactionalStorageProvider {
 
-    private static Logger LOGGER = Logger.getLogger(MySqlStorageProvider.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MySqlStorageProvider.class.getName());
 
     private List<FormProvider> providers = new ArrayList<>();
     private final QueryExecutor executor;
@@ -73,7 +73,7 @@ public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, T
         providers.add(new HrdProvider());
 
         geodbFolder = new GeodbFolder(executor);
-        databasesFolder = new DatabasesFolder(activityLoader, executor);
+        databasesFolder = new DatabasesFolder(activityLoader, executor, this);
         formFolder = new FormFolder(this);
         
         this.executor = executor;
