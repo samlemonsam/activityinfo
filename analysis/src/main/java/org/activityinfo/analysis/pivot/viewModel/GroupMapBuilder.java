@@ -28,6 +28,8 @@ import java.util.function.Function;
 
 public class GroupMapBuilder {
 
+    private static final int MIN_CAPACITY = 16;
+
     /**
      * Maps a key to it's group id
      */
@@ -96,7 +98,7 @@ public class GroupMapBuilder {
     }
 
     private String key(int row) {
-        StringBuilder key = new StringBuilder();
+        StringBuilder key = new StringBuilder(MIN_CAPACITY * this.keyDim);
         for (int i = 0; i < this.keyDim; i++) {
             String category = readers[i].read(row);
             if(category == null) {

@@ -23,6 +23,8 @@ import java.util.*;
 
 public class GroupMap {
 
+    private static final int MIN_CAPACITY = 16;
+
     private final List<EffectiveMapping> dimensions;
     private int[] groupArray;
     private final List<String[]> groups;
@@ -92,7 +94,7 @@ public class GroupMap {
         assert group.length == dimensions.size();
         assert group.length == totalSubset.getDimCount();
 
-        StringBuilder key = new StringBuilder();
+        StringBuilder key = new StringBuilder(MIN_CAPACITY * group.length);
         for (int i = 0; i < group.length; i++) {
             if(!totalSubset.isDimensionCollapsed(i)) {
                 key.append('\0');
