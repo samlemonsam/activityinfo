@@ -62,7 +62,11 @@ public class AnalysisViewModel {
         this.formStore = formStore;
         this.saved = formStore.getAnalysis(analysisId).transform(maybe -> maybe.transform(a -> {
             LOGGER.info("Saved pivot model retrieved");
-            LOGGER.info("Saved Model: " + "{" + "id:"  + a.getId() + ", label:" + a.getLabel() + ", parentId:" + a.getParentId() + ", model:" + PivotModel.fromJson(a.getModel()));
+            LOGGER.info("Saved Model: " + "id:"  + a.getId());
+            LOGGER.info("Saved Model: " + "label:"  + a.getLabel());
+            LOGGER.info("Saved Model: " + "parentId:"  + a.getParentId());
+            LOGGER.info("Saved Model: " + "model (unparsed):"  + a.getModel());
+            LOGGER.info("Saved Model: " + "model (parsed): " + PivotModel.fromJson(a.getModel()));
             TypedAnalysis<PivotModel> typedAnalysis =  new TypedAnalysis<PivotModel>(a.getId(), a.getLabel(), a.getParentId(), PivotModel.fromJson(a.getModel()));
             LOGGER.info("Pivot analysis model generated");
             return typedAnalysis;
