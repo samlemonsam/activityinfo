@@ -62,22 +62,15 @@ public class AnalysisViewModel {
         this.formStore = formStore;
         this.saved = formStore.getAnalysis(analysisId).transform(maybe -> maybe.transform(a -> {
             LOGGER.info("Saved pivot model retrieved");
-            LOGGER.info("Saved Model: " + "id:"  + a.getId());
-            LOGGER.info("Saved Model: " + "label:"  + a.getLabel());
-            LOGGER.info("Saved Model: " + "parentId:"  + a.getParentId());
-            LOGGER.info("Saved Model: " + "model (unparsed):"  + a.getModel());
-            LOGGER.info("Saved Model: " + "model (parsed): " + PivotModel.fromJson(a.getModel()));
-            TypedAnalysis<PivotModel> typedAnalysis =  new TypedAnalysis<PivotModel>(a.getId(), a.getLabel(), a.getParentId(), PivotModel.fromJson(a.getModel()));
-            LOGGER.info("Pivot analysis model generated");
-            return typedAnalysis;
+            return new TypedAnalysis<PivotModel>(a.getId(), a.getLabel(), a.getParentId(), PivotModel.fromJson(a.getModel()));
         }));
 
         this.draftModel = new StatefulValue<>(Optional.absent());
         this.draftMetadata = new StatefulValue<>(ImmutableDraftMetadata.builder().build());
 
-        this.workingModel = Observable.transform(saved, draftMetadata, draftModel, (saved, metadata, model) -> {
+        this.workingModel = Observable.transform(saved, draftMetadata, draftModel, (savedModel, metadata, model) -> {
             LOGGER.info("Loaded working model");
-            return new WorkingModel<PivotModel>(analysisId, saved, metadata, model, PivotViewModel.EMPTY);
+            return new WorkingModel<PivotModel>(analysisId, savedModel, metadata, model, PivotViewModel.EMPTY);
         });
 
         // Before anything else, we need to fetch/compute the metadata required to even
@@ -107,7 +100,7 @@ public class AnalysisViewModel {
 
     public PivotModel updateModel(PivotModel model) {
 
-        LOGGER.info("model: " + model.toJson().toJson());
+        LOGGER.info(() -> "model: " + model.toJson().toJson());
 
         this.draftModel.updateValue(Optional.of(ImmutablePivotModel.copyOf(model)));
         return model;
