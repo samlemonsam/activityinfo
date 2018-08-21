@@ -122,8 +122,11 @@ public class DimensionMapping {
             formId = ResourceId.valueOf(object.getString("formId"));
         }
         String formula = object.getString("formula");
-        Type type = Type.valueOf(object.getString("type"));
-        return new DimensionMapping(formId, formula, type);
+        if (object.hasKey("type")) {
+            return new DimensionMapping(formId, formula, Type.valueOf(object.getString("type")));
+        } else {
+            return new DimensionMapping(formId, formula);
+        }
     }
 
     @Override
