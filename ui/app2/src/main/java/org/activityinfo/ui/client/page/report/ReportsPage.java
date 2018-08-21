@@ -53,17 +53,13 @@ public class ReportsPage extends LayoutContainer implements Page {
         setLayout(new BorderLayout());
 
         ContentPanel betaLinkPanel = new ContentPanel();
+        betaLinkPanel.setBodyStyle("font-family: sans-serif;");
         betaLinkPanel.setHeaderVisible(false);
         betaLinkPanel.setLayout(new CenterLayout());
         Anchor betaLink = new Anchor(I18N.CONSTANTS.tryNewReportingInterface());
-        betaLink.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                Window.open("/app?ui=3#analysis", "_blank", null);
-            }
-        });
+        betaLink.addClickHandler(clickEvent -> Window.open("/app?ui=3#analysis", "_blank", null));
         betaLinkPanel.add(betaLink);
-        add(betaLink, new BorderLayoutData(LayoutRegion.NORTH, 32));
+        add(betaLinkPanel, new BorderLayoutData(LayoutRegion.NORTH, 32));
 
         BorderLayoutData newLayout = new BorderLayoutData(LayoutRegion.EAST);
         newLayout.setSize(0.40f);
@@ -78,7 +74,7 @@ public class ReportsPage extends LayoutContainer implements Page {
 
     @Override
     public void shutdown() {
-
+        //
     }
 
     @Override
