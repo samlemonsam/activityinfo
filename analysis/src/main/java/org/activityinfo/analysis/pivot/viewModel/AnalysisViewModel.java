@@ -61,6 +61,7 @@ public class AnalysisViewModel {
         this.id = analysisId;
         this.formStore = formStore;
         this.saved = formStore.getAnalysis(analysisId).transform(maybe -> maybe.transform(a -> {
+            LOGGER.info("Saved pivot model retrieved");
             return new TypedAnalysis<PivotModel>(a.getId(), a.getLabel(), a.getParentId(), PivotModel.fromJson(a.getModel()));
         }));
 
@@ -74,7 +75,10 @@ public class AnalysisViewModel {
 
         // Before anything else, we need to fetch/compute the metadata required to even
         // plan the computation
-        Observable<PivotModel> pivotModel = workingModel.transform(wm -> wm.getModel());
+        Observable<PivotModel> pivotModel = workingModel.transform(wm -> {
+            LOGGER.info("Working pivot model updated");
+            return wm.getModel();
+        });
         this.pivotViewModel = new PivotViewModel(pivotModel, formStore);
     }
 
