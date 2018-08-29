@@ -26,6 +26,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.time.PeriodType;
 import org.activityinfo.store.hrd.FieldConverter;
@@ -123,8 +124,9 @@ public class QueryVersions implements Work<List<RecordVersion>> {
         Optional<FormField> periodField = formClass.getFieldIfPresent(ResourceId.valueOf("period"));
         if (periodField.isPresent()) {
             FieldConverter converter = FieldConverters.forType(periodField.get().getType());
-            Object periodValue = snapshot.getRecord().getFieldValues().getProperty(periodField.get().getName());
-            return Optional.of(converter.toFieldValue(periodValue).toString());
+            Object period = snapshot.getRecord().getFieldValues().getProperty(periodField.get().getName());
+            FieldValue periodValue = converter.toFieldValue(period);
+            return periodValue != null ? Optional.of(periodValue.toString()) : Optional.absent();
         } else {
             return Optional.absent();
         }
