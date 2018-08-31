@@ -136,6 +136,10 @@ class KeyMatrix {
         return keyColumns.transform(columns -> columns.getColumnView(keyColumn(lookupKey)));
     }
 
+    public Observable<Integer> getKeyColumnSize(LookupKey lookupKey) {
+        return getKeyColumn(lookupKey).transform(ColumnView::numRows);
+    }
+
     private Observable<ColumnView> getIdColumn() {
         return keyColumns.transform(columns -> columns.getColumnView(ID_COLUMN));
     }
