@@ -32,10 +32,7 @@ import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.HasStringValue;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -173,18 +170,20 @@ public class LookupKey {
         return fieldId;
     }
 
-    public List<LookupKey> parentLevels() {
+    private List<LookupKey> parentLevels() {
         assert !parentLevels.isEmpty();
-        return parentLevels.stream().map(ParentKey::getKey).collect(Collectors.toList());
+        return parentLevels.stream()
+                .map(ParentKey::getKey)
+                .collect(Collectors.toList());
     }
 
-    public List<LookupKey> getParentLevels() {
-        List<LookupKey> parents = new ArrayList<>();
+    public Set<LookupKey> getParentLevels() {
+        Set<LookupKey> parents = new HashSet<>();
         collectParents(parents);
         return parents;
     }
 
-    private void collectParents(List<LookupKey> parents) {
+    private void collectParents(Set<LookupKey> parents) {
         if(this.isRoot()) {
             return;
         }
