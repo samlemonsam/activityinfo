@@ -34,6 +34,7 @@ public enum ApplicationLocale {
     EL("Ελληνικά"),
     FR("Français"),
     NL("Nederlands"),
+    RU("русский"),
     TR("Türkçe"),
     VI("Vietnamese"),
     AR("العربية"),
