@@ -27,7 +27,6 @@ import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Unions a set of {@link KeyMatrixSet}
@@ -61,16 +60,7 @@ public class KeySelectionSet {
         if(key.isRoot()) {
             return Observable.just(true);
         } else {
-            // First need to get the status of every parent of this key
-            List<Observable<Boolean>> parentKeyStatus = key.getParentLevels().stream()
-                    .map(this::getSelectedKey)
-                    .map(potentialParentKey -> potentialParentKey.transform(Optional::isPresent))
-                    .collect(Collectors.toList());
-
-            // Then we flatten the list of observables and reduce the status of all the parent keys to whether the
-            // current key is enabled (which is true if *any* parents are enabled)
-            return Observable.flatten(parentKeyStatus)
-                    .transform(statusList -> statusList.stream().reduce(false, (a,b) -> a || b));
+            return getSelectedKey(key.getParentLevel()).transform(pk -> pk.isPresent());
         }
     }
 

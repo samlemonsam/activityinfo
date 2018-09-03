@@ -46,7 +46,7 @@ class KeySelection {
 
     private final Observable<Optional<RecordRef>> selectedRef;
 
-    KeySelection(KeyMatrix keyMatrix, Map<LookupKey,Observable<Optional<String>>> selectedKeys) {
+    KeySelection(KeyMatrix keyMatrix, Map<LookupKey, Observable<Optional<String>>> selectedKeys) {
         this.keyMatrix = keyMatrix;
         this.selectedKeys = selectedKeys;
 
@@ -96,34 +96,14 @@ class KeySelection {
     private Observable<BitSet> matchingRows(Iterable<LookupKey> keys) {
         List<Observable<BitSet>> parents = new ArrayList<>();
         for (LookupKey key : keys) {
-            if (selectedKeys.containsKey(key) && matchingRows.containsKey(key)) {
-                parents.add(Observable.join(selectedKeys.get(key),
-                                            matchingRows.get(key),
-                                            keyMatrix.getKeyColumnSize(key),
-                                            this::effectiveBitSet));
+            if(matchingRows.containsKey(key)) {
+                parents.add(matchingRows.get(key));
             }
         }
         return Observable.flatten(parents).transform(this::intersect);
     }
 
-    private Observable<BitSet> effectiveBitSet(Optional<String> selected, BitSet bitSet, Integer size) {
-        if (selected.isPresent()) {
-            // If the key has been selected, then we return its bitset
-            return Observable.just(bitSet);
-        } else {
-            // Otherwise we must return a "full" bitset in order to find the correct intersection of bitsets
-            return Observable.just(fullBitSet(size));
-        }
-    }
 
-    private static BitSet fullBitSet(int size) {
-        if (size <= 0) {
-            return EMPTY_SET;
-        }
-        BitSet fullBitSet = new BitSet(size);
-        fullBitSet.set(0, size-1, true);
-        return fullBitSet;
-    }
 
     public Observable<Optional<RecordRef>> getSelectedRef() {
         return selectedRef;
