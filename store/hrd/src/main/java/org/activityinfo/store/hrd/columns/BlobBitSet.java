@@ -183,7 +183,7 @@ public class BlobBitSet {
         int destBitIndex = 0;
 
         // ITERATE over BLOCKS
-        while (remainingBits > 0) {
+        while (remainingBits > 0 && blockIndex < blocks.length) {
             byte[] block = blocks[blockIndex];
 
             // ITERATE over BYTES

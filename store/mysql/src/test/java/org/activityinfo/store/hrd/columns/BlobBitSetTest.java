@@ -79,6 +79,9 @@ public class BlobBitSetTest {
         BitSet slice = BlobBitSet.toBitSet(blocks, blockSize, 10, 20);
 
         assertThat(toList(slice), contains(1, 13));
+
+        // Take a subset that extends beyond the defined range
+        BitSet big = BlobBitSet.toBitSet(blocks, blockSize, 10, 20000);
     }
 
     @Test
