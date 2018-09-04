@@ -30,9 +30,6 @@ import java.util.Locale;
  * Describes a user
  */
 @Entity @Table(name = "UserLogin")
-// We want to avoid calling this table 'User' as it is a reserved word in some
-// dialects
-// of SQL
 @NamedQueries({@NamedQuery(name = "findUserByEmail", query = "select u from User u where u.email = :email"),
         @NamedQuery(name = "findUserByChangePasswordKey",
                 query = "select u from User u where u.changePasswordKey = :key")})
@@ -54,6 +51,7 @@ public class User implements java.io.Serializable {
     private Date dateCreated;
     private String features;
     private boolean bounced;
+    private BillingAccount billingAccount;
 
     public User() {
         dateCreated = new Date();
@@ -248,6 +246,16 @@ public class User implements java.io.Serializable {
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "billingAccountId", nullable = true)
+    public BillingAccount getBillingAccount() {
+        return billingAccount;
+    }
+
+    public void setBillingAccount(BillingAccount billingAccount) {
+        this.billingAccount = billingAccount;
     }
 
     @Override

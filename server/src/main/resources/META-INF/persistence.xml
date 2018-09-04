@@ -34,6 +34,7 @@
     <class>org.activityinfo.server.database.hibernate.entity.AttributeValue</class>
     <class>org.activityinfo.server.database.hibernate.entity.Authentication</class>
     <class>org.activityinfo.server.database.hibernate.entity.Bounds</class>
+    <class>org.activityinfo.server.database.hibernate.entity.BillingAccount</class>
     <class>org.activityinfo.server.database.hibernate.entity.Country</class>
     <class>org.activityinfo.server.database.hibernate.entity.Folder</class>
     <class>org.activityinfo.server.database.hibernate.entity.Indicator</class>

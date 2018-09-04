@@ -26,11 +26,11 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.account.AccountStatus;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.analysis.pivot.PivotModel;
-import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -351,6 +351,11 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         return post(RequestBuilder.POST,
                 baseUrl + "/database/" + databaseId + "/transfer/cancel",
                 decision.toJson().toJson());
+    }
+
+    @Override
+    public Promise<AccountStatus> getAccountStatus() {
+        return get(baseUrl + "/accounts/status", AccountStatus::fromJson);
     }
 
     private <R> Promise<R> getRaw(final String url, final Function<Response, R> parser) {

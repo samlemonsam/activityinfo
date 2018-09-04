@@ -225,4 +225,8 @@ public class RootResource {
         return new AnalysesResource(permissionOracle, userProvider);
     }
 
+    @Path("/accounts")
+    public AccountResource getAccounts() {
+        return new AccountResource(entityManager.get(), userProvider);
+    }
 }
