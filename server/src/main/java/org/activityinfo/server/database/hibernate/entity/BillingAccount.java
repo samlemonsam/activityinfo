@@ -7,9 +7,7 @@ import java.util.Date;
 @Table(name = "billingaccount")
 public class BillingAccount {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(unique = true, nullable = false)
+
     private int id;
 
     private String name;
@@ -19,6 +17,9 @@ public class BillingAccount {
     private Date startTime;
     private Date endTime;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(unique = true, nullable = false)
     public int getId() {
         return id;
     }
