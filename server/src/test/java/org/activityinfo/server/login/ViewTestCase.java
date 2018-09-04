@@ -23,10 +23,9 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
-import org.activityinfo.server.branding.ScaffoldingDirective;
-import org.activityinfo.server.database.hibernate.entity.Domain;
 import org.activityinfo.server.login.model.PageModel;
 import org.activityinfo.server.util.TemplateModule;
+import org.activityinfo.server.util.jaxrs.Domain;
 import org.activityinfo.server.util.jaxrs.FreemarkerViewProcessor;
 import org.bouncycastle.util.Strings;
 import org.junit.BeforeClass;
@@ -51,7 +50,7 @@ public abstract class ViewTestCase {
     protected String process(PageModel model) throws IOException,
             TemplateException {
         FreemarkerViewProcessor processor = new FreemarkerViewProcessor(
-                templateCfg, Providers.of(Locale.ENGLISH), new ScaffoldingDirective(Providers.of(Domain.DEFAULT), templateCfg));
+                templateCfg, Providers.of(Locale.ENGLISH));
         Template template = processor.resolve(model.asViewable()
                 .getTemplateName());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

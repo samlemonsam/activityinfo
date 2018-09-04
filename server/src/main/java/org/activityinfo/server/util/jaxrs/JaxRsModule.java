@@ -32,6 +32,7 @@ public class JaxRsModule extends ServletModule {
     @Override
     protected void configureServlets() {
         bind(FreemarkerViewProcessor.class);
+        bind(Domain.class).toProvider(DomainProvider.class);
         bind(JacksonJsonProvider.class).toInstance(new Utf8JacksonJsonProvider());
         bind(CacheFilterFactory.class);
     }

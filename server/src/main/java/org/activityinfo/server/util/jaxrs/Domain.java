@@ -16,85 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.server.database.hibernate.entity;
+package org.activityinfo.server.util.jaxrs;
 
-import javax.persistence.*;
 import java.io.Serializable;
 
 /**
- * Defines a custom domain for ActivityInfo that has its own branding, titles,
- * and scaffolding template.
+ * Provides metadata about the domain on which the application is being served.
  */
-@Entity
 public class Domain implements Serializable {
     private static final long serialVersionUID = 241542892559897521L;
 
 
     public static final String DEFAULT_HOST = "www.activityinfo.org";
     public static final String DEFAULT_TITLE = "ActivityInfo";
-    public static final Domain DEFAULT = new Domain(DEFAULT_HOST, DEFAULT_TITLE);
+    public static final Domain DEFAULT = new Domain();
 
-    private String host;
-    private String title;
-    private int port;
-
-    private String scaffolding;
-    private String homePageBody;
-    private boolean signUpAllowed;
+    private final String host;
+    private final int port;
 
     public Domain() {
+        this(DEFAULT_HOST, 443);
     }
 
-    public Domain(String host, String title) {
-        super();
+    public Domain(String host, int port) {
         this.host = host;
-        this.title = title;
+        this.port = port;
     }
 
-    @Id @Column(name = "host", unique = true, nullable = false, length = 100)
+    public String getTitle() {
+        return DEFAULT_TITLE;
+    }
+
     public String getHost() {
         return host;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    @Column(name = "title", nullable = false, length = 100)
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    @Lob
-    public String getScaffolding() {
-        return scaffolding;
-    }
-
-    public void setScaffolding(String scaffolding) {
-        this.scaffolding = scaffolding;
-    }
-
-    public String getHomePageBody() {
-        return homePageBody;
-    }
-
-    public void setHomePageBody(String homePageBody) {
-        this.homePageBody = homePageBody;
-    }
-
-    public boolean isSignUpAllowed() {
-        return signUpAllowed;
-    }
-
-    public void setSignUpAllowed(boolean signUpAllowed) {
-        this.signUpAllowed = signUpAllowed;
-    }
-
-    @Transient
     public int getPort() {
         if(port == 0) {
             throw new IllegalStateException("port == 0");
@@ -102,15 +58,10 @@ public class Domain implements Serializable {
         return port;
     }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
-
     /**
      * @return the root url for this domain, including only protocal (http/https),
      * host, and port number if neccessary.
      */
-    @Transient
     public String getRootUrl() {
         StringBuilder sb = new StringBuilder();
         if(host.equals("localhost")) {

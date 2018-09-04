@@ -25,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.DeploymentConfiguration;
-import org.activityinfo.server.database.hibernate.entity.Domain;
+import org.activityinfo.server.util.jaxrs.Domain;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -38,7 +38,7 @@ public class GcsStorageProvider implements StorageProvider {
     public static final String BUCKET_PROPERTY = "generated.resources.bucket";
     
     private final SecureRandom random = new SecureRandom();
-    private Provider<Domain> domainProvider;
+    private final Provider<Domain> domainProvider;
     private final Provider<AuthenticatedUser> authProvider;
 
     private final String bucket;

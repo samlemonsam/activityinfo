@@ -21,11 +21,10 @@ package org.activityinfo.server;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
+import org.activityinfo.server.approval.ApprovalModule;
 import org.activityinfo.server.attachment.AttachmentModule;
 import org.activityinfo.server.authentication.AuthenticationModule;
 import org.activityinfo.server.blob.GcsBlobFieldStorageServiceModule;
-import org.activityinfo.server.branding.BrandingModule;
-import org.activityinfo.server.approval.ApprovalModule;
 import org.activityinfo.server.csp.ContentSecurityModule;
 import org.activityinfo.server.database.ServerDatabaseModule;
 import org.activityinfo.server.database.hibernate.HibernateModule;
@@ -91,7 +90,6 @@ public class StartupListener extends GuiceServletContextListener {
                 new JobModule(),
                 new GeneratedModule(),
                 new KmlModule(),
-                new BrandingModule(),
                 new LocaleModule(),
                 new JaxRsModule(),
                 new RestApiModule(),

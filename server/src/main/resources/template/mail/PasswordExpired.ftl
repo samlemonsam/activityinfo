@@ -18,13 +18,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<#-- @ftlvariable name="" type="org.activityinfo.server.mail.Invitation" -->
 Hi ${user.name},
 
 For security reasons, your ActivityInfo password has expired. Please follow the link
 below to choose a new password:
 
-https://${domain.host}/changePassword?${user.changePasswordKey}
+${domain.rootUrl}/changePassword?${user.changePasswordKey}
 
 Best regards,
 

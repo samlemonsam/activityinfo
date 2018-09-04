@@ -18,13 +18,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<#-- @ftlvariable name="" type="org.activityinfo.server.mail.Invitation" -->
 Bonjour ${user.name},
 
 Pour des raisons sécuritaires, votre mot de passe ActivityInfo a expiré. Merci de définir un
 nouveau mot de passe en suivant le lien ci-dessous:
 
-https://${domain.host}/changePassword?${user.changePasswordKey}
+${domain.rootUrl}/changePassword?${user.changePasswordKey}
 
 Cordialement,
 

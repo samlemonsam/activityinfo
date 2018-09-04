@@ -18,13 +18,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<#-- @ftlvariable name="" type="org.activityinfo.server.mail.Invitation" -->
+<#-- @ftlvariable name="domain" type="org.activityinfo.server.util.jaxrs.Domain" -->
+<#-- @ftlvariable name="" type="org.activityinfo.server.mail.ResetPasswordMessage" -->
+
 Hi ${user.name},
 
 Someone (probably you) asked to reset your password for ActivityInfo. To complete changing your password,
 click on the link below:
 
-https://${domain.host}/changePassword?${user.changePasswordKey}
+${domain.rootUrl}/changePassword?${user.changePasswordKey}
 
 If you did not request a password change, you can safely ignore this message.
 

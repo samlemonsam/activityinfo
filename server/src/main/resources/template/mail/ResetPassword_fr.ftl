@@ -18,12 +18,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<#-- @ftlvariable name="" type="org.activityinfo.server.mail.Invitation" -->
+<#-- @ftlvariable name="" type="org.activityinfo.server.mail.ResetPasswordMessage" -->
+<#-- @ftlvariable name="domain" type="org.activityinfo.server.util.jaxrs.Domain" -->
+
 Bonjour ${user.name},
 
 Quelqu'un (probablement vous) a demandé pour réinitialiser votre mot de passe ActivityInfo.
 
-https://${domain.host}/changePassword?${user.changePasswordKey}
+${domain.rootUrl}/changePassword?${user.changePasswordKey}
 
 Si vous n'avez pas demandé de réinitialiser votre mot de passe, vous pouvez ignorer ce message.
 

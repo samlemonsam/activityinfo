@@ -18,14 +18,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<#-- @ftlvariable name="" type="org.activityinfo.server.mail.SignUpConfirmation" -->
+<#-- @ftlvariable name="" type="org.activityinfo.server.mail.SignUpConfirmationMessage" -->
+<#-- @ftlvariable name="domain" type="org.activityinfo.server.util.jaxrs.Domain" -->
+
+
 Bonjour ${user.name},
 
 Merci de vous inscrire à ActivityInfo!
 
 Pour confirmer votre adresse et connecter au système, visitez le lien suivante:
 
-https://${domain.host}/confirm?${user.changePasswordKey}
+${domain.rootUrl}/confirm?${user.changePasswordKey}
 
 Cordialement,
 

@@ -18,16 +18,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<#-- @ftlvariable name="" type="org.activityinfo.server.mail.Invitation" -->
+<#-- @ftlvariable name="" type="org.activityinfo.server.mail.InvitationMessage" -->
+<#-- @ftlvariable name="domain" type="org.activityinfo.server.util.jaxrs.Domain" -->
+
 Bonjour ${newUser.name},
 
 ${invitingUser.name} (${invitingUser.email}) vous invite à acceder au ActivityInfo. Pour confirmer
 votre adresse et connecter au système, visitez le lien suivante:
 
-https://${domain.host}/confirm?${newUser.changePasswordKey}
+${domain.rootUrl}/confirm?${newUser.changePasswordKey}
 
 Si vous disposez d'une compte Humanitarian ID, vous pouvez connecter directement:
-https://${domain.host}/oauth/oauthconnector_hid_oauth
+${domain.rootUrl}/oauth/oauthconnector_hid_oauth
 
 
 Cordialement,

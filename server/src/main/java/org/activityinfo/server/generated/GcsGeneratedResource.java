@@ -21,7 +21,7 @@ package org.activityinfo.server.generated;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
-import org.activityinfo.server.database.hibernate.entity.Domain;
+import org.activityinfo.server.util.jaxrs.Domain;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;

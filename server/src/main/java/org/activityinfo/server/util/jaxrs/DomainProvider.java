@@ -16,13 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.server.branding;
+package org.activityinfo.server.util.jaxrs;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.activityinfo.server.database.hibernate.entity.Domain;
 
-import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
 import static com.google.common.base.Strings.emptyToNull;
@@ -34,43 +32,19 @@ import static com.google.common.base.Strings.emptyToNull;
 public class DomainProvider implements Provider<Domain> {
 
     private final Provider<HttpServletRequest> request;
-    private final Provider<EntityManager> entityManager;
-
-    protected DomainProvider() {
-        request = null;
-        entityManager = null;
-    }
 
     @Inject
-    public DomainProvider(Provider<HttpServletRequest> request, Provider<EntityManager> entityManager) {
+    public DomainProvider(Provider<HttpServletRequest> request) {
         super();
         this.request = request;
-        this.entityManager = entityManager;
     }
 
     @Override
     public Domain get() {
-
-        String host = getBrandHostName();
-        Domain result = entityManager.get().find(Domain.class, host);
-        if (result == null) {
-            result = new Domain();
-            result.setTitle("ActivityInfo");
-            result.setSignUpAllowed(true);
-        } else {
-            entityManager.get().detach(result);
-        }
-
-        result.setHost(getExternalHostName());
-        result.setPort(request.get().getServerPort());
-        return result;
+        return new Domain(getExternalHostName(), request.get().getServerPort());
     }
 
     private String getExternalHostName() {
-        String host = getHeader("X-Forwarded-Host");
-        if(host != null) {
-            return host;
-        }
 
         String requestHost = request.get().getServerName();
 
