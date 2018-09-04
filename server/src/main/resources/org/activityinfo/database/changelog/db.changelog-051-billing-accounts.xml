@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    ActivityInfo
+    Copyright (C) 2009-2013 UNICEF
+    Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="akbertram" id="051-01">
+        <comment>
+            Add table for billing accounts
+        </comment>
+        <sql>
+            CREATE TABLE billingaccount (
+                id INT NOT NULL AUTO_INCREMENT,
+                code VARCHAR(45) NULL,
+                name VARCHAR(255) NOT NULL,
+                userLimit INT NOT NULL DEFAULT 10,
+                startTime DATETIME NOT NULL,
+                endTime DATETIME NOT NULL,
+                PRIMARY KEY (id),
+                UNIQUE INDEX code_UNIQUE (code ASC));
+        </sql>
+    </changeSet>
+    <changeSet id="051-02" author="akbertram">
+        <addColumn tableName="userlogin">
+            <column name="billingAccountId" type="INT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="051-03" author="akbertram">
+        <addForeignKeyConstraint baseTableName="userlogin"
+                                 baseColumnNames="billingAccountId"
+                                 constraintName="fk_user_billingaccount"
+                                 onDelete="SET NULL"
+                                 referencedTableName="billingaccount"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
