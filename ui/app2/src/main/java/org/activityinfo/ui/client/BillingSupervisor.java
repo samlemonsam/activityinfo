@@ -3,17 +3,15 @@ package org.activityinfo.ui.client;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.common.base.Function;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.model.account.AccountStatus;
 
 import javax.annotation.Nullable;
 
 public class BillingSupervisor {
 
-    private final ActivityInfoClientAsync client;
+    private final ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl();
 
-    public BillingSupervisor(ActivityInfoClientAsync client) {
-        this.client = client;
-    }
 
     public void run() {
         client.getAccountStatus().then(new Function<AccountStatus, Void>() {
