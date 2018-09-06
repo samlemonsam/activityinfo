@@ -26,5 +26,6 @@
 
   <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 
-  <add-linker name="std"/>
+  <collapse-property name="user.agent" values="ie8,ie9,ie10" />
+
 </module>

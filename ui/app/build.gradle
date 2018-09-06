@@ -63,7 +63,9 @@ dependencies {
     compile project(':tools:codemirror')
     compile project(':tools:indexeddb')
 
-    compile libraries.rebar.appcache
+    compile libraries.appcache.client
+    compile libraries.appcache.linker
+
 
     compile group: 'com.sencha.gxt', name: 'gxt', version: '4.0.0'
     compile group: 'com.sencha.gxt', name: 'gxt-chart', version: '4.0.0'
@@ -103,6 +105,10 @@ task compileApp(type: JavaExec) {
 
     jvmArgs "-Dgwt.persistentunitcache=true"
     jvmArgs "-Dgwt.persistentunitcachedir=${buildDir}/gwtCache"
+
+    if("true".equals(project.property("gwtSoyc"))) {
+        args '-compileReport'
+    }
 
     args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'

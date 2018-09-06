@@ -35,4 +35,8 @@
 
     <set-property name="locale" value="en,fr,es,ar,nl,fa,vi,tr,ru,el"/>
 
+    <!-- Reduce the number of per-locale builds -->
+    <collapse-property name="locale" values="nl,el,es,vi" />
+    <collapse-property name="locale" values="ar,fa" />
+
 </module>

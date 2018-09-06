@@ -43,7 +43,6 @@
   <inherits name="com.google.common.collect.Collect"/>
 
   <inherits name="com.bedatadriven.rebar.sql.Sql"/>
-  <inherits name="com.bedatadriven.rebar.appcache.AppCache"/>
   <inherits name="com.bedatadriven.rebar.Time"/>
   <inherits name="com.bedatadriven.rebar.style.Style"/>
 
@@ -78,4 +77,23 @@
   <!-- Include generated sources -->
   <source path='client'/>
   <source path="shared"/>
+
+  <!-- Configure AppCache -->
+  <inherits name="org.realityforge.gwt.appcache.Appcache"/>
+
+  <!-- Enable the linker -->
+
+  <inherits name="org.realityforge.gwt.appcache.linker.Linker"/>
+
+  <!-- enable the linker that generates the manifest -->
+  <add-linker name="appcache"/>
+
+  <!-- configure all the static files not managed by the GWT compiler -->
+  <extend-configuration-property name="appcache_static_files" value="/about/assets/css/style.css"/>
+  <extend-configuration-property name="appcache_static_files" value="/about/assets/images/logo-activityinfo.png"/>
+  <extend-configuration-property name="appcache_static_files" value="/about/assets/images/bdd-logo.svg"/>
+
+  <!-- configure fallback rules used by the client when offline -->
+  <extend-configuration-property name="appcache_fallback_files" value="/login /app/offline"/>
+
 </module>

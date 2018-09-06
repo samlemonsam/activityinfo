@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.ui.client.local.sync.pipeline;
+package org.activityinfo.server.login;
 
-import com.bedatadriven.rebar.async.AsyncPipeline;
-import com.google.inject.Inject;
-import org.activityinfo.ui.client.local.sync.DownSynchronizer;
+import org.junit.Test;
 
-public class InstallPipeline extends AsyncPipeline {
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
-    @Inject
-    public InstallPipeline(DropAll dropAll,
-                           DownSynchronizer downSychronizer) {
-        super(dropAll, downSychronizer);
+public class ManifestServletTest {
+
+    @Test
+    public void testLocaleParsing() {
+        assertThat(ManifestServlet.localeFromPath("/ActivityInfo/fr.appcache"), equalTo("fr"));
     }
 }

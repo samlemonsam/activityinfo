@@ -71,7 +71,8 @@ dependencies {
     compile libraries.google.apiClient
 
     compile libraries.gwt.i18nServer
-    compile libraries.rebar.appcache
+
+    compile libraries.appcache.server
 
     compile libraries.appengine.apiLabs
     compile libraries.appengine.trace
