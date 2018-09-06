@@ -33,7 +33,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.TargetDTO;
@@ -54,9 +53,6 @@ import java.util.List;
 
 public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> implements DbTargetEditor.View {
 
-    private final UiConstants messages;
-    private final IconImageBundle icons;
-
     private Grid<TargetDTO> grid;
     private ListStore<TargetDTO> store;
     private ContentPanel targetValueContainer;
@@ -64,9 +60,7 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
     private UserDatabaseDTO db;
 
     @Inject
-    public DbTargetGrid(UiConstants messages, IconImageBundle icons) {
-        this.messages = messages;
-        this.icons = icons;
+    public DbTargetGrid() {
     }
 
     @Override
@@ -86,7 +80,7 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
     protected ColumnModel createColumnModel() {
         List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
-        ColumnConfig projectColumn = new ColumnConfig("projectId", messages.project(), 150);
+        ColumnConfig projectColumn = new ColumnConfig("projectId", I18N.CONSTANTS.project(), 150);
         projectColumn.setRenderer(new GridCellRenderer() {
             @Override
             public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
@@ -102,7 +96,7 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
             }
         });
 
-        ColumnConfig partnerColumn = new ColumnConfig("partnerId", messages.partner(), 150);
+        ColumnConfig partnerColumn = new ColumnConfig("partnerId", I18N.CONSTANTS.partner(), 150);
         partnerColumn.setRenderer(new GridCellRenderer() {
             @Override
             public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
@@ -118,19 +112,19 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
             }
         });
 
-        columns.add(new ColumnConfig("name", messages.name(), 150));
+        columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 150));
         columns.add(projectColumn);
         columns.add(partnerColumn);
-        columns.add(new TimePeriodColumn("timePeriod", messages.timePeriod(), 300));
+        columns.add(new TimePeriodColumn("timePeriod", I18N.CONSTANTS.timePeriod(), 300));
 
         return new ColumnModel(columns);
     }
 
     @Override
     protected void initToolBar() {
-        toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.add(), icons.add());
-        toolBar.addButton(UIActions.DELETE, messages.delete(), icons.delete());
-        toolBar.addButton(UIActions.EDIT, messages.edit(), icons.edit());
+        toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.add(), IconImageBundle.ICONS.add());
+        toolBar.addButton(UIActions.DELETE, I18N.CONSTANTS.delete(), IconImageBundle.ICONS.delete());
+        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.edit(), IconImageBundle.ICONS.edit());
     }
 
     @Override
@@ -150,10 +144,10 @@ public class DbTargetGrid extends AbstractGridView<TargetDTO, DbTargetEditor> im
         dlg.setWidth(450);
         dlg.setHeight(300);
         if(editDialog) {
-            dlg.setHeadingText(messages.editTarget());
+            dlg.setHeadingText(I18N.CONSTANTS.editTarget());
         }
         else {
-            dlg.setHeadingText(messages.createTarget());
+            dlg.setHeadingText(I18N.CONSTANTS.createTarget());
         }
 
         dlg.show(callback);

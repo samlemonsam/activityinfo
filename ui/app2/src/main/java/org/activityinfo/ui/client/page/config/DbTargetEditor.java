@@ -29,7 +29,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.AddTarget;
@@ -90,14 +89,14 @@ public class DbTargetEditor extends AbstractGridPresenter<TargetDTO> implements 
     public DbTargetEditor(EventBus eventBus,
                           Dispatcher service,
                           StateProvider stateMgr,
-                          View view,
-                          Provider<TargetIndicatorPresenter> targetIndicatorPresenterProvider) {
+                          View view) {
 
         super(eventBus, stateMgr, view);
         this.service = service;
         this.eventBus = eventBus;
         this.view = view;
-        targetIndicatorPresenter = targetIndicatorPresenterProvider.get();
+        targetIndicatorPresenter = new TargetIndicatorPresenter(eventBus, service, stateMgr,
+                new TargetIndicatorView(service));
     }
 
     @Override
