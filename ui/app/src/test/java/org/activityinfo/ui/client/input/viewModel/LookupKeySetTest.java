@@ -111,9 +111,9 @@ public class LookupKeySetTest {
         LookupKey leafKey = Iterables.getOnlyElement(lookupKeySet.getLeafKeys());
 
         assertThat(leafKey.getKeyFormulas().values(), containsInAnyOrder(
-            villageName,
-            territoryName,
-            provinceName));
+                villageName,
+                territoryName,
+                provinceName));
     }
 
     /**
@@ -162,6 +162,60 @@ public class LookupKeySetTest {
 
         assertThat(lookupKeySet.getAncestorForms(provinceId), hasSize(0));
         assertThat(lookupKeySet.getAncestorForms(territoryId), contains(provinceId));
+
+        // Formulas...
+        for (LookupKey lookupKey : lookupKeySet.getLeafKeys()) {
+            System.out.println(lookupKey.getKeyLabel() + " => " + lookupKey.getKeyFormulas());
+        }
+    }
+
+    /**
+     * It may be the case that a referenced form may have multiple *parent* forms. This is true for the instance where a
+     * Localite or Village can exist in one of multiple types of administrative unit.
+     *
+     * In this case, you have a hierarchy:
+     * <pre>
+     *               Province.Name
+     *                 ^    ^    ^
+     *                 |    |    |
+     *     Territory.Name   |   Health Zone.Name
+     *                 ^    |    ^
+     *                 |    |    |
+     *                Village.Name
+     *
+     * </pre>
+     *
+     * Therefore the user can select from a Village that can sit within a Province, a Territory, _or_ a Health Zone.
+     */
+    @Test
+    public void overlappingHierarchiesWithMultipleParents() {
+
+        TestingStorageProvider catalog = setup.getCatalog();
+        LocationSelectionForm locationSelectionForm = catalog.getLocationSelectionForm();
+        FormTree formTree = setup.getFormTree(locationSelectionForm.getFormId());
+
+        LookupKeySet lookupKeySet = new LookupKeySet(formTree, locationSelectionForm.getLocalitieField());
+
+        // The resulting key set should only include 4 keys, not 6
+        // because the three different forms in the range overlap
+
+        assertThat(lookupKeySet.getLookupKeys(), hasSize(4));
+
+        assertThat(lookupKeySet.getKey(0).getKeyLabel(), equalTo("Province Name"));
+        assertThat(lookupKeySet.getKey(1).getKeyLabel(), equalTo("Territory Name"));
+        assertThat(lookupKeySet.getKey(2).getKeyLabel(), equalTo("Zone de Sante Name"));
+        assertThat(lookupKeySet.getKey(3).getKeyLabel(), equalTo("Village Name"));
+
+        // We need the relationships between the forms
+        ResourceId provinceId = catalog.getProvince().getFormId();
+        ResourceId territoryId = catalog.getTerritory().getFormId();
+        ResourceId healthZoneId = catalog.getHealthZone().getFormId();
+        ResourceId localiteId = catalog.getLocaliteForm().getFormId();
+
+        assertThat(lookupKeySet.getAncestorForms(provinceId), hasSize(0));
+        assertThat(lookupKeySet.getAncestorForms(territoryId), contains(provinceId));
+        assertThat(lookupKeySet.getAncestorForms(healthZoneId), contains(provinceId));
+        assertThat(lookupKeySet.getAncestorForms(localiteId), containsInAnyOrder(provinceId, territoryId, healthZoneId));
 
         // Formulas...
         for (LookupKey lookupKey : lookupKeySet.getLeafKeys()) {

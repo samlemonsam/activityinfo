@@ -43,7 +43,7 @@ public class LookupKeyViewModel {
     }
 
     public boolean isLeaf() {
-        return lookupKey.getChildLevels().isEmpty();
+        return lookupKey.isLeaf();
     }
 
     public Observable<Optional<String>> getSelectedKey() {

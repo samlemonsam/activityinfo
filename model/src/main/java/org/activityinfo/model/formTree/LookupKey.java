@@ -32,10 +32,8 @@ import org.activityinfo.model.type.SerialNumberType;
 import org.activityinfo.model.type.primitive.HasStringValue;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A level within a hierarchy of lookup choices.
@@ -44,9 +42,7 @@ public class LookupKey {
 
     private int keyIndex;
 
-    private LookupKey parentLevel;
-
-    private SymbolNode parentFieldId;
+    List<ParentKey> parentLevels = new ArrayList<>();
 
     private ResourceId formId;
 
@@ -71,27 +67,54 @@ public class LookupKey {
      */
     String keyLabel;
 
-    private LookupKey(int keyIndex,
-              String parentFieldId,
-              LookupKey parentLevel,
-              FormClass formClass,
-              SymbolNode keyFormula,
-              String fieldLabel) {
-        this.keyIndex = keyIndex;
-        if(parentFieldId == null) {
-            this.parentFieldId = null;
-        } else {
-            this.parentFieldId = new SymbolNode(parentFieldId);
+    /**
+     * A key cannot know itself whether it is leaf key - keys both with and without children can be valid candidates
+     * for a leaf key depending on what level we are selecting from. This is set by {@link LookupKeySet} if it has
+     * determined the key is a leaf key.
+     */
+    boolean leaf = false;
+
+    /**
+     * Defines a parent of a key, including the field path for navigating to the parent in the form tree
+     */
+    final static class ParentKey {
+
+        private LookupKey key;
+        private SymbolNode fieldId;
+
+        public ParentKey(LookupKey key) {
+            this.key = key;
         }
-        this.parentLevel = parentLevel;
+
+        public ParentKey(LookupKey key, String fieldId) {
+            this(key);
+            this.fieldId = fieldId == null ? null : new SymbolNode(fieldId);
+        }
+
+        public LookupKey getKey() {
+            return key;
+        }
+
+        public SymbolNode getFieldId() {
+            return fieldId;
+        }
+    }
+
+    private LookupKey(int keyIndex,
+                      String parentFieldId,
+                      LookupKey parentLevel,
+                      FormClass formClass,
+                      SymbolNode keyFormula,
+                      String fieldLabel) {
+        this.keyIndex = keyIndex;
+        if (parentLevel != null) {
+            parentLevels.add(new ParentKey(parentLevel, parentFieldId));
+            parentLevel.childLevels.add(this);
+        }
         this.formId = formClass.getId();
         this.formLabel = formClass.getLabel();
         this.fieldLabel = fieldLabel;
         this.fieldId = keyFormula;
-
-        if(parentLevel != null) {
-            parentLevel.childLevels.add(this);
-        }
     }
 
     /**
@@ -104,6 +127,14 @@ public class LookupKey {
               FormField formField) {
 
         this(keyIndex, parentFieldId, parentLevel, formClass, new SymbolNode(formField.getId()), formField.getLabel());
+    }
+
+    LookupKey(int keyIndex, List<ParentKey> parentKeys, FormClass formClass, FormField formField) {
+        this(keyIndex, null, null, formClass, new SymbolNode(formField.getId()), formField.getLabel());
+        for (ParentKey parentKey : parentKeys) {
+            parentLevels.add(parentKey);
+            parentKey.getKey().childLevels.add(this);
+        }
     }
 
     /**
@@ -126,11 +157,15 @@ public class LookupKey {
     }
 
     public boolean isRoot() {
-        return parentLevel == null;
+        return parentLevels.isEmpty();
     }
 
     public boolean isLeaf() {
-        return childLevels.isEmpty();
+        return leaf;
+    }
+
+    public void setLeaf(boolean leaf) {
+        this.leaf = leaf;
     }
 
     public String getFormLabel() {
@@ -149,21 +184,26 @@ public class LookupKey {
         return fieldId;
     }
 
-    public LookupKey getParentLevel() {
-        assert parentLevel != null;
-        return parentLevel;
+    private List<LookupKey> parentLevels() {
+        assert !parentLevels.isEmpty();
+        return parentLevels.stream()
+                .map(ParentKey::getKey)
+                .collect(Collectors.toList());
     }
 
-    public List<LookupKey> getParentLevels() {
-        List<LookupKey> parents = new ArrayList<>();
+    public Set<LookupKey> getParentLevels() {
+        Set<LookupKey> parents = new HashSet<>();
         collectParents(parents);
         return parents;
     }
 
-    private void collectParents(List<LookupKey> parents) {
-        if(!this.isRoot()) {
-            parents.add(getParentLevel());
-            getParentLevel().collectParents(parents);
+    private void collectParents(Set<LookupKey> parents) {
+        if(this.isRoot()) {
+            return;
+        }
+        for (LookupKey parent : parentLevels()) {
+            parents.add(parent);
+            parent.collectParents(parents);
         }
     }
 
@@ -180,7 +220,9 @@ public class LookupKey {
         keys.put(this, join(baseField, fieldId));
 
         if(!isRoot()) {
-            parentLevel.collectKeys(join(baseField, parentFieldId), keys);
+            parentLevels.forEach(parentLevel -> {
+                parentLevel.getKey().collectKeys(join(baseField, parentLevel.getFieldId()), keys);
+            });
         }
     }
 
@@ -206,11 +248,6 @@ public class LookupKey {
         return keys;
     }
 
-
-    public FormulaNode getParentKey() {
-        return join(parentFieldId, parentLevel.getKeyField());
-    }
-
     public String label(FormInstance record) {
         if(fieldId.getName().equals(ColumnModel.RECORD_ID_SYMBOL)) {
             return record.getId().asString();
@@ -233,4 +270,14 @@ public class LookupKey {
     public String getKeyLabel() {
         return keyLabel;
     }
+
+    void addParentLevel(ParentKey parent) {
+        this.parentLevels.add(parent);
+        parent.getKey().childLevels.add(this);
+    }
+
+    void addParentLevels(List<ParentKey> parents) {
+        parents.forEach(this::addParentLevel);
+    }
+
 }

@@ -101,7 +101,7 @@ class KeyMatrix {
      *
      */
     public Observable<Map<LookupKey, String>> findKeyLabels(RecordRef ref) {
-        return keyColumns.transform (columns -> {
+        return keyColumns.transform(columns -> {
             Map<LookupKey, String> labels = new HashMap<>();
             int rowIndex = findRowIndex(columns, ref);
             if(rowIndex != -1) {
@@ -150,7 +150,8 @@ class KeyMatrix {
 
     /**
      * Compute the {@code BitSet} of rows whose value in the given {@code column} is equal to the given
-     * {@code selection}. If the {@code selection} is absent, an empty {@code BitSet} is returned.
+     * {@code selection}. If the {@code selection} is absent, a {@code BitSet} of rows which are not defined
+     * is returned.
      */
     private BitSet match(ColumnView column, Optional<String> selection) {
         BitSet bitSet = new BitSet();
@@ -158,6 +159,10 @@ class KeyMatrix {
             String stringValue = selection.get();
             for (int i = 0; i < column.numRows(); i++) {
                 bitSet.set(i, stringValue.equals(column.getString(i)));
+            }
+        } else {
+            for (int i=0; i<column.numRows(); i++) {
+                bitSet.set(i, column.isMissing(i));
             }
         }
         return bitSet;
