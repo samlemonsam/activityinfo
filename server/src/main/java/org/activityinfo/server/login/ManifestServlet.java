@@ -19,6 +19,7 @@
 package org.activityinfo.server.login;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -65,8 +66,11 @@ public class ManifestServlet extends AbstractManifestServlet {
         @Nullable
         @Override
         public String getPropertyValue(@Nonnull HttpServletRequest request) throws Exception {
-            return localeFromPath(request.getRequestURI());
-
+            String locale = request.getParameter("locale");
+            if (Strings.isNullOrEmpty(locale)) {
+                return "en";
+            }
+            return locale;
         }
     }
 
@@ -78,6 +82,8 @@ public class ManifestServlet extends AbstractManifestServlet {
         //    /ActivityInfo/en.appcache
         //    /ActivityInfo/fr.appcache
 
+
+
         if(path.endsWith(".appcache") && path.length() > ".appcache".length() + 2) {
             int lastSlash = path.lastIndexOf('/');
             String locale = path.substring(lastSlash + 1, lastSlash + 3);
@@ -86,4 +92,5 @@ public class ManifestServlet extends AbstractManifestServlet {
 
         return "en";
     }
+
 }

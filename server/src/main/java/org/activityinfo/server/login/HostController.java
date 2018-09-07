@@ -102,7 +102,7 @@ public class HostController {
                 module = "ActivityInfo";
             }
             model.setBootstrapScript(String.format("/%s/%s.nocache.js", module, module));
-            model.setAppCacheManifest(String.format("/%s/%s.appcache", module, locale));
+            model.setAppCacheManifest(String.format("/%s/%s.appcache?locale=%s", module, module, locale));
         }
         
         return Response.ok(model.asViewable())
