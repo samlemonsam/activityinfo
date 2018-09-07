@@ -40,7 +40,7 @@ public class UserDatabaseMeta {
     private String version;
 
     private final Map<ResourceId, Resource> resources = new HashMap<>();
-    private final Multimap<ResourceId, GrantModel> grants = HashMultimap.create();
+    private final Map<ResourceId, GrantModel> grants = new HashMap<>();
     private final Multimap<ResourceId, RecordLock> locks = HashMultimap.create();
 
     public ResourceId getDatabaseId() {
@@ -132,6 +132,7 @@ public class UserDatabaseMeta {
         JsonValue grantsArray = object.get("grants");
         for (int i = 0; i < grantsArray.length(); i++) {
             GrantModel grant = GrantModel.fromJson(grantsArray.get(i));
+            assert !meta.grants.containsKey(grant.getResourceId()) : "Cannot define more than 1 Grant for a given Resource.";
             meta.grants.put(grant.getResourceId(), grant);
         }
         return meta;
@@ -177,6 +178,7 @@ public class UserDatabaseMeta {
 
         public Builder addGrants(List<GrantModel> grants) {
             for (GrantModel grant : grants) {
+                assert !meta.grants.containsKey(grant.getResourceId()) : "Cannot define more than 1 Grant for a given Resource.";
                 meta.grants.put(grant.getResourceId(), grant);
             }
             return this;
