@@ -199,6 +199,7 @@ public class DatabasesFolder {
         UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(permission.getModel()));
         return model.getGrants().stream()
                 .map(GrantModel::getResourceId)
+                .filter(id -> id.getDomain() == CuidAdapter.FOLDER_DOMAIN)
                 .map(CuidAdapter::getLegacyIdFromCuid)
                 .collect(Collectors.toList());
     }

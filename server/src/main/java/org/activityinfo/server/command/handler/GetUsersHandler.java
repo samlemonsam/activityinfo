@@ -137,6 +137,9 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(perm.getModel()));
             List<FolderDTO> folderList = new ArrayList<>();
             for (GrantModel grantModel : model.getGrants()) {
+                if (grantModel.getResourceId().getDomain() != CuidAdapter.FOLDER_DOMAIN) {
+                    continue;
+                }
                 Folder folder = folderMap.get(grantModel.getResourceId());
                 if(folder != null) {
                     folderList.add(createFolderDTO(folder));

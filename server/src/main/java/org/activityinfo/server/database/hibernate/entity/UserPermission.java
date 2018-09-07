@@ -18,7 +18,6 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
-import com.google.common.collect.Lists;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.GrantModel;
@@ -28,6 +27,7 @@ import org.activityinfo.model.resource.ResourceId;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -345,7 +345,7 @@ public class UserPermission implements Serializable {
             throw new UnsupportedOperationException("Unsupported model");
         }
 
-        List<GrantModel> grants = Lists.newArrayList();
+        List<GrantModel> grants = new ArrayList<>();
         modelObject.get("grants").values().forEach(grant -> {
             if (grant.hasKey("folderId")) {
                 GrantModel.Builder folderGrant = new GrantModel.Builder();
@@ -362,11 +362,10 @@ public class UserPermission implements Serializable {
             // Set common operations
             setOperations(folderGrantModel);
             return;
+        } else {
+            folderGrant.get("operations").values()
+                    .forEach(operation -> folderGrantModel.addOperation(Operation.valueOf(operation.asString())));
         }
-
-        folderGrant.get("operations")
-                .values()
-                .forEach(operation -> folderGrantModel.addOperation(Operation.valueOf(operation.asString())));
     }
 
     private void setOperations(GrantModel.Builder grantModel) {

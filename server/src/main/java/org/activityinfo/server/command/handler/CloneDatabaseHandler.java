@@ -158,6 +158,9 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             List<GrantModel> destinationGrants = new ArrayList<>();
 
             for (GrantModel sourceGrant : sourceModel.getGrants()) {
+                if (sourceGrant.getResourceId().getDomain() != CuidAdapter.FOLDER_DOMAIN) {
+                    continue;
+                }
                 int folderId = CuidAdapter.getLegacyIdFromCuid(sourceGrant.getResourceId());
                 if (!folderMapping.containsKey(folderId)) {
                     // folder not copied - do not add grant to new permission model
